@@ -12,7 +12,7 @@ function getHttp() {
 }
 
 function visit(url, { replace, preserveScroll }, setPage) {
-  let progress = setTimeout(() => nprogress.start(), 250)
+  let progress = setTimeout(() => nprogress.start(), 500)
 
   if (window.inertiaRequest) {
     window.inertiaRequest.cancel(window.inertiaRequest)
