@@ -160,9 +160,4 @@ export default {
   replace(url, { preserveScroll = false } = {}) {
     visit(url, { replace: true, preserveScroll }, this.setPage.bind(this))
   },
-  render(h) {
-    if (this.page.instance) {
-      return h(this.page.instance, { props: this.page.props })
-    }
-  },
 }
