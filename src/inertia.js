@@ -1,147 +1,29 @@
 import axios from 'axios'
 import nprogress from 'nprogress'
 
-function getHttp() {
-  return axios.create({
-    headers: {
-      'Accept': 'text/html, application/xhtml+xml',
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-Inertia': true,
-    },
-  })
-}
-
-function visit(url, { replace, preserveScroll }, setPage) {
-  let progress = setTimeout(() => nprogress.start(), 500)
-
-  if (window.inertiaRequest) {
-    window.inertiaRequest.cancel(window.inertiaRequest)
-  }
-
-  window.inertiaRequest = axios.CancelToken.source()
-
-  getHttp().get(url, { cancelToken: window.inertiaRequest.token }).then(response => {
-    if (response.headers['x-inertia']) {
-      window.history[replace ? 'replaceState' : 'pushState'](null, null, response.data.url)
-      setPage(response.data.component, response.data.props, preserveScroll)
-    } else {
-      showHtmlModal(response.data)
-    }
-  }).catch(error => {
-    if (axios.isCancel(error)) {
-      return
-    } else if (error.response && error.response.headers['x-inertia']) {
-      window.history[replace ? 'replaceState' : 'pushState'](null, null, error.response.data.url)
-      setPage(error.response.data.component, error.response.data.props, preserveScroll)
-    } else if (error.response) {
-      showHtmlModal(error.response.data)
-    } else {
-      return Promise.reject(error)
-    }
-  }).then(() => {
-    nprogress.done()
-    clearInterval(progress)
-  })
-}
-
-function showHtmlModal(html) {
-  let page = document.createElement('html')
-  page.innerHTML = html
-  page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
-
-  let modal = document.createElement('div')
-  modal.id = 'inertia-modal'
-  modal.style.position = 'fixed'
-  modal.style.width = '100vw'
-  modal.style.height = '100vh'
-  modal.style.padding = '50px'
-  modal.style.backgroundColor = 'rgba(0, 0, 0, .6)'
-  modal.style.zIndex = 200000
-  modal.addEventListener('click', () => hideHtmlModal(modal))
-
-  let iframe = document.createElement('iframe')
-  iframe.style.backgroundColor = 'white'
-  iframe.style.borderRadius = '5px'
-  iframe.style.width = '100%'
-  iframe.style.height = '100%'
-  modal.appendChild(iframe)
-
-  document.body.prepend(modal)
-  document.body.style.overflow = 'hidden'
-  iframe.contentWindow.document.open()
-  iframe.contentWindow.document.write(page.outerHTML)
-  iframe.contentWindow.document.close()
-}
-
-function hideHtmlModal(modal) {
-  modal.outerHTML = ''
-  document.body.style.overflow = 'visible'
-}
-
-function handlePopState(event, setPage) {
-  let modal = document.getElementById('inertia-modal')
-
-  if (modal) {
-    hideHtmlModal(modal)
-  }
-
-  let progress = setTimeout(() => nprogress.start(), 250)
-
-  if (window.inertiaRequest) {
-    window.inertiaRequest.cancel(window.inertiaRequest)
-  }
-
-  window.inertiaRequest = axios.CancelToken.source()
-
-  getHttp().get(window.location.href, { cancelToken: window.inertiaRequest.token }).then(response => {
-    if (response.headers['x-inertia']) {
-      setPage(response.data.component, response.data.props)
-    } else {
-      showHtmlModal(response.data)
-    }
-  }).catch(error => {
-    if (axios.isCancel(error)) {
-      return
-    } else if (error.response && error.response.headers['x-inertia']) {
-      setPage(error.response.data.component, error.response.data.props)
-    } else if (error.response) {
-      showHtmlModal(error.response.data)
-    } else {
-      return Promise.reject(error)
-    }
-  }).then(() => {
-    nprogress.done()
-    clearInterval(progress)
-  })
-}
-
-function handleKeydown() {
-  if (event.keyCode == 27) {
-    let modal = document.getElementById('inertia-modal')
-    if (modal) {
-      hideHtmlModal(modal)
-    }
-  }
-}
-
 export default {
   resolveComponent: null,
+  currentRequest: null,
+  isFirstPage: null,
+  progressBar: null,
+  modal: null,
   page: {
-    first: null,
     component: null,
     props: null,
     instance: null,
   },
+
   init(component, props, resolveComponent) {
     this.resolveComponent = resolveComponent
     this.setPage(component, props)
 
-    window.onpopstate = (event) => handlePopState(event, this.setPage.bind(this))
-    document.onkeydown = (event) => handleKeydown(event)
+    window.onpopstate = (event) => this.handlePopState(event)
+    document.onkeydown = (event) => this.handleKeydown(event)
   },
-  setPage(component, props, preserveScroll) {
+
+  setPage(component, props, preserveScroll = false) {
     Promise.resolve(this.resolveComponent(component)).then(instance => {
-      this.page.first = this.page.first === null
+      this.isFirstPage = this.isFirstPage === null
       this.page.component = component
       this.page.props = props
       this.page.instance = instance
@@ -151,13 +33,126 @@ export default {
       }
     })
   },
+
   first() {
-    return this.page.first
+    return this.isFirstPage
   },
+
+  getHttp() {
+    if (this.currentRequest) {
+      this.currentRequest.cancel(this.currentRequest)
+    }
+
+    this.currentRequest = axios.CancelToken.source()
+
+    return axios.create({
+      cancelToken: this.currentRequest.token,
+      headers: {
+        'Accept': 'text/html, application/xhtml+xml',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Inertia': true,
+      },
+    })
+  },
+
+  isInertiaResponse(response) {
+    return response && response.headers['x-inertia']
+  },
+
   visit(url, { replace = false, preserveScroll = false } = {}) {
-    visit(url, { replace, preserveScroll }, this.setPage.bind(this))
+    this.hideModal()
+    this.showProgressBar()
+    this.getHttp().get(url).then(response => {
+      if (this.isInertiaResponse(response)) {
+        this.setState(replace, response.data)
+        this.setPage(response.data.component, response.data.props, preserveScroll)
+      } else {
+        this.showModal(response.data)
+      }
+    }).catch(error => {
+      if (axios.isCancel(error)) {
+        return
+      } else if (this.isInertiaResponse(error.response)) {
+        this.setState(replace, error.response.data)
+        this.setPage(error.response.data.component, error.response.data.props, preserveScroll)
+      } else if (error.response) {
+        this.showModal(error.response.data)
+      } else {
+        return Promise.reject(error)
+      }
+    }).then(() => {
+      this.clearProgressBar()
+    })
   },
+
   replace(url, { preserveScroll = false } = {}) {
-    visit(url, { replace: true, preserveScroll }, this.setPage.bind(this))
+    this.visit(url, { replace: true, preserveScroll })
+  },
+
+  setState(replace, data) {
+    if (replace === true) {
+      window.history.replaceState(data, null, data.url)
+    } else if (replace === false) {
+      window.history.pushState(data, null, data.url)
+    }
+  },
+
+  handlePopState(event) {
+    if (event.state) {
+      this.setPage(event.state.component, event.state.props, true)
+    }
+
+    this.visit(window.location.href, { replace: null, preserveScroll: true })
+  },
+
+  showProgressBar() {
+    this.progressBar = setTimeout(() => nprogress.start(), 250)
+  },
+
+  clearProgressBar() {
+    nprogress.done()
+    clearInterval(this.progressBar)
+  },
+
+  handleKeydown(event) {
+    if (this.modal && event.keyCode == 27) {
+      this.hideModal()
+    }
+  },
+
+  hideModal() {
+    if (this.modal) {
+      this.modal.outerHTML = ''
+      this.modal = null
+      document.body.style.overflow = 'visible'
+    }
+  },
+
+  showModal(html) {
+    let page = document.createElement('html')
+    page.innerHTML = html
+    page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
+
+    this.modal = document.createElement('div')
+    this.modal.style.position = 'fixed'
+    this.modal.style.width = '100vw'
+    this.modal.style.height = '100vh'
+    this.modal.style.padding = '50px'
+    this.modal.style.backgroundColor = 'rgba(0, 0, 0, .6)'
+    this.modal.style.zIndex = 200000
+    this.modal.addEventListener('click', this.hideModal)
+
+    let iframe = document.createElement('iframe')
+    iframe.style.backgroundColor = 'white'
+    iframe.style.borderRadius = '5px'
+    iframe.style.width = '100%'
+    iframe.style.height = '100%'
+    this.modal.appendChild(iframe)
+
+    document.body.prepend(this.modal)
+    document.body.style.overflow = 'hidden'
+    iframe.contentWindow.document.open()
+    iframe.contentWindow.document.write(page.outerHTML)
+    iframe.contentWindow.document.close()
   },
 }
