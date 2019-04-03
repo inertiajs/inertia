@@ -143,7 +143,7 @@ export default {
     this.modal.style.padding = '50px'
     this.modal.style.backgroundColor = 'rgba(0, 0, 0, .6)'
     this.modal.style.zIndex = 200000
-    this.modal.addEventListener('click', this.hideModal)
+    this.modal.addEventListener('click', () => this.hideModal())
 
     let iframe = document.createElement('iframe')
     iframe.style.backgroundColor = 'white'
