@@ -11,6 +11,7 @@ export default {
     component: null,
     props: null,
     instance: null,
+    cached: false,
   },
 
   init(component, props, resolveComponent) {
@@ -22,7 +23,7 @@ export default {
   },
 
   setPage(component, props, preserveScroll = false) {
-    Promise.resolve(this.resolveComponent(component)).then(instance => {
+    return Promise.resolve(this.resolveComponent(component)).then(instance => {
       this.isFirstPage = this.isFirstPage === null
       this.page.component = component
       this.page.props = props
@@ -62,10 +63,11 @@ export default {
   visit(url, { replace = false, preserveScroll = false } = {}) {
     this.hideModal()
     this.showProgressBar()
-    this.getHttp().get(url).then(response => {
+
+    return this.getHttp().get(url).then(response => {
       if (this.isInertiaResponse(response)) {
         this.setState(replace, response.data)
-        this.setPage(response.data.component, response.data.props, preserveScroll)
+        return this.setPage(response.data.component, response.data.props, preserveScroll)
       } else {
         this.showModal(response.data)
       }
@@ -74,7 +76,7 @@ export default {
         return
       } else if (this.isInertiaResponse(error.response)) {
         this.setState(replace, error.response.data)
-        this.setPage(error.response.data.component, error.response.data.props, preserveScroll)
+        return this.setPage(error.response.data.component, error.response.data.props, preserveScroll)
       } else if (error.response) {
         this.showModal(error.response.data)
       } else {
@@ -99,10 +101,11 @@ export default {
 
   handlePopState(event) {
     if (event.state) {
-      this.setPage(event.state.component, event.state.props, true)
+      this.page.cached = true
+      this.setPage(event.state.component, event.state.props, true).then(() => {
+        return this.visit(window.location.href, { replace: null, preserveScroll: true })
+      }).then(() => this.page.cached = false)
     }
-
-    this.visit(window.location.href, { replace: null, preserveScroll: true })
   },
 
   showProgressBar() {
