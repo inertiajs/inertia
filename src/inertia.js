@@ -3,51 +3,35 @@ import nprogress from 'nprogress'
 
 export default {
   resolveComponent: null,
-  currentRequest: null,
-  isFirstPage: null,
+  cancelToken: null,
   progressBar: null,
+  firstPage: null,
   modal: null,
   page: {
     component: null,
     props: null,
     instance: null,
-    cached: false,
   },
 
   init(component, props, resolveComponent) {
     this.resolveComponent = resolveComponent
-    this.setPage(component, props)
+    this.setPage(component, props).then(() => this.setScroll('restore'))
 
-    window.onpopstate = (event) => this.handlePopState(event)
-    document.onkeydown = (event) => this.handleKeydown(event)
-  },
-
-  setPage(component, props, preserveScroll = false) {
-    return Promise.resolve(this.resolveComponent(component)).then(instance => {
-      this.isFirstPage = this.isFirstPage === null
-      this.page.component = component
-      this.page.props = props
-      this.page.instance = instance
-
-      if (!preserveScroll) {
-        window.scrollTo(0, 0)
-      }
-    })
-  },
-
-  first() {
-    return this.isFirstPage
+    window.history.scrollRestoration = 'manual'
+    window.addEventListener('popstate', this.restore.bind(this))
+    document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
+    document.addEventListener('scroll', this.saveScrollPosition.bind(this))
   },
 
   getHttp() {
-    if (this.currentRequest) {
-      this.currentRequest.cancel(this.currentRequest)
+    if (this.cancelToken) {
+      this.cancelToken.cancel(this.cancelToken)
     }
 
-    this.currentRequest = axios.CancelToken.source()
+    this.cancelToken = axios.CancelToken.source()
 
     return axios.create({
-      cancelToken: this.currentRequest.token,
+      cancelToken: this.cancelToken.token,
       headers: {
         'Accept': 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
@@ -60,14 +44,22 @@ export default {
     return response && response.headers['x-inertia']
   },
 
-  visit(url, { replace = false, preserveScroll = false } = {}) {
+  showProgressBar() {
+    this.progressBar = setTimeout(() => nprogress.start(), 250)
+  },
+
+  hideProgressBar() {
+    nprogress.done()
+    clearInterval(this.progressBar)
+  },
+
+  load(url) {
     this.hideModal()
     this.showProgressBar()
 
     return this.getHttp().get(url).then(response => {
       if (this.isInertiaResponse(response)) {
-        this.setState(replace, response.data)
-        return this.setPage(response.data.component, response.data.props, preserveScroll)
+        return response.data
       } else {
         this.showModal(response.data)
       }
@@ -75,15 +67,50 @@ export default {
       if (axios.isCancel(error)) {
         return
       } else if (this.isInertiaResponse(error.response)) {
-        this.setState(replace, error.response.data)
-        return this.setPage(error.response.data.component, error.response.data.props, preserveScroll)
+        return error.response.data
       } else if (error.response) {
         this.showModal(error.response.data)
       } else {
         return Promise.reject(error)
       }
-    }).then(() => {
-      this.clearProgressBar()
+    }).then(page => {
+      this.hideProgressBar()
+      return page
+    })
+  },
+
+  setPage(component, props) {
+    return Promise.resolve(this.resolveComponent(component)).then(instance => {
+      this.firstPage = this.firstPage === null
+      this.page.component = component
+      this.page.props = props
+      this.page.instance = instance
+    })
+  },
+
+  setState(replace = false, url) {
+    window.history[replace ? 'replaceState' : 'pushState']({ scrollPosition: this.getScrollPosition() }, '', url)
+  },
+
+  setScroll(action) {
+    if (action === 'restore' && window.history.state) {
+      window.scrollTo(window.history.state.scrollPosition.x, window.history.state.scrollPosition.y)
+    } else if (action === 'top') {
+      window.scrollTo(0, 0)
+    }
+  },
+
+  first() {
+    return this.firstPage
+  },
+
+  visit(url, { replace = false, preserveScroll = false } = {}) {
+    this.load(url).then(page => {
+      if (page) {
+        this.setState(replace, page.url)
+        this.setPage(page.component, page.props)
+          .then(() => this.setScroll(preserveScroll ? 'preserve' : 'top'))
+      }
     })
   },
 
@@ -91,43 +118,23 @@ export default {
     this.visit(url, { replace: true, preserveScroll })
   },
 
-  setState(replace, data) {
-    if (replace === true) {
-      window.history.replaceState(data, null, data.url)
-    } else if (replace === false) {
-      window.history.pushState(data, null, data.url)
-    }
+  restore() {
+    this.load(window.location.href).then(page => {
+      if (page) {
+        this.setPage(page.component, page.props)
+          .then(() => this.setScroll('restore'))
+      }
+    })
   },
 
-  handlePopState(event) {
-    if (event.state) {
-      this.page.cached = true
-      this.setPage(event.state.component, event.state.props, true).then(() => {
-        return this.visit(window.location.href, { replace: null, preserveScroll: true })
-      }).then(() => this.page.cached = false)
-    }
+  saveScrollPosition() {
+    this.setState(true, window.location.pathname + window.location.search)
   },
 
-  showProgressBar() {
-    this.progressBar = setTimeout(() => nprogress.start(), 250)
-  },
-
-  clearProgressBar() {
-    nprogress.done()
-    clearInterval(this.progressBar)
-  },
-
-  handleKeydown(event) {
-    if (this.modal && event.keyCode == 27) {
-      this.hideModal()
-    }
-  },
-
-  hideModal() {
-    if (this.modal) {
-      this.modal.outerHTML = ''
-      this.modal = null
-      document.body.style.overflow = 'visible'
+  getScrollPosition() {
+    return {
+      x: window.pageXOffset,
+      y: window.pageYOffset,
     }
   },
 
@@ -157,5 +164,19 @@ export default {
     iframe.contentWindow.document.open()
     iframe.contentWindow.document.write(page.outerHTML)
     iframe.contentWindow.document.close()
+  },
+
+  hideModal() {
+    if (this.modal) {
+      this.modal.outerHTML = ''
+      this.modal = null
+      document.body.style.overflow = 'visible'
+    }
+  },
+
+  hideModalOnEscape(event) {
+    if (this.modal && event.keyCode == 27) {
+      this.hideModal()
+    }
   },
 }
