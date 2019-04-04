@@ -105,7 +105,7 @@ export default {
   },
 
   visit(url, { replace = false, preserveScroll = false } = {}) {
-    this.load(url).then(page => {
+    return this.load(url).then(page => {
       if (page) {
         this.setState(replace, page.url)
         this.setPage(page.component, page.props)
