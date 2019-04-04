@@ -115,7 +115,7 @@ export default {
   },
 
   replace(url, { preserveScroll = false } = {}) {
-    this.visit(url, { replace: true, preserveScroll })
+    return this.visit(url, { replace: true, preserveScroll })
   },
 
   restore() {
