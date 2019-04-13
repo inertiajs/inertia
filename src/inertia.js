@@ -15,12 +15,14 @@ export default {
 
   init(component, props, resolveComponent) {
     this.resolveComponent = resolveComponent
-    this.setPage(component, props).then(() => this.setScroll('restore'))
+    this.setPage(component, props)
+    this.setState(true, window.location.pathname + window.location.search, {
+      component: component,
+      props: props,
+    })
 
-    window.history.scrollRestoration = 'manual'
     window.addEventListener('popstate', this.restore.bind(this))
     document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
-    document.addEventListener('scroll', this.saveScrollPosition.bind(this))
   },
 
   getHttp() {
@@ -53,11 +55,17 @@ export default {
     clearInterval(this.progressBar)
   },
 
-  load(url) {
+  load(url, method, data = {}) {
     this.hideModal()
     this.showProgressBar()
 
-    return this.getHttp().get(url).then(response => {
+    if (method === 'get') {
+      var request = this.getHttp().get(url)
+    } else if (method === 'post') {
+      var request = this.getHttp().post(url, data)
+    }
+
+    return request.then(response => {
       if (this.isInertiaResponse(response)) {
         return response.data
       } else {
@@ -88,14 +96,12 @@ export default {
     })
   },
 
-  setState(replace = false, url) {
-    window.history[replace ? 'replaceState' : 'pushState']({ scrollPosition: this.getScrollPosition() }, '', url)
+  setState(replace = false, url, data = {}) {
+    window.history[replace ? 'replaceState' : 'pushState']({ ...data }, '', url)
   },
 
-  setScroll(action) {
-    if (action === 'restore' && window.history.state) {
-      window.scrollTo(window.history.state.scrollPosition.x, window.history.state.scrollPosition.y)
-    } else if (action === 'top') {
+  setScroll(preserveScroll) {
+    if (!preserveScroll) {
       window.scrollTo(0, 0)
     }
   },
@@ -105,11 +111,27 @@ export default {
   },
 
   visit(url, { replace = false, preserveScroll = false } = {}) {
-    return this.load(url).then(page => {
+    return this.load(url, 'get').then(page => {
       if (page) {
-        this.setState(replace, page.url)
+        this.setState(replace, page.url, {
+          component: page.component,
+          props: page.props,
+        })
         this.setPage(page.component, page.props)
-          .then(() => this.setScroll(preserveScroll ? 'preserve' : 'top'))
+          .then(() => this.setScroll(preserveScroll))
+      }
+    })
+  },
+
+  post(url, data = {}, { preserveScroll = false } = {}) {
+    return this.load(url, 'post', data).then(page => {
+      if (page) {
+        this.setState(page.url === window.location.pathname + window.location.search, page.url, {
+          component: page.component,
+          props: page.props,
+        })
+        this.setPage(page.component, page.props)
+          .then(() => this.setScroll(preserveScroll))
       }
     })
   },
@@ -118,24 +140,17 @@ export default {
     return this.visit(url, { replace: true, preserveScroll })
   },
 
-  restore() {
-    this.load(window.location.href).then(page => {
-      if (page) {
-        this.setPage(page.component, page.props)
-          .then(() => this.setScroll('restore'))
-      }
-    })
-  },
-
-  saveScrollPosition() {
-    this.setState(true, window.location.pathname + window.location.search)
-  },
-
-  getScrollPosition() {
-    return {
-      x: window.pageXOffset,
-      y: window.pageYOffset,
+  restore(event) {
+    if (event.state) {
+      this.setPage(event.state.component, event.state.props)
     }
+  },
+
+  state(key, props) {
+    this.setState(true, window.location.pathname + window.location.search, {
+      component: this.page.component,
+      props: { ...this.page.props, [key]: props },
+    })
   },
 
   showModal(html) {
