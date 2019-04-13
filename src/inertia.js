@@ -7,6 +7,7 @@ export default {
   progressBar: null,
   firstPage: null,
   modal: null,
+  cached: {},
   page: {
     component: null,
     props: null,
@@ -58,6 +59,7 @@ export default {
   load(url, method, data = {}) {
     this.hideModal()
     this.showProgressBar()
+    this.saveCache()
 
     if (method === 'get') {
       var request = this.getHttp().get(url)
@@ -97,7 +99,7 @@ export default {
   },
 
   setState(replace = false, url, data = {}) {
-    window.history[replace ? 'replaceState' : 'pushState']({ ...data }, '', url)
+    window.history[replace ? 'replaceState' : 'pushState'](data, '', url)
   },
 
   setScroll(preserveScroll) {
@@ -146,10 +148,16 @@ export default {
     }
   },
 
-  state(key, props) {
+  cache(key, props) {
+    this.cached[key] = props
+
+    return props
+  },
+
+  saveCache() {
     this.setState(true, window.location.pathname + window.location.search, {
       component: this.page.component,
-      props: { ...this.page.props, [key]: props },
+      props: { ...this.page.props, ...this.cached },
     })
   },
 
