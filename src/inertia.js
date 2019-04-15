@@ -7,7 +7,6 @@ export default {
   progressBar: null,
   firstPage: null,
   modal: null,
-  cached: {},
   page: {
     component: null,
     props: null,
@@ -16,14 +15,25 @@ export default {
 
   init(component, props, resolveComponent) {
     this.resolveComponent = resolveComponent
-    this.setPage(component, props)
-    this.setState(true, window.location.pathname + window.location.search, {
-      component: component,
-      props: props,
-    })
+
+    if (window.history.state && this.navigationType() === 'back_forward') {
+      this.setPage(window.history.state.component, window.history.state.props)
+    } else {
+      this.setPage(component, props)
+      this.setState(true, window.location.pathname + window.location.search, {
+        component: component,
+        props: props,
+      })
+    }
 
     window.addEventListener('popstate', this.restore.bind(this))
     document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
+  },
+
+  navigationType() {
+    if (window.performance) {
+      return window.performance.getEntriesByType('navigation')[0].type
+    }
   },
 
   getHttp() {
@@ -59,7 +69,6 @@ export default {
   load(url, method, data = {}) {
     this.hideModal()
     this.showProgressBar()
-    this.saveCache()
 
     if (method === 'get') {
       var request = this.getHttp().get(url)
@@ -149,15 +158,9 @@ export default {
   },
 
   cache(key, props) {
-    this.cached[key] = props
-
-    return props
-  },
-
-  saveCache() {
     this.setState(true, window.location.pathname + window.location.search, {
       component: this.page.component,
-      props: { ...this.page.props, ...this.cached },
+      props: { ...this.page.props, [key]: props },
     })
   },
 
