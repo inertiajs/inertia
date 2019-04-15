@@ -41,7 +41,7 @@ export default {
   },
 
   showProgressBar() {
-    this.progressBar = setTimeout(() => nprogress.start(), 250)
+    this.progressBar = setTimeout(() => nprogress.start(), 100)
   },
 
   hideProgressBar() {
