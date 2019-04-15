@@ -124,24 +124,24 @@ export default {
     return this.firstPage
   },
 
-  replace(url, { preserveScroll = false } = {}) {
-    return this.visit(url, { replace: true, preserveScroll })
+  replace(url, options = {}) {
+    return this.visit(url, { replace: true, ...options })
   },
 
-  post(url, data = {}, { replace = false, preserveScroll = false } = {}) {
-    return this.visit(url, { method: 'post', data, replace, preserveScroll })
+  post(url, data = {}, options = {}) {
+    return this.visit(url, { method: 'post', data, ...options })
   },
 
-  put(url, data = {}, { replace = false, preserveScroll = false } = {}) {
-    return this.visit(url, { method: 'put', data, replace, preserveScroll })
+  put(url, data = {}, options = {}) {
+    return this.visit(url, { method: 'put', data, ...options })
   },
 
-  patch(url, data = {}, { replace = false, preserveScroll = false } = {}) {
-    return this.visit(url, { method: 'patch', data, replace, preserveScroll })
+  patch(url, data = {}, options = {}) {
+    return this.visit(url, { method: 'patch', data, ...options })
   },
 
-  delete(url, { replace = false, preserveScroll = false } = {}) {
-    return this.visit(url, { method: 'delete', replace, preserveScroll })
+  delete(url, options = {}) {
+    return this.visit(url, { method: 'delete', ...options })
   },
 
   restore(event) {
