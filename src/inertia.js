@@ -36,23 +36,6 @@ export default {
     }
   },
 
-  getHttp() {
-    if (this.cancelToken) {
-      this.cancelToken.cancel(this.cancelToken)
-    }
-
-    this.cancelToken = axios.CancelToken.source()
-
-    return axios.create({
-      cancelToken: this.cancelToken.token,
-      headers: {
-        'Accept': 'text/html, application/xhtml+xml',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-Inertia': true,
-      },
-    })
-  },
-
   isInertiaResponse(response) {
     return response && response.headers['x-inertia']
   },
@@ -66,17 +49,27 @@ export default {
     clearInterval(this.progressBar)
   },
 
-  load(url, method, data = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
     this.hideModal()
     this.showProgressBar()
 
-    if (method === 'get') {
-      var request = this.getHttp().get(url)
-    } else if (method === 'post') {
-      var request = this.getHttp().post(url, data)
+    if (this.cancelToken) {
+      this.cancelToken.cancel(this.cancelToken)
     }
 
-    return request.then(response => {
+    this.cancelToken = axios.CancelToken.source()
+
+    return axios({
+      method: method,
+      url: url,
+      data: data,
+      cancelToken: this.cancelToken.token,
+      headers: {
+        'Accept': 'text/html, application/xhtml+xml',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Inertia': true,
+      },
+    }).then(response => {
       if (this.isInertiaResponse(response)) {
         return response.data
       } else {
@@ -93,8 +86,18 @@ export default {
         return Promise.reject(error)
       }
     }).then(page => {
-      this.hideProgressBar()
-      return page
+      if (page) {
+        this.setState(replace || page.url === window.location.pathname + window.location.search, page.url, {
+          component: page.component,
+          props: page.props,
+        })
+
+        this.setPage(page.component, page.props)
+          .then(() => {
+            this.setScroll(preserveScroll)
+            this.hideProgressBar()
+          })
+      }
     })
   },
 
@@ -121,34 +124,24 @@ export default {
     return this.firstPage
   },
 
-  visit(url, { replace = false, preserveScroll = false } = {}) {
-    return this.load(url, 'get').then(page => {
-      if (page) {
-        this.setState(replace, page.url, {
-          component: page.component,
-          props: page.props,
-        })
-        this.setPage(page.component, page.props)
-          .then(() => this.setScroll(preserveScroll))
-      }
-    })
-  },
-
-  post(url, data = {}, { preserveScroll = false } = {}) {
-    return this.load(url, 'post', data).then(page => {
-      if (page) {
-        this.setState(page.url === window.location.pathname + window.location.search, page.url, {
-          component: page.component,
-          props: page.props,
-        })
-        this.setPage(page.component, page.props)
-          .then(() => this.setScroll(preserveScroll))
-      }
-    })
-  },
-
   replace(url, { preserveScroll = false } = {}) {
     return this.visit(url, { replace: true, preserveScroll })
+  },
+
+  post(url, data = {}, { replace = false, preserveScroll = false } = {}) {
+    return this.visit(url, { method: 'post', data, replace, preserveScroll })
+  },
+
+  put(url, data = {}, { replace = false, preserveScroll = false } = {}) {
+    return this.visit(url, { method: 'put', data, replace, preserveScroll })
+  },
+
+  patch(url, data = {}, { replace = false, preserveScroll = false } = {}) {
+    return this.visit(url, { method: 'patch', data, replace, preserveScroll })
+  },
+
+  delete(url, { replace = false, preserveScroll = false } = {}) {
+    return this.visit(url, { method: 'delete', replace, preserveScroll })
   },
 
   restore(event) {
