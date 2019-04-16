@@ -2,19 +2,13 @@ import axios from 'axios'
 import nprogress from 'nprogress'
 
 export default {
-  resolveComponent: null,
+  setPage: null,
   cancelToken: null,
   progressBar: null,
-  firstPage: null,
   modal: null,
-  page: {
-    component: null,
-    props: null,
-    instance: null,
-  },
 
-  init(component, props, resolveComponent) {
-    this.resolveComponent = resolveComponent
+  init(component, props, setPage) {
+    this.setPage = setPage
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state.component, window.history.state.props)
@@ -101,15 +95,6 @@ export default {
     })
   },
 
-  setPage(component, props) {
-    return Promise.resolve(this.resolveComponent(component)).then(instance => {
-      this.firstPage = this.firstPage === null
-      this.page.component = component
-      this.page.props = props
-      this.page.instance = instance
-    })
-  },
-
   setState(replace = false, url, data = {}) {
     window.history[replace ? 'replaceState' : 'pushState'](data, '', url)
   },
@@ -118,10 +103,6 @@ export default {
     if (!preserveScroll) {
       window.scrollTo(0, 0)
     }
-  },
-
-  first() {
-    return this.firstPage
   },
 
   replace(url, options = {}) {
@@ -152,8 +133,8 @@ export default {
 
   cache(key, props) {
     this.setState(true, window.location.pathname + window.location.search, {
-      component: this.page.component,
-      props: { ...this.page.props, [key]: props },
+      component: window.history.state.component,
+      props: { ...window.history.state.props, [key]: props },
     })
   },
 
