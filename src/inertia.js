@@ -24,7 +24,7 @@ export default {
   },
 
   navigationType() {
-    if (window.performance) {
+    if (window.performance && window.performance.getEntriesByType('navigation').length) {
       return window.performance.getEntriesByType('navigation')[0].type
     }
   },
