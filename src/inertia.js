@@ -3,24 +3,23 @@ import nprogress from 'nprogress'
 
 export default {
   setPage: null,
+  version: null,
   cancelToken: null,
   progressBar: null,
   modal: null,
 
-  init(component, props, setPage) {
+  init(page, setPage) {
+    this.version = page.version
     this.setPage = setPage
 
     if (window.history.state && this.navigationType() === 'back_forward') {
-      this.setPage(window.history.state.component, window.history.state.props)
+      this.setPage(window.history.state)
     } else {
-      this.setPage(component, props)
-      this.setState(true, window.location.pathname + window.location.search, {
-        component: component,
-        props: props,
-      })
+      this.setPage(page)
+      this.setState(true, window.location.pathname + window.location.search, page)
     }
 
-    window.addEventListener('popstate', this.restore.bind(this))
+    window.addEventListener('popstate', this.restoreState.bind(this))
     document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
   },
 
@@ -62,6 +61,7 @@ export default {
         'Accept': 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
+        ...this.version ? { 'X-Inertia-Version': this.version } : {},
       },
     }).then(response => {
       if (this.isInertiaResponse(response)) {
@@ -72,6 +72,8 @@ export default {
     }).catch(error => {
       if (axios.isCancel(error)) {
         return
+      } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
+        return this.hardVisit(true, error.response.headers['x-inertia-location'])
       } else if (this.isInertiaResponse(error.response)) {
         return error.response.data
       } else if (error.response) {
@@ -81,27 +83,40 @@ export default {
       }
     }).then(page => {
       if (page) {
-        this.setState(replace || page.url === window.location.pathname + window.location.search, page.url, {
-          component: page.component,
-          props: page.props,
+        this.version = page.version
+        this.setState(replace || page.url === window.location.pathname + window.location.search, page.url, page)
+        this.setPage(page).then(() => {
+          this.setScroll(preserveScroll)
+          this.hideProgressBar()
         })
-
-        this.setPage(page.component, page.props)
-          .then(() => {
-            this.setScroll(preserveScroll)
-            this.hideProgressBar()
-          })
       }
     })
   },
 
-  setState(replace = false, url, data = {}) {
-    window.history[replace ? 'replaceState' : 'pushState'](data, '', url)
+  hardVisit(replace, url) {
+    if (replace) {
+      window.location.replace(url)
+    } else {
+      window.location.href = url
+    }
   },
 
   setScroll(preserveScroll) {
     if (!preserveScroll) {
       window.scrollTo(0, 0)
+    }
+  },
+
+  setState(replace = false, url, page) {
+    window.history[replace ? 'replaceState' : 'pushState']({
+      component: page.component,
+      props: page.props,
+    }, '', url)
+  },
+
+  restoreState(event) {
+    if (event.state) {
+      this.setPage(event.state)
     }
   },
 
@@ -125,17 +140,10 @@ export default {
     return this.visit(url, { method: 'delete', ...options })
   },
 
-  restore(event) {
-    if (event.state) {
-      this.setPage(event.state.component, event.state.props)
-    }
-  },
-
   cache(key, props) {
-    this.setState(true, window.location.pathname + window.location.search, {
-      component: window.history.state.component,
-      props: { ...window.history.state.props, [key]: props },
-    })
+    let page = window.history.state
+    page.props = { ...page.props, [key]: props }
+    this.setState(true, window.location.pathname + window.location.search, state)
   },
 
   showModal(html) {
