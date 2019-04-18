@@ -143,7 +143,7 @@ export default {
   cache(key, props) {
     let page = window.history.state
     page.props = { ...page.props, [key]: props }
-    this.setState(true, window.location.pathname + window.location.search, state)
+    this.setState(true, window.location.pathname + window.location.search, page)
   },
 
   showModal(html) {
