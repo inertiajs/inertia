@@ -16,7 +16,11 @@ export default {
       this.setPage(window.history.state)
     } else {
       this.setPage(page)
-      this.setState(true, window.location.pathname + window.location.search, page)
+      this.setState(
+        true,
+        window.location.pathname + window.location.search,
+        page
+      )
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
@@ -24,7 +28,10 @@ export default {
   },
 
   navigationType() {
-    if (window.performance && window.performance.getEntriesByType('navigation').length) {
+    if (
+      window.performance &&
+      window.performance.getEntriesByType('navigation').length
+    ) {
       return window.performance.getEntriesByType('navigation')[0].type
     }
   },
@@ -42,7 +49,10 @@ export default {
     clearInterval(this.progressBar)
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
+  visit(
+    url,
+    { method = 'get', data = {}, replace = false, preserveScroll = false } = {}
+  ) {
     this.hideModal()
     this.showProgressBar()
 
@@ -58,39 +68,53 @@ export default {
       data: data,
       cancelToken: this.cancelToken.token,
       headers: {
-        'Accept': 'text/html, application/xhtml+xml',
+        Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...this.version ? { 'X-Inertia-Version': this.version } : {},
+        ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
-    }).then(response => {
-      if (this.isInertiaResponse(response)) {
-        return response.data
-      } else {
-        this.showModal(response.data)
-      }
-    }).catch(error => {
-      if (axios.isCancel(error)) {
-        return
-      } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        return this.hardVisit(true, error.response.headers['x-inertia-location'])
-      } else if (this.isInertiaResponse(error.response)) {
-        return error.response.data
-      } else if (error.response) {
-        this.showModal(error.response.data)
-      } else {
-        return Promise.reject(error)
-      }
-    }).then(page => {
-      if (page) {
-        this.version = page.version
-        this.setState(replace || page.url === window.location.pathname + window.location.search, page.url, page)
-        this.setPage(page).then(() => {
-          this.setScroll(preserveScroll)
-          this.hideProgressBar()
-        })
-      }
     })
+      .then(response => {
+        if (this.isInertiaResponse(response)) {
+          return response.data
+        } else {
+          this.showModal(response.data)
+        }
+      })
+      .catch(error => {
+        if (axios.isCancel(error)) {
+          return
+        } else if (
+          error.response.status === 409 &&
+          error.response.headers['x-inertia-location']
+        ) {
+          return this.hardVisit(
+            true,
+            error.response.headers['x-inertia-location']
+          )
+        } else if (this.isInertiaResponse(error.response)) {
+          return error.response.data
+        } else if (error.response) {
+          this.showModal(error.response.data)
+        } else {
+          return Promise.reject(error)
+        }
+      })
+      .then(page => {
+        if (page) {
+          this.version = page.version
+          this.setState(
+            replace ||
+              page.url === window.location.pathname + window.location.search,
+            page.url,
+            page
+          )
+          this.setPage(page).then(() => {
+            this.setScroll(preserveScroll)
+            this.hideProgressBar()
+          })
+        }
+      })
   },
 
   hardVisit(replace, url) {
@@ -108,10 +132,14 @@ export default {
   },
 
   setState(replace = false, url, page) {
-    window.history[replace ? 'replaceState' : 'pushState']({
-      component: page.component,
-      props: page.props,
-    }, '', url)
+    window.history[replace ? 'replaceState' : 'pushState'](
+      {
+        component: page.component,
+        props: page.props,
+      },
+      '',
+      url
+    )
   },
 
   restoreState(event) {
