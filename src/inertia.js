@@ -121,23 +121,23 @@ export default {
   },
 
   replace(url, options = {}) {
-    return this.visit(url, { replace: true, ...options })
+    return this.visit(url, { ...options, replace: true })
   },
 
   post(url, data = {}, options = {}) {
-    return this.visit(url, { method: 'post', data, ...options })
+    return this.visit(url, { ...options, method: 'post', data })
   },
 
   put(url, data = {}, options = {}) {
-    return this.visit(url, { method: 'put', data, ...options })
+    return this.visit(url, { ...options, method: 'put', data })
   },
 
   patch(url, data = {}, options = {}) {
-    return this.visit(url, { method: 'patch', data, ...options })
+    return this.visit(url, { ...options, method: 'patch', data })
   },
 
   delete(url, options = {}) {
-    return this.visit(url, { method: 'delete', ...options })
+    return this.visit(url, { ...options, method: 'delete' })
   },
 
   cache(key, props) {
