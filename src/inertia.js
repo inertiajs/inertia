@@ -10,7 +10,7 @@ export default {
   progressBar: null,
   modal: null,
 
-  init(page, setPage) {
+  init(page, setPage, beforeVisit = null, afterVisit = null) {
     this.version = page.version
     this.setPage = setPage
 
@@ -19,6 +19,11 @@ export default {
     } else {
       this.setPage(page)
       this.setState(page)
+    }
+
+    if(beforeVisit && afterVisit) {
+      this.beforeVisit = beforeVisit
+      this.afterVisit = afterVisit
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
