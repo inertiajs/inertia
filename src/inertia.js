@@ -1,5 +1,7 @@
+import _ from 'lodash'
 import axios from 'axios'
 import nprogress from 'nprogress'
+import WatchJS from 'melanke-watchjs'
 
 export default {
   setPage: null,
@@ -108,10 +110,7 @@ export default {
   },
 
   setState(replace = false, url, page) {
-    window.history[replace ? 'replaceState' : 'pushState']({
-      component: page.component,
-      props: page.props,
-    }, '', url)
+    window.history[replace ? 'replaceState' : 'pushState'](page, '', url)
   },
 
   restoreState(event) {
@@ -144,10 +143,19 @@ export default {
     return this.visit(url, { ...options, method: 'delete' })
   },
 
-  cache(key, props) {
-    let page = window.history.state
-    page.props = { ...page.props, [key]: props }
-    this.setState(true, window.location.pathname + window.location.search, page)
+  cache(data) {
+    WatchJS.watch(data, () => {
+      this.setState(true, window.location.pathname + window.location.search, {
+        ...window.history.state,
+        cache: { ...data },
+      })
+    })
+
+    if (window.history.state.cache) {
+      return _.merge(data, window.history.state.cache)
+    }
+
+    return data
   },
 
   showModal(html) {

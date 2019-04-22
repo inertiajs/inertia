@@ -7,6 +7,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
+    "lodash": "^4.17.5",
+    "melanke-watchjs": "^1.5.0",
     "nprogress": "^0.2.0"
   },
   "devDependencies": {
