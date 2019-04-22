@@ -44,9 +44,17 @@ export default {
     clearInterval(this.progressBar)
   },
 
+  beforeVisit() {
+    this.showProgressBar()
+  },
+
+  afterVisit() {
+    this.hideProgressBar()
+  },
+
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
     this.hideModal()
-    this.showProgressBar()
+    this.beforeVisit()
 
     if (this.cancelToken) {
       this.cancelToken.cancel(this.cancelToken)
@@ -89,7 +97,7 @@ export default {
         this.setState(page, replace)
         this.setPage(page).then(() => {
           this.setScroll(preserveScroll)
-          this.hideProgressBar()
+          this.afterVisit()
         })
       }
     })
