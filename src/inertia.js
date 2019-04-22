@@ -18,7 +18,7 @@ export default {
       this.setPage(window.history.state)
     } else {
       this.setPage(page)
-      this.setState(true, window.location.pathname + window.location.search, page)
+      this.setState(page)
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
@@ -86,7 +86,7 @@ export default {
     }).then(page => {
       if (page) {
         this.version = page.version
-        this.setState(replace || page.url === window.location.pathname + window.location.search, page.url, page)
+        this.setState(page, replace)
         this.setPage(page).then(() => {
           this.setScroll(preserveScroll)
           this.hideProgressBar()
@@ -109,8 +109,9 @@ export default {
     }
   },
 
-  setState(replace = false, url, page) {
-    window.history[replace ? 'replaceState' : 'pushState'](page, '', url)
+  setState(page, replace = false) {
+    replace = replace || page.url === window.location.pathname + window.location.search
+    window.history[replace ? 'replaceState' : 'pushState'](page, '', page.url)
   },
 
   restoreState(event) {
@@ -143,16 +144,13 @@ export default {
     return this.visit(url, { ...options, method: 'delete' })
   },
 
-  cache(data) {
+  remember(data, key = 'default') {
     WatchJS.watch(data, () => {
-      this.setState(true, window.location.pathname + window.location.search, {
-        ...window.history.state,
-        cache: { ...data },
-      })
+      this.setState({ ...window.history.state, cache: { [key]: { ...data } } })
     })
 
-    if (window.history.state.cache) {
-      return _.merge(data, window.history.state.cache)
+    if (window.history.state.cache && window.history.state.cache[key]) {
+      return _.merge(data, window.history.state.cache[key])
     }
 
     return data
