@@ -39,7 +39,7 @@ export default {
 
   hideProgressBar() {
     nprogress.done()
-    clearInterval(this.progressBar)
+    clearTimeout(this.progressBar)
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
