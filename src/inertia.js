@@ -1,7 +1,5 @@
-import _ from 'lodash'
 import axios from 'axios'
 import nprogress from 'nprogress'
-import WatchJS from 'melanke-watchjs'
 
 export default {
   setPage: null,
@@ -158,15 +156,16 @@ export default {
   },
 
   remember(data, key = 'default') {
-    WatchJS.watch(data, () => {
-      this.setState({ ...window.history.state, cache: { [key]: { ...data } } })
+    this.setState({
+      ...window.history.state,
+      cache: { ...window.history.state.cache, [key]: data }
     })
+  },
 
+  restore(key = 'default') {
     if (window.history.state.cache && window.history.state.cache[key]) {
-      return _.merge(data, window.history.state.cache[key])
+      return window.history.state.cache[key]
     }
-
-    return data
   },
 
   showModal(html) {
