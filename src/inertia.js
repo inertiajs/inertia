@@ -75,7 +75,9 @@ export default {
         ...this.version ? { 'X-Inertia-Version': this.version } : {},
       },
     }).then(response => {
-      if (this.isInertiaResponse(response)) {
+      if (response.status === 409 && response.headers.has('x-inertia-location')) {
+        return this.hardVisit(true, response.headers.get('x-inertia-location'))
+      } else if (this.isInertiaResponse(response)) {
         return response.json()
       } else {
         response.text().then(data => this.showModal(data))
@@ -83,12 +85,6 @@ export default {
     }).catch(error => {
       if (error.name === 'AbortError') {
         return
-      } else if (error.response.status === 409 && error.response.headers.has('x-inertia-location')) {
-        return this.hardVisit(true, error.response.headers.get('x-inertia-location'))
-      } else if (this.isInertiaResponse(error.response)) {
-        return error.response.json()
-      } else if (error.response) {
-        error.response.text().then(data => this.showModal(data))
       } else {
         return Promise.reject(error)
       }
