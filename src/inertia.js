@@ -1,10 +1,9 @@
-import axios from 'axios'
 import nprogress from 'nprogress'
 
 export default {
   setPage: null,
   version: null,
-  cancelToken: null,
+  abortController: null,
   progressBar: null,
   modal: null,
 
@@ -30,7 +29,16 @@ export default {
   },
 
   isInertiaResponse(response) {
-    return response && response.headers['x-inertia']
+    return response && response.headers.has('x-inertia')
+  },
+
+  hasBody(method) {
+    return ['GET', 'HEAD'].indexOf(method.toUpperCase()) === -1
+  },
+
+  getCookieValue(name) {
+    let match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'))
+    return match ? decodeURIComponent(match[3]) : null
   },
 
   showProgressBar() {
@@ -46,38 +54,40 @@ export default {
     this.hideModal()
     this.showProgressBar()
 
-    if (this.cancelToken) {
-      this.cancelToken.cancel(this.cancelToken)
+    if (this.abortController) {
+      this.abortController.abort()
     }
 
-    this.cancelToken = axios.CancelToken.source()
+    this.abortController = new AbortController()
 
-    return axios({
+    return window.fetch(url, {
       method: method,
-      url: url,
-      data: data,
-      cancelToken: this.cancelToken.token,
+      ...this.hasBody(method) ? { body: JSON.stringify(data) } : {},
+      signal: this.abortController.signal,
+      credentials: 'include',
       headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
         'Accept': 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
+        'X-Xsrf-Token': this.getCookieValue('XSRF-TOKEN'),
         ...this.version ? { 'X-Inertia-Version': this.version } : {},
       },
     }).then(response => {
       if (this.isInertiaResponse(response)) {
-        return response.data
+        return response.json()
       } else {
-        this.showModal(response.data)
+        response.text().then(data => this.showModal(data))
       }
     }).catch(error => {
-      if (axios.isCancel(error)) {
+      if (error.name === 'AbortError') {
         return
-      } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        return this.hardVisit(true, error.response.headers['x-inertia-location'])
+      } else if (error.response.status === 409 && error.response.headers.has('x-inertia-location')) {
+        return this.hardVisit(true, error.response.headers.get('x-inertia-location'))
       } else if (this.isInertiaResponse(error.response)) {
-        return error.response.data
+        return error.response.json()
       } else if (error.response) {
-        this.showModal(error.response.data)
+        error.response.text().then(data => this.showModal(data))
       } else {
         return Promise.reject(error)
       }
