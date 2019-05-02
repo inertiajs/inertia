@@ -1,3 +1,4 @@
+import fetch, { AbortController } from 'unfetch-abortable'
 import nprogress from 'nprogress'
 
 export default {
@@ -60,7 +61,7 @@ export default {
 
     this.abortController = new AbortController()
 
-    return window.fetch(url, {
+    return fetch(url, {
       method: method,
       ...this.hasBody(method) ? { body: JSON.stringify(data) } : {},
       signal: this.abortController.signal,
