@@ -85,7 +85,7 @@ export default {
       if (page) {
         this.version = page.version
         this.setState(page, replace)
-        this.setPage(page).then(() => {
+        return this.setPage(page).then(() => {
           this.setScroll(preserveScroll)
           this.hideProgressBar()
         })
