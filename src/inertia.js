@@ -122,7 +122,7 @@ export default {
     return this.visit(url, { ...options, replace: true })
   },
 
-  reload(url, options = {}) {
+  reload(options = {}) {
     return this.replace(window.location.href, options)
   },
 
