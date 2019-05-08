@@ -108,7 +108,10 @@ export default {
   },
 
   setState(page, replace = false) {
-    replace = replace || page.url === window.location.pathname + window.location.search
+    replace = replace
+      || page.url === window.location.href
+      || (window.location.pathname === '/' && page.url === window.location.href.replace(/\/$/, ''))
+
     window.history[replace ? 'replaceState' : 'pushState'](page, '', page.url)
   },
 
