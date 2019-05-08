@@ -82,12 +82,12 @@ export default {
         return Promise.reject(error)
       }
     }).then(page => {
+      this.hideProgressBar()
       if (page) {
         this.version = page.version
         this.setState(page, replace)
         return this.setPage(page).then(() => {
           this.setScroll(preserveScroll)
-          this.hideProgressBar()
         })
       }
     })
