@@ -16,7 +16,7 @@ export default {
       this.setPage(window.history.state)
     } else {
       this.setPage(page)
-      this.setState(page)
+      this.setState(page, true)
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
