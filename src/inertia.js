@@ -52,6 +52,9 @@ export default {
 
     this.cancelToken = axios.CancelToken.source()
 
+    let visitId = {}
+    this.visitId = visitId
+
     return axios({
       method: method,
       url: url,
@@ -85,9 +88,11 @@ export default {
       if (page) {
         this.version = page.version
         this.setState(page, replace)
-        return this.setPage(page).then(() => {
-          this.setScroll(preserveScroll)
-          this.hideProgressBar()
+        return this.setPage(page, () => visitId === this.visitId).then(didUpdate => {
+          if (didUpdate) {
+            this.setScroll(preserveScroll)
+            this.hideProgressBar()
+          }
         })
       } else {
         this.hideProgressBar()
