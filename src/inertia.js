@@ -10,7 +10,9 @@ export default {
 
   init(page, setPage) {
     this.version = page.version
-    this.setPage = setPage
+    this.setPage = (page, token = this.createToken()) => {
+      return setPage(page, () => token === this.token)
+    }
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
@@ -42,6 +44,12 @@ export default {
     clearTimeout(this.progressBar)
   },
 
+  createToken() {
+    let token = {}
+    this.token = token
+    return token
+  },
+
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
     this.hideModal()
     this.showProgressBar()
@@ -52,8 +60,7 @@ export default {
 
     this.cancelToken = axios.CancelToken.source()
 
-    let visitId = {}
-    this.visitId = visitId
+    let token = this.createToken()
 
     return axios({
       method: method,
@@ -88,7 +95,7 @@ export default {
       if (page) {
         this.version = page.version
         this.setState(page, replace)
-        return this.setPage(page, () => visitId === this.visitId).then(didUpdate => {
+        return this.setPage(page, token).then(didUpdate => {
           if (didUpdate) {
             this.setScroll(preserveScroll)
             this.hideProgressBar()
