@@ -149,7 +149,7 @@ export default {
     this.setState({
       ...window.history.state,
       cache: { ...window.history.state.cache, [key]: data }
-    })
+    }, true)
   },
 
   restore(key = 'default') {
