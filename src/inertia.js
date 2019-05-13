@@ -55,7 +55,8 @@ export default {
     return axios({
       method: method,
       url: url,
-      data: data,
+      data: method.toLowerCase() === 'get' ? {} : data,
+      params: method.toLowerCase() === 'get' ? data : {},
       cancelToken: this.cancelToken.token,
       headers: {
         'Accept': 'text/html, application/xhtml+xml',
