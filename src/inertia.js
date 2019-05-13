@@ -92,10 +92,12 @@ export default {
       if (page) {
         this.version = page.version
         this.setState(page, replace)
-        this.setPage(page).then(() => {
+        return this.setPage(page).then(() => {
           this.setScroll(preserveScroll)
           this.hideProgressBar()
         })
+      } else {
+        this.hideProgressBar()
       }
     })
   },
@@ -115,7 +117,10 @@ export default {
   },
 
   setState(page, replace = false) {
-    replace = replace || page.url === window.location.pathname + window.location.search
+    replace = replace
+      || page.url === window.location.href
+      || (window.location.pathname === '/' && page.url === window.location.href.replace(/\/$/, ''))
+
     window.history[replace ? 'replaceState' : 'pushState'](page, '', page.url)
   },
 
@@ -129,7 +134,7 @@ export default {
     return this.visit(url, { ...options, replace: true })
   },
 
-  reload(url, options = {}) {
+  reload(options = {}) {
     return this.replace(window.location.href, options)
   },
 
