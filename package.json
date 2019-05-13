@@ -6,8 +6,7 @@
   "author": "Jonathan Reinink",
   "license": "MIT",
   "dependencies": {
-    "nprogress": "^0.2.0",
-    "unfetch-abortable": "0.0.1"
+    "nprogress": "^0.2.0"
   },
   "devDependencies": {
     "eslint": "^5.15.3"
