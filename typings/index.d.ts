@@ -1,6 +1,7 @@
+type PageProps = {}
 type Page = {
   component: string,
-  props: object,
+  props: PageProps,
   url: string,
   version: string | null,
 }
