@@ -1,12 +1,12 @@
-type PageProps = {}
-type Page = {
+interface PageProps {}
+interface Page {
   component: string,
   props: PageProps,
   url: string,
   version: string | null,
 }
 
-type SpecificVisitOptions = {
+interface SpecificVisitOptions {
   preserveScroll?: boolean,
   replace?: boolean,
 }
@@ -16,19 +16,19 @@ type SpecificVisit = (
   options?: SpecificVisitOptions
 ) => Promise<void>
 
-type ReloadOptions = ReplaceOptions
+interface ReloadOptions extends ReplaceOptions {}
 
 type RememberData = object
 
-type ReplaceOptions = {
+interface ReplaceOptions {
   data?: object,
   method?: string,
   preserveScroll?: boolean,
 }
 
-type VisitOptions = ReplaceOptions & SpecificVisitOptions
+interface VisitOptions extends ReplaceOptions, SpecificVisitOptions {}
 
-declare const Inertia: {
+interface Inertia {
   delete: SpecificVisit,
   init: (page: Page, setPage: (page: Page) => void) => void,
   patch: SpecificVisit,
