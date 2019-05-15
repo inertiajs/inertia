@@ -1,5 +1,4 @@
-interface PageProps {}
-interface Page {
+interface Page<PageProps = {}> {
   component: string,
   props: PageProps,
   url: string,
@@ -28,9 +27,12 @@ interface ReplaceOptions {
 
 interface VisitOptions extends ReplaceOptions, SpecificVisitOptions {}
 
-interface Inertia {
+interface Inertia<PageProps = {}> {
   delete: SpecificVisit,
-  init: (page: Page, setPage: (page: Page) => void) => void,
+  init: (
+    page: Page<PageProps>,
+    setPage: (page: Page<PageProps>) => void
+  ) => void,
   patch: SpecificVisit,
   post: SpecificVisit,
   put: SpecificVisit,
