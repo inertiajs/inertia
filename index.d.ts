@@ -15,7 +15,7 @@ type SpecificVisit = (
   options?: SpecificVisitOptions
 ) => Promise<void>
 
-interface ReloadOptions extends ReplaceOptions {}
+type ReloadOptions = ReplaceOptions
 
 type RememberData = object
 
@@ -25,7 +25,7 @@ interface ReplaceOptions {
   preserveScroll?: boolean
 }
 
-interface VisitOptions extends ReplaceOptions, SpecificVisitOptions {}
+type VisitOptions = ReplaceOptions & SpecificVisitOptions
 
 interface Inertia<PageProps = {}> {
   delete: SpecificVisit
