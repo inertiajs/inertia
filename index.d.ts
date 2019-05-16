@@ -41,9 +41,7 @@ interface Inertia<PageProps = {}> {
   visit: (url: string, options?: VisitOptions) => Promise<void>
 }
 
-declare function shouldIntercept(
-  event: HTMLInputElement | KeyboardEvent
-): boolean
+declare function shouldIntercept(event: MouseEvent | KeyboardEvent): boolean
 
 export default Inertia
 export { Page, shouldIntercept }
