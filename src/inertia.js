@@ -124,7 +124,7 @@ export default {
       if (visitId === this.visitId) {
         this.version = page.version
         this.setState(page, replace)
-        this.updatePage(component, page.props, preserveState)
+        this.updatePage(component, page.props, { preserveState })
         this.setScroll(preserveScroll)
         this.stopProgressBar()
       }
