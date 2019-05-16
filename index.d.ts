@@ -5,13 +5,10 @@ interface Page<PageProps = {}> {
   version: string | null
 }
 
-interface SpecificVisitOptions {
-  preserveScroll?: boolean
-  replace?: boolean
-}
+type SpecificVisitOptions = Pick<VisitOptions, 'preserveScroll' | 'replace'>
 type SpecificVisit = (
   url: string,
-  data?: object,
+  data?: VisitOptions['data'],
   options?: SpecificVisitOptions
 ) => Promise<void>
 
@@ -19,13 +16,14 @@ type ReloadOptions = ReplaceOptions
 
 type RememberData = object
 
-interface ReplaceOptions {
+type ReplaceOptions = Pick<VisitOptions, 'data' | 'method' | 'preserveScroll'>
+
+interface VisitOptions {
   data?: object
   method?: string
   preserveScroll?: boolean
+  replace?: boolean
 }
-
-type VisitOptions = ReplaceOptions & SpecificVisitOptions
 
 interface Inertia<PageProps = {}> {
   delete: SpecificVisit
