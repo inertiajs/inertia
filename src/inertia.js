@@ -151,7 +151,7 @@ export default {
     }
   },
 
-  replace(url, options = {}) {
+  replace(url, options = { preserveState: true }) {
     return this.visit(url, { ...options, replace: true })
   },
 
