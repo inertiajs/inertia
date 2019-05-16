@@ -53,16 +53,16 @@ export default {
     this.cancelToken = axios.CancelToken.source()
 
     return axios({
-      method: method,
-      url: url,
+      method,
+      url,
       data: method.toLowerCase() === 'get' ? {} : data,
       params: method.toLowerCase() === 'get' ? data : {},
       cancelToken: this.cancelToken.token,
       headers: {
-        'Accept': 'text/html, application/xhtml+xml',
+        Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...this.version ? { 'X-Inertia-Version': this.version } : {},
+        ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
     }).then(response => {
       if (this.isInertiaResponse(response)) {
@@ -86,6 +86,7 @@ export default {
       if (page) {
         this.version = page.version
         this.setState(page, replace)
+
         return this.setPage(page).then(() => {
           this.setScroll(preserveScroll)
           this.hideProgressBar()
@@ -151,7 +152,7 @@ export default {
   remember(data, key = 'default') {
     this.setState({
       ...window.history.state,
-      cache: { ...window.history.state.cache, [key]: data }
+      cache: { ...window.history.state.cache, [key]: data },
     })
   },
 
