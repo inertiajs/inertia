@@ -2,25 +2,28 @@ import axios from 'axios'
 import nprogress from 'nprogress'
 
 export default {
-  setPage: null,
+  resolveComponent: null,
+  updatePage: null,
   version: null,
+  visitId: null,
   cancelToken: null,
   progressBar: null,
   modal: null,
 
-  init(page, setPage) {
-    this.version = page.version
-    this.setPage = setPage
+  init({ initialPage, resolveComponent, updatePage }) {
+    this.resolveComponent = resolveComponent
+    this.updatePage = updatePage
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
     } else {
-      this.setPage(page)
-      this.setState(page)
+      this.setPage(initialPage)
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
     document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
+
+    this.initProgressBar()
   },
 
   navigationType() {
@@ -33,24 +36,40 @@ export default {
     return response && response.headers['x-inertia']
   },
 
-  showProgressBar() {
-    this.progressBar = setTimeout(() => nprogress.start(), 100)
+  initProgressBar() {
+    nprogress.configure({ showSpinner: false })
   },
 
-  hideProgressBar() {
+  startProgressBar() {
+    nprogress.set(0)
+    nprogress.start()
+  },
+
+  incrementProgressBar() {
+    nprogress.inc(0.4)
+  },
+
+  stopProgressBar() {
     nprogress.done()
-    clearTimeout(this.progressBar)
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
-    this.hideModal()
-    this.showProgressBar()
-
+  cancelActiveVisits() {
     if (this.cancelToken) {
       this.cancelToken.cancel(this.cancelToken)
     }
 
     this.cancelToken = axios.CancelToken.source()
+  },
+
+  createVisitId() {
+    this.visitId = {}
+    return this.visitId
+  },
+
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
+    this.startProgressBar()
+    this.cancelActiveVisits()
+    let visitId = this.createVisitId()
 
     return axios({
       method,
@@ -74,25 +93,19 @@ export default {
       if (axios.isCancel(error)) {
         return
       } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
+        this.stopProgressBar()
         return this.hardVisit(true, error.response.headers['x-inertia-location'])
       } else if (this.isInertiaResponse(error.response)) {
         return error.response.data
       } else if (error.response) {
+        this.stopProgressBar()
         this.showModal(error.response.data)
       } else {
         return Promise.reject(error)
       }
     }).then(page => {
       if (page) {
-        this.version = page.version
-        this.setState(page, replace)
-
-        return this.setPage(page).then(() => {
-          this.setScroll(preserveScroll)
-          this.hideProgressBar()
-        })
-      } else {
-        this.hideProgressBar()
+        this.setPage(page, visitId, replace, preserveScroll)
       }
     })
   },
@@ -103,6 +116,19 @@ export default {
     } else {
       window.location.href = url
     }
+  },
+
+  setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false) {
+    this.incrementProgressBar()
+    return this.resolveComponent(page.component).then(component => {
+      if (visitId === this.visitId) {
+        this.version = page.version
+        this.setState(page, replace)
+        this.updatePage(component, page.props)
+        this.setScroll(preserveScroll)
+        this.stopProgressBar()
+      }
+    })
   },
 
   setScroll(preserveScroll) {
