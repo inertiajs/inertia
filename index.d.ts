@@ -25,11 +25,16 @@ interface VisitOptions {
   replace?: boolean
 }
 
-interface Inertia<PageProps = {}> {
+interface InitArguments<Component, PageProps = {}> {
+  initialPage: Page<PageProps>
+  resolveComponent: (name: string) => Promise<Component>
+  updatePage: (component: Component, props: PageProps) => void
+}
+
+interface Inertia {
   delete: SpecificVisit
-  init: (
-    page: Page<PageProps>,
-    setPage: (page: Page<PageProps>) => void
+  init: <Component, PageProps = {}>(
+    arguments: InitArguments<Component, PageProps>
   ) => void
   patch: SpecificVisit
   post: SpecificVisit
