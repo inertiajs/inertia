@@ -1,4 +1,5 @@
 import axios from 'axios'
+import Modal from './modal'
 import nprogress from 'nprogress'
 
 export default {
@@ -8,7 +9,6 @@ export default {
   visitId: null,
   cancelToken: null,
   progressBar: null,
-  modal: null,
 
   init({ initialPage, resolveComponent, updatePage }) {
     this.resolveComponent = resolveComponent
@@ -21,7 +21,6 @@ export default {
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
-    document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
 
     this.initProgressBar()
   },
@@ -87,7 +86,7 @@ export default {
       if (this.isInertiaResponse(response)) {
         return response.data
       } else {
-        this.showModal(response.data)
+        Modal.show(response.data)
       }
     }).catch(error => {
       if (axios.isCancel(error)) {
@@ -99,7 +98,7 @@ export default {
         return error.response.data
       } else if (error.response) {
         this.stopProgressBar()
-        this.showModal(error.response.data)
+        Modal.show(error.response.data)
       } else {
         return Promise.reject(error)
       }
@@ -192,48 +191,6 @@ export default {
   restore(key = 'default') {
     if (window.history.state.cache && window.history.state.cache[key]) {
       return window.history.state.cache[key]
-    }
-  },
-
-  showModal(html) {
-    let page = document.createElement('html')
-    page.innerHTML = html
-    page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
-
-    this.modal = document.createElement('div')
-    this.modal.style.position = 'fixed'
-    this.modal.style.width = '100vw'
-    this.modal.style.height = '100vh'
-    this.modal.style.padding = '50px'
-    this.modal.style.backgroundColor = 'rgba(0, 0, 0, .6)'
-    this.modal.style.zIndex = 200000
-    this.modal.addEventListener('click', () => this.hideModal())
-
-    let iframe = document.createElement('iframe')
-    iframe.style.backgroundColor = 'white'
-    iframe.style.borderRadius = '5px'
-    iframe.style.width = '100%'
-    iframe.style.height = '100%'
-    this.modal.appendChild(iframe)
-
-    document.body.prepend(this.modal)
-    document.body.style.overflow = 'hidden'
-    iframe.contentWindow.document.open()
-    iframe.contentWindow.document.write(page.outerHTML)
-    iframe.contentWindow.document.close()
-  },
-
-  hideModal() {
-    if (this.modal) {
-      this.modal.outerHTML = ''
-      this.modal = null
-      document.body.style.overflow = 'visible'
-    }
-  },
-
-  hideModalOnEscape(event) {
-    if (this.modal && event.keyCode == 27) {
-      this.hideModal()
     }
   },
 }
