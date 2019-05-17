@@ -4,71 +4,75 @@ declare namespace Inertia {
   interface PageProps {}
 
   interface Page<CustomPageProps extends PageProps = {}> {
-    component: string
-    props: CustomPageProps
-    url: string
-    version: string | null
+    component: string;
+    props: CustomPageProps;
+    url: string;
+    version: string | null;
   }
 
   type SpecificVisitOptions = Pick<
     VisitOptions,
-    'preserveScroll' | 'preserveState' | 'replace'
-  >
+    "preserveScroll" | "preserveState" | "replace"
+  >;
 
   type SpecificVisit = (
     url: string,
-    data?: VisitOptions['data'],
+    data?: VisitOptions["data"],
     options?: SpecificVisitOptions
-  ) => Promise<void>
+  ) => Promise<void>;
 
-  type ReloadOptions = ReplaceOptions
+  type ReloadOptions = ReplaceOptions;
 
-  type RememberData = object
+  type RememberData = object;
 
-  type ReplaceOptions = Pick<VisitOptions, 'data' | 'method' | 'preserveScroll'>
+  type ReplaceOptions = Pick<
+    VisitOptions,
+    "data" | "method" | "preserveScroll"
+  >;
 
   interface VisitOptions {
-    data?: object
-    method?: string
-    preserveScroll?: boolean
-    preserveState?: boolean
-    replace?: boolean
+    data?: object;
+    method?: string;
+    preserveScroll?: boolean;
+    preserveState?: boolean;
+    replace?: boolean;
   }
 
   interface UpdatePageOptions {
-    preserveState: VisitOptions['preserveState']
+    preserveState: VisitOptions["preserveState"];
   }
 
   interface Inertia {
-    delete: SpecificVisit
-    init: <Component, CustomPageProps extends PagePropsBeforeTransform = {}>(
-      arguments: {
-        initialPage: Page<CustomPageProps>
-        resolveComponent: (name: string) => Promise<Component>
-        updatePage: (
-          component: Component,
-          props: CustomPageProps,
-          options: UpdatePageOptions
-        ) => void
-      }
-    ) => void
-    patch: SpecificVisit
-    post: SpecificVisit
-    put: SpecificVisit
-    reload: (options?: ReloadOptions) => Promise<void>
-    remember: (data: RememberData, key?: string) => void
-    replace: (url: string, options?: ReplaceOptions) => Promise<void>
-    restore: (key?: string) => RememberData
-    visit: (url: string, options?: VisitOptions) => Promise<void>
+    delete: SpecificVisit;
+    init: <
+      Component,
+      CustomPageProps extends PagePropsBeforeTransform = {}
+    >(arguments: {
+      initialPage: Page<CustomPageProps>;
+      resolveComponent: (name: string) => Promise<Component>;
+      updatePage: (
+        component: Component,
+        props: CustomPageProps,
+        options: UpdatePageOptions
+      ) => void;
+    }) => void;
+    patch: SpecificVisit;
+    post: SpecificVisit;
+    put: SpecificVisit;
+    reload: (options?: ReloadOptions) => Promise<void>;
+    remember: (data: RememberData, key?: string) => void;
+    replace: (url: string, options?: ReplaceOptions) => Promise<void>;
+    restore: (key?: string) => RememberData;
+    visit: (url: string, options?: VisitOptions) => Promise<void>;
   }
 
-  type shouldIntercept = (event: MouseEvent | KeyboardEvent) => boolean
+  type shouldIntercept = (event: MouseEvent | KeyboardEvent) => boolean;
 }
 
-declare module 'inertia' {
-  export const shouldIntercept: Inertia.shouldIntercept
+declare module "inertia" {
+  export const shouldIntercept: Inertia.shouldIntercept;
 
-  const _default: Inertia.Inertia
+  const _default: Inertia.Inertia;
 
-  export default _default
+  export default _default;
 }
