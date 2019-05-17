@@ -151,24 +151,24 @@ export default {
     }
   },
 
-  replace(url, options = { preserveState: true }) {
-    return this.visit(url, { ...options, replace: true })
+  replace(url, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
   reload(options = {}) {
     return this.replace(window.location.href, options)
   },
 
-  post(url, data = {}, options = { preserveState: true }) {
-    return this.visit(url, { ...options, method: 'post', data })
+  post(url, data = {}, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   },
 
-  put(url, data = {}, options = { preserveState: true }) {
-    return this.visit(url, { ...options, method: 'put', data })
+  put(url, data = {}, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   },
 
-  patch(url, data = {}, options = { preserveState: true }) {
-    return this.visit(url, { ...options, method: 'patch', data })
+  patch(url, data = {}, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   },
 
   delete(url, options = {}) {
