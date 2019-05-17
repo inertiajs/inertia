@@ -9,24 +9,24 @@ declare namespace Inertia {
     url: string
     version: string | null
   }
-  
+
   type SpecificVisitOptions = Pick<
     VisitOptions,
     'preserveScroll' | 'preserveState' | 'replace'
   >
-  
+
   type SpecificVisit = (
     url: string,
     data?: VisitOptions['data'],
     options?: SpecificVisitOptions
   ) => Promise<void>
-  
+
   type ReloadOptions = ReplaceOptions
-  
+
   type RememberData = object
-  
+
   type ReplaceOptions = Pick<VisitOptions, 'data' | 'method' | 'preserveScroll'>
-  
+
   interface VisitOptions {
     data?: object
     method?: string
@@ -34,7 +34,7 @@ declare namespace Inertia {
     preserveState?: boolean
     replace?: boolean
   }
-  
+
   interface UpdatePageOptions {
     preserveState: VisitOptions['preserveState']
   }
@@ -61,7 +61,7 @@ declare namespace Inertia {
     restore: (key?: string) => RememberData
     visit: (url: string, options?: VisitOptions) => Promise<void>
   }
-  
+
   type shouldIntercept = (event: MouseEvent | KeyboardEvent) => boolean
 }
 
@@ -69,6 +69,6 @@ declare module 'inertia' {
   export const shouldIntercept: Inertia.shouldIntercept
 
   const _default: Inertia.Inertia
-  
+
   export default _default
 }
