@@ -1,6 +1,6 @@
 import Axios from 'axios'
 import Modal from './modal'
-import Nprogress from 'nprogress'
+import Progress from './progress'
 
 export default {
   resolveComponent: null,
@@ -8,7 +8,6 @@ export default {
   version: null,
   visitId: null,
   cancelToken: null,
-  progressBar: null,
 
   init({ initialPage, resolveComponent, updatePage }) {
     this.resolveComponent = resolveComponent
@@ -21,8 +20,6 @@ export default {
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
-
-    this.initProgressBar()
   },
 
   navigationType() {
@@ -33,23 +30,6 @@ export default {
 
   isInertiaResponse(response) {
     return response && response.headers['x-inertia']
-  },
-
-  initProgressBar() {
-    Nprogress.configure({ showSpinner: false })
-  },
-
-  startProgressBar() {
-    Nprogress.set(0)
-    Nprogress.start()
-  },
-
-  incrementProgressBar() {
-    Nprogress.inc(0.4)
-  },
-
-  stopProgressBar() {
-    Nprogress.done()
   },
 
   cancelActiveVisits() {
@@ -66,7 +46,7 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false } = {}) {
-    this.startProgressBar()
+    Progress.start()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
 
@@ -92,12 +72,12 @@ export default {
       if (Axios.isCancel(error)) {
         return
       } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        this.stopProgressBar()
+        Progress.stop()
         return this.hardVisit(true, error.response.headers['x-inertia-location'])
       } else if (this.isInertiaResponse(error.response)) {
         return error.response.data
       } else if (error.response) {
-        this.stopProgressBar()
+        Progress.stop()
         Modal.show(error.response.data)
       } else {
         return Promise.reject(error)
@@ -118,14 +98,14 @@ export default {
   },
 
   setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false) {
-    this.incrementProgressBar()
+    Progress.increment()
     return this.resolveComponent(page.component).then(component => {
       if (visitId === this.visitId) {
         this.version = page.version
         this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState })
         this.setScroll(preserveScroll)
-        this.stopProgressBar()
+        Progress.stop()
       }
     })
   },
