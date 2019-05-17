@@ -17,7 +17,9 @@ export default {
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
     } else {
-      window.history.state.cache = null
+      if (window.history.state) {
+        window.history.state.cache = null
+      }
       this.setPage(initialPage)
     }
 
@@ -144,7 +146,10 @@ export default {
       || (window.location.pathname === '/' && page.url === window.location.href.replace(/\/$/, ''))
 
     if (replace) {
-      window.history.replaceState({ cache: window.history.state.cache, ...page }, '', page.url)
+      window.history.replaceState({
+        ...window.history.state ? { cache: window.history.state.cache } : {},
+        ...page
+      }, '', page.url)
     } else {
       window.history.pushState(page, '', page.url)
     }
