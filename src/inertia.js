@@ -66,7 +66,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false } = {}) {
     this.startProgressBar()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
@@ -105,7 +105,7 @@ export default {
       }
     }).then(page => {
       if (page) {
-        this.setPage(page, visitId, replace, preserveScroll)
+        this.setPage(page, visitId, replace, preserveScroll, preserveState)
       }
     })
   },
@@ -118,13 +118,13 @@ export default {
     }
   },
 
-  setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false) {
+  setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false) {
     this.incrementProgressBar()
     return this.resolveComponent(page.component).then(component => {
       if (visitId === this.visitId) {
         this.version = page.version
         this.setState(page, replace)
-        this.updatePage(component, page.props)
+        this.updatePage(component, page.props, { preserveState })
         this.setScroll(preserveScroll)
         this.stopProgressBar()
       }
@@ -152,7 +152,7 @@ export default {
   },
 
   replace(url, options = {}) {
-    return this.visit(url, { ...options, replace: true })
+    return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
   reload(options = {}) {
@@ -160,15 +160,15 @@ export default {
   },
 
   post(url, data = {}, options = {}) {
-    return this.visit(url, { ...options, method: 'post', data })
+    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   },
 
   put(url, data = {}, options = {}) {
-    return this.visit(url, { ...options, method: 'put', data })
+    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   },
 
   patch(url, data = {}, options = {}) {
-    return this.visit(url, { ...options, method: 'patch', data })
+    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   },
 
   delete(url, options = {}) {
