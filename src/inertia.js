@@ -1,6 +1,6 @@
 import Axios from 'axios'
 import Modal from './modal'
-import nprogress from 'nprogress'
+import Nprogress from 'nprogress'
 
 export default {
   resolveComponent: null,
@@ -36,20 +36,20 @@ export default {
   },
 
   initProgressBar() {
-    nprogress.configure({ showSpinner: false })
+    Nprogress.configure({ showSpinner: false })
   },
 
   startProgressBar() {
-    nprogress.set(0)
-    nprogress.start()
+    Nprogress.set(0)
+    Nprogress.start()
   },
 
   incrementProgressBar() {
-    nprogress.inc(0.4)
+    Nprogress.inc(0.4)
   },
 
   stopProgressBar() {
-    nprogress.done()
+    Nprogress.done()
   },
 
   cancelActiveVisits() {
