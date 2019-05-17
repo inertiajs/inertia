@@ -123,8 +123,8 @@ export default {
 
     if (replace) {
       window.history.replaceState({
-        ...(preserveState && window.history.state) ? { cache: window.history.state.cache } : {},
-        ...page
+        ...((preserveState && window.history.state) ? { cache: window.history.state.cache } : {}),
+        ...page,
       }, '', page.url)
     } else {
       window.history.pushState(page, '', page.url)
