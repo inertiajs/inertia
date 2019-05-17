@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "author": "Jonathan Reinink",
   "license": "MIT",
+  "typings": "index.d.ts",
   "dependencies": {
     "axios": "^0.18.0",
     "nprogress": "^0.2.0"
