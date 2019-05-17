@@ -17,9 +17,6 @@ export default {
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
     } else {
-      if (window.history.state) {
-        window.history.state.cache = null
-      }
       this.setPage(initialPage)
     }
 
@@ -126,7 +123,7 @@ export default {
     return this.resolveComponent(page.component).then(component => {
       if (visitId === this.visitId) {
         this.version = page.version
-        this.setState(page, replace)
+        this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState })
         this.setScroll(preserveScroll)
         this.stopProgressBar()
@@ -140,14 +137,14 @@ export default {
     }
   },
 
-  setState(page, replace = false) {
+  setState(page, replace = false, preserveState = false) {
     replace = replace
       || page.url === window.location.href
       || (window.location.pathname === '/' && page.url === window.location.href.replace(/\/$/, ''))
 
     if (replace) {
       window.history.replaceState({
-        ...window.history.state ? { cache: window.history.state.cache } : {},
+        ...(preserveState && window.history.state) ? { cache: window.history.state.cache } : {},
         ...page
       }, '', page.url)
     } else {
