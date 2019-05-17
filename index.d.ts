@@ -7,7 +7,10 @@ interface Page<CustomPageProps extends PageProps = {}> {
   version: string | null
 }
 
-type SpecificVisitOptions = Pick<VisitOptions, 'preserveScroll' | 'replace'>
+type SpecificVisitOptions = Pick<
+  VisitOptions,
+  'preserveScroll' | 'preserveState' | 'replace'
+>
 type SpecificVisit = (
   url: string,
   data?: VisitOptions['data'],
@@ -24,13 +27,21 @@ interface VisitOptions {
   data?: object
   method?: string
   preserveScroll?: boolean
+  preserveState?: boolean
   replace?: boolean
 }
 
+interface UpdatePageOptions {
+  preserveState: VisitOptions['preserveState']
+}
 interface InitArguments<Component, CustomPageProps extends PageProps = {}> {
   initialPage: Page<CustomPageProps>
   resolveComponent: (name: string) => Promise<Component>
-  updatePage: (component: Component, props: CustomPageProps) => void
+  updatePage: (
+    component: Component,
+    props: CustomPageProps,
+    options: UpdatePageOptions
+  ) => void
 }
 
 interface Inertia {
