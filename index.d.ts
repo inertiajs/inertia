@@ -1,6 +1,8 @@
-interface Page<PageProps = {}> {
+interface PageProps {}
+
+interface Page<CustomPageProps extends PageProps = {}> {
   component: string
-  props: PageProps
+  props: CustomPageProps
   url: string
   version: string | null
 }
@@ -25,16 +27,16 @@ interface VisitOptions {
   replace?: boolean
 }
 
-interface InitArguments<Component, PageProps = {}> {
-  initialPage: Page<PageProps>
+interface InitArguments<Component, CustomPageProps extends PageProps = {}> {
+  initialPage: Page<CustomPageProps>
   resolveComponent: (name: string) => Promise<Component>
-  updatePage: (component: Component, props: PageProps) => void
+  updatePage: (component: Component, props: CustomPageProps) => void
 }
 
 interface Inertia {
   delete: SpecificVisit
-  init: <Component, PageProps = {}>(
-    arguments: InitArguments<Component, PageProps>
+  init: <Component, CustomPageProps extends PageProps = {}>(
+    arguments: InitArguments<Component, CustomPageProps>
   ) => void
   patch: SpecificVisit
   post: SpecificVisit
@@ -49,4 +51,4 @@ interface Inertia {
 declare function shouldIntercept(event: MouseEvent | KeyboardEvent): boolean
 
 export default Inertia
-export { Page, shouldIntercept }
+export { Page, PageProps, shouldIntercept }
