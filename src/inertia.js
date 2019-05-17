@@ -1,4 +1,4 @@
-import axios from 'axios'
+import Axios from 'axios'
 import Modal from './modal'
 import nprogress from 'nprogress'
 
@@ -57,7 +57,7 @@ export default {
       this.cancelToken.cancel(this.cancelToken)
     }
 
-    this.cancelToken = axios.CancelToken.source()
+    this.cancelToken = Axios.CancelToken.source()
   },
 
   createVisitId() {
@@ -70,7 +70,7 @@ export default {
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
 
-    return axios({
+    return Axios({
       method,
       url,
       data: method.toLowerCase() === 'get' ? {} : data,
@@ -89,7 +89,7 @@ export default {
         Modal.show(response.data)
       }
     }).catch(error => {
-      if (axios.isCancel(error)) {
+      if (Axios.isCancel(error)) {
         return
       } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
         this.stopProgressBar()
