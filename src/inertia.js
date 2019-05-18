@@ -99,7 +99,7 @@ export default {
 
   setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false) {
     Progress.increment()
-    return this.resolveComponent(page.component).then(component => {
+    return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         this.version = page.version
         this.setState(page, replace, preserveState)
