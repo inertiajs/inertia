@@ -46,7 +46,7 @@ declare namespace Inertia {
       CustomPageProps extends PagePropsBeforeTransform = {}
     >(arguments: {
       initialPage: Page<CustomPageProps>
-      resolveComponent: (name: string) => Promise<Component>
+      resolveComponent: (name: string) => Component | Promise<Component>
       updatePage: (
         component: Component,
         props: CustomPageProps,
