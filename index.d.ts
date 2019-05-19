@@ -3,7 +3,7 @@ declare namespace Inertia {
 
   interface PageProps {}
 
-  interface Page<CustomPageProps extends PageProps = {}> {
+  interface Page<CustomPageProps extends PageProps = PageProps> {
     component: string
     props: CustomPageProps
     url: string
@@ -43,7 +43,7 @@ declare namespace Inertia {
     delete: SpecificVisit
     init: <
       Component,
-      CustomPageProps extends PagePropsBeforeTransform = {}
+      CustomPageProps extends PagePropsBeforeTransform = PagePropsBeforeTransform
     >(arguments: {
       initialPage: Page<CustomPageProps>
       resolveComponent: (name: string) => Component | Promise<Component>
