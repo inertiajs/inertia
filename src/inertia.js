@@ -117,11 +117,7 @@ export default {
   },
 
   setState(page, replace = false, preserveState = false) {
-    replace = replace
-      || page.url === window.location.href
-      || (window.location.pathname === '/' && page.url === window.location.href.replace(/\/$/, ''))
-
-    if (replace) {
+    if (replace || page.url === window.location.pathname+window.location.search) {
       window.history.replaceState({
         ...((preserveState && window.history.state) ? { cache: window.history.state.cache } : {}),
         ...page,
