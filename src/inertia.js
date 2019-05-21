@@ -86,6 +86,7 @@ export default {
       if (page) {
         this.setPage(page, visitId, replace, preserveScroll, preserveState)
       }
+      return page;
     })
   },
 
