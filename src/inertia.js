@@ -45,7 +45,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false } = {}) {
+  visit(url, { method = 'get', data = {}, headers = {}, replace = false, preserveScroll = false, preserveState = false } = {}) {
     Progress.start()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
@@ -61,6 +61,7 @@ export default {
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
         ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
+        ...headers,
       },
     }).then(response => {
       if (this.isInertiaResponse(response)) {
