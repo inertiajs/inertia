@@ -8,7 +8,7 @@
   "typings": "index.d.ts",
   "dependencies": {
     "axios": "^0.18.0",
-    "nprogress": "^0.2.0"
+    "nanobar": "^0.4.2"
   },
   "devDependencies": {
     "eslint": "^5.15.3"
