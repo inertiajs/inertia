@@ -16,6 +16,7 @@ export default {
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
     } else {
+      initialPage.url += window.location.hash;
       this.setPage(initialPage)
     }
 
