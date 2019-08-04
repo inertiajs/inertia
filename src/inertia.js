@@ -1,25 +1,24 @@
-import nprogress from 'nprogress'
+import Modal from './modal'
+import Progress from './progress'
 
 export default {
-  setPage: null,
+  resolveComponent: null,
+  updatePage: null,
   version: null,
+  visitId: null,
   abortController: null,
-  progressBar: null,
-  modal: null,
 
-  init(page, setPage) {
-    this.version = page.version
-    this.setPage = setPage
+  init({ initialPage, resolveComponent, updatePage }) {
+    this.resolveComponent = resolveComponent
+    this.updatePage = updatePage
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
     } else {
-      this.setPage(page)
-      this.setState(page)
+      this.setPage(initialPage)
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
-    document.addEventListener('keydown', this.hideModalOnEscape.bind(this))
   },
 
   navigationType() {
@@ -41,45 +40,48 @@ export default {
     return match ? decodeURIComponent(match[3]) : null
   },
 
-  showProgressBar() {
-    this.progressBar = setTimeout(() => nprogress.start(), 100)
-  },
-
-  hideProgressBar() {
-    nprogress.done()
-    clearTimeout(this.progressBar)
-  },
-
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false } = {}) {
-    this.hideModal()
-    this.showProgressBar()
-
+  cancelActiveVisits() {
     if (this.abortController) {
       this.abortController.abort()
     }
 
     this.abortController = new AbortController()
+  },
+
+  createVisitId() {
+    this.visitId = {}
+    return this.visitId
+  },
+
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false } = {}) {
+    Progress.start()
+    this.cancelActiveVisits()
+    let visitId = this.createVisitId()
 
     return window.fetch(url, {
-      method: method,
+      method,
       ...this.hasBody(method) ? { body: JSON.stringify(data) } : {},
       signal: this.abortController.signal,
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json;charset=UTF-8',
-        'Accept': 'text/html, application/xhtml+xml',
+        Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
         'X-Xsrf-Token': this.getCookieValue('XSRF-TOKEN'),
-        ...this.version ? { 'X-Inertia-Version': this.version } : {},
+        ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
     }).then(response => {
       if (response.status === 409 && response.headers.has('x-inertia-location')) {
+        Progress.stop()
         return this.hardVisit(true, response.headers.get('x-inertia-location'))
       } else if (this.isInertiaResponse(response)) {
         return response.json()
       } else {
-        response.text().then(data => this.showModal(data))
+        response.text().then(data => {
+          Progress.stop()
+          Modal.show(data)
+        })
       }
     }).catch(error => {
       if (error.name === 'AbortError') {
@@ -89,14 +91,7 @@ export default {
       }
     }).then(page => {
       if (page) {
-        this.version = page.version
-        this.setState(page, replace)
-        return this.setPage(page).then(() => {
-          this.setScroll(preserveScroll)
-          this.hideProgressBar()
-        })
-      } else {
-        this.hideProgressBar()
+        this.setPage(page, visitId, replace, preserveScroll, preserveState)
       }
     })
   },
@@ -109,18 +104,34 @@ export default {
     }
   },
 
+  setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false) {
+    Progress.increment()
+    return Promise.resolve(this.resolveComponent(page.component)).then(component => {
+      if (visitId === this.visitId) {
+        this.version = page.version
+        this.setState(page, replace, preserveState)
+        this.updatePage(component, page.props, { preserveState })
+        this.setScroll(preserveScroll)
+        Progress.stop()
+      }
+    })
+  },
+
   setScroll(preserveScroll) {
     if (!preserveScroll) {
       window.scrollTo(0, 0)
     }
   },
 
-  setState(page, replace = false) {
-    replace = replace
-      || page.url === window.location.href
-      || (window.location.pathname === '/' && page.url === window.location.href.replace(/\/$/, ''))
-
-    window.history[replace ? 'replaceState' : 'pushState'](page, '', page.url)
+  setState(page, replace = false, preserveState = false) {
+    if (replace || page.url === `${window.location.pathname}${window.location.search}`) {
+      window.history.replaceState({
+        ...((preserveState && window.history.state) ? { cache: window.history.state.cache } : {}),
+        ...page,
+      }, '', page.url)
+    } else {
+      window.history.pushState(page, '', page.url)
+    }
   },
 
   restoreState(event) {
@@ -130,7 +141,7 @@ export default {
   },
 
   replace(url, options = {}) {
-    return this.visit(url, { ...options, replace: true })
+    return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
   reload(options = {}) {
@@ -138,15 +149,15 @@ export default {
   },
 
   post(url, data = {}, options = {}) {
-    return this.visit(url, { ...options, method: 'post', data })
+    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   },
 
   put(url, data = {}, options = {}) {
-    return this.visit(url, { ...options, method: 'put', data })
+    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   },
 
   patch(url, data = {}, options = {}) {
-    return this.visit(url, { ...options, method: 'patch', data })
+    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   },
 
   delete(url, options = {}) {
@@ -156,55 +167,13 @@ export default {
   remember(data, key = 'default') {
     this.setState({
       ...window.history.state,
-      cache: { ...window.history.state.cache, [key]: data }
+      cache: { ...window.history.state.cache, [key]: data },
     })
   },
 
   restore(key = 'default') {
     if (window.history.state.cache && window.history.state.cache[key]) {
       return window.history.state.cache[key]
-    }
-  },
-
-  showModal(html) {
-    let page = document.createElement('html')
-    page.innerHTML = html
-    page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
-
-    this.modal = document.createElement('div')
-    this.modal.style.position = 'fixed'
-    this.modal.style.width = '100vw'
-    this.modal.style.height = '100vh'
-    this.modal.style.padding = '50px'
-    this.modal.style.backgroundColor = 'rgba(0, 0, 0, .6)'
-    this.modal.style.zIndex = 200000
-    this.modal.addEventListener('click', () => this.hideModal())
-
-    let iframe = document.createElement('iframe')
-    iframe.style.backgroundColor = 'white'
-    iframe.style.borderRadius = '5px'
-    iframe.style.width = '100%'
-    iframe.style.height = '100%'
-    this.modal.appendChild(iframe)
-
-    document.body.prepend(this.modal)
-    document.body.style.overflow = 'hidden'
-    iframe.contentWindow.document.open()
-    iframe.contentWindow.document.write(page.outerHTML)
-    iframe.contentWindow.document.close()
-  },
-
-  hideModal() {
-    if (this.modal) {
-      this.modal.outerHTML = ''
-      this.modal = null
-      document.body.style.overflow = 'visible'
-    }
-  },
-
-  hideModalOnEscape(event) {
-    if (this.modal && event.keyCode == 27) {
-      this.hideModal()
     }
   },
 }
