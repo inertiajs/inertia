@@ -1,16 +1,23 @@
 {
   "name": "inertia",
   "version": "0.1.0",
-  "description": "A framework for creating server-driven single page apps.",
-  "main": "src/index.js",
-  "author": "Jonathan Reinink",
   "license": "MIT",
+  "description": "A framework for creating server-driven single page apps.",
+  "author": "Jonathan Reinink",
+  "source": "src/index.js", 
+  "main": "dist/index.js", 
+  "module": "dist/index.mjs", 
+  "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
+  "scripts": {
+    "build": "microbundle --name Inertia"
+  },
   "dependencies": {
     "axios": "^0.18.0",
     "nprogress": "^0.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.15.3"
+    "eslint": "^5.15.3",
+    "microbundle": "^0.11.0"
   }
 }
