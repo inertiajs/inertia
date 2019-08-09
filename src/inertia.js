@@ -8,6 +8,7 @@ export default {
   version: null,
   visitId: null,
   cancelToken: null,
+  page: null,
 
   init({ initialPage, resolveComponent, updatePage }) {
     this.resolveComponent = resolveComponent
@@ -46,7 +47,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false } = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
     Progress.start()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
@@ -61,6 +62,7 @@ export default {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
+        ...(only ? { 'X-Inertia-Only': only.join(',') } : {}),
         ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
     }).then(response => {
@@ -85,6 +87,10 @@ export default {
       }
     }).then(page => {
       if (page) {
+        if (only.length) {
+          page.props = { ...this.page.props, ...page.props }
+        }
+
         return this.setPage(page, visitId, replace, preserveScroll, preserveState)
       }
     })
@@ -99,6 +105,7 @@ export default {
   },
 
   setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false) {
+    this.page = page
     Progress.increment()
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
