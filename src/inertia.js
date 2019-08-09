@@ -85,7 +85,7 @@ export default {
       }
     }).then(page => {
       if (page) {
-        this.setPage(page, visitId, replace, preserveScroll, preserveState)
+        return this.setPage(page, visitId, replace, preserveScroll, preserveState)
       }
     })
   },
