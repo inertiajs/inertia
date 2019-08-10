@@ -62,7 +62,10 @@ export default {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...(only ? { 'X-Inertia-Only': only.join(',') } : {}),
+        ...(only ? {
+          'X-Inertia-Partial-Component': this.page.component,
+          'X-Inertia-Partial-Data': only.join(','),
+        } : {}),
         ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
     }).then(response => {
