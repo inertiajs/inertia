@@ -16,8 +16,8 @@ export default {
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
-    } else if (window.localStorage.getItem('inertia.hardVisit')) {
-      window.localStorage.removeItem('inertia.hardVisit')
+    } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
+      window.sessionStorage.removeItem('inertia.hardVisit')
       this.setPage(initialPage, { preserveState: true })
     } else {
       initialPage.url += window.location.hash;
@@ -103,7 +103,7 @@ export default {
   },
 
   hardVisit(replace, url) {
-    window.localStorage.setItem('inertia.hardVisit', true)
+    window.sessionStorage.setItem('inertia.hardVisit', true)
 
     if (replace) {
       window.location.replace(url)
