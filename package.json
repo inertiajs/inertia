@@ -6,11 +6,10 @@
   "author": "Jonathan Reinink",
   "source": "src/index.js", 
   "main": "dist/index.js", 
-  "module": "dist/index.mjs", 
   "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "microbundle --name Inertia"
+    "build": "microbundle --name Inertia --format cjs,umd"
   },
   "dependencies": {
     "axios": "^0.18.0",
