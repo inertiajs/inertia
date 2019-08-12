@@ -54,7 +54,7 @@ export default {
 
     return Axios({
       method,
-      url,
+      url: url.toString(),
       data: method.toLowerCase() === 'get' ? {} : data,
       params: method.toLowerCase() === 'get' ? data : {},
       cancelToken: this.cancelToken.token,
