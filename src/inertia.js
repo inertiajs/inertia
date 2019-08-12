@@ -16,6 +16,9 @@ export default {
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
+    } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
+      window.sessionStorage.removeItem('inertia.hardVisit')
+      this.setPage(initialPage, { preserveState: true })
     } else {
       initialPage.url += window.location.hash;
       this.setPage(initialPage)
@@ -94,12 +97,14 @@ export default {
           page.props = { ...this.page.props, ...page.props }
         }
 
-        return this.setPage(page, visitId, replace, preserveScroll, preserveState)
+        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }
     })
   },
 
   hardVisit(replace, url) {
+    window.sessionStorage.setItem('inertia.hardVisit', true)
+
     if (replace) {
       window.location.replace(url)
     } else {
@@ -107,7 +112,7 @@ export default {
     }
   },
 
-  setPage(page, visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false) {
+  setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
     this.page = page
     Progress.increment()
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
