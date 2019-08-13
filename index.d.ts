@@ -66,7 +66,7 @@ declare namespace Inertia {
   type shouldIntercept = (event: MouseEvent | KeyboardEvent) => boolean
 }
 
-declare module 'inertia' {
+declare module '@inertiajs/inertia' {
   export const shouldIntercept: Inertia.shouldIntercept
 
   export const Inertia: Inertia.Inertia
