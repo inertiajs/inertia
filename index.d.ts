@@ -69,7 +69,5 @@ declare namespace Inertia {
 declare module 'inertia' {
   export const shouldIntercept: Inertia.shouldIntercept
 
-  const _default: Inertia.Inertia
-
-  export default _default
+  export const Inertia: Inertia.Inertia
 }
