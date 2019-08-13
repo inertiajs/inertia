@@ -1,5 +1,5 @@
 {
-  "name": "inertia",
+  "name": "@inertiajs/inertia",
   "version": "0.1.0",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
