@@ -4,12 +4,15 @@
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "author": "Jonathan Reinink",
-  "source": "src/index.js", 
-  "main": "dist/index.js", 
+  "source": "src/index.js",
+  "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "microbundle --name Inertia --format cjs,umd"
+    "build": "npm run build:cjs && npm run build:umd",
+    "build:cjs": "microbundle --format cjs",
+    "build:umd": "microbundle --format umd --name Inertia --external none",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "axios": "^0.18.0",
