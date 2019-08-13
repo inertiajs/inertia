@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
-  "author": "Jonathan Reinink",
+  "contributors": [
+    "Jonathan Reinink <jonathan@reinink.ca>",
+    "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
+  ],
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
