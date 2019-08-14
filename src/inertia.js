@@ -20,7 +20,7 @@ export default {
       window.sessionStorage.removeItem('inertia.hardVisit')
       this.setPage(initialPage, { preserveState: true })
     } else {
-      initialPage.url += window.location.hash;
+      initialPage.url += window.location.hash
       this.setPage(initialPage)
     }
 
