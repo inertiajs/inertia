@@ -65,7 +65,7 @@ export default {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...(only ? {
+        ...(only.length ? {
           'X-Inertia-Partial-Component': this.page.component,
           'X-Inertia-Partial-Data': only.join(','),
         } : {}),
