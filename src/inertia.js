@@ -175,6 +175,7 @@ export default {
 
   remember(data, key = 'default') {
     let newState = { ...window.history.state }
+    newState.cache = newState.cache || {}
     newState.cache[key] = data
     this.setState(newState)
   },
