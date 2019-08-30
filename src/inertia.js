@@ -166,7 +166,7 @@ export default {
   },
 
   reload(options = {}) {
-    options.data = this.mergeQueryParameters(options.data)
+    options.data = this.mergeQueryParameters(options.data || {})
     return this.replace(window.location.origin + window.location.pathname, options)
   },
 
