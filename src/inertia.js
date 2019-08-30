@@ -155,7 +155,7 @@ export default {
 
     for(let parameter of urlSearchParams.entries()) {
       const [key, value] = parameter
-      merged[key] = value
+      queryParameters[key] = value
     }
 
     return Object.assign(queryParameters, dataToMerge)
