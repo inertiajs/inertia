@@ -149,12 +149,25 @@ export default {
     }
   },
 
+  mergeQueryParameters(dataToMerge = {}) {
+    let urlSearchParams = new URLSearchParams(window.location.search)
+    let queryParameters = {}
+
+    for(let parameter of urlSearchParams.entries()) {
+      const [key, value] = parameter
+      merged[key] = value
+    }
+
+    return Object.assign(queryParameters, dataToMerge)
+  },
+
   replace(url, options = {}) {
     return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
   reload(options = {}) {
-    return this.replace(window.location.href, options)
+    options.data = this.mergeQueryParameters(options.data)
+    return this.replace(window.location.origin + window.location.pathname, options)
   },
 
   post(url, data = {}, options = {}) {
