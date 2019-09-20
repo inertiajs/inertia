@@ -1,5 +1,5 @@
 import Axios from 'axios'
-import Modal from './modal'
+import defaultNoInertiaResponseHandler from './noInertiaResponseHandler'
 import Progress from './progress'
 
 export default {
@@ -10,9 +10,10 @@ export default {
   cancelToken: null,
   page: null,
 
-  init({ initialPage, resolveComponent, updatePage }) {
+  init({ initialPage, resolveComponent, updatePage, noInertiaResponseHandler = null }) {
     this.resolveComponent = resolveComponent
     this.updatePage = updatePage
+    this.noInertiaResponseHandler = noInertiaResponseHandler || defaultNoInertiaResponseHandler
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
@@ -75,7 +76,13 @@ export default {
       if (this.isInertiaResponse(response)) {
         return response.data
       } else {
-        Modal.show(response.data)
+           this.noInertiaResponseHandler({
+            status: response.status,
+            statusText: response.statusText,
+            data: response.data,
+            headers: response.headers,
+            request: response.request
+          })
       }
     }).catch(error => {
       if (Axios.isCancel(error)) {
@@ -87,7 +94,13 @@ export default {
         return error.response.data
       } else if (error.response) {
         Progress.stop()
-        Modal.show(error.response.data)
+        this.noInertiaResponseHandler({
+            status: error.response.status,
+            statusText: error.response.statusText,
+            data: error.response.data,
+            headers: error.response.headers,
+            request: error.response.request
+          })
       } else {
         return Promise.reject(error)
       }
