@@ -135,7 +135,7 @@ export default {
   setState(page, replace = false, preserveState = false) {
     if (replace || page.url === `${window.location.pathname}${window.location.search}`) {
       window.history.replaceState({
-        ...((preserveState && window.history.state) ? { cache: window.history.state.cache } : {}),
+        ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
         ...page,
       }, '', page.url)
     } else {
