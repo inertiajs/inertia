@@ -140,7 +140,10 @@ export default {
         ...page,
       }, '', page.url)
     } else {
-      window.history.pushState(page, '', page.url)
+      window.history.pushState({
+        cache: {},
+        ...page,
+      }, '', page.url)
     }
   },
 
