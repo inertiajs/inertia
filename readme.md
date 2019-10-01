@@ -1,5 +1,5 @@
 # Inertia.js
 
-## About
+Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers.
 
-Inertia.js is a JavaScript framework for creating server-driven single page apps. To learn more about it, see the [introduction blog post](https://reinink.ca/articles/introducing-inertia-js).
+Visit [inertiajs.com](https://inertiajs.com/) to learn more.
