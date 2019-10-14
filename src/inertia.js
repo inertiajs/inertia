@@ -128,7 +128,7 @@ export default {
 
   setScroll(preserveScroll) {
     if (!preserveScroll) {
-      document.querySelectorAll('body,[scroll-region]')
+      document.querySelectorAll('html,body,[scroll-region]')
         .forEach(region => region.scrollTo(0, 0))
     }
   },
