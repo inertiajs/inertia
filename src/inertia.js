@@ -1,4 +1,3 @@
-import Axios from 'axios'
 import Modal from './modal'
 import Progress from './progress'
 
@@ -7,7 +6,8 @@ export default {
   updatePage: null,
   version: null,
   visitId: null,
-  cancelToken: null,
+  signal: null,
+  controller: null,
   page: null,
 
   init({ initialPage, resolveComponent, updatePage }) {
@@ -38,11 +38,12 @@ export default {
   },
 
   cancelActiveVisits() {
-    if (this.cancelToken) {
-      this.cancelToken.cancel(this.cancelToken)
+    if (this.signal) {
+      this.controller.abort()
     }
 
-    this.cancelToken = Axios.CancelToken.source()
+    this.controller = new AbortController()
+    this.signal = this.controller.signal
   },
 
   createVisitId() {
@@ -55,14 +56,13 @@ export default {
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
 
-    return Axios({
+    let request = {
       method,
-      url: url.toString(),
-      data: method.toLowerCase() === 'get' ? {} : data,
-      params: method.toLowerCase() === 'get' ? data : {},
-      cancelToken: this.cancelToken.token,
+      signal: this.signal,
       headers: {
         Accept: 'text/html, application/xhtml+xml',
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': this.getXsrfToken(),
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
         ...(only.length ? {
@@ -71,35 +71,39 @@ export default {
         } : {}),
         ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
-    }).then(response => {
-      if (this.isInertiaResponse(response)) {
-        return response.data
-      } else {
-        Modal.show(response.data)
-      }
-    }).catch(error => {
-      if (Axios.isCancel(error)) {
-        return
-      } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        Progress.stop()
-        return this.hardVisit(true, error.response.headers['x-inertia-location'])
-      } else if (this.isInertiaResponse(error.response)) {
-        return error.response.data
-      } else if (error.response) {
-        Progress.stop()
-        Modal.show(error.response.data)
-      } else {
-        return Promise.reject(error)
-      }
-    }).then(page => {
-      if (page) {
-        if (only.length) {
-          page.props = { ...this.page.props, ...page.props }
-        }
+    }
 
-        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
-      }
-    })
+    request[method.toLowerCase() === 'get' ? 'params' : 'body'] = JSON.stringify(data)
+
+    return fetch(url.toString(), request)
+      .then(response => {
+        if (response.status === 409 && response.headers.has('x-inertia-location')) {
+          Progress.stop()
+          this.hardVisit(true, response.headers.get('x-inertia-location'))
+        } else if (this.isInertiaResponse(response)) {
+          return response.json()
+        } else {
+          return response.text()
+        }
+      })
+      .catch(error => {
+        if (error.name === 'AbortError') {
+          return
+        }
+        Progress.stop()
+        Modal.show(error)
+      })
+      .then(page => {
+        if (typeof page === 'string') {
+          Modal.show(page)
+        } else if (typeof page === 'object') {
+          if (only.length) {
+            page.props = { ...this.page.props, ...page.props }
+          }
+
+          return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
+        }
+      })
   },
 
   hardVisit(replace, url) {
@@ -188,5 +192,10 @@ export default {
     if (window.history.state.cache && window.history.state.cache[key]) {
       return window.history.state.cache[key]
     }
+  },
+
+  getXsrfToken() {
+    let xsrfToken = document.cookie.match('(^|;) ?' + 'XSRF-TOKEN' + '=([^;]*)(;|$)')
+    return xsrfToken ? decodeURIComponent(xsrfToken[2]) : null
   },
 }
