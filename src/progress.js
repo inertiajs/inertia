@@ -1,6 +1,6 @@
 import Nprogress from 'nprogress'
 
-Nprogress.configure({ showSpinner: false })
+Nprogress.configure()
 
 export default {
   delay: null,
