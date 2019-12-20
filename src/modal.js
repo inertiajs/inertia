@@ -8,6 +8,7 @@ export default {
     page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
 
     this.modal = document.createElement('div')
+    this.modal.classList.add('inertia-unrecognised-response-modal')
     this.modal.style.position = 'fixed'
     this.modal.style.width = '100vw'
     this.modal.style.height = '100vh'
