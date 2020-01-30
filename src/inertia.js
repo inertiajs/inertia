@@ -135,15 +135,25 @@ export default {
 
   setState(page, replace = false, preserveState = false) {
     if (replace || page.url === `${window.location.pathname}${window.location.search}`) {
-      window.history.replaceState({
-        ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
-        ...page,
-      }, '', page.url)
+      try {
+        window.history.replaceState({
+          ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
+          ...page,
+        }, '', page.url)
+      } catch (e) {
+        console.warn(`There was an error in window.history.replaceState: ${e.name}. Please make sure the data size does not exceed browser limitations.`)
+        throw e
+      }
     } else {
-      window.history.pushState({
-        cache: {},
-        ...page,
-      }, '', page.url)
+      try {
+        window.history.pushState({
+          cache: {},
+          ...page,
+        }, '', page.url)
+      } catch (e) {
+        console.warn(`There was an error in window.history.pushState: ${e.name}. Please make sure the data size does not exceed browser limitations.`)
+        throw e
+      }
     }
   },
 
