@@ -50,8 +50,10 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
-    Progress.start()
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], showProgress = true } = {}) {
+    if (showProgress)  {
+      Progress.start()
+    }
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
 
@@ -81,12 +83,16 @@ export default {
       if (Axios.isCancel(error)) {
         return
       } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        Progress.stop()
+        if (showProgress)  {
+          Progress.stop()
+        }
         return this.hardVisit(true, error.response.headers['x-inertia-location'])
       } else if (this.isInertiaResponse(error.response)) {
         return error.response.data
       } else if (error.response) {
-        Progress.stop()
+        if (showProgress)  {
+          Progress.stop()
+        }
         Modal.show(error.response.data)
       } else {
         return Promise.reject(error)
@@ -97,7 +103,7 @@ export default {
           page.props = { ...this.page.props, ...page.props }
         }
 
-        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
+        return this.setPage(page, { visitId, replace, preserveScroll, preserveState, showProgress })
       }
     })
   },
@@ -112,16 +118,20 @@ export default {
     }
   },
 
-  setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
+  setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false, showProgress = true } = {}) {
     this.page = page
-    Progress.increment()
+    if (showProgress)  {
+      Progress.increment()
+    }
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         this.version = page.version
         this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState })
         this.setScroll(preserveScroll)
-        Progress.stop()
+        if (showProgress)  {
+          Progress.stop()
+        }
       }
     })
   },
