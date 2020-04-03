@@ -14,17 +14,17 @@ export default {
     this.resolveComponent = resolveComponent
     this.updatePage = updatePage
 
+    window.addEventListener('popstate', this.restoreState.bind(this))
+
     if (window.history.state && this.navigationType() === 'back_forward') {
-      this.setPage(window.history.state)
+      return this.setPage(window.history.state)
     } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
       window.sessionStorage.removeItem('inertia.hardVisit')
-      this.setPage(initialPage, { preserveState: true })
+      return this.setPage(initialPage, { preserveState: true })
     } else {
       initialPage.url += window.location.hash
-      this.setPage(initialPage)
+      return this.setPage(initialPage)
     }
-
-    window.addEventListener('popstate', this.restoreState.bind(this))
   },
 
   navigationType() {
@@ -129,7 +129,7 @@ export default {
   setScroll(preserveScroll) {
     if (!preserveScroll) {
       document.querySelectorAll('html,body,[scroll-region]')
-        .forEach(region => region.scrollTo(0, 0))
+        .forEach(region => region.scrollTop = 0)
     }
   },
 

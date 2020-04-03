@@ -3,11 +3,12 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  extends: ['eslint:recommended'],
+  extends: ['eslint:recommended', 'plugin:jest/recommended'],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
+  plugins: ["jest"],
   rules: {
     indent: ['error', 2],
     quotes: ['warn', 'single'],

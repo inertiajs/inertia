@@ -15,14 +15,19 @@
     "build": "npm run build:cjs && npm run build:umd",
     "build:cjs": "microbundle --format cjs",
     "build:umd": "microbundle --format umd --name Inertia --external none",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "jest",
+    "lint": "eslint . --ext=.js"
   },
   "dependencies": {
     "axios": "^0.19.0",
     "nprogress": "^0.2.0"
   },
   "devDependencies": {
-    "eslint": "^6.1.0",
+    "@babel/preset-env": "^7.9.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-jest": "^23.8.2",
+    "jest": "^25.2.0",
     "microbundle": "^0.11.0"
   }
 }
