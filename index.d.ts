@@ -20,8 +20,8 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
 
 type VisitOptions = {
   method?: string
-  preserveScroll?: boolean
-  preserveState?: boolean
+  preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
+  preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
   replace?: boolean
   only?: string[]
 }
@@ -30,7 +30,7 @@ interface Inertia {
   init: <
     Component,
     CustomPageProps extends PagePropsBeforeTransform = PagePropsBeforeTransform
-    >(arguments: {
+  >(arguments: {
     initialPage: Page<CustomPageProps>
     resolveComponent: (name: string) => Component | Promise<Component>
     updatePage: (
