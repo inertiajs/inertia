@@ -30,7 +30,7 @@ interface Inertia {
   init: <
     Component,
     CustomPageProps extends PagePropsBeforeTransform = PagePropsBeforeTransform
-    >(arguments: {
+  >(arguments: {
     initialPage: Page<CustomPageProps>
     resolveComponent: (name: string) => Component | Promise<Component>
     updatePage: (
