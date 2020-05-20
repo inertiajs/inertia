@@ -180,6 +180,12 @@ export default {
     return this.visit(url, { ...options, method: 'delete' })
   },
 
+  request(method, url, data = {}, options = {}) {
+    let preserveState = method !== 'delete'
+
+    return this.visit(url, { preserveState: preserveState, ...options, method: method, data })
+  },
+
   remember(data, key = 'default') {
     let newState = { ...window.history.state }
     newState.cache = newState.cache || {}
