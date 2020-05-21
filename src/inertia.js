@@ -50,7 +50,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], onUploadProgress = null } = {}) {
     Progress.start()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
@@ -61,6 +61,7 @@ export default {
       data: method.toLowerCase() === 'get' ? {} : data,
       params: method.toLowerCase() === 'get' ? data : {},
       cancelToken: this.cancelToken.token,
+      onUploadProgress,
       headers: {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
@@ -119,7 +120,7 @@ export default {
       if (visitId === this.visitId) {
         preserveState = typeof preserveState === 'function' ? preserveState(page.props) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page.props) : preserveScroll
-        
+
         this.version = page.version
         this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState })
