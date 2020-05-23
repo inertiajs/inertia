@@ -50,7 +50,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], onUploadProgress = null } = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], config = {} } = {}) {
     Progress.start()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
@@ -61,7 +61,7 @@ export default {
       data: method.toLowerCase() === 'get' ? {} : data,
       params: method.toLowerCase() === 'get' ? data : {},
       cancelToken: this.cancelToken.token,
-      onUploadProgress,
+      ...config,
       headers: {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
