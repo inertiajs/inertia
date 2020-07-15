@@ -51,8 +51,18 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
-    if (method === 'get' && window.inertiaBeforeVisit && !window.confirm(window.inertiaBeforeVisit)) {
-      return Promise.resolve()
+    if (window.inertiaBeforeVisit) {
+      if (typeof window.inertiaBeforeVisit === 'function') {
+        const needsConfirm = window.inertiaBeforeVisit(url, {method, data, replace, preserveScroll, preserveState, only})
+
+        if (needsConfirm && !window.confirm(needsConfirm)) {
+          return Promise.resolve()
+        }
+      }
+
+      if (typeof window.inertiaBeforeVisit === 'string' && !window.confirm(window.inertiaBeforeVisit)) {
+        return Promise.resolve()
+      }
     }
 
     Progress.start()
@@ -161,7 +171,7 @@ export default {
   },
 
   replace(url, options = {}) {
-    return this.visit(url, { preserveState: true, ...options, replace: true })
+    return this.visit(url, { preserveState: true, ...options, replace: true, withoutConfirm: true })
   },
 
   reload(options = {}) {
