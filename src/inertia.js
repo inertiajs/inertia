@@ -171,7 +171,7 @@ export default {
   },
 
   replace(url, options = {}) {
-    return this.visit(url, { preserveState: true, ...options, replace: true, withoutConfirm: true })
+    return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
   reload(options = {}) {
