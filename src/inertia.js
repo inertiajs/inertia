@@ -51,6 +51,10 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
+    if (method === 'get' && window.inertiaBeforeVisit && !window.confirm(window.inertiaBeforeVisit)) {
+      return Promise.resolve()
+    }
+
     Progress.start()
     this.cancelActiveVisits()
     let visitId = this.createVisitId()
@@ -119,7 +123,7 @@ export default {
       if (visitId === this.visitId) {
         preserveState = typeof preserveState === 'function' ? preserveState(page.props) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page.props) : preserveScroll
-        
+
         this.version = page.version
         this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState })
