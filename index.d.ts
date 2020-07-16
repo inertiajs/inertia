@@ -1,3 +1,5 @@
+import { string } from "postcss-selector-parser"
+
 declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
@@ -5,6 +7,13 @@ declare global {
     interface PagePropsBeforeTransform {}
 
     interface PageProps {}
+  }
+
+  interface Window {
+    inertiaBeforeVisit:
+      | undefined
+      | string
+      | ((url: string, options: VisitOptions & { data?: object }) => void);
   }
 }
 
