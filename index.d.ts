@@ -1,5 +1,3 @@
-import { string } from "postcss-selector-parser"
-
 declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
