@@ -1,0 +1,29 @@
+{
+  "name": "@inertiajs/inertia",
+  "version": "0.1.9",
+  "license": "MIT",
+  "description": "A framework for creating server-driven single page apps.",
+  "contributors": [
+    "Jonathan Reinink <jonathan@reinink.ca>",
+    "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
+  ],
+  "source": "src/index.js",
+  "main": "dist/index.js",
+  "unpkg": "dist/index.umd.js",
+  "typings": "index.d.ts",
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:umd",
+    "build:cjs": "microbundle --format cjs",
+    "build:umd": "microbundle --format umd --name Inertia --external none",
+    "prepublishOnly": "npm run build",
+    "watch": "microbundle watch --format cjs"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "nprogress": "^0.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "microbundle": "^0.12.0"
+  }
+}
