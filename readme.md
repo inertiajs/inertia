@@ -1,8 +1,6 @@
-# Inertia.js
+![Inertia.js](https://raw.githubusercontent.com/inertiajs/inertia/master/logo.png)
 
-Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers.
-
-Visit [inertiajs.com](https://inertiajs.com/) to learn more.
+Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers. Find full documentation at [inertiajs.com](https://inertiajs.com/).
 
 ## Local development
 
