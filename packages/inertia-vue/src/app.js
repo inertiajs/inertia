@@ -51,7 +51,7 @@ export default {
           return this.component.layout(h, child)
         }
 
-        return h(this.component.layout, [child])
+        return this.resolveLayout(h, this.component.layout, child);
       }
 
       return child
@@ -62,5 +62,13 @@ export default {
     Object.defineProperty(Vue.prototype, '$page', { get: () => app.props })
     Vue.mixin(Remember)
     Vue.component('InertiaLink', Link)
+  },
+  methods: {
+    resolveLayout(h, layout, child) {
+        child = h(layout, [child]);
+        layout = layout.layout;
+
+        return layout ? this.resolveLayout(h, layout, child) : child;
+    }
   },
 }
