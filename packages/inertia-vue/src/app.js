@@ -32,12 +32,10 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
-      updatePage: (component, props, { preserveState }) => {
+      updatePage: async (component, props, { preserveState }) => {
         this.component = component
         this.props = this.transformProps(props)
         this.key = preserveState ? this.key : Date.now()
-
-        return Promise.resolve()
       },
     })
   },
