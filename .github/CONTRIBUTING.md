@@ -42,14 +42,14 @@ cd inertia
 yarn watch
 ```
 
-If you're developing the `inertia-react` package, you'll likely get an "Invalid hook call" error message. This is a [known issue](https://github.com/facebook/react/issues/13991) with React, where you can't have two instances of React installed at the same time. This happens because there is one copy in the monorepo and another in your application. You can get around this issue by creating a (local only) Webpack alias for `react`. For example:
+If you're developing the `inertia-react` or `inertia-svelte` packages, you'll likely run into issues caused by the fact that there are two instances of the framework installed. This happens because there is one copy in the monorepo and another in your application. You can get around this issue by creating a (local only) Webpack alias. For example:
 
 ```js
 mix.webpackConfig({
   resolve: {
     alias: {
-      // Path to the Inertia monorepo node_modules/react folder
-      react: path.resolve('../inertia/node_modules/react')
+      react: path.resolve('node_modules', 'react'),
+      svelte: path.resolve('node_modules', 'svelte'),
     }
   }
 })
