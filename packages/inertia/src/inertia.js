@@ -29,9 +29,12 @@ export default {
     this.saveScrollPositions = Debounce(() => {
       this.setState({
         ...window.history.state,
-        scrollRegions: Array.prototype.slice.call(
-          document.querySelectorAll('[scroll-region]')
-        ).map(region => region.scrollTop),
+        scrollRegions: Array.prototype.slice.call(document.querySelectorAll('[scroll-region]')).map(region => {
+          return {
+            top: region.scrollTop,
+            left: region.scrollLeft,
+          }
+        }),
       })
     }, 100)
 
@@ -140,7 +143,11 @@ export default {
 
           if (!preserveScroll) {
             window.scrollTop = 0
-            scrollRegions.forEach(region => region.scrollTop = 0)
+            window.scrollLeft = 0
+            scrollRegions.forEach(region => {
+              region.scrollTop = 0
+              region.scrollLeft = 0
+            })
           }
 
           this.saveScrollPositions()
@@ -176,7 +183,8 @@ export default {
           this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
             if (this.page.scrollRegions) {
               document.querySelectorAll('[scroll-region]').forEach((region, index) => {
-                region.scrollTop = this.page.scrollRegions[index]
+                region.scrollTop = this.page.scrollRegions[index].top
+                region.scrollLeft = this.page.scrollRegions[index].left
               })
             }
           })
