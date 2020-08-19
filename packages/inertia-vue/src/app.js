@@ -1,6 +1,7 @@
 import { Inertia } from '@inertiajs/inertia'
 import Link from './link'
 import Remember from './remember'
+import Vue from 'vue'
 
 let app = {}
 
@@ -36,6 +37,8 @@ export default {
         this.component = component
         this.props = this.transformProps(props)
         this.key = preserveState ? this.key : Date.now()
+
+        return new Promise(resolve => Vue.nextTick(resolve))
       },
     })
   },

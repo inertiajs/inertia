@@ -1,8 +1,10 @@
 import Axios from 'axios'
 import Modal from './modal'
+import Debounce from './debounce'
 import Progress from './progress'
 
 export default {
+  saveScrollPositions: null,
   resolveComponent: null,
   updatePage: null,
   version: null,
@@ -23,6 +25,15 @@ export default {
       initialPage.url += window.location.hash
       this.setPage(initialPage)
     }
+
+    this.saveScrollPositions = Debounce(() => {
+      this.setState({
+        ...window.history.state,
+        scrollRegions: Array.prototype.slice.call(
+          document.querySelectorAll('[scroll-region]')
+        ).map(region => region.scrollTop),
+      })
+    }, 100)
 
     window.addEventListener('popstate', this.restoreState.bind(this))
   },
@@ -53,6 +64,7 @@ export default {
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
     Progress.start()
     this.cancelActiveVisits()
+    this.saveScrollPositions()
     let visitId = this.createVisitId()
 
     return Axios({
@@ -117,23 +129,25 @@ export default {
     Progress.increment()
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
-        preserveState = typeof preserveState === 'function' ? preserveState(page.props) : preserveState
-        preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page.props) : preserveScroll
-
         this.version = page.version
         this.setState(page, replace, preserveState)
-        this.updatePage(component, page.props, { preserveState })
-        this.setScroll(preserveScroll)
+        this.updatePage(component, page.props, { preserveState }).then(() => {
+          let scrollRegions = document.querySelectorAll('[scroll-region]')
+
+          scrollRegions.forEach(region => {
+            region.addEventListener('scroll', this.saveScrollPositions)
+          })
+
+          if (!preserveScroll) {
+            window.scrollTop = 0
+            scrollRegions.forEach(region => region.scrollTop = 0)
+          }
+
+          this.saveScrollPositions()
+        })
         Progress.stop()
       }
     })
-  },
-
-  setScroll(preserveScroll) {
-    if (!preserveScroll) {
-      document.querySelectorAll('html,body,[scroll-region]')
-        .forEach(region => region.scrollTo(0, 0))
-    }
   },
 
   setState(page, replace = false, preserveState = false) {
@@ -152,7 +166,23 @@ export default {
 
   restoreState(event) {
     if (event.state) {
-      this.setPage(event.state)
+      Progress.start()
+      this.page = event.state
+      let visitId = this.createVisitId()
+      return Promise.resolve(this.resolveComponent(this.page.component)).then(component => {
+        if (visitId === this.visitId) {
+          this.version = this.page.version
+          this.setState(this.page)
+          this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
+            if (this.page.scrollRegions) {
+              document.querySelectorAll('[scroll-region]').forEach((region, index) => {
+                region.scrollTop = this.page.scrollRegions[index]
+              })
+            }
+          })
+          Progress.stop()
+        }
+      })
     }
   },
 
