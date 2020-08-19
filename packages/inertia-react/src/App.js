@@ -26,6 +26,8 @@ export default function App({
           key: preserveState ? page.key : Date.now(),
           props: transformProps(props),
         }))
+
+        return Promise.resolve()
       },
     })
   }, [initialPage, resolveComponent, transformProps])
