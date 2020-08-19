@@ -17,13 +17,7 @@ Next, install the dependencies. Note, Yarn will automatically install all the pa
 yarn install
 ```
 
-If you're developing one of the packages that requires a build step (`inertia`, `inertia-react` or `inertia-vue`), you'll want to setup a watcher to automatically run the build step anytime the package files change.
-
-```sh
-yarn watch
-```
-
-Next, it's often helpful to develop Inertia.js within a real application, such as [Ping CRM](https://github.com/inertiajs/pingcrm). To do this, you'll need to use the `yarn link` feature to tell your application to use the local versions of the Inertia.js dependencies. To do this, first run `yarn link` within each Inertia.js package that you want to develop.
+It's often helpful to develop Inertia.js within a real application, such as [Ping CRM](https://github.com/inertiajs/pingcrm). To do this, you'll need to use the `yarn link` feature to tell your application to use the local versions of the Inertia.js dependencies. To do this, first run `yarn link` within each Inertia.js package that you want to develop.
 
 ```sh
 cd packages/inertia
@@ -36,7 +30,14 @@ Finally, within your application, run `yarn link` again, but this time specifyin
 
 ```sh
 cd pingcrm
+yarn install
 yarn link @inertiajs/inertia
 yarn link @inertiajs/inertia-vue
 ```
 
+If you're developing one of the packages that requires a build step (`inertia`, `inertia-react` or `inertia-vue`), you'll want to setup a watcher to automatically run the build step anytime the package files change.
+
+```sh
+cd inertia
+yarn watch
+```
