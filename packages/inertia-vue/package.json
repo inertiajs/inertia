@@ -7,7 +7,6 @@
     "Jonathan Reinink <jonathan@reinink.ca>",
     "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
   ],
-  "license": "MIT",
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",

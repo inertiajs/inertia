@@ -10,7 +10,6 @@
   "keywords": [
     "svelte"
   ],
-  "license": "MIT",
   "main": "src/index.js",
   "devDependencies": {
     "@inertiajs/inertia": "^0.1.7",
