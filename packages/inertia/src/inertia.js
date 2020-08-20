@@ -146,8 +146,8 @@ export default {
           })
 
           if (!preserveScroll) {
-            window.scrollTop = 0
-            window.scrollLeft = 0
+            document.documentElement.scrollTop = 0
+            document.documentElement.scrollLeft = 0
             scrollRegions.forEach(region => {
               region.scrollTop = 0
               region.scrollLeft = 0
