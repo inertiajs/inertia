@@ -4,7 +4,6 @@ import modal from './modal'
 import progress from './progress'
 
 export default {
-  saveScrollPositions: null,
   onRegionScroll: null,
   resolveComponent: null,
   updatePage: null,
@@ -27,21 +26,20 @@ export default {
       this.setPage(initialPage)
     }
 
-    this.saveScrollPositions = () => {
-      this.setState({
-        ...window.history.state,
-        scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
-          return {
-            top: region.scrollTop,
-            left: region.scrollLeft,
-          }
-        }),
-      })
-    }
-
-    this.onRegionScroll = debounce(this.saveScrollPositions, 100)
-
     window.addEventListener('popstate', this.restoreState.bind(this))
+    this.onRegionScroll = debounce(this.saveScrollPositions, 100)
+  },
+
+  saveScrollPositions() {
+    this.setState({
+      ...window.history.state,
+      scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
+        return {
+          top: region.scrollTop,
+          left: region.scrollLeft,
+        }
+      }),
+    })
   },
 
   navigationType() {
