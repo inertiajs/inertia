@@ -20,7 +20,7 @@ export default function App({
     Inertia.init({
       initialPage,
       resolveComponent,
-      updatePage: (component, props, { preserveState }) => {
+      updatePage: async (component, props, { preserveState }) => {
         setPage(page => ({
           component,
           key: preserveState ? page.key : Date.now(),
