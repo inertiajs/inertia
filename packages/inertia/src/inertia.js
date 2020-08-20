@@ -29,7 +29,7 @@ export default {
     this.saveScrollPositions = debounce(() => {
       this.setState({
         ...window.history.state,
-        scrollRegions: Array.prototype.slice.call(document.querySelectorAll('[scroll-region]')).map(region => {
+        scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
           return {
             top: region.scrollTop,
             left: region.scrollLeft,
@@ -45,6 +45,10 @@ export default {
     if (window.performance && window.performance.getEntriesByType('navigation').length) {
       return window.performance.getEntriesByType('navigation')[0].type
     }
+  },
+
+  scrollRegions() {
+    return document.querySelectorAll('[scroll-region]')
   },
 
   isInertiaResponse(response) {
@@ -135,7 +139,7 @@ export default {
         this.version = page.version
         this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState }).then(() => {
-          let scrollRegions = document.querySelectorAll('[scroll-region]')
+          let scrollRegions = this.scrollRegions()
 
           scrollRegions.forEach(region => {
             region.addEventListener('scroll', this.saveScrollPositions)
@@ -182,7 +186,7 @@ export default {
           this.setState(this.page)
           this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
             if (this.page.scrollRegions) {
-              document.querySelectorAll('[scroll-region]').forEach((region, index) => {
+              this.scrollRegions().forEach((region, index) => {
                 region.scrollTop = this.page.scrollRegions[index].top
                 region.scrollLeft = this.page.scrollRegions[index].left
               })
