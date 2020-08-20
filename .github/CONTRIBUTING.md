@@ -47,7 +47,6 @@ yarn link @inertiajs/inertia
 yarn link @inertiajs/inertia-vue
 ```
 
-
 If you're developing the `inertia-react` or `inertia-svelte` packages, you'll likely run into issues caused by the fact that there are two instances of the framework installed. This happens because there is one copy in the monorepo and another in your application. You can get around this issue by creating a (local only) Webpack alias. For example:
 
 ```js
@@ -59,4 +58,12 @@ mix.webpackConfig({
     }
   }
 })
-````
+```
+
+## Publishing
+
+This section is really for the benefit of the core maintainers.
+
+1. Increment the version number in the package `package.json` file.
+2. Run `npm publish`. This will automatically run the necessary build step.
+3. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).
