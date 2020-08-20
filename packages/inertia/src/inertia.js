@@ -27,7 +27,7 @@ export default {
     }
 
     window.addEventListener('popstate', this.restoreState.bind(this))
-    this.onRegionScroll = debounce(this.saveScrollPositions, 100)
+    this.onRegionScroll = debounce(() => this.saveScrollPositions(), 100)
   },
 
   saveScrollPositions() {
