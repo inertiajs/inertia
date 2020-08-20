@@ -5,6 +5,7 @@ import progress from './progress'
 
 export default {
   saveScrollPositions: null,
+  onRegionScroll: null,
   resolveComponent: null,
   updatePage: null,
   version: null,
@@ -26,7 +27,7 @@ export default {
       this.setPage(initialPage)
     }
 
-    this.saveScrollPositions = debounce(() => {
+    this.saveScrollPositions = () => {
       this.setState({
         ...window.history.state,
         scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
@@ -36,7 +37,9 @@ export default {
           }
         }),
       })
-    }, 100)
+    }
+
+    this.onRegionScroll = debounce(this.saveScrollPositions, 100)
 
     window.addEventListener('popstate', this.restoreState.bind(this))
   },
@@ -71,7 +74,6 @@ export default {
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
     progress.start()
     this.cancelActiveVisits()
-    this.saveScrollPositions()
     let visitId = this.createVisitId()
 
     return Axios({
@@ -116,6 +118,8 @@ export default {
           page.props = { ...this.page.props, ...page.props }
         }
 
+        this.saveScrollPositions()
+
         return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }
     })
@@ -141,10 +145,6 @@ export default {
         this.updatePage(component, page.props, { preserveState }).then(() => {
           let scrollRegions = this.scrollRegions()
 
-          scrollRegions.forEach(region => {
-            region.addEventListener('scroll', this.saveScrollPositions)
-          })
-
           if (!preserveScroll) {
             window.scrollTop = 0
             window.scrollLeft = 0
@@ -154,7 +154,9 @@ export default {
             })
           }
 
-          this.saveScrollPositions()
+          scrollRegions.forEach(region => {
+            region.addEventListener('scroll', this.onRegionScroll)
+          })
         })
         progress.stop()
       }
