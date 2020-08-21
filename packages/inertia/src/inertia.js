@@ -185,12 +185,15 @@ export default {
           this.version = this.page.version
           this.setState(this.page)
           this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
-            if (this.page.scrollRegions) {
-              this.scrollRegions().forEach((region, index) => {
+            this.scrollRegions().forEach((region, index) => {
+              region.scrollTop = 0
+              region.scrollLeft = 0
+
+              if (this.page.scrollRegions) {
                 region.scrollTop = this.page.scrollRegions[index].top
                 region.scrollLeft = this.page.scrollRegions[index].left
-              })
-            }
+              }
+            })
           })
           progress.stop()
         }
