@@ -44,6 +44,7 @@ export default {
       const child = h(this.component, {
         key: this.key,
         props: this.props,
+        scopedSlots: this.$scopedSlots,
       })
 
       if (this.component.layout) {
