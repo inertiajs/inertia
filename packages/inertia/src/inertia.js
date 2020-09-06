@@ -68,7 +68,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [] } = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
     progress.start()
     this.cancelActiveVisits()
     this.saveScrollPositions()
@@ -81,6 +81,7 @@ export default {
       params: method.toLowerCase() === 'get' ? data : {},
       cancelToken: this.cancelToken.token,
       headers: {
+        ...headers,
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
