@@ -1,6 +1,7 @@
 <script>
   import { Inertia } from '@inertiajs/inertia'
   import store from './store'
+  import Render, { h } from './Render.svelte'
 
   export let
     initialPage,
@@ -18,8 +19,12 @@
       }))
     },
   })
+
+  $: page = $store.component && h($store.component.default, $store.props)
+  $: layout = $store.component && $store.component.layout
+  $: components = layout
+    ? layout.name === 'layout' ? layout(h, page) : h(layout, [page])
+    : page
 </script>
 
-{#each [$store.key] as key (key)}
-<svelte:component this={$store.component} {...$store.props} />
-{/each}
+<Render {...components} />
