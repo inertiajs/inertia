@@ -20,11 +20,11 @@
     },
   })
 
-  $: page = $store.component && h($store.component.default, $store.props)
+  $: child = $store.component && h($store.component.default, $store.props)
   $: layout = $store.component && $store.component.layout
   $: components = layout
-    ? layout.name === 'layout' ? layout(h, page) : h(layout, [page])
-    : page
+    ? h(layout, {}, [child])
+    : child
 </script>
 
 <Render {...components} />
