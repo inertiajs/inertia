@@ -50,6 +50,11 @@ export default {
       if (this.component.layout) {
         if (typeof this.component.layout === 'function') {
           return this.component.layout(h, child)
+        } else if (Array.isArray(this.component.layout)) {
+          return this.component.layout
+            .concat(child)
+            .reverse()
+            .reduce((child, layout) => h(layout, [child]))
         }
 
         return h(this.component.layout, [child])
