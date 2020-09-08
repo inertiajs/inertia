@@ -23,7 +23,9 @@
   $: child = $store.component && h($store.component.default, $store.props)
   $: layout = $store.component && $store.component.layout
   $: components = layout
-    ? h(layout, {}, [child])
+    ? Array.isArray(layout)
+      ? layout.concat(child).reverse().reduce((child, layout) => h(layout, {}, [child]))
+      : h(layout, {}, [child])
     : child
 </script>
 
