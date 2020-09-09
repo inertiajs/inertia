@@ -11,7 +11,7 @@ export default {
 
       const method = binding.arg || 'get'
       const options = (binding.value || {}).options || {}
-      const data = (binding.value || {}).data || (! options ? binding.value : {})
+      const data = (binding.value || {}).data || (Object.keys(options).length === 0 ? binding.value : {})
       const url = ((vnode.data || {}).attrs || {}).href || (binding.value || {}).href || (binding.value || {}).url
 
       if (method === 'replace') {
