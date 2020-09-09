@@ -11,6 +11,9 @@ export default {
   visitId: null,
   cancelToken: null,
   page: null,
+  events: {
+    visit: [],
+  },
 
   init({ initialPage, resolveComponent, updatePage }) {
     this.resolveComponent = resolveComponent
@@ -69,6 +72,11 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
+
+    if (this.events.visit.map(callback => callback(...arguments)).filter(result => result === false).length) {
+      return
+    }
+
     progress.start()
     this.cancelActiveVisits()
     this.saveScrollPositions()
@@ -235,4 +243,11 @@ export default {
       return window.history.state.cache[key]
     }
   },
+
+  on(type, callback) {
+    this.events[type].push(callback)
+    return () => {
+      this.events[type] = this.events[type].filter(e => e !== callback)
+    }
+  }
 }
