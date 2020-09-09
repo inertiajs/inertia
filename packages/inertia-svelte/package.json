@@ -17,6 +17,6 @@
   },
   "peerDependencies": {
     "@inertiajs/inertia": "^0.2.0",
-    "svelte": "^3.8.0"
+    "svelte": "^3.20.0"
   }
 }
