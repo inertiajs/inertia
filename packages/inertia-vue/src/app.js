@@ -57,7 +57,7 @@ export default {
             .reduce((child, layout) => h(layout, [child]))
         }
 
-        return this.resolveLayout(h, this.component.layout, child);
+        return this.resolveLayoutRecursively(h, this.component.layout, child);
       }
 
       return child
@@ -70,11 +70,11 @@ export default {
     Vue.component('InertiaLink', Link)
   },
   methods: {
-    resolveLayout(h, layout, child) {
+    resolveLayoutRecursively(h, layout, child) {
         child = h(layout, [child]);
         layout = layout.layout;
 
-        return layout ? this.resolveLayout(h, layout, child) : child;
+        return layout ? this.resolveLayoutRecursively(h, layout, child) : child;
     }
   },
 }
