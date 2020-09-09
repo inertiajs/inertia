@@ -1,13 +1,12 @@
 {
   "name": "@inertiajs/inertia-vue",
-  "version": "0.1.4",
+  "version": "0.2.2",
   "license": "MIT",
   "description": "The Vue adapter for Inertia.js",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
     "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
   ],
-  "license": "MIT",
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
@@ -26,7 +25,7 @@
     "vue": "^2.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.1.4",
+    "@inertiajs/inertia": "^0.2.0",
     "vue": "^2.0.0"
   }
 }

@@ -10,7 +10,7 @@
   Inertia.init({
     initialPage,
     resolveComponent,
-    updatePage: (component, props, { preserveState }) => {
+    updatePage: async (component, props, { preserveState }) => {
       store.update(page => ({
         component,
         key: preserveState ? page.key : Date.now(),
