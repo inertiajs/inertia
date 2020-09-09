@@ -14,8 +14,6 @@
     only = [],
     headers = {}
 
-  $: props = (({ data, href, method, preserveScroll, preserveState, replace, only, headers, ...rest }) => rest)($$props)
-
   function visit(event) {
     dispatch('click', event)
 
@@ -35,6 +33,6 @@
   }
 </script>
 
-<a {...props} href={href} on:click={visit}>
+<a {...$$restProps} {href} on:click={visit}>
   <slot />
 </a>
