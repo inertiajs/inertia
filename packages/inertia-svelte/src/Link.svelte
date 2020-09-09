@@ -11,9 +11,10 @@
     replace = false,
     preserveScroll = false,
     preserveState = false,
-    only = []
+    only = [],
+    headers = {}
 
-  $: props = (({ data, href, method, preserveScroll, preserveState, replace, only, ...rest }) => rest)($$props)
+  $: props = (({ data, href, method, preserveScroll, preserveState, replace, only, headers, ...rest }) => rest)($$props)
 
   function visit(event) {
     dispatch('click', event)
@@ -28,6 +29,7 @@
         preserveState,
         replace,
         only,
+        headers
       })
     }
   }

@@ -30,6 +30,10 @@ export default {
     only: {
       type: Array,
       default: () => [],
+    },
+    headers: {
+      type: Object,
+      default: () => {},
     }
   },
   render(h, { props, data, children }) {
@@ -56,6 +60,7 @@ export default {
               preserveScroll: props.preserveScroll,
               preserveState: props.preserveState,
               only: props.only,
+              headers: props.headers,
             })
           }
         },
