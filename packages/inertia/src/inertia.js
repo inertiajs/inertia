@@ -11,9 +11,6 @@ export default {
   visitId: null,
   cancelToken: null,
   page: null,
-  events: {
-    visit: [],
-  },
 
   init({ initialPage, resolveComponent, updatePage }) {
     this.resolveComponent = resolveComponent
