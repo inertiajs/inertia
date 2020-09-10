@@ -72,8 +72,12 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
+    let event = new CustomEvent('inertia:visit', {
+      cancelable: true,
+      detail: { url: url, options: arguments[1] }
+    })
 
-    if (this.events.visit.map(callback => callback(...arguments)).filter(result => result === false).length) {
+    if (!document.dispatchEvent(event)) {
       return
     }
 
@@ -245,9 +249,9 @@ export default {
   },
 
   on(type, callback) {
-    this.events[type].push(callback)
+    document.addEventListener(`inertia:${type}`, callback)
     return () => {
-      this.events[type] = this.events[type].filter(e => e !== callback)
+      document.removeEventListener(`inertia:${type}`, callback)
     }
   }
 }
