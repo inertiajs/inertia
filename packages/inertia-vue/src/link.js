@@ -33,7 +33,7 @@ export default {
     },
     headers: {
       type: Object,
-      default: () => {},
+      default: () => ({}),
     }
   },
   render(h, { props, data, children }) {
