@@ -53,7 +53,7 @@ interface Inertia {
 
   put: (url: string, data?: object, options?: VisitOptions) => Promise<void>
 
-  delete: (url: string, data?: object, options?: VisitOptions) => Promise<void>
+  delete: (url: string, options?: VisitOptions) => Promise<void>
 
   reload: (options?: VisitOptions) => Promise<void>
 
