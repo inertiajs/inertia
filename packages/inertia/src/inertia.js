@@ -69,7 +69,7 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {} } = {}) {
-    let event = new CustomEvent('inertia:visit', {
+    let event = new CustomEvent('inertia:start', {
       cancelable: true,
       detail: { url: url, ...arguments[1] }
     })
