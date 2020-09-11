@@ -19,6 +19,7 @@ export default {
       type: Function,
       default: props => props,
     },
+    layout: {}
   },
   data() {
     return {
@@ -47,17 +48,23 @@ export default {
         scopedSlots: this.$scopedSlots,
       })
 
-      if (this.component.layout) {
-        if (typeof this.component.layout === 'function') {
-          return this.component.layout(h, child)
-        } else if (Array.isArray(this.component.layout)) {
-          return this.component.layout
+      let layout = this.layout;
+
+      if (typeof this.component.layout !== 'undefined') {
+        layout = this.component.layout
+      }
+
+      if (layout) {
+        if (typeof layout === 'function') {
+          return layout(h, child)
+        } else if (Array.isArray(layout)) {
+          return layout
             .concat(child)
             .reverse()
             .reduce((child, layout) => h(layout, [child]))
         }
 
-        return h(this.component.layout, [child])
+        return h(layout, [child])
       }
 
       return child
