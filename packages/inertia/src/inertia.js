@@ -68,10 +68,10 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {} } = {}) {
     let event = new CustomEvent('inertia:visit', {
       cancelable: true,
-      detail: { url: url, options: arguments[1] }
+      detail: { url: url, ...arguments[1] }
     })
 
     if (!document.dispatchEvent(event)) {
