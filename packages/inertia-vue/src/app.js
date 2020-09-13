@@ -19,6 +19,10 @@ export default {
       type: Function,
       default: props => props,
     },
+    injectProps: {
+      type: Boolean,
+      default: () => false,
+    }
   },
   data() {
     return {
@@ -41,6 +45,10 @@ export default {
   },
   render(h) {
     if (this.component) {
+
+      if (this.injectProps)
+        this.component.props = Object.keys(this.props);
+
       const child = h(this.component, {
         key: this.key,
         props: this.props,
