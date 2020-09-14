@@ -19,7 +19,6 @@
     "watch": "microbundle watch --format cjs"
   },
   "dependencies": {
-    "axios": "^0.19.0",
     "nprogress": "^0.2.0"
   },
   "devDependencies": {
