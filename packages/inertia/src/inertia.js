@@ -68,7 +68,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}, returnsJson = false} = {}) {
     progress.start()
     this.cancelActiveVisits()
     this.saveScrollPositions()
@@ -82,7 +82,7 @@ export default {
       cancelToken: this.cancelToken.token,
       headers: {
         ...headers,
-        Accept: 'text/html, application/xhtml+xml',
+        Accept: returnsJson ? 'application/json' : 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
         ...(only.length ? {
@@ -94,6 +94,9 @@ export default {
     }).then(response => {
       if (this.isInertiaResponse(response)) {
         return response.data
+      } else if (returnsJson) {
+        progress.stop()
+        return response
       } else {
         modal.show(response.data)
       }
@@ -111,8 +114,12 @@ export default {
       } else {
         return Promise.reject(error)
       }
-    }).then(page => {
-      if (page) {
+    }).then(data => {
+        if(returnsJson){
+            return data
+        }
+      else if (data) {
+        let page = data
         if (only.length) {
           page.props = { ...this.page.props, ...page.props }
         }
