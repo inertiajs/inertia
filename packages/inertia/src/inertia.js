@@ -1,7 +1,6 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import progress from './progress'
 
 export default {
   saveScrollPositions: null,
@@ -78,7 +77,6 @@ export default {
       return
     }
 
-    progress.start()
     this.cancelActiveVisits()
     this.saveScrollPositions()
     let visitId = this.createVisitId()
@@ -110,12 +108,10 @@ export default {
       if (Axios.isCancel(error)) {
         return
       } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        progress.stop()
         return this.hardVisit(true, error.response.headers['x-inertia-location'])
       } else if (this.isInertiaResponse(error.response)) {
         return error.response.data
       } else if (error.response) {
-        progress.stop()
         modal.show(error.response.data)
       } else {
         return Promise.reject(error)
@@ -143,7 +139,6 @@ export default {
 
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
     this.page = page
-    progress.increment()
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         this.version = page.version
@@ -166,7 +161,6 @@ export default {
 
           this.saveScrollPositions()
         })
-        progress.stop()
       }
     })
   },
@@ -187,7 +181,6 @@ export default {
 
   restoreState(event) {
     if (event.state) {
-      progress.start()
       this.page = event.state
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(this.page.component)).then(component => {
@@ -202,7 +195,6 @@ export default {
               })
             }
           })
-          progress.stop()
         }
       })
     }
