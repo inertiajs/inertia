@@ -23,6 +23,7 @@ export default {
       this.setPage(initialPage)
     }
 
+    this.fireEvent('navigate', { detail: { page: initialPage } })
 
     window.addEventListener('popstate', this.restoreState.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
@@ -78,6 +79,16 @@ export default {
     return response && response.headers['x-inertia']
   },
 
+  isHardVisit(response) {
+    return response && response.status === 409 && response.headers['x-inertia-location']
+  },
+
+  fireEvent(name, options) {
+    return document.dispatchEvent(
+      new CustomEvent(`inertia:${name}`, options),
+    )
+  },
+
   cancelActiveVisits() {
     if (this.cancelToken) {
       this.cancelToken.cancel(this.cancelToken)
@@ -92,13 +103,8 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {} } = {}) {
-    let event = new CustomEvent('inertia:start', {
-      cancelable: true,
-      detail: { url: url, ...arguments[1] }
-    })
-
-    if (!document.dispatchEvent(event)) {
-      return
+    if (!this.fireEvent('start', { cancelable: true, detail: { url, ...arguments[1] } } )) {
+      return Promise.reject()
     }
 
     this.cancelActiveVisits()
@@ -123,23 +129,32 @@ export default {
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
     }).then(response => {
-      if (this.isInertiaResponse(response)) {
-        return response.data
-      } else {
-        modal.show(response.data)
+      if (!this.isInertiaResponse(response)) {
+        return Promise.reject({ response })
       }
-    }).catch(error => {
-      if (Axios.isCancel(error)) {
+      if (!this.fireEvent('success', { cancelable: true, detail: { response } })) {
         return
-      } else if (error.response.status === 409 && error.response.headers['x-inertia-location']) {
-        return this.hardVisit(true, error.response.headers['x-inertia-location'])
-      } else if (this.isInertiaResponse(error.response)) {
-        return error.response.data
-      } else if (error.response) {
-        modal.show(error.response.data)
-      } else {
-        return Promise.reject(error)
       }
+      return response.data
+    }).catch(error => {
+      if (this.isInertiaResponse(error.response)) {
+        return error.response.data
+      } else if (Axios.isCancel(error)) {
+        return
+      } else if (this.isHardVisit(error.response)) {
+        this.hardVisit(error.response.headers['x-inertia-location'])
+        return
+      } else if (error.response) {
+        if (this.fireEvent('invalid', { cancelable: true, detail: { error } })) {
+          modal.show(error.response.data)
+        }
+      } else {
+        if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
+          return Promise.reject(error)
+        }
+      }
+    }).finally(() => {
+      this.fireEvent('finish')
     }).then(page => {
       if (page) {
         if (only.length) {
@@ -151,18 +166,14 @@ export default {
     })
   },
 
-  hardVisit(replace, url) {
+  hardVisit(url) {
     window.sessionStorage.setItem('inertia.hardVisit', true)
-
-    if (replace) {
-      window.location.replace(url)
-    } else {
-      window.location.href = url
-    }
+    window.location.href = url
   },
 
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
     this.page = page
+    replace = replace || page.url === `${window.location.pathname}${window.location.search}`
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         this.setState(page, replace, preserveState)
@@ -170,13 +181,16 @@ export default {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
+          if (!replace) {
+            this.fireEvent('navigate', { detail: { page: page } })
+          }
         })
       }
     })
   },
 
   setState(page, replace = false, preserveState = false) {
-    if (replace || page.url === `${window.location.pathname}${window.location.search}`) {
+    if (replace) {
       window.history.replaceState({
         ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
         ...page,
@@ -195,9 +209,9 @@ export default {
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(this.page.component)).then(component => {
         if (visitId === this.visitId) {
-          this.setState(this.page)
           this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
             this.restoreScrollPositions(this.page)
+            this.fireEvent('navigate', { detail: { page: this.page } })
           })
         }
       })
@@ -232,7 +246,7 @@ export default {
     let newState = { ...window.history.state }
     newState.cache = newState.cache || {}
     newState.cache[key] = data
-    this.setState(newState)
+    this.setState(newState, true)
   },
 
   restore(key = 'default') {
@@ -246,5 +260,5 @@ export default {
     return () => {
       document.removeEventListener(`inertia:${type}`, callback)
     }
-  }
+  },
 }
