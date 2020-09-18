@@ -133,6 +133,9 @@ export default {
         return
       } else if(this.isInertiaResponse(error.response)) {
         return error.response
+      } else if (this.isHardVisit(error.response)) {
+        this.hardVisit(error.response.headers['x-inertia-location'])
+        return
       }
 
       return Promise.reject(error)
@@ -145,9 +148,7 @@ export default {
       }
       return response.data
     }).catch(error => {
-      if (this.isHardVisit(error.response)) {
-        this.hardVisit(error.response.headers['x-inertia-location'])
-      } else if (error.response) {
+      if (error.response) {
         if (this.fireEvent('invalid', { cancelable: true, detail: { error } })) {
           modal.show(error.response.data)
         }
