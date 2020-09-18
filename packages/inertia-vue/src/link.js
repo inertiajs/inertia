@@ -19,6 +19,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    preload: {
+      type: Boolean,
+      default: true,
+    },
     preserveScroll: {
       type: Boolean,
       default: false,
@@ -34,7 +38,7 @@ export default {
     headers: {
       type: Object,
       default: () => ({}),
-    }
+    },
   },
   render(h, { props, data, children }) {
     return h('a', {
@@ -62,6 +66,36 @@ export default {
               only: props.only,
               headers: props.headers,
             })
+          }
+        },
+        mouseover: event => {
+          if (data.on && data.on.mouseover) {
+            data.on.mouseover(event)
+          }
+
+          if (!props.preload || data.preloadTimer) {
+            return
+          }
+
+          data.preloadTimer = setTimeout(() => {
+            Inertia.preload(props.href, {
+              data: props.data,
+              method: props.method,
+              only: props.only,
+              headers: props.headers,
+            })
+
+            data.preloadTimer = undefined
+          }, 130)
+        },
+        mouseleave: event => {
+          if (data.on && data.on.mouseleave) {
+            data.on.mouseleave(event)
+          }
+
+          if (data.preloadTimer) {
+            clearTimeout(data.preloadTimer)
+            data.preloadTimer = undefined
           }
         },
       },

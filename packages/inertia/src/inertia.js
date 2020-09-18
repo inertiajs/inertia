@@ -2,6 +2,7 @@ import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
 import progress from './progress'
+import preloader from './preloader'
 
 export default {
   saveScrollPositions: null,
@@ -87,6 +88,17 @@ export default {
         ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
     })
+  },
+
+  preload(url, { method = 'get', data = {}, only = [], headers = {} }) {
+    if (method.toLowerCase() !== 'get') {
+      return
+    }
+
+    return preloader.load(
+      url.toString(),
+      cancelToken => this.inertiaRequest(url, cancelToken, { method, data, only, headers }),
+    )
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
