@@ -107,11 +107,19 @@ export default {
     this.saveScrollPositions()
     let visitId = this.createVisitId()
 
-    return this.inertiaRequest(
-      url,
-      this.cancelToken,
-      { method, data, only, headers },
-    ).then(response => {
+
+    const request = () => {
+      if (method.toLowerCase() === 'get') {
+        // When the request is a GET request, let's take it over from the preloader.
+        const preloadRequest = this.preload(url, { method, data, only, headers })
+        this.cancelToken = preloadRequest.cancelToken
+        return preloadRequest.request
+      }
+
+      return this.inertiaRequest(url, this.cancelToken, { method, data, only, headers })
+    }
+
+    return request().then(response => {
       if (this.isInertiaResponse(response)) {
         return response.data
       } else {
