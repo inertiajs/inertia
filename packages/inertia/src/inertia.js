@@ -219,6 +219,7 @@ export default {
               })
             }
           })
+          preloader.flush()
           progress.stop()
         }
       })
