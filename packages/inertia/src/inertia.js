@@ -68,18 +68,13 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
-    progress.start()
-    this.cancelActiveVisits()
-    this.saveScrollPositions()
-    let visitId = this.createVisitId()
-
+  inertiaRequest(url, cancelToken, { method = 'get', data = {}, only = [], headers = {} }) {
     return Axios({
       method,
       url: url.toString(),
       data: method.toLowerCase() === 'get' ? {} : data,
       params: method.toLowerCase() === 'get' ? data : {},
-      cancelToken: this.cancelToken.token,
+      cancelToken: cancelToken.token,
       headers: {
         ...headers,
         Accept: 'text/html, application/xhtml+xml',
@@ -91,7 +86,20 @@ export default {
         } : {}),
         ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
       },
-    }).then(response => {
+    })
+  },
+
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}} = {}) {
+    progress.start()
+    this.cancelActiveVisits()
+    this.saveScrollPositions()
+    let visitId = this.createVisitId()
+
+    return this.inertiaRequest(
+      url,
+      this.cancelToken,
+      { method, data, only, headers },
+    ).then(response => {
       if (this.isInertiaResponse(response)) {
         return response.data
       } else {
