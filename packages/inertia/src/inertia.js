@@ -128,6 +128,14 @@ export default {
         } : {}),
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
+    }).catch(error => {
+      if (Axios.isCancel(error)) {
+        return
+      } else if(this.isInertiaResponse(error.response)) {
+        return error.response
+      }
+
+      return Promise.reject(error)
     }).then(response => {
       if (!this.isInertiaResponse(response)) {
         return Promise.reject({ response })
@@ -137,13 +145,8 @@ export default {
       }
       return response.data
     }).catch(error => {
-      if (this.isInertiaResponse(error.response)) {
-        return error.response.data
-      } else if (Axios.isCancel(error)) {
-        return
-      } else if (this.isHardVisit(error.response)) {
+      if (this.isHardVisit(error.response)) {
         this.hardVisit(error.response.headers['x-inertia-location'])
-        return
       } else if (error.response) {
         if (this.fireEvent('invalid', { cancelable: true, detail: { error } })) {
           modal.show(error.response.data)
