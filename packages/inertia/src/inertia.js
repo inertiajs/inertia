@@ -5,7 +5,6 @@ import modal from './modal'
 export default {
   resolveComponent: null,
   updatePage: null,
-  version: null,
   visitId: null,
   cancelToken: null,
   page: null,
@@ -121,7 +120,7 @@ export default {
           'X-Inertia-Partial-Component': this.page.component,
           'X-Inertia-Partial-Data': only.join(','),
         } : {}),
-        ...(this.version ? { 'X-Inertia-Version': this.version } : {}),
+        ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
     }).then(response => {
       if (this.isInertiaResponse(response)) {
@@ -166,7 +165,6 @@ export default {
     this.page = page
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
-        this.version = page.version
         this.setState(page, replace, preserveState)
         this.updatePage(component, page.props, { preserveState }).then(() => {
           if (!preserveScroll) {
@@ -197,7 +195,6 @@ export default {
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(this.page.component)).then(component => {
         if (visitId === this.visitId) {
-          this.version = this.page.version
           this.setState(this.page)
           this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
             this.restoreScrollPositions(this.page)
