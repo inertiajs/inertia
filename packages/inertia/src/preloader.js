@@ -31,9 +31,11 @@ export default {
           return response
         })
         .catch(error => {
-          if (! Axios.isCancel(error)) {
-            Promise.reject(error)
+          if (Axios.isCancel(error)) {
+            delete this.requests[url]
+            return
           }
+          Promise.reject(error)
         })
     }
 
