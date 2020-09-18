@@ -185,6 +185,7 @@ export default {
 
           this.saveScrollPositions()
         })
+        preloader.flush()
         progress.stop()
       }
     })
