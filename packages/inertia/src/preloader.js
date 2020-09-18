@@ -7,6 +7,12 @@ export default {
     this.requests = {}
   },
   load(url, handler) {
+    return {
+      request : this.attach(url, handler),
+      cancelToken: this.requests[url].cancelToken,
+    }
+  },
+  attach(url, handler) {
     if (Object.keys(this.requests).indexOf(url) === -1) {
       const cancelToken = Axios.CancelToken.source()
       this.requests[url] = {
