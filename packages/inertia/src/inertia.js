@@ -40,7 +40,7 @@ export default {
   },
 
   saveScrollPositions() {
-    this.setState({
+    this.replaceState({
       ...window.history.state,
       scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
         return {
@@ -48,7 +48,7 @@ export default {
           left: region.scrollLeft,
         }
       }),
-    }, true)
+    })
   },
 
   resetScrollPositions() {
@@ -172,10 +172,10 @@ export default {
 
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
     this.page = page
-    replace = replace || page.url === `${window.location.pathname}${window.location.search}`
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
-        this.setState(page, replace, preserveState)
+        replace = replace || page.url === `${window.location.pathname}${window.location.search}`
+        replace ? this.replaceState(page, preserveState) : this.pushState(page)
         this.updatePage(component, page.props, { preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
@@ -188,18 +188,18 @@ export default {
     })
   },
 
-  setState(page, replace = false, preserveState = false) {
-    if (replace) {
-      window.history.replaceState({
-        ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
-        ...page,
-      }, '', page.url)
-    } else {
-      window.history.pushState({
-        cache: {},
-        ...page,
-      }, '', page.url)
-    }
+  pushState(page) {
+    window.history.pushState({
+      cache: {},
+      ...page,
+    }, '', page.url)
+  },
+
+  replaceState(page, preserveState = false) {
+    window.history.replaceState({
+      ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
+      ...page,
+    }, '', page.url)
   },
 
   restoreState(event) {
@@ -245,7 +245,7 @@ export default {
     let newState = { ...window.history.state }
     newState.cache = newState.cache || {}
     newState.cache[key] = data
-    this.setState(newState, true)
+    this.replaceState(newState)
   },
 
   restore(key = 'default') {
