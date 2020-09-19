@@ -144,7 +144,7 @@ export default {
       } else if (this.isHardVisit(error.response)) {
         this.hardVisit(error.response.headers['x-inertia-location'])
       } else if (error.response) {
-        if (this.fireEvent('invalid', { cancelable: true, detail: { error } })) {
+        if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
           modal.show(error.response.data)
         }
       } else {
