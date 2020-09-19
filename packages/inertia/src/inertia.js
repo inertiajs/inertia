@@ -103,7 +103,7 @@ export default {
   },
 
   visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {} } = {}) {
-    if (!this.fireEvent('start', { cancelable: true, detail: { url, ...arguments[1] } } )) {
+    if (!this.fireEvent('start', { cancelable: true, detail: { request: { url, ...arguments[1] }} } )) {
       return Promise.reject()
     }
 
