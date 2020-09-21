@@ -148,9 +148,7 @@ export default {
           modal.show(error.response.data)
         }
       } else {
-        if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
-          return Promise.reject(error)
-        }
+        return Promise.reject(error)
       }
     }).then(page => {
       if (page) {
@@ -159,6 +157,10 @@ export default {
         }
 
         return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
+      }
+    }).catch(error => {
+      if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
+        return Promise.reject(error)
       }
     }).finally(() => {
       this.fireEvent('finish')
