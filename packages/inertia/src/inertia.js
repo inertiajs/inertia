@@ -102,7 +102,7 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {} } = {}) {
+  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}, onProgress = () => ({}) } = {}) {
     if (!this.fireEvent('start', { cancelable: true, detail: { request: { url, ...arguments[1] }} } )) {
       return Promise.reject()
     }
@@ -127,6 +127,10 @@ export default {
           'X-Inertia-Partial-Data': only.join(','),
         } : {}),
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
+      },
+      onUploadProgress: progress => {
+        this.fireEvent('progress', { cancelable: true, detail: { progress } })
+        onProgress(progress)
       },
     }).then(response => {
       if (!this.isInertiaResponse(response)) {
