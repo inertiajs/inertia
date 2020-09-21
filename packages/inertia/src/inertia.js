@@ -160,7 +160,7 @@ export default {
 
         return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }
-    }).then(() => {
+    }).finally(() => {
       this.fireEvent('finish')
     })
   },
