@@ -152,8 +152,6 @@ export default {
           return Promise.reject(error)
         }
       }
-    }).finally(() => {
-      this.fireEvent('finish')
     }).then(page => {
       if (page) {
         if (only.length) {
@@ -162,6 +160,8 @@ export default {
 
         return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }
+    }).then(() => {
+      this.fireEvent('finish')
     })
   },
 
