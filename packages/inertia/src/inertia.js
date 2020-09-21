@@ -129,7 +129,7 @@ export default {
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
       onUploadProgress: progress => {
-        this.fireEvent('progress', { cancelable: true, detail: { progress } })
+        this.fireEvent('progress', { detail: { progress } })
         onProgress(progress)
       },
     }).then(response => {
