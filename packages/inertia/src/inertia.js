@@ -127,64 +127,71 @@ export default {
     let visitId = this.createVisitId()
     onCancelToken(this.cancelToken)
 
-    Axios({
-      method,
-      url: url.toString(),
-      data: method.toLowerCase() === 'get' ? {} : data,
-      params: method.toLowerCase() === 'get' ? data : {},
-      cancelToken: this.cancelToken.token,
-      headers: {
-        ...headers,
-        Accept: 'text/html, application/xhtml+xml',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-Inertia': true,
-        ...(only.length ? {
-          'X-Inertia-Partial-Component': this.page.component,
-          'X-Inertia-Partial-Data': only.join(','),
-        } : {}),
-        ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
-      },
-      onUploadProgress: progress => {
-        progress.completed = Math.round(progress.loaded / progress.total * 100)
-        this.fireEvent('progress', { detail: { progress } })
-        onProgress(progress)
-      },
-    }).then(response => {
-      if (!this.isInertiaResponse(response)) {
-        return Promise.reject({ response })
-      }
-      if (this.fireEvent('success', { cancelable: true, detail: { response } })) {
-        if (only.length) {
-          response.data.props = { ...this.page.props, ...response.data.props }
+    return new Proxy(
+      Axios({
+        method,
+        url: url.toString(),
+        data: method.toLowerCase() === 'get' ? {} : data,
+        params: method.toLowerCase() === 'get' ? data : {},
+        cancelToken: this.cancelToken.token,
+        headers: {
+          ...headers,
+          Accept: 'text/html, application/xhtml+xml',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-Inertia': true,
+          ...(only.length ? {
+            'X-Inertia-Partial-Component': this.page.component,
+            'X-Inertia-Partial-Data': only.join(','),
+          } : {}),
+          ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
+        },
+        onUploadProgress: progress => {
+          progress.completed = Math.round(progress.loaded / progress.total * 100)
+          this.fireEvent('progress', { detail: { progress } })
+          onProgress(progress)
+        },
+      }).then(response => {
+        if (!this.isInertiaResponse(response)) {
+          return Promise.reject({ response })
         }
-        return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
-      }
-    }).then(() => {
-      onSuccess()
-    }).catch(error => {
-      if (this.isInertiaResponse(error.response)) {
-        return this.setPage(error.response.data, { visitId })
-      } else if (Axios.isCancel(error)) {
-        onCancel()
-      } else if (this.isHardVisit(error.response)) {
-        this.hardVisit(error.response.headers['x-inertia-location'])
-      } else if (error.response) {
-        if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
-          modal.show(error.response.data)
+        if (this.fireEvent('success', { cancelable: true, detail: { response } })) {
+          if (only.length) {
+            response.data.props = { ...this.page.props, ...response.data.props }
+          }
+          return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
         }
-      } else {
-        return Promise.reject(error)
-      }
-    }).catch(error => {
-      if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
-        return Promise.reject(error)
-      }
-    }).finally(() => {
-      if (visitId === this.visitId) {
-        this.fireEvent('finish')
-      }
-      onFinish()
-    })
+      }).then(() => {
+        onSuccess()
+      }).catch(error => {
+        if (this.isInertiaResponse(error.response)) {
+          return this.setPage(error.response.data, { visitId })
+        } else if (Axios.isCancel(error)) {
+          onCancel()
+        } else if (this.isHardVisit(error.response)) {
+          this.hardVisit(error.response.headers['x-inertia-location'])
+        } else if (error.response) {
+          if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
+            modal.show(error.response.data)
+          }
+        } else {
+          return Promise.reject(error)
+        }
+      }).catch(error => {
+        if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
+          return Promise.reject(error)
+        }
+      }).finally(() => {
+        if (visitId === this.visitId) {
+          this.fireEvent('finish')
+        }
+        onFinish()
+      }), {
+        get: function(target, prop) {
+          console.warn('Inertia.js visit promises have been deprecated. Use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/events')
+          return target[prop].bind(target)
+        },
+      },
+    )
   },
 
   hardVisit(url) {
