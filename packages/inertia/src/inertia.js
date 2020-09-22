@@ -91,7 +91,7 @@ export default {
 
   cancelActiveVisits() {
     if (this.cancelToken) {
-      this.cancelToken.cancel(this.cancelToken)
+      this.cancelToken.cancel()
     }
 
     this.cancelToken = Axios.CancelToken.source()
@@ -102,16 +102,32 @@ export default {
     return this.visitId
   },
 
-  visit(url, { method = 'get', data = {}, replace = false, preserveScroll = false, preserveState = false, only = [], headers = {}, onProgress = () => ({}) } = {}) {
+  visit(url, {
+    method = 'get',
+    data = {},
+    replace = false,
+    preserveScroll = false,
+    preserveState = false,
+    only = [],
+    headers = {},
+    onCancelToken = () => ({}),
+    onStart = () => ({}),
+    onProgress = () => ({}),
+    onFinish = () => ({}),
+    onCancel = () => ({}),
+    onSuccess = () => ({}),
+  } = {}) {
     if (!this.fireEvent('start', { cancelable: true, detail: { request: { url, ...arguments[1] }} } )) {
-      return Promise.reject()
+      return
     }
 
+    onStart()
     this.cancelActiveVisits()
     this.saveScrollPositions()
     let visitId = this.createVisitId()
+    onCancelToken(this.cancelToken)
 
-    return Axios({
+    Axios({
       method,
       url: url.toString(),
       data: method.toLowerCase() === 'get' ? {} : data,
@@ -129,6 +145,7 @@ export default {
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
       onUploadProgress: progress => {
+        progress.completed = Math.round(progress.loaded / progress.total * 100)
         this.fireEvent('progress', { detail: { progress } })
         onProgress(progress)
       },
@@ -136,15 +153,19 @@ export default {
       if (!this.isInertiaResponse(response)) {
         return Promise.reject({ response })
       }
-      if (!this.fireEvent('success', { cancelable: true, detail: { response } })) {
-        return
+      if (this.fireEvent('success', { cancelable: true, detail: { response } })) {
+        if (only.length) {
+          response.data.props = { ...this.page.props, ...response.data.props }
+        }
+        return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }
-      return response.data
+    }).then(() => {
+      onSuccess()
     }).catch(error => {
       if (this.isInertiaResponse(error.response)) {
-        return error.response.data
+        return this.setPage(error.response.data, { visitId })
       } else if (Axios.isCancel(error)) {
-        return
+        onCancel()
       } else if (this.isHardVisit(error.response)) {
         this.hardVisit(error.response.headers['x-inertia-location'])
       } else if (error.response) {
@@ -154,20 +175,15 @@ export default {
       } else {
         return Promise.reject(error)
       }
-    }).then(page => {
-      if (page) {
-        if (only.length) {
-          page.props = { ...this.page.props, ...page.props }
-        }
-
-        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
-      }
     }).catch(error => {
       if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
         return Promise.reject(error)
       }
     }).finally(() => {
-      this.fireEvent('finish')
+      if (visitId === this.visitId) {
+        this.fireEvent('finish')
+      }
+      onFinish()
     })
   },
 
