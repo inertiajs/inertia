@@ -146,7 +146,7 @@ export default {
           ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
         },
         onUploadProgress: progress => {
-          progress.completed = Math.round(progress.loaded / progress.total * 100)
+          progress.percentage = Math.round(progress.loaded / progress.total * 100)
           this.fireEvent('progress', { detail: { progress } })
           onProgress(progress)
         },
