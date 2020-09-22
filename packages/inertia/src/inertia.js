@@ -187,7 +187,7 @@ export default {
         onFinish()
       }), {
         get: function(target, prop) {
-          console.warn('Inertia.js visit promises have been deprecated. Use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/events')
+          console.warn('Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/events')
           return target[prop].bind(target)
         },
       },
