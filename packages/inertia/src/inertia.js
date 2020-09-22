@@ -161,7 +161,7 @@ export default {
           return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
         }
       }).then(() => {
-        onSuccess()
+        return onSuccess()
       }).catch(error => {
         if (this.isInertiaResponse(error.response)) {
           return this.setPage(error.response.data, { visitId })
