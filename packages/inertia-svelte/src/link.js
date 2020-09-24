@@ -22,6 +22,9 @@ export default (node, options = {}) => {
   node.addEventListener('click', visit)
 
   return {
+    update(newOptions) {
+      options = newOptions
+    },
     destroy() {
       node.removeEventListener('click', visit)
     }
