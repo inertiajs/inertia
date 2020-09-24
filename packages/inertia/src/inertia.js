@@ -283,16 +283,18 @@ export default {
   },
 
   on(type, callback) {
-    document.addEventListener(`inertia:${type}`, event => {
+    const listener = event => {
       const response = callback(event)
 
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
-    })
+    }
+
+    document.addEventListener(`inertia:${type}`, listener)
 
     return () => {
-      document.removeEventListener(`inertia:${type}`, callback)
+      document.removeEventListener(`inertia:${type}`, listener)
     }
   },
 }
