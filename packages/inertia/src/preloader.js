@@ -2,6 +2,9 @@ import Axios from 'axios'
 
 export default {
   requests: {},
+  init(inertia) {
+    inertia.on('success', this.flush.bind(this))
+  },
   flush() {
     Object.keys(this.requests).forEach(url => this.requests[url].cancelToken.cancel())
     this.requests = {}
