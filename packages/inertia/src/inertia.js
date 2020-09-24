@@ -118,7 +118,7 @@ export default {
     onSuccess = () => ({}),
   } = {}) {
     let visit = { url, ...arguments[1] }
-    if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
+    if (!this.fireEvent('start', { cancelable: true, detail: { visit } } ) || onStart(visit) === false) {
       this.fireEvent('finish')
       return
     }
