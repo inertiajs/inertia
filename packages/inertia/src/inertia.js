@@ -118,11 +118,9 @@ export default {
     onSuccess = () => ({}),
   } = {}) {
     let visit = { url, ...arguments[1] }
-    if (!this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
-      this.fireEvent('finish')
+    if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
       return
     }
-    onStart(visit)
     this.cancelActiveVisits()
     this.saveScrollPositions()
     let visitId = this.createVisitId()
