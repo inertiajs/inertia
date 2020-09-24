@@ -119,6 +119,7 @@ export default {
   } = {}) {
     let visit = { url, ...arguments[1] }
     if (!this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
+      this.fireEvent('finish')
       return
     }
     onStart(visit)
