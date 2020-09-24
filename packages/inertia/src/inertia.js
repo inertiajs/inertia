@@ -292,7 +292,6 @@ export default {
     }
 
     document.addEventListener(`inertia:${type}`, listener)
-
     return () => {
       document.removeEventListener(`inertia:${type}`, listener)
     }
