@@ -12,15 +12,19 @@ export default {
   init({ initialPage, resolveComponent, updatePage }) {
     this.resolveComponent = resolveComponent
     this.updatePage = updatePage
-
-    if (window.history.state && this.navigationType() === 'back_forward') {
-      this.setPage(window.history.state)
-    } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
-      window.sessionStorage.removeItem('inertia.hardVisit')
-      this.setPage(initialPage, { preserveState: true })
-    } else {
-      initialPage.url += window.location.hash
-      this.setPage(initialPage)
+    try {
+      if (window.history.state && this.navigationType() === 'back_forward') {
+        this.setPage(window.history.state)
+      } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
+        window.sessionStorage.removeItem('inertia.hardVisit')
+        this.setPage(initialPage, { preserveState: true })
+      } else {
+        initialPage.url += window.location.hash
+        this.setPage(initialPage)
+      }
+    } catch(error) {
+        initialPage.url += window.location.hash
+        this.setPage(initialPage)      
     }
 
     this.fireEvent('navigate', { detail: { page: initialPage } })
