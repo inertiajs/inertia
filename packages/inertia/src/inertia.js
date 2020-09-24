@@ -181,9 +181,7 @@ export default {
           return Promise.reject(error)
         }
       }).finally(() => {
-        if (visitId === this.visitId) {
-          this.fireEvent('finish')
-        }
+        this.fireEvent('finish')
         onFinish()
       }), {
         get: function(target, prop) {
