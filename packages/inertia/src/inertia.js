@@ -34,7 +34,7 @@ export default {
   },
 
   handleScrollEvent(event) {
-    if (event.target.hasAttribute('scroll-region')) {
+    if (typeof event.target.hasAttribute === 'function' && event.target.hasAttribute('scroll-region')) {
       this.saveScrollPositions()
     }
   },
