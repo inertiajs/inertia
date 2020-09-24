@@ -117,11 +117,11 @@ export default {
     onCancel = () => ({}),
     onSuccess = () => ({}),
   } = {}) {
-    if (!this.fireEvent('start', { cancelable: true, detail: { request: { url, ...arguments[1] }} } )) {
+    let visit = { url, ...arguments[1] }
+    if (!this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
       return
     }
-
-    onStart()
+    onStart(visit)
     this.cancelActiveVisits()
     this.saveScrollPositions()
     let visitId = this.createVisitId()
