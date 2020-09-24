@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia-vue",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "license": "MIT",
   "description": "The Vue adapter for Inertia.js",
   "contributors": [
@@ -25,7 +25,7 @@
     "vue": "^2.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.2.0",
+    "@inertiajs/inertia": "^0.2.0 || ^0.3.0",
     "vue": "^2.0.0"
   }
 }
