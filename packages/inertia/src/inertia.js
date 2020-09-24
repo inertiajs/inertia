@@ -154,14 +154,13 @@ export default {
         if (!this.isInertiaResponse(response)) {
           return Promise.reject({ response })
         }
-        if (this.fireEvent('success', { cancelable: true, detail: { response } })) {
-          if (only.length) {
-            response.data.props = { ...this.page.props, ...response.data.props }
-          }
-          return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
+        if (only.length) {
+          response.data.props = { ...this.page.props, ...response.data.props }
         }
+        return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
-        return onSuccess()
+        this.fireEvent('success', { detail: { page: this.page } })
+        return onSuccess(this.page)
       }).catch(error => {
         if (this.isInertiaResponse(error.response)) {
           return this.setPage(error.response.data, { visitId })
