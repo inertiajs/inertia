@@ -203,6 +203,8 @@ export default {
     this.page = page
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
+        preserveState = typeof preserveState === 'function' ? preserveState(page.props) : preserveState
+        preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page.props) : preserveScroll
         replace = replace || page.url === `${window.location.pathname}${window.location.search}`
         replace ? this.replaceState(page, preserveState) : this.pushState(page)
         this.updatePage(component, page.props, { preserveState }).then(() => {
