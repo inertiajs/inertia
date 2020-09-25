@@ -4,6 +4,17 @@ import { createEventDispatcher } from 'svelte'
 export default (node, options = {}) => {
   const dispatch = createEventDispatcher()
 
+  options.onCancelToken = cancelToken => fireEvent('cancelToken', { detail: { cancelToken } })
+  options.onStart = visit => fireEvent('start', { cancelable: true, detail: { visit } })
+  options.onProgress = progress => fireEvent('progress', { detail: { progress } })
+  options.onFinish = () => fireEvent('finish')
+  options.onCancel = () => fireEvent('cancel')
+  options.onSuccess = page => fireEvent('success', { detail: { page } })
+
+  function fireEvent(name, eventOptions) {
+    return node.dispatchEvent(new CustomEvent(name, eventOptions))
+  }
+
   function visit(event) {
     dispatch('click', event)
 
