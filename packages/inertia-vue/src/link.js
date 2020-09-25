@@ -34,9 +34,20 @@ export default {
     headers: {
       type: Object,
       default: () => ({}),
-    }
+    },
   },
   render(h, { props, data, children }) {
+    data.on = {
+      click: () => ({}),
+      cancelToken: () => ({}),
+      start: () => ({}),
+      progress: () => ({}),
+      finish: () => ({}),
+      cancel: () => ({}),
+      success: () => ({}),
+      ... (data.on || {}),
+    }
+
     return h('a', {
       ...data,
       attrs: {
@@ -44,11 +55,9 @@ export default {
         href: props.href,
       },
       on: {
-        ...(data.on || {}),
+        ...data.on,
         click: event => {
-          if (data.on && data.on.click) {
-            data.on.click(event)
-          }
+          data.on.click(event)
 
           if (shouldIntercept(event)) {
             event.preventDefault()
@@ -61,6 +70,12 @@ export default {
               preserveState: props.preserveState,
               only: props.only,
               headers: props.headers,
+              onCancelToken: data.on.cancelToken,
+              onStart: data.on.start,
+              onProgress: data.on.progress,
+              onFinish: data.on.finish,
+              onCancel: data.on.cancel,
+              onSuccess: data.on.success,
             })
           }
         },
