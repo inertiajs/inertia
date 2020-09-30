@@ -244,6 +244,10 @@ export default {
     }
   },
 
+  get(url, data = {}, options = {}) {
+    return this.visit(url, { ...options, method: 'get', data })
+  },
+
   replace(url, options = {}) {
     return this.visit(url, { preserveState: true, ...options, replace: true })
   },
