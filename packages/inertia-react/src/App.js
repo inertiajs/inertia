@@ -37,8 +37,15 @@ export default function App({
   const renderChildren = children || (({ Component, props, key }) => {
     const child = createElement(Component, { key, ...props })
 
-    if (Component.layout) {
+    if (typeof Component.layout === 'function') {
       return Component.layout(child)
+    }
+
+    if (Array.isArray(Component.layout)) {
+      return Component.layout
+        .concat(child)
+        .reverse()
+        .reduce((children, Layout) => createElement(Layout, { children }))
     }
 
     return child
