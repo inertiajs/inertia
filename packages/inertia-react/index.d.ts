@@ -17,7 +17,7 @@ type App<
   transformProps?: (props: PagePropsBeforeTransform) => PageProps
 }>
 
-interface InertiaLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
+interface InertiaLinkProps {
   data?: object
   href: string
   method?: string
@@ -30,9 +30,17 @@ interface InertiaLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
   replace?: boolean
   only?: string[]
+  onCancelToken: (cancelToken: string) => void
+  onStart: () => void
+  onProgress: (progress: number) => void
+  onFinish: () => void
+  onCancel: () => void
+  onSuccess: () => void
 }
 
-type InertiaLink = React.FunctionComponent<InertiaLinkProps>
+type InertiaLink = React.FunctionComponent<
+  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLAnchorElement>, 'onProgress'>
+>
 
 export function usePage<
   PageProps extends Inertia.PageProps = Inertia.PageProps
