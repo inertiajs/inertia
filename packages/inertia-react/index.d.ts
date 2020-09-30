@@ -30,7 +30,7 @@ interface InertiaLinkProps {
   preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
   replace?: boolean
   only?: string[]
-  onCancelToken: (cancelToken: string) => void
+  onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
   onStart: () => void
   onProgress: (progress: number) => void
   onFinish: () => void
