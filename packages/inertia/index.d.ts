@@ -32,7 +32,7 @@ type VisitOptions = {
   onProgress?: (progress: any) => void // Cast to any, Axios doesn't have a type definition for this
   onFinish?: () => void
   onCancel?: () => void
-  onSuccess?: (page: Page) => void | Promise
+  onSuccess?: (page: Page) => void | Promise<any>
 }
 
 interface Inertia {
