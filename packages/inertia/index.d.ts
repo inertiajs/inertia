@@ -1,3 +1,5 @@
+import { CancelTokenSource } from "axios"
+
 declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
@@ -20,10 +22,17 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
 
 type VisitOptions = {
   method?: string
+  replace?: boolean
   preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
   preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
-  replace?: boolean
   only?: string[]
+  headers?: object
+  onCancelToken?: (cancelToken: CancelTokenSource) => void
+  onStart?: (visit: VisitOptions & {url: string}) => void | boolean
+  onProgress?: (progress: any) => void // Cast to any, Axios doesn't have a type definition for this
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: (page: Page) => void | Promise
 }
 
 interface Inertia {
