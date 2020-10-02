@@ -56,6 +56,8 @@ interface Inertia {
     options?: VisitOptions & { data?: object }
   ) => Promise<void>
 
+  get: (url: string, data?: object, options?: VisitOptions) => Promise<void>
+
   patch: (url: string, data?: object, options?: VisitOptions) => Promise<void>
 
   post: (url: string, data?: object, options?: VisitOptions) => Promise<void>
