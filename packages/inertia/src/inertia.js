@@ -126,10 +126,13 @@ export default {
     let visitId = this.createVisitId()
     onCancelToken(this.cancelToken)
 
+    const stringifiedUrl = url.toString()
+    const [, hash] = stringifiedUrl.split('#')
+
     return new Proxy(
       Axios({
         method,
-        url: url.toString(),
+        url: stringifiedUrl,
         data: method.toLowerCase() === 'get' ? {} : data,
         params: method.toLowerCase() === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
@@ -143,6 +146,7 @@ export default {
             'X-Inertia-Partial-Data': only.join(','),
           } : {}),
           ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
+          ...(hash ? { 'X-Inertia-Hash': '#' + hash } : {}),
         },
         onUploadProgress: progress => {
           progress.percentage = Math.round(progress.loaded / progress.total * 100)
