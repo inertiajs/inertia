@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Inertia Vue - Testing Environment</title>
+        <script src="app.js" defer></script>
+    </head>
+    <body>
+        <div id="app" data-page=""></div>
+        <script>
+            document.getElementById('app').setAttribute('data-page', JSON.stringify('{{ placeholder }}'))
+
+            const currentScript = document.currentScript || document.scripts[document.scripts.length - 1];
+            currentScript.parentNode.removeChild(currentScript);
+        </script>
+    </body>
+</html>
