@@ -203,7 +203,7 @@ export default {
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
         replace = replace || page.url === `${window.location.pathname}${window.location.search}`
         replace ? this.replaceState(page, preserveState) : this.pushState(page)
-        this.updatePage(component, page.props, { preserveState }).then(() => {
+        this.updatePage(component, page, { preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
@@ -235,7 +235,7 @@ export default {
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(this.page.component)).then(component => {
         if (visitId === this.visitId) {
-          this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
+          this.updatePage(component, this.page, { preserveState: false }).then(() => {
             this.restoreScrollPositions(this.page)
             this.fireEvent('navigate', { detail: { page: this.page } })
           })
