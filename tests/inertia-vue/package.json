@@ -3,16 +3,16 @@
     "build:library": "npm run --prefix ../../packages/inertia build:cjs",
     "build:driver": "npm run --prefix ../../packages/inertia-vue build:cjs",
     "ci": "npm run build:library && npm run build:driver && npm run test",
-    "serve": "node src/server.js",
     "test": "npm run test:build && npm run test:run",
     "test:build": "webpack",
-    "test:run": "jest --ci --verbose"
+    "test:run": "start-server-and-test test:serve http://localhost:13714 test:cy",
+    "test:serve": "node src/server.js",
+    "test:cy": "cypress run"
   },
   "devDependencies": {
+    "cypress": "^5.3.0",
     "express": "^4.17.1",
-    "jest": "^26.4.2",
-    "jest-puppeteer": "^4.4.0",
-    "puppeteer": "^5.3.1",
+    "start-server-and-test": "^1.11.5",
     "vue": "^2.0.0",
     "vue-loader": "^15.9.3",
     "vue-template-compiler": "^2.6.12",
