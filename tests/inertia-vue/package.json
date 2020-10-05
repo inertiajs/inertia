@@ -6,7 +6,7 @@
     "serve": "node src/server.js",
     "test": "npm run test:build && npm run test:run",
     "test:build": "webpack",
-    "test:run": "jest"
+    "test:run": "jest --ci --verbose"
   },
   "devDependencies": {
     "express": "^4.17.1",

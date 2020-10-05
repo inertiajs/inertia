@@ -21,20 +21,6 @@ it('has the $inertia app injected into page component', async () => {
     expect($inertia).toHaveProperty('page')
 })
 
-it('has inertia props injected into the page component', async () => {
-    await page.goto(HOST)
-
-    const props = await page.evaluate(() => {
-        const inertiaRoot = window.vm.$children[0]
-        const page = inertiaRoot.$children[0]
-
-        return page.$vnode.data.props
-    })
-
-    expect(props).toHaveProperty('example')
-    expect(props.example).toMatch('FooBar')
-})
-
 it('has the $page helper injected into the Vue component', async () => {
     await page.goto(HOST)
 
