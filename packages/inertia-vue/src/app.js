@@ -23,7 +23,7 @@ export default {
   data() {
     return {
       component: null,
-      props: {},
+      page: {},
       key: null,
     }
   },
@@ -32,18 +32,19 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
-      updatePage: async (component, props, { preserveState }) => {
+      swapComponent: async ({ component, page, preserveState }) => {
         this.component = component
-        this.props = this.transformProps(props)
+        this.page = page
         this.key = preserveState ? this.key : Date.now()
       },
+      transformProps: this.transformProps,
     })
   },
   render(h) {
     if (this.component) {
       const child = h(this.component, {
         key: this.key,
-        props: this.props,
+        props: this.page.props,
         scopedSlots: this.$scopedSlots,
       })
 
@@ -65,7 +66,7 @@ export default {
   },
   install(Vue) {
     Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
-    Object.defineProperty(Vue.prototype, '$page', { get: () => app.props })
+    Object.defineProperty(Vue.prototype, '$page', { get: () => app.page.props })
     Vue.mixin(Remember)
     Vue.component('InertiaLink', Link)
   },
