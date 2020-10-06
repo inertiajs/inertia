@@ -1,5 +1,5 @@
-import Link from './link'
-import Remember from './remember'
+import link from './link'
+import remember from './remember'
 import { Inertia } from '@inertiajs/inertia'
 
 export default {
@@ -7,7 +7,7 @@ export default {
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => this.instance.page })
-    app.mixin(Remember)
-    app.component('InertiaLink', Link)
+    app.mixin(remember)
+    app.component('InertiaLink', link)
   },
 }
