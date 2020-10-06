@@ -6,7 +6,7 @@ export default {
   instance: null,
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
-    Object.defineProperty(app.config.globalProperties, '$page', { get: () => this.instance.page })
+    Object.defineProperty(app.config.globalProperties, '$page', { get: () => this.instance.page.props })
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
