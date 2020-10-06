@@ -1,7 +1,7 @@
-import { defineComponent, h } from 'vue'
+import { h } from 'vue'
 import { Inertia, shouldIntercept } from '@inertiajs/inertia'
 
-export default defineComponent({
+export default {
   functional: true,
   props: {
     data: {
@@ -64,4 +64,4 @@ export default defineComponent({
       },
     }, slots.default())
   },
-})
+}

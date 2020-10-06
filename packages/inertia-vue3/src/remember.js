@@ -1,7 +1,6 @@
-import { defineComponent } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-export default defineComponent({
+export default {
   created() {
     if (!this.$options.remember) {
       return
@@ -38,4 +37,4 @@ export default defineComponent({
       }, { immediate: true, deep: true })
     })
   },
-})
+}
