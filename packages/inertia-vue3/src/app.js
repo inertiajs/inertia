@@ -30,12 +30,12 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
-      updatePage: async (component, page, { preserveState }) => {
+      swapComponent: async ({ component, page, preserveState }) => {
         this.component = markRaw(component)
-        page.props = this.transformProps(page.props)
-        Object.assign(this.page, page)
+        this.page = page
         this.key = preserveState ? this.key : Date.now()
       },
+      transformProps: this.transformProps,
     })
   },
   render() {
