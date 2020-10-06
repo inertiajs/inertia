@@ -1,9 +1,6 @@
-import Link from './link'
-import Remember from './remember'
+import plugin from './plugin'
 import { h, markRaw } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
-
-let instance = {}
 
 export default {
   name: 'Inertia',
@@ -29,7 +26,7 @@ export default {
     }
   },
   created() {
-    instance = this
+    plugin.instance = this
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
@@ -64,14 +61,5 @@ export default {
 
       return child
     }
-  },
-}
-
-export const InertiaPlugin = {
-  install(app) {
-    Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
-    Object.defineProperty(app.config.globalProperties, '$page', { get: () => instance.page })
-    app.mixin(Remember)
-    app.component('InertiaLink', Link)
   },
 }
