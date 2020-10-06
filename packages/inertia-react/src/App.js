@@ -32,7 +32,7 @@ export default function App({
   }, [initialPage, resolveComponent, transformProps])
 
   if (!current.component) {
-    return createElement(PageContext.Provider, { value: current.page.props }, null)
+    return createElement(PageContext.Provider, { value: current.page }, null)
   }
 
   const renderChildren = children || (({ Component, props, key }) => {
@@ -54,7 +54,7 @@ export default function App({
 
   return createElement(
     PageContext.Provider,
-    { value: current.page.props },
+    { value: current.page },
     renderChildren({ Component: current.component, key: current.key, props: current.page.props }),
   )
 }
