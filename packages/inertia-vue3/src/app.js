@@ -1,6 +1,13 @@
-import plugin from './plugin'
-import { h, markRaw } from 'vue'
+import link from './link'
+import remember from './remember'
+import { h, markRaw, reactive } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
+
+const current = reactive({
+  component: null,
+  page: {},
+  key: null,
+});
 
 export default {
   name: 'Inertia',
@@ -18,48 +25,49 @@ export default {
       default: props => props,
     },
   },
-  data() {
-    return {
-      component: null,
-      page: {},
-      key: null,
-    }
-  },
-  created() {
-    plugin.instance = this
+  setup({ initialPage, resolveComponent, transformProps }) {
     Inertia.init({
-      initialPage: this.initialPage,
-      resolveComponent: this.resolveComponent,
+      initialPage,
+      resolveComponent,
+      transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
-        this.component = markRaw(component)
-        this.page = page
-        this.key = preserveState ? this.key : Date.now()
+        current.component = markRaw(component)
+        current.page = page
+        current.key = preserveState ? current.key : Date.now()
       },
-      transformProps: this.transformProps,
     })
-  },
-  render() {
-    if (this.component) {
-      const child = h(this.component, {
-        ...this.page.props,
-        key: this.key,
-        slots: this.$slots,
-      })
 
-      if (this.component.layout) {
-        if (typeof this.component.layout === 'function') {
-          return this.component.layout(h, child)
-        } else if (Array.isArray(this.component.layout)) {
-          return this.component.layout
-            .concat(child)
-            .reverse()
-            .reduce((child, layout) => h(layout, [child]))
+    return () => {
+      if (current.component) {
+        const child = h(current.component, {
+          ...current.page.props,
+          key: current.key,
+        })
+
+        if (current.component.layout) {
+          if (typeof current.component.layout === 'function') {
+            return current.component.layout(h, child)
+          } else if (Array.isArray(current.component.layout)) {
+            return current.component.layout
+              .concat(child)
+              .reverse()
+              .reduce((child, layout) => h(layout, [child]))
+          }
+
+          return h(current.component.layout, () => child)
         }
 
-        return h(this.component.layout, () => child)
+        return child
       }
-
-      return child
     }
+  }
+}
+
+export const InertiaPlugin = {
+  install(app) {
+    Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
+    Object.defineProperty(app.config.globalProperties, '$page', { get: () => current.page })
+    app.mixin(remember)
+    app.component('InertiaLink', link)
   },
 }
