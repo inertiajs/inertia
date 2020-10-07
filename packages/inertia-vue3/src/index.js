@@ -1,2 +1,2 @@
-export { default as InertiaApp, InertiaPlugin } from './app'
+export { default as InertiaApp, InertiaPlugin, usePage } from './app'
 export { default as InertiaLink } from './link'

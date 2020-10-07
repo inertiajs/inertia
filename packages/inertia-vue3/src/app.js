@@ -61,6 +61,15 @@ export default {
   }
 }
 
+export function usePage() {
+  return {
+    props: computed(() => page.value.props),
+    url: computed(() => page.value.url),
+    component: computed(() => page.value.component),
+    version: computed(() => page.value.version),
+  }
+}
+
 export const InertiaPlugin = {
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
