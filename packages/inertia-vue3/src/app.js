@@ -1,13 +1,11 @@
 import link from './link'
 import remember from './remember'
-import { h, markRaw, reactive } from 'vue'
+import { computed, h, markRaw, ref } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-const current = reactive({
-  component: null,
-  page: {},
-  key: null,
-});
+const component = ref(null)
+const page = ref({})
+const key = ref(null)
 
 export default {
   name: 'Inertia',
@@ -30,31 +28,31 @@ export default {
       initialPage,
       resolveComponent,
       transformProps,
-      swapComponent: async ({ component, page, preserveState }) => {
-        current.component = markRaw(component)
-        current.page = page
-        current.key = preserveState ? current.key : Date.now()
+      swapComponent: async (args) => {
+        component.value = markRaw(args.component)
+        page.value = args.page
+        key.value = args.preserveState ? key.value : Date.now()
       },
     })
 
     return () => {
-      if (current.component) {
-        const child = h(current.component, {
-          ...current.page.props,
-          key: current.key,
+      if (component.value) {
+        const child = h(component.value, {
+          ...page.value.props,
+          key: key.value,
         })
 
-        if (current.component.layout) {
-          if (typeof current.component.layout === 'function') {
-            return current.component.layout(h, child)
-          } else if (Array.isArray(current.component.layout)) {
-            return current.component.layout
+        if (component.value.layout) {
+          if (typeof component.value.layout === 'function') {
+            return component.value.layout(h, child)
+          } else if (Array.isArray(component.value.layout)) {
+            return component.value.layout
               .concat(child)
               .reverse()
               .reduce((child, layout) => h(layout, [child]))
           }
 
-          return h(current.component.layout, () => child)
+          return h(component.value.layout, () => child)
         }
 
         return child
@@ -66,7 +64,7 @@ export default {
 export const InertiaPlugin = {
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
-    Object.defineProperty(app.config.globalProperties, '$page', { get: () => current.page })
+    Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
