@@ -1,6 +1,7 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
+import preloader from './preloader'
 
 export default {
   resolveComponent: null,
@@ -25,6 +26,7 @@ export default {
 
     this.fireEvent('navigate', { detail: { page: initialPage } })
 
+    preloader.init(this)
     window.addEventListener('popstate', this.restoreState.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
   },
@@ -102,6 +104,43 @@ export default {
     return this.visitId
   },
 
+  inertiaRequest(url, cancelToken, { method = 'get', data = {}, only = [], headers = {}, onProgress = () => ({}) }) {
+    return Axios({
+      method,
+      url: url.toString(),
+      data: method.toLowerCase() === 'get' ? {} : data,
+      params: method.toLowerCase() === 'get' ? data : {},
+      cancelToken: cancelToken.token,
+      headers: {
+        ...headers,
+        Accept: 'text/html, application/xhtml+xml',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Inertia': true,
+        ...(only.length ? {
+          'X-Inertia-Partial-Component': this.page.component,
+          'X-Inertia-Partial-Data': only.join(','),
+        } : {}),
+        ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
+      },
+      onUploadProgress: progress => {
+        progress.percentage = Math.round(progress.loaded / progress.total * 100)
+        this.fireEvent('progress', { detail: { progress } })
+        onProgress(progress)
+      },
+    })
+  },
+
+  preload(url, { method = 'get', data = {}, only = [], headers = {}, onProgress = () => ({}) }) {
+    if (method.toLowerCase() !== 'get') {
+      return
+    }
+
+    return preloader.load(
+      url.toString(),
+      cancelToken => this.inertiaRequest(url, cancelToken, { method, data, only, headers, onProgress }),
+    )
+  },
+
   visit(url, {
     method = 'get',
     data = {},
@@ -127,29 +166,15 @@ export default {
     onCancelToken(this.cancelToken)
 
     return new Proxy(
-      Axios({
-        method,
-        url: url.toString(),
-        data: method.toLowerCase() === 'get' ? {} : data,
-        params: method.toLowerCase() === 'get' ? data : {},
-        cancelToken: this.cancelToken.token,
-        headers: {
-          ...headers,
-          Accept: 'text/html, application/xhtml+xml',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-Inertia': true,
-          ...(only.length ? {
-            'X-Inertia-Partial-Component': this.page.component,
-            'X-Inertia-Partial-Data': only.join(','),
-          } : {}),
-          ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
-        },
-        onUploadProgress: progress => {
-          progress.percentage = Math.round(progress.loaded / progress.total * 100)
-          this.fireEvent('progress', { detail: { progress } })
-          onProgress(progress)
-        },
-      }).then(response => {
+      (() => {
+        if (method.toLowerCase() === 'get') {
+          const preloadRequest = this.preload(url, { method, data, only, headers, onProgress })
+          this.cancelToken = preloadRequest.cancelToken
+          return preloadRequest.request
+        }
+
+        return this.inertiaRequest(url, this.cancelToken, { method, data, only, headers, onProgress })
+      })().then(response => {
         if (!this.isInertiaResponse(response)) {
           return Promise.reject({ response })
         }
