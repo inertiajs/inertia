@@ -2,7 +2,6 @@ import { h } from 'vue'
 import { Inertia, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
-  functional: true,
   props: {
     data: {
       type: Object,
