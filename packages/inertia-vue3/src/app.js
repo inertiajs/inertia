@@ -70,7 +70,7 @@ export function usePage() {
   }
 }
 
-export const InertiaPlugin = {
+export const plugin = {
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
