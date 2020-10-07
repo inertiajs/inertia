@@ -153,7 +153,7 @@ export default {
         if (!this.isInertiaResponse(response)) {
           return Promise.reject({ response })
         }
-        if (only.length) {
+        if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
