@@ -1,6 +1,7 @@
 <script>
   import { Inertia } from '@inertiajs/inertia'
   import store from './store'
+  import Render, { h } from './Render.svelte'
 
   export let
     initialPage,
@@ -10,7 +11,7 @@
   Inertia.init({
     initialPage,
     resolveComponent,
-    updatePage: (component, props, { preserveState }) => {
+    updatePage: async (component, props, { preserveState }) => {
       store.update(page => ({
         component,
         key: preserveState ? page.key : Date.now(),
@@ -18,8 +19,14 @@
       }))
     },
   })
+
+  $: child = $store.component && h($store.component.default, $store.props)
+  $: layout = $store.component && $store.component.layout
+  $: components = layout
+    ? Array.isArray(layout)
+      ? layout.concat(child).reverse().reduce((child, layout) => h(layout, {}, [child]))
+      : h(layout, {}, [child])
+    : child
 </script>
 
-{#each [$store.key] as key (key)}
-<svelte:component this={$store.component} {...$store.props} />
-{/each}
+<Render {...components} />

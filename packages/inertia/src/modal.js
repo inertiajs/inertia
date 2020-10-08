@@ -3,6 +3,10 @@ export default {
   listener: null,
 
   show(html) {
+    if (typeof html === 'object') {
+      html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(html)}`
+    }
+
     let page = document.createElement('html')
     page.innerHTML = html
     page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))

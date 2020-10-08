@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia",
-  "version": "0.1.9",
+  "version": "0.3.6",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -19,8 +19,7 @@
     "watch": "microbundle watch --format cjs"
   },
   "dependencies": {
-    "axios": "^0.19.0",
-    "nprogress": "^0.2.0"
+    "axios": "^0.19.0 || ^0.20.0"
   },
   "devDependencies": {
     "eslint": "^6.1.0",

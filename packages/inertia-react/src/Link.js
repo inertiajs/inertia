@@ -13,24 +13,58 @@ export default forwardRef(function InertiaLink({
   preserveState = false,
   replace = false,
   only = [],
+  headers = {},
+  onCancelToken = noop,
+  onStart = noop,
+  onProgress = noop,
+  onFinish = noop,
+  onCancel = noop,
+  onSuccess = noop,
   ...props
 }, ref) {
-  const visit = useCallback(event => {
-    onClick(event)
+  const visit = useCallback(
+    (event) => {
+      onClick(event)
 
-    if (shouldIntercept(event)) {
-      event.preventDefault()
+      if (shouldIntercept(event)) {
+        event.preventDefault()
 
-      Inertia.visit(href, {
-        data,
-        method,
-        preserveScroll,
-        preserveState,
-        replace,
-        only,
-      })
-    }
-  }, [data, href, method, onClick, preserveScroll, preserveState, replace, only])
+        Inertia.visit(href, {
+          data,
+          method,
+          preserveScroll,
+          preserveState,
+          replace,
+          only,
+          headers,
+          onCancelToken,
+          onStart,
+          onProgress,
+          onFinish,
+          onCancel,
+          onSuccess,
+        })
+      }
+    },
+    [
+      data,
+      href,
+      method,
+      onClick,
+      preserveScroll,
+      preserveState,
+      replace,
+      only,
+      headers,
+      onClick,
+      onCancelToken,
+      onStart,
+      onProgress,
+      onFinish,
+      onCancel,
+      onSuccess,
+    ]
+  )
 
   return createElement('a', { ...props, href, ref, onClick: visit }, children)
 })

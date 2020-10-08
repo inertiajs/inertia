@@ -1,3 +1,5 @@
+import { CancelTokenSource } from "axios"
+
 declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
@@ -20,10 +22,17 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
 
 type VisitOptions = {
   method?: string
+  replace?: boolean
   preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
   preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
-  replace?: boolean
   only?: string[]
+  headers?: object
+  onCancelToken?: (cancelToken: CancelTokenSource) => void
+  onStart?: (visit: VisitOptions & {url: string}) => void | boolean
+  onProgress?: (progress: ProgressEvent) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: (page: Page) => void | Promise<any>
 }
 
 interface Inertia {
@@ -47,13 +56,15 @@ interface Inertia {
     options?: VisitOptions & { data?: object }
   ) => Promise<void>
 
+  get: (url: string, data?: object, options?: VisitOptions) => Promise<void>
+
   patch: (url: string, data?: object, options?: VisitOptions) => Promise<void>
 
   post: (url: string, data?: object, options?: VisitOptions) => Promise<void>
 
   put: (url: string, data?: object, options?: VisitOptions) => Promise<void>
 
-  delete: (url: string, data?: object, options?: VisitOptions) => Promise<void>
+  delete: (url: string, options?: VisitOptions) => Promise<void>
 
   reload: (options?: VisitOptions) => Promise<void>
 

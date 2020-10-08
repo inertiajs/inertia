@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia-svelte",
-  "version": "0.1.1",
+  "version": "0.3.1",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -10,14 +10,13 @@
   "keywords": [
     "svelte"
   ],
-  "license": "MIT",
   "main": "src/index.js",
   "devDependencies": {
-    "@inertiajs/inertia": "^0.1.7",
+    "@inertiajs/inertia": "^0.3.0",
     "eslint": "^6.1.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.1.7",
-    "svelte": "^3.8.0"
+    "@inertiajs/inertia": "^0.2.0 || ^0.3.0",
+    "svelte": "^3.20.0"
   }
 }

@@ -32,7 +32,7 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
-      updatePage: (component, props, { preserveState }) => {
+      updatePage: async (component, props, { preserveState }) => {
         this.component = component
         this.props = this.transformProps(props)
         this.key = preserveState ? this.key : Date.now()
@@ -44,11 +44,17 @@ export default {
       const child = h(this.component, {
         key: this.key,
         props: this.props,
+        scopedSlots: this.$scopedSlots,
       })
 
       if (this.component.layout) {
         if (typeof this.component.layout === 'function') {
           return this.component.layout(h, child)
+        } else if (Array.isArray(this.component.layout)) {
+          return this.component.layout
+            .concat(child)
+            .reverse()
+            .reduce((child, layout) => h(layout, [child]))
         }
 
         return h(this.component.layout, [child])
