@@ -20,6 +20,7 @@ export default function App({
     Inertia.init({
       initialPage,
       resolveComponent,
+      transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
         setCurrent(current => ({
           component,
@@ -27,7 +28,6 @@ export default function App({
           key: preserveState ? current.key : Date.now(),
         }))
       },
-      transformProps,
     })
   }, [initialPage, resolveComponent, transformProps])
 

@@ -29,12 +29,12 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
+      transformProps: this.transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
         this.component = component
         this.page = page
         this.key = preserveState ? this.key : Date.now()
       },
-      transformProps: this.transformProps,
     })
   },
   render(h) {

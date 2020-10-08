@@ -11,6 +11,7 @@
   Inertia.init({
     initialPage,
     resolveComponent,
+    transformProps,
     swapComponent: async ({ component, page, preserveState }) => {
       store.update(current => ({
         component,
@@ -18,7 +19,6 @@
         key: preserveState ? current.key : Date.now(),
       }))
     },
-    transformProps,
   })
 
   $: child = $store.component && h($store.component.default, $store.page.props)
