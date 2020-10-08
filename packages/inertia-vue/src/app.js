@@ -1,5 +1,8 @@
-import plugin from './plugin'
+import link from './link'
+import remember from './remember'
 import { Inertia } from '@inertiajs/inertia'
+
+let app = {}
 
 export default {
   name: 'Inertia',
@@ -25,7 +28,7 @@ export default {
     }
   },
   created() {
-    plugin.instance = this
+    app = this
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
@@ -63,5 +66,14 @@ export default {
   },
   install(Vue) {
     plugin.install(Vue)
+  },
+}
+
+export const plugin = {
+  install(Vue) {
+    Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
+    Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })
+    Vue.mixin(remember)
+    Vue.component('InertiaLink', link)
   },
 }
