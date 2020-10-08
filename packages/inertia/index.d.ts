@@ -29,7 +29,7 @@ type VisitOptions = {
   headers?: object
   onCancelToken?: (cancelToken: CancelTokenSource) => void
   onStart?: (visit: VisitOptions & {url: string}) => void | boolean
-  onProgress?: (progress: any) => void // Cast to any, Axios doesn't have a type definition for this
+  onProgress?: (progress: ProgressEvent) => void
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: (page: Page) => void | Promise<any>
