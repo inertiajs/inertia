@@ -4,14 +4,19 @@ import modal from './modal'
 
 export default {
   resolveComponent: null,
-  updatePage: null,
-  visitId: null,
+  swapComponent: null,
+  transformProps: null,
   cancelToken: null,
+  visitId: null,
   page: null,
 
-  init({ initialPage, resolveComponent, updatePage }) {
+  init({ initialPage, resolveComponent, swapComponent, transformProps }) {
     this.resolveComponent = resolveComponent
-    this.updatePage = updatePage
+    this.swapComponent = swapComponent
+    this.transformProps = page => {
+      page.props = transformProps(page.props)
+      return page
+    }
 
     if (window.history.state && this.navigationType() === 'back_forward') {
       this.setPage(window.history.state)
@@ -196,14 +201,14 @@ export default {
   },
 
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
-    this.page = page
+    this.page = this.transformProps(page)
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
         replace = replace || page.url === `${window.location.pathname}${window.location.search}`
         replace ? this.replaceState(page, preserveState) : this.pushState(page)
-        this.updatePage(component, page.props, { preserveState }).then(() => {
+        this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
@@ -231,13 +236,13 @@ export default {
 
   restoreState(event) {
     if (event.state) {
-      this.page = event.state
+      const page = this.transformProps(event.state)
       let visitId = this.createVisitId()
-      return Promise.resolve(this.resolveComponent(this.page.component)).then(component => {
+      return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
-          this.updatePage(component, this.page.props, { preserveState: false }).then(() => {
-            this.restoreScrollPositions(this.page)
-            this.fireEvent('navigate', { detail: { page: this.page } })
+          this.swapComponent({ component, page, preserveState: false }).then(() => {
+            this.restoreScrollPositions(page)
+            this.fireEvent('navigate', { detail: { page: page } })
           })
         }
       })

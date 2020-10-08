@@ -10,28 +10,29 @@ export default function App({
   resolveComponent,
   transformProps = identity,
 }) {
-  const [page, setPage] = useState({
+  const [current, setCurrent] = useState({
     component: null,
+    page: {},
     key: null,
-    props: {},
   })
 
   useEffect(() => {
     Inertia.init({
       initialPage,
       resolveComponent,
-      updatePage: async (component, props, { preserveState }) => {
-        setPage(page => ({
+      transformProps,
+      swapComponent: async ({ component, page, preserveState }) => {
+        setCurrent(current => ({
           component,
-          key: preserveState ? page.key : Date.now(),
-          props: transformProps(props),
+          page,
+          key: preserveState ? current.key : Date.now(),
         }))
       },
     })
   }, [initialPage, resolveComponent, transformProps])
 
-  if (!page.component) {
-    return createElement(PageContext.Provider, { value: page.props }, null)
+  if (!current.component) {
+    return createElement(PageContext.Provider, { value: current.page }, null)
   }
 
   const renderChildren = children || (({ Component, props, key }) => {
@@ -53,8 +54,8 @@ export default function App({
 
   return createElement(
     PageContext.Provider,
-    { value: page.props },
-    renderChildren({ Component: page.component, key: page.key, props: page.props })
+    { value: current.page },
+    renderChildren({ Component: current.component, key: current.key, props: current.page.props }),
   )
 }
 
