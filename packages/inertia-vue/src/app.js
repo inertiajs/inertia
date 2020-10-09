@@ -65,6 +65,7 @@ export default {
     }
   },
   install(Vue) {
+    console.warn('Registering the Inertia Vue plugin via the "app" component has been deprecated. Use the new "plugin" named export instead.\n\nimport { plugin } from \'@inertiajs/inertia-vue\'\n\nVue.use(plugin)')
     plugin.install(Vue)
   },
 }
