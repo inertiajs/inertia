@@ -253,12 +253,12 @@ export default {
     return this.visit(url, { ...options, method: 'get', data })
   },
 
-  replace(url, options = {}) {
-    return this.visit(url, { preserveState: true, ...options, replace: true })
-  },
-
   reload(options = {}) {
     return this.replace(window.location.href, options)
+  },
+
+  replace(url, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
   post(url, data = {}, options = {}) {
