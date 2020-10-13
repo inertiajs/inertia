@@ -274,7 +274,7 @@ export default {
   },
 
   delete(url, options = {}) {
-    return this.visit(url, { ...options, method: 'delete' })
+    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   },
 
   remember(data, key = 'default') {
