@@ -34,6 +34,8 @@ type VisitOptions = {
   onCancel?: () => void
   onSuccess?: (page: Page) => void | Promise<any>
 }
+  
+type InertiaEvent = 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
 
 interface Inertia {
   init: <
@@ -73,6 +75,8 @@ interface Inertia {
   remember: (data: object, key?: string) => void
 
   restore: (key?: string) => object
+  
+  on: (type: InertiaEvent, callback: (event: Event) => boolean | void) => () => void
 }
 
 export const Inertia: Inertia
