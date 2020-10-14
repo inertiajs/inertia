@@ -126,8 +126,7 @@ export default {
   },
 
   urlWithoutHash(url) {
-    const parts = url.href.split('#')
-    return parts[0]
+    return url.href.split('#')[0]
   },
 
   visit(url, {
