@@ -64,6 +64,7 @@ export default {
       region.scrollTop = 0
       region.scrollLeft = 0
     })
+    this.saveScrollPositions()
 
     if (window.location.hash) {
       const el = document.getElementById(window.location.hash.slice(1))
@@ -265,7 +266,7 @@ export default {
   },
 
   restoreState(event) {
-    if (event.state) {
+    if (event.state && event.state.component) {
       const page = this.transformProps(event.state)
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
@@ -276,6 +277,8 @@ export default {
           })
         }
       })
+    } else {
+      this.resetScrollPositions()
     }
   },
 
