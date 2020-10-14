@@ -31,7 +31,7 @@ export default {
 
     this.fireEvent('navigate', { detail: { page: initialPage } })
 
-    window.addEventListener('popstate', this.restoreState.bind(this))
+    window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
   },
 
@@ -265,7 +265,7 @@ export default {
     }, '', page.url)
   },
 
-  restoreState(event) {
+  handlePopstateEvent(event) {
     if (event.state && event.state.component) {
       const page = this.transformProps(event.state)
       let visitId = this.createVisitId()
