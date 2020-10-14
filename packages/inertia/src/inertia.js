@@ -115,6 +115,20 @@ export default {
     return this.visitId
   },
 
+  normalizeUrl(url) {
+    url = url.toString()
+    try {
+      return new URL(url)
+    } catch (error) {
+      return new URL(`${window.location.origin}${url}`)
+    }
+  },
+
+  urlWithoutHash(url) {
+    const parts = url.href.split('#')
+    return parts[0]
+  },
+
   visit(url, {
     method = 'get',
     data = {},
@@ -130,6 +144,7 @@ export default {
     onCancel = () => ({}),
     onSuccess = () => ({}),
   } = {}) {
+    url = this.normalizeUrl(url)
     let visit = { url, ...arguments[1] }
     if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
       return
@@ -139,12 +154,10 @@ export default {
     let visitId = this.createVisitId()
     onCancelToken(this.cancelToken)
 
-    const [urlWithoutHash, hash] = url.toString().split('#')
-
     return new Proxy(
       Axios({
         method,
-        url: urlWithoutHash,
+        url: this.urlWithoutHash(url),
         data: method.toLowerCase() === 'get' ? {} : data,
         params: method.toLowerCase() === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
@@ -171,8 +184,8 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
-        if (hash && urlWithoutHash === response.data.url) {
-          response.data.url = `${response.data.url}#${hash}`
+        if (url.hash && this.urlWithoutHash(url) === this.normalizeUrl(response.data.url).href) {
+          response.data.url = `${response.data.url}${url.hash}`
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
@@ -184,14 +197,11 @@ export default {
         } else if (Axios.isCancel(error)) {
           onCancel()
         } else if (this.isHardVisit(error.response)) {
-          let location = new URL(error.response.headers['x-inertia-location'])
-          if (hash &&
-              window.location.origin === location.origin &&
-              urlWithoutHash === `${location.pathname}${location.search}`
-          ) {
-            location.hash = `#${hash}`
+          let locationUrl = this.normalizeUrl(error.response.headers['x-inertia-location'])
+          if (url.hash && this.urlWithoutHash(url) === this.urlWithoutHash(locationUrl)) {
+            locationUrl.hash = url.hash
           }
-          this.hardVisit(location.href)
+          this.hardVisit(locationUrl.href)
         } else if (error.response) {
           if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
             modal.show(error.response.data)
