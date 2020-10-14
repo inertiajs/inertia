@@ -22,6 +22,7 @@ export default {
       this.setPage(window.history.state)
     } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
       window.sessionStorage.removeItem('inertia.hardVisit')
+      initialPage.url += window.location.hash
       this.setPage(initialPage, { preserveState: true })
     } else {
       initialPage.url += window.location.hash
@@ -63,6 +64,13 @@ export default {
       region.scrollTop = 0
       region.scrollLeft = 0
     })
+
+    if (window.location.hash) {
+      const el = document.getElementById(window.location.hash.slice(1))
+      if (el) {
+        el.scrollIntoView()
+      }
+    }
   },
 
   restoreScrollPositions(page) {
@@ -131,10 +139,12 @@ export default {
     let visitId = this.createVisitId()
     onCancelToken(this.cancelToken)
 
+    const [urlWithoutHash, hash] = url.toString().split('#')
+
     return new Proxy(
       Axios({
         method,
-        url: url.toString(),
+        url: urlWithoutHash,
         data: method.toLowerCase() === 'get' ? {} : data,
         params: method.toLowerCase() === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
@@ -161,6 +171,9 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
+        if (hash && urlWithoutHash === response.data.url) {
+          response.data.url = `${response.data.url}#${hash}`
+        }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
         this.fireEvent('success', { detail: { page: this.page } })
@@ -171,7 +184,14 @@ export default {
         } else if (Axios.isCancel(error)) {
           onCancel()
         } else if (this.isHardVisit(error.response)) {
-          this.hardVisit(error.response.headers['x-inertia-location'])
+          let location = new URL(error.response.headers['x-inertia-location'])
+          if (hash &&
+              window.location.origin === location.origin &&
+              urlWithoutHash === `${location.pathname}${location.search}`
+          ) {
+            location.hash = `#${hash}`
+          }
+          this.hardVisit(location.href)
         } else if (error.response) {
           if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
             modal.show(error.response.data)
