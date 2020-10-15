@@ -277,6 +277,10 @@ export default {
         }
       })
     } else {
+      let url = this.normalizeUrl(this.page.url)
+      url.hash = window.location.hash
+      this.page.url = url.href
+      this.replaceState(this.page, true)
       this.resetScrollPositions()
     }
   },
