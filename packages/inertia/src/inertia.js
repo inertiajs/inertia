@@ -13,24 +13,24 @@ export default {
   init({ initialPage, resolveComponent, swapComponent, transformProps }) {
     this.resolveComponent = resolveComponent
     this.swapComponent = swapComponent
-    this.transformProps = page => {
-      page.props = transformProps(page.props)
-      return page
-    }
+    this.transformProps = transformProps
+    this.handleInitialPageVisit(initialPage)
+    this.setupEventListeners()
+  },
 
-    if (window.history.state && this.navigationType() === 'back_forward') {
-      this.setPage(window.history.state)
-    } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
-      window.sessionStorage.removeItem('inertia.hardVisit')
-      initialPage.url += window.location.hash
-      this.setPage(initialPage, { preserveState: true })
+  handleInitialPageVisit(page) {
+    if (this.isBackForwardVisit()) {
+      this.handleBackForwardVisit()
+    } else if (this.isLocationVisit()) {
+      this.handleLocationVisit(page)
     } else {
-      initialPage.url += window.location.hash
-      this.setPage(initialPage)
+      page.url += window.location.hash
+      this.setPage(page)
     }
+    this.fireEvent('navigate', { detail: { page: page } })
+  },
 
-    this.fireEvent('navigate', { detail: { page: initialPage } })
-
+  setupEventListeners() {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
   },
@@ -47,7 +47,7 @@ export default {
 
   saveScrollPositions() {
     this.replaceState({
-      ...window.history.state,
+      ...this.page,
       scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
         return {
           top: region.scrollTop,
@@ -74,40 +74,70 @@ export default {
     }
   },
 
-  restoreScrollPositions(page) {
-    if (page.scrollRegions) {
+  restoreScrollPositions() {
+    if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region, index) => {
-        region.scrollTop = page.scrollRegions[index].top
-        region.scrollLeft = page.scrollRegions[index].left
+        region.scrollTop = this.page.scrollRegions[index].top
+        region.scrollLeft = this.page.scrollRegions[index].left
       })
     }
   },
 
-  navigationType() {
-    if (window.performance && window.performance.getEntriesByType('navigation').length) {
-      return window.performance.getEntriesByType('navigation')[0].type
+  isBackForwardVisit() {
+    return window.history.state
+      && window.performance
+      && window.performance.getEntriesByType('navigation').length
+      && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'
+  },
+
+  handleBackForwardVisit() {
+    this.setPage(window.history.state, { preserveScroll: true }).then(() => {
+      this.restoreScrollPositions()
+    })
+  },
+
+  locationVisit(url, preserveScroll) {
+    try {
+      window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify({ preserveScroll }))
+      window.location.href = url
+    } catch (error) {
+      return false
     }
+  },
+
+  isLocationVisit() {
+    try {
+      return window.sessionStorage.getItem('inertiaLocationVisit') !== null
+    } catch (error) {
+      return false
+    }
+  },
+
+  handleLocationVisit(page) {
+    const locationVisit = JSON.parse(window.sessionStorage.getItem('inertiaLocationVisit'))
+    window.sessionStorage.removeItem('inertiaLocationVisit')
+    page.url += window.location.hash
+    page.rememberedState = window.history.state ? window.history.state.rememberedState : {}
+    page.scrollRegions = window.history.state ? window.history.state.scrollRegions : []
+    this.setPage(page, { preserveScroll: locationVisit.preserveScroll }).then(() => {
+      if (locationVisit.preserveScroll) {
+        this.restoreScrollPositions()
+      }
+    })
+  },
+
+  isLocationVisitResponse(response) {
+    return response && response.status === 409 && response.headers['x-inertia-location']
   },
 
   isInertiaResponse(response) {
     return response && response.headers['x-inertia']
   },
 
-  isHardVisit(response) {
-    return response && response.status === 409 && response.headers['x-inertia-location']
-  },
-
-  fireEvent(name, options) {
-    return document.dispatchEvent(
-      new CustomEvent(`inertia:${name}`, options),
-    )
-  },
-
   cancelActiveVisits() {
     if (this.cancelToken) {
       this.cancelToken.cancel()
     }
-
     this.cancelToken = Axios.CancelToken.source()
   },
 
@@ -196,12 +226,12 @@ export default {
           return this.setPage(error.response.data, { visitId })
         } else if (Axios.isCancel(error)) {
           onCancel()
-        } else if (this.isHardVisit(error.response)) {
+        } else if (this.isLocationVisitResponse(error.response)) {
           let locationUrl = this.normalizeUrl(error.response.headers['x-inertia-location'])
           if (url.hash && this.urlWithoutHash(url) === this.urlWithoutHash(locationUrl)) {
             locationUrl.hash = url.hash
           }
-          this.hardVisit(locationUrl.href)
+          this.locationVisit(locationUrl.href, preserveScroll)
         } else if (error.response) {
           if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
             modal.show(error.response.data)
@@ -225,20 +255,17 @@ export default {
     )
   },
 
-  hardVisit(url) {
-    window.sessionStorage.setItem('inertia.hardVisit', true)
-    window.location.href = url
-  },
-
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
-    this.page = page
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
+        page.props = this.transformProps(page.props)
+        page.scrollRegions = page.scrollRegions || []
+        page.rememberedState = page.rememberedState || {}
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
-        replace = replace || page.url === `${window.location.pathname}${window.location.search}`
-        replace ? this.replaceState(page, preserveState) : this.pushState(page)
-        this.swapComponent({ component, page: this.transformProps(page), preserveState }).then(() => {
+        replace = replace || this.normalizeUrl(page.url).href === window.location.href
+        replace ? this.replaceState(page) : this.pushState(page)
+        this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
@@ -251,27 +278,24 @@ export default {
   },
 
   pushState(page) {
-    window.history.pushState({
-      cache: {},
-      ...page,
-    }, '', page.url)
+    this.page = page
+    window.history.pushState(page, '', page.url)
   },
 
-  replaceState(page, preserveState = false) {
-    window.history.replaceState({
-      ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
-      ...page,
-    }, '', page.url)
+  replaceState(page) {
+    this.page = page
+    window.history.replaceState(page, '', page.url)
   },
 
   handlePopstateEvent(event) {
-    if (event.state && event.state.component) {
-      const page = event.state
+    if (event.state !== null) {
+      let page = event.state
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
-          this.swapComponent({ component, page: this.transformProps(page), preserveState: false }).then(() => {
-            this.restoreScrollPositions(page)
+          this.page = page
+          this.swapComponent({ component, page, preserveState: false }).then(() => {
+            this.restoreScrollPositions()
             this.fireEvent('navigate', { detail: { page: page } })
           })
         }
@@ -279,8 +303,7 @@ export default {
     } else {
       let url = this.normalizeUrl(this.page.url)
       url.hash = window.location.hash
-      this.page.url = url.href
-      this.replaceState(this.page, true)
+      this.replaceState({ ...this.page, url: url.href })
       this.resetScrollPositions()
     }
   },
@@ -314,30 +337,32 @@ export default {
   },
 
   remember(data, key = 'default') {
-    let newState = { ...window.history.state }
-    newState.cache = newState.cache || {}
-    newState.cache[key] = data
-    this.replaceState(newState)
+    let page = { ...this.page }
+    page.rememberedState[key] = data
+    this.replaceState(page)
   },
 
   restore(key = 'default') {
-    if (window.history.state.cache && window.history.state.cache[key]) {
-      return window.history.state.cache[key]
+    if (window.history.state.rememberedState && window.history.state.rememberedState[key]) {
+      return window.history.state.rememberedState[key]
     }
+  },
+
+  fireEvent(name, options) {
+    return document.dispatchEvent(
+      new CustomEvent(`inertia:${name}`, options),
+    )
   },
 
   on(type, callback) {
     const listener = event => {
       const response = callback(event)
-
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
     }
 
     document.addEventListener(`inertia:${type}`, listener)
-    return () => {
-      document.removeEventListener(`inertia:${type}`, listener)
-    }
+    return () => document.removeEventListener(`inertia:${type}`, listener)
   },
 }
