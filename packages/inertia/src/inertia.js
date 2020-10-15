@@ -231,14 +231,14 @@ export default {
   },
 
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
-    this.page = this.transformProps(page)
+    this.page = page
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
         replace = replace || page.url === `${window.location.pathname}${window.location.search}`
         replace ? this.replaceState(page, preserveState) : this.pushState(page)
-        this.swapComponent({ component, page, preserveState }).then(() => {
+        this.swapComponent({ component, page: this.transformProps(page), preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
@@ -266,11 +266,11 @@ export default {
 
   handlePopstateEvent(event) {
     if (event.state && event.state.component) {
-      const page = this.transformProps(event.state)
+      const page = event.state
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
-          this.swapComponent({ component, page, preserveState: false }).then(() => {
+          this.swapComponent({ component, page: this.transformProps(page), preserveState: false }).then(() => {
             this.restoreScrollPositions(page)
             this.fireEvent('navigate', { detail: { page: page } })
           })
