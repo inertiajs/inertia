@@ -344,9 +344,7 @@ export default {
   },
 
   restore(key = 'default') {
-    if (window.history.state.rememberedState && window.history.state.rememberedState[key]) {
-      return window.history.state.rememberedState[key]
-    }
+    return window.history.state?.rememberedState?.[key]
   },
 
   fireEvent(name, options) {
