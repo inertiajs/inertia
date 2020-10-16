@@ -339,9 +339,13 @@ export default {
   },
 
   remember(data, key = 'default') {
-    let page = { ...this.page }
-    page.rememberedState[key] = data
-    this.replaceState(page)
+    this.replaceState({
+      ...this.page,
+      rememberedState: {
+        ...this.page.rememberedState,
+        [key]: data,
+      },
+    })
   },
 
   restore(key = 'default') {
