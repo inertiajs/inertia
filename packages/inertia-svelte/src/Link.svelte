@@ -1,8 +1,5 @@
 <script>
-  import { Inertia, shouldIntercept } from '@inertiajs/inertia'
-  import { createEventDispatcher } from 'svelte'
-
-  const dispatch = createEventDispatcher()
+  import inertia from './link'
 
   export let
     data = {},
@@ -13,26 +10,18 @@
     preserveState = false,
     only = [],
     headers = {}
-
-  function visit(event) {
-    dispatch('click', event)
-
-    if (shouldIntercept(event)) {
-      event.preventDefault()
-
-      Inertia.visit(href, {
-        data,
-        method,
-        preserveScroll,
-        preserveState,
-        replace,
-        only,
-        headers
-      })
-    }
-  }
 </script>
 
-<a {...$$restProps} {href} on:click={visit}>
+<a
+  use:inertia={{ ...$$props }}
+  {...$$restProps}
+  {href}
+  on:click
+  on:cancelToken
+  on:start
+  on:progress
+  on:finish
+  on:cancel
+  on:success>
   <slot />
 </a>
