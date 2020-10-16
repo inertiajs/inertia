@@ -21,9 +21,9 @@
   "devDependencies": {
     "@inertiajs/inertia": "^0.4.0",
     "@types/react": "^16.9.1",
-    "eslint": "^6.1.0",
+    "eslint": "^7.0.0",
     "eslint-plugin-react": "^7.14.3",
-    "eslint-plugin-react-hooks": "^1.7.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
     "microbundle": "^0.12.0",
     "react": "^16.9.0"
   },

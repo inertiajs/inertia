@@ -13,24 +13,25 @@ export default {
   init({ initialPage, resolveComponent, swapComponent, transformProps }) {
     this.resolveComponent = resolveComponent
     this.swapComponent = swapComponent
-    this.transformProps = page => {
-      page.props = transformProps(page.props)
-      return page
-    }
+    this.transformProps = transformProps
+    this.handleInitialPageVisit(initialPage)
+    this.setupEventListeners()
+  },
 
-    if (window.history.state && this.navigationType() === 'back_forward') {
-      this.setPage(window.history.state)
-    } else if (window.sessionStorage.getItem('inertia.hardVisit')) {
-      window.sessionStorage.removeItem('inertia.hardVisit')
-      this.setPage(initialPage, { preserveState: true })
+  handleInitialPageVisit(page) {
+    if (this.isBackForwardVisit()) {
+      this.handleBackForwardVisit(page)
+    } else if (this.isLocationVisit()) {
+      this.handleLocationVisit(page)
     } else {
-      initialPage.url += window.location.hash
-      this.setPage(initialPage)
+      page.url += window.location.hash
+      this.setPage(page)
     }
+    this.fireEvent('navigate', { detail: { page: page } })
+  },
 
-    this.fireEvent('navigate', { detail: { page: initialPage } })
-
-    window.addEventListener('popstate', this.restoreState.bind(this))
+  setupEventListeners() {
+    window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
   },
 
@@ -46,7 +47,7 @@ export default {
 
   saveScrollPositions() {
     this.replaceState({
-      ...window.history.state,
+      ...this.page,
       scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
         return {
           top: region.scrollTop,
@@ -63,48 +64,105 @@ export default {
       region.scrollTop = 0
       region.scrollLeft = 0
     })
+    this.saveScrollPositions()
+
+    if (window.location.hash) {
+      document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
+    }
   },
 
-  restoreScrollPositions(page) {
-    if (page.scrollRegions) {
+  restoreScrollPositions() {
+    if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region, index) => {
-        region.scrollTop = page.scrollRegions[index].top
-        region.scrollLeft = page.scrollRegions[index].left
+        region.scrollTop = this.page.scrollRegions[index].top
+        region.scrollLeft = this.page.scrollRegions[index].left
       })
     }
   },
 
-  navigationType() {
-    if (window.performance && window.performance.getEntriesByType('navigation').length) {
-      return window.performance.getEntriesByType('navigation')[0].type
+  isBackForwardVisit() {
+    return window.history.state
+      && window.performance
+      && window.performance.getEntriesByType('navigation').length
+      && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'
+  },
+
+  handleBackForwardVisit(page) {
+    window.history.state.version = page.version
+    this.setPage(window.history.state, { preserveScroll: true }).then(() => {
+      this.restoreScrollPositions()
+    })
+  },
+
+  locationVisit(url, preserveScroll) {
+    try {
+      window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify({ preserveScroll }))
+      window.location.href = url.href
+      if (this.urlWithoutHash(window.location).href === this.urlWithoutHash(url).href) {
+        window.location.reload()
+      }
+    } catch (error) {
+      return false
     }
   },
 
-  isInertiaResponse(response) {
-    return response && response.headers['x-inertia']
+  isLocationVisit() {
+    try {
+      return window.sessionStorage.getItem('inertiaLocationVisit') !== null
+    } catch (error) {
+      return false
+    }
   },
 
-  isHardVisit(response) {
+  handleLocationVisit(page) {
+    const locationVisit = JSON.parse(window.sessionStorage.getItem('inertiaLocationVisit'))
+    window.sessionStorage.removeItem('inertiaLocationVisit')
+    page.url += window.location.hash
+    page.rememberedState = window.history.state?.rememberedState ?? {}
+    page.scrollRegions = window.history.state?.scrollRegions ?? []
+    this.setPage(page, { preserveScroll: locationVisit.preserveScroll }).then(() => {
+      if (locationVisit.preserveScroll) {
+        this.restoreScrollPositions()
+      }
+    })
+  },
+
+  isLocationVisitResponse(response) {
     return response && response.status === 409 && response.headers['x-inertia-location']
   },
 
-  fireEvent(name, options) {
-    return document.dispatchEvent(
-      new CustomEvent(`inertia:${name}`, options),
-    )
+  isInertiaResponse(response) {
+    return response?.headers['x-inertia']
   },
 
   cancelActiveVisits() {
     if (this.cancelToken) {
       this.cancelToken.cancel()
     }
-
     this.cancelToken = Axios.CancelToken.source()
   },
 
   createVisitId() {
     this.visitId = {}
     return this.visitId
+  },
+
+  normalizeUrl(url) {
+    try {
+      if (url.startsWith('#')) {
+        return new URL(`${this.urlWithoutHash(window.location)}${url}`)
+      } else {
+        return new URL(url)
+      }
+    } catch (error) {
+      return new URL(`${window.location.origin}${url}`)
+    }
+  },
+
+  urlWithoutHash(url) {
+    url = new URL(url.href)
+    url.hash = ''
+    return url
   },
 
   visit(url, {
@@ -122,6 +180,7 @@ export default {
     onCancel = () => ({}),
     onSuccess = () => ({}),
   } = {}) {
+    url = this.normalizeUrl(url)
     let visit = { url, ...arguments[1] }
     if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
       return
@@ -134,7 +193,7 @@ export default {
     return new Proxy(
       Axios({
         method,
-        url: url.toString(),
+        url: this.urlWithoutHash(url).href,
         data: method.toLowerCase() === 'get' ? {} : data,
         params: method.toLowerCase() === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
@@ -161,6 +220,11 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
+        const responseUrl = this.normalizeUrl(response.data.url)
+        if (url.hash && !responseUrl.hash && this.urlWithoutHash(url).href === responseUrl.href) {
+          responseUrl.hash = url.hash
+          response.data.url = responseUrl.href
+        }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
         this.fireEvent('success', { detail: { page: this.page } })
@@ -170,8 +234,12 @@ export default {
           return this.setPage(error.response.data, { visitId })
         } else if (Axios.isCancel(error)) {
           onCancel()
-        } else if (this.isHardVisit(error.response)) {
-          this.hardVisit(error.response.headers['x-inertia-location'])
+        } else if (this.isLocationVisitResponse(error.response)) {
+          let locationUrl = this.normalizeUrl(error.response.headers['x-inertia-location'])
+          if (url.hash && !locationUrl.hash && this.urlWithoutHash(url).href === locationUrl.href) {
+            locationUrl.hash = url.hash
+          }
+          this.locationVisit(locationUrl, preserveScroll)
         } else if (error.response) {
           if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
             modal.show(error.response.data)
@@ -195,19 +263,16 @@ export default {
     )
   },
 
-  hardVisit(url) {
-    window.sessionStorage.setItem('inertia.hardVisit', true)
-    window.location.href = url
-  },
-
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
-    this.page = this.transformProps(page)
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
+        page.props = this.transformProps(page.props)
+        page.scrollRegions = page.scrollRegions || []
+        page.rememberedState = page.rememberedState || {}
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
-        replace = replace || page.url === `${window.location.pathname}${window.location.search}`
-        replace ? this.replaceState(page, preserveState) : this.pushState(page)
+        replace = replace || this.normalizeUrl(page.url).href === window.location.href
+        replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
@@ -221,31 +286,33 @@ export default {
   },
 
   pushState(page) {
-    window.history.pushState({
-      cache: {},
-      ...page,
-    }, '', page.url)
+    this.page = page
+    window.history.pushState(page, '', page.url)
   },
 
-  replaceState(page, preserveState = false) {
-    window.history.replaceState({
-      ...{ cache: preserveState && window.history.state ? window.history.state.cache : {} },
-      ...page,
-    }, '', page.url)
+  replaceState(page) {
+    this.page = page
+    window.history.replaceState(page, '', page.url)
   },
 
-  restoreState(event) {
-    if (event.state) {
-      const page = this.transformProps(event.state)
+  handlePopstateEvent(event) {
+    if (event.state !== null) {
+      const page = event.state
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
+          this.page = page
           this.swapComponent({ component, page, preserveState: false }).then(() => {
-            this.restoreScrollPositions(page)
+            this.restoreScrollPositions()
             this.fireEvent('navigate', { detail: { page: page } })
           })
         }
       })
+    } else {
+      const url = this.normalizeUrl(this.page.url)
+      url.hash = window.location.hash
+      this.replaceState({ ...this.page, url: url.href })
+      this.resetScrollPositions()
     }
   },
 
@@ -278,30 +345,34 @@ export default {
   },
 
   remember(data, key = 'default') {
-    let newState = { ...window.history.state }
-    newState.cache = newState.cache || {}
-    newState.cache[key] = data
-    this.replaceState(newState)
+    this.replaceState({
+      ...this.page,
+      rememberedState: {
+        ...this.page.rememberedState,
+        [key]: data,
+      },
+    })
   },
 
   restore(key = 'default') {
-    if (window.history.state.cache && window.history.state.cache[key]) {
-      return window.history.state.cache[key]
-    }
+    return window.history.state?.rememberedState?.[key]
+  },
+
+  fireEvent(name, options) {
+    return document.dispatchEvent(
+      new CustomEvent(`inertia:${name}`, options),
+    )
   },
 
   on(type, callback) {
     const listener = event => {
       const response = callback(event)
-
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
     }
 
     document.addEventListener(`inertia:${type}`, listener)
-    return () => {
-      document.removeEventListener(`inertia:${type}`, listener)
-    }
+    return () => document.removeEventListener(`inertia:${type}`, listener)
   },
 }

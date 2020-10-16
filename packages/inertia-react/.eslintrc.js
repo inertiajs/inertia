@@ -6,7 +6,7 @@ module.exports = {
   extends: ['eslint:recommended', 'plugin:react/recommended'],
   parserOptions: {
     sourceType: 'module',
-    ecmaVersion: 2018,
+    ecmaVersion: 2020,
   },
   plugins: ['react-hooks'],
   rules: {
@@ -19,7 +19,7 @@ module.exports = {
   },
   settings: {
     react: {
-      version: 'detect'
-    }
-  }
+      version: 'detect',
+    },
+  },
 }
