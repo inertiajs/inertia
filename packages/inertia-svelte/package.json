@@ -13,7 +13,7 @@
   "main": "src/index.js",
   "devDependencies": {
     "@inertiajs/inertia": "^0.4.0",
-    "eslint": "^6.1.0"
+    "eslint": "^7.0.0"
   },
   "peerDependencies": {
     "@inertiajs/inertia": "^0.4.0",
