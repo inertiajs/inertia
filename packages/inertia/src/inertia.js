@@ -302,7 +302,7 @@ export default {
         }
       })
     } else {
-      let url = this.normalizeUrl(this.page.url)
+      const url = this.normalizeUrl(this.page.url)
       url.hash = window.location.hash
       this.replaceState({ ...this.page, url: url.href })
       this.resetScrollPositions()
