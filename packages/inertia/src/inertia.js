@@ -153,7 +153,9 @@ export default {
   },
 
   urlWithoutHash(url) {
-    return url.href.split('#')[0]
+    url = new URL(url.href)
+    url.hash = ''
+    return url
   },
 
   visit(url, {
@@ -184,7 +186,7 @@ export default {
     return new Proxy(
       Axios({
         method,
-        url: this.urlWithoutHash(url),
+        url: this.urlWithoutHash(url).href,
         data: method.toLowerCase() === 'get' ? {} : data,
         params: method.toLowerCase() === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
@@ -211,8 +213,10 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
-        if (url.hash && this.urlWithoutHash(url) === this.normalizeUrl(response.data.url).href) {
-          response.data.url = `${response.data.url}${url.hash}`
+        const responseUrl = this.normalizeUrl(response.data.url)
+        if (url.hash && !responseUrl.hash && this.urlWithoutHash(url).href === responseUrl.href) {
+          responseUrl.hash = url.hash
+          response.data.url = responseUrl.href
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
@@ -225,7 +229,7 @@ export default {
           onCancel()
         } else if (this.isLocationVisitResponse(error.response)) {
           let locationUrl = this.normalizeUrl(error.response.headers['x-inertia-location'])
-          if (url.hash && this.urlWithoutHash(url) === this.urlWithoutHash(locationUrl)) {
+          if (url.hash && !locationUrl.hash && this.urlWithoutHash(url).href === locationUrl.href) {
             locationUrl.hash = url.hash
           }
           this.locationVisit(locationUrl.href, preserveScroll)
