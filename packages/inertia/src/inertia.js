@@ -114,8 +114,8 @@ export default {
     const locationVisit = JSON.parse(window.sessionStorage.getItem('inertiaLocationVisit'))
     window.sessionStorage.removeItem('inertiaLocationVisit')
     page.url += window.location.hash
-    page.rememberedState = window.history.state ? window.history.state.rememberedState : {}
-    page.scrollRegions = window.history.state ? window.history.state.scrollRegions : []
+    page.rememberedState = window.history.state?.rememberedState ?? {}
+    page.scrollRegions = window.history.state?.scrollRegions ?? []
     this.setPage(page, { preserveScroll: locationVisit.preserveScroll }).then(() => {
       if (locationVisit.preserveScroll) {
         this.restoreScrollPositions()
