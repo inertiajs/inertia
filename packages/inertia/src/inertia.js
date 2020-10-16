@@ -97,7 +97,10 @@ export default {
   locationVisit(url, preserveScroll) {
     try {
       window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify({ preserveScroll }))
-      window.location.href = url
+      window.location.href = url.href
+      if (this.urlWithoutHash(window.location).href === this.urlWithoutHash(url).href) {
+        window.location.reload()
+      }
     } catch (error) {
       return false
     }
@@ -236,7 +239,7 @@ export default {
           if (url.hash && !locationUrl.hash && this.urlWithoutHash(url).href === locationUrl.href) {
             locationUrl.hash = url.hash
           }
-          this.locationVisit(locationUrl.href, preserveScroll)
+          this.locationVisit(locationUrl, preserveScroll)
         } else if (error.response) {
           if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
             modal.show(error.response.data)
