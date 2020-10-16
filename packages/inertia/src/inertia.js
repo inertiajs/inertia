@@ -146,7 +146,11 @@ export default {
 
   normalizeUrl(url) {
     try {
-      return new URL(url)
+      if (url.startsWith('#')) {
+        return new URL(`${this.urlWithoutHash(window.location)}${url}`)
+      } else {
+        return new URL(url)
+      }
     } catch (error) {
       return new URL(`${window.location.origin}${url}`)
     }
