@@ -128,7 +128,7 @@ export default {
   },
 
   isInertiaResponse(response) {
-    return response && response.headers['x-inertia']
+    return response.?headers['x-inertia']
   },
 
   cancelActiveVisits() {
