@@ -145,7 +145,6 @@ export default {
   },
 
   normalizeUrl(url) {
-    url = url.toString()
     try {
       return new URL(url)
     } catch (error) {
