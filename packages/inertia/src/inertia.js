@@ -67,10 +67,7 @@ export default {
     this.saveScrollPositions()
 
     if (window.location.hash) {
-      const el = document.getElementById(window.location.hash.slice(1))
-      if (el) {
-        el.scrollIntoView()
-      }
+      document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
     }
   },
 
