@@ -20,7 +20,7 @@ export default {
 
   handleInitialPageVisit(page) {
     if (this.isBackForwardVisit()) {
-      this.handleBackForwardVisit()
+      this.handleBackForwardVisit(page)
     } else if (this.isLocationVisit()) {
       this.handleLocationVisit(page)
     } else {
@@ -87,7 +87,8 @@ export default {
       && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'
   },
 
-  handleBackForwardVisit() {
+  handleBackForwardVisit(page) {
+    window.history.state.version = page.version
     this.setPage(window.history.state, { preserveScroll: true }).then(() => {
       this.restoreScrollPositions()
     })
