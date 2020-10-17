@@ -1,4 +1,4 @@
-import { Inertia, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeQueryStringsWithData, shouldIntercept } from '@inertiajs/inertia'
 import { createElement, useCallback, forwardRef } from 'react'
 
 const noop = () => undefined
@@ -64,6 +64,10 @@ export default forwardRef(function InertiaLink({
       onSuccess,
     ],
   )
+
+  const [url, _data] = mergeQueryStringsWithData(method, hrefToUrl(href), data)
+  href = url.href
+  data = _data
 
   return createElement('a', { ...props, href, ref, onClick: visit }, children)
 })
