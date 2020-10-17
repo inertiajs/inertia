@@ -1,7 +1,11 @@
 import Vue from 'vue'
-import { InertiaApp } from '@inertiajs/inertia-vue'
+import { InertiaApp, plugin } from '@inertiajs/inertia-vue'
 
-Vue.use(InertiaApp)
+if (window.location.pathname === '/plugin/deprecated') {
+  Vue.use(InertiaApp)
+} else if (window.location.pathname !== '/plugin/without') {
+  Vue.use(plugin)
+}
 
 const app = document.getElementById('app')
 
