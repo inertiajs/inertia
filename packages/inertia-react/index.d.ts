@@ -30,12 +30,12 @@ interface InertiaLinkProps {
   preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
   replace?: boolean
   only?: string[]
-  onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
-  onStart: () => void
-  onProgress: (progress: number) => void
-  onFinish: () => void
-  onCancel: () => void
-  onSuccess: () => void
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onStart?: () => void
+  onProgress?: (progress: number) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: () => void
 }
 
 type InertiaLink = React.FunctionComponent<

@@ -1,6 +1,6 @@
+import link from './link'
+import remember from './remember'
 import { Inertia } from '@inertiajs/inertia'
-import Link from './link'
-import Remember from './remember'
 
 let app = {}
 
@@ -23,7 +23,7 @@ export default {
   data() {
     return {
       component: null,
-      props: {},
+      page: {},
       key: null,
     }
   },
@@ -32,9 +32,10 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
-      updatePage: async (component, props, { preserveState }) => {
+      transformProps: this.transformProps,
+      swapComponent: async ({ component, page, preserveState }) => {
         this.component = component
-        this.props = this.transformProps(props)
+        this.page = page
         this.key = preserveState ? this.key : Date.now()
       },
     })
@@ -43,7 +44,7 @@ export default {
     if (this.component) {
       const child = h(this.component, {
         key: this.key,
-        props: this.props,
+        props: this.page.props,
         scopedSlots: this.$scopedSlots,
       })
 
@@ -64,9 +65,16 @@ export default {
     }
   },
   install(Vue) {
+    console.warn('Registering the Inertia Vue plugin via the "app" component has been deprecated. Use the new "plugin" named export instead.\n\nimport { plugin } from \'@inertiajs/inertia-vue\'\n\nVue.use(plugin)')
+    plugin.install(Vue)
+  },
+}
+
+export const plugin = {
+  install(Vue) {
     Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
-    Object.defineProperty(Vue.prototype, '$page', { get: () => app.props })
-    Vue.mixin(Remember)
-    Vue.component('InertiaLink', Link)
+    Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })
+    Vue.mixin(remember)
+    Vue.component('InertiaLink', link)
   },
 }
