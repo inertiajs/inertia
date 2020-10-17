@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "build:driver": "npm run --prefix ../ build:cjs",
+    "build:library": "npm run --prefix ../../inertia build:cjs",
+    "build:tests": "webpack",
+    "build": "npm run build:driver && npm run build:library && npm run build:tests",
+    "ci": "npm run build && npm run test",
+    "test": "start-server-and-test test:server http://localhost:13714 test:cypress",
+    "test:server": "node app/server.js",
+    "test:cypress": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^5.3.0",
+    "eslint-plugin-cypress": "^2.11.2",
+    "express": "^4.17.1",
+    "start-server-and-test": "^1.11.5",
+    "vue": "^2.0.0",
+    "vue-loader": "^15.9.3",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  }
+}
