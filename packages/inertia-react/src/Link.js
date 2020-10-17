@@ -8,12 +8,12 @@ export default forwardRef(function InertiaLink({
   data = {},
   href,
   method = 'get',
-  onClick = noop,
   preserveScroll = false,
-  preserveState = false,
+  preserveState = null,
   replace = false,
   only = [],
   headers = {},
+  onClick = noop,
   onCancelToken = noop,
   onStart = noop,
   onProgress = noop,
@@ -33,7 +33,7 @@ export default forwardRef(function InertiaLink({
           data,
           method,
           preserveScroll,
-          preserveState,
+          preserveState: preserveState ?? (method !== 'get'),
           replace,
           only,
           headers,
@@ -50,7 +50,6 @@ export default forwardRef(function InertiaLink({
       data,
       href,
       method,
-      onClick,
       preserveScroll,
       preserveState,
       replace,
@@ -63,7 +62,7 @@ export default forwardRef(function InertiaLink({
       onFinish,
       onCancel,
       onSuccess,
-    ]
+    ],
   )
 
   return createElement('a', { ...props, href, ref, onClick: visit }, children)
