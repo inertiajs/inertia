@@ -1,2 +1,5 @@
+export { default as hrefToUrl } from './hrefToUrl'
 export { default as Inertia } from './inertia'
+export { default as mergeQueryStringsWithData } from './mergeQueryStringsWithData'
 export { default as shouldIntercept } from './shouldIntercept'
+export { default as urlWithoutHash } from './urlWithoutHash'
