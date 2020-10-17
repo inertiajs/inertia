@@ -33,7 +33,7 @@ export default forwardRef(function InertiaLink({
           data,
           method,
           preserveScroll,
-          preserveState: preserveState ?? (method !== 'get'),
+          preserveState: preserveState ?? (method.toLowerCase() !== 'get'),
           replace,
           only,
           headers,
