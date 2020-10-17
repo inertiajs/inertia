@@ -24,7 +24,7 @@
         data,
         method,
         preserveScroll,
-        preserveState: preserveState !== null ? preserveState : (method !== 'get'),
+        preserveState: preserveState !== null ? preserveState : (method.toLowerCase() !== 'get'),
         replace,
         only,
         headers
