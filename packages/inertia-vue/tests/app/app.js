@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { InertiaApp, plugin } from '@inertiajs/inertia-vue'
+import { Inertia } from '@inertiajs/inertia'
 
 if (window.location.pathname === '/plugin/deprecated') {
   Vue.use(InertiaApp)
@@ -9,7 +10,9 @@ if (window.location.pathname === '/plugin/deprecated') {
 
 const app = document.getElementById('app')
 
-window.vm = new Vue({
+window.testing = {}
+window.testing.Inertia = Inertia
+window.testing.vue = new Vue({
   render: h => h(InertiaApp, {
     props: {
       initialPage: window.initialPage,

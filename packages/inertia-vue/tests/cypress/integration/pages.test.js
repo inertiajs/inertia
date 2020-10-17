@@ -2,8 +2,8 @@ describe('Pages', () => {
   it('receives data from the controllers as props', () => {
     cy.visit('/')
 
-    cy.window().then(win => {
-      const inertiaRoot = win.vm.$children[0]
+    cy.window().then(window => {
+      const inertiaRoot = window.testing.vue.$children[0]
       const page = inertiaRoot.$children[0]
 
       expect(page.$vnode.data.props).to.have.property('example')
