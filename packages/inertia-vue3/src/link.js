@@ -49,7 +49,7 @@ export default {
             method: props.method,
             replace: props.replace,
             preserveScroll: props.preserveScroll,
-            preserveState: props.preserveState ?? (props.method !== 'get'),
+            preserveState: props.preserveState ?? (props.method.toLowerCase() !== 'get'),
             only: props.only,
             headers: props.headers,
             onCancelToken: attrs.onCancelToken || (() => ({})),
