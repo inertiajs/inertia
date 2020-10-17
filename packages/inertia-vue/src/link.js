@@ -1,4 +1,4 @@
-import { Inertia, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeQueryStringsWithData, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
   functional: true,
@@ -45,14 +45,20 @@ export default {
       finish: () => ({}),
       cancel: () => ({}),
       success: () => ({}),
-      ... (data.on || {}),
+      ...(data.on || {}),
     }
+
+    let [url, propsData] = mergeQueryStringsWithData(
+      props.method,
+      hrefToUrl(props.href),
+      props.data,
+    )
 
     return h('a', {
       ...data,
       attrs: {
         ...data.attrs,
-        href: props.href,
+        href: url.href,
       },
       on: {
         ...data.on,
@@ -62,8 +68,8 @@ export default {
           if (shouldIntercept(event)) {
             event.preventDefault()
 
-            Inertia.visit(props.href, {
-              data: props.data,
+            Inertia.visit(url.href, {
+              data: propsData,
               method: props.method,
               replace: props.replace,
               preserveScroll: props.preserveScroll,
