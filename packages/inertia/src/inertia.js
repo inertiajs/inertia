@@ -1,6 +1,8 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
+import qs from 'qs'
+import deepmerge from 'deepmerge'
 
 export default {
   resolveComponent: null,
@@ -165,6 +167,12 @@ export default {
     return url
   },
 
+  mergeQueryStringsWithData(url, data) {
+    data = deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data)
+    url.search = ''
+    return [url, data]
+  },
+
   visit(url, {
     method = 'get',
     data = {},
@@ -181,6 +189,10 @@ export default {
     onSuccess = () => ({}),
   } = {}) {
     url = this.normalizeUrl(url)
+    if (method === 'get') {
+      [url, data] = this.mergeQueryStringsWithData(url, data)
+    }
+
     let visit = { url, ...arguments[1] }
     if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
       return
