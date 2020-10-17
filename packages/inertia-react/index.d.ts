@@ -27,7 +27,7 @@ interface InertiaLinkProps {
       | React.KeyboardEvent<HTMLAnchorElement>
   ) => void
   preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
-  preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
+  preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
   replace?: boolean
   only?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void

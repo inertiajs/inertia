@@ -32,7 +32,7 @@ interface InertiaLinkProps {
   method?: string
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: boolean
-  preserveState?: boolean
+  preserveState?: boolean | null
   replace?: boolean
 }
 

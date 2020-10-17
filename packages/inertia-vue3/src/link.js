@@ -25,7 +25,7 @@ export default {
     },
     preserveState: {
       type: Boolean,
-      default: false,
+      default: null,
     },
     only: {
       type: Array,
@@ -56,7 +56,7 @@ export default {
               method: props.method,
               replace: props.replace,
               preserveScroll: props.preserveScroll,
-              preserveState: props.preserveState,
+              preserveState: props.preserveState ?? (props.method.toLowerCase() !== 'get'),
               only: props.only,
               headers: props.headers,
               onCancelToken: attrs.onCancelToken || (() => ({})),
