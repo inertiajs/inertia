@@ -10,7 +10,7 @@
     method = 'get',
     replace = false,
     preserveScroll = false,
-    preserveState = false,
+    preserveState = null,
     only = [],
     headers = {}
 
@@ -24,7 +24,7 @@
         data,
         method,
         preserveScroll,
-        preserveState,
+        preserveState: preserveState !== null ? preserveState : (method !== 'get'),
         replace,
         only,
         headers
