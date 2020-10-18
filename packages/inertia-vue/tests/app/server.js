@@ -32,9 +32,7 @@ app.get('/', (req, res) => render(req, res, {
 app.get('/links', (req, res) => render(req, res))
 app.get('/links-target', (req, res) => render(req, res))
 
-app.get('/persistent-layouts/via-function/simple/page-a', (req, res) => render(req, res))
-app.get('/persistent-layouts/via-function/simple/page-b', (req, res) => render(req, res))
-app.get('/persistent-layouts/via-function/nested/page-a', (req, res) => render(req, res))
-app.get('/persistent-layouts/via-function/nested/page-b', (req, res) => render(req, res))
+app.get('/persistent-layouts/*/simple/page-*', (req, res) => render(req, res))
+app.get('/persistent-layouts/*/nested/page-*', (req, res) => render(req, res))
 
 app.listen(13714)

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <span>Simple Persistent Layout - Page A</span>
-    <inertia-link href="/persistent-layouts/via-function/simple/page-b">Page B</inertia-link>
+    <span>Simple Persistent Layout - Page B</span>
+    <inertia-link href="/persistent-layouts/render-function/simple/page-a">Page A</inertia-link>
   </div>
 </template>
 <script>

@@ -1,13 +1,13 @@
 <template>
   <div>
     <span>Simple Persistent Layout - Page B</span>
-    <inertia-link href="/persistent-layouts/via-function/simple/page-a">Page A</inertia-link>
+    <inertia-link href="/persistent-layouts/shorthand/simple/page-a">Page A</inertia-link>
   </div>
 </template>
 <script>
   import Layout from "@/Layouts/SiteLayout"
 
   export default {
-    layout: (h, page) => h(Layout, [page]),
+    layout: Layout,
   }
 </script>
