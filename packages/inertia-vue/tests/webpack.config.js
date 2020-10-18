@@ -25,6 +25,7 @@ module.exports = {
     alias: {
       '@inertiajs/inertia': path.resolve(__dirname, '../../inertia/dist/index.js'),
       '@inertiajs/inertia-vue': path.resolve(__dirname, '../dist/index.js'),
+      '@': path.resolve(__dirname, 'app'),
     },
   },
   stats: 'errors-only',
