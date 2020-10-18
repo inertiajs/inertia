@@ -37,11 +37,13 @@ describe('Plugin', () => {
       expect(page.$page).to.deep.equal(page.$inertia.page)
       expect(page.$inertia).to.deep.equal(window.testing.Inertia)
 
-      cy.get('@consoleWarn').should('be.calledWith',
-        'Registering the Inertia Vue plugin via the "app" component has been deprecated. Use the new "plugin" named export instead.\n\n' +
-        'import { plugin } from \'@inertiajs/inertia-vue\'\n\n' +
-        'Vue.use(plugin)',
-      )
+      cy
+        .get('@consoleWarn')
+        .should('be.calledWith',
+          'Registering the Inertia Vue plugin via the "app" component has been deprecated. Use the new "plugin" named export instead.\n\n' +
+          'import { plugin } from \'@inertiajs/inertia-vue\'\n\n' +
+          'Vue.use(plugin)',
+        )
     })
   })
 })
