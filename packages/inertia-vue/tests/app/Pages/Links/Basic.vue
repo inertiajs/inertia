@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span>This is the root Links page</span>
+    <span class="text">This is the basic Links page</span>
     <inertia-link href="/links-target/get" class="basic">Basic visit Link</inertia-link>
 
     <inertia-link method="GET" href="/links-target/get" class="get">GET Link</inertia-link>

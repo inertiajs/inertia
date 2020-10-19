@@ -9,6 +9,7 @@
     "test": "start-server-and-test 'node app/server.js' http://localhost:13714 'cypress run'"
   },
   "devDependencies": {
+    "body-parser": "^1.19.0",
     "cypress": "^5.3.0",
     "eslint-plugin-cypress": "^2.11.2",
     "express": "^4.17.1",

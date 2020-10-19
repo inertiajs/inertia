@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span>Nested Persistent Layout - Page A</span>
+    <span class="text">Nested Persistent Layout - Page A</span>
     <inertia-link href="/persistent-layouts/shorthand/nested/page-b">Page B</inertia-link>
   </div>
 </template>

@@ -22,16 +22,13 @@ describe('Pages', () => {
           const layoutAUid = layoutA._uid
           expect(layoutAUid).is.not.null
 
-          cy
-            .get('body > div > div > div > span')
-            .as('pageLabel')
-            .should('have.text', 'Simple Persistent Layout - Page A')
+          cy.get('.text').should('have.text', 'Simple Persistent Layout - Page A')
 
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/render-function/simple/page-b')
 
           cy
-            .get('@pageLabel')
+            .get('.text')
             .should('have.text', 'Simple Persistent Layout - Page B')
             .then(() => {
               const layoutB = inertiaRoot.$children[0]
@@ -53,16 +50,13 @@ describe('Pages', () => {
           const nestedLayoutAUid = nestedLayoutA._uid
           expect(nestedLayoutAUid).is.not.null
 
-          cy
-            .get('body > div > div > div > div > div > span')
-            .as('pageLabel')
-            .should('have.text', 'Nested Persistent Layout - Page A')
+          cy.get('.text').should('have.text', 'Nested Persistent Layout - Page A')
 
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/render-function/nested/page-b')
 
           cy
-            .get('@pageLabel')
+            .get('.text')
             .should('have.text', 'Nested Persistent Layout - Page B')
             .then(() => {
               const siteLayoutB = inertiaRoot.$children[0]
@@ -85,16 +79,13 @@ describe('Pages', () => {
           const layoutAUid = layoutA._uid
           expect(layoutAUid).is.not.null
 
-          cy
-            .get('body > div > div > div > span')
-            .as('pageLabel')
-            .should('have.text', 'Simple Persistent Layout - Page A')
+          cy.get('.text').should('have.text', 'Simple Persistent Layout - Page A')
 
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/simple/page-b')
 
           cy
-            .get('@pageLabel')
+            .get('.text')
             .should('have.text', 'Simple Persistent Layout - Page B')
             .then(() => {
               const layoutB = inertiaRoot.$children[0]
@@ -116,16 +107,13 @@ describe('Pages', () => {
           const nestedLayoutAUid = nestedLayoutA._uid
           expect(nestedLayoutAUid).is.not.null
 
-          cy
-            .get('body > div > div > div > div > div > span')
-            .as('pageLabel')
-            .should('have.text', 'Nested Persistent Layout - Page A')
+          cy.get('.text').as('pageLabel').should('have.text', 'Nested Persistent Layout - Page A')
 
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/nested/page-b')
 
           cy
-            .get('@pageLabel')
+            .get('.text')
             .should('have.text', 'Nested Persistent Layout - Page B')
             .then(() => {
               const siteLayoutB = inertiaRoot.$children[0]

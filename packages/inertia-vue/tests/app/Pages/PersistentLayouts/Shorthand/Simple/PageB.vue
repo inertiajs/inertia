@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span>Simple Persistent Layout - Page B</span>
+    <span class="text">Simple Persistent Layout - Page B</span>
     <inertia-link href="/persistent-layouts/shorthand/simple/page-a">Page A</inertia-link>
   </div>
 </template>
