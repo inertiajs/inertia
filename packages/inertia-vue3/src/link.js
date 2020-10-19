@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { hrefToUrl, Inertia, mergeQueryStringWithData, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
   props: {
@@ -38,7 +38,7 @@ export default {
   },
   setup(props, { slots, attrs }) {
     return props => {
-      let [url, data] = mergeQueryStringWithData(
+      let [url, data] = mergeDataIntoQueryString(
         props.method,
         hrefToUrl(props.href),
         props.data,

@@ -1,5 +1,5 @@
 <script>
-  import { hrefToUrl, Inertia, mergeQueryStringWithData, shouldIntercept } from '@inertiajs/inertia'
+  import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
   import { createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
@@ -14,7 +14,7 @@
     only = [],
     headers = {}
 
-  const [url, _data] = mergeQueryStringWithData(method, hrefToUrl(href), data)
+  const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
   href = url.href
   data = _data
 

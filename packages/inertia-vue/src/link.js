@@ -1,4 +1,4 @@
-import { hrefToUrl, Inertia, mergeQueryStringWithData, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
   functional: true,
@@ -48,7 +48,7 @@ export default {
       ...(data.on || {}),
     }
 
-    let [url, propsData] = mergeQueryStringWithData(
+    let [url, propsData] = mergeDataIntoQueryString(
       props.method,
       hrefToUrl(props.href),
       props.data,

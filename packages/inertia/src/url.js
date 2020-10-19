@@ -13,7 +13,7 @@ export function hrefToUrl(href) {
   }
 }
 
-export function mergeQueryStringWithData(method, url, data) {
+export function mergeDataIntoQueryString(method, url, data) {
   if (method === 'get' && Object.keys(data).length) {
     url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data))
     data = {}
