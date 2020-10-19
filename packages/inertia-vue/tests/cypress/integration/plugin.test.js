@@ -72,6 +72,25 @@ describe('Plugin', () => {
   })
 
   describe('InertiaLink', () => {
+    it('is not registered when the plugin is not installed', () => {
+      cy.visit('/plugin/without/inertia-link', {
+        onBeforeLoad (window) {
+          cy.spy(window.console, 'error').as('consoleWarn')
+        },
+      })
+
+      cy
+        .get('@consoleWarn')
+        .should('be.calledWith',
+          '[Vue warn]: Unknown custom element: <inertia-link> - did you register the component correctly? ' +
+          'For recursive components, make sure to provide the "name" option.\n\n' +
+          'found in\n\n' +
+          '---> <Home> at app/Pages/Home.vue\n' +
+          '       <Inertia>\n' +
+          '         <Root>',
+        )
+    })
+
     it('visits a different page', () => {
       cy.visit('/links')
 

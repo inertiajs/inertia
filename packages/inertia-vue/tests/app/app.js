@@ -2,9 +2,9 @@ import Vue from 'vue'
 import { InertiaApp, plugin } from '@inertiajs/inertia-vue'
 import { Inertia } from '@inertiajs/inertia'
 
-if (window.location.pathname === '/plugin/deprecated') {
+if (window.location.pathname.startsWith('/plugin/deprecated')) {
   Vue.use(InertiaApp)
-} else if (window.location.pathname !== '/plugin/without') {
+} else if (! window.location.pathname.startsWith('/plugin/without')) {
   Vue.use(plugin)
 }
 
