@@ -30,7 +30,12 @@ app.get('/', (req, res) => render(req, res, {
 }))
 
 app.get('/links', (req, res) => render(req, res))
-app.get('/links-target', (req, res) => render(req, res))
+
+app.get('/links-target/get', (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'get' }}))
+app.post('/links-target/post', (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'post' }}))
+app.put('/links-target/put', (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'put' }}))
+app.patch('/links-target/patch', (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'patch' }}))
+app.delete('/links-target/delete', (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'delete' }}))
 
 app.get('/persistent-layouts/*/simple/page-*', (req, res) => render(req, res))
 app.get('/persistent-layouts/*/nested/page-*', (req, res) => render(req, res))
