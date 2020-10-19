@@ -34,7 +34,7 @@ export default forwardRef(function InertiaLink({
           data,
           method,
           preserveScroll,
-          preserveState: preserveState ?? (method.toLowerCase() !== 'get'),
+          preserveState: preserveState ?? (method !== 'get'),
           replace,
           only,
           headers,
@@ -66,6 +66,8 @@ export default forwardRef(function InertiaLink({
     ],
   )
 
+  as = as.toLowerCase()
+  method = method.toLowerCase()
   const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
   href = url.href
   data = _data

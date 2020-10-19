@@ -15,6 +15,7 @@
     headers = {}
 
   beforeUpdate(() => {
+    method = method.toLowerCase()
     const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
     href = url.href
     data = _data
@@ -30,7 +31,7 @@
         data,
         method,
         preserveScroll,
-        preserveState: preserveState !== null ? preserveState : (method.toLowerCase() !== 'get'),
+        preserveState: preserveState !== null ? preserveState : (method !== 'get'),
         replace,
         only,
         headers,

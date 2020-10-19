@@ -163,6 +163,7 @@ export default {
     onCancel = () => ({}),
     onSuccess = () => ({}),
   } = {}) {
+    method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
 
     let visit = { url, ...arguments[1] }
@@ -178,8 +179,8 @@ export default {
       Axios({
         method,
         url: urlWithoutHash(url).href,
-        data: method.toLowerCase() === 'get' ? {} : data,
-        params: method.toLowerCase() === 'get' ? data : {},
+        data: method === 'get' ? {} : data,
+        params: method === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
         headers: {
           ...headers,
