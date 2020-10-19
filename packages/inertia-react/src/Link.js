@@ -5,6 +5,7 @@ const noop = () => undefined
 
 export default forwardRef(function InertiaLink({
   children,
+  as = 'a',
   data = {},
   href,
   method = 'get',
@@ -69,5 +70,10 @@ export default forwardRef(function InertiaLink({
   href = url.href
   data = _data
 
-  return createElement('a', { ...props, href, ref, onClick: visit }, children)
+  return createElement(as, {
+    ...props,
+    ...as === 'a' ? { href } : {},
+    ref,
+    onClick: visit,
+  }, children)
 })
