@@ -13,6 +13,7 @@
     "cypress": "^5.3.0",
     "eslint-plugin-cypress": "^2.11.2",
     "express": "^4.17.1",
+    "multer": "^1.4.2",
     "start-server-and-test": "^1.11.5",
     "vue": "^2.0.0",
     "vue-loader": "^15.9.3",
