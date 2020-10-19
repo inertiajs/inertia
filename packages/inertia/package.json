@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "axios": "^0.19.0 || ^0.20.0",
-    "deepmerge": "^4.2.2",
-    "qs": "^6.9.4"
+    "deepmerge": "^4.0.0",
+    "qs": "^6.9.0"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
