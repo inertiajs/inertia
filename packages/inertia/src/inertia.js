@@ -1,9 +1,7 @@
 import Axios from 'axios'
 import debounce from './debounce'
-import hrefToUrl from './hrefToUrl'
-import mergeQueryStringsWithData from './mergeQueryStringsWithData'
 import modal from './modal'
-import urlWithoutHash from './urlWithoutHash'
+import { hrefToUrl, mergeQueryStringWithData, urlWithoutHash } from './url'
 
 export default {
   resolveComponent: null,
@@ -165,7 +163,7 @@ export default {
     onCancel = () => ({}),
     onSuccess = () => ({}),
   } = {}) {
-    [url, data] = mergeQueryStringsWithData(method, hrefToUrl(url), data)
+    [url, data] = mergeQueryStringWithData(method, hrefToUrl(url), data)
 
     let visit = { url, ...arguments[1] }
     if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
