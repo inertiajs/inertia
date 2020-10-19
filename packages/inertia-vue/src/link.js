@@ -56,6 +56,10 @@ export default {
     const method = props.method.toLowerCase()
     const [url, propsData] = mergeDataIntoQueryString(method, hrefToUrl(props.href), props.data)
 
+    if (as === 'a' && method !== 'get') {
+      console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${url.href}" method="${method}" as="button">...</inertia-link>`)
+    }
+
     return h(props.as, {
       ...data,
       attrs: {
