@@ -1,0 +1,8 @@
+tasks:
+  - init: yarn install && yarn build
+    command: yarn watch
+
+vscode:
+  extensions:
+    - svelte.svelte-vscode@102.2.0:iaSoYOG2z21hy3Al1KkLjw==
+    - octref.vetur@0.28.0:bW1RGNnmWYQO43JdJgK34w==

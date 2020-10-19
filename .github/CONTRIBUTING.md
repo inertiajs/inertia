@@ -29,6 +29,12 @@ If you're making changes to one of the packages that requires a build step (`ine
 yarn watch
 ```
 
+### Online one-click development setup
+
+You can use Gitpod(a VS-Code like IDE) for online development. With a single click it will launch a workspace and automatically: clone this repo, install the dependencies, run `yarn build` and `yarn watch`.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
+
 It's often helpful to develop Inertia.js within a real application, such as [Ping CRM](https://github.com/inertiajs/pingcrm). To do this, you'll need to use the `yarn link` feature to tell your application to use the local versions of the Inertia.js dependencies. To do this, first run `yarn link` within each Inertia.js package that you want to develop.
 
 ```sh
