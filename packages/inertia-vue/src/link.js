@@ -3,6 +3,10 @@ import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@
 export default {
   functional: true,
   props: {
+    as: {
+      type: String,
+      default: 'a',
+    },
     data: {
       type: Object,
       default: () => ({}),
@@ -54,11 +58,11 @@ export default {
       props.data,
     )
 
-    return h('a', {
+    return h(props.as, {
       ...data,
       attrs: {
         ...data.attrs,
-        href: url.href,
+        ...props.as === 'a' ? { href: url.href } : {},
       },
       on: {
         ...data.on,
