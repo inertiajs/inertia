@@ -1,6 +1,6 @@
 <script>
-  import { Inertia, shouldIntercept } from '@inertiajs/inertia'
-  import { createEventDispatcher } from 'svelte'
+  import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+  import { beforeUpdate, createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -13,6 +13,12 @@
     preserveState = null,
     only = [],
     headers = {}
+
+  beforeUpdate(() => {
+    const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
+    href = url.href
+    data = _data
+  })
 
   function visit(event) {
     dispatch('click', event)
@@ -27,7 +33,7 @@
         preserveState: preserveState !== null ? preserveState : (method.toLowerCase() !== 'get'),
         replace,
         only,
-        headers
+        headers,
       })
     }
   }

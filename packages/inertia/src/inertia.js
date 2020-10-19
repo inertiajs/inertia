@@ -1,6 +1,7 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
+import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
   resolveComponent: null,
@@ -98,7 +99,7 @@ export default {
     try {
       window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify({ preserveScroll }))
       window.location.href = url.href
-      if (this.urlWithoutHash(window.location).href === this.urlWithoutHash(url).href) {
+      if (urlWithoutHash(window.location).href === urlWithoutHash(url).href) {
         window.location.reload()
       }
     } catch (error) {
@@ -147,24 +148,6 @@ export default {
     return this.visitId
   },
 
-  normalizeUrl(url) {
-    try {
-      if (url.startsWith('#')) {
-        return new URL(`${this.urlWithoutHash(window.location)}${url}`)
-      } else {
-        return new URL(url)
-      }
-    } catch (error) {
-      return new URL(`${window.location.origin}${url}`)
-    }
-  },
-
-  urlWithoutHash(url) {
-    url = new URL(url.href)
-    url.hash = ''
-    return url
-  },
-
   visit(url, {
     method = 'get',
     data = {},
@@ -180,7 +163,8 @@ export default {
     onCancel = () => ({}),
     onSuccess = () => ({}),
   } = {}) {
-    url = this.normalizeUrl(url)
+    [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+
     let visit = { url, ...arguments[1] }
     if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
       return
@@ -193,7 +177,7 @@ export default {
     return new Proxy(
       Axios({
         method,
-        url: this.urlWithoutHash(url).href,
+        url: urlWithoutHash(url).href,
         data: method.toLowerCase() === 'get' ? {} : data,
         params: method.toLowerCase() === 'get' ? data : {},
         cancelToken: this.cancelToken.token,
@@ -220,8 +204,8 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
-        const responseUrl = this.normalizeUrl(response.data.url)
-        if (url.hash && !responseUrl.hash && this.urlWithoutHash(url).href === responseUrl.href) {
+        const responseUrl = hrefToUrl(response.data.url)
+        if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
           responseUrl.hash = url.hash
           response.data.url = responseUrl.href
         }
@@ -235,8 +219,8 @@ export default {
         } else if (Axios.isCancel(error)) {
           onCancel()
         } else if (this.isLocationVisitResponse(error.response)) {
-          let locationUrl = this.normalizeUrl(error.response.headers['x-inertia-location'])
-          if (url.hash && !locationUrl.hash && this.urlWithoutHash(url).href === locationUrl.href) {
+          let locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
+          if (url.hash && !locationUrl.hash && urlWithoutHash(url).href === locationUrl.href) {
             locationUrl.hash = url.hash
           }
           this.locationVisit(locationUrl, preserveScroll)
@@ -275,7 +259,7 @@ export default {
         page.rememberedState = page.rememberedState || {}
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
-        replace = replace || this.normalizeUrl(page.url).href === window.location.href
+        replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
@@ -313,7 +297,7 @@ export default {
         }
       })
     } else {
-      const url = this.normalizeUrl(this.page.url)
+      const url = hrefToUrl(this.page.url)
       url.hash = window.location.hash
       this.replaceState({ ...this.page, url: url.href })
       this.resetScrollPositions()

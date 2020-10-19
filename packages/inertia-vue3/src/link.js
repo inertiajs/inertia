@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { Inertia, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
   props: {
@@ -37,30 +37,38 @@ export default {
     },
   },
   setup(props, { slots, attrs }) {
-    return () => h('a', {
-      ...attrs,
-      href: props.href,
-      onClick: (event) => {
-        if (shouldIntercept(event)) {
-          event.preventDefault()
+    return props => {
+      let [url, data] = mergeDataIntoQueryString(
+        props.method,
+        hrefToUrl(props.href),
+        props.data,
+      )
 
-          Inertia.visit(props.href, {
-            data: props.data,
-            method: props.method,
-            replace: props.replace,
-            preserveScroll: props.preserveScroll,
-            preserveState: props.preserveState ?? (props.method.toLowerCase() !== 'get'),
-            only: props.only,
-            headers: props.headers,
-            onCancelToken: attrs.onCancelToken || (() => ({})),
-            onStart: attrs.onStart || (() => ({})),
-            onProgress: attrs.onProgress || (() => ({})),
-            onFinish: attrs.onFinish || (() => ({})),
-            onCancel: attrs.onCancel || (() => ({})),
-            onSuccess: attrs.onSuccess || (() => ({})),
-          })
-        }
-      },
-    }, slots.default())
+      return h('a', {
+        ...attrs,
+        href: url.href,
+        onClick: (event) => {
+          if (shouldIntercept(event)) {
+            event.preventDefault()
+
+            Inertia.visit(url.href, {
+              data: data,
+              method: props.method,
+              replace: props.replace,
+              preserveScroll: props.preserveScroll,
+              preserveState: props.preserveState ?? (props.method.toLowerCase() !== 'get'),
+              only: props.only,
+              headers: props.headers,
+              onCancelToken: attrs.onCancelToken || (() => ({})),
+              onStart: attrs.onStart || (() => ({})),
+              onProgress: attrs.onProgress || (() => ({})),
+              onFinish: attrs.onFinish || (() => ({})),
+              onCancel: attrs.onCancel || (() => ({})),
+              onSuccess: attrs.onSuccess || (() => ({})),
+            })
+          }
+        },
+      }, slots.default())
+    }
   },
 }
