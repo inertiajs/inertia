@@ -31,6 +31,13 @@ export default (node, options = {}) => {
 
   return {
     update(newOptions) {
+      const [url, data] = mergeDataIntoQueryString(
+        newOptions.method || 'get',
+        hrefToUrl(node.href || newOptions.href),
+        newOptions.data || {},
+      )
+      node.href = url.href
+      newOptions.data = data
       options = newOptions
     },
     destroy() {

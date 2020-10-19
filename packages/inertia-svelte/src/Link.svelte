@@ -1,6 +1,6 @@
 <script>
   import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
-  import { createEventDispatcher } from 'svelte'
+  import { beforeUpdate, createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -14,9 +14,11 @@
     only = [],
     headers = {}
 
-  const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
-  href = url.href
-  data = _data
+  beforeUpdate(() => {
+    const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
+    href = url.href
+    data = _data
+  })
 
   function visit(event) {
     dispatch('click', event)
