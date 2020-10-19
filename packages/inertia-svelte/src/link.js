@@ -2,6 +2,14 @@ import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@
 import { createEventDispatcher } from 'svelte'
 
 export default (node, options = {}) => {
+  const [url, data] = mergeDataIntoQueryString(
+    options.method || 'get',
+    hrefToUrl(node.href || options.href),
+    options.data || {},
+  )
+  node.href = url.href
+  options.data = data
+
   const dispatch = createEventDispatcher()
 
   function visit(event) {
@@ -18,14 +26,6 @@ export default (node, options = {}) => {
       Inertia.visit(href, options)
     }
   }
-
-  const [url, data] = mergeDataIntoQueryString(
-    options.method || 'get',
-    hrefToUrl(node.href || options.href),
-    options.data || {},
-  )
-  node.href = url.href
-  options.data = data
 
   node.addEventListener('click', visit)
 
