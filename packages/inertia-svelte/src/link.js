@@ -1,4 +1,4 @@
-import { Inertia, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeQueryStringWithData, shouldIntercept } from '@inertiajs/inertia'
 import { createEventDispatcher } from 'svelte'
 
 export default (node, options = {}) => {
@@ -19,6 +19,14 @@ export default (node, options = {}) => {
     }
   }
 
+  const [url, data] = mergeQueryStringWithData(
+    options.method || 'get',
+    hrefToUrl(node.href || options.href),
+    options.data || {},
+  )
+  node.href = url.href
+  options.data = data
+
   node.addEventListener('click', visit)
 
   return {
@@ -27,6 +35,6 @@ export default (node, options = {}) => {
     },
     destroy() {
       node.removeEventListener('click', visit)
-    }
+    },
   }
 }
