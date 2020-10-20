@@ -1,11 +1,12 @@
 export default function shouldIntercept(event) {
+  const isLink = event.currentTarget.tagName.toLowerCase() === 'a'
   return !(
     (event.target && event.target.isContentEditable)
     || event.defaultPrevented
-    || event.which > 1
-    || event.altKey
-    || event.ctrlKey
-    || event.metaKey
-    || event.shiftKey
+    || (isLink && event.which > 1)
+    || (isLink && event.altKey)
+    || (isLink && event.ctrlKey)
+    || (isLink && event.metaKey)
+    || (isLink && event.shiftKey)
   )
 }
