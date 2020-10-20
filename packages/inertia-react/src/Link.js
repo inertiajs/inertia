@@ -5,6 +5,7 @@ const noop = () => undefined
 
 export default forwardRef(function InertiaLink({
   children,
+  as = 'a',
   data = {},
   href,
   method = 'get',
@@ -33,7 +34,7 @@ export default forwardRef(function InertiaLink({
           data,
           method,
           preserveScroll,
-          preserveState: preserveState ?? (method.toLowerCase() !== 'get'),
+          preserveState: preserveState ?? (method !== 'get'),
           replace,
           only,
           headers,
@@ -65,9 +66,20 @@ export default forwardRef(function InertiaLink({
     ],
   )
 
+  as = as.toLowerCase()
+  method = method.toLowerCase()
   const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
   href = url.href
   data = _data
 
-  return createElement('a', { ...props, href, ref, onClick: visit }, children)
+  if (as === 'a' && method !== 'get') {
+    console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<InertiaLink href="${href}" method="${method}" as="button">...</InertiaLink>`)
+  }
+
+  return createElement(as, {
+    ...props,
+    ...as === 'a' ? { href } : {},
+    ref,
+    onClick: visit,
+  }, children)
 })

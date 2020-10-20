@@ -3,6 +3,10 @@ import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@
 
 export default {
   props: {
+    as: {
+      type: String,
+      default: 'a',
+    },
     data: {
       type: Object,
       default: () => ({}),
@@ -38,25 +42,27 @@ export default {
   },
   setup(props, { slots, attrs }) {
     return props => {
-      let [url, data] = mergeDataIntoQueryString(
-        props.method,
-        hrefToUrl(props.href),
-        props.data,
-      )
+      const as = props.as.toLowerCase()
+      const method = props.method.toLowerCase()
+      const [url, data] = mergeDataIntoQueryString(method, hrefToUrl(props.href), props.data)
 
-      return h('a', {
+      if (as === 'a' && method !== 'get') {
+        console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${url.href}" method="${method}" as="button">...</inertia-link>`)
+      }
+
+      return h(props.as, {
         ...attrs,
-        href: url.href,
+        ...as === 'a' ? { href: url.href } : {},
         onClick: (event) => {
           if (shouldIntercept(event)) {
             event.preventDefault()
 
             Inertia.visit(url.href, {
               data: data,
-              method: props.method,
+              method: method,
               replace: props.replace,
               preserveScroll: props.preserveScroll,
-              preserveState: props.preserveState ?? (props.method.toLowerCase() !== 'get'),
+              preserveState: props.preserveState ?? (method !== 'get'),
               only: props.only,
               headers: props.headers,
               onCancelToken: attrs.onCancelToken || (() => ({})),
