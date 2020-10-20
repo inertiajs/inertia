@@ -1,4 +1,4 @@
-describe('InertiaLink', () => {
+describe('Links', () => {
   it('visits a different page', () => {
     cy.visit('/links/basic')
 
