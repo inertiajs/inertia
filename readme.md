@@ -15,5 +15,6 @@ A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help pus
 - [ActivitySource](https://www.activitysource.com/)
 - [Aryeo](https://www.aryeo.com/)
 - [Indigit](https://www.indigit.pt/en)
+- [ContestKit](https://contestkit.com/)
 
 If you'd like to become a sponsor, please [see here](https://inertiajs.com/sponsors) for more information. 💜
