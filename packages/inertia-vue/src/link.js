@@ -40,7 +40,7 @@ export default {
       default: () => ({}),
     },
   },
-  render(h, { props, data, children }) {
+  render(h, { props, data, children, scopedSlots }) {
     data.on = {
       click: () => ({}),
       cancelToken: () => ({}),
@@ -56,6 +56,40 @@ export default {
     const method = props.method.toLowerCase()
     const [url, propsData] = mergeDataIntoQueryString(method, hrefToUrl(props.href), props.data)
 
+    const visit = (e) => {
+      if (shouldIntercept(e)) {
+        e.preventDefault()
+        debugger;
+
+        Inertia.visit(url.href, {
+          data: propsData,
+          method: method,
+          replace: props.replace,
+          preserveScroll: props.preserveScroll,
+          preserveState: props.preserveState ?? (method !== 'get'),
+          only: props.only,
+          headers: props.headers,
+          onCancelToken: data.on.cancelToken,
+          onStart: data.on.start,
+          onProgress: data.on.progress,
+          onFinish: data.on.finish,
+          onCancel: data.on.cancel,
+          onSuccess: data.on.success,
+        })
+      }
+    }
+
+    const scopedSlot =
+      !scopedSlots.$hasNormal &&
+      scopedSlots.default &&
+      scopedSlots.default({
+        visit,
+      })
+
+    if (scopedSlot) {
+      return scopedSlot;
+    }
+
     if (as === 'a' && method !== 'get') {
       console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${url.href}" method="${method}" as="button">...</inertia-link>`)
     }
@@ -70,26 +104,7 @@ export default {
         ...data.on,
         click: event => {
           data.on.click(event)
-
-          if (shouldIntercept(event)) {
-            event.preventDefault()
-
-            Inertia.visit(url.href, {
-              data: propsData,
-              method: method,
-              replace: props.replace,
-              preserveScroll: props.preserveScroll,
-              preserveState: props.preserveState ?? (method !== 'get'),
-              only: props.only,
-              headers: props.headers,
-              onCancelToken: data.on.cancelToken,
-              onStart: data.on.start,
-              onProgress: data.on.progress,
-              onFinish: data.on.finish,
-              onCancel: data.on.cancel,
-              onSuccess: data.on.success,
-            })
-          }
+          visit(event);
         },
       },
     }, children)
