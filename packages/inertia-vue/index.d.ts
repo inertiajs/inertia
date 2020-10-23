@@ -27,13 +27,22 @@ type App<
 >
 
 interface InertiaLinkProps {
+  as?: string
   data?: object
   href: string
   method?: string
+  headers?: object
   onClick?: (event: MouseEvent | KeyboardEvent) => void
-  preserveScroll?: boolean
-  preserveState?: boolean | null
+  preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
+  preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
   replace?: boolean
+  only?: string[]
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onStart?: () => void
+  onProgress?: (progress: number) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: () => void
 }
 
 type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
