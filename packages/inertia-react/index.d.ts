@@ -41,7 +41,7 @@ interface InertiaLinkProps {
 }
 
 type InertiaLink = React.FunctionComponent<
-  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'>
+  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
 >
 
 export function usePage<
