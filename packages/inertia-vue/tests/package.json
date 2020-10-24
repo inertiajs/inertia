@@ -1,10 +1,10 @@
 {
   "scripts": {
-    "build:driver": "npm run --prefix ../ build:cjs",
-    "build:library": "npm run --prefix ../../inertia build:cjs",
+    "build:driver": "npm --prefix ../ install && npm run --prefix ../ build:cjs",
+    "build:library": "npm --prefix ../../inertia install && npm run --prefix ../../inertia build:cjs",
     "build:tests": "webpack",
     "build": "npm run build:driver && npm run build:library && npm run build:tests",
-    "ci": "npm run build && npm run test",
+    "ci": "npm install && npm run build && npm run test",
     "debug": "start-server-and-test 'node app/server.js' http://localhost:13714 'cypress open'",
     "test": "start-server-and-test 'node app/server.js' http://localhost:13714 'cypress run'"
   },
