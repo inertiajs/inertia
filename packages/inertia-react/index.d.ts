@@ -18,9 +18,11 @@ type App<
 }>
 
 interface InertiaLinkProps {
+  as?: string
   data?: object
   href: string
   method?: string
+  headers?: object
   onClick?: (
     event:
       | React.MouseEvent<HTMLAnchorElement>
@@ -39,7 +41,7 @@ interface InertiaLinkProps {
 }
 
 type InertiaLink = React.FunctionComponent<
-  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLAnchorElement>, 'onProgress'>
+  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
 >
 
 export function usePage<
