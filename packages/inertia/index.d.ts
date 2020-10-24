@@ -24,7 +24,7 @@ type VisitOptions = {
   method?: string
   replace?: boolean
   preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
-  preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
+  preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
   only?: string[]
   headers?: object
   onCancelToken?: (cancelToken: CancelTokenSource) => void
@@ -34,7 +34,7 @@ type VisitOptions = {
   onCancel?: () => void
   onSuccess?: (page: Page) => void | Promise<any>
 }
-  
+
 type InertiaEvent = 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
 
 interface Inertia {
@@ -75,7 +75,7 @@ interface Inertia {
   remember: (data: object, key?: string) => void
 
   restore: (key?: string) => object
-  
+
   on: (type: InertiaEvent, callback: (event: Event) => boolean | void) => () => void
 }
 

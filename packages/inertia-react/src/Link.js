@@ -1,19 +1,20 @@
-import { Inertia, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 import { createElement, useCallback, forwardRef } from 'react'
 
 const noop = () => undefined
 
 export default forwardRef(function InertiaLink({
   children,
+  as = 'a',
   data = {},
   href,
   method = 'get',
-  onClick = noop,
   preserveScroll = false,
-  preserveState = false,
+  preserveState = null,
   replace = false,
   only = [],
   headers = {},
+  onClick = noop,
   onCancelToken = noop,
   onStart = noop,
   onProgress = noop,
@@ -33,7 +34,7 @@ export default forwardRef(function InertiaLink({
           data,
           method,
           preserveScroll,
-          preserveState,
+          preserveState: preserveState ?? (method !== 'get'),
           replace,
           only,
           headers,
@@ -50,7 +51,6 @@ export default forwardRef(function InertiaLink({
       data,
       href,
       method,
-      onClick,
       preserveScroll,
       preserveState,
       replace,
@@ -63,8 +63,23 @@ export default forwardRef(function InertiaLink({
       onFinish,
       onCancel,
       onSuccess,
-    ]
+    ],
   )
 
-  return createElement('a', { ...props, href, ref, onClick: visit }, children)
+  as = as.toLowerCase()
+  method = method.toLowerCase()
+  const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
+  href = url.href
+  data = _data
+
+  if (as === 'a' && method !== 'get') {
+    console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<InertiaLink href="${href}" method="${method}" as="button">...</InertiaLink>`)
+  }
+
+  return createElement(as, {
+    ...props,
+    ...as === 'a' ? { href } : {},
+    ref,
+    onClick: visit,
+  }, children)
 })
