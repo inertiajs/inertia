@@ -2,6 +2,8 @@ import qs from 'qs'
 import deepmerge from 'deepmerge'
 
 export function hrefToUrl(href) {
+  href = href.toString()
+
   try {
     if (href.startsWith('#')) {
       return new URL(`${urlWithoutHash(window.location)}${href}`)
