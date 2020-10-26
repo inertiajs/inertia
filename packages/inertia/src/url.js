@@ -4,12 +4,12 @@ import deepmerge from 'deepmerge'
 export function hrefToUrl(href) {
   href = href.toString()
 
+  if (href.startsWith('#')) {
+    return new URL(`${urlWithoutHash(window.location)}${href}`)
+  }
+
   try {
-    if (href.startsWith('#')) {
-      return new URL(`${urlWithoutHash(window.location)}${href}`)
-    } else {
-      return new URL(href)
-    }
+    return new URL(href)
   } catch (error) {
     return new URL(`${window.location.origin}${href}`)
   }
