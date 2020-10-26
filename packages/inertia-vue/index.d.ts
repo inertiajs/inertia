@@ -50,3 +50,7 @@ type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 export const InertiaLink: InertiaLink
 
 export const InertiaApp: App
+
+export const App: App
+
+export const plugin: PluginObject
