@@ -7,7 +7,6 @@ export default {
   resolveComponent: null,
   swapComponent: null,
   transformProps: null,
-  cancelToken: null,
   activeVisit: null,
   visitId: null,
   page: null,
@@ -139,8 +138,8 @@ export default {
 
   cancelActiveVisit(type) {
     if (this.activeVisit) {
-      this.cancelToken.cancel()
       this.fireEvent('finish', { detail: { finish: { type } } } )
+      this.activeVisit.cancelToken.cancel()
       this.activeVisit.onFinish()
       this.activeVisit.onCancel()
     }
@@ -179,7 +178,7 @@ export default {
 
     let visitId = this.createVisitId()
     this.activeVisit = visit
-    this.cancelToken = Axios.CancelToken.source()
+    this.activeVisit.cancelToken = Axios.CancelToken.source()
     onCancelToken({ cancel: () => this.cancelActiveVisit('cancelled') })
 
     this.fireEvent('start', { detail: { visit } } )
@@ -191,7 +190,7 @@ export default {
         url: urlWithoutHash(url).href,
         data: method === 'get' ? {} : data,
         params: method === 'get' ? data : {},
-        cancelToken: this.cancelToken.token,
+        cancelToken: this.activeVisit.cancelToken.token,
         headers: {
           ...headers,
           Accept: 'text/html, application/xhtml+xml',
