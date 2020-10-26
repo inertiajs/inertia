@@ -8,6 +8,7 @@ export default {
   swapComponent: null,
   transformProps: null,
   cancelToken: null,
+  activeVisit: null,
   visitId: null,
   page: null,
 
@@ -136,11 +137,13 @@ export default {
     return response?.headers['x-inertia']
   },
 
-  cancelActiveVisits() {
-    if (this.cancelToken) {
+  cancelActiveVisit(type) {
+    if (this.activeVisit) {
       this.cancelToken.cancel()
+      this.fireEvent('finish', { detail: { finish: { type } } } )
+      this.activeVisit.onFinish()
+      this.activeVisit.onCancel()
     }
-    this.cancelToken = Axios.CancelToken.source()
   },
 
   createVisitId() {
@@ -157,6 +160,7 @@ export default {
     only = [],
     headers = {},
     onCancelToken = () => ({}),
+    onBeforeStart = () => ({}),
     onStart = () => ({}),
     onProgress = () => ({}),
     onFinish = () => ({}),
@@ -165,15 +169,21 @@ export default {
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
-
-    let visit = { url, ...arguments[1] }
-    if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBeforeStart, onStart, onProgress, onFinish, onCancel, onSuccess }
+    if (onBeforeStart(visit) === false || !this.fireEvent('before-start', { cancelable: true, detail: { visit } } )) {
       return
     }
-    this.cancelActiveVisits()
+
+    this.cancelActiveVisit('replaced')
     this.saveScrollPositions()
+
     let visitId = this.createVisitId()
-    onCancelToken(this.cancelToken)
+    this.activeVisit = visit
+    this.cancelToken = Axios.CancelToken.source()
+    onCancelToken({ cancel: () => this.cancelActiveVisit('cancelled') })
+
+    this.fireEvent('start', { detail: { visit } } )
+    onStart(visit)
 
     return new Proxy(
       Axios({
@@ -217,8 +227,6 @@ export default {
       }).catch(error => {
         if (this.isInertiaResponse(error.response)) {
           return this.setPage(error.response.data, { visitId })
-        } else if (Axios.isCancel(error)) {
-          onCancel()
         } else if (this.isLocationVisitResponse(error.response)) {
           let locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
           if (url.hash && !locationUrl.hash && urlWithoutHash(url).href === locationUrl.href) {
@@ -232,13 +240,18 @@ export default {
         } else {
           return Promise.reject(error)
         }
-      }).catch(error => {
-        if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
-          return Promise.reject(error)
-        }
-      }).finally(() => {
-        this.fireEvent('finish')
+      }).then(() => {
+        this.fireEvent('finish', { detail: { finish: { type: 'done' } } } )
         onFinish()
+      }).catch(error => {
+        if (!Axios.isCancel(error)) {
+          const throwError = this.fireEvent('error', { cancelable: true, detail: { error } })
+          this.fireEvent('finish', { detail: { finish: { type: 'done' } } } )
+          onFinish()
+          if (throwError) {
+            return Promise.reject(error)
+          }
+        }
       }), {
         get: function(target, prop) {
           if (['then', 'catch', 'finally'].includes(prop)) {
