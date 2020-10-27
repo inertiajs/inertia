@@ -314,6 +314,7 @@ export default {
   },
 
   replace(url, options = {}) {
+    console.warn(`Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${options.method ?? 'get'}() instead.`)
     return this.visit(url, { preserveState: true, ...options, replace: true })
   },
 
