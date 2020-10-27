@@ -173,7 +173,7 @@ export default {
       return
     }
 
-    this.cancelActiveVisit('replaced')
+    this.cancelActiveVisit('interrupted')
     this.saveScrollPositions()
 
     let visitId = this.createVisitId()
@@ -240,12 +240,12 @@ export default {
           return Promise.reject(error)
         }
       }).then(() => {
-        this.fireEvent('finish', { detail: { finish: { type: 'done' } } } )
+        this.fireEvent('finish', { detail: { finish: { type: 'completed' } } } )
         onFinish()
       }).catch(error => {
         if (!Axios.isCancel(error)) {
           const throwError = this.fireEvent('error', { cancelable: true, detail: { error } })
-          this.fireEvent('finish', { detail: { finish: { type: 'done' } } } )
+          this.fireEvent('finish', { detail: { finish: { type: 'completed' } } } )
           onFinish()
           if (throwError) {
             return Promise.reject(error)
