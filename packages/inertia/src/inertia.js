@@ -1,6 +1,7 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
+import { fireBeforeStartEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
@@ -28,7 +29,7 @@ export default {
       page.url += window.location.hash
       this.setPage(page)
     }
-    this.fireEvent('navigate', { detail: { page: page } })
+    fireNavigateEvent(page)
   },
 
   setupEventListeners() {
@@ -139,7 +140,7 @@ export default {
   cancelActiveVisit({ cancelled = false, interrupted = false }) {
     if (this.activeVisit) {
       this.activeVisit.cancelToken.cancel()
-      this.fireEvent('finish', { detail: { visit: { ...this.activeVisit, completed: false, cancelled, interrupted } } } )
+      fireFinishEvent(this.activeVisit, { cancelled, interrupted })
       this.activeVisit.onFinish()
       this.activeVisit.onCancel()
     }
@@ -169,7 +170,7 @@ export default {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
     const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBeforeStart, onStart, onProgress, onFinish, onCancel, onSuccess }
-    if (onBeforeStart(visit) === false || !this.fireEvent('before-start', { cancelable: true, detail: { visit } } )) {
+    if (onBeforeStart(visit) === false || !fireBeforeStartEvent(visit)) {
       return
     }
 
@@ -181,7 +182,7 @@ export default {
     this.activeVisit.cancelToken = Axios.CancelToken.source()
     onCancelToken({ cancel: () => this.cancelActiveVisit({ cancelled: true }) })
 
-    this.fireEvent('start', { detail: { visit } } )
+    fireStartEvent(visit)
     onStart(visit)
 
     return new Proxy(
@@ -204,7 +205,7 @@ export default {
         },
         onUploadProgress: progress => {
           progress.percentage = Math.round(progress.loaded / progress.total * 100)
-          this.fireEvent('progress', { detail: { progress } })
+          fireProgressEvent(progress)
           onProgress(progress)
         },
       }).then(response => {
@@ -221,7 +222,7 @@ export default {
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
-        this.fireEvent('success', { detail: { page: this.page } })
+        fireSuccessEvent(this.page)
         return onSuccess(this.page)
       }).catch(error => {
         if (this.isInertiaResponse(error.response)) {
@@ -233,19 +234,19 @@ export default {
           }
           this.locationVisit(locationUrl, preserveScroll)
         } else if (error.response) {
-          if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
+          if (fireInvalidEvent(error.response)) {
             modal.show(error.response.data)
           }
         } else {
           return Promise.reject(error)
         }
       }).then(() => {
-        this.fireEvent('finish', { detail: { visit: { ...visit, completed: true, cancelled: false, interrupted: false } } } )
+        fireFinishEvent(visit, { completed: true })
         onFinish()
       }).catch(error => {
         if (!Axios.isCancel(error)) {
-          const throwError = this.fireEvent('error', { cancelable: true, detail: { error } })
-          this.fireEvent('finish', { detail: { visit: { ...visit, completed: true, cancelled: false, interrupted: false } } } )
+          const throwError = fireErrorEvent(error)
+          fireFinishEvent(visit, { completed: true })
           onFinish()
           if (throwError) {
             return Promise.reject(error)
@@ -279,7 +280,7 @@ export default {
             this.resetScrollPositions()
           }
           if (!replace) {
-            this.fireEvent('navigate', { detail: { page: page } })
+            fireNavigateEvent(page)
           }
         })
       }
@@ -305,7 +306,7 @@ export default {
           this.page = page
           this.swapComponent({ component, page, preserveState: false }).then(() => {
             this.restoreScrollPositions()
-            this.fireEvent('navigate', { detail: { page: page } })
+            fireNavigateEvent(page)
           })
         }
       })
@@ -357,12 +358,6 @@ export default {
 
   restore(key = 'default') {
     return window.history.state?.rememberedState?.[key]
-  },
-
-  fireEvent(name, options) {
-    return document.dispatchEvent(
-      new CustomEvent(`inertia:${name}`, options),
-    )
   },
 
   on(type, callback) {
