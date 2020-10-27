@@ -170,6 +170,7 @@ export default {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
     const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBeforeStart, onStart, onProgress, onFinish, onCancel, onSuccess }
+
     if (onBeforeStart(visit) === false || !fireBeforeStartEvent(visit)) {
       return
     }
