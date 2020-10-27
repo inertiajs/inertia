@@ -136,10 +136,10 @@ export default {
     return response?.headers['x-inertia']
   },
 
-  cancelActiveVisit(type) {
+  cancelActiveVisit({ cancelled = false, interrupted = false }) {
     if (this.activeVisit) {
-      this.fireEvent('finish', { detail: { finish: { type } } } )
       this.activeVisit.cancelToken.cancel()
+      this.fireEvent('finish', { detail: { visit: { ...this.activeVisit, completed: false, cancelled, interrupted } } } )
       this.activeVisit.onFinish()
       this.activeVisit.onCancel()
     }
@@ -173,13 +173,13 @@ export default {
       return
     }
 
-    this.cancelActiveVisit('interrupted')
+    this.cancelActiveVisit({ interrupted: true })
     this.saveScrollPositions()
 
     let visitId = this.createVisitId()
     this.activeVisit = visit
     this.activeVisit.cancelToken = Axios.CancelToken.source()
-    onCancelToken({ cancel: () => this.cancelActiveVisit('cancelled') })
+    onCancelToken({ cancel: () => this.cancelActiveVisit({ cancelled: true }) })
 
     this.fireEvent('start', { detail: { visit } } )
     onStart(visit)
@@ -240,12 +240,12 @@ export default {
           return Promise.reject(error)
         }
       }).then(() => {
-        this.fireEvent('finish', { detail: { finish: { type: 'completed' } } } )
+        this.fireEvent('finish', { detail: { visit: { ...visit, completed: true, cancelled: false, interrupted: false } } } )
         onFinish()
       }).catch(error => {
         if (!Axios.isCancel(error)) {
           const throwError = this.fireEvent('error', { cancelable: true, detail: { error } })
-          this.fireEvent('finish', { detail: { finish: { type: 'completed' } } } )
+          this.fireEvent('finish', { detail: { visit: { ...visit, completed: true, cancelled: false, interrupted: false } } } )
           onFinish()
           if (throwError) {
             return Promise.reject(error)
