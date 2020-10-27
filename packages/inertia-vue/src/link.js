@@ -83,7 +83,7 @@ export default {
               only: props.only,
               headers: props.headers,
               onCancelToken: data.on.cancelToken,
-              onBeforeStart: data.on.start,
+              onBefore: data.on.before,
               onStart: data.on.start,
               onProgress: data.on.progress,
               onFinish: data.on.finish,

@@ -4,8 +4,8 @@ function fireEvent(name, options) {
   )
 }
 
-export function fireBeforeStartEvent(visit) {
-  return fireEvent('before-start', { cancelable: true, detail: { visit } } )
+export function fireBeforeEvent(visit) {
+  return fireEvent('before', { cancelable: true, detail: { visit } } )
 }
 
 export function fireErrorEvent(error) {

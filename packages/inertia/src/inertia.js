@@ -1,7 +1,7 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import { fireBeforeStartEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
+import { fireBeforeEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
@@ -160,7 +160,7 @@ export default {
     only = [],
     headers = {},
     onCancelToken = () => ({}),
-    onBeforeStart = () => ({}),
+    onBefore = () => ({}),
     onStart = () => ({}),
     onProgress = () => ({}),
     onFinish = () => ({}),
@@ -169,9 +169,9 @@ export default {
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBeforeStart, onStart, onProgress, onFinish, onCancel, onSuccess }
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess }
 
-    if (onBeforeStart(visit) === false || !fireBeforeStartEvent(visit)) {
+    if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
     }
 

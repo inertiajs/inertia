@@ -38,7 +38,7 @@ interface InertiaLinkProps {
   replace?: boolean
   only?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBeforeStart?: () => void
+  onBefore?: () => void
   onStart?: () => void
   onProgress?: (progress: number) => void
   onFinish?: () => void
