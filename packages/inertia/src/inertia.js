@@ -310,7 +310,7 @@ export default {
   },
 
   reload(options = {}) {
-    return this.visit(window.location.href, { preserveScroll: true, preserveState: true, ...options })
+    return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   },
 
   replace(url, options = {}) {
