@@ -66,6 +66,7 @@ export default {
               only: props.only,
               headers: props.headers,
               onCancelToken: attrs.onCancelToken || (() => ({})),
+              onBeforeStart: attrs.onBeforeStart || (() => ({})),
               onStart: attrs.onStart || (() => ({})),
               onProgress: attrs.onProgress || (() => ({})),
               onFinish: attrs.onFinish || (() => ({})),
