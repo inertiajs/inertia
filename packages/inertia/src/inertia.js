@@ -1,13 +1,14 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
+import { fireBeforeStartEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
   resolveComponent: null,
   swapComponent: null,
   transformProps: null,
-  cancelToken: null,
+  activeVisit: null,
   visitId: null,
   page: null,
 
@@ -28,7 +29,7 @@ export default {
       page.url += window.location.hash
       this.setPage(page)
     }
-    this.fireEvent('navigate', { detail: { page: page } })
+    fireNavigateEvent(page)
   },
 
   setupEventListeners() {
@@ -136,11 +137,13 @@ export default {
     return response?.headers['x-inertia']
   },
 
-  cancelActiveVisits() {
-    if (this.cancelToken) {
-      this.cancelToken.cancel()
+  cancelActiveVisit({ cancelled = false, interrupted = false }) {
+    if (this.activeVisit) {
+      this.activeVisit.cancelToken.cancel()
+      fireFinishEvent(this.activeVisit, { cancelled, interrupted })
+      this.activeVisit.onFinish()
+      this.activeVisit.onCancel()
     }
-    this.cancelToken = Axios.CancelToken.source()
   },
 
   createVisitId() {
@@ -157,6 +160,7 @@ export default {
     only = [],
     headers = {},
     onCancelToken = () => ({}),
+    onBeforeStart = () => ({}),
     onStart = () => ({}),
     onProgress = () => ({}),
     onFinish = () => ({}),
@@ -165,15 +169,22 @@ export default {
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBeforeStart, onStart, onProgress, onFinish, onCancel, onSuccess }
 
-    let visit = { url, ...arguments[1] }
-    if (onStart(visit) === false || !this.fireEvent('start', { cancelable: true, detail: { visit } } )) {
+    if (onBeforeStart(visit) === false || !fireBeforeStartEvent(visit)) {
       return
     }
-    this.cancelActiveVisits()
+
+    this.cancelActiveVisit({ interrupted: true })
     this.saveScrollPositions()
+
     let visitId = this.createVisitId()
-    onCancelToken(this.cancelToken)
+    this.activeVisit = visit
+    this.activeVisit.cancelToken = Axios.CancelToken.source()
+    onCancelToken({ cancel: () => this.cancelActiveVisit({ cancelled: true }) })
+
+    fireStartEvent(visit)
+    onStart(visit)
 
     return new Proxy(
       Axios({
@@ -181,7 +192,7 @@ export default {
         url: urlWithoutHash(url).href,
         data: method === 'get' ? {} : data,
         params: method === 'get' ? data : {},
-        cancelToken: this.cancelToken.token,
+        cancelToken: this.activeVisit.cancelToken.token,
         headers: {
           ...headers,
           Accept: 'text/html, application/xhtml+xml',
@@ -195,7 +206,7 @@ export default {
         },
         onUploadProgress: progress => {
           progress.percentage = Math.round(progress.loaded / progress.total * 100)
-          this.fireEvent('progress', { detail: { progress } })
+          fireProgressEvent(progress)
           onProgress(progress)
         },
       }).then(response => {
@@ -212,13 +223,11 @@ export default {
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
-        this.fireEvent('success', { detail: { page: this.page } })
+        fireSuccessEvent(this.page)
         return onSuccess(this.page)
       }).catch(error => {
         if (this.isInertiaResponse(error.response)) {
           return this.setPage(error.response.data, { visitId })
-        } else if (Axios.isCancel(error)) {
-          onCancel()
         } else if (this.isLocationVisitResponse(error.response)) {
           let locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
           if (url.hash && !locationUrl.hash && urlWithoutHash(url).href === locationUrl.href) {
@@ -226,19 +235,24 @@ export default {
           }
           this.locationVisit(locationUrl, preserveScroll)
         } else if (error.response) {
-          if (this.fireEvent('invalid', { cancelable: true, detail: { response: error.response } })) {
+          if (fireInvalidEvent(error.response)) {
             modal.show(error.response.data)
           }
         } else {
           return Promise.reject(error)
         }
-      }).catch(error => {
-        if (this.fireEvent('error', { cancelable: true, detail: { error } })) {
-          return Promise.reject(error)
-        }
-      }).finally(() => {
-        this.fireEvent('finish')
+      }).then(() => {
+        fireFinishEvent(visit, { completed: true })
         onFinish()
+      }).catch(error => {
+        if (!Axios.isCancel(error)) {
+          const throwError = fireErrorEvent(error)
+          fireFinishEvent(visit, { completed: true })
+          onFinish()
+          if (throwError) {
+            return Promise.reject(error)
+          }
+        }
       }), {
         get: function(target, prop) {
           if (['then', 'catch', 'finally'].includes(prop)) {
@@ -267,7 +281,7 @@ export default {
             this.resetScrollPositions()
           }
           if (!replace) {
-            this.fireEvent('navigate', { detail: { page: page } })
+            fireNavigateEvent(page)
           }
         })
       }
@@ -293,7 +307,7 @@ export default {
           this.page = page
           this.swapComponent({ component, page, preserveState: false }).then(() => {
             this.restoreScrollPositions()
-            this.fireEvent('navigate', { detail: { page: page } })
+            fireNavigateEvent(page)
           })
         }
       })
@@ -346,12 +360,6 @@ export default {
 
   restore(key = 'default') {
     return window.history.state?.rememberedState?.[key]
-  },
-
-  fireEvent(name, options) {
-    return document.dispatchEvent(
-      new CustomEvent(`inertia:${name}`, options),
-    )
   },
 
   on(type, callback) {
