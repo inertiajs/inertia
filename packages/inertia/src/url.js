@@ -2,17 +2,7 @@ import qs from 'qs'
 import deepmerge from 'deepmerge'
 
 export function hrefToUrl(href) {
-  href = href.toString()
-
-  if (href.startsWith('#')) {
-    return new URL(`${urlWithoutHash(window.location)}${href}`)
-  }
-
-  try {
-    return new URL(href)
-  } catch (error) {
-    return new URL(`${window.location.origin}${href}`)
-  }
+  return new URL(href, window.location)
 }
 
 export function mergeDataIntoQueryString(method, url, data) {
