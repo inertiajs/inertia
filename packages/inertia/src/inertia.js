@@ -269,14 +269,15 @@ export default {
   setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
-        page.props = this.transformProps(page.props)
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
-        this.swapComponent({ component, page, preserveState }).then(() => {
+        const clone = JSON.parse(JSON.stringify(page))
+        clone.props = this.transformProps(clone.props)
+        this.swapComponent({ component, page: clone, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
