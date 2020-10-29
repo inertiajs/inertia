@@ -75,7 +75,7 @@ export default {
             })
           }
         },
-      }, slots.default())
+      }, slots && slots.default() || '')
     }
   },
 }
