@@ -137,18 +137,31 @@ export default {
     return response?.headers['x-inertia']
   },
 
-  cancelActiveVisit({ cancelled = false, interrupted = false }) {
-    if (this.activeVisit) {
-      this.activeVisit.cancelToken.cancel()
-      fireFinishEvent(this.activeVisit, { cancelled, interrupted })
-      this.activeVisit.onFinish()
-      this.activeVisit.onCancel()
-    }
-  },
-
   createVisitId() {
     this.visitId = {}
     return this.visitId
+  },
+
+  cancelVisit(visit, { cancelled = false, interrupted = false }) {
+    if (visit && !visit.completed && !visit.cancelled && !visit.interrupted) {
+      visit.cancelToken.cancel()
+      visit.onCancel()
+      visit.completed = false
+      visit.cancelled = cancelled
+      visit.interrupted = interrupted
+      fireFinishEvent(visit)
+      visit.onFinish()
+    }
+  },
+
+  finishVisit(visit) {
+    if (!visit.cancelled && !visit.interrupted) {
+      visit.completed = true
+      visit.cancelled = false
+      visit.interrupted = false
+      fireFinishEvent(visit)
+      visit.onFinish()
+    }
   },
 
   visit(url, {
@@ -175,13 +188,13 @@ export default {
       return
     }
 
-    this.cancelActiveVisit({ interrupted: true })
+    this.cancelVisit(this.activeVisit, { interrupted: true })
     this.saveScrollPositions()
 
     let visitId = this.createVisitId()
     this.activeVisit = visit
     this.activeVisit.cancelToken = Axios.CancelToken.source()
-    onCancelToken({ cancel: () => this.cancelActiveVisit({ cancelled: true }) })
+    onCancelToken({ cancel: () => this.cancelVisit(this.activeVisit, { cancelled: true }) })
 
     fireStartEvent(visit)
     onStart(visit)
@@ -242,13 +255,11 @@ export default {
           return Promise.reject(error)
         }
       }).then(() => {
-        fireFinishEvent(visit, { completed: true })
-        onFinish()
+        this.finishVisit(visit)
       }).catch(error => {
         if (!Axios.isCancel(error)) {
           const throwError = fireErrorEvent(error)
-          fireFinishEvent(visit, { completed: true })
-          onFinish()
+          this.finishVisit(visit)
           if (throwError) {
             return Promise.reject(error)
           }

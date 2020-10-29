@@ -12,8 +12,8 @@ export function fireErrorEvent(error) {
   return fireEvent('error', { cancelable: true, detail: { error } })
 }
 
-export function fireFinishEvent(visit, { completed = false, cancelled = false, interrupted = false }) {
-  return fireEvent('finish', { detail: { visit: { ...visit, completed, cancelled, interrupted } } } )
+export function fireFinishEvent(visit) {
+  return fireEvent('finish', { detail: { visit } } )
 }
 
 export function fireInvalidEvent(response) {
