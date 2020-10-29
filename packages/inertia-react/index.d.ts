@@ -56,4 +56,6 @@ export function useRememberedState<RememberedState>(
 
 export const InertiaLink: InertiaLink
 
+export const Link: InertiaLink
+
 export const InertiaApp: App
