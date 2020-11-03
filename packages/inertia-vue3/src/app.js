@@ -5,6 +5,7 @@ import { Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
 const page = ref({})
+const partials = ref([])
 const key = ref(null)
 
 export default {
@@ -32,6 +33,7 @@ export default {
         component.value = markRaw(args.component)
         page.value = args.page
         key.value = args.preserveState ? key.value : Date.now()
+        partials.value = args.partials.map(partial => h(markRaw(partial)))
       },
     })
 
@@ -52,13 +54,13 @@ export default {
               .reduce((child, layout) => h(layout, [child]))
           }
 
-          return h(component.value.layout, () => child)
+          return [h(component.value.layout, () => child), ...partials.value]
         }
 
-        return child
+        return [child, ...partials.value ]
       }
     }
-  }
+  },
 }
 
 export const plugin = {

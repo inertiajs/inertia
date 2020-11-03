@@ -134,7 +134,11 @@ export default {
   },
 
   isInertiaResponse(response) {
-    return response?.headers['x-inertia']
+    return response?.headers['x-inertia'] === 'page'
+  },
+
+  isInertiaPartialResponse(response) {
+    return response?.headers['x-inertia'] === 'partial'
   },
 
   createVisitId() {
@@ -223,18 +227,31 @@ export default {
           onProgress(progress)
         },
       }).then(response => {
-        if (!this.isInertiaResponse(response)) {
+        if (!this.isInertiaResponse(response) && !this.isInertiaPartialResponse(response)) {
           return Promise.reject({ response })
         }
-        if (only.length && response.data.component === this.page.component) {
-          response.data.props = { ...this.page.props, ...response.data.props }
+
+        let page = response.data
+
+        if (this.isInertiaPartialResponse(response)) {
+          page = this.page
+          page.url = response.data.url
+          page.partials = [{
+            component: response.data.component,
+            props: response.data.props,
+          }]
         }
-        const responseUrl = hrefToUrl(response.data.url)
+
+        if (only.length && response.data.component === this.page.component) {
+          page.props = { ...this.page.props, ...page.props }
+        }
+        const responseUrl = hrefToUrl(page.url)
         if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
           responseUrl.hash = url.hash
-          response.data.url = responseUrl.href
+          page.url = responseUrl.href
         }
-        return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
+        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
+
       }).then(() => {
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
@@ -288,13 +305,15 @@ export default {
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
         clone.props = this.transformProps(clone.props)
-        this.swapComponent({ component, page: clone, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
-          if (!replace) {
-            fireNavigateEvent(page)
-          }
+        Promise.all((page.partials || []).map(partial => this.resolveComponent(partial.component))).then(partials => {
+          this.swapComponent({ component, page: clone, preserveState, partials }).then(() => {
+            if (!preserveScroll) {
+              this.resetScrollPositions()
+            }
+            if (!replace) {
+              fireNavigateEvent(page)
+            }
+          })
         })
       }
     })
@@ -317,9 +336,11 @@ export default {
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
           this.page = page
-          this.swapComponent({ component, page, preserveState: false }).then(() => {
-            this.restoreScrollPositions()
-            fireNavigateEvent(page)
+          Promise.all(page.partials.map(partial => this.resolveComponent(partial.component))).then(partials => {
+            this.swapComponent({ component, page, preserveState: false, partials }).then(() => {
+              this.restoreScrollPositions()
+              fireNavigateEvent(page)
+            })
           })
         }
       })
