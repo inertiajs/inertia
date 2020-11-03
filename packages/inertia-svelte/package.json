@@ -7,6 +7,15 @@
     "Jonathan Reinink <jonathan@reinink.ca>",
     "Pedro Borges <oi@pedroborg.es>"
   ],
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/inertiajs/inertia.git",
+      "directory": "packages/svelte"
+  },
+  "bugs": {
+      "url": "https://github.com/inertiajs/inertia/issues"
+  },
   "keywords": [
     "svelte"
   ],

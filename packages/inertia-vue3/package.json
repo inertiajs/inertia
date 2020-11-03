@@ -6,6 +6,15 @@
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>"
   ],
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/inertiajs/inertia.git",
+      "directory": "packages/inertia-vue3"
+  },
+  "bugs": {
+      "url": "https://github.com/inertiajs/inertia/issues"
+  },
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
