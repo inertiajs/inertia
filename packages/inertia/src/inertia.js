@@ -231,18 +231,20 @@ export default {
           return Promise.reject({ response })
         }
 
-        let page = response.data
+        let page = null
 
         if (this.isInertiaPartialResponse(response)) {
           page = this.page
-          page.url = response.data.url
-          page.partials = [{
+          page.partial = {
             component: response.data.component,
             props: response.data.props,
-          }]
+            url: response.data.url,
+          }
+        } else {
+          page = response.data
         }
 
-        if (only.length && response.data.component === this.page.component) {
+        if (only.length && page.component === this.page.component) {
           page.props = { ...this.page.props, ...page.props }
         }
         const responseUrl = hrefToUrl(page.url)
@@ -301,12 +303,19 @@ export default {
         page.rememberedState = page.rememberedState || {}
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
-        replace = replace || hrefToUrl(page.url).href === window.location.href
+
+        if (page.partial) {
+          replace = replace || hrefToUrl(page.partial.url).href === window.location.href
+        } else {
+          replace = replace || hrefToUrl(page.url).href === window.location.href
+        }
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
         clone.props = this.transformProps(clone.props)
-        Promise.all((page.partials || []).map(partial => this.resolveComponent(partial.component))).then(partials => {
-          this.swapComponent({ component, page: clone, preserveState, partials }).then(() => {
+
+        Promise.resolve(page.partial ? this.resolveComponent(page.partial.component) : null).then(partialComponent => {
+          const partial = partialComponent ? { component: partialComponent, props: page.partial.props } : null
+          this.swapComponent({ component, page: clone, preserveState, partial }).then(() => {
             if (!preserveScroll) {
               this.resetScrollPositions()
             }
@@ -321,12 +330,12 @@ export default {
 
   pushState(page) {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(page, '', page.partial ? page.partial.url : page.url)
   },
 
   replaceState(page) {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(page, '', page.partial ? page.partial.url : page.url)
   },
 
   handlePopstateEvent(event) {
@@ -336,8 +345,9 @@ export default {
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
           this.page = page
-          Promise.all(page.partials.map(partial => this.resolveComponent(partial.component))).then(partials => {
-            this.swapComponent({ component, page, preserveState: false, partials }).then(() => {
+          Promise.resolve(page.partial ? this.resolveComponent(page.partial.component) : null).then(partialComponent => {
+            const partial = partialComponent ? { component: partialComponent, props: page.partial.props } : null
+            this.swapComponent({ component, page, preserveState: false, partial: partial }).then(() => {
               this.restoreScrollPositions()
               fireNavigateEvent(page)
             })
