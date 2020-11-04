@@ -23,6 +23,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    inline: {
+      type: Boolean,
+      default: false,
+    },
     preserveScroll: {
       type: Boolean,
       default: false,
@@ -61,6 +65,7 @@ export default {
               data: data,
               method: method,
               replace: props.replace,
+              inline: props.inline,
               preserveScroll: props.preserveScroll,
               preserveState: props.preserveState ?? (method !== 'get'),
               only: props.only,

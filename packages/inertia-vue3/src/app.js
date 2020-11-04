@@ -5,7 +5,7 @@ import { Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
 const page = ref({})
-const partial = ref(null)
+const inline = ref({})
 const key = ref(null)
 
 export default {
@@ -32,8 +32,8 @@ export default {
       swapComponent: async (args) => {
         component.value = markRaw(args.component)
         page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
-        partial.value = args.partial ? h(markRaw(args.partial.component), args.partial.props) : null
+        key.value = (args.preserveState || args.inline) ? key.value : Date.now()
+        inline.value = args.inline ? { component: markRaw(args.inline.component), props: args.inline.props, url: args.inline.url } : null
       },
     })
 
@@ -54,10 +54,16 @@ export default {
               .reduce((child, layout) => h(layout, [child]))
           }
 
-          return [h(component.value.layout, () => child), partial.value]
+          return [
+            h(component.value.layout, () => child),
+            inline.value ? h(inline.value.component, inline.value.props) : null,
+          ]
         }
 
-        return [child, partial.value]
+        return [
+          child,
+          inline.value ? h(inline.value.component, inline.value.props) : null,
+        ]
       }
     }
   },
@@ -67,6 +73,7 @@ export const plugin = {
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    Object.defineProperty(app.config.globalProperties, '$inline', { get: () => inline.value })
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
@@ -78,5 +85,6 @@ export function usePage() {
     url: computed(() => page.value.url),
     component: computed(() => page.value.component),
     version: computed(() => page.value.version),
+    inline: computed(() => inline.value),
   }
 }

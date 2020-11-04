@@ -134,11 +134,7 @@ export default {
   },
 
   isInertiaResponse(response) {
-    return response?.headers['x-inertia'] === 'page'
-  },
-
-  isInertiaPartialResponse(response) {
-    return response?.headers['x-inertia'] === 'partial'
+    return response?.headers['x-inertia']
   },
 
   createVisitId() {
@@ -172,6 +168,7 @@ export default {
     method = 'get',
     data = {},
     replace = false,
+    inline = false,
     preserveScroll = false,
     preserveState = false,
     only = [],
@@ -227,15 +224,18 @@ export default {
           onProgress(progress)
         },
       }).then(response => {
-        if (!this.isInertiaResponse(response) && !this.isInertiaPartialResponse(response)) {
+        if (!this.isInertiaResponse(response)) {
           return Promise.reject({ response })
         }
 
         let page = null
 
-        if (this.isInertiaPartialResponse(response)) {
+        if (inline === true ||
+          (inline === 'if-inline' && this.page.inline) ||
+          (inline === 'if-inline-and-same-component' && this.page.inline && this.page.inline.component === response.data.component)
+        ) {
           page = this.page
-          page.partial = {
+          page.inline = {
             component: response.data.component,
             props: response.data.props,
             url: response.data.url,
@@ -303,19 +303,13 @@ export default {
         page.rememberedState = page.rememberedState || {}
         preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
         preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
-
-        if (page.partial) {
-          replace = replace || hrefToUrl(page.partial.url).href === window.location.href
-        } else {
-          replace = replace || hrefToUrl(page.url).href === window.location.href
-        }
+        replace = replace || hrefToUrl(page.inline ? page.inline.url : page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
         clone.props = this.transformProps(clone.props)
-
-        Promise.resolve(page.partial ? this.resolveComponent(page.partial.component) : null).then(partialComponent => {
-          const partial = partialComponent ? { component: partialComponent, props: page.partial.props } : null
-          this.swapComponent({ component, page: clone, preserveState, partial }).then(() => {
+        Promise.resolve(page.inline ? this.resolveComponent(page.inline.component) : null).then(inlineComponent => {
+          const inline = inlineComponent ? { component: inlineComponent, props: page.inline.props, url: page.inline.url } : null
+          this.swapComponent({ component, page: clone, preserveState, inline }).then(() => {
             if (!preserveScroll) {
               this.resetScrollPositions()
             }
@@ -330,12 +324,12 @@ export default {
 
   pushState(page) {
     this.page = page
-    window.history.pushState(page, '', page.partial ? page.partial.url : page.url)
+    window.history.pushState(page, '', page.inline ? page.inline.url : page.url)
   },
 
   replaceState(page) {
     this.page = page
-    window.history.replaceState(page, '', page.partial ? page.partial.url : page.url)
+    window.history.replaceState(page, '', page.inline ? page.inline.url : page.url)
   },
 
   handlePopstateEvent(event) {
@@ -345,9 +339,9 @@ export default {
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
           this.page = page
-          Promise.resolve(page.partial ? this.resolveComponent(page.partial.component) : null).then(partialComponent => {
-            const partial = partialComponent ? { component: partialComponent, props: page.partial.props } : null
-            this.swapComponent({ component, page, preserveState: false, partial: partial }).then(() => {
+          Promise.resolve(page.inline ? this.resolveComponent(page.inline.component) : null).then(inlineComponent => {
+            const inline = inlineComponent ? { component: inlineComponent, props: page.inline.props, url: page.inline.url } : null
+            this.swapComponent({ component, page, preserveState: false, inline: inline }).then(() => {
               this.restoreScrollPositions()
               fireNavigateEvent(page)
             })
