@@ -232,8 +232,8 @@ export default {
         let page = null
 
         if (inline === true ||
-          (inline === 'if-inline' && this.page.inline) ||
-          (inline === 'if-inline-and-same-component' && this.page.inline && this.page.inline.component === response.data.component)
+          (inline === 'maintain' && this.page.inline) ||
+          (inline === 'same' && this.page.inline && this.page.inline.component === response.data.component)
         ) {
           page = this.page
           page.inline = {
