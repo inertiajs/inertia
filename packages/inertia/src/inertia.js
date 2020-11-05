@@ -231,36 +231,28 @@ export default {
           return Promise.reject({ response })
         }
 
-        return Promise.resolve(inline ? this.resolveComponent(response.data.component) : null).then(inlineComponent => {
-          let page = response.data
+        let page = response.data
 
-          if ((inlineComponent && inlineComponent.section === this.page.section) && (
-            inline === true ||
-            (inline === 'maintain' && this.page.inline) ||
-            (inline === 'same' && this.page.inline && this.page.inline.component === response.data.component)
-          )) {
-            page = this.page
-            page.inline = {
-              component: response.data.component,
-              props: response.data.props,
-              url: response.data.url,
-            }
+        if ((this.page.inline && this.page.inline.component === response.data.component) || inline === response.data.inlineable) {
+          page = this.page
+          page.inline = {
+            component: response.data.component,
+            props: response.data.props,
+            url: response.data.url,
           }
+        }
 
-          if (only.length && page.component === this.page.component) {
-            page.props = { ...this.page.props, ...page.props }
-          }
+        if (only.length && page.component === this.page.component) {
+          page.props = { ...this.page.props, ...page.props }
+        }
 
-          const responseUrl = hrefToUrl(page.url)
-          if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
-            responseUrl.hash = url.hash
-            page.url = responseUrl.href
-          }
+        const responseUrl = hrefToUrl(page.url)
+        if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
+          responseUrl.hash = url.hash
+          page.url = responseUrl.href
+        }
 
-          return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
-        })
-
-
+        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
@@ -309,8 +301,8 @@ export default {
         page.section = component.section
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        preserveState = (typeof preserveState === 'function' ? preserveState(page) : preserveState) || page.inline
-        preserveScroll = (typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll) || page.inline
+        preserveState = (typeof preserveState === 'function' ? preserveState(page) : preserveState)
+        preserveScroll = (typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll)
         replace = replace || hrefToUrl(page.inline ? page.inline.url : page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
