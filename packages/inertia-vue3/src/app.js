@@ -4,8 +4,8 @@ import { computed, h, markRaw, ref } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
+const inlineComponent = ref(null)
 const page = ref({})
-const inline = ref({})
 const key = ref(null)
 
 export default {
@@ -31,9 +31,9 @@ export default {
       transformProps,
       swapComponent: async (args) => {
         component.value = markRaw(args.component)
+        inlineComponent.value = args.inlineComponent ? markRaw(args.inlineComponent) : null
         page.value = args.page
-        key.value = (args.preserveState || args.inline) ? key.value : Date.now()
-        inline.value = args.inline ? { component: markRaw(args.inline.component), props: args.inline.props, url: args.inline.url } : null
+        key.value = args.preserveState ? key.value : Date.now()
       },
     })
 
@@ -56,13 +56,13 @@ export default {
 
           return [
             h(component.value.layout, () => child),
-            inline.value ? h(inline.value.component, inline.value.props) : null,
+            inlineComponent.value ? h(inlineComponent.value, page.value.inline.props) : null,
           ]
         }
 
         return [
           child,
-          inline.value ? h(inline.value.component, inline.value.props) : null,
+          inlineComponent.value ? h(inlineComponent.value, page.value.inline.props) : null,
         ]
       }
     }
@@ -73,7 +73,6 @@ export const plugin = {
   install(app) {
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
-    Object.defineProperty(app.config.globalProperties, '$inline', { get: () => inline.value })
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
@@ -85,6 +84,5 @@ export function usePage() {
     url: computed(() => page.value.url),
     component: computed(() => page.value.component),
     version: computed(() => page.value.version),
-    inline: computed(() => inline.value),
   }
 }

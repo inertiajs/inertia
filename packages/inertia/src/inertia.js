@@ -311,8 +311,7 @@ export default {
         const clone = JSON.parse(JSON.stringify(page))
         clone.props = this.transformProps(clone.props)
         Promise.resolve(page.inline ? this.resolveComponent(page.inline.component) : null).then(inlineComponent => {
-          const inline = inlineComponent ? { component: inlineComponent, props: page.inline.props, url: page.inline.url } : null
-          this.swapComponent({ component, page: clone, preserveState, inline }).then(() => {
+          this.swapComponent({ component, page: clone, preserveState, inlineComponent }).then(() => {
             if (!preserveScroll) {
               this.resetScrollPositions()
             }
@@ -343,8 +342,7 @@ export default {
         if (visitId === this.visitId) {
           this.page = page
           Promise.resolve(page.inline ? this.resolveComponent(page.inline.component) : null).then(inlineComponent => {
-            const inline = inlineComponent ? { component: inlineComponent, props: page.inline.props, url: page.inline.url } : null
-            this.swapComponent({ component, page, preserveState: false, inline: inline }).then(() => {
+            this.swapComponent({ component, page, preserveState: false, inlineComponent }).then(() => {
               this.restoreScrollPositions()
               fireNavigateEvent(page)
             })
