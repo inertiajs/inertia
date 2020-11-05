@@ -212,6 +212,7 @@ export default {
           Accept: 'text/html, application/xhtml+xml',
           'X-Requested-With': 'XMLHttpRequest',
           'X-Inertia': true,
+          ...(inline ? { 'X-Inertia-Inline': inline } : {}),
           ...(only.length ? {
             'X-Inertia-Partial-Component': this.page.component,
             'X-Inertia-Partial-Data': only.join(','),
