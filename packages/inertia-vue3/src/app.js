@@ -7,6 +7,7 @@ const component = ref(null)
 const inlineComponent = ref(null)
 const page = ref({})
 const key = ref(null)
+const inlineKey = ref(null)
 
 export default {
   name: 'Inertia',
@@ -33,7 +34,8 @@ export default {
         component.value = markRaw(args.component)
         inlineComponent.value = args.inlineComponent ? markRaw(args.inlineComponent) : null
         page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
+        key.value = (args.preserveState || args.inlineComponent) ? key.value : Date.now()
+        inlineKey.value = (args.preserveState && args.inlineComponent) ? inlineKey.value : Date.now()
       },
     })
 
@@ -56,13 +58,14 @@ export default {
 
           return [
             h(component.value.layout, () => child),
-            inlineComponent.value ? h(inlineComponent.value, page.value.inline.props) : null,
+            inlineComponent.value ? h(inlineComponent.value, { ...page.value.inline.props, key: inlineKey.value }) : null,
           ]
         }
 
+
         return [
           child,
-          inlineComponent.value ? h(inlineComponent.value, page.value.inline.props) : null,
+          inlineComponent.value ? h(inlineComponent.value, { ...page.value.inline.props, key: inlineKey.value }) : null,
         ]
       }
     }
