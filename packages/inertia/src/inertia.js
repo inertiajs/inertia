@@ -301,8 +301,8 @@ export default {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
-        preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
+        preserveState = (typeof preserveState === 'function' ? preserveState(page) : preserveState) || page.inline
+        preserveScroll = (typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll) || page.inline
         replace = replace || hrefToUrl(page.inline ? page.inline.url : page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
