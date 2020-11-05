@@ -76,8 +76,10 @@ export default {
   restoreScrollPositions() {
     if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region, index) => {
-        region.scrollTop = this.page.scrollRegions[index].top
-        region.scrollLeft = this.page.scrollRegions[index].left
+        if (this.page.scrollRegions[index]) {
+          region.scrollTop = this.page.scrollRegions[index].top
+          region.scrollLeft = this.page.scrollRegions[index].left
+        }
       })
     }
   },
