@@ -231,7 +231,7 @@ export default {
           return Promise.reject({ response })
         }
 
-        let page = null
+        let page = response.data
 
         if (inline === true ||
           (inline === 'maintain' && this.page.inline) ||
@@ -243,20 +243,19 @@ export default {
             props: response.data.props,
             url: response.data.url,
           }
-        } else {
-          page = response.data
         }
 
         if (only.length && page.component === this.page.component) {
           page.props = { ...this.page.props, ...page.props }
         }
+
         const responseUrl = hrefToUrl(page.url)
         if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
           responseUrl.hash = url.hash
           page.url = responseUrl.href
         }
-        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
 
+        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
