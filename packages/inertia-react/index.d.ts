@@ -46,8 +46,8 @@ type InertiaLink = React.FunctionComponent<
 >
 
 export function usePage<
-  PageProps extends Inertia.PageProps = Inertia.PageProps
->(): PageProps
+  Page extends Inertia.Page = Inertia.Page
+>(): Page
 
 export function useRememberedState<RememberedState>(
   initialState: RememberedState,
