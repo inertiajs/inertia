@@ -18,6 +18,10 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
   props: CustomPageProps
   url: string
   version: string | null
+  scrollRegions: { top: number, left: number }[]
+  rememberedState: {
+    [key: string]: any
+  }
 }
 
 type VisitOptions = {
