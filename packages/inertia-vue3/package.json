@@ -33,7 +33,7 @@
     "vue": "^3.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.5.0",
+    "@inertiajs/inertia": "^0.6.0",
     "vue": "^3.0.0"
   }
 }
