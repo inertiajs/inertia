@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia-vue3",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -8,12 +8,12 @@
   ],
   "homepage": "https://inertiajs.com/",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/inertiajs/inertia.git",
-      "directory": "packages/inertia-vue3"
+    "type": "git",
+    "url": "https://github.com/inertiajs/inertia.git",
+    "directory": "packages/inertia-vue3"
   },
   "bugs": {
-      "url": "https://github.com/inertiajs/inertia/issues"
+    "url": "https://github.com/inertiajs/inertia/issues"
   },
   "source": "src/index.js",
   "main": "dist/index.js",
