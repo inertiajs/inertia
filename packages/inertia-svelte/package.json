@@ -9,12 +9,12 @@
   ],
   "homepage": "https://inertiajs.com/",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/inertiajs/inertia.git",
-      "directory": "packages/svelte"
+    "type": "git",
+    "url": "https://github.com/inertiajs/inertia.git",
+    "directory": "packages/svelte"
   },
   "bugs": {
-      "url": "https://github.com/inertiajs/inertia/issues"
+    "url": "https://github.com/inertiajs/inertia/issues"
   },
   "keywords": [
     "svelte"
