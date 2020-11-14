@@ -39,7 +39,7 @@ type VisitOptions = {
   onSuccess?: (page: Page) => void | Promise<any>
 }
 
-type InertiaEvent = 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
+type InertiaEvent = 'before' | 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
 
 interface Inertia {
   init: <
