@@ -362,7 +362,7 @@ export default {
 
   remember(data, key = 'default') {
     this.replaceState({
-      ...this.page,
+      ...window.history.state,
       rememberedState: {
         ...this.page.rememberedState,
         [key]: data,
