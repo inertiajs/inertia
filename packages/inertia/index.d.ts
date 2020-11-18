@@ -27,8 +27,8 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
 type VisitOptions = {
   method?: string
   replace?: boolean
-  preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
-  preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
+  preserveScroll?: boolean | ((props: Page<Inertia.PageProps>) => boolean)
+  preserveState?: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only?: string[]
   headers?: object
   onCancelToken?: (cancelToken: CancelTokenSource) => void
