@@ -39,6 +39,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    external: {
+      type: Boolean,
+      default: false,
+    }
   },
   render(h, { props, data, children }) {
     data.on = {
@@ -70,6 +74,10 @@ export default {
         ...data.on,
         click: event => {
           data.on.click(event)
+
+          if (external) {
+              window.location.href = url.href
+          }
 
           if (shouldIntercept(event)) {
             event.preventDefault()
