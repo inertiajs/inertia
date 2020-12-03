@@ -28,7 +28,7 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.6.0",
+    "@inertiajs/inertia": "^0.6.0 || ^0.7.0",
     "@types/react": "^16.9.1",
     "eslint": "^7.0.0",
     "eslint-plugin-react": "^7.14.3",
@@ -37,7 +37,7 @@
     "react": "^16.9.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.6.0",
+    "@inertiajs/inertia": "^0.6.0 || ^0.7.0",
     "react": "^16.8.0"
   }
 }
