@@ -7,7 +7,12 @@ export function hrefToUrl(href) {
 
 export function mergeDataIntoQueryString(method, url, data) {
   if (method === 'get' && Object.keys(data).length) {
-    url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), { encode: false })
+    url.search = qs.stringify(
+      deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
+        encodeValuesOnly: true,
+        arrayFormat: 'brackets',
+      },
+    )
     data = {}
   }
   return [url, data]
