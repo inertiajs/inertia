@@ -58,4 +58,6 @@ export const InertiaLink: InertiaLink
 
 export const Link: InertiaLink
 
+export const App: App
+
 export const InertiaApp: App
