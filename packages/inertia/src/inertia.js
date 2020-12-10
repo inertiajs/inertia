@@ -337,6 +337,7 @@ export default {
   handlePopstateEvent(event) {
     if (event.state !== null) {
       const page = event.state
+      page.props = this.transformProps(page.props)
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
