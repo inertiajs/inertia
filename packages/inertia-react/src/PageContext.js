@@ -1,3 +1,6 @@
 import { createContext } from 'react'
 
-export default createContext()
+const pageContext = createContext()
+pageContext.displayName = 'InertiaPageContext'
+
+export default pageContext
