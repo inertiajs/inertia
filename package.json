@@ -5,7 +5,8 @@
   ],
   "scripts": {
     "build": "yarn wsrun --exclude-missing build",
-    "watch": "yarn wsrun --exclude-missing watch"
+    "watch": "yarn wsrun --exclude-missing watch",
+    "lint": "eslint \"**/*.js\" --fix"
   },
   "dependencies": {
     "wsrun": "^5.2.1"

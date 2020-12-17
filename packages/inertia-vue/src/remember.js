@@ -32,7 +32,7 @@ export default {
       this.$watch(key, () => {
         Inertia.remember(
           this.$options.remember.data.reduce((data, key) => ({ ...data, [key]: this[key] }), {}),
-          stateKey
+          stateKey,
         )
       }, { immediate: true, deep: true })
     })
