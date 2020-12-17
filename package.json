@@ -6,7 +6,7 @@
   "scripts": {
     "build": "yarn wsrun --exclude-missing build",
     "watch": "yarn wsrun --exclude-missing watch",
-    "lint": "eslint \"**/*.js\" --fix"
+    "lint": "yarn wsrun --exclude-missing lint"
   },
   "dependencies": {
     "wsrun": "^5.2.1"

@@ -1,13 +1,13 @@
-export default {
+export const modal = {
   modal: null,
   listener: null,
 
-  show(html) {
+  show(html: string) {
     if (typeof html === 'object') {
       html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(html)}`
     }
 
-    let page = document.createElement('html')
+    const page = document.createElement('html')
     page.innerHTML = html
     page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
 
@@ -21,7 +21,7 @@ export default {
     this.modal.style.zIndex = 200000
     this.modal.addEventListener('click', () => this.hide())
 
-    let iframe = document.createElement('iframe')
+    const iframe = document.createElement('iframe')
     iframe.style.backgroundColor = 'white'
     iframe.style.borderRadius = '5px'
     iframe.style.width = '100%'
@@ -45,8 +45,8 @@ export default {
     document.removeEventListener('keydown', this.listener)
   },
 
-  hideOnEscape(event) {
-    if (event.keyCode === 27) {
+  hideOnEscape(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
       this.hide()
     }
   },

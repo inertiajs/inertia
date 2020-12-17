@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "allowSyntheticDefaultImports": true,
+      "lib": ["dom", "ESNext"],
+      "moduleResolution": "node",
+      "module": "esnext",
+      "target": "ESNext"
+    },
+    "exclude": ["node_modules"]
+  }
+  

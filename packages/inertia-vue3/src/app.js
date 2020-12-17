@@ -58,7 +58,7 @@ export default {
         return child
       }
     }
-  },
+  }
 }
 
 export const plugin = {
