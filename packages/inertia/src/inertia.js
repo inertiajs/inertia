@@ -1,7 +1,7 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import { fireBeforeEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
+import { fireBeforeEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
@@ -258,9 +258,9 @@ export default {
         this.finishVisit(visit)
       }).catch(error => {
         if (!Axios.isCancel(error)) {
-          const throwError = fireErrorEvent(error)
+          const throwException = fireExceptionEvent(error)
           this.finishVisit(visit)
-          if (throwError) {
+          if (throwException) {
             return Promise.reject(error)
           }
         }
