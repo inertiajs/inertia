@@ -8,6 +8,7 @@ export default function App({
   children,
   initialPage,
   resolveComponent,
+  resolveErrors,
   transformProps = identity,
 }) {
   const [current, setCurrent] = useState({
@@ -20,6 +21,7 @@ export default function App({
     Inertia.init({
       initialPage,
       resolveComponent,
+      resolveErrors,
       transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
         setCurrent(current => ({
@@ -29,7 +31,7 @@ export default function App({
         }))
       },
     })
-  }, [initialPage, resolveComponent, transformProps])
+  }, [initialPage, resolveComponent, resolveErrors, transformProps])
 
   if (!current.component) {
     return createElement(PageContext.Provider, { value: current.page }, null)
