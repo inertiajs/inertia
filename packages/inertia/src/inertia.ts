@@ -429,7 +429,7 @@ class InertiaJS {
     return window.history.state?.rememberedState?.[key]
   }
 
-  on<T extends keyof InertiaEvents>(type: T, callback: (event: InertiaEvents[T]) => any) {
+  on<T extends keyof InertiaEvents>(type: T, callback: (event: CustomEvent<InertiaEvents[T]>) => any) {
     const listener = event => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {

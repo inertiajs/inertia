@@ -3,17 +3,17 @@ import { AxiosError } from 'axios'
 import { InertiaProgressEvent, Page, Visit } from './inertia'
 
 export type InertiaEvents = {
-  before: CustomEvent<Visit>
-  start: CustomEvent<Visit>
-  progress: CustomEvent<InertiaProgressEvent>
-  success: CustomEvent<Page>
-  finish: CustomEvent<Visit>
-  invalid: CustomEvent<AxiosError['response']>
-  error: CustomEvent<AxiosError>
-  navigate: CustomEvent<Page>
+  before: {visit: Visit}
+  start: {visit: Visit}
+  progress: {progress: InertiaProgressEvent}
+  success: {page: Page}
+  finish: {visit: Visit}
+  invalid: {response: AxiosError['response']}
+  error: {error: AxiosError}
+  navigate: {page: Page}
 }
 
-function fireEvent<T>(name: string, options: CustomEventInit<T>) {
+function fireEvent<T extends keyof InertiaEvents>(name: T, options: CustomEventInit<InertiaEvents[T]>) {
   return document.dispatchEvent(
     new CustomEvent(`inertia:${name}`, options),
   )
