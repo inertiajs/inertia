@@ -2,6 +2,7 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
+    node: true,
   },
   extends: ['eslint:recommended', 'plugin:react/recommended'],
   parserOptions: {
@@ -16,6 +17,7 @@ module.exports = {
     'comma-dangle': ['warn', 'always-multiline'],
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'react/prop-types': 'warn',
   },
   settings: {
     react: {

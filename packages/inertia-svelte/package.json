@@ -20,6 +20,9 @@
     "svelte"
   ],
   "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint \"**/*.js\" --fix"
+  },
   "devDependencies": {
     "@inertiajs/inertia": "^0.6.0 || ^0.7.0",
     "eslint": "^7.0.0"

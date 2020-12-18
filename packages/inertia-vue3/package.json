@@ -24,7 +24,8 @@
     "build:cjs": "microbundle --format cjs",
     "build:umd": "microbundle --format umd --name InertiaVue --globals vue=Vue,@inertiajs/inertia=Inertia",
     "prepublishOnly": "npm run build",
-    "watch": "microbundle watch --format cjs"
+    "watch": "microbundle watch --format cjs",
+    "lint": "eslint \"**/*.js\" --fix"
   },
   "devDependencies": {
     "@inertiajs/inertia": "^0.6.0 || ^0.7.0",
