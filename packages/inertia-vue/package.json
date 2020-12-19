@@ -1,13 +1,21 @@
 {
   "name": "@inertiajs/inertia-vue",
-  "version": "0.1.4",
+  "version": "0.4.3",
   "license": "MIT",
   "description": "The Vue adapter for Inertia.js",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
     "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
   ],
-  "license": "MIT",
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inertiajs/inertia.git",
+    "directory": "packages/inertia-vue"
+  },
+  "bugs": {
+    "url": "https://github.com/inertiajs/inertia/issues"
+  },
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
@@ -20,13 +28,13 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.1.4",
-    "eslint": "^6.1.0",
+    "@inertiajs/inertia": "^0.6.0 || ^0.7.0",
+    "eslint": "^7.0.0",
     "microbundle": "^0.12.0",
     "vue": "^2.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.1.4",
+    "@inertiajs/inertia": "^0.6.0 || ^0.7.0",
     "vue": "^2.0.0"
   }
 }

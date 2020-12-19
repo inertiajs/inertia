@@ -31,8 +31,8 @@ export default {
 
       this.$watch(key, () => {
         Inertia.remember(
-          this.$options.remember.data.reduce((data, key) => ({ ...data, [key]: this[key] }), {}),
-          stateKey
+          this.$options.remember.data.reduce((data, key) => ({ ...data, [key]: JSON.parse(JSON.stringify(this[key])) }), {}),
+          stateKey,
         )
       }, { immediate: true, deep: true })
     })

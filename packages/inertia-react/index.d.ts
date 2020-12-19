@@ -17,26 +17,37 @@ type App<
   transformProps?: (props: PagePropsBeforeTransform) => PageProps
 }>
 
-interface InertiaLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
+interface InertiaLinkProps {
+  as?: string
   data?: object
   href: string
   method?: string
+  headers?: object
   onClick?: (
     event:
       | React.MouseEvent<HTMLAnchorElement>
       | React.KeyboardEvent<HTMLAnchorElement>
   ) => void
   preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
-  preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
+  preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
   replace?: boolean
   only?: string[]
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onBefore?: () => void
+  onStart?: () => void
+  onProgress?: (progress: number) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: () => void
 }
 
-type InertiaLink = React.FunctionComponent<InertiaLinkProps>
+type InertiaLink = React.FunctionComponent<
+  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
+>
 
 export function usePage<
-  PageProps extends Inertia.PageProps = Inertia.PageProps
->(): PageProps
+  Page extends Inertia.Page = Inertia.Page
+>(): Page
 
 export function useRememberedState<RememberedState>(
   initialState: RememberedState,
@@ -44,5 +55,7 @@ export function useRememberedState<RememberedState>(
 ): [RememberedState, React.Dispatch<React.SetStateAction<RememberedState>>]
 
 export const InertiaLink: InertiaLink
+
+export const Link: InertiaLink
 
 export const InertiaApp: App

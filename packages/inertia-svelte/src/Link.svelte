@@ -1,6 +1,6 @@
 <script>
-  import { Inertia, shouldIntercept } from '@inertiajs/inertia'
-  import { createEventDispatcher } from 'svelte'
+  import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+  import { beforeUpdate, createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
 
@@ -10,10 +10,20 @@
     method = 'get',
     replace = false,
     preserveScroll = false,
-    preserveState = false,
-    only = []
+    preserveState = null,
+    only = [],
+    headers = {}
 
-  $: props = (({ data, href, method, preserveScroll, preserveState, replace, only, ...rest }) => rest)($$props)
+  beforeUpdate(() => {
+    method = method.toLowerCase()
+    const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
+    href = url.href
+    data = _data
+
+    if (method !== 'get') {
+      console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "inertia" directive. For example:\n\n<button use:inertia={{ method: 'post', href: '${url.href}' }}>...</button>`)
+    }
+  })
 
   function visit(event) {
     dispatch('click', event)
@@ -25,14 +35,15 @@
         data,
         method,
         preserveScroll,
-        preserveState,
+        preserveState: preserveState !== null ? preserveState : (method !== 'get'),
         replace,
         only,
+        headers,
       })
     }
   }
 </script>
 
-<a {...props} href={href} on:click={visit}>
+<a {...$$restProps} {href} on:click={visit}>
   <slot />
 </a>
