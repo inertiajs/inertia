@@ -8,8 +8,8 @@ export function fireBeforeEvent(visit) {
   return fireEvent('before', { cancelable: true, detail: { visit } } )
 }
 
-export function fireErrorEvent(error) {
-  return fireEvent('error', { detail: { error } })
+export function fireErrorEvent(errors) {
+  return fireEvent('error', { detail: { errors } })
 }
 
 export function fireExceptionEvent(exception) {
