@@ -1,9 +1,9 @@
 ---
-name: Bug Report - @inertiajs/inertia-svelte
-about: Create a report to help us improve the Inertia.js Svelte experience
+name: Bug Report - Vue
+about: Create a report to help us improve the Inertia.js Vue 2 experience.
 title: ''
-labels: svelte
-assignees: pedroborges
+labels: vue.js
+assignees: ''
 
 ---
 
@@ -24,8 +24,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots, code samples or errors logs to help explain your problem.
 
 **Environment (please complete the following information):**
- - `@inertiajs/inertia` version: [e.g. 0.4.3]
- - `@inertiajs/inertia-svelte` version: [e.g. 0.5.0]
+ - `@inertiajs/inertia` version: [e.g. 0.6.2]
+ - `@inertiajs/inertia-vue` version: [e.g. 0.4.2]
  - OS: [e.g. iOS]
  - Browser [e.g. Chrome, Safari]
  - Version [e.g. 22]

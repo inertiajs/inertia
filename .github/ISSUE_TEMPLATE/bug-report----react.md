@@ -1,8 +1,8 @@
 ---
-name: Bug Report - @inertiajs/inertia-vue3
-about: Create a report to help us improve the Inertia.js Vue 3 experience
+name: Bug Report - React
+about: Create a report to help us improve the Inertia.js React experience.
 title: ''
-labels: vue.js v3
+labels: react
 assignees: ''
 
 ---
@@ -25,7 +25,7 @@ If applicable, add screenshots, code samples or errors logs to help explain your
 
 **Environment (please complete the following information):**
  - `@inertiajs/inertia` version: [e.g. 0.6.2]
- - `@inertiajs/inertia-vue3` version: [e.g. 0.4.2]
+ - `@inertiajs/inertia-react` version: [e.g. 0.4.2]
  - OS: [e.g. iOS]
  - Browser [e.g. Chrome, Safari]
  - Version [e.g. 22]
