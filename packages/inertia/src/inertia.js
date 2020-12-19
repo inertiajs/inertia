@@ -1,24 +1,14 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
-} from './events'
+import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events' // prettier-ignore
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
   resolveComponent: null,
   resolveErrors: page => (page.props.errors || {}),
   swapComponent: null,
-  transformProps: null,
+  transformProps: props => props,
   activeVisit: null,
   visitId: null,
   page: null,
@@ -27,7 +17,7 @@ export default {
     this.resolveComponent = resolveComponent
     this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
-    this.transformProps = transformProps
+    this.transformProps = transformProps || this.transformProps
     this.handleInitialPageVisit(initialPage)
     this.setupEventListeners()
   },

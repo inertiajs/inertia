@@ -2,14 +2,12 @@ import { Inertia } from '@inertiajs/inertia'
 import { createElement, useEffect, useState } from 'react'
 import PageContext from './PageContext'
 
-const identity = i => i
-
 export default function App({
   children,
   initialPage,
   resolveComponent,
   resolveErrors,
-  transformProps = identity,
+  transformProps,
 }) {
   const [current, setCurrent] = useState({
     component: null,

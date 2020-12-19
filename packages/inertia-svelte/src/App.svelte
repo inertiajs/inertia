@@ -7,7 +7,7 @@
     initialPage,
     resolveComponent,
     resolveErrors,
-    transformProps = props => props
+    transformProps
 
   Inertia.init({
     initialPage,

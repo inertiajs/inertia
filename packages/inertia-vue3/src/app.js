@@ -24,7 +24,7 @@ export default {
     },
     transformProps: {
       type: Function,
-      default: props => props,
+      required: false,
     },
   },
   setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
