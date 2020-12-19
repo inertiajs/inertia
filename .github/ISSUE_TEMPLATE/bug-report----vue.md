@@ -1,5 +1,5 @@
 ---
-name: Bug Report - Vue 2
+name: Bug Report - Vue
 about: Create a report to help us improve the Inertia.js Vue 2 experience.
 title: ''
 labels: vue.js
