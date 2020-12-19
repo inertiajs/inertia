@@ -6,7 +6,7 @@ contact_links:
   - name: Help
     url: https://github.com/inertiajs/inertia/discussions/new?category=help
     about: 'If you have a question or need help, ask a question on the discussion forums.'
-  - name: 'Laravel Issue'
+  - name: 'Laravel Adapter Issue'
     url: https://github.com/inertiajs/inertia-laravel
     about: 'For Laravel adapter issues, suggest changes on our (server-side) Laravel adapter repository.'
   - name: Documentation Issue
