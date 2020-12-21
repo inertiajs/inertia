@@ -11,7 +11,7 @@ export default initialData => {
       url = url || Inertia.page.url
       options = options || {}
 
-      const requestOptions = {
+      Inertia[method](url, form.data, {
         ... options,
         onStart: visit => {
           form.processing = true
@@ -41,9 +41,7 @@ export default initialData => {
             return options.onSuccess(page)
           }
         },
-      }
-
-      Inertia[method](url, form.data, requestOptions)
+      })
     },
     post(url, options) {
       form.submit('post', url, options)
