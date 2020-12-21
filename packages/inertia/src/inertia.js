@@ -3,6 +3,8 @@ import debounce from './debounce'
 import modal from './modal'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events' // prettier-ignore
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
+import { hasFiles } from './files'
+import { objectToFormData } from './formData'
 
 export default {
   resolveComponent: null,
@@ -185,6 +187,11 @@ export default {
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+
+    if (method !== 'get' && hasFiles(data)) {
+      data = objectToFormData(data)
+    }
+
     const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
