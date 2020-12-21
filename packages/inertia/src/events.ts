@@ -9,8 +9,9 @@ export type InertiaEvents = {
   success: {page: Page}
   finish: {visit: Visit}
   invalid: {response: AxiosError['response']}
-  error: {error: AxiosError}
+  error: {errors: Record<string, string>}
   navigate: {page: Page}
+  exception: {exception: AxiosError}
 }
 
 function fireEvent<T extends keyof InertiaEvents>(name: T, options: CustomEventInit<InertiaEvents[T]>) {
@@ -23,8 +24,12 @@ export function fireBeforeEvent(visit: Visit) {
   return fireEvent('before', { cancelable: true, detail: { visit } } )
 }
 
-export function fireErrorEvent(error: AxiosError) {
-  return fireEvent('error', { cancelable: true, detail: { error } })
+export function fireErrorEvent(errors: Record<string, string>) {
+  return fireEvent('error', { cancelable: true, detail: { errors } })
+}
+
+export function fireExceptionEvent(exception: AxiosError) {
+  return fireEvent('exception', { cancelable: true, detail: { exception } })
 }
 
 export function fireFinishEvent(visit: Visit) {

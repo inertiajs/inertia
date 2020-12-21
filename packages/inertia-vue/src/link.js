@@ -49,6 +49,7 @@ export default {
       finish: () => ({}),
       cancel: () => ({}),
       success: () => ({}),
+      error: () => ({}),
       ...(data.on || {}),
     }
 
@@ -89,6 +90,7 @@ export default {
               onFinish: data.on.finish,
               onCancel: data.on.cancel,
               onSuccess: data.on.success,
+              onError: data.on.error,
             })
           }
         },

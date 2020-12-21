@@ -1,7 +1,7 @@
 import Axios, { AxiosError, CancelTokenSource, Method } from 'axios'
 
 import { debounce } from './debounce'
-import { fireBeforeEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent, InertiaEvents } from './events'
+import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent, InertiaEvents } from './events'
 import { modal } from './modal'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
@@ -20,6 +20,7 @@ export type VisitOptions = {
   onFinish: () => void
   onCancel: () => void
   onSuccess: (page: Page) => void | Promise<any>
+  onError: (errors: Record<string, string>) => void
 }
 
 export type Visit = VisitOptions & {
@@ -32,7 +33,7 @@ export type Visit = VisitOptions & {
 
 export interface Page<CustomPageProps = Record<string, unknown>> {
   component: string
-  props: CustomPageProps
+  props: CustomPageProps & {errors: Record<string, string>}
   url: string
   version: string | null
   scrollRegions: { top: number, left: number }[]
@@ -42,9 +43,6 @@ export interface Page<CustomPageProps = Record<string, unknown>> {
 }
 
 export type InertiaProgressEvent = ProgressEvent & {percentage: number}
-
-
-
 
 const noop = () => null
 
@@ -59,7 +57,8 @@ export const AxiosInstance = Axios.create({
 class InertiaJS {
   resolveComponent: (component: string) => string
   swapComponent: (options: {component: string, page: Page, preserveState: VisitOptions['preserveState']}) => Promise<void>
-  transformProps: (props: any) => any
+  transformProps = (props: Record<string, any>) => props
+  resolveErrors = (page: Page) => (page.props.errors || {})
 
   activeVisit: Visit
   visitId: Record<string, never>
@@ -68,12 +67,14 @@ class InertiaJS {
   init({
     initialPage,
     resolveComponent,
+    resolveErrors,
     swapComponent,
     transformProps,
-  }: {initialPage: Page, resolveComponent: InertiaJS['resolveComponent'], swapComponent: InertiaJS['swapComponent'], transformProps: InertiaJS['transformProps']}) {
+  }: {initialPage: Page, resolveComponent: InertiaJS['resolveComponent'], resolveErrors: InertiaJS['resolveErrors'], swapComponent: InertiaJS['swapComponent'], transformProps: InertiaJS['transformProps']}) {
     this.resolveComponent = resolveComponent
+    this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
-    this.transformProps = transformProps
+    this.transformProps = transformProps || this.transformProps
     this.handleInitialPageVisit(initialPage)
     this.setupEventListeners()
   }
@@ -237,10 +238,11 @@ class InertiaJS {
     onFinish = noop,
     onCancel = noop,
     onSuccess = noop,
+    onError = noop,
   }: Partial<VisitOptions> = {}) {
     let visitURL: URL
     [visitURL, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
-    const visit: Visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess }
+    const visit: Visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
@@ -291,6 +293,11 @@ class InertiaJS {
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
+        const errors = this.resolveErrors(this.page)
+        if (Object.keys(errors).length > 0) {
+          fireErrorEvent(errors)
+          return onError(errors)
+        }
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
       }).catch((error: AxiosError) => {
@@ -313,9 +320,9 @@ class InertiaJS {
         this.finishVisit(visit)
       }).catch((error: AxiosError) => {
         if (!Axios.isCancel(error)) {
-          const throwError = fireErrorEvent(error)
+          const throwException = fireExceptionEvent(error)
           this.finishVisit(visit)
-          if (throwError) {
+          if (throwException) {
             return Promise.reject(error)
           }
         }
@@ -411,8 +418,8 @@ class InertiaJS {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  delete(url, options?: VisitOptions) {
-    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
+  delete(url, data = {}, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, method: 'delete', data })
   }
 
   remember(data, key = 'default') {

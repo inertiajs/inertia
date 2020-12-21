@@ -72,6 +72,7 @@ export default {
               onFinish: attrs.onFinish || (() => ({})),
               onCancel: attrs.onCancel || (() => ({})),
               onSuccess: attrs.onSuccess || (() => ({})),
+              onError: attrs.onError || (() => ({})),
             })
           }
         },

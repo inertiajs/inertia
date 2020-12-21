@@ -15,9 +15,13 @@ export default {
       type: Function,
       required: true,
     },
+    resolveErrors: {
+      type: Function,
+      required: false,
+    },
     transformProps: {
       type: Function,
-      default: props => props,
+      required: false,
     },
   },
   data() {
@@ -32,6 +36,7 @@ export default {
     Inertia.init({
       initialPage: this.initialPage,
       resolveComponent: this.resolveComponent,
+      resolveErrors: this.resolveErrors,
       transformProps: this.transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
         this.component = component
