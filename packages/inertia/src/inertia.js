@@ -1,21 +1,23 @@
 import Axios from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import { fireBeforeEvent, fireErrorEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
+import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events' // prettier-ignore
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 export default {
   resolveComponent: null,
+  resolveErrors: page => (page.props.errors || {}),
   swapComponent: null,
-  transformProps: null,
+  transformProps: props => props,
   activeVisit: null,
   visitId: null,
   page: null,
 
-  init({ initialPage, resolveComponent, swapComponent, transformProps }) {
+  init({ initialPage, resolveComponent, resolveErrors, swapComponent, transformProps }) {
     this.resolveComponent = resolveComponent
+    this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
-    this.transformProps = transformProps
+    this.transformProps = transformProps || this.transformProps
     this.handleInitialPageVisit(initialPage)
     this.setupEventListeners()
   },
@@ -179,10 +181,11 @@ export default {
     onFinish = () => ({}),
     onCancel = () => ({}),
     onSuccess = () => ({}),
+    onError = () => ({}),
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess }
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
@@ -236,6 +239,11 @@ export default {
         }
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
+        const errors = this.resolveErrors(this.page)
+        if (Object.keys(errors).length > 0) {
+          fireErrorEvent(errors)
+          return onError(errors)
+        }
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
       }).catch(error => {
@@ -258,9 +266,9 @@ export default {
         this.finishVisit(visit)
       }).catch(error => {
         if (!Axios.isCancel(error)) {
-          const throwError = fireErrorEvent(error)
+          const throwException = fireExceptionEvent(error)
           this.finishVisit(visit)
-          if (throwError) {
+          if (throwException) {
             return Promise.reject(error)
           }
         }

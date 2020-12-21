@@ -18,15 +18,20 @@ export default {
       type: Function,
       required: true,
     },
+    resolveErrors: {
+      type: Function,
+      required: false,
+    },
     transformProps: {
       type: Function,
-      default: props => props,
+      required: false,
     },
   },
-  setup({ initialPage, resolveComponent, transformProps }) {
+  setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
     Inertia.init({
       initialPage,
       resolveComponent,
+      resolveErrors,
       transformProps,
       swapComponent: async (args) => {
         component.value = markRaw(args.component)
@@ -58,7 +63,7 @@ export default {
         return child
       }
     }
-  }
+  },
 }
 
 export const plugin = {

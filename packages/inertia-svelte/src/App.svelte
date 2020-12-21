@@ -6,11 +6,13 @@
   export let
     initialPage,
     resolveComponent,
-    transformProps = props => props
+    resolveErrors,
+    transformProps
 
   Inertia.init({
     initialPage,
     resolveComponent,
+    resolveErrors,
     transformProps,
     swapComponent: async ({ component, page, preserveState }) => {
       store.update(current => ({

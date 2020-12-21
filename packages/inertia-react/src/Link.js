@@ -22,6 +22,7 @@ export default forwardRef(function InertiaLink({
   onFinish = noop,
   onCancel = noop,
   onSuccess = noop,
+  onError = noop,
   ...props
 }, ref) {
   const visit = useCallback(
@@ -46,6 +47,7 @@ export default forwardRef(function InertiaLink({
           onFinish,
           onCancel,
           onSuccess,
+          onError,
         })
       }
     },
@@ -66,6 +68,7 @@ export default forwardRef(function InertiaLink({
       onFinish,
       onCancel,
       onSuccess,
+      onError,
     ],
   )
 
