@@ -68,7 +68,8 @@ export default data => {
           .reduce((carry, key) => {
             carry[key] = form.defaults[key]
             return carry
-          }, {}))
+          }, {})
+        )
       }
 
       return this
