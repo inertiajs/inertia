@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-export default initialData => {
+export default data => {
   const form = {
-    data: { ... initialData },
-    defaults: { ... initialData },
+    data: { ... data },
+    defaults: { ... data },
     errors: {},
     processing: false,
     submit(method, url, options) {
