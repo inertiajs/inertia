@@ -25,14 +25,21 @@ export default {
     const restored = Inertia.restore(stateKey)
 
     this.$options.remember.data.forEach(key => {
-      if (restored !== undefined && restored[key] !== undefined) {
-        this[key] = restored[key]
+      if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
+        typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
+          ? this[key].unserialize(restored[key])
+          : (this[key] = restored[key])
       }
 
       this.$watch(key, () => {
         Inertia.remember(
-          this.$options.remember.data.reduce((data, key) => ({ ...data, [key]: this[key] }), {}),
-          stateKey
+          this.$options.remember.data.reduce((carry, key) => ({
+            ...carry,
+            [key]: typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
+              ? this[key].serialize()
+              : this[key],
+          }), {}),
+          stateKey,
         )
       }, { immediate: true, deep: true })
     })

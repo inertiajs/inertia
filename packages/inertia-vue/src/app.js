@@ -1,3 +1,4 @@
+import form from './form'
 import link from './link'
 import remember from './remember'
 import { Inertia } from '@inertiajs/inertia'
@@ -78,6 +79,7 @@ export default {
 export const plugin = {
   install(Vue) {
     Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
+    Object.defineProperty(Vue.prototype.$inertia, 'form', { get: () => form })
     Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })
     Vue.mixin(remember)
     Vue.component('InertiaLink', link)
