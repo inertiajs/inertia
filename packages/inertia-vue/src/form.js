@@ -9,6 +9,7 @@ export default function(data) {
     errors: {},
     hasErrors: false,
     processing: false,
+    progress: null,
     data() {
       return Object
         .keys(data)
@@ -67,6 +68,7 @@ export default function(data) {
         },
         onFinish: () => {
           this.processing = false
+          this.progress = null
 
           if (options.onFinish) {
             return options.onFinish()
@@ -80,6 +82,7 @@ export default function(data) {
             return options.onError(errors)
           }
         },
+        onProgress: progress => (this.progress = progress),
         onSuccess: page => {
           this.clearErrors()
 
