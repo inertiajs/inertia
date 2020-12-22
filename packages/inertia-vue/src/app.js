@@ -1,5 +1,5 @@
-import link from './link'
 import form from './form'
+import link from './link'
 import remember from './remember'
 import { Inertia } from '@inertiajs/inertia'
 
