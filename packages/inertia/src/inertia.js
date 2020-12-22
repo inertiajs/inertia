@@ -188,7 +188,8 @@ export default {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
 
-    if (method !== 'get' && hasFiles(data)) {
+    const visitHasFiles = hasFiles(data)
+    if (method !== 'get' && visitHasFiles) {
       data = objectToFormData(data)
     }
 
@@ -228,9 +229,11 @@ export default {
           ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
         },
         onUploadProgress: progress => {
-          progress.percentage = Math.round(progress.loaded / progress.total * 100)
-          fireProgressEvent(progress)
-          onProgress(progress)
+          if (visitHasFiles) {
+            progress.percentage = Math.round(progress.loaded / progress.total * 100)
+            fireProgressEvent(progress)
+            onProgress(progress)
+          }
         },
       }).then(response => {
         if (!this.isInertiaResponse(response)) {
