@@ -18,9 +18,7 @@ export default function(data) {
           return carry
         }, {})
     },
-    reset(fields) {
-      fields = Array.isArray(fields) ? fields : Object.values(arguments)
-
+    reset(...fields) {
       if (fields.length === 0) {
         Object.assign(this, defaults)
       } else {
