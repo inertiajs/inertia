@@ -40,7 +40,8 @@ export default function(data) {
       return this.clearErrors()
     },
     clearErrors() {
-      this.errors = {}
+      Vue.set(this, 'errors', {})
+      this.hasErrors = false
 
       return this
     },
@@ -80,8 +81,7 @@ export default function(data) {
           }
         },
         onSuccess: page => {
-          Vue.set(this, 'errors', {})
-          this.hasErrors = false
+          this.clearErrors()
 
           if (options.onSuccess) {
             return options.onSuccess(page)
