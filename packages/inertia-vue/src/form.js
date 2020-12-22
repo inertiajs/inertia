@@ -66,12 +66,12 @@ export default function(data) {
             return options.onStart(visit)
           }
         },
-        onFinish: () => {
-          this.processing = false
-          this.progress = null
+        onProgress: progress => (this.progress = progress),
+        onSuccess: page => {
+          this.clearErrors()
 
-          if (options.onFinish) {
-            return options.onFinish()
+          if (options.onSuccess) {
+            return options.onSuccess(page)
           }
         },
         onError: errors => {
@@ -82,12 +82,12 @@ export default function(data) {
             return options.onError(errors)
           }
         },
-        onProgress: progress => (this.progress = progress),
-        onSuccess: page => {
-          this.clearErrors()
+        onFinish: () => {
+          this.processing = false
+          this.progress = null
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
+          if (options.onFinish) {
+            return options.onFinish()
           }
         },
       })
