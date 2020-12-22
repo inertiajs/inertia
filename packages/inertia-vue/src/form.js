@@ -77,9 +77,6 @@ export default data => {
 
       return this
     },
-    hasErrors() {
-      return Object.keys(form.errors).length > 0
-    },
   }
 
   return new Proxy(form, {
