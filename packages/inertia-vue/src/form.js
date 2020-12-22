@@ -1,41 +1,52 @@
 import Vue from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-export default data => {
-  const form = {
-    data: { ... data },
-    defaults: { ... data },
+export default function(data) {
+  const defaults = JSON.parse(JSON.stringify(data))
+
+  return {
     errors: {},
+    hasErrors: false,
     processing: false,
+    data() {
+      return Object
+        .keys(data)
+        .reduce((carry, key) => {
+          carry[key] = this[key]
+          return carry
+        }, {})
+    },
     submit(method, url, options) {
       url = url || Inertia.page.url
       options = options || {}
 
-      Inertia[method](url, form.data, {
+      Inertia[method](url, this.data(), {
         ... options,
         onStart: visit => {
-          form.processing = true
+          this.processing = true
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
         onFinish: () => {
-          form.processing = false
+          this.processing = false
 
           if (options.onFinish) {
             return options.onFinish()
           }
         },
         onError: errors => {
-          Vue.set(form, 'errors', errors)
+          Vue.set(this, 'errors', errors)
+          this.hasErrors = true
 
           if (options.onError) {
             return options.onError(errors)
           }
         },
         onSuccess: page => {
-          Vue.set(form, 'errors', {})
+          Vue.set(this, 'errors', {})
+          this.hasErrors = false
 
           if (options.onSuccess) {
             return options.onSuccess(page)
@@ -44,16 +55,16 @@ export default data => {
       })
     },
     post(url, options) {
-      form.submit('post', url, options)
+      this.submit('post', url, options)
     },
     put(url, options) {
-      form.submit('put', url, options)
+      this.submit('put', url, options)
     },
     patch(url, options) {
-      form.submit('patch', url, options)
+      this.submit('patch', url, options)
     },
     delete(url, options) {
-      form.submit('delete', url, options)
+      this.submit('delete', url, options)
     },
     reset(fields) {
       const args = Array.isArray(fields)
@@ -61,39 +72,37 @@ export default data => {
         : Object.values(arguments)
 
       if (args.length === 0) {
-        form.data = { ... form.defaults }
+        Object.assign(this, defaults)
       } else {
         Object.assign(
-          form.data,
+          this,
           Object
-            .keys(form.defaults)
+            .keys(defaults)
             .filter(key => args.includes(key))
             .reduce((carry, key) => {
-              carry[key] = form.defaults[key]
+              carry[key] = defaults[key]
               return carry
             }, {}),
         )
       }
 
+      return this.clearErrors()
+    },
+    clearErrors() {
+      this.errors = {}
+
       return this
     },
-  }
-
-  return new Proxy(form, {
-    has(obj, prop) {
-      return Object.keys(form.data).includes(prop) || Object.keys(form).includes(prop)
-    },
-    get(obj, prop) {
-      return form.data[prop] || form[prop]
-    },
-    set(obj, prop, value){
-      if (Object.keys(form).includes(prop)) {
-        throw new Error(`Field name [${prop}] cannot be used within an Inertia Form, as it is reserved keyword.`)
+    serialize() {
+      return {
+        errors: this.errors,
+        ... this.data(),
       }
-
-      form.data[prop] = value
-
-      return true
     },
-  })
+    unserialize(data) {
+      Object.assign(this, data)
+      this.hasErrors = Object.keys(this.errors).length > 0
+    },
+    ... defaults,
+  }
 }
