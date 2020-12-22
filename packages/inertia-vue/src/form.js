@@ -63,12 +63,15 @@ export default data => {
       if (args.length === 0) {
         form.data = { ... form.defaults }
       } else {
-        Object.assign(form.data, Object.keys(form.defaults)
-          .filter(key => args.includes(key))
-          .reduce((carry, key) => {
-            carry[key] = form.defaults[key]
-            return carry
-          }, {})
+        Object.assign(
+          form.data,
+          Object
+            .keys(form.defaults)
+            .filter(key => args.includes(key))
+            .reduce((carry, key) => {
+              carry[key] = form.defaults[key]
+              return carry
+            }, {}),
         )
       }
 
