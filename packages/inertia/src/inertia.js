@@ -174,6 +174,7 @@ export default {
     preserveState = false,
     only = [],
     headers = {},
+    errorBag = null,
     onCancelToken = () => ({}),
     onBefore = () => ({}),
     onStart = () => ({}),
@@ -185,7 +186,7 @@ export default {
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
@@ -218,6 +219,7 @@ export default {
             'X-Inertia-Partial-Component': this.page.component,
             'X-Inertia-Partial-Data': only.join(','),
           } : {}),
+          ...(errorBag ? { 'X-Inertia-Error-Bag': errorBag } : {}),
           ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
         },
         onUploadProgress: progress => {
@@ -241,8 +243,8 @@ export default {
       }).then(() => {
         const errors = this.resolveErrors(this.page)
         if (Object.keys(errors).length > 0) {
-          fireErrorEvent(errors)
-          return onError(errors)
+          fireErrorEvent(errors[errorBag] || errors)
+          return onError(errors[errorBag] || errors)
         }
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
