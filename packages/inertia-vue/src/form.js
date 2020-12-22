@@ -66,7 +66,13 @@ export default function(data) {
             return options.onStart(visit)
           }
         },
-        onProgress: progress => (this.progress = progress),
+        onProgress: event => {
+          this.progress = event
+
+          if (options.onProgress) {
+            return options.onProgress(event)
+          }
+        },
         onSuccess: page => {
           this.clearErrors()
 
