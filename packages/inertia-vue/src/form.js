@@ -5,6 +5,7 @@ export default function(data) {
   const defaults = JSON.parse(JSON.stringify(data))
 
   return {
+    ...defaults,
     errors: {},
     hasErrors: false,
     processing: false,
@@ -16,12 +17,46 @@ export default function(data) {
           return carry
         }, {})
     },
-    submit(method, url, options) {
-      url = url || Inertia.page.url
-      options = options || {}
+    reset(fields) {
+      const args = Array.isArray(fields)
+        ? fields
+        : Object.values(arguments)
 
+      if (args.length === 0) {
+        Object.assign(this, defaults)
+      } else {
+        Object.assign(
+          this,
+          Object
+            .keys(defaults)
+            .filter(key => args.includes(key))
+            .reduce((carry, key) => {
+              carry[key] = defaults[key]
+              return carry
+            }, {}),
+        )
+      }
+
+      return this.clearErrors()
+    },
+    clearErrors() {
+      this.errors = {}
+
+      return this
+    },
+    serialize() {
+      return {
+        errors: this.errors,
+        ...this.data(),
+      }
+    },
+    unserialize(data) {
+      Object.assign(this, data)
+      this.hasErrors = Object.keys(this.errors).length > 0
+    },
+    submit(method, url, options = {}) {
       Inertia[method](url, this.data(), {
-        ... options,
+        ...options,
         onStart: visit => {
           this.processing = true
 
@@ -66,43 +101,5 @@ export default function(data) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
-    reset(fields) {
-      const args = Array.isArray(fields)
-        ? fields
-        : Object.values(arguments)
-
-      if (args.length === 0) {
-        Object.assign(this, defaults)
-      } else {
-        Object.assign(
-          this,
-          Object
-            .keys(defaults)
-            .filter(key => args.includes(key))
-            .reduce((carry, key) => {
-              carry[key] = defaults[key]
-              return carry
-            }, {}),
-        )
-      }
-
-      return this.clearErrors()
-    },
-    clearErrors() {
-      this.errors = {}
-
-      return this
-    },
-    serialize() {
-      return {
-        errors: this.errors,
-        ... this.data(),
-      }
-    },
-    unserialize(data) {
-      Object.assign(this, data)
-      this.hasErrors = Object.keys(this.errors).length > 0
-    },
-    ... defaults,
   }
 }
