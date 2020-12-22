@@ -19,18 +19,16 @@ export default function(data) {
         }, {})
     },
     reset(fields) {
-      const args = Array.isArray(fields)
-        ? fields
-        : Object.values(arguments)
+      fields = Array.isArray(fields) ? fields : Object.values(arguments)
 
-      if (args.length === 0) {
+      if (fields.length === 0) {
         Object.assign(this, defaults)
       } else {
         Object.assign(
           this,
           Object
             .keys(defaults)
-            .filter(key => args.includes(key))
+            .filter(key => fields.includes(key))
             .reduce((carry, key) => {
               carry[key] = defaults[key]
               return carry
