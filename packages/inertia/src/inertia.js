@@ -3,6 +3,8 @@ import debounce from './debounce'
 import modal from './modal'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events' // prettier-ignore
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
+import { hasFiles } from './files'
+import { objectToFormData } from './formData'
 
 export default {
   resolveComponent: null,
@@ -186,6 +188,12 @@ export default {
   } = {}) {
     method = method.toLowerCase();
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+
+    const visitHasFiles = hasFiles(data)
+    if (method !== 'get' && visitHasFiles) {
+      data = objectToFormData(data)
+    }
+
     const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
@@ -223,9 +231,11 @@ export default {
           ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
         },
         onUploadProgress: progress => {
-          progress.percentage = Math.round(progress.loaded / progress.total * 100)
-          fireProgressEvent(progress)
-          onProgress(progress)
+          if (visitHasFiles) {
+            progress.percentage = Math.round(progress.loaded / progress.total * 100)
+            fireProgressEvent(progress)
+            onProgress(progress)
+          }
         },
       }).then(response => {
         if (!this.isInertiaResponse(response)) {
