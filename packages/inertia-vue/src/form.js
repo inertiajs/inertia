@@ -1,6 +1,6 @@
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data) {
+export default function(data = {}) {
   let transform = data => data
   const defaults = JSON.parse(JSON.stringify(data))
 
