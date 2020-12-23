@@ -1,6 +1,7 @@
 import { Inertia } from '@inertiajs/inertia'
 
 export default function(data) {
+  let transform = data => data
   const defaults = JSON.parse(JSON.stringify(data))
 
   return {
@@ -16,6 +17,11 @@ export default function(data) {
           carry[key] = this[key]
           return carry
         }, {})
+    },
+    transform(callback) {
+      transform = callback
+
+      return this
     },
     reset(...fields) {
       if (fields.length === 0) {
@@ -58,7 +64,7 @@ export default function(data) {
       this.hasErrors = Object.keys(this.errors).length > 0
     },
     submit(method, url, options = {}) {
-      Inertia[method](url, this.data(), {
+      Inertia[method](url, transform(this.data()), {
         ...options,
         onStart: visit => {
           this.processing = true
