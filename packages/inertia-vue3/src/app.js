@@ -1,3 +1,4 @@
+import form from './form'
 import link from './link'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
@@ -68,6 +69,7 @@ export default {
 
 export const plugin = {
   install(app) {
+    Inertia.form = form
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     app.mixin(remember)
