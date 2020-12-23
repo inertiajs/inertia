@@ -20,6 +20,7 @@ export default function(data) {
     },
     transform(callback) {
       transform = callback
+
       return this
     },
     reset(...fields) {
