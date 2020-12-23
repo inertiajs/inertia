@@ -33,11 +33,17 @@ export default function(data) {
         )
       }
 
-      return this.clearErrors()
+      return this.clearErrors(...fields)
     },
-    clearErrors() {
-      this.errors = {}
-      this.hasErrors = false
+    clearErrors(...fields) {
+      this.errors = Object
+        .keys(this.errors)
+        .reduce((carry, field) => ({
+          ...carry,
+          ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
+        }), {})
+
+      this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
     },
