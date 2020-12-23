@@ -85,3 +85,7 @@ export function usePage() {
     version: computed(() => page.value.version),
   }
 }
+
+export function useForm(data) {
+  return ref(form(data))
+}
