@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function(data) {
@@ -37,7 +36,7 @@ export default function(data) {
       return this.clearErrors()
     },
     clearErrors() {
-      Vue.set(this, 'errors', {})
+      this.errors = {}
       this.hasErrors = false
 
       return this
@@ -77,7 +76,7 @@ export default function(data) {
           }
         },
         onError: errors => {
-          Vue.set(this, 'errors', errors)
+          this.errors = errors
           this.hasErrors = true
 
           if (options.onError) {

@@ -78,8 +78,8 @@ export default {
 
 export const plugin = {
   install(Vue) {
+    Inertia.form = form
     Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
-    Object.defineProperty(Vue.prototype.$inertia, 'form', { get: () => form })
     Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })
     Vue.mixin(remember)
     Vue.component('InertiaLink', link)
