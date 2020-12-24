@@ -6,6 +6,7 @@ export default function(data = {}) {
 
   return {
     ...defaults,
+    wasSuccessful: false,
     errors: {},
     hasErrors: false,
     processing: false,
@@ -53,6 +54,11 @@ export default function(data = {}) {
 
       return this
     },
+    clearWasSuccessful() {
+      this.wasSuccessful = false
+
+      return this
+    },
     serialize() {
       return {
         errors: this.errors,
@@ -66,6 +72,13 @@ export default function(data = {}) {
     submit(method, url, options = {}) {
       Inertia[method](url, transform(this.data()), {
         ...options,
+        onBefore: visit => {
+          this.wasSuccessful = false
+
+          if (options.onBefore) {
+            return options.onBefore(visit)
+          }
+        },
         onStart: visit => {
           this.processing = true
 
@@ -81,6 +94,7 @@ export default function(data = {}) {
           }
         },
         onSuccess: page => {
+          this.wasSuccessful = true
           this.clearErrors()
 
           if (options.onSuccess) {
