@@ -41,7 +41,7 @@ export default function(data = {}) {
         )
       }
 
-      return this.clearErrors(...fields)
+      return this
     },
     clearErrors(...fields) {
       this.errors = Object
