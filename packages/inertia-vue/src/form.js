@@ -1,8 +1,9 @@
 import { Inertia } from '@inertiajs/inertia'
 
 export default function(data = {}) {
-  let transform = data => data
   const defaults = JSON.parse(JSON.stringify(data))
+  let recentlySuccessfulTimeoutId = null
+  let transform = data => data
 
   return {
     ...defaults,
@@ -10,6 +11,7 @@ export default function(data = {}) {
     hasErrors: false,
     processing: false,
     progress: null,
+    recentlySuccessful: false,
     data() {
       return Object
         .keys(data)
@@ -66,6 +68,14 @@ export default function(data = {}) {
     submit(method, url, options = {}) {
       Inertia[method](url, transform(this.data()), {
         ...options,
+        onBefore: visit => {
+          clearTimeout(recentlySuccessfulTimeoutId)
+          this.recentlySuccessful = false
+
+          if (options.onBefore) {
+            return options.onBefore(visit)
+          }
+        },
         onStart: visit => {
           this.processing = true
 
@@ -82,6 +92,8 @@ export default function(data = {}) {
         },
         onSuccess: page => {
           this.clearErrors()
+          this.recentlySuccessful = true
+          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
           if (options.onSuccess) {
             return options.onSuccess(page)
