@@ -1,8 +1,8 @@
 ---
-name: Bug Report - React
-about: Submit a React related issue.
+name: Bug Report - Vue 2
+about: Submit a Vue 2 related issue.
 title: ''
-labels: react
+labels: vue.js
 assignees: ''
 
 ---
@@ -10,7 +10,7 @@ assignees: ''
 ### Versions:
 
 - `@inertiajs/inertia` version: #.#.#
-- `@inertiajs/inertia-react` version: #.#.#
+- `@inertiajs/inertia-vue` version: #.#.#
 
 ### Describe the problem:
 

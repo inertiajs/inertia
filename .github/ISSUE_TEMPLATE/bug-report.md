@@ -1,33 +1,30 @@
 ---
 name: Bug Report
-about: Create a generic report to help us improve Inertia.js.
+about: Submit a generic Inertia.js issue.
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+### Versions:
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Define '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error in browser console
+- `@inertiajs/inertia` version: #.#.#
+- `@inertiajs/inertia-vue` version: #.#.#
+- `@inertiajs/inertia-vue3` version: #.#.#
+- `@inertiajs/inertia-react` version: #.#.#
+- `@inertiajs/inertia-svelte` version: #.#.#
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+### Describe the problem:
 
-**Screenshots, code samples etc.**
-If applicable, add screenshots, code samples or errors logs to help explain your problem.
+<!--
+  Explain the behavior you're seeing that you think is a bug,
+  and explain how you think things should behave instead.
+-->
 
-**Environment (please complete the following information):**
- - `@inertiajs/inertia` version: [e.g. 0.6.2]
- - OS: [e.g. iOS]
- - Browser [e.g. Chrome, Safari]
- - Version [e.g. 22]
+### Steps to reproduce:
 
-**Additional context**
-Add any other context about the problem here.
+<!--
+  Please carefully explain the steps to reproduce this issue.
+  We can't help you without a reproduction.
+-->
