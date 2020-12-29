@@ -376,8 +376,8 @@ export default {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   },
 
-  delete(url, data = {}, options = {}) {
-    return this.visit(url, { preserveState: true, ...options, method: 'delete', data })
+  delete(url, options = {}) {
+    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   },
 
   remember(data, key = 'default') {
