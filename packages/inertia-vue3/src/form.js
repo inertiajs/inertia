@@ -11,6 +11,7 @@ export default function(data = {}) {
     hasErrors: false,
     processing: false,
     progress: null,
+    wasSuccessful: false,
     recentlySuccessful: false,
     data() {
       return Object
@@ -69,8 +70,9 @@ export default function(data = {}) {
       Inertia[method](url, transform(this.data()), {
         ...options,
         onBefore: visit => {
-          clearTimeout(recentlySuccessfulTimeoutId)
+          this.wasSuccessful = false
           this.recentlySuccessful = false
+          clearTimeout(recentlySuccessfulTimeoutId)
 
           if (options.onBefore) {
             return options.onBefore(visit)
@@ -92,6 +94,7 @@ export default function(data = {}) {
         },
         onSuccess: page => {
           this.clearErrors()
+          this.wasSuccessful = true
           this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
