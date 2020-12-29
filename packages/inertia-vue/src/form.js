@@ -67,7 +67,8 @@ export default function(data = {}) {
       this.hasErrors = Object.keys(this.errors).length > 0
     },
     submit(method, url, options = {}) {
-      options = {
+      const data = transform(this.data())
+      const _options = {
         ...options,
         onBefore: visit => {
           this.wasSuccessful = false
@@ -121,9 +122,9 @@ export default function(data = {}) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ...options, data: transform(this.data()) })
+        Inertia.delete(url, { ..._options, data  })
       } else {
-        Inertia[method](url, transform(this.data()), options)
+        Inertia[method](url, data, _options)
       }
     },
     post(url, options) {
