@@ -2,11 +2,12 @@ name: End-to-end tests
 on: [push]
 jobs:
   tests:
-    runs-on: ubuntu-16.04
+    runs-on: macos-11.0
 
     strategy:
       matrix:
         adapter: ['vue']
+        browser: ['chrome', 'edge', 'firefox']
 
     steps:
       - name: Checkout
@@ -43,10 +44,11 @@ jobs:
           yarn link "@inertiajs/inertia"
           yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
 
-      - name: Run Cypress (inertia-${{ matrix.adapter }})
+      - name: Run Cypress (${{ matrix.browser }} / inertia-${{ matrix.adapter }})
         uses: cypress-io/github-action@v2
         with:
           working-directory: packages/inertia-${{ matrix.adapter }}/tests
+          browser: ${{ matrix.browser }}
           install: false
           build: yarn build
           start: yarn run-server
