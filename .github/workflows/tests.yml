@@ -21,7 +21,7 @@ jobs:
       - name: Cache Node modules
         uses: actions/cache@v2
         with:
-          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.OS }}-yarn-cache-${{ hashFiles('yarn.lock') }}
           path: |
             ~/.cache
             node_modules
