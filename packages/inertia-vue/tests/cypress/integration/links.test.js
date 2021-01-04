@@ -7,9 +7,9 @@ describe('Links', () => {
     cy.on('load', () => expect(true).to.equal(false))
 
     cy.get('.basic').click()
-    cy.url().should('eq', Cypress.config().baseUrl + '/links-target/get')
+    cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
-    cy.get('.text').should('have.text', 'This is one of the links target page')
+    cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
   })
 
   describe('Methods', () => {
@@ -21,11 +21,15 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.get').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links-target/get')
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
-      cy.get('.method').should('have.text', 'Method: get')
-      cy.get('.query').should('have.text', 'QueryParams: {}')
-      cy.get('.form').should('have.text', 'FormData: {}')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, query }) => {
+          expect(method).to.eq('get')
+          expect(query).to.be.empty
+          expect(form).to.be.empty
+        })
     })
 
     it('can use the POST method', () => {
@@ -36,11 +40,15 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.post').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links-target/post')
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
-      cy.get('.method').should('have.text', 'Method: post')
-      cy.get('.query').should('have.text', 'QueryParams: {}')
-      cy.get('.form').should('have.text', 'FormData: {}')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, query }) => {
+          expect(method).to.eq('post')
+          expect(query).to.be.empty
+          expect(form).to.be.empty
+        })
     })
 
     it('can use the PUT method', () => {
@@ -51,11 +59,15 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.put').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links-target/put')
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
 
-      cy.get('.method').should('have.text', 'Method: put')
-      cy.get('.query').should('have.text', 'QueryParams: {}')
-      cy.get('.form').should('have.text', 'FormData: {}')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, query }) => {
+          expect(method).to.eq('put')
+          expect(query).to.be.empty
+          expect(form).to.be.empty
+        })
     })
 
     it('can use the PATCH method', () => {
@@ -66,11 +78,15 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.patch').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links-target/patch')
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
-      cy.get('.method').should('have.text', 'Method: patch')
-      cy.get('.query').should('have.text', 'QueryParams: {}')
-      cy.get('.form').should('have.text', 'FormData: {}')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, query }) => {
+          expect(method).to.eq('patch')
+          expect(query).to.be.empty
+          expect(form).to.be.empty
+        })
     })
 
     it('can use the DELETE method', () => {
@@ -81,11 +97,15 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.delete').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links-target/delete')
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
 
-      cy.get('.method').should('have.text', 'Method: delete')
-      cy.get('.query').should('have.text', 'QueryParams: {}')
-      cy.get('.form').should('have.text', 'FormData: {}')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, query }) => {
+          expect(method).to.eq('delete')
+          expect(query).to.be.empty
+          expect(form).to.be.empty
+        })
     })
   })
 
@@ -99,13 +119,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.get').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/get')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: application/json')
-        cy.get('.method').should('have.text', 'Method: get')
-        cy.get('.form').should('have.text', 'FormData: {}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {\n  "foo": "get"\n}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('application/json')
+
+            expect(method).to.eq('get')
+            expect(query).to.contain.key('foo')
+            expect(query.foo).to.eq('get')
+            expect(form).to.be.empty
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the POST method', () => {
@@ -116,13 +143,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.post').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/post')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: application/json')
-        cy.get('.method').should('have.text', 'Method: post')
-        cy.get('.form').should('have.text', 'FormData: {\n  "bar": "post"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('application/json')
+
+            expect(method).to.eq('post')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('bar')
+            expect(form.bar).to.eq('post')
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the PUT method', () => {
@@ -133,13 +167,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.put').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/put')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: application/json')
-        cy.get('.method').should('have.text', 'Method: put')
-        cy.get('.form').should('have.text', 'FormData: {\n  "baz": "put"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('application/json')
+
+            expect(method).to.eq('put')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('baz')
+            expect(form.baz).to.eq('put')
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the PATCH method', () => {
@@ -150,13 +191,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.patch').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/patch')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: application/json')
-        cy.get('.method').should('have.text', 'Method: patch')
-        cy.get('.form').should('have.text', 'FormData: {\n  "foo": "patch"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('application/json')
+
+            expect(method).to.eq('patch')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('patch')
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the DELETE method', () => {
@@ -167,13 +215,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.delete').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/delete')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: application/json')
-        cy.get('.method').should('have.text', 'Method: delete')
-        cy.get('.form').should('have.text', 'FormData: {\n  "bar": "delete"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('application/json')
+
+            expect(method).to.eq('delete')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('bar')
+            expect(form.bar).to.eq('delete')
+            expect(files).to.be.empty
+          })
       })
     })
 
@@ -186,13 +241,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.post').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/post')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: post')
-        cy.get('.form').should('have.text', 'FormData: {\n  "bar": "baz"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('post')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('bar')
+            expect(form.bar).to.eq('baz')
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the PUT method', () => {
@@ -203,13 +265,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.put').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/put')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: put')
-        cy.get('.form').should('have.text', 'FormData: {\n  "bar": "baz"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('put')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('bar')
+            expect(form.bar).to.eq('baz')
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the PATCH method', () => {
@@ -220,13 +289,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.patch').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/patch')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: patch')
-        cy.get('.form').should('have.text', 'FormData: {\n  "bar": "baz"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('patch')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('bar')
+            expect(form.bar).to.eq('baz')
+            expect(files).to.be.empty
+          })
       })
 
       it('can pass data using the DELETE method', () => {
@@ -237,14 +313,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.delete').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/delete')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.method').should('have.text', 'Method: delete')
-        cy.get('.form').should('have.text', 'FormData: {\n  "bar": "baz"\n}')
-        cy.get('.files').should('have.text', 'Files: 0')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('delete')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('bar')
+            expect(form.bar).to.eq('baz')
+            expect(files).to.be.empty
+          })
       })
     })
 
@@ -257,14 +339,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.post').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/post')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: post')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.form').should('have.text', 'FormData: {\n  "foo": "bar"\n}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('post')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
       })
 
       it('auto-converts objects to form-data when files are present using the PUT method', () => {
@@ -275,14 +363,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.put').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/put')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: put')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.form').should('have.text', 'FormData: {\n  "foo": "bar"\n}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('put')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
       })
 
       it('auto-converts objects to form-data when files are present using the PATCH method', () => {
@@ -293,14 +387,20 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.patch').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/patch')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: patch')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.form').should('have.text', 'FormData: {\n  "foo": "bar"\n}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('patch')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
       })
 
       it('auto-converts objects to form-data when files are present using the DELETE method', () => {
@@ -311,15 +411,103 @@ describe('Links', () => {
         cy.on('load', () => expect(true).to.equal(false))
 
         cy.get('.delete').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links-target/delete')
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
 
-        cy.get('.content-type').should('contain.text', 'Content-Type: multipart/form-data; boundary=')
-        cy.get('.method').should('have.text', 'Method: delete')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.query').should('have.text', 'QueryParams: {}')
-        cy.get('.files').should('have.text', 'Files: 1')
-        cy.get('.form').should('have.text', 'FormData: {\n  "foo": "bar"\n}')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('delete')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
       })
+    })
+  })
+
+  describe('Headers', () => {
+    it('has the default set of headers', () => {
+      cy.visit('/links/headers')
+
+      // Fail the assertion when a hard visit / location visit is made.
+      // Inertia's SPA-visit should not trigger this.
+      cy.on('load', () => expect(true).to.equal(false))
+
+      cy.get('.basic').click()
+
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+        })
+    })
+
+    it('contains headers specific to the "only" parameter', () => {
+      cy.visit('/links/headers')
+
+      // Fail the assertion when a hard visit / location visit is made.
+      // Inertia's SPA-visit should not trigger this.
+      cy.on('load', () => expect(true).to.equal(false))
+
+      cy.get('.only').click()
+
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'x-inertia-partial-component', 'x-inertia-partial-data'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['x-inertia-partial-data']).to.eq('foo,bar')
+          expect(headers['x-inertia-partial-component']).to.eq('Links/Headers')
+        })
+    })
+
+    it('allows to settings custom headers using the GET method', () => {
+      cy.visit('/links/headers')
+
+      // Fail the assertion when a hard visit / location visit is made.
+      // Inertia's SPA-visit should not trigger this.
+      cy.on('load', () => expect(true).to.equal(false))
+
+      cy.get('.custom').click()
+
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'foo'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['foo']).to.eq('bar')
+        })
+    })
+
+    it('cannot override built-in Inertia headers', () => {
+      cy.visit('/links/headers')
+
+      // Fail the assertion when a hard visit / location visit is made.
+      // Inertia's SPA-visit should not trigger this.
+      cy.on('load', () => expect(true).to.equal(false))
+
+      cy.get('.overridden').click()
+
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['bar']).to.eq('baz')
+        })
     })
   })
 })

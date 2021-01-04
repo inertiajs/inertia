@@ -34,11 +34,11 @@ app.get('/', (req, res) => render(req, res, {
   },
 }))
 
-app.get('/links-target/get', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'get', form: req.body, query: req.query, files: req.files }}))
-app.post('/links-target/post', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'post', form: req.body, query: req.query, files: req.files }}))
-app.put('/links-target/put', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'put', form: req.body, query: req.query, files: req.files }}))
-app.patch('/links-target/patch', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'patch', form: req.body, query: req.query, files: req.files }}))
-app.delete('/links-target/delete', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'delete', form: req.body, query: req.query, files: req.files }}))
+app.get('/dump/get', upload.any(), (req, res) => render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files }}))
+app.post('/dump/post', upload.any(), (req, res) => render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files }}))
+app.put('/dump/put', upload.any(), (req, res) => render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'put', form: req.body, query: req.query, files: req.files }}))
+app.patch('/dump/patch', upload.any(), (req, res) => render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files }}))
+app.delete('/dump/delete', upload.any(), (req, res) => render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files }}))
 
 app.get('*', (req, res) => render(req, res))
 
