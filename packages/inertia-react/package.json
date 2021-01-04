@@ -1,12 +1,21 @@
 {
   "name": "@inertiajs/inertia-react",
-  "version": "0.2.2",
+  "version": "0.5.0",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
     "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
   ],
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inertiajs/inertia.git",
+    "directory": "packages/inertia-react"
+  },
+  "bugs": {
+    "url": "https://github.com/inertiajs/inertia/issues"
+  },
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
@@ -19,16 +28,16 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.3.0",
+    "@inertiajs/inertia": "^0.8.0",
     "@types/react": "^16.9.1",
-    "eslint": "^6.1.0",
+    "eslint": "^7.0.0",
     "eslint-plugin-react": "^7.14.3",
-    "eslint-plugin-react-hooks": "^1.7.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
     "microbundle": "^0.12.0",
     "react": "^16.9.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.2.0 || ^0.3.0",
+    "@inertiajs/inertia": "^0.8.0",
     "react": "^16.8.0"
   }
 }

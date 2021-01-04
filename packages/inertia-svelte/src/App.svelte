@@ -6,21 +6,24 @@
   export let
     initialPage,
     resolveComponent,
-    transformProps = props => props
+    resolveErrors,
+    transformProps
 
   Inertia.init({
     initialPage,
     resolveComponent,
-    updatePage: async (component, props, { preserveState }) => {
-      store.update(page => ({
+    resolveErrors,
+    transformProps,
+    swapComponent: async ({ component, page, preserveState }) => {
+      store.update(current => ({
         component,
-        key: preserveState ? page.key : Date.now(),
-        props: transformProps(props),
+        page,
+        key: preserveState ? current.key : Date.now(),
       }))
     },
   })
 
-  $: child = $store.component && h($store.component.default, $store.props)
+  $: child = $store.component && h($store.component.default, $store.page.props)
   $: layout = $store.component && $store.component.layout
   $: components = layout
     ? Array.isArray(layout)

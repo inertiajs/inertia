@@ -1,8 +1,12 @@
-import { Inertia, shouldIntercept } from '@inertiajs/inertia'
+import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
   functional: true,
   props: {
+    as: {
+      type: String,
+      default: 'a',
+    },
     data: {
       type: Object,
       default: () => ({}),
@@ -25,7 +29,7 @@ export default {
     },
     preserveState: {
       type: Boolean,
-      default: false,
+      default: null,
     },
     only: {
       type: Array,
@@ -45,14 +49,23 @@ export default {
       finish: () => ({}),
       cancel: () => ({}),
       success: () => ({}),
-      ... (data.on || {}),
+      error: () => ({}),
+      ...(data.on || {}),
     }
 
-    return h('a', {
+    const as = props.as.toLowerCase()
+    const method = props.method.toLowerCase()
+    const [url, propsData] = mergeDataIntoQueryString(method, hrefToUrl(props.href), props.data)
+
+    if (as === 'a' && method !== 'get') {
+      console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${url.href}" method="${method}" as="button">...</inertia-link>`)
+    }
+
+    return h(props.as, {
       ...data,
       attrs: {
         ...data.attrs,
-        href: props.href,
+        ...as === 'a' ? { href: url.href } : {},
       },
       on: {
         ...data.on,
@@ -62,20 +75,22 @@ export default {
           if (shouldIntercept(event)) {
             event.preventDefault()
 
-            Inertia.visit(props.href, {
-              data: props.data,
-              method: props.method,
+            Inertia.visit(url.href, {
+              data: propsData,
+              method: method,
               replace: props.replace,
               preserveScroll: props.preserveScroll,
-              preserveState: props.preserveState,
+              preserveState: props.preserveState ?? (method !== 'get'),
               only: props.only,
               headers: props.headers,
               onCancelToken: data.on.cancelToken,
+              onBefore: data.on.before,
               onStart: data.on.start,
               onProgress: data.on.progress,
               onFinish: data.on.finish,
               onCancel: data.on.cancel,
               onSuccess: data.on.success,
+              onError: data.on.error,
             })
           }
         },

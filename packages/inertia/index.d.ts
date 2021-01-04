@@ -1,3 +1,5 @@
+import { CancelTokenSource } from "axios"
+
 declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
@@ -16,15 +18,28 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
   props: CustomPageProps
   url: string
   version: string | null
+  scrollRegions: { top: number, left: number }[]
+  rememberedState: {
+    [key: string]: any
+  }
 }
 
 type VisitOptions = {
   method?: string
-  preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
-  preserveState?: boolean | ((props: Inertia.PageProps) => boolean)
   replace?: boolean
+  preserveScroll?: boolean | ((props: Page<Inertia.PageProps>) => boolean)
+  preserveState?: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only?: string[]
+  headers?: object
+  onCancelToken?: (cancelToken: CancelTokenSource) => void
+  onStart?: (visit: VisitOptions & {url: string}) => void | boolean
+  onProgress?: (progress: ProgressEvent) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: (page: Page) => void | Promise<any>
 }
+
+type InertiaEvent = 'before' | 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
 
 interface Inertia {
   init: <
@@ -47,6 +62,8 @@ interface Inertia {
     options?: VisitOptions & { data?: object }
   ) => Promise<void>
 
+  get: (url: string, data?: object, options?: VisitOptions) => Promise<void>
+
   patch: (url: string, data?: object, options?: VisitOptions) => Promise<void>
 
   post: (url: string, data?: object, options?: VisitOptions) => Promise<void>
@@ -62,6 +79,8 @@ interface Inertia {
   remember: (data: object, key?: string) => void
 
   restore: (key?: string) => object
+
+  on: (type: InertiaEvent, callback: (event: Event) => boolean | void) => () => void
 }
 
 export const Inertia: Inertia

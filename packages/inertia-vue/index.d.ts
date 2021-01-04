@@ -1,5 +1,5 @@
 import * as Inertia from '@inertiajs/inertia'
-import { Component, FunctionalComponentOptions } from 'vue'
+import { Component, FunctionalComponentOptions, PluginObject } from 'vue'
 
 interface AppData<PageProps extends Inertia.PageProps = Inertia.PageProps> {
   component: Component | null
@@ -27,13 +27,23 @@ type App<
 >
 
 interface InertiaLinkProps {
+  as?: string
   data?: object
   href: string
   method?: string
+  headers?: object
   onClick?: (event: MouseEvent | KeyboardEvent) => void
-  preserveScroll?: boolean
-  preserveState?: boolean
+  preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
+  preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
   replace?: boolean
+  only?: string[]
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onBefore?: () => void
+  onStart?: () => void
+  onProgress?: (progress: number) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: () => void
 }
 
 type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
@@ -41,3 +51,7 @@ type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 export const InertiaLink: InertiaLink
 
 export const InertiaApp: App
+
+export const App: App
+
+export const plugin: PluginObject<any>
