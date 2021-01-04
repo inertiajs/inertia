@@ -24,7 +24,8 @@ jobs:
           key: ${{ runner.OS }}-npm-cache-${{ hashFiles('yarn.lock') }}
           path: |
             ~/.cache
-            **/node_modules
+            node_modules
+            packages/*/tests/node_modules
 
       - name: Build Inertia
         run: |
