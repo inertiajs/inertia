@@ -1,6 +1,7 @@
+import { ref } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data = {}) {
+export default function form(data = {}) {
   const defaults = JSON.parse(JSON.stringify(data))
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
@@ -142,4 +143,8 @@ export default function(data = {}) {
       this.submit('delete', url, options)
     },
   }
+}
+
+export function useForm(data) {
+  return ref(form(data))
 }
