@@ -58,7 +58,9 @@ export default function(data = {}) {
     },
     serialize() {
       return {
-        errors: this.errors,
+        errors: {
+          ...this.errors,
+        },
         ...this.data(),
       }
     },
