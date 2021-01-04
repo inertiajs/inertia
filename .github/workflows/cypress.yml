@@ -1,7 +1,7 @@
 name: End-to-end tests
 on: [push]
 jobs:
-  cypress-vue:
+  tests:
     runs-on: ubuntu-16.04
 
     strategy:
@@ -12,34 +12,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install Yarn
+      - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
           node-version: 14.15.3
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('yarn.lock') }}
+          path: |
+            ~/.cache
+            **/node_modules
 
       - name: Prepare Inertia
         run: |
           yarn install
           yarn build
-          yarn cache dir
 
       - name: Local-link Inertia core
         run: cd packages/inertia && yarn link
 
-      - name: Local-link @inertiajs/inertia-${{ matrix.adapter }})
+      - name: Local-link @inertiajs/inertia-${{ matrix.adapter }}
         run: cd packages/inertia-${{ matrix.adapter }} && yarn link
-
-      - name: Install Cypress Dependencies
-        run: |
-          cd packages/inertia-${{ matrix.adapter }}
-          yarn
-          yarn link "@inertiajs/inertia"
-          yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
 
       - name: Run Cypress (inertia-${{ matrix.adapter }})
         uses: cypress-io/github-action@v2
         with:
           working-directory: packages/inertia-${{matrix.adapter}}/tests
+          install-command: |
+            yarn
+            yarn link "@inertiajs/inertia"
+            yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
           build: yarn build
           start: yarn test:server
           wait-on: 'http://localhost:13714'
