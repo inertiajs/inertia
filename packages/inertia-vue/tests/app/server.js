@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 const multer  = require('multer')
 
 const app = express()
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ extended: true }))
 const render = helpers.render
 const upload = multer()
@@ -34,11 +34,11 @@ app.get('/', (req, res) => render(req, res, {
   },
 }))
 
-app.get('/links-target/get', upload.none(), (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'get', form: req.body, query: req.query }}))
-app.post('/links-target/post', upload.none(), (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'post', form: req.body, query: req.query }}))
-app.put('/links-target/put', upload.none(), (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'put', form: req.body, query: req.query }}))
-app.patch('/links-target/patch', upload.none(), (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'patch', form: req.body, query: req.query }}))
-app.delete('/links-target/delete', upload.none(), (req, res) => render(req, res, { component: 'LinksTarget', props: { method: 'delete', form: req.body, query: req.query }}))
+app.get('/links-target/get', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'get', form: req.body, query: req.query, files: req.files }}))
+app.post('/links-target/post', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'post', form: req.body, query: req.query, files: req.files }}))
+app.put('/links-target/put', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'put', form: req.body, query: req.query, files: req.files }}))
+app.patch('/links-target/patch', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'patch', form: req.body, query: req.query, files: req.files }}))
+app.delete('/links-target/delete', upload.any(), (req, res) => render(req, res, { component: 'LinksTarget', props: { contentType: req.headers['content-type'] || '', method: 'delete', form: req.body, query: req.query, files: req.files }}))
 
 app.get('*', (req, res) => render(req, res))
 

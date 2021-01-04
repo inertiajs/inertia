@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span class="text">This is the links page with FormData based data</span>
+    <span class="text">This is the links page with automatic data conversion from plain objects to form-data</span>
 
     <inertia-link method="GET" href="/links-target/get" :data="linkData" class="get">GET Link</inertia-link>
     <inertia-link method="POST" href="/links-target/post" :data="linkData" class="post">POST Link</inertia-link>
@@ -10,12 +10,12 @@
   </div>
 </template>
 <script>
-  export default {
-    data: () => ({
-      linkData: new FormData,
-    }),
-    created() {
-      this.linkData.append('bar', 'baz')
+export default {
+  data: () => ({
+    linkData: {
+      file: new File([], 'example.jpg'),
+      foo: 'bar'
     }
-  }
+  })
+}
 </script>
