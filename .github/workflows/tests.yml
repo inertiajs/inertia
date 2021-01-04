@@ -1,13 +1,13 @@
 name: End-to-end tests
-on: [push]
+on: [push, pull_request]
 jobs:
   tests:
-    runs-on: windows-latest
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
         adapter: ['vue']
-        browser: ['chrome', 'edge', 'firefox']
+        browser: ['chrome', 'firefox']
 
     steps:
       - name: Checkout
