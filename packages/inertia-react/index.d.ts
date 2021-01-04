@@ -49,10 +49,10 @@ export function usePage<
   Page extends Inertia.Page = Inertia.Page
 >(): Page
 
-export function useRememberedState<RememberedState>(
-  initialState: RememberedState,
+export function useRemember<State>(
+  initialState: State,
   key?: string
-): [RememberedState, React.Dispatch<React.SetStateAction<RememberedState>>]
+): [State, React.Dispatch<React.SetStateAction<State>>]
 
 export const InertiaLink: InertiaLink
 
