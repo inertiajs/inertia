@@ -1,18 +1,21 @@
 import Vue from 'vue'
 import { InertiaApp, plugin } from '@inertiajs/inertia-vue'
+import { Inertia } from '@inertiajs/inertia'
 
-if (window.location.href.indexOf('use-deprecated-vue-plugin') > -1) {
+if (window.location.pathname.startsWith('/plugin/deprecated')) {
   Vue.use(InertiaApp)
-} else {
+} else if (! window.location.pathname.startsWith('/plugin/without')) {
   Vue.use(plugin)
 }
 
 const app = document.getElementById('app')
 
-window.vm = new Vue({
+window.testing = {}
+window.testing.Inertia = Inertia
+window.testing.vue = new Vue({
   render: h => h(InertiaApp, {
     props: {
-      initialPage: JSON.parse(app.dataset.page),
+      initialPage: window.initialPage,
       resolveComponent: name => {
         return import(`./Pages/${name}`).then(module => module.default)
       },

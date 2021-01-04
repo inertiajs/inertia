@@ -2,7 +2,7 @@ const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
-  entry: './src/app.js',
+  entry: './app/app.js',
   mode: 'development',
   module: {
     rules: [
@@ -15,12 +15,16 @@ module.exports = {
   output: {
     filename: 'app.js',
     path: path.resolve(__dirname, 'tmp'),
+    publicPath: '/',
   },
   plugins: [
     new VueLoaderPlugin(),
   ],
   resolve: {
     extensions: ['*', '.js', '.vue'],
+    alias: {
+      '@': path.resolve(__dirname, 'app'),
+    },
   },
   stats: 'errors-only',
 }
