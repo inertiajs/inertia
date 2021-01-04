@@ -1,9 +1,10 @@
 {
   "scripts": {
     "build": "webpack",
-    "test": "start-server-and-test test:server http://localhost:13714 test:cy",
-    "test:server": "node src/server.js",
-    "test:cy": "cypress run"
+    "gui": "yarn build && start-server-and-test run-server http://localhost:13714 'cypress open'",
+    "cli": "yarn build && start-server-and-test run-server http://localhost:13714 'cypress run'",
+    "run-server": "node src/server.js",
+    "test": "yarn cli"
   },
   "devDependencies": {
     "cypress": "^5.3.0",
