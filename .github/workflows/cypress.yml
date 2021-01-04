@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 14.15.3
 
-      - name: Cache node modules
+      - name: Cache Node modules
         uses: actions/cache@v2
         with:
           key: ${{ runner.OS }}-npm-cache-${{ hashFiles('yarn.lock') }}
@@ -25,25 +25,29 @@ jobs:
             ~/.cache
             **/node_modules
 
-      - name: Prepare Inertia
+      - name: Build Inertia
         run: |
           yarn install
           yarn build
 
-      - name: Local-link Inertia core
-        run: cd packages/inertia && yarn link && which yarn && echo $PATH
+      - name: Local-link @inertiajs/inertia
+        run: cd packages/inertia && yarn link
 
       - name: Local-link @inertiajs/inertia-${{ matrix.adapter }}
         run: cd packages/inertia-${{ matrix.adapter }} && yarn link
 
+      - name: Install Cypress Dependencies
+        run: |
+          cd packages/inertia-${{ matrix.adapter }}/tests
+          yarn
+          yarn link "@inertiajs/inertia"
+          yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
+
       - name: Run Cypress (inertia-${{ matrix.adapter }})
         uses: cypress-io/github-action@v2
         with:
-          working-directory: packages/inertia-${{matrix.adapter}}/tests
-          install-command: |
-            yarn
-            yarn link "@inertiajs/inertia"
-            yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
+          working-directory: packages/inertia-${{ matrix.adapter }}/tests
+          install: false
           build: yarn build
           start: yarn test:server
           wait-on: 'http://localhost:13714'
