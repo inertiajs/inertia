@@ -1,12 +1,8 @@
 {
   "scripts": {
-    "build:library": "npm run --prefix ../../packages/inertia build:cjs",
-    "build:driver": "npm run --prefix ../../packages/inertia-vue build:cjs",
-    "ci": "npm run build:library && npm run build:driver && npm run test",
-    "test": "npm run test:build && npm run test:run",
-    "test:build": "webpack",
-    "test:run": "start-server-and-test test:serve http://localhost:13714 test:cy",
-    "test:serve": "node src/server.js",
+    "build": "webpack",
+    "test": "start-server-and-test test:server http://localhost:13714 test:cy",
+    "test:server": "node src/server.js",
     "test:cy": "cypress run"
   },
   "devDependencies": {
@@ -16,7 +12,7 @@
     "vue": "^2.0.0",
     "vue-loader": "^15.9.3",
     "vue-template-compiler": "^2.6.12",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12"
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.1"
   }
 }
