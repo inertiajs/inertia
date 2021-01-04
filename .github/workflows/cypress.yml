@@ -31,7 +31,7 @@ jobs:
           yarn build
 
       - name: Local-link Inertia core
-        run: cd packages/inertia && yarn link
+        run: cd packages/inertia && yarn link && which yarn && echo $PATH
 
       - name: Local-link @inertiajs/inertia-${{ matrix.adapter }}
         run: cd packages/inertia-${{ matrix.adapter }} && yarn link
