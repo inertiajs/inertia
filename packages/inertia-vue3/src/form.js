@@ -68,6 +68,7 @@ export default function form(data = {}) {
     unserialize(data) {
       Object.assign(this, data)
       this.hasErrors = Object.keys(this.errors).length > 0
+      return this
     },
     submit(method, url, options = {}) {
       const data = transform(this.data())

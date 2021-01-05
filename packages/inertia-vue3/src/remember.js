@@ -1,4 +1,4 @@
-import { toRaw } from 'vue'
+import { ref, toRaw, unref, watch } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
 export default {
@@ -45,4 +45,26 @@ export default {
       }, { immediate: true, deep: true })
     })
   },
+}
+
+export function useRemember(data, key) {
+  data = toRaw(unref(data))
+  const restored = Inertia.restore(key)
+
+  const remembered = restored === undefined ? ref(data) : ref(
+    typeof data.serialize === 'function' && typeof data.unserialize === 'function'
+      ? data.unserialize(restored)
+      : restored,
+  )
+
+  watch(remembered, (remembered) => {
+    Inertia.remember(
+      typeof data.serialize === 'function' && typeof data.unserialize === 'function'
+        ? data.serialize()
+        : toRaw(remembered),
+      key,
+    )
+  }, { immediate: true, deep: true })
+
+  return remembered
 }
