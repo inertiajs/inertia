@@ -34,6 +34,7 @@ app.get('/', (req, res) => inertia.render(req, res, {
 }))
 
 app.get('/location', ({ res }) => inertia.location(res, 'https://google.com'))
+app.all('/links/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo }}))
 
 app.get('/dump/get', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files }}))
 app.post('/dump/post', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files }}))

@@ -192,7 +192,7 @@ describe('Links', () => {
       })
     })
 
-    describe('FormData objects', () => {
+    describe.skip('FormData objects', () => {
       beforeEach(() => {
         cy.visit('/links/data/form-data', {
           onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
@@ -454,7 +454,6 @@ describe('Links', () => {
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
     })
 
-
     it('does not replace the current history state when it is set to false', () => {
       cy.get('.links-replace').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
@@ -467,6 +466,52 @@ describe('Links', () => {
 
       cy.go(1)
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+  })
+
+  describe('Preserve state', () => {
+    beforeEach(() => {
+      cy.visit('/links/preserve-state', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+    })
+
+    it('preserves the page\'s local state', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Example value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now bar')
+          cy.get('.field').should('have.value', 'Example value')
+        })
+      })
+    })
+
+    it('does not preserve the page\'s local state', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Another value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve-false').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.not.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now baz')
+          cy.get('.field').should('have.value', '')
+        })
+      })
     })
   })
 })
