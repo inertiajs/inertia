@@ -24,4 +24,5 @@ module.exports = {
       .replace('\'{{ placeholder }}\'', JSON.stringify(data)),
     )
   },
+  location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),
 }
