@@ -5,6 +5,6 @@
     <inertia-link href="/dump/get" :only="['foo', 'bar']" class="only">Basic visit Link</inertia-link>
 
     <inertia-link method="GET" href="/dump/get" :headers="{ foo: 'bar' }" class="custom">GET Link</inertia-link>
-    <inertia-link method="POST" href="/dump/post" :headers="{ bar: 'baz', 'X-Requested-With': 'custom' }" class="overridden">POST Link</inertia-link>
+    <inertia-link method="POST" href="/dump/post" :headers="{ bar: 'baz', 'X-Requested-With': 'custom', 'X-Inertia-Partial-Component': 'bug' }" class="overridden">POST Link</inertia-link>
   </div>
 </template>

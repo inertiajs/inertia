@@ -425,6 +425,8 @@ describe('Links', () => {
           expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
           expect(headers['x-inertia']).to.eq('true')
           expect(headers['bar']).to.eq('baz')
+
+          expect(headers).not.to.contain.key('x-inertia-partial-component')
         })
     })
   })
