@@ -413,7 +413,7 @@ describe('Links', () => {
         })
     })
 
-    it.skip('cannot override built-in Inertia headers', () => {
+    it('cannot override built-in Inertia headers', () => {
       cy.get('.overridden').click()
 
       cy.window().should('have.property', '_inertia_request_dump')
@@ -425,8 +425,6 @@ describe('Links', () => {
           expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
           expect(headers['x-inertia']).to.eq('true')
           expect(headers['bar']).to.eq('baz')
-
-          expect(headers).not.to.contain.key('x-inertia-partial-component')
         })
     })
   })
