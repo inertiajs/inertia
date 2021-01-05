@@ -25,7 +25,7 @@ jobs:
           path: |
             ~/.cache
             node_modules
-            packages/*/tests/node_modules
+            packages/inertia-vue/tests/node_modules
 
       - name: Build Inertia
         run: |
@@ -41,7 +41,7 @@ jobs:
       - name: Install Cypress Dependencies
         run: |
           cd packages/inertia-${{ matrix.adapter }}/tests
-          yarn
+          yarn install --frozen-lockfile
           yarn link "@inertiajs/inertia"
           yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
 
