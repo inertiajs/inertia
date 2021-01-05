@@ -4,15 +4,15 @@ describe('Links', () => {
       onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
     })
 
-    cy.get('.links-basic').click()
-    cy.url().should('eq', Cypress.config().baseUrl + '/links/basic')
+    cy.get('.links-method').click()
+    cy.url().should('eq', Cypress.config().baseUrl + '/links/method')
 
-    cy.get('.text').should('have.text', 'This is the links page that demonstrates basic inertia-links')
+    cy.get('.text').should('have.text', 'This is the links page that demonstrates inertia-link methods')
   })
 
-  describe('Methods', () => {
+  describe('Method', () => {
     beforeEach(() => {
-      cy.visit('/links/basic', {
+      cy.visit('/links/method', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
       })
     })
@@ -91,7 +91,7 @@ describe('Links', () => {
   describe('Data', () => {
     describe('plain objects', () => {
       beforeEach(() => {
-        cy.visit('/links/object', {
+        cy.visit('/links/data/object', {
           onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
         })
       })
@@ -194,7 +194,7 @@ describe('Links', () => {
 
     describe('FormData objects', () => {
       beforeEach(() => {
-        cy.visit('/links/form-data', {
+        cy.visit('/links/data/form-data', {
           onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
         })
       })
@@ -278,7 +278,7 @@ describe('Links', () => {
 
     describe('auto-converted objects (when files are present)', () => {
       beforeEach(() => {
-        cy.visit('/links/auto-converted', {
+        cy.visit('/links/data/auto-converted', {
           onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
         })
       })
@@ -369,7 +369,8 @@ describe('Links', () => {
     })
 
     it('has the default set of headers', () => {
-      cy.get('.basic').click()
+      cy.get('.default').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
@@ -384,6 +385,7 @@ describe('Links', () => {
 
     it('contains headers specific to the "only" parameter', () => {
       cy.get('.only').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
@@ -400,6 +402,7 @@ describe('Links', () => {
 
     it('allows to settings custom headers using the GET method', () => {
       cy.get('.custom').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
@@ -415,6 +418,7 @@ describe('Links', () => {
 
     it('cannot override built-in Inertia headers', () => {
       cy.get('.overridden').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
@@ -426,6 +430,43 @@ describe('Links', () => {
           expect(headers['x-inertia']).to.eq('true')
           expect(headers['bar']).to.eq('baz')
         })
+    })
+  })
+
+  describe('Replace', () => {
+    beforeEach(() => {
+      cy.visit('/', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+    })
+
+    it('replaces the current history state', () => {
+      cy.get('.links-replace').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
+
+      cy.get('.replace').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.go(-1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/')
+
+      cy.go(1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+
+
+    it('does not replace the current history state when it is set to false', () => {
+      cy.get('.links-replace').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
+
+      cy.get('.replace-false').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.go(-1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
+
+      cy.go(1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
     })
   })
 })

@@ -1,7 +1,6 @@
 <template>
   <div>
-    <span class="text">This is the links page that demonstrates basic inertia-links</span>
-    <inertia-link href="/location" class="basic">Basic visit Link</inertia-link>
+    <span class="text">This is the links page that demonstrates inertia-link methods</span>
 
     <inertia-link method="GET" href="/dump/get" class="get">GET Link</inertia-link>
     <inertia-link method="POST" href="/dump/post" class="post">POST Link</inertia-link>
