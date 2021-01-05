@@ -23,6 +23,8 @@ describe('Links', () => {
       cy.get('.get').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
       cy.window()
         .then(window => window._inertia_request_dump)
         .then(({ method, form, query }) => {
@@ -41,6 +43,8 @@ describe('Links', () => {
 
       cy.get('.post').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
       cy.window()
         .then(window => window._inertia_request_dump)
@@ -61,6 +65,8 @@ describe('Links', () => {
       cy.get('.put').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
 
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
       cy.window()
         .then(window => window._inertia_request_dump)
         .then(({ method, form, query }) => {
@@ -80,6 +86,8 @@ describe('Links', () => {
       cy.get('.patch').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
       cy.window()
         .then(window => window._inertia_request_dump)
         .then(({ method, form, query }) => {
@@ -98,6 +106,8 @@ describe('Links', () => {
 
       cy.get('.delete').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
+
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
       cy.window()
         .then(window => window._inertia_request_dump)
@@ -120,6 +130,8 @@ describe('Links', () => {
 
         cy.get('.get').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -145,6 +157,8 @@ describe('Links', () => {
         cy.get('.post').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
         cy.window()
           .then(window => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
@@ -168,6 +182,8 @@ describe('Links', () => {
 
         cy.get('.put').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -193,6 +209,8 @@ describe('Links', () => {
         cy.get('.patch').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
         cy.window()
           .then(window => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
@@ -216,6 +234,8 @@ describe('Links', () => {
 
         cy.get('.delete').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -243,6 +263,8 @@ describe('Links', () => {
         cy.get('.post').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
         cy.window()
           .then(window => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
@@ -266,6 +288,8 @@ describe('Links', () => {
 
         cy.get('.put').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -291,6 +315,8 @@ describe('Links', () => {
         cy.get('.patch').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
         cy.window()
           .then(window => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
@@ -314,6 +340,8 @@ describe('Links', () => {
 
         cy.get('.delete').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -341,6 +369,8 @@ describe('Links', () => {
         cy.get('.post').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
         cy.window()
           .then(window => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
@@ -364,6 +394,8 @@ describe('Links', () => {
 
         cy.get('.put').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -389,6 +421,8 @@ describe('Links', () => {
         cy.get('.patch').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
 
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
         cy.window()
           .then(window => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
@@ -412,6 +446,8 @@ describe('Links', () => {
 
         cy.get('.delete').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
+
+        cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
         cy.window()
           .then(window => window._inertia_request_dump)
@@ -439,6 +475,8 @@ describe('Links', () => {
 
       cy.get('.basic').click()
 
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
       cy.window()
         .then(window => window._inertia_request_dump)
         .then(({ headers }) => {
@@ -457,6 +495,8 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.only').click()
+
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
       cy.window()
         .then(window => window._inertia_request_dump)
@@ -479,6 +519,8 @@ describe('Links', () => {
 
       cy.get('.custom').click()
 
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
+
       cy.window()
         .then(window => window._inertia_request_dump)
         .then(({ headers }) => {
@@ -498,6 +540,8 @@ describe('Links', () => {
       cy.on('load', () => expect(true).to.equal(false))
 
       cy.get('.overridden').click()
+
+      cy.get('.text').should('have.text', 'This is Inertia page component containing a data dump of the request')
 
       cy.window()
         .then(window => window._inertia_request_dump)
