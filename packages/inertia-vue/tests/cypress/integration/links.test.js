@@ -362,9 +362,13 @@ describe('Links', () => {
   })
 
   describe('Headers', () => {
-    it('has the default set of headers', () => {
-      cy.visit('/links/headers')
+    beforeEach(() => {
+      cy.visit('/links/headers', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+    })
 
+    it('has the default set of headers', () => {
       cy.get('.basic').click()
 
       cy.window().should('have.property', '_inertia_request_dump')
@@ -379,8 +383,6 @@ describe('Links', () => {
     })
 
     it('contains headers specific to the "only" parameter', () => {
-      cy.visit('/links/headers')
-
       cy.get('.only').click()
 
       cy.window().should('have.property', '_inertia_request_dump')
@@ -397,8 +399,6 @@ describe('Links', () => {
     })
 
     it('allows to settings custom headers using the GET method', () => {
-      cy.visit('/links/headers')
-
       cy.get('.custom').click()
 
       cy.window().should('have.property', '_inertia_request_dump')
@@ -414,8 +414,6 @@ describe('Links', () => {
     })
 
     it('cannot override built-in Inertia headers', () => {
-      cy.visit('/links/headers')
-
       cy.get('.overridden').click()
 
       cy.window().should('have.property', '_inertia_request_dump')
