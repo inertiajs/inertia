@@ -413,7 +413,7 @@ describe('Links', () => {
         })
     })
 
-    it('cannot override built-in Inertia headers', () => {
+    it.skip('cannot override built-in Inertia headers', () => {
       cy.get('.overridden').click()
 
       cy.window().should('have.property', '_inertia_request_dump')
