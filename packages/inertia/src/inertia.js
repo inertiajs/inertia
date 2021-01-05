@@ -324,11 +324,15 @@ export default {
   },
 
   pushState(page) {
+    this.remember.cancel()
     this.page = page
     window.history.pushState(page, '', page.url)
   },
 
-  replaceState(page) {
+  replaceState(page, { cancelRemember = true } = {}) {
+    if (cancelRemember) {
+      this.remember.cancel()
+    }
     this.page = page
     window.history.replaceState(page, '', page.url)
   },
@@ -383,15 +387,15 @@ export default {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   },
 
-  remember(data, key = 'default') {
+  remember: debounce(function (data, key = 'default') {
     this.replaceState({
       ...this.page,
       rememberedState: {
         ...this.page.rememberedState,
         [key]: data,
       },
-    })
-  },
+    }, { cancelRemember: false })
+  }, 400),
 
   restore(key = 'default') {
     return window.history.state?.rememberedState?.[key]
