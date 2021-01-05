@@ -177,6 +177,7 @@ export default {
     only = [],
     headers = {},
     errorBag = null,
+    forceFormData = false,
     onCancelToken = () => ({}),
     onBefore = () => ({}),
     onStart = () => ({}),
@@ -190,11 +191,11 @@ export default {
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
 
     const visitHasFiles = hasFiles(data)
-    if (method !== 'get' && visitHasFiles) {
+    if (method !== 'get' && (visitHasFiles || forceFormData)) {
       data = objectToFormData(data)
     }
 
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, forceFormData, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
