@@ -4,7 +4,7 @@
     <span class="foo">Foo is now {{ foo }}</span>
     <inertia-link href="/links/preserve-scroll-page-two" :data="{ foo: 'bar' }" class="default">Reset Scroll</inertia-link>
     <inertia-link href="/links/preserve-scroll-page-two" preserve-scroll :data="{ foo: 'baz' }" class="preserve">Preserve Scroll</inertia-link>
-    
+
     <div class="area1-text">Area 1 scroll position is {{ areaOneScrollLeft }} & {{ areaOneScrollTop }}</div>
     <div id="area1" style="overflow: scroll; background-color: #FF0000; width: 100px; height: 100px;">
       <div style="padding: 200px;">Test</div>
