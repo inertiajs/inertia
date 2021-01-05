@@ -1,8 +1,8 @@
 {
   "scripts": {
+    "cli": "start-server-and-test server:run http://localhost:13714 cypress:run",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "cli": "start-server-and-test server:run http://localhost:13714 cypress:run",
     "gui": "start-server-and-test server:run http://localhost:13714 cypress:open",
     "server:run": "webpack && node app/server.js",
     "test": "yarn cli"

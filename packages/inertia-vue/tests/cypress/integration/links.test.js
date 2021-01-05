@@ -519,7 +519,6 @@ describe('Links', () => {
     beforeEach(() => {
       cy.visit('/links/preserve-scroll')
       cy.get('.foo').should('have.text', 'Foo is now default')
-
       cy.get('.text').should('have.text', 'Document scroll position is 0 & 0')
       cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
       cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 0 & 0')
@@ -527,31 +526,62 @@ describe('Links', () => {
       cy.scrollTo('20px', '40px')
       cy.get('#area1').scrollTo('195px', '198px')
       cy.get('#area2').scrollTo('201px', '205px')
-
       cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 40')
       cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 195 & 198')
       cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
     })
 
-    it('resets all scrolling when preserve-scroll is not set', () => {
-      cy.get('.default').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+    describe('When preserve-scroll is not set', () => {
+      it('Resets all tracked scroll regions', () => {
+        cy.get('.default').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
 
-      cy.get('.text').should('have.text', 'Document scroll position is 0 & 0')
-      cy.get('.foo').should('have.text', 'Foo is now bar')
-      cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
-      cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 0 & 0')
+        cy.get('.text').should('have.text', 'Document scroll position is 0 & 0')
+        cy.get('.foo').should('have.text', 'Foo is now bar')
+        cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+        cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 0 & 0')
+      })
+
+      it('Restores all tracked scroll regions when pressing the back button', () => {
+        cy.get('.default').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+
+        cy.go(-1)
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll')
+
+        cy.get('.text').should('contain.text', 'Document scroll position is 20 & ')
+        cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 0')
+        cy.get('.foo').should('have.text', 'Foo is now default')
+        cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+        cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
+      })
     })
 
-    it('preserves the scrolling position when preserve-scroll is set', () => {
-      cy.get('.preserve').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+    describe('When preserve-scroll is set', () => {
+      it.skip('Preserves all tracked scroll regions', () => {
+        cy.get('.preserve').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
 
-      cy.get('.text').should('contain.text', 'Document scroll position is 20 & ')
-      cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 0')
-      cy.get('.foo').should('have.text', 'Foo is now baz')
-      cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
-      cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
+        cy.get('.text').should('contain.text', 'Document scroll position is 20 & ')
+        cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 0')
+        cy.get('.foo').should('have.text', 'Foo is now baz')
+        cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+        cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
+      })
+
+      it('Restores all tracked scroll regions when pressing the back button', () => {
+        cy.get('.preserve').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+
+        cy.go(-1)
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll')
+
+        cy.get('.text').should('contain.text', 'Document scroll position is 20 & ')
+        cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 0')
+        cy.get('.foo').should('have.text', 'Foo is now default')
+        cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+        cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
+      })
     })
   })
 
