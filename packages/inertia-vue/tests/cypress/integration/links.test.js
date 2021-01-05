@@ -515,10 +515,50 @@ describe('Links', () => {
     })
   })
 
+  describe.only('Preserve scroll', () => {
+    beforeEach(() => {
+      cy.visit('/links/preserve-scroll')
+      cy.get('.foo').should('have.text', 'Foo is now default')
+
+      cy.get('.text').should('have.text', 'Document scroll position is 0 & 0')
+      cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+      cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 0 & 0')
+
+      cy.scrollTo('20px', '40px')
+      cy.get('#area1').scrollTo('195px', '198px')
+      cy.get('#area2').scrollTo('201px', '205px')
+
+      cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 40')
+      cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 195 & 198')
+      cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
+    })
+
+    it('resets all scrolling when preserve-scroll is not set', () => {
+      cy.get('.default').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+
+      cy.get('.text').should('have.text', 'Document scroll position is 0 & 0')
+      cy.get('.foo').should('have.text', 'Foo is now bar')
+      cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+      cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 0 & 0')
+    })
+
+    it('preserves the scrolling position when preserve-scroll is set', () => {
+      cy.get('.preserve').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+
+      cy.get('.text').should('contain.text', 'Document scroll position is 20 & ')
+      cy.get('.text').should('not.have.text', 'Document scroll position is 20 & 0')
+      cy.get('.foo').should('have.text', 'Foo is now baz')
+      cy.get('.area1-text').should('have.text', 'Area 1 scroll position is 0 & 0')
+      cy.get('.area2-text').should('have.text', 'Area 2 scroll position is 201 & 205')
+    })
+  })
+
   describe('"as" warning', () => {
     it('shows no warning when using GET inertia-links', () => {
       cy.visit('/links/as-warning/get', {
-        onBeforeLoad (window) {
+        onBeforeLoad(window) {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -528,7 +568,7 @@ describe('Links', () => {
 
     it('shows a warning when using POST inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/post', {
-        onBeforeLoad (window) {
+        onBeforeLoad(window) {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -544,7 +584,7 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/put', {
-        onBeforeLoad (window) {
+        onBeforeLoad(window) {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -560,7 +600,7 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/patch', {
-        onBeforeLoad (window) {
+        onBeforeLoad(window) {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -576,7 +616,7 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/delete', {
-        onBeforeLoad (window) {
+        onBeforeLoad(window) {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })

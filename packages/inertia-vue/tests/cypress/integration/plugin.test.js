@@ -1,7 +1,7 @@
 describe('Plugin', () => {
   it('shows a deprecation warning when registering via the "app" component', () => {
     cy.visit('/plugin/deprecated', {
-      onBeforeLoad (window) {
+      onBeforeLoad(window) {
         cy.spy(window.console, 'warn').as('consoleWarn')
       },
     })
@@ -74,7 +74,7 @@ describe('Plugin', () => {
   describe('InertiaLink', () => {
     it('is not available when the plugin is not registered', () => {
       cy.visit('/plugin/without/inertia-link', {
-        onBeforeLoad (window) {
+        onBeforeLoad(window) {
           cy.spy(window.console, 'error').as('consoleWarn')
         },
       })
