@@ -514,4 +514,80 @@ describe('Links', () => {
       })
     })
   })
+
+  describe('"as" warning', () => {
+    it('shows no warning when using GET inertia-links', () => {
+      cy.visit('/links/as-warning/get', {
+        onBeforeLoad (window) {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('@consoleWarn').should('not.be.called')
+    })
+
+    it('shows a warning when using POST inertia-links using the anchor tag', () => {
+      cy.visit('/links/as-warning/post', {
+        onBeforeLoad (window) {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy
+        .get('@consoleWarn')
+        .should('be.calledWith',
+          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
+          '<inertia-link href="http://localhost:13714/example" method="post" as="button">...</inertia-link>',
+        )
+    })
+
+    it('shows a warning when using PUT inertia-links using the anchor tag', () => {
+      cy.visit('/links/as-warning/put', {
+        onBeforeLoad (window) {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy
+        .get('@consoleWarn')
+        .should('be.calledWith',
+          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
+          '<inertia-link href="http://localhost:13714/example" method="put" as="button">...</inertia-link>',
+        )
+    })
+
+    it('shows a warning when using PUT inertia-links using the anchor tag', () => {
+      cy.visit('/links/as-warning/patch', {
+        onBeforeLoad (window) {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy
+        .get('@consoleWarn')
+        .should('be.calledWith',
+          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
+          '<inertia-link href="http://localhost:13714/example" method="patch" as="button">...</inertia-link>',
+        )
+    })
+
+    it('shows a warning when using PUT inertia-links using the anchor tag', () => {
+      cy.visit('/links/as-warning/delete', {
+        onBeforeLoad (window) {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy
+        .get('@consoleWarn')
+        .should('be.calledWith',
+          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
+          '<inertia-link href="http://localhost:13714/example" method="delete" as="button">...</inertia-link>',
+        )
+    })
+  })
 })
