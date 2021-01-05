@@ -244,6 +244,9 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
+        if (preserveState && window.history.state?.rememberedState && response.data.component === this.page.component) {
+          response.data.rememberedState = window.history.state.rememberedState
+        }
         const responseUrl = hrefToUrl(response.data.url)
         if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
           responseUrl.hash = url.hash
