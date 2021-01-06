@@ -6,6 +6,7 @@
     <inertia-link href="/links/replace" class="links-replace">'Replace' inertia-links</inertia-link>
 
     <span @click="visitsMethod" class="visits-method">Manual basic visits</span>
+    <span @click="visitsReplace" class="visits-replace">Manual 'Replace' visits</span>
   </div>
 </template>
 <script>
@@ -13,6 +14,9 @@ export default {
   methods: {
     visitsMethod() {
       this.$inertia.visit('/visits/method');
+    },
+    visitsReplace() {
+      this.$inertia.get('/visits/replace');
     }
   }
 }

@@ -564,4 +564,36 @@ describe('Manual Visits', () => {
         })
     })
   })
+
+  describe.only('Replace', () => {
+    beforeEach(() => {
+      cy.visit('/', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+      cy.get('.visits-replace').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/replace')
+    })
+
+    it('replaces the current history state', () => {
+      cy.get('.replace').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.go(-1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/')
+
+      cy.go(1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+
+    it('does not replace the current history state when it is set to false', () => {
+      cy.get('.replace-false').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.go(-1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/replace')
+
+      cy.go(1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+  })
 })

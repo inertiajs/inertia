@@ -421,12 +421,11 @@ describe('Links', () => {
       cy.visit('/', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
       })
+      cy.get('.links-replace').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
     })
 
     it('replaces the current history state', () => {
-      cy.get('.links-replace').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
-
       cy.get('.replace').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
@@ -438,9 +437,6 @@ describe('Links', () => {
     })
 
     it('does not replace the current history state when it is set to false', () => {
-      cy.get('.links-replace').click()
-      cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
-
       cy.get('.replace-false').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
