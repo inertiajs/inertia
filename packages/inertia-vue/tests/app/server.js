@@ -45,6 +45,7 @@ app.all('/links/preserve-state-page-two', (req, res) => inertia.render(req, res,
 app.all('/links/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveScroll', props: { foo: req.query.foo }}))
 
 app.all('/visits/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveState', props: { foo: req.query.foo }}))
+app.all('/visits/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveScroll', props: { foo: req.query.foo }}))
 
 app.get('/dump/get', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files }}))
 app.post('/dump/post', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files }}))
