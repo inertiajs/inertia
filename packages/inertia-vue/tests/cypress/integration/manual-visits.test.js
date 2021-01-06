@@ -429,4 +429,139 @@ describe('Manual Visits', () => {
       })
     })
   })
+
+  describe('Headers', () => {
+    beforeEach(() => {
+      cy.visit('/visits/headers', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+    })
+
+    it('has the default set of headers', () => {
+      cy.get('.default').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+        })
+    })
+
+    it('allows to set custom headers using the visit method', () => {
+      cy.get('.visit').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'foo'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['foo']).to.eq('bar')
+        })
+    })
+
+    it('allows to set custom headers using the GET method', () => {
+      cy.get('.get').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['bar']).to.eq('baz')
+        })
+    })
+
+    it('allows to set custom headers using the POST method', () => {
+      cy.get('.post').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'baz'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['baz']).to.eq('foo')
+        })
+    })
+
+    it('allows to set custom headers using the PUT method', () => {
+      cy.get('.put').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'foo'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['foo']).to.eq('bar')
+        })
+    })
+
+    it('allows to set custom headers using the PATCH method', () => {
+      cy.get('.patch').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['bar']).to.eq('baz')
+        })
+    })
+
+    it('allows to set custom headers using the DELETE method', () => {
+      cy.get('.delete').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'baz'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['baz']).to.eq('foo')
+        })
+    })
+
+    it('cannot override built-in Inertia headers', () => {
+      cy.get('.overridden').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
+          expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+          expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+          expect(headers['x-inertia']).to.eq('true')
+          expect(headers['bar']).to.eq('baz')
+        })
+    })
+  })
 })

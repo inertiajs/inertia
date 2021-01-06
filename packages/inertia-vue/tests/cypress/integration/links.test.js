@@ -383,7 +383,7 @@ describe('Links', () => {
         })
     })
 
-    it('allows to settings custom headers using the GET method', () => {
+    it('allows to set custom headers', () => {
       cy.get('.custom').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
