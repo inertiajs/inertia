@@ -17,8 +17,8 @@ describe('Manual Visits', () => {
       })
     })
 
-    it('can use the visit method', () => {
-      cy.get('.visit').click()
+    it('can use the visit method without any options to make a GET request', () => {
+      cy.get('.visit-get').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
       cy.window().should('have.property', '_inertia_request_dump')
@@ -26,6 +26,20 @@ describe('Manual Visits', () => {
         .then(window => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('get')
+          expect(query).to.be.empty
+          expect(form).to.be.empty
+        })
+    })
+
+    it('can use the visit method with a specific method option to manually set the request method', () => {
+      cy.get('.visit-specific').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, query }) => {
+          expect(method).to.eq('patch')
           expect(query).to.be.empty
           expect(form).to.be.empty
         })
