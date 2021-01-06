@@ -344,5 +344,89 @@ describe('Manual Visits', () => {
           })
       })
     })
+
+    describe('auto-converted objects (when files are present)', () => {
+      beforeEach(() => {
+        cy.visit('/visits/data/auto-converted', {
+          onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        })
+      })
+
+      it('auto-converts objects to form-data when files are present using the POST method', () => {
+        cy.get('.post').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+        cy.window().should('have.property', '_inertia_request_dump')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('post')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
+      })
+
+      it('auto-converts objects to form-data when files are present using the PUT method', () => {
+        cy.get('.put').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/put')
+
+        cy.window().should('have.property', '_inertia_request_dump')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('put')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
+      })
+
+      it('auto-converts objects to form-data when files are present using the PATCH method', () => {
+        cy.get('.patch').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/patch')
+
+        cy.window().should('have.property', '_inertia_request_dump')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('patch')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
+      })
+
+      it('auto-converts objects to form-data when files are present using the DELETE method', () => {
+        cy.get('.delete').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/delete')
+
+        cy.window().should('have.property', '_inertia_request_dump')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
+            expect(headers).to.contain.key('content-type')
+            expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
+
+            expect(method).to.eq('delete')
+            expect(query).to.be.empty
+            expect(form).to.contain.key('foo')
+            expect(form.foo).to.eq('bar')
+            expect(files).to.not.be.empty
+          })
+      })
+    })
   })
 })
