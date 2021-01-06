@@ -53,6 +53,8 @@ app.put('/dump/put', upload.any(), (req, res) => inertia.render(req, res, { comp
 app.patch('/dump/patch', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files }}))
 app.delete('/dump/delete', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files }}))
 
+app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
+
 app.get('*', (req, res) => inertia.render(req, res))
 
 app.listen(13714)

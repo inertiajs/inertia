@@ -1064,4 +1064,20 @@ describe('Manual Visits', () => {
         })
     })
   })
+
+  describe('Visit cancellation', () => {
+    it('cancels a pending visit and fires the appropriate events', () => {
+      cy.visit('/visits/cancellation')
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/cancellation')
+
+      const stub = cy.stub()
+      cy.on('window:alert', stub)
+
+      cy.get('.cancel').click().then(() => {
+        expect(stub.getCall(0)).to.be.calledWith('onCancelToken')
+        expect(stub.getCall(1)).to.be.calledWith('onCancel')
+        expect(stub.getCall(2)).to.be.calledWith('onFinish')
+      })
+    })
+  })
 })
