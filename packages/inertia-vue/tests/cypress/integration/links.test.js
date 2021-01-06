@@ -611,7 +611,6 @@ describe('Links', () => {
       cy.visit('/links/partial-reloads', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
       })
-      cy.url().should('eq', Cypress.config().baseUrl + '/links/partial-reloads')
       cy.get('.foo-text').should('have.text', 'Foo is now 1')
       cy.get('.bar-text').should('have.text', 'Bar is now 2')
       cy.get('.baz-text').should('have.text', 'Baz is now 3')
@@ -679,7 +678,7 @@ describe('Links', () => {
   describe('"as" warning', () => {
     it('shows no warning when using GET inertia-links', () => {
       cy.visit('/links/as-warning/get', {
-        onBeforeLoad(window) {
+        onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -689,7 +688,7 @@ describe('Links', () => {
 
     it('shows a warning when using POST inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/post', {
-        onBeforeLoad(window) {
+        onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -705,7 +704,7 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/put', {
-        onBeforeLoad(window) {
+        onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -721,7 +720,7 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/patch', {
-        onBeforeLoad(window) {
+        onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -737,7 +736,7 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/delete', {
-        onBeforeLoad(window) {
+        onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
