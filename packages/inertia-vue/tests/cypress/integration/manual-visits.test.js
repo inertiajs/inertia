@@ -267,7 +267,6 @@ describe('Manual Visits', () => {
           })
       })
 
-
       it('can pass data using the POST method', () => {
         cy.get('.post').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
@@ -565,7 +564,7 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe.only('Replace', () => {
+  describe('Replace', () => {
     beforeEach(() => {
       cy.visit('/', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
@@ -574,7 +573,7 @@ describe('Manual Visits', () => {
       cy.url().should('eq', Cypress.config().baseUrl + '/visits/replace')
     })
 
-    it('replaces the current history state', () => {
+    it('replaces the current history state (visit method)', () => {
       cy.get('.replace').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
@@ -585,7 +584,18 @@ describe('Manual Visits', () => {
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
     })
 
-    it('does not replace the current history state when it is set to false', () => {
+    it('replaces the current history state (GET method)', () => {
+      cy.get('.replace-get').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.go(-1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/')
+
+      cy.go(1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+
+    it('does not replace the current history state when it is set to false (visit method)', () => {
       cy.get('.replace-false').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
@@ -594,6 +604,101 @@ describe('Manual Visits', () => {
 
       cy.go(1)
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+
+    it('does not replace the current history state when it is set to false (GET method)', () => {
+      cy.get('.replace-get-false').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.go(-1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/replace')
+
+      cy.go(1)
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+    })
+  })
+
+  describe('Preserve state', () => {
+    beforeEach(() => {
+      cy.visit('/visits/preserve-state', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+    })
+
+    it('preserves the page\'s local state (visit method)', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Example value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now bar')
+          cy.get('.field').should('have.value', 'Example value')
+        })
+      })
+    })
+
+    it('preserves the page\'s local state (GET method)', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Example value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve-get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now get-bar')
+          cy.get('.field').should('have.value', 'Example value')
+        })
+      })
+    })
+
+    it('does not preserve the page\'s local state (visit method)', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Another value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve-false').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.not.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now baz')
+          cy.get('.field').should('have.value', '')
+        })
+      })
+    })
+
+    it('does not preserve the page\'s local state (GET method)', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Another value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve-get-false').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.not.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now get-baz')
+          cy.get('.field').should('have.value', '')
+        })
+      })
     })
   })
 })
