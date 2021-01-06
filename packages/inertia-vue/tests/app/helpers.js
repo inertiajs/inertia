@@ -10,8 +10,24 @@ module.exports = {
       props: {},
       url: req.path,
       version: null,
-      ... data,
+      ...data,
     }
+
+    const partialDataHeader = req.headers['x-inertia-partial-data'] || ''
+    const partialComponentHeader = req.headers['x-inertia-partial-component'] || ''
+    data.props = Object.keys(data.props)
+      .filter(key => !partialComponentHeader
+        || partialComponentHeader !== data.component
+        || !partialDataHeader
+        || partialDataHeader.split(',').indexOf(key) > -1,
+      )
+      .reduce((carry, key) => {
+        carry[key] = typeof data.props[key] === 'function'
+          ? data.props[key](data.props)
+          : data.props[key]
+
+        return carry
+      }, {})
 
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
