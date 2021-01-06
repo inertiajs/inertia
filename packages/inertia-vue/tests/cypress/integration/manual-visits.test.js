@@ -879,7 +879,7 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe.only('Partial Reloads', () => {
+  describe('Partial Reloads', () => {
     beforeEach(() => {
       cy.visit('/visits/partial-reloads', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
@@ -1008,6 +1008,60 @@ describe('Manual Visits', () => {
         cy.get('.bar-text').should('have.text', 'Bar is now 4')
         cy.get('.baz-text').should('have.text', 'Baz is now 5')
       })
+    })
+  })
+
+  describe('Error bags', () => {
+    beforeEach(() => {
+      cy.visit('/visits/error-bags', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/error-bags')
+    })
+
+    it('does not use error bags by default', () => {
+      cy.get('.default').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, headers }) => {
+          expect(method).to.eq('post')
+          expect(headers).to.not.contain.key('x-inertia-error-bag')
+        })
+    })
+
+    it('uses error bags using the visit method', () => {
+      cy.get('.visit').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, headers }) => {
+          expect(method).to.eq('post')
+          expect(form).to.contain.key('foo')
+          expect(form.foo).to.eq('bar')
+          expect(headers).to.contain.key('x-inertia-error-bag')
+          expect(headers['x-inertia-error-bag']).to.contain('visitErrorBag')
+        })
+    })
+
+    it('uses error bags using the GET method', () => {
+      cy.get('.get').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ method, form, headers }) => {
+          expect(method).to.eq('post')
+          expect(form).to.contain.key('foo')
+          expect(form.foo).to.eq('baz')
+          expect(headers).to.contain.key('x-inertia-error-bag')
+          expect(headers['x-inertia-error-bag']).to.contain('postErrorBag')
+        })
     })
   })
 })
