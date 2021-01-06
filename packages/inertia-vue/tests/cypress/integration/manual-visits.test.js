@@ -702,7 +702,7 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe.only('Preserve scroll', () => {
+  describe('Preserve scroll', () => {
     beforeEach(() => {
       cy.visit('/visits/preserve-scroll')
       cy.get('.foo').should('have.text', 'Foo is now default')
@@ -823,6 +823,58 @@ describe('Manual Visits', () => {
         cy.get('.foo').should('have.text', 'Foo is now default')
         cy.get('.area1-position').should('have.text', 'Area 1 scroll position is 0 & 0')
         cy.get('.area2-position').should('have.text', 'Area 2 scroll position is 201 & 205')
+      })
+    })
+  })
+
+  describe('URL fragment navigation (& automatic scrolling)', () => {
+    /** @see https://github.com/inertiajs/inertia/pull/257 */
+
+    beforeEach(() => {
+      cy.visit('/visits/url-fragments', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments')
+      cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
+    })
+
+    describe('visit-method', () => {
+      it('Scrolls to the fragment element when making a visit to a different page', () => {
+        cy.get('.basic').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments#target')
+        cy.get('.document-position').should('not.have.text', 'Document scroll position is 0 & 0')
+      })
+
+      it('Scrolls to the fragment element when making a visit to the same page', () => {
+        cy.get('.fragment').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments#target')
+        cy.get('.document-position').should('not.have.text', 'Document scroll position is 0 & 0')
+      })
+
+      it('Does not scroll to the fragment element when it does not exist on the page', () => {
+        cy.get('.non-existent-fragment').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments#non-existent-fragment')
+        cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
+      })
+    })
+
+    describe('GET-method', () => {
+      it('Scrolls to the fragment element when making a visit to a different page', () => {
+        cy.get('.basic-get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments#target')
+        cy.get('.document-position').should('not.have.text', 'Document scroll position is 0 & 0')
+      })
+
+      it('Scrolls to the fragment element when making a visit to the same page', () => {
+        cy.get('.fragment-get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments#target')
+        cy.get('.document-position').should('not.have.text', 'Document scroll position is 0 & 0')
+      })
+
+      it('Does not scroll to the fragment element when it does not exist on the page', () => {
+        cy.get('.non-existent-fragment-get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments#non-existent-fragment')
+        cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
       })
     })
   })

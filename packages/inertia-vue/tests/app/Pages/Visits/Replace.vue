@@ -4,7 +4,6 @@
 
     <span @click="replace" class="replace">[State] Replace visit: true</span>
     <span @click="replaceFalse" class="replace-false">[State] Replace visit: false</span>
-
     <span @click="replaceGet" class="replace-get">[State] Replace GET: true</span>
     <span @click="replaceGetFalse" class="replace-get-false">[State] Replace GET: false</span>
   </div>

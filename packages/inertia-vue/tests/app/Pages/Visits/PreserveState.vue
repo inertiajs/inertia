@@ -9,7 +9,6 @@
 
     <span @click="preserve" class="preserve">[State] Preserve visit: true</span>
     <span @click="preserveFalse" class="preserve-false">[State] Preserve visit: false</span>
-
     <span @click="preserveGet" class="preserve-get">[State] Preserve GET: true</span>
     <span @click="preserveGetFalse" class="preserve-get-false">[State] Preserve GET: false</span>
   </div>

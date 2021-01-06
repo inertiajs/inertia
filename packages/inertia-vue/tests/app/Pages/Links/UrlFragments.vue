@@ -19,7 +19,6 @@ export default {
   }),
   created() {
     document.addEventListener('scroll', this.handleScrollEvent)
-    // this.handleScrollEvent()
   },
   beforeDestroy() {
     document.removeEventListener('scroll', this.handleScrollEvent)
