@@ -606,7 +606,7 @@ describe('Links', () => {
     })
   })
 
-  describe.only('Partial Reloads', () => {
+  describe('Partial Reloads', () => {
     beforeEach(() => {
       cy.visit('/links/partial-reloads', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
@@ -658,7 +658,6 @@ describe('Links', () => {
     it('it only updates props that are passed through "only"', () => {
       cy.get('.foo-bar').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/links/partial-reloads')
-      cy.window().should('have.property', '_inertia_props')
       cy.get('.foo-text').should('have.text', 'Foo is now 2')
       cy.get('.bar-text').should('have.text', 'Bar is now 3')
       cy.get('.baz-text').should('have.text', 'Baz is now 3')
