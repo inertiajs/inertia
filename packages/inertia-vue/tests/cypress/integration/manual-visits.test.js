@@ -878,4 +878,136 @@ describe('Manual Visits', () => {
       })
     })
   })
+
+  describe.only('Partial Reloads', () => {
+    beforeEach(() => {
+      cy.visit('/visits/partial-reloads', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+      cy.get('.foo-text').should('have.text', 'Foo is now 1')
+      cy.get('.bar-text').should('have.text', 'Bar is now 2')
+      cy.get('.baz-text').should('have.text', 'Baz is now 3')
+    })
+
+    describe('visit-method', () => {
+      it('does not have headers specific to partial reloads when the feature is not being used', () => {
+        cy.get('.visit').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.window().should('have.property', '_inertia_props')
+        cy.window()
+          .then(window => window._inertia_props)
+          .then(({ headers }) => {
+            expect(headers).to.not.contain.keys(['x-inertia-partial-component', 'x-inertia-partial-data'])
+          })
+      })
+
+      it('has headers specific to partial reloads', () => {
+        cy.get('.visit-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.window().should('have.property', '_inertia_props')
+        cy.window()
+          .then(window => window._inertia_props)
+          .then(({ headers }) => {
+            expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'x-inertia-partial-component', 'x-inertia-partial-data'])
+            expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+            expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+            expect(headers['x-inertia']).to.eq('true')
+            expect(headers['x-inertia-partial-data']).to.eq('headers,foo,bar')
+            expect(headers['x-inertia-partial-component']).to.eq('Visits/PartialReloads')
+          })
+      })
+
+      it('it updates all props when the feature is not being used', () => {
+        cy.get('.visit').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 4')
+      })
+
+      it('it only updates props that are passed through "only"', () => {
+        cy.get('.visit-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 3')
+
+        cy.get('.visit-baz').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 5')
+
+        cy.get('.visit').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 3')
+        cy.get('.bar-text').should('have.text', 'Bar is now 4')
+        cy.get('.baz-text').should('have.text', 'Baz is now 5')
+      })
+    })
+
+    describe('GET-method', () => {
+      it('does not have headers specific to partial reloads when the feature is not being used', () => {
+        cy.get('.get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.window().should('have.property', '_inertia_props')
+        cy.window()
+          .then(window => window._inertia_props)
+          .then(({ headers }) => {
+            expect(headers).to.not.contain.keys(['x-inertia-partial-component', 'x-inertia-partial-data'])
+          })
+      })
+
+      it('has headers specific to partial reloads', () => {
+        cy.get('.get-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.window().should('have.property', '_inertia_props')
+        cy.window()
+          .then(window => window._inertia_props)
+          .then(({ headers }) => {
+            expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'x-inertia-partial-component', 'x-inertia-partial-data'])
+            expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+            expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+            expect(headers['x-inertia']).to.eq('true')
+            expect(headers['x-inertia-partial-data']).to.eq('headers,foo,bar')
+            expect(headers['x-inertia-partial-component']).to.eq('Visits/PartialReloads')
+          })
+      })
+
+      it('it updates all props when the feature is not being used', () => {
+        cy.get('.get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 4')
+      })
+
+      it('it only updates props that are passed through "only"', () => {
+        cy.get('.get-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 3')
+
+        cy.get('.get-baz').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 5')
+
+        cy.get('.get').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 3')
+        cy.get('.bar-text').should('have.text', 'Bar is now 4')
+        cy.get('.baz-text').should('have.text', 'Baz is now 5')
+      })
+    })
+  })
 })
