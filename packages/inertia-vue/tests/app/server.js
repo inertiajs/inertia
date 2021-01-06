@@ -9,6 +9,9 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ extended: true }))
 const upload = multer()
 
+// Used because Cypress does not allow you to navigate to a different origin URL within a single test.
+app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
+
 // Intercepts all .js assets (including files loaded via code splitting)
 app.get(/.*\.js$/, (req, res) => res.sendFile(path.resolve(__dirname, '../tmp/', req.path.substr(1))))
 
@@ -33,7 +36,7 @@ app.get('/', (req, res) => inertia.render(req, res, {
   },
 }))
 
-app.get('/location', ({ res }) => inertia.location(res, 'https://google.com'))
+app.get('/location', ({ res }) => inertia.location(res, '/non-inertia'))
 
 app.get('/links/as-warning/:method', (req, res) => inertia.render(req, res, { component: 'Links/AsWarning', props: { method: req.params.method }}))
 app.all('/links/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo }}))

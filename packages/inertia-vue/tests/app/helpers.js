@@ -14,6 +14,7 @@ module.exports = {
     }
 
     if (req.get('X-Inertia')) {
+      res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
       return res.json(data)
     }
