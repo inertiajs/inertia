@@ -13,5 +13,6 @@ module.exports = {
     quotes: ['warn', 'single'],
     semi: ['warn', 'never'],
     'comma-dangle': ['warn', 'always-multiline'],
+    'cypress/no-unnecessary-waiting': 'off',
   },
 }
