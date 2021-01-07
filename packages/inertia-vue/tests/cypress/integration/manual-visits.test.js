@@ -1112,18 +1112,202 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe('Visit cancellation', () => {
-    it('cancels a pending visit and fires the appropriate events', () => {
-      cy.visit('/visits/cancellation')
-      cy.url().should('eq', Cypress.config().baseUrl + '/visits/cancellation')
+  describe('Events', () => {
+    let alert = null
+    beforeEach(() => {
+      cy.visit('/visits/events')
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/events')
 
-      const stub = cy.stub()
-      cy.on('window:alert', stub)
+      alert = cy.stub()
+      cy.on('window:alert', alert)
+    })
 
-      cy.get('.cancel').click().then(() => {
-        expect(stub.getCall(0)).to.be.calledWith('onCancelToken')
-        expect(stub.getCall(1)).to.be.calledWith('onCancel')
-        expect(stub.getCall(2)).to.be.calledWith('onFinish')
+    describe('Lifecycles', () => {
+      it('makes a successful request', () => {
+        cy.get('.successful-request').click().then(() => {
+          expect(alert.getCalls()).to.have.length(5)
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+          expect(alert.getCall(4)).to.be.calledWith('onFinish')
+        })
+      })
+
+      it('makes a successful request with errors', () => {
+        cy.get('.error-request').click().then(() => {
+          expect(alert.getCalls()).to.have.length(5)
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.calledWith('onError')
+          expect(alert.getCall(4)).to.be.calledWith('onFinish')
+        })
+      })
+
+      describe('Cancelling', () => {
+        it('cancels a visit before it completes', () => {
+          cy.get('.cancel').click().then(() => {
+            expect(alert.getCalls()).to.have.length(6)
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('CANCELLING!')
+            expect(alert.getCall(4)).to.be.calledWith('onCancel')
+            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+          })
+        })
+
+        it('cancels a visit while it is processing a response', () => {
+          cy.get('.cancel-after-response').click().then(() => {
+            expect(alert.getCalls()).to.have.length(7)
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+            expect(alert.getCall(4)).to.be.calledWith('CANCELLING!')
+            expect(alert.getCall(5)).to.be.calledWith('onCancel')
+            expect(alert.getCall(6)).to.be.calledWith('onFinish')
+          })
+        })
+
+        it('prevents onCancel from firing when the request is already finished', () => {
+          cy.get('.cancel-after-finish').click().then(() => {
+            expect(alert.getCalls()).to.have.length(6)
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+            expect(alert.getCall(4)).to.be.calledWith('onFinish')
+            expect(alert.getCall(5)).to.be.calledWith('CANCELLING!')
+          })
+        })
+      })
+    })
+
+    describe('Callbacks', () => {
+      describe('onBefore', () => {
+        it('fires the event when a request is about to be made', () => {
+          cy.get('.before').click().then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            cy.tap(alert.getCall(1).lastArg, value => {
+              // Assert this is the request/visit object.
+              expect(value).to.be.an('object')
+              expect(value).to.have.property('url')
+              expect(value).to.have.property('method')
+              expect(value).to.have.property('data')
+              expect(value).to.have.property('headers')
+              expect(value).to.have.property('onBefore')
+              expect(value).to.have.property('onProgress')
+              expect(value).to.have.property('preserveState')
+            })
+          })
+        })
+
+        it('prevents the visit by returning false', () => {
+          cy.get('.before-cancel').click().then(() => {
+            expect(alert.getCalls()).to.have.length(1)
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          })
+        })
+      })
+
+      it('fires the onStart event when the request has started', () => {
+        cy.get('.start').click().then(() => {
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          cy.tap(alert.getCall(3).lastArg, visit => {
+            // Assert this is the request/visit object.
+            expect(visit).to.be.an('object')
+            expect(visit).to.have.property('url')
+            expect(visit).to.have.property('method')
+            expect(visit).to.have.property('data')
+            expect(visit).to.have.property('headers')
+            expect(visit).to.have.property('onBefore')
+            expect(visit).to.have.property('onProgress')
+            expect(visit).to.have.property('preserveState')
+          })
+        })
+      })
+
+      it('fires the onProgress event when the request has files and is progressing', () => {
+        cy.get('.progress').click().then(() => {
+          expect(alert.getCall(3)).to.be.calledWith('onProgress')
+          cy.tap(alert.getCall(4).lastArg, event => {
+            expect(event).to.have.property('isTrusted')
+            expect(event).to.have.property('percentage')
+            expect(event).to.have.property('total')
+            expect(event).to.have.property('loaded')
+            expect(event.percentage).to.be.gte(0).and.lte(100)
+          })
+        })
+      })
+
+      it('fires the onCancel event when the request was cancelled', () => {
+        cy.get('.cancel').click().then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onCancel')
+        })
+      })
+
+      it('fires the onFinish event when the request completes', () => {
+        cy.get('.successful-request').click().then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onFinish')
+        })
+      })
+
+      describe('onSuccess', () => {
+        it('fires the onSuccess event when the request succeeds without validation errors', () => {
+          cy.get('.success').click().then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+            cy.tap(alert.getCall(4).lastArg, page => {
+              expect(page).to.be.an('object')
+              expect(page).to.have.property('component')
+              expect(page).to.have.property('props')
+              expect(page).to.have.property('url')
+              expect(page).to.have.property('version')
+            })
+          })
+        })
+
+        it('can delay onFinish from firing by returning a promise from onSuccess', () => {
+          cy.get('.success-promise').click().then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+          })
+        })
+      })
+
+      describe('onError', () => {
+        it('fires the onError event when the request succeeds without validation errors', () => {
+          cy.get('.error').click().then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onError')
+            cy.tap(alert.getCall(4).lastArg, errors => {
+              expect(errors).to.be.an('object')
+              expect(errors).to.have.property('foo')
+              expect(errors.foo).to.eq('bar')
+            })
+          })
+        })
+
+        it('can delay onFinish from firing by returning a promise from onError', () => {
+          cy.get('.error-promise').click().then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onError')
+            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+          })
+        })
       })
     })
   })

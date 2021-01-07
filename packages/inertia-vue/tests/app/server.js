@@ -51,6 +51,8 @@ app.all('/visits/preserve-state-page-two', (req, res) => inertia.render(req, res
 app.all('/visits/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveScroll', props: { foo: req.query.foo }}))
 app.all('/visits/preserve-scroll-false-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveScrollFalse', props: { foo: req.query.foo }}))
 
+app.post('/visits/events-errors', (req, res) => inertia.render(req, res, { component: 'Visits/Events', props: { errors: { foo: 'bar' } }}))
+
 app.get('/dump/get', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files }}))
 app.post('/dump/post', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files }}))
 app.put('/dump/put', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'put', form: req.body, query: req.query, files: req.files }}))
