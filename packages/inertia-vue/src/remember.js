@@ -26,7 +26,7 @@ export default {
 
     this.$options.remember.data.forEach(key => {
       if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
-        typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
+        this[key] !== null && typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
           ? this[key].unserialize(restored[key])
           : (this[key] = restored[key])
       }
@@ -35,7 +35,7 @@ export default {
         Inertia.remember(
           this.$options.remember.data.reduce((carry, key) => ({
             ...carry,
-            [key]: typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
+            [key]: this[key] !== null && typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
               ? this[key].serialize()
               : this[key],
           }), {}),
