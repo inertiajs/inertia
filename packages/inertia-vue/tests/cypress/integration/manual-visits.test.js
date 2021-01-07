@@ -1175,7 +1175,7 @@ describe('Manual Visits', () => {
             })
         })
 
-        it.only('prevents onCancel from firing when the request is already finished', () => {
+        it('prevents onCancel from firing when the request is already finished', () => {
           cy.get('.cancel-after-finish').click()
             .wait(30)
             .then(() => {
