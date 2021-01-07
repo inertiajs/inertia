@@ -15,7 +15,6 @@
     <span @click="onSuccessPromiseVisit" class="success-promise">onSuccess promise</span>
     <span @click="onErrorVisit" class="error">onError</span>
     <span @click="onErrorPromiseVisit" class="error-promise">onError promise</span>
-    <span @click="onFinishVisit" class="finish">finish</span>
   </div>
 </template>
 <script>

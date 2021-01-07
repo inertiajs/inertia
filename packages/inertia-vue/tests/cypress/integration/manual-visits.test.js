@@ -1354,4 +1354,141 @@ describe('Manual Visits', () => {
       })
     })
   })
+
+  describe.only('Promise Deprecation', () => {
+    it('does not show any warnings when making a regular visit', () => {
+      cy.visit('/visits/events', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.successful-request')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy.get('@consoleWarn').should('not.be.called')
+        })
+    })
+
+    it('displays a warning when trying to chain a .then on visit calls (visit method)', () => {
+      cy.visit('/visits/promise-deprecation', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.then')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy
+            .get('@consoleWarn')
+            .should('be.calledWith',
+              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
+              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
+            )
+        })
+    })
+
+    it('displays a warning when trying to chain a .then on visit calls (GET method)', () => {
+      cy.visit('/visits/promise-deprecation', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.then-get')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy
+            .get('@consoleWarn')
+            .should('be.calledWith',
+              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
+              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
+            )
+        })
+    })
+
+    it('displays a warning when trying to chain a .catch on visit calls (visit method)', () => {
+      cy.visit('/visits/promise-deprecation', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.catch')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy
+            .get('@consoleWarn')
+            .should('be.calledWith',
+              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
+              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
+            )
+        })
+    })
+
+    it('displays a warning when trying to chain a .catch on visit calls (GET method)', () => {
+      cy.visit('/visits/promise-deprecation', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.catch-get')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy
+            .get('@consoleWarn')
+            .should('be.calledWith',
+              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
+              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
+            )
+        })
+    })
+
+    it('displays a warning when trying to chain a .finally on visit calls (visit method)', () => {
+      cy.visit('/visits/promise-deprecation', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.finally')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy
+            .get('@consoleWarn')
+            .should('be.calledWith',
+              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
+              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
+            )
+        })
+    })
+
+    it('displays a warning when trying to chain a .finally on visit calls (GET method)', () => {
+      cy.visit('/visits/promise-deprecation', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('.finally-get')
+        .click()
+        .wait(20)
+        .then(() => {
+          cy
+            .get('@consoleWarn')
+            .should('be.calledWith',
+              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
+              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
+            )
+        })
+    })
+  })
 })
