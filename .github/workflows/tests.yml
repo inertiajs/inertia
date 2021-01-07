@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         adapter: ['vue']
-        browser: ['chrome', 'firefox']
+        browser: ['chrome']
 
     steps:
       - name: Checkout

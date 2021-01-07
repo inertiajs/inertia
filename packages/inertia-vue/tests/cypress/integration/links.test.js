@@ -494,7 +494,7 @@ describe('Links', () => {
     })
   })
 
-  describe.only('Preserve scroll', () => {
+  describe('Preserve scroll', () => {
     describe('disabled (default)', () => {
       beforeEach(() => {
         cy.visit('/links/preserve-scroll-false')
