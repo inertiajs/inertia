@@ -1355,7 +1355,40 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe.only('Promise Deprecation', () => {
+  describe('Redirects', () => {
+    let alert = null
+    beforeEach(() => {
+      cy.visit('/', {
+        onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+      })
+
+      alert = cy.stub()
+      cy.on('window:alert', alert)
+    })
+
+    it('follows 303 redirects', () => {
+      cy.get('.visits-redirect')
+        .click()
+        .wait(50)
+        .then(() => {
+          cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+          expect(alert.getCalls()).to.have.length(0)
+        })
+    })
+
+    it('follows external redirects', () => {
+      cy.get('.visits-redirect-external')
+        .click()
+        .wait(50)
+        .then(() => {
+          cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
+          expect(alert.getCalls()).to.have.length(1)
+          expect(alert.getCall(0)).to.be.calledWith('A location/non-SPA visit was detected')
+        })
+    })
+  })
+
+  describe('Promise Deprecation', () => {
     it('does not show any warnings when making a regular visit', () => {
       cy.visit('/visits/events', {
         onBeforeLoad: window => {

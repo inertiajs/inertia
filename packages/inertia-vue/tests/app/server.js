@@ -60,6 +60,8 @@ app.patch('/dump/patch', upload.any(), (req, res) => inertia.render(req, res, { 
 app.delete('/dump/delete', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files }}))
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
+app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
+app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 
 app.get('*', (req, res) => inertia.render(req, res))
 
