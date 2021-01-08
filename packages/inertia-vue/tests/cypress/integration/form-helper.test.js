@@ -450,7 +450,7 @@ describe('Form Helper', () => {
     })
 
     describe('onProgress', () => {
-      it('fires when the form has files', () => {
+      it('fires when the form has files (and upload progression occurs)', () => {
         cy.get('.progress')
           .click()
           .wait(30)

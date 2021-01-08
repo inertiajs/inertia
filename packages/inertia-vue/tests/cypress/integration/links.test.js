@@ -763,6 +763,16 @@ describe('Links', () => {
         )
     })
 
+    it('shows no warning when using POST inertia-links "as" a non-anchor tag', () => {
+      cy.visit('/links/as-warning-false/post', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('@consoleWarn').should('not.be.called')
+    })
+
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/put', {
         onBeforeLoad: window => {
@@ -779,7 +789,17 @@ describe('Links', () => {
         )
     })
 
-    it('shows a warning when using PUT inertia-links using the anchor tag', () => {
+    it('shows no warning when using PUT inertia-links "as" a non-anchor tag', () => {
+      cy.visit('/links/as-warning-false/put', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('@consoleWarn').should('not.be.called')
+    })
+
+    it('shows a warning when using PATCH inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/patch', {
         onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
@@ -795,7 +815,17 @@ describe('Links', () => {
         )
     })
 
-    it('shows a warning when using PUT inertia-links using the anchor tag', () => {
+    it('shows no warning when using PATCH inertia-links "as" a non-anchor tag', () => {
+      cy.visit('/links/as-warning-false/patch', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('@consoleWarn').should('not.be.called')
+    })
+
+    it('shows a warning when using DELETE inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/delete', {
         onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
@@ -809,6 +839,16 @@ describe('Links', () => {
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
           '<inertia-link href="http://localhost:13714/example" method="delete" as="button">...</inertia-link>',
         )
+    })
+
+    it('shows no warning when using DELETE inertia-links "as" a non-anchor tag', () => {
+      cy.visit('/links/as-warning-false/delete', {
+        onBeforeLoad: window => {
+          cy.spy(window.console, 'warn').as('consoleWarn')
+        },
+      })
+
+      cy.get('@consoleWarn').should('not.be.called')
     })
   })
 })

@@ -43,6 +43,7 @@ app.all('/links/preserve-state-page-two', (req, res) => inertia.render(req, res,
 app.all('/links/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveScroll', props: { foo: req.query.foo }}))
 app.all('/links/preserve-scroll-false-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveScrollFalse', props: { foo: req.query.foo }}))
 app.get('/links/as-warning/:method', (req, res) => inertia.render(req, res, { component: 'Links/AsWarning', props: { method: req.params.method }}))
+app.get('/links/as-warning-false/:method', (req, res) => inertia.render(req, res, { component: 'Links/AsWarningFalse', props: { method: req.params.method }}))
 
 app.get('/visits/partial-reloads', (req, res) => inertia.render(req, res, { component: 'Visits/PartialReloads', props: { headers: req.headers, foo: Number.parseInt(req.query.foo || 0) + 1, bar: props => props.foo + 1, baz: props => props.foo + 2 }}))
 app.all('/visits/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveState', props: { foo: req.query.foo }}))

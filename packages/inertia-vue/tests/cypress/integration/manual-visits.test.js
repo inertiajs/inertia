@@ -1228,7 +1228,7 @@ describe('Manual Visits', () => {
       })
 
       describe('onProgress', () => {
-        it('fires when the request has files', () => {
+        it('fires when the request has files (and upload progression occurs)', () => {
           cy.get('.progress')
             .click()
             .wait(30)
