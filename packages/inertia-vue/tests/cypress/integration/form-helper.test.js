@@ -482,7 +482,6 @@ describe('Form Helper', () => {
             expect(alert.getCall(7)).to.be.calledWith(null)
             expect(alert.getCall(8)).to.be.calledWith('onFinish')
             expect(alert.getCall(9)).to.be.calledWith(null)
-            // })
           })
       })
 
@@ -536,6 +535,19 @@ describe('Form Helper', () => {
           })
       })
 
+      it('can delay onFinish from firing by returning a promise', () => {
+        cy.get('.success-promise').click()
+          .wait(50)
+          .then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+          })
+      })
+
       it('clears all existing errors and resets the hasErrors prop', () => {
         cy.get('.success-reset-errors').click()
           .wait(50)
@@ -584,19 +596,6 @@ describe('Form Helper', () => {
           cy.get('.recently-status').should('have.text', 'Form was not recently successful')
         })
       })
-
-      it('can delay onFinish from firing by returning a promise', () => {
-        cy.get('.success-promise').click()
-          .wait(50)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
-            expect(alert.getCall(5)).to.be.calledWith('onFinish')
-          })
-      })
     })
 
     describe('onError', () => {
@@ -617,6 +616,20 @@ describe('Form Helper', () => {
           })
       })
 
+      it('can delay onFinish from firing by returning a promise', () => {
+        cy.get('.error-promise')
+          .click()
+          .wait(50)
+          .then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onError')
+            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+          })
+      })
+
       it('sets form errors', () => {
         cy.get('.errors-set-on-error')
           .click()
@@ -632,20 +645,6 @@ describe('Form Helper', () => {
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
             })
-          })
-      })
-
-      it('can delay onFinish from firing by returning a promise', () => {
-        cy.get('.error-promise')
-          .click()
-          .wait(50)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onError')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
-            expect(alert.getCall(5)).to.be.calledWith('onFinish')
           })
       })
     })

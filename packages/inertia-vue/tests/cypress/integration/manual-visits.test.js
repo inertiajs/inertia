@@ -1123,34 +1123,6 @@ describe('Manual Visits', () => {
     })
 
     describe('Lifecycles', () => {
-      it('makes a successful request', () => {
-        cy.get('.successful-request')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCalls()).to.have.length(5)
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish')
-          })
-      })
-
-      it('makes a successful request with errors', () => {
-        cy.get('.error-request')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCalls()).to.have.length(5)
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onError')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish')
-          })
-      })
-
       describe('Cancelling', () => {
         it('cancels a visit before it completes', () => {
           cy.get('.cancel')
@@ -1233,62 +1205,73 @@ describe('Manual Visits', () => {
         })
       })
 
-      it('fires the onStart event when the request has started', () => {
-        cy.get('.start')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            cy.tap(alert.getCall(3).lastArg, visit => {
-            // Assert this is the request/visit object.
-              expect(visit).to.be.an('object')
-              expect(visit).to.have.property('url')
-              expect(visit).to.have.property('method')
-              expect(visit).to.have.property('data')
-              expect(visit).to.have.property('headers')
-              expect(visit).to.have.property('onBefore')
-              expect(visit).to.have.property('onProgress')
-              expect(visit).to.have.property('preserveState')
+      describe('onStart', () => {
+        it('fires when the request has started', () => {
+          cy.get('.start')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCall(2)).to.be.calledWith('onStart')
+              cy.tap(alert.getCall(3).lastArg, visit => {
+                // Assert this is the request/visit object.
+                expect(visit).to.be.an('object')
+                expect(visit).to.have.property('url')
+                expect(visit).to.have.property('method')
+                expect(visit).to.have.property('data')
+                expect(visit).to.have.property('headers')
+                expect(visit).to.have.property('onBefore')
+                expect(visit).to.have.property('onProgress')
+                expect(visit).to.have.property('preserveState')
+              })
             })
-          })
+        })
       })
 
-      it('fires the onProgress event when the request has files and is progressing', () => {
-        cy.get('.progress')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(3)).to.be.calledWith('onProgress')
-            cy.tap(alert.getCall(4).lastArg, event => {
-              expect(event).to.have.property('isTrusted')
-              expect(event).to.have.property('percentage')
-              expect(event).to.have.property('total')
-              expect(event).to.have.property('loaded')
-              expect(event.percentage).to.be.gte(0).and.lte(100)
+      describe('onProgress', () => {
+        it('fires when the request has files', () => {
+          cy.get('.progress')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCall(3)).to.be.calledWith('onProgress')
+              cy.tap(alert.getCall(4).lastArg, event => {
+                expect(event).to.have.property('isTrusted')
+                expect(event).to.have.property('percentage')
+                expect(event).to.have.property('total')
+                expect(event).to.have.property('loaded')
+                expect(event.percentage).to.be.gte(0).and.lte(100)
+              })
             })
-          })
+        })
+
+        it('does not fire when the request has no files', () => {
+          cy.get('.successful-request')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCalls()).to.have.length(5)
+              expect(alert.getCall(0)).to.be.calledWith('onBefore')
+              expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+              expect(alert.getCall(2)).to.be.calledWith('onStart')
+              expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+              expect(alert.getCall(4)).to.be.calledWith('onFinish')
+            })
+        })
       })
 
-      it('fires the onCancel event when the request was cancelled', () => {
-        cy.get('.cancel')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onCancel')
-          })
-      })
-
-      it('fires the onFinish event when the request completes', () => {
-        cy.get('.successful-request')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onFinish')
-          })
+      describe('onCancel', () => {
+        it('fires when the request was cancelled', () => {
+          cy.get('.cancel')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCall(4)).to.be.calledWith('onCancel')
+            })
+        })
       })
 
       describe('onSuccess', () => {
-        it('fires the onSuccess event when the request succeeds without validation errors', () => {
+        it('fires when the request succeeds without validation errors', () => {
           cy.get('.success').click()
             .wait(30)
             .then(() => {
@@ -1306,7 +1289,7 @@ describe('Manual Visits', () => {
             })
         })
 
-        it('can delay onFinish from firing by returning a promise from onSuccess', () => {
+        it('can delay onFinish from firing by returning a promise', () => {
           cy.get('.success-promise').click()
             .wait(50)
             .then(() => {
@@ -1321,7 +1304,7 @@ describe('Manual Visits', () => {
       })
 
       describe('onError', () => {
-        it('fires the onError event when the request succeeds without validation errors', () => {
+        it('fires when the request finishes with validation errors', () => {
           cy.get('.error')
             .click()
             .wait(30)
@@ -1338,7 +1321,7 @@ describe('Manual Visits', () => {
             })
         })
 
-        it('can delay onFinish from firing by returning a promise from onError', () => {
+        it('can delay onFinish from firing by returning a promise', () => {
           cy.get('.error-promise')
             .click()
             .wait(50)
@@ -1349,6 +1332,17 @@ describe('Manual Visits', () => {
               expect(alert.getCall(3)).to.be.calledWith('onError')
               expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
               expect(alert.getCall(5)).to.be.calledWith('onFinish')
+            })
+        })
+      })
+
+      describe('onFinish', () => {
+        it('fires when the request completes', () => {
+          cy.get('.successful-request')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCall(4)).to.be.calledWith('onFinish')
             })
         })
       })
