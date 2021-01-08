@@ -9,7 +9,7 @@
       <input type="checkbox" id="remember" name="remember" v-model="remember" />
     </label>
     <label>
-      Remember Me
+      Untracked
       <input type="text" id="untracked" name="untracked" v-model="untracked" />
     </label>
 
