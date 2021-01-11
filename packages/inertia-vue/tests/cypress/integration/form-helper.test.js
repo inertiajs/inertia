@@ -1,3 +1,5 @@
+import {tap} from '../support/commands'
+
 describe('Form Helper', () => {
   describe('Methods', () => {
     beforeEach(() => {
@@ -377,7 +379,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            cy.tap(alert.getCall(1).lastArg, visit => {
+            tap(alert.getCall(1).lastArg, visit => {
               // Assert this is the request/visit object.
               expect(visit).to.be.an('object')
               expect(visit).to.have.property('url')
@@ -422,7 +424,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(2)).to.be.calledWith('onStart')
-            cy.tap(alert.getCall(3).lastArg, visit => {
+            tap(alert.getCall(3).lastArg, visit => {
               // Assert this is the request/visit object.
               expect(visit).to.be.an('object')
               expect(visit).to.have.property('url')
@@ -456,7 +458,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(3)).to.be.calledWith('onProgress')
-            cy.tap(alert.getCall(4).lastArg, event => {
+            tap(alert.getCall(4).lastArg, event => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
@@ -494,7 +496,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(5)).to.be.calledWith(null)
 
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            cy.tap(alert.getCall(7).lastArg, event => {
+            tap(alert.getCall(7).lastArg, event => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
@@ -525,7 +527,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
             expect(alert.getCall(2)).to.be.calledWith('onStart')
             expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            cy.tap(alert.getCall(4).lastArg, page => {
+            tap(alert.getCall(4).lastArg, page => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -562,7 +564,7 @@ describe('Form Helper', () => {
 
             expect(alert.getCall(4)).to.be.calledWith('onStart')
             expect(alert.getCall(5)).to.be.calledWith(true)
-            cy.tap(alert.getCall(6).lastArg, errors => {
+            tap(alert.getCall(6).lastArg, errors => {
               expect(errors).to.be.an('object')
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
@@ -608,7 +610,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
             expect(alert.getCall(2)).to.be.calledWith('onStart')
             expect(alert.getCall(3)).to.be.calledWith('onError')
-            cy.tap(alert.getCall(4).lastArg, errors => {
+            tap(alert.getCall(4).lastArg, errors => {
               expect(errors).to.be.an('object')
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
@@ -640,7 +642,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(3).lastArg).to.be.empty
 
             expect(alert.getCall(4)).to.be.calledWith('onError')
-            cy.tap(alert.getCall(5).lastArg, errors => {
+            tap(alert.getCall(5).lastArg, errors => {
               expect(errors).to.be.an('object')
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
@@ -678,7 +680,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(8)).to.be.calledWith('onSuccess')
-            cy.tap(alert.getCall(9).lastArg, event => {
+            tap(alert.getCall(9).lastArg, event => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')

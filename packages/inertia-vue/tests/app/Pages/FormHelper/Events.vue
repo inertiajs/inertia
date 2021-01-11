@@ -38,8 +38,8 @@ export default {
   methods: {
     callbacks(overrides = {}) {
       const defaults = {
-        onCancelToken: () => alert('onCancelToken'),
         onBefore: () => alert('onBefore'),
+        onCancelToken: () => alert('onCancelToken'),
         onStart: () => alert('onStart'),
         onProgress: () => alert('onProgress'),
         onFinish: () => alert('onFinish'),

@@ -1,3 +1,5 @@
+import {tap} from '../support/commands'
+
 describe('Manual Visits', () => {
   it('visits a different page', () => {
     cy.visit('/', {
@@ -1173,38 +1175,6 @@ describe('Manual Visits', () => {
     })
 
     describe('Callbacks', () => {
-      describe('onBefore', () => {
-        it('fires the event when a request is about to be made', () => {
-          cy.get('.before')
-            .click()
-            .wait(30)
-            .then(() => {
-              expect(alert.getCall(0)).to.be.calledWith('onBefore')
-              cy.tap(alert.getCall(1).lastArg, value => {
-              // Assert this is the request/visit object.
-                expect(value).to.be.an('object')
-                expect(value).to.have.property('url')
-                expect(value).to.have.property('method')
-                expect(value).to.have.property('data')
-                expect(value).to.have.property('headers')
-                expect(value).to.have.property('onBefore')
-                expect(value).to.have.property('onProgress')
-                expect(value).to.have.property('preserveState')
-              })
-            })
-        })
-
-        it('prevents the visit by returning false', () => {
-          cy.get('.before-cancel')
-            .click()
-            .wait(30)
-            .then(() => {
-              expect(alert.getCalls()).to.have.length(1)
-              expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            })
-        })
-      })
-
       describe('onStart', () => {
         it('fires when the request has started', () => {
           cy.get('.start')
@@ -1212,7 +1182,7 @@ describe('Manual Visits', () => {
             .wait(30)
             .then(() => {
               expect(alert.getCall(2)).to.be.calledWith('onStart')
-              cy.tap(alert.getCall(3).lastArg, visit => {
+              tap(alert.getCall(3).lastArg, visit => {
                 // Assert this is the request/visit object.
                 expect(visit).to.be.an('object')
                 expect(visit).to.have.property('url')
@@ -1234,7 +1204,7 @@ describe('Manual Visits', () => {
             .wait(30)
             .then(() => {
               expect(alert.getCall(3)).to.be.calledWith('onProgress')
-              cy.tap(alert.getCall(4).lastArg, event => {
+              tap(alert.getCall(4).lastArg, event => {
                 expect(event).to.have.property('isTrusted')
                 expect(event).to.have.property('percentage')
                 expect(event).to.have.property('total')
@@ -1279,7 +1249,7 @@ describe('Manual Visits', () => {
               expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
               expect(alert.getCall(2)).to.be.calledWith('onStart')
               expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-              cy.tap(alert.getCall(4).lastArg, page => {
+              tap(alert.getCall(4).lastArg, page => {
                 expect(page).to.be.an('object')
                 expect(page).to.have.property('component')
                 expect(page).to.have.property('props')
@@ -1313,7 +1283,7 @@ describe('Manual Visits', () => {
               expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
               expect(alert.getCall(2)).to.be.calledWith('onStart')
               expect(alert.getCall(3)).to.be.calledWith('onError')
-              cy.tap(alert.getCall(4).lastArg, errors => {
+              tap(alert.getCall(4).lastArg, errors => {
                 expect(errors).to.be.an('object')
                 expect(errors).to.have.property('foo')
                 expect(errors.foo).to.eq('bar')
