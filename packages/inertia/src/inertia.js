@@ -154,7 +154,7 @@ export default {
       visit.cancelled = cancelled
       visit.interrupted = interrupted
       fireFinishEvent(visit)
-      visit.onFinish()
+      visit.onFinish(visit)
     }
   },
 
@@ -164,7 +164,7 @@ export default {
       visit.cancelled = false
       visit.interrupted = false
       fireFinishEvent(visit)
-      visit.onFinish()
+      visit.onFinish(visit)
     }
   },
 
