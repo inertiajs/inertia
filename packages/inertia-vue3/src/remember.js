@@ -1,3 +1,4 @@
+import { ref, toRaw, unref, watch } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
 export default {
@@ -25,16 +26,45 @@ export default {
     const restored = Inertia.restore(stateKey)
 
     this.$options.remember.data.forEach(key => {
-      if (restored !== undefined && restored[key] !== undefined) {
-        this[key] = restored[key]
+      if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
+        typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
+          ? this[key].unserialize(restored[key])
+          : (this[key] = restored[key])
       }
 
       this.$watch(key, () => {
         Inertia.remember(
-          this.$options.remember.data.reduce((data, key) => ({ ...data, [key]: JSON.parse(JSON.stringify(this[key])) }), {}),
+          this.$options.remember.data.reduce((data, key) => ({
+            ...data,
+            [key]: typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
+              ? this[key].serialize()
+              : toRaw(this[key]),
+          }), {}),
           stateKey,
         )
       }, { immediate: true, deep: true })
     })
   },
+}
+
+export function useRemember(data, key) {
+  data = toRaw(unref(data))
+  const restored = Inertia.restore(key)
+
+  const remembered = restored === undefined ? ref(data) : ref(
+    typeof data.serialize === 'function' && typeof data.unserialize === 'function'
+      ? data.unserialize(restored)
+      : restored,
+  )
+
+  watch(remembered, (remembered) => {
+    Inertia.remember(
+      typeof data.serialize === 'function' && typeof data.unserialize === 'function'
+        ? data.serialize()
+        : toRaw(remembered),
+      key,
+    )
+  }, { immediate: true, deep: true })
+
+  return remembered
 }

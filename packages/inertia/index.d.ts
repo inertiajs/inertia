@@ -37,6 +37,7 @@ type VisitOptions = {
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: (page: Page) => void | Promise<any>
+  onError?: (errors: Record<string, string>) => void
 }
 
 type InertiaEvent = 'before' | 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'

@@ -154,7 +154,7 @@ export default {
       visit.cancelled = cancelled
       visit.interrupted = interrupted
       fireFinishEvent(visit)
-      visit.onFinish()
+      visit.onFinish(visit)
     }
   },
 
@@ -164,7 +164,7 @@ export default {
       visit.cancelled = false
       visit.interrupted = false
       fireFinishEvent(visit)
-      visit.onFinish()
+      visit.onFinish(visit)
     }
   },
 
@@ -177,6 +177,7 @@ export default {
     only = [],
     headers = {},
     errorBag = null,
+    forceFormData = false,
     onCancelToken = () => ({}),
     onBefore = () => ({}),
     onStart = () => ({}),
@@ -190,11 +191,11 @@ export default {
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
 
     const visitHasFiles = hasFiles(data)
-    if (method !== 'get' && visitHasFiles) {
+    if (method !== 'get' && (visitHasFiles || forceFormData)) {
       data = objectToFormData(data)
     }
 
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
+    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, forceFormData, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
@@ -243,6 +244,9 @@ export default {
         }
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
+        }
+        if (preserveState && window.history.state?.rememberedState && response.data.component === this.page.component) {
+          response.data.rememberedState = window.history.state.rememberedState
         }
         const responseUrl = hrefToUrl(response.data.url)
         if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
