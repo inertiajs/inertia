@@ -64,9 +64,12 @@ app.put('/dump/put', upload.any(), (req, res) => inertia.render(req, res, { comp
 app.patch('/dump/patch', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files }}))
 app.delete('/dump/delete', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files }}))
 
+app.post('/events/errors', (req, res) => inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } }}))
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
+app.post('/disconnect', (req, res) => res.connection.destroy())
 
 app.all('*', (req, res) => inertia.render(req, res))
 
