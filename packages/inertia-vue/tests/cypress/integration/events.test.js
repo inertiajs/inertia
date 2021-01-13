@@ -100,6 +100,25 @@ describe('Events', () => {
             // Ensure the listeners did not prevent the visit
             expect(alert.getCall(6)).to.be.calledWith('onStart')
           })
+          .get('.link-before')
+          .click()
+          .wait(30)
+          .then(() => {
+            // Link Event Callback
+            expect(alert.getCall(7)).to.be.calledWith('linkOnBefore')
+            assertVisitObject(alert.getCall(8).lastArg)
+
+            // Global Inertia Event Listener
+            expect(alert.getCall(9)).to.be.calledWith('Inertia.on(before)')
+            assertGlobalEvent(alert.getCall(10).lastArg)
+
+            // Global Native Event Listener
+            expect(alert.getCall(11)).to.be.calledWith('addEventListener(inertia:before)')
+            assertGlobalEvent(alert.getCall(12).lastArg)
+
+            // Ensure the listeners did not prevent the visit
+            expect(alert.getCall(13)).to.be.calledWith('linkOnStart')
+          })
       })
 
       describe('Local Event Callbacks', () => {
@@ -110,6 +129,13 @@ describe('Events', () => {
             .then(() => {
               expect(alert.getCalls()).to.have.length(1)
               expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            })
+            .get('.link-before-prevent-local')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCalls()).to.have.length(2)
+              expect(alert.getCall(1)).to.be.calledWith('linkOnBefore')
             })
         })
       })
@@ -161,6 +187,17 @@ describe('Events', () => {
             expect(alert.getCall(0)).to.be.calledWith('onCancelToken')
             assertCancelToken(alert.getCall(1).lastArg)
           })
+          .get('.link-canceltoken')
+          .click()
+          .wait(30)
+          .then(() => {
+            // Assert that it only gets fired locally.
+            expect(alert.getCalls()).to.have.length(4)
+
+            // Link Event Callback
+            expect(alert.getCall(2)).to.be.calledWith('linkOnCancelToken')
+            assertCancelToken(alert.getCall(3).lastArg)
+          })
       })
     })
 
@@ -173,6 +210,14 @@ describe('Events', () => {
             expect(alert.getCalls()).to.have.length(2)
             expect(alert.getCall(0)).to.be.calledWith('onCancel')
             expect(alert.getCall(1)).to.be.calledWith(undefined)
+          })
+          .get('.link-cancel')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCalls()).to.have.length(4)
+            expect(alert.getCall(2)).to.be.calledWith('linkOnCancel')
+            expect(alert.getCall(3)).to.be.calledWith(undefined)
           })
       })
     })
@@ -212,6 +257,24 @@ describe('Events', () => {
             expect(alert.getCall(4)).to.be.calledWith('onStart')
             assertVisitObject(alert.getCall(5).lastArg)
           })
+          .get('.link-start')
+          .click()
+          .wait(30)
+          .then(() =>{
+            expect(alert.getCalls()).to.have.length(12)
+
+            // Global Inertia Event Listener
+            expect(alert.getCall(6)).to.be.calledWith('Inertia.on(start)')
+            assertGlobalEvent(alert.getCall(7).lastArg)
+
+            // Global Native Event Listener
+            expect(alert.getCall(8)).to.be.calledWith('addEventListener(inertia:start)')
+            assertGlobalEvent(alert.getCall(9).lastArg)
+
+            // Local Event Callback
+            expect(alert.getCall(10)).to.be.calledWith('linkOnStart')
+            assertVisitObject(alert.getCall(11).lastArg)
+          })
       })
     })
 
@@ -250,6 +313,24 @@ describe('Events', () => {
             expect(alert.getCall(4)).to.be.calledWith('onProgress')
             assertProgressObject(alert.getCall(5).lastArg)
           })
+          .get('.link-progress')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCalls()).to.have.length(12)
+
+            // Global Inertia Event Listener
+            expect(alert.getCall(6)).to.be.calledWith('Inertia.on(progress)')
+            assertGlobalEvent(alert.getCall(7).lastArg)
+
+            // Global Native Event Listener
+            expect(alert.getCall(8)).to.be.calledWith('addEventListener(inertia:progress)')
+            assertGlobalEvent(alert.getCall(9).lastArg)
+
+            // Local Event Callback
+            expect(alert.getCall(10)).to.be.calledWith('linkOnProgress')
+            assertProgressObject(alert.getCall(11).lastArg)
+          })
       })
 
       it('does not fire when the request has no files', () => {
@@ -259,6 +340,13 @@ describe('Events', () => {
           .then(() => {
             expect(alert.getCalls()).to.have.length(1)
             expect(alert.getCall(0)).to.be.calledWith('progressNoFilesOnBefore')
+          })
+          .get('.link-progress-no-files')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCalls()).to.have.length(2)
+            expect(alert.getCall(1)).to.be.calledWith('linkProgressNoFilesOnBefore')
           })
       })
 
@@ -302,6 +390,24 @@ describe('Events', () => {
               expect(alert.getCall(4)).to.be.calledWith('onError')
               assertErrorsObject(alert.getCall(5).lastArg)
             })
+            .get('.link-error')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCalls()).to.have.length(12)
+
+              // Global Inertia Event Listener
+              expect(alert.getCall(6)).to.be.calledWith('Inertia.on(error)')
+              assertGlobalEvent(alert.getCall(7).lastArg)
+
+              // Global Native Event Listener
+              expect(alert.getCall(8)).to.be.calledWith('addEventListener(inertia:error)')
+              assertGlobalEvent(alert.getCall(9).lastArg)
+
+              // Local Event Callback
+              expect(alert.getCall(10)).to.be.calledWith('linkOnError')
+              assertErrorsObject(alert.getCall(11).lastArg)
+            })
         })
       })
 
@@ -311,9 +417,19 @@ describe('Events', () => {
             .click()
             .wait(50)
             .then(() => {
+              expect(alert.getCalls()).to.have.length(3)
               expect(alert.getCall(0)).to.be.calledWith('onError')
               expect(alert.getCall(1)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
               expect(alert.getCall(2)).to.be.calledWith('onFinish')
+            })
+            .get('.link-error-promise')
+            .click()
+            .wait(50)
+            .then(() => {
+              expect(alert.getCalls()).to.have.length(6)
+              expect(alert.getCall(3)).to.be.calledWith('linkOnError')
+              expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+              expect(alert.getCall(5)).to.be.calledWith('linkOnFinish')
             })
         })
       })
@@ -354,6 +470,24 @@ describe('Events', () => {
             expect(alert.getCall(4)).to.be.calledWith('onSuccess')
             assertPageObject(alert.getCall(5).lastArg)
           })
+          .get('.link-success')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCalls()).to.have.length(12)
+
+            // Global Inertia Event Listener
+            expect(alert.getCall(6)).to.be.calledWith('Inertia.on(success)')
+            assertGlobalEvent(alert.getCall(7).lastArg)
+
+            // Global Native Event Listener
+            expect(alert.getCall(8)).to.be.calledWith('addEventListener(inertia:success)')
+            assertGlobalEvent(alert.getCall(9).lastArg)
+
+            // Local Event Callback
+            expect(alert.getCall(10)).to.be.calledWith('linkOnSuccess')
+            assertPageObject(alert.getCall(11).lastArg)
+          })
       })
 
       describe('Local Event Callbacks', () => {
@@ -362,9 +496,19 @@ describe('Events', () => {
             .click()
             .wait(50)
             .then(() => {
+              expect(alert.getCalls()).to.have.length(3)
               expect(alert.getCall(0)).to.be.calledWith('onSuccess')
               expect(alert.getCall(1)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
               expect(alert.getCall(2)).to.be.calledWith('onFinish')
+            })
+            .get('.link-success-promise')
+            .click()
+            .wait(50)
+            .then(() => {
+              expect(alert.getCalls()).to.have.length(6)
+              expect(alert.getCall(3)).to.be.calledWith('linkOnSuccess')
+              expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+              expect(alert.getCall(5)).to.be.calledWith('linkOnFinish')
             })
         })
       })
@@ -479,6 +623,24 @@ describe('Events', () => {
             // Local Event Callback
             expect(alert.getCall(4)).to.be.calledWith('onFinish')
             assertVisitObject(alert.getCall(5).lastArg)
+          })
+          .get('.link-finish')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCalls()).to.have.length(12)
+
+            // Global Inertia Event Listener
+            expect(alert.getCall(6)).to.be.calledWith('Inertia.on(finish)')
+            assertGlobalEvent(alert.getCall(7).lastArg)
+
+            // Global Native Event Listener
+            expect(alert.getCall(8)).to.be.calledWith('addEventListener(inertia:finish)')
+            assertGlobalEvent(alert.getCall(9).lastArg)
+
+            // Local Event Callback
+            expect(alert.getCall(10)).to.be.calledWith('linkOnFinish')
+            assertVisitObject(alert.getCall(11).lastArg)
           })
       })
     })

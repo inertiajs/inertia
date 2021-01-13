@@ -40,4 +40,10 @@ window.testing.vue = new Vue({
       ... (window.location.pathname.startsWith('/error-resolver') ? { resolveErrors } : {}),
     },
   }),
+  methods: {
+    tap: (value, callback) => {
+      callback(value)
+      return value
+    },
+  },
 }).$mount(app)

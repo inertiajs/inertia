@@ -7,29 +7,40 @@
     <!-- Events: Before -->
     <span @click="beforeVisit" class="before">Before Event</span>
     <span @click="beforeVisitPreventLocal" class="before-prevent-local">Before Event</span>
+    <inertia-link :href="$page.url" method="post" @before="visit => alert('linkOnBefore', visit)" @start="() => alert('linkOnStart')" class="link-before">Before Event Link</inertia-link>
+    <inertia-link :href="$page.url" method="post" @before="visit => tap(false, alert('linkOnBefore'))" @start="() => alert('This listener should not have been called.')" class="link-before-prevent-local">Before Event Link</inertia-link>
     <span @click="beforeVisitPreventGlobalInertia" class="before-prevent-global-inertia">Before Event - Prevent globally using Inertia Event Listener</span>
     <span @click="beforeVisitPreventGlobalNative" class="before-prevent-global-native">Before Event - Prevent globally using Native Event Listeners</span>
 
     <!-- Events: CancelToken -->
     <span @click="cancelTokenVisit" class="canceltoken">Cancel Token Event</span>
+    <inertia-link :href="$page.url" method="post" @cancelToken="event => alert('linkOnCancelToken', event)" class="link-canceltoken">Cancel Token Event Link</inertia-link>
 
     <!-- Events: Cancel -->
     <span @click="cancelVisit" class="cancel">Cancel Event</span>
+    <inertia-link :href="$page.url" method="post" @cancelToken="token => token.cancel()" @cancel="event => alert('linkOnCancel', event)" class="link-cancel">Cancel Event Link</inertia-link>
 
     <!-- Events: Start -->
     <span @click="startVisit" class="start">Start Event</span>
+    <inertia-link :href="$page.url" method="post" @start="event => alert('linkOnStart', event)" class="link-start">Start Event Link</inertia-link>
 
     <!-- Events: Progress -->
     <span @click="progressVisit" class="progress">Progress Event</span>
     <span @click="progressNoFilesVisit" class="progress-no-files">Missing Progress Event (no files)</span>
+    <inertia-link :href="$page.url" method="post" :data="payloadWithFile" @progress="event => alert('linkOnProgress', event)" class="link-progress">Progress Event Link</inertia-link>
+    <inertia-link :href="$page.url" method="post" @before="() => alert('linkProgressNoFilesOnBefore')" @progress="event => alert('linkOnProgress', event)" class="link-progress-no-files">Progress Event Link (no files)</inertia-link>
 
     <!-- Events: Error -->
     <span @click="errorVisit" class="error">Error Event</span>
     <span @click="errorPromiseVisit" class="error-promise">Error Event (delaying onFinish w/ Promise)</span>
+    <inertia-link href="/events/errors" method="post" @error="errors => alert('linkOnError', errors)" @success="() => alert('This listener should not have been called')" class="link-error">Error Event Link</inertia-link>
+    <inertia-link href="/events/errors" method="post" @error="() => callbackSuccessErrorPromise('linkOnError')" @success="() => alert('This listener should not have been called')" @finish="() => alert('linkOnFinish')" class="link-error-promise">Error Event Link (delaying onFinish w/ Promise)</inertia-link>
 
     <!-- Events: Success -->
     <span @click="successVisit" class="success">Success Event</span>
     <span @click="successPromiseVisit" class="success-promise">Success Event (delaying onFinish w/ Promise)</span>
+    <inertia-link :href="$page.url" method="post" @error="() => alert('This listener should not have been called')" @success="event => alert('linkOnSuccess', event)" class="link-success">Success Event Link</inertia-link>
+    <inertia-link :href="$page.url" method="post" @error="() => alert('This listener should not have been called')" @success="() => callbackSuccessErrorPromise('linkOnSuccess')" @finish="() => alert('linkOnFinish')" class="link-success-promise">Success Event Link (delaying onFinish w/ Promise)</inertia-link>
 
     <!-- Events: Invalid -->
     <span @click="invalidVisit" class="invalid">Finish Event</span>
@@ -39,6 +50,7 @@
 
     <!-- Events: Finish -->
     <span @click="finishVisit" class="finish">Finish Event</span>
+    <inertia-link :href="$page.url" method="post" @finish="event => alert('linkOnFinish', event)" class="link-finish">Finish Event Link</inertia-link>
 
     <!-- Events: Navigate -->
     <span @click="navigateVisit" class="navigate">Navigate Event</span>
@@ -60,6 +72,9 @@ export default {
     }
   }),
   methods: {
+    alert(... args) {
+      args.forEach(arg => alert(arg))
+    },
     withoutEventListeners() {
       this.$inertia.post(this.$page.url, {})
     },
@@ -234,11 +249,7 @@ export default {
     },
     errorPromiseVisit() {
       this.$inertia.post('/events/errors', {}, {
-        onError: () => {
-          alert('onError');
-          setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
-          return new Promise(resolve => setTimeout(resolve, 20))
-        },
+        onError: () => this.callbackSuccessErrorPromise('onError'),
         onSuccess: () => alert('This listener should not have been called'),
         onFinish: () => alert('onFinish')
       })
@@ -264,11 +275,7 @@ export default {
     },
     successPromiseVisit() {
       this.$inertia.post(this.$page.url, {}, {
-        onSuccess: () => {
-          alert('onSuccess');
-          setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
-          return new Promise(resolve => setTimeout(resolve, 20))
-        },
+        onSuccess: () => this.callbackSuccessErrorPromise('onSuccess'),
         onError: () => alert('This listener should not have been called'),
         onFinish: () => alert('onFinish')
       })
@@ -408,7 +415,12 @@ export default {
           cancelToken.cancel()
         }
       })
-    }
+    },
+    callbackSuccessErrorPromise(eventName) {
+      alert(eventName);
+      setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
+      return new Promise(resolve => setTimeout(resolve, 20))
+    },
   }
 }
 </script>
