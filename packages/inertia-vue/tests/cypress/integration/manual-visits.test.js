@@ -846,7 +846,7 @@ describe('Manual Visits', () => {
           .then(() => {
             cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-scroll-false-page-two')
 
-            cy.get('.foo').should('have.text', 'Foo is now test')
+            cy.get('.foo').should('have.text', 'Foo is now baz')
             cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
             cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
           })
@@ -899,7 +899,7 @@ describe('Manual Visits', () => {
           .click({ force: true })
           .then(() => {
             cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-scroll-false-page-two')
-            cy.get('.foo').should('have.text', 'Foo is now test')
+            cy.get('.foo').should('have.text', 'Foo is now baz')
             cy.get('#slot').scrollTo(0, 0)
             cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
 
