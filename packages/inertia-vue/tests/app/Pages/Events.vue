@@ -54,6 +54,11 @@
 import { Inertia } from '@inertiajs/inertia'
 
 export default {
+  data: () => ({
+    payloadWithFile: {
+      file: new File(['foobar'], 'example.bin')
+    }
+  }),
   methods: {
     withoutEventListeners() {
       this.$inertia.post(this.$page.url, {})
@@ -164,9 +169,7 @@ export default {
         alert(event)
       })
 
-      this.$inertia.post(this.$page.url, {
-        file: new File(['foobar'], 'example.bin')
-      }, {
+      this.$inertia.post(this.$page.url, this.payloadWithFile, {
         onProgress: event => {
           alert('onProgress')
           alert(event)
@@ -185,6 +188,7 @@ export default {
       })
 
       this.$inertia.post(this.$page.url, {}, {
+        onBefore: () => alert('progressNoFilesOnBefore'),
         onProgress: event => {
           alert('onProgress')
           alert(event)
@@ -371,19 +375,13 @@ export default {
       }
     },
     lifecycleSuccess() {
-      this.$inertia.post(this.$page.url, {
-        file: new File(['foobar'], 'example.bin')
-      }, this.registerAllListeners())
+      this.$inertia.post(this.$page.url, this.payloadWithFile, this.registerAllListeners())
     },
     lifecycleError() {
-      this.$inertia.post('/events/errors', {
-        file: new File(['foobar'], 'example.bin')
-      }, this.registerAllListeners())
+      this.$inertia.post('/events/errors', this.payloadWithFile, this.registerAllListeners())
     },
     lifecycleCancel() {
-      this.$inertia.post('/sleep', {
-        file: new File(['foobar'], 'example.bin')
-      }, {
+      this.$inertia.post('/sleep', this.payloadWithFile, {
         ... this.registerAllListeners(),
         onCancelToken: token => {
           alert('onCancelToken')
@@ -398,9 +396,7 @@ export default {
     lifecycleCancelAfterFinish() {
       let cancelToken = null;
 
-      this.$inertia.post(this.$page.url, {
-        file: new File(['foobar'], 'example.bin')
-      }, {
+      this.$inertia.post(this.$page.url, this.payloadWithFile, {
         ... this.registerAllListeners(),
         onCancelToken: token => {
           alert('onCancelToken')

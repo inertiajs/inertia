@@ -1,5 +1,30 @@
 import { tap } from '../support/commands'
 
+const assertVisitObject = visit => {
+  expect(visit).to.be.an('object')
+  expect(visit).to.have.property('url')
+  expect(visit).to.have.property('method')
+  expect(visit).to.have.property('data')
+  expect(visit).to.have.property('headers')
+  expect(visit).to.have.property('onBefore')
+  expect(visit).to.have.property('onProgress')
+  expect(visit).to.have.property('preserveState')
+}
+const assertPageObject = page => {
+  expect(page).to.be.an('object')
+  expect(page).to.have.property('component')
+  expect(page).to.have.property('props')
+  expect(page).to.have.property('url')
+  expect(page).to.have.property('version')
+}
+const assertProgressObject = progress => {
+  expect(progress).to.have.property('isTrusted')
+  expect(progress).to.have.property('percentage')
+  expect(progress).to.have.property('total')
+  expect(progress).to.have.property('loaded')
+  expect(progress.percentage).to.be.gte(0).and.lte(100)
+}
+
 describe('Events', () => {
   let alert = null
   beforeEach(() => {
@@ -41,52 +66,36 @@ describe('Events', () => {
   describe('Hooks', () => {
     describe('before', () => {
       it('fires the event when a request is about to be made', () => {
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:before')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.true
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('visit')
+            assertVisitObject(detail.visit)
+          })
+        }
+
         cy.get('.before')
           .click()
           .wait(30)
           .then(() => {
             // Local Event Callback
             expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            tap(alert.getCall(1).lastArg, visit => {
-              expect(visit).to.be.an('object')
-              expect(visit).to.have.property('url')
-              expect(visit).to.have.property('method')
-              expect(visit).to.have.property('data')
-              expect(visit).to.have.property('headers')
-              expect(visit).to.have.property('onBefore')
-              expect(visit).to.have.property('onProgress')
-              expect(visit).to.have.property('preserveState')
-            })
+            assertVisitObject(alert.getCall(1).lastArg)
 
             // Global Inertia Event Listener
             expect(alert.getCall(2)).to.be.calledWith('Inertia.on(before)')
-            const eventArg = tap(alert.getCall(3).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:before')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.true
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('visit')
-                tap(detail.visit, visit => {
-                  expect(visit).to.be.an('object')
-                  expect(visit).to.have.property('url')
-                  expect(visit).to.have.property('method')
-                  expect(visit).to.have.property('data')
-                  expect(visit).to.have.property('headers')
-                  expect(visit).to.have.property('onBefore')
-                  expect(visit).to.have.property('onProgress')
-                  expect(visit).to.have.property('preserveState')
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(3).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(4)).to.be.calledWith('addEventListener(inertia:before)')
-            expect(alert.getCall(5)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(5).lastArg)
 
             // Ensure the listeners did not prevent the visit
             expect(alert.getCall(6)).to.be.calledWith('onStart')
@@ -136,6 +145,11 @@ describe('Events', () => {
 
     describe('cancelToken', () => {
       it('fires when the request is starting', () => {
+        const assertCancelToken = token => {
+          expect(token).to.be.an('object')
+          expect(token).to.have.property('cancel')
+        }
+
         cy.get('.canceltoken')
           .click()
           .wait(30)
@@ -145,10 +159,7 @@ describe('Events', () => {
 
             // Local Event Callback
             expect(alert.getCall(0)).to.be.calledWith('onCancelToken')
-            tap(alert.getCall(1).lastArg, token => {
-              expect(token).to.be.an('object')
-              expect(token).to.have.property('cancel')
-            })
+            assertCancelToken(alert.getCall(1).lastArg)
           })
       })
     })
@@ -168,6 +179,21 @@ describe('Events', () => {
 
     describe('start', () => {
       it('fires when the request has started', () => {
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:start')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.false
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('visit')
+            assertVisitObject(detail.visit)
+          })
+        }
+
         cy.get('.start')
           .click()
           .wait(30)
@@ -176,52 +202,36 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(start)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:start')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.false
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('visit')
-                tap(detail.visit, visit => {
-                  expect(visit).to.be.an('object')
-                  expect(visit).to.have.property('url')
-                  expect(visit).to.have.property('method')
-                  expect(visit).to.have.property('data')
-                  expect(visit).to.have.property('headers')
-                  expect(visit).to.have.property('onBefore')
-                  expect(visit).to.have.property('onProgress')
-                  expect(visit).to.have.property('preserveState')
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:start)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
 
             // Local Event Callback
             expect(alert.getCall(4)).to.be.calledWith('onStart')
-            tap(alert.getCall(5).lastArg, visit => {
-              expect(visit).to.be.an('object')
-              expect(visit).to.have.property('url')
-              expect(visit).to.have.property('method')
-              expect(visit).to.have.property('data')
-              expect(visit).to.have.property('headers')
-              expect(visit).to.have.property('onBefore')
-              expect(visit).to.have.property('onProgress')
-              expect(visit).to.have.property('preserveState')
-            })
+            assertVisitObject(alert.getCall(5).lastArg)
           })
       })
     })
 
     describe('progress', () => {
       it('fires when the request has files and upload progression occurs', () => {
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:progress')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.false
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('progress')
+            assertProgressObject(detail.progress)
+          })
+        }
+
         cy.get('.progress')
           .click()
           .wait(30)
@@ -230,40 +240,15 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(progress)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:progress')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.false
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('progress')
-                tap(detail.progress, progress => {
-                  expect(progress).to.have.property('isTrusted')
-                  expect(progress).to.have.property('percentage')
-                  expect(progress).to.have.property('total')
-                  expect(progress).to.have.property('loaded')
-                  expect(progress.percentage).to.be.gte(0).and.lte(100)
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:progress)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
 
             // Local Event Callback
             expect(alert.getCall(4)).to.be.calledWith('onProgress')
-            tap(alert.getCall(5).lastArg, progress => {
-              expect(progress).to.have.property('isTrusted')
-              expect(progress).to.have.property('percentage')
-              expect(progress).to.have.property('total')
-              expect(progress).to.have.property('loaded')
-              expect(progress.percentage).to.be.gte(0).and.lte(100)
-            })
+            assertProgressObject(alert.getCall(5).lastArg)
           })
       })
 
@@ -272,52 +257,52 @@ describe('Events', () => {
           .click()
           .wait(30)
           .then(() => {
-            expect(alert.getCalls()).to.be.empty
+            expect(alert.getCalls()).to.have.length(1)
+            expect(alert.getCall(0)).to.be.calledWith('progressNoFilesOnBefore')
           })
       })
-    })
 
-    describe('error', () => {
-      it('fires when the request finishes with validation errors', () => {
-        cy.get('.error')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCalls()).to.have.length(6)
+      describe('error', () => {
+        it('fires when the request finishes with validation errors', () => {
+          const assertErrorsObject = errors => {
+            expect(errors).to.be.an('object')
+            expect(errors).to.have.property('foo')
+            expect(errors.foo).to.eq('bar')
+          }
+          const assertGlobalEvent = event => {
+            expect(event).to.be.an('CustomEvent')
+            expect(event.type).to.eq('inertia:error')
 
-            // Global Inertia Event Listener
-            expect(alert.getCall(0)).to.be.calledWith('Inertia.on(error)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:error')
+            expect(event).to.have.property('cancelable')
+            expect(event.cancelable).to.be.false
 
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.false
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('errors')
-                tap(detail.errors, errors => {
-                  expect(errors).to.be.an('object')
-                  expect(errors).to.have.property('foo')
-                  expect(errors.foo).to.eq('bar')
-                })
-              })
+            expect(event).to.have.property('detail')
+            tap(event.detail, detail => {
+              expect(detail).to.be.an('object')
+              expect(detail).to.have.property('errors')
+              assertErrorsObject(detail.errors)
             })
+          }
 
-            // Global Native Event Listener
-            expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:error)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+          cy.get('.error')
+            .click()
+            .wait(30)
+            .then(() => {
+              expect(alert.getCalls()).to.have.length(6)
 
-            // Local Event Callback
-            expect(alert.getCall(4)).to.be.calledWith('onError')
-            tap(alert.getCall(5).lastArg, errors => {
-              expect(errors).to.be.an('object')
-              expect(errors).to.have.property('foo')
-              expect(errors.foo).to.eq('bar')
+              // Global Inertia Event Listener
+              expect(alert.getCall(0)).to.be.calledWith('Inertia.on(error)')
+              assertGlobalEvent(alert.getCall(1).lastArg)
+
+              // Global Native Event Listener
+              expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:error)')
+              assertGlobalEvent(alert.getCall(3).lastArg)
+
+              // Local Event Callback
+              expect(alert.getCall(4)).to.be.calledWith('onError')
+              assertErrorsObject(alert.getCall(5).lastArg)
             })
-          })
+        })
       })
 
       describe('Local Event Callbacks', () => {
@@ -336,6 +321,21 @@ describe('Events', () => {
 
     describe('success', () => {
       it('fires when the request finished without validation errors', () => {
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:success')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.false
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('page')
+            assertPageObject(detail.page)
+          })
+        }
+
         cy.get('.success')
           .click()
           .wait(30)
@@ -344,40 +344,15 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(success)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:success')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.false
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('page')
-                tap(detail.page, page => {
-                  expect(page).to.be.an('object')
-                  expect(page).to.have.property('component')
-                  expect(page).to.have.property('props')
-                  expect(page).to.have.property('url')
-                  expect(page).to.have.property('version')
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:success)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
 
             // Local Event Callback
             expect(alert.getCall(4)).to.be.calledWith('onSuccess')
-            tap(alert.getCall(5).lastArg, page => {
-              expect(page).to.be.an('object')
-              expect(page).to.have.property('component')
-              expect(page).to.have.property('props')
-              expect(page).to.have.property('url')
-              expect(page).to.have.property('version')
-            })
+            assertPageObject(alert.getCall(5).lastArg)
           })
       })
 
@@ -397,6 +372,27 @@ describe('Events', () => {
 
     describe('invalid', () => {
       it('gets fired when a non-Inertia response is received', () => {
+        const assertResponseObject = response => {
+          expect(response).to.be.an('object')
+          expect(response).to.have.property('headers')
+          expect(response).to.have.property('data')
+          expect(response).to.have.property('status')
+        }
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:invalid')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.true
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('response')
+            assertResponseObject(detail.response)
+          })
+        }
+
         cy.get('.invalid')
           .click()
           .wait(50)
@@ -405,35 +401,33 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(invalid)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:invalid')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.true
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('response')
-                tap(detail.response, response => {
-                  expect(response).to.be.an('object')
-                  expect(response).to.have.property('headers')
-                  expect(response).to.have.property('data')
-                  expect(response).to.have.property('status')
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:invalid)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
           })
       })
     })
 
     describe('exception', () => {
       it('gets fired when an unexpected situation occurs (e.g. network disconnect)', () => {
+        const assertExceptionObject = detail => {
+          expect(detail).to.be.an('object')
+          expect(detail).to.have.property('exception')
+          expect(detail.exception).to.be.an('Error')
+        }
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:exception')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.true
+
+          expect(event).to.have.property('detail')
+          assertExceptionObject(event.detail)
+        }
+
         cy.get('.exception')
           .click()
           .wait(2000) // The browser will 'wait' for a bit when the connection has been dropped server-side.
@@ -442,30 +436,32 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(exception)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:exception')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.true
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('exception')
-                expect(detail.exception).to.be.an('Error')
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:exception)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
           })
       })
     })
 
     describe('finish', () => {
       it('fires when the request completes', () => {
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:finish')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.false
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('visit')
+            assertVisitObject(detail.visit)
+          })
+        }
+
         cy.get('.finish')
           .click()
           .wait(30)
@@ -474,52 +470,36 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(finish)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:finish')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.false
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('visit')
-                tap(detail.visit, visit => {
-                  expect(visit).to.be.an('object')
-                  expect(visit).to.have.property('url')
-                  expect(visit).to.have.property('method')
-                  expect(visit).to.have.property('data')
-                  expect(visit).to.have.property('headers')
-                  expect(visit).to.have.property('onBefore')
-                  expect(visit).to.have.property('onProgress')
-                  expect(visit).to.have.property('preserveState')
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:finish)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
 
             // Local Event Callback
             expect(alert.getCall(4)).to.be.calledWith('onFinish')
-            tap(alert.getCall(5).lastArg, visit => {
-              expect(visit).to.be.an('object')
-              expect(visit).to.have.property('url')
-              expect(visit).to.have.property('method')
-              expect(visit).to.have.property('data')
-              expect(visit).to.have.property('headers')
-              expect(visit).to.have.property('onBefore')
-              expect(visit).to.have.property('onProgress')
-              expect(visit).to.have.property('preserveState')
-            })
+            assertVisitObject(alert.getCall(5).lastArg)
           })
       })
     })
 
     describe('navigate', () => {
       it('fires when the page navigates away after a successful request', () => {
+        const assertGlobalEvent = event => {
+          expect(event).to.be.an('CustomEvent')
+          expect(event.type).to.eq('inertia:navigate')
+
+          expect(event).to.have.property('cancelable')
+          expect(event.cancelable).to.be.false
+
+          expect(event).to.have.property('detail')
+          tap(event.detail, detail => {
+            expect(detail).to.be.an('object')
+            expect(detail).to.have.property('page')
+            assertPageObject(detail.page)
+          })
+        }
+
         cy.get('.navigate')
           .click()
           .wait(30)
@@ -528,30 +508,11 @@ describe('Events', () => {
 
             // Global Inertia Event Listener
             expect(alert.getCall(0)).to.be.calledWith('Inertia.on(navigate)')
-            const eventArg = tap(alert.getCall(1).lastArg, event => {
-              expect(event).to.be.an('CustomEvent')
-              expect(event.type).to.eq('inertia:navigate')
-
-              expect(event).to.have.property('cancelable')
-              expect(event.cancelable).to.be.false
-
-              expect(event).to.have.property('detail')
-              tap(event.detail, detail => {
-                expect(detail).to.be.an('object')
-                expect(detail).to.have.property('page')
-                tap(detail.page, page => {
-                  expect(page).to.be.an('object')
-                  expect(page).to.have.property('component')
-                  expect(page).to.have.property('props')
-                  expect(page).to.have.property('url')
-                  expect(page).to.have.property('version')
-                })
-              })
-            })
+            assertGlobalEvent(alert.getCall(1).lastArg)
 
             // Global Native Event Listener
             expect(alert.getCall(2)).to.be.calledWith('addEventListener(inertia:navigate)')
-            expect(alert.getCall(3)).to.be.calledWith(eventArg)
+            assertGlobalEvent(alert.getCall(3).lastArg)
           })
       })
     })
