@@ -1,3 +1,5 @@
+import { tap } from '../support/commands'
+
 describe('Links', () => {
   it('visits a different page', () => {
     cy.visit('/', {
@@ -522,6 +524,25 @@ describe('Links', () => {
       })
     })
 
+    it('preserves the page\'s local state (callback)', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Example value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve-callback').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now callback-bar')
+          cy.get('.field').should('have.value', 'Example value')
+        })
+      })
+    })
+
     it('does not preserve the page\'s local state', () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Another value')
@@ -540,9 +561,35 @@ describe('Links', () => {
         })
       })
     })
+
+    it('does not preserve the page\'s local state (callback)', () => {
+      cy.get('.foo').should('have.text', 'Foo is now default')
+      cy.get('.field').type('Another value')
+
+      cy.window().should('have.property', '_inertia_page_key')
+      cy.window().then(window => {
+        const componentKey = window._inertia_page_key
+
+        cy.get('.preserve-callback-false').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
+
+        cy.window().then(window => {
+          expect(componentKey).to.not.eq(window._inertia_page_key)
+          cy.get('.foo').should('have.text', 'Foo is now callback-baz')
+          cy.get('.field').should('have.value', '')
+        })
+      })
+    })
   })
 
   describe('Preserve scroll', () => {
+    let alert = null
+
+    beforeEach(() => {
+      alert = cy.stub()
+      cy.on('window:alert', alert)
+    })
+
     describe('disabled (default)', () => {
       beforeEach(() => {
         cy.visit('/links/preserve-scroll-false')
@@ -554,41 +601,103 @@ describe('Links', () => {
       })
 
       it('does not reset untracked scroll regions in persistent layouts', () => {
-        cy.get('.reset').click({ force: true })
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false-page-two')
+        cy.get('.reset')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false-page-two')
 
-        cy.get('.foo').should('have.text', 'Foo is now bar')
-        cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
-        cy.get('.slot-position').should('contain.text', 'Slot scroll position is 10')
-        cy.get('.slot-position').should('not.contain.text', '& 0')
+            cy.get('.foo').should('have.text', 'Foo is now bar')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
+          })
+      })
+
+      it('does not reset untracked scroll regions in persistent layouts when returning false from a preserveScroll callback', () => {
+        cy.get('.reset-callback')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now foo')
+
+            cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
+
+            // Assert that the page is passed in to the callback
+            expect(alert.getCalls()).to.have.length(1)
+            tap(alert.getCall(0).lastArg, page => {
+              expect(page).to.be.an('object')
+              expect(page).to.have.property('component')
+              expect(page).to.have.property('props')
+              expect(page).to.have.property('url')
+              expect(page).to.have.property('version')
+            })
+          })
       })
 
       it('does not restore untracked scroll regions when pressing the back button', () => {
-        cy.get('.reset').click({ force: true })
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false-page-two')
-        cy.get('.foo').should('have.text', 'Foo is now bar')
-        cy.get('#slot').scrollTo(0, 0)
-        cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+        cy.get('.reset')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now bar')
+            cy.get('#slot').scrollTo(0, 0)
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
 
-        cy.go(-1)
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false')
-        cy.get('.foo').should('have.text', 'Foo is now default')
+            return cy.go(-1)
+          })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false')
+            cy.get('.foo').should('have.text', 'Foo is now default')
 
-        cy.get('.document-position').should('contain.text', 'Document scroll position is 5 &')
-        cy.get('.document-position').should('not.contain.text', '& 0')
-        cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+          })
+      })
+
+      it('does not restore untracked scroll regions when returning true from a preserveScroll callback', () => {
+        cy.get('.preserve-callback')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now baz')
+            cy.get('#slot').scrollTo(0, 0)
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+
+            // Assert that the page is passed in to the callback
+            expect(alert.getCalls()).to.have.length(1)
+            tap(alert.getCall(0).lastArg, page => {
+              expect(page).to.be.an('object')
+              expect(page).to.have.property('component')
+              expect(page).to.have.property('props')
+              expect(page).to.have.property('url')
+              expect(page).to.have.property('version')
+            })
+
+            return cy.go(-1)
+          })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false')
+            cy.get('.foo').should('have.text', 'Foo is now default')
+
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+          })
       })
 
       it('does not restore untracked scroll regions when pressing the back button from another website', () => {
-        cy.get('.off-site').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
+        cy.get('.off-site')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
 
-        cy.go(-1)
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false')
+            return cy.go(-1)
+          })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-false')
 
-        cy.get('.document-position').should('contain.text', 'Document scroll position is 5 &')
-        cy.get('.document-position').should('not.contain.text', '& 0')
-        cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+          })
       })
     })
 
@@ -603,51 +712,108 @@ describe('Links', () => {
       })
 
       it('resets scroll regions to the top when doing a regular visit', () => {
-        cy.get('.reset').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
-        cy.get('.foo').should('have.text', 'Foo is now bar')
+        cy.get('.reset')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now bar')
 
-        cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
-        cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+          })
+      })
+
+      it('resets scroll regions to the top when returning false from a preserveScroll callback', () => {
+        cy.get('.reset-callback')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now foo')
+
+            cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+
+            // Assert that the page is passed in to the callback
+            expect(alert.getCalls()).to.have.length(1)
+            tap(alert.getCall(0).lastArg, page => {
+              expect(page).to.be.an('object')
+              expect(page).to.have.property('component')
+              expect(page).to.have.property('props')
+              expect(page).to.have.property('url')
+              expect(page).to.have.property('version')
+            })
+          })
       })
 
       it('preserves scroll regions when using the "preserve-scroll" feature', () => {
-        cy.get('.preserve').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
-        cy.get('.foo').should('have.text', 'Foo is now baz')
+        cy.get('.preserve')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now baz')
 
-        cy.get('.document-position').should('contain.text', 'Document scroll position is 5 &')
-        cy.get('.document-position').should('not.contain.text', '& 0')
-        cy.get('.slot-position').should('contain.text', 'Slot scroll position is 10')
-        cy.get('.slot-position').should('not.contain.text', '& 0')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
+          })
+      })
+
+      it('preserves scroll regions when using the "preserve-scroll" feature from a callback', () => {
+        cy.get('.preserve-callback')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+            cy.get('.foo').should('have.text', 'Foo is now baz')
+
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
+
+            cy.then(() => {
+              // Assert that the page is passed in to the callback
+              expect(alert.getCalls()).to.have.length(1)
+              tap(alert.getCall(0).lastArg, page => {
+                expect(page).to.be.an('object')
+                expect(page).to.have.property('component')
+                expect(page).to.have.property('props')
+                expect(page).to.have.property('url')
+                expect(page).to.have.property('version')
+              })
+            })
+          })
       })
 
       it('restores all tracked scroll regions when pressing the back button', () => {
-        cy.get('.preserve').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
-        cy.get('#slot').scrollTo(0, 0)
-        cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
+        cy.get('.preserve')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll-page-two')
+            cy.get('#slot').scrollTo(0, 0)
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 0 & 0')
 
-        cy.go(-1)
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll')
+            return cy.go(-1)
+          })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll')
 
-        cy.get('.foo').should('have.text', 'Foo is now default')
-        cy.get('.document-position').should('contain.text', 'Document scroll position is 5 &')
-        cy.get('.document-position').should('not.contain.text', '& 0')
-        cy.get('.slot-position').should('contain.text', 'Slot scroll position is 10')
-        cy.get('.slot-position').should('not.contain.text', '& 0')
+            cy.get('.foo').should('have.text', 'Foo is now default')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
+          })
       })
 
       it.skip('restores all tracked scroll regions when pressing the back button from another website', () => {
-        cy.get('.off-site').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
+        cy.get('.off-site')
+          .click({ force: true })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
 
-        cy.go(-1)
-        cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll')
+            return cy.go(-1)
+          })
+          .then(() => {
+            cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-scroll')
 
-        cy.get('.document-position').should('contain.text', 'Document scroll position is 5 &')
-        cy.get('.document-position').should('not.contain.text', '& 0')
-        cy.get('.slot-position').should('not.have.text', 'Slot scroll position is 0 & 0')
+            cy.get('.document-position').should('have.text', 'Document scroll position is 5 & 7')
+            cy.get('.slot-position').should('have.text', 'Slot scroll position is 10 & 15')
+          })
       })
     })
   })

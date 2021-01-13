@@ -5,6 +5,8 @@
 
     <span @click="preserve" class="preserve">Preserve Scroll</span>
     <span @click="preserveFalse" class="reset">Reset Scroll</span>
+    <span @click="preserveCallback" class="preserve-callback">Preserve Scroll (Callback)</span>
+    <span @click="preserveCallbackFalse" class="reset-callback">Reset Scroll (Callback)</span>
     <span @click="preserveGet" class="preserve-get">Preserve Scroll (GET)</span>
     <span @click="preserveGetFalse" class="reset-get">Reset Scroll (GET)</span>
 
@@ -34,16 +36,36 @@ export default {
         data: { foo: 'bar' }
       })
     },
+    preserveCallback() {
+      this.$inertia.visit('/visits/preserve-scroll-false-page-two', {
+        data: { foo: 'baz' },
+        preserveScroll: page => {
+          alert(page)
+
+          return true
+        }
+      })
+    },
+    preserveCallbackFalse() {
+      this.$inertia.visit('/visits/preserve-scroll-false-page-two', {
+        data: { foo: 'foo' },
+        preserveScroll: page => {
+          alert(page)
+
+          return false
+        }
+      })
+    },
     preserveGet() {
       this.$inertia.get('/visits/preserve-scroll-false-page-two', {
-        foo: 'baz'
+        foo: 'bar'
       }, {
         preserveScroll: true
       })
     },
     preserveGetFalse() {
       this.$inertia.get('/visits/preserve-scroll-false-page-two', {
-        foo: 'test'
+        foo: 'baz'
       })
     },
   }
