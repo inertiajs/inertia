@@ -1147,7 +1147,7 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe.only('Promise Deprecation', () => {
+  describe('Promise Deprecation', () => {
     beforeEach(() => {
       cy.visit('/visits/promise-deprecation', {
         onBeforeLoad: window => {
