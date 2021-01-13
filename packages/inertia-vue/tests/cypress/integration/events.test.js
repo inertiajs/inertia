@@ -1,4 +1,4 @@
-import {tap} from '../support/commands'
+import { tap } from '../support/commands'
 
 describe('Events', () => {
   let alert = null

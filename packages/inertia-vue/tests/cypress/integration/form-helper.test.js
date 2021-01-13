@@ -1,4 +1,4 @@
-import {tap} from '../support/commands'
+import { tap } from '../support/commands'
 
 describe('Form Helper', () => {
   describe('Methods', () => {

@@ -36,20 +36,20 @@ app.get('/', (req, res) => inertia.render(req, res, {
   },
 }))
 
-app.get('/location', ({ res }) => inertia.location(res, '/non-inertia'))
-
 app.get('/links/partial-reloads', (req, res) => inertia.render(req, res, { component: 'Links/PartialReloads', props: { headers: req.headers, foo: Number.parseInt(req.query.foo || 0) + 1, bar: props => props.foo + 1, baz: props => props.foo + 2 }}))
 app.all('/links/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo }}))
 app.all('/links/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveScroll', props: { foo: req.query.foo }}))
 app.all('/links/preserve-scroll-false-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveScrollFalse', props: { foo: req.query.foo }}))
 app.get('/links/as-warning/:method', (req, res) => inertia.render(req, res, { component: 'Links/AsWarning', props: { method: req.params.method }}))
 app.get('/links/as-warning-false/:method', (req, res) => inertia.render(req, res, { component: 'Links/AsWarningFalse', props: { method: req.params.method }}))
+app.get('/links/headers/version', (req, res) => inertia.render(req, res, { component: 'Links/Headers', version: 'example-version-header' }))
 
 app.get('/visits/partial-reloads', (req, res) => inertia.render(req, res, { component: 'Visits/PartialReloads', props: { headers: req.headers, foo: Number.parseInt(req.query.foo || 0) + 1, bar: props => props.foo + 1, baz: props => props.foo + 2 }}))
 app.all('/visits/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveState', props: { foo: req.query.foo }}))
 app.all('/visits/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveScroll', props: { foo: req.query.foo }}))
 app.all('/visits/preserve-scroll-false-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveScrollFalse', props: { foo: req.query.foo }}))
 app.post('/visits/events-errors', (req, res) => inertia.render(req, res, { component: 'Visits/Events', props: { errors: { foo: 'bar' } }}))
+app.get('/visits/headers/version', (req, res) => inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }))
 
 app.post('/remember/form-helper/default', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Default', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
 app.post('/remember/form-helper/remember', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Remember', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
@@ -68,6 +68,7 @@ app.post('/events/errors', (req, res) => inertia.render(req, res, { component: '
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
+app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.connection.destroy())
 app.post('/json', (req, res) => res.json({ foo: 'bar' }))

@@ -10,6 +10,30 @@ describe('Links', () => {
     cy.get('.text').should('have.text', 'This is the links page that demonstrates inertia-link methods')
   })
 
+  it('can make a location visit', () => {
+    cy.visit('/links/location', {
+      onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+    })
+
+    const alert = cy.stub()
+    cy.on('window:alert', alert)
+
+    cy.get('.example')
+      .click()
+      .then(() => {
+        expect(alert.getCalls()).to.have.length(1)
+        expect(alert.getCall(0)).to.be.calledWith('A location/non-SPA visit was detected')
+
+        cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+        cy.window().should('have.property', '_inertia_request_dump')
+        cy.window()
+          .then(window => window._inertia_request_dump)
+          .then(({ headers }) => {
+            expect(headers).to.not.have.property('x-inertia')
+          })
+      })
+  })
+
   describe('Method', () => {
     beforeEach(() => {
       cy.visit('/links/method', {
@@ -362,13 +386,11 @@ describe('Links', () => {
   })
 
   describe('Headers', () => {
-    beforeEach(() => {
+    it('has the default set of headers', () => {
       cy.visit('/links/headers', {
         onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
       })
-    })
 
-    it('has the default set of headers', () => {
       cy.get('.default').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
@@ -377,13 +399,35 @@ describe('Links', () => {
         .then(window => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia'])
+          expect(headers).to.not.contain.key('x-inertia-version')
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
           expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
           expect(headers['x-inertia']).to.eq('true')
         })
     })
 
+    it('starts using the x-inertia-version header when a version was given from the back-end', () => {
+      cy.visit('/links/headers/version', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+
+      cy.get('.default').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+
+      cy.window().should('have.property', '_inertia_request_dump')
+      cy.window()
+        .then(window => window._inertia_request_dump)
+        .then(({ headers }) => {
+          expect(headers).to.contain.key('x-inertia-version')
+          expect(headers['x-inertia-version']).to.eq('example-version-header')
+        })
+    })
+
     it('allows to set custom headers', () => {
+      cy.visit('/links/headers', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+
       cy.get('.custom').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
@@ -400,6 +444,10 @@ describe('Links', () => {
     })
 
     it('cannot override built-in Inertia headers', () => {
+      cy.visit('/links/headers', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+
       cy.get('.overridden').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/post')
 
