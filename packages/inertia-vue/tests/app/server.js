@@ -36,6 +36,8 @@ app.get('/', (req, res) => inertia.render(req, res, {
   },
 }))
 
+app.get('/transform-props', (req, res) => inertia.render(req, res, { component: 'Dump', props: { foo: 'bar', bar: 'baz' }}))
+
 app.get('/links/partial-reloads', (req, res) => inertia.render(req, res, { component: 'Links/PartialReloads', props: { headers: req.headers, foo: Number.parseInt(req.query.foo || 0) + 1, bar: props => props.foo + 1, baz: props => props.foo + 2 }}))
 app.all('/links/preserve-state-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo }}))
 app.all('/links/preserve-scroll-page-two', (req, res) => inertia.render(req, res, { component: 'Links/PreserveScroll', props: { foo: req.query.foo }}))
