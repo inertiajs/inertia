@@ -1147,15 +1147,17 @@ describe('Manual Visits', () => {
     })
   })
 
-  describe('Promise Deprecation', () => {
-    it('does not show any warnings when making a regular visit', () => {
-      cy.visit('/visits/events', {
+  describe.only('Promise Deprecation', () => {
+    beforeEach(() => {
+      cy.visit('/visits/promise-deprecation', {
         onBeforeLoad: window => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
+    })
 
-      cy.get('.successful-request')
+    it('does not show any warnings when making a regular visit', () => {
+      cy.get('.no-warning')
         .click()
         .wait(20)
         .then(() => {
@@ -1164,12 +1166,6 @@ describe('Manual Visits', () => {
     })
 
     it('displays a warning when trying to chain a .then on visit calls (visit method)', () => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-
       cy.get('.then')
         .click()
         .wait(20)
@@ -1184,12 +1180,6 @@ describe('Manual Visits', () => {
     })
 
     it('displays a warning when trying to chain a .then on visit calls (GET method)', () => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-
       cy.get('.then-get')
         .click()
         .wait(20)
@@ -1204,12 +1194,6 @@ describe('Manual Visits', () => {
     })
 
     it('displays a warning when trying to chain a .catch on visit calls (visit method)', () => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-
       cy.get('.catch')
         .click()
         .wait(20)
@@ -1224,12 +1208,6 @@ describe('Manual Visits', () => {
     })
 
     it('displays a warning when trying to chain a .catch on visit calls (GET method)', () => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-
       cy.get('.catch-get')
         .click()
         .wait(20)
@@ -1244,12 +1222,6 @@ describe('Manual Visits', () => {
     })
 
     it('displays a warning when trying to chain a .finally on visit calls (visit method)', () => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-
       cy.get('.finally')
         .click()
         .wait(20)
@@ -1264,12 +1236,6 @@ describe('Manual Visits', () => {
     })
 
     it('displays a warning when trying to chain a .finally on visit calls (GET method)', () => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-
       cy.get('.finally-get')
         .click()
         .wait(20)

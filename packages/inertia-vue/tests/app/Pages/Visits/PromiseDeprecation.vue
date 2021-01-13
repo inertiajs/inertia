@@ -2,7 +2,9 @@
   <div>
     <span class="text">This is the page that demonstrates Inertia visit promise deprecation</span>
 
-    <span @click="thenPromise" class="then">The</span>
+    <span @click="noWarningVisit" class="no-warning">Visit without warnings</span>
+
+    <span @click="thenPromise" class="then">Then</span>
     <span @click="catchPromise" class="catch">Catch</span>
     <span @click="finallyPromise" class="finally">Finally</span>
 
@@ -14,6 +16,9 @@
 <script>
 export default {
  methods: {
+   noWarningVisit() {
+     this.$inertia.visit(this.$page.url)
+   },
    thenPromise() {
      this.$inertia.visit('/sleep').then(() => true)
    },
