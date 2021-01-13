@@ -36,6 +36,28 @@ describe('Manual Visits', () => {
       })
   })
 
+  describe('Auto-cancellation', () => {
+    it('will automatically cancel a pending visits when a new request is made', () => {
+      cy.visit('/visits/automatic-cancellation', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+
+      const alert = cy.stub()
+      cy.on('window:alert', alert)
+
+      cy.get('.visit')
+        .click()
+        .click()
+        .wait(30)
+        .then(() => {
+          expect(alert.getCalls()).to.have.length(3)
+          expect(alert.getCall(0)).to.be.calledWith('started')
+          expect(alert.getCall(1)).to.be.calledWith('cancelled')
+          expect(alert.getCall(2)).to.be.calledWith('started')
+        })
+    })
+  })
+
   describe('Method', () => {
     beforeEach(() => {
       cy.visit('/visits/method', {
