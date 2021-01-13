@@ -15,6 +15,16 @@ const transformProps = props => {
   }
 }
 
+const resolveErrors = page => {
+  // Alerting the page object, to test that it is available.
+  alert(page)
+
+  // Return the custom resolved errors
+  return {
+    overloaded: 'manually',
+  }
+}
+
 const app = document.getElementById('app')
 
 window.testing = {}
@@ -27,6 +37,7 @@ window.testing.vue = new Vue({
         return import(`./Pages/${name}`).then(module => module.default)
       },
       ... (window.location.pathname.startsWith('/transform-props') ? { transformProps } : {}),
+      ... (window.location.pathname.startsWith('/error-resolver') ? { resolveErrors } : {}),
     },
   }),
 }).$mount(app)
