@@ -70,6 +70,7 @@ app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.connection.destroy())
+app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 
 app.all('*', (req, res) => inertia.render(req, res))
 
