@@ -42,6 +42,12 @@
 
     <!-- Events: Navigate -->
     <span @click="navigateVisit" class="navigate">Navigate Event</span>
+
+    <!-- Lifecycles -->
+    <span @click="lifecycleSuccess" class="lifecycle-success">Lifecycle Success</span>
+    <span @click="lifecycleError" class="lifecycle-error">Lifecycle Error</span>
+    <span @click="lifecycleCancel" class="lifecycle-cancel">Lifecycle Cancel</span>
+    <span @click="lifecycleCancelAfterFinish" class="lifecycle-cancel-after-finish">Lifecycle Cancel - After Finish</span>
   </div>
 </template>
 <script>
@@ -326,6 +332,87 @@ export default {
         onNavigate: () => alert('This listener should not have been called.')
       })
     },
+    registerAllListeners() {
+      Inertia.on('before', () => alert('Inertia.on(before)'))
+      Inertia.on('cancelToken', () => alert('Inertia.on(cancelToken)'))
+      Inertia.on('cancel', () => alert('Inertia.on(cancel)'))
+      Inertia.on('start', () => alert('Inertia.on(start)'))
+      Inertia.on('progress', () => alert('Inertia.on(progress)'))
+      Inertia.on('error', () => alert('Inertia.on(error)'))
+      Inertia.on('success', () => alert('Inertia.on(success)'))
+      Inertia.on('invalid', () => alert('Inertia.on(invalid)'))
+      Inertia.on('exception', () => alert('Inertia.on(exception)'))
+      Inertia.on('finish', () => alert('Inertia.on(finish)'))
+      Inertia.on('navigate', () => alert('Inertia.on(navigate)'))
+      document.addEventListener('inertia:before', () => alert('addEventListener(inertia:before)'))
+      document.addEventListener('inertia:cancelToken', () => alert('addEventListener(inertia:cancelToken)'))
+      document.addEventListener('inertia:cancel', () => alert('addEventListener(inertia:cancel)'))
+      document.addEventListener('inertia:start', () => alert('addEventListener(inertia:start)'))
+      document.addEventListener('inertia:progress', () => alert('addEventListener(inertia:progress)'))
+      document.addEventListener('inertia:error', () => alert('addEventListener(inertia:error)'))
+      document.addEventListener('inertia:success', () => alert('addEventListener(inertia:success)'))
+      document.addEventListener('inertia:invalid', () => alert('addEventListener(inertia:invalid)'))
+      document.addEventListener('inertia:exception', () => alert('addEventListener(inertia:exception)'))
+      document.addEventListener('inertia:finish', () => alert('addEventListener(inertia:finish)'))
+      document.addEventListener('inertia:navigate', () => alert('addEventListener(inertia:navigate)'))
+
+      return {
+        onBefore: () => alert('onBefore'),
+        onCancelToken: () => alert('onCancelToken'),
+        onCancel: () => alert('onCancel'),
+        onStart: () => alert('onStart'),
+        onProgress: () => alert('onProgress'),
+        onError: () => alert('onError'),
+        onSuccess: () => alert('onSuccess'),
+        onInvalid: () => alert('onInvalid'), // Does not exist.
+        onException: () => alert('onException'), // Does not exist.
+        onFinish: () => alert('onFinish'),
+        onNavigate: () => alert('onNavigate'), // Does not exist.
+      }
+    },
+    lifecycleSuccess() {
+      this.$inertia.post(this.$page.url, {
+        file: new File(['foobar'], 'example.bin')
+      }, this.registerAllListeners())
+    },
+    lifecycleError() {
+      this.$inertia.post('/events/errors', {
+        file: new File(['foobar'], 'example.bin')
+      }, this.registerAllListeners())
+    },
+    lifecycleCancel() {
+      this.$inertia.post('/sleep', {
+        file: new File(['foobar'], 'example.bin')
+      }, {
+        ... this.registerAllListeners(),
+        onCancelToken: token => {
+          alert('onCancelToken')
+
+          setTimeout(() => {
+            alert('CANCELLING!')
+            token.cancel()
+          }, 10)
+        }
+      })
+    },
+    lifecycleCancelAfterFinish() {
+      let cancelToken = null;
+
+      this.$inertia.post(this.$page.url, {
+        file: new File(['foobar'], 'example.bin')
+      }, {
+        ... this.registerAllListeners(),
+        onCancelToken: token => {
+          alert('onCancelToken')
+          cancelToken = token
+        },
+        onFinish: () => {
+          alert('onFinish')
+          alert('CANCELLING!')
+          cancelToken.cancel()
+        }
+      })
+    }
   }
 }
 </script>
