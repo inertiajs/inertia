@@ -72,6 +72,8 @@ export const plugin = {
     Inertia.form = form
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    app.provide('$inertia', Inertia)
+    app.provide('$page', page.value)
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
