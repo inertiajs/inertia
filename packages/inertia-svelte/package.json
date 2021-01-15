@@ -19,10 +19,21 @@
   "keywords": [
     "svelte"
   ],
-  "main": "src/index.js",
+  "module": "dist/index.mjs",
+  "main": "dist/index.js",
   "devDependencies": {
     "@inertiajs/inertia": "^0.8.0",
-    "eslint": "^7.0.0"
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^6.0.0",
+    "eslint": "^7.0.0",
+    "rollup": "^2.30.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "svelte": "^3.31.2"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@inertiajs/inertia": "^0.8.0",
