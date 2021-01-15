@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function form(data = {}) {
@@ -147,5 +147,5 @@ export default function form(data = {}) {
 }
 
 export function useForm(data) {
-  return ref(form(data))
+  return reactive(form(data))
 }
