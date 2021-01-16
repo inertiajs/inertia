@@ -28,6 +28,7 @@
     "@rollup/plugin-node-resolve": "^6.0.0",
     "eslint": "^7.0.0",
     "rollup": "^2.30.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-svelte": "^7.0.0",
     "svelte": "^3.31.2"
   },
