@@ -45,12 +45,30 @@ export default function form(data = {}) {
 
       return this
     },
+    getErrors(field) {
+      const errors = Object
+        .keys(this.errors)
+        .filter(key => key === field || key.startsWith(`${field}.`))
+        .reduce((carry, key) => {
+          if (Array.isArray(this.errors[key])) {
+            this.errors[key].forEach(message => {
+              carry.push(message)
+            })
+          } else {
+            carry.push(this.errors[key])
+          }
+
+          return carry
+        }, [])
+
+      return errors.length > 0 ? errors : null
+    },
     clearErrors(...fields) {
       this.errors = Object
         .keys(this.errors)
-        .reduce((carry, field) => ({
+        .reduce((carry, key) => ({
           ...carry,
-          ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
+          ...(fields.length > 0 && !fields.some(field => key === field || key.startsWith(`${field}.`)) ? { [key]: this.errors[key] } : {}),
         }), {})
 
       this.hasErrors = Object.keys(this.errors).length > 0
