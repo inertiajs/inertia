@@ -1,12 +1,14 @@
 import form from './form'
 import link from './link'
 import remember from './remember'
-import { computed, h, markRaw, ref } from 'vue'
+import { computed, h, markRaw, reactive } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-const component = ref(null)
-const page = ref({})
-const key = ref(null)
+const current = reactive({
+  component: null,
+  page: {},
+  key: null,
+})
 
 export default {
   name: 'Inertia',
@@ -35,30 +37,30 @@ export default {
       resolveErrors,
       transformProps,
       swapComponent: async (args) => {
-        component.value = markRaw(args.component)
-        page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
+        current.component = markRaw(args.component)
+        current.page = args.page
+        current.key = args.preserveState ? current.key : Date.now()
       },
     })
 
     return () => {
-      if (component.value) {
-        const child = h(component.value, {
-          ...page.value.props,
-          key: key.value,
+      if (current.component) {
+        const child = h(current.component, {
+          ...current.page.props,
+          key: current.key,
         })
 
-        if (component.value.layout) {
-          if (typeof component.value.layout === 'function') {
-            return component.value.layout(h, child)
-          } else if (Array.isArray(component.value.layout)) {
-            return component.value.layout
+        if (current.component.layout) {
+          if (typeof current.component.layout === 'function') {
+            return current.component.layout(h, child)
+          } else if (Array.isArray(current.component.layout)) {
+            return current.component.layout
               .concat(child)
               .reverse()
               .reduce((child, layout) => h(layout, [child]))
           }
 
-          return h(component.value.layout, () => child)
+          return h(current.component.layout, () => child)
         }
 
         return child
@@ -71,7 +73,7 @@ export const plugin = {
   install(app) {
     Inertia.form = form
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
-    Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    Object.defineProperty(app.config.globalProperties, '$page', { get: () => current.page })
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
@@ -79,9 +81,9 @@ export const plugin = {
 
 export function usePage() {
   return {
-    props: computed(() => page.value.props),
-    url: computed(() => page.value.url),
-    component: computed(() => page.value.component),
-    version: computed(() => page.value.version),
+    props: computed(() => current.page.props),
+    url: computed(() => current.page.url),
+    component: computed(() => current.page.component),
+    version: computed(() => current.page.version),
   }
 }
