@@ -131,6 +131,9 @@ export default function form(data = {}) {
         Inertia[method](url, data, _options)
       }
     },
+    get(url, options) {
+      this.submit('get', url, options)
+    },
     post(url, options) {
       this.submit('post', url, options)
     },
