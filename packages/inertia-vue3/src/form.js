@@ -1,8 +1,14 @@
 import { ref } from 'vue'
+import { cloneDeep } from './objects'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function form(data = {}) {
-  const defaults = JSON.parse(JSON.stringify(data))
+  const defaults = Object.keys(data).reduce((carry, key) => {
+    carry[key] = cloneDeep(data[key])
+
+    return carry
+  }, {})
+
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 

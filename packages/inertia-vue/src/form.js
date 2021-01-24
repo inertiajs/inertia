@@ -1,7 +1,13 @@
 import { Inertia } from '@inertiajs/inertia'
+import { cloneDeep } from './objects'
 
 export default function(data = {}) {
-  const defaults = JSON.parse(JSON.stringify(data))
+  const defaults = Object.keys(data).reduce((carry, key) => {
+    carry[key] = cloneDeep(data[key])
+
+    return carry
+  }, {})
+
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
