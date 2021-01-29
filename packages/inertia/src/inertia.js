@@ -95,7 +95,7 @@ export default {
 
   handleBackForwardVisit(page) {
     window.history.state.version = page.version
-    this.setPage(window.history.state, { preserveScroll: true }).then(() => {
+    this.setPage(window.history.state || page, { preserveScroll: true }).then(() => {
       this.restoreScrollPositions()
     })
   },
