@@ -5,6 +5,7 @@ import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, f
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
+import { v4 as uuidv4 } from 'uuid';
 
 export default {
   resolveComponent: null,
@@ -95,7 +96,9 @@ export default {
 
   handleBackForwardVisit(page) {
     window.history.state.version = page.version
-    this.setPage(window.history.state, { preserveScroll: true }).then(() => {
+    const state = window.history.state
+    const props = JSON.parse(window.sessionStorage.getItem(state.uuid))
+    this.setPage({ ...state, props }, { preserveScroll: true }).then(() => {
       this.restoreScrollPositions()
     })
   },
@@ -326,17 +329,24 @@ export default {
 
   pushState(page) {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    const { props, ...state } = page
+    state.uuid = uuidv4()
+    window.history.pushState(state, '', page.url)
+    window.sessionStorage.setItem(state.uuid, JSON.stringify(props))
   },
 
   replaceState(page) {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    const { props, ...state } = page
+    state.uuid = uuidv4()
+    window.history.replaceState(state, '', page.url)
+    window.sessionStorage.setItem(state.uuid, JSON.stringify(props))
   },
 
   handlePopstateEvent(event) {
     if (event.state !== null) {
-      const page = event.state
+      const props = JSON.parse(window.sessionStorage.getItem(event.state.uuid))
+      const page = { ...event.state, props }
       let visitId = this.createVisitId()
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {

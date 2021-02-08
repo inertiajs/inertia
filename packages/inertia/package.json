@@ -30,7 +30,8 @@
   "dependencies": {
     "axios": "^0.21.1",
     "deepmerge": "^4.0.0",
-    "qs": "^6.9.0"
+    "qs": "^6.9.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
