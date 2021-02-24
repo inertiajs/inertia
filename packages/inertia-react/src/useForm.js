@@ -120,6 +120,7 @@ export default function useForm(defaults, key) {
       )
       setHasErrors(Object.keys(errors).length > 0)
     },
+    submit,
     get(url, options) {
       submit('get', url, options)
     },
