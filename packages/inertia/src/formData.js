@@ -21,6 +21,8 @@ function appendToFormData(formData, key, value) {
     return formData.append(key, value.toISOString())
   } else if (value instanceof File) {
     return formData.append(key, value, value.name)
+  } else if (value instanceof Blob) {
+    return formData.append(key, value)
   } else if (typeof value === 'boolean') {
     return formData.append(key, value ? '1' : '0')
   } else if (value === null) {
