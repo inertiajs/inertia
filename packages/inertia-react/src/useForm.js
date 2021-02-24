@@ -3,7 +3,7 @@ import { useRef, useCallback, useState } from 'react'
 import useRemember from './useRemember'
 
 export default function useForm(defaults, key) {
-  let transform = data => data
+  let transform = (data) => data
 
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = useRemember(defaults, `${key}-data`)
@@ -14,67 +14,70 @@ export default function useForm(defaults, key) {
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
 
-  const submit = useCallback((method, url, options = {}) => {
-    const _options = {
-      ...options,
-      onBefore: visit => {
-        setWasSuccessful(false)
-        setRecentlySuccessful(false)
-        clearTimeout(recentlySuccessfulTimeoutId.current)
+  const submit = useCallback(
+    (method, url, options = {}) => {
+      const _options = {
+        ...options,
+        onBefore: (visit) => {
+          setWasSuccessful(false)
+          setRecentlySuccessful(false)
+          clearTimeout(recentlySuccessfulTimeoutId.current)
 
-        if (options.onBefore) {
-          return options.onBefore(visit)
-        }
-      },
-      onStart: visit => {
-        setProcessing(true)
+          if (options.onBefore) {
+            return options.onBefore(visit)
+          }
+        },
+        onStart: (visit) => {
+          setProcessing(true)
 
-        if (options.onStart) {
-          return options.onStart(visit)
-        }
-      },
-      onProgress: event => {
-        setProgress(event)
+          if (options.onStart) {
+            return options.onStart(visit)
+          }
+        },
+        onProgress: (event) => {
+          setProgress(event)
 
-        if (options.onProgress) {
-          return options.onProgress(event)
-        }
-      },
-      onSuccess: page => {
-        setErrors({})
-        setHasErrors(false)
-        setWasSuccessful(true)
-        setRecentlySuccessful(true)
-        recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
+          if (options.onProgress) {
+            return options.onProgress(event)
+          }
+        },
+        onSuccess: (page) => {
+          setErrors({})
+          setHasErrors(false)
+          setWasSuccessful(true)
+          setRecentlySuccessful(true)
+          recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
 
-        if (options.onSuccess) {
-          return options.onSuccess(page)
-        }
-      },
-      onError: errors => {
-        setErrors(errors)
-        setHasErrors(true)
+          if (options.onSuccess) {
+            return options.onSuccess(page)
+          }
+        },
+        onError: (errors) => {
+          setErrors(errors)
+          setHasErrors(true)
 
-        if (options.onError) {
-          return options.onError(errors)
-        }
-      },
-      onFinish: () => {
-        setProcessing(false)
-        setProgress(null)
+          if (options.onError) {
+            return options.onError(errors)
+          }
+        },
+        onFinish: () => {
+          setProcessing(false)
+          setProgress(null)
 
-        if (options.onFinish) {
-          return options.onFinish()
-        }
-      },
-    }
+          if (options.onFinish) {
+            return options.onFinish()
+          }
+        },
+      }
 
-    if (method === 'delete') {
-      Inertia.delete(url, { ..._options, data: transform(data)  })
-    } else {
-      Inertia[method](url, transform(data), _options)
-    }
-  }, [data, setErrors])
+      if (method === 'delete') {
+        Inertia.delete(url, { ..._options, data: transform(data) })
+      } else {
+        Inertia[method](url, transform(data), _options)
+      }
+    },
+    [data, setErrors],
+  )
 
   return {
     data,
@@ -86,7 +89,7 @@ export default function useForm(defaults, key) {
     wasSuccessful,
     recentlySuccessful,
     set(key, value) {
-      setData({ ...data, [key]: value})
+      setData({ ...data, [key]: value })
     },
     transform(callback) {
       transform = callback
@@ -95,39 +98,41 @@ export default function useForm(defaults, key) {
       if (fields.length === 0) {
         setData(defaults)
       } else {
-        setData(Object
-          .keys(defaults)
-          .filter(key => fields.includes(key))
-          .reduce((carry, key) => {
-            carry[key] = defaults[key]
-            return carry
-          }, {}),
+        setData(
+          Object.keys(defaults)
+            .filter((key) => fields.includes(key))
+            .reduce((carry, key) => {
+              carry[key] = defaults[key]
+              return carry
+            }, {}),
         )
       }
     },
     clearErrors(...fields) {
-      setErrors(Object
-        .keys(errors)
-        .reduce((carry, field) => ({
-          ...carry,
-          ...(fields.length > 0 && !fields.includes(field) ? { [field] : errors[field] } : {}),
-        }), {}),
+      setErrors(
+        Object.keys(errors).reduce(
+          (carry, field) => ({
+            ...carry,
+            ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
+          }),
+          {},
+        ),
       )
       setHasErrors(Object.keys(errors).length > 0)
     },
-    get(url, options){
+    get(url, options) {
       submit('get', url, options)
     },
-    post(url, options){
+    post(url, options) {
       submit('post', url, options)
     },
-    put(url, options){
+    put(url, options) {
       submit('put', url, options)
     },
-    patch(url, options){
+    patch(url, options) {
       submit('patch', url, options)
     },
-    delete(url, options){
+    delete(url, options) {
       submit('delete', url, options)
     },
   }
