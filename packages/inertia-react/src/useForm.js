@@ -1,5 +1,5 @@
 import { Inertia } from '@inertiajs/inertia'
-import { useRef, useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
 export default function useForm(defaults, key) {
