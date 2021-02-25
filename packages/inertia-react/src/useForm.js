@@ -81,16 +81,21 @@ export default function useForm(defaults, key) {
 
   return {
     data,
-    setData,
+    setData(key, value) {
+      if (typeof key === 'string') {
+        setData({ ...data, [key]: value })
+      } else if (typeof key === 'function') {
+        setData(data => key(data))
+      } else {
+        setData(key)
+      }
+    },
     errors,
     hasErrors,
     processing,
     progress,
     wasSuccessful,
     recentlySuccessful,
-    set(key, value) {
-      setData({ ...data, [key]: value })
-    },
     transform(callback) {
       transform = callback
     },
