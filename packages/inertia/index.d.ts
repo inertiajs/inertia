@@ -24,7 +24,7 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
   }
 }
 
-type VisitOptions = {
+export type VisitOptions = {
   method?: string
   replace?: boolean
   preserveScroll?: boolean | ((props: Page<Inertia.PageProps>) => boolean)
