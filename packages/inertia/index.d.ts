@@ -4,9 +4,9 @@ declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
   namespace Inertia {
-    interface PagePropsBeforeTransform {}
+    interface PagePropsBeforeTransform { }
 
-    interface PageProps {}
+    interface PageProps { }
   }
 }
 
@@ -32,7 +32,7 @@ export type VisitOptions = {
   only?: string[]
   headers?: object
   onCancelToken?: (cancelToken: CancelTokenSource) => void
-  onStart?: (visit: VisitOptions & {url: string}) => void | boolean
+  onStart?: (visit: VisitOptions & { url: string }) => void | boolean
   onProgress?: (progress: ProgressEvent) => void
   onFinish?: () => void
   onCancel?: () => void
@@ -46,17 +46,17 @@ interface Inertia {
   init: <
     Component,
     CustomPageProps extends PagePropsBeforeTransform = PagePropsBeforeTransform
-  >(arguments: {
-    initialPage: Page<CustomPageProps>
-    resolveComponent: (name: string) => Component | Promise<Component>
-    updatePage: (
-      component: Component,
-      props: CustomPageProps,
-      options: {
-        preserveState: boolean
-      }
-    ) => void
-  }) => void
+    >(arguments: {
+      initialPage: Page<CustomPageProps>
+      resolveComponent: (name: string) => Component | Promise<Component>
+      updatePage: (
+        component: Component,
+        props: CustomPageProps,
+        options: {
+          preserveState: boolean
+        }
+      ) => void
+    }) => void
 
   visit: (
     url: string,
