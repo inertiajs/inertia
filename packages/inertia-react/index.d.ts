@@ -78,7 +78,7 @@ export interface InertiaFormProps {
 	post: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
 	put: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
 	delete: (url: string, options?: Inertia.VisitOptions) => Promise<void>
-
 }
 
-type useForm = (initialValues: { [key: string]: any }) => InertiaFormProps
+type InertiaForm = (initialValues: { [key: string]: any }) => InertiaFormProps
+export const useForm:InertiaForm;
