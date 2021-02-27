@@ -59,3 +59,26 @@ export const InertiaLink: InertiaLink
 export const Link: InertiaLink
 
 export const InertiaApp: App
+
+export interface InertiaFormProps {
+	data: object
+	errors: any
+	hasErrors: boolean
+	processing: boolean
+	progress: number
+	wasSuccessful: boolean
+	recentlySuccessful: boolean
+	setData: (...prop: [key?: string | object | (() => void), value?: any]) => void
+	transform: (callback: () => void) => void
+	reset: (fields?: object) => void
+	clearErrors: (fields?: object) => void
+	submit: (method: () => void, url: string, options?: Inertia.VisitOptions) => Promise<void>
+	get: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
+	patch: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
+	post: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
+	put: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
+	delete: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+}
+
+type InertiaForm = (initialValues: { [key: string]: any }) => InertiaFormProps
+export const useForm:InertiaForm;
