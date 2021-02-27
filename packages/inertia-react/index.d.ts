@@ -17,7 +17,7 @@ type App<
   transformProps?: (props: PagePropsBeforeTransform) => PageProps
 }>
 
-interface InertiaLinkProps {
+interface BaseInertiaLinkProps {
   as?: string
   data?: object
   href: string
@@ -41,9 +41,9 @@ interface InertiaLinkProps {
   onSuccess?: () => void
 }
 
-type InertiaLink = React.FunctionComponent<
-  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
->
+type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
+
+type InertiaLink = React.FunctionComponent<InertiaLinkProps>
 
 export function usePage<
   Page extends Inertia.Page = Inertia.Page
