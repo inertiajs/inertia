@@ -8,7 +8,7 @@
 </script>
 
 <svelte:component this={component} {...$store.page.props}>
-  {#each $store.layout as layout, childIndex ($store.key)}
-    <svelte:self {layout} index={childIndex + 1} />
+  {#each $store.layout as _, childIndex ($store.key)}
+    <svelte:self index={childIndex + 1} />
   {/each}
 </svelte:component>
