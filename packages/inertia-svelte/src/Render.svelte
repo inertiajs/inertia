@@ -18,7 +18,7 @@
 
 {#if $store.component}
   <svelte:component this={component} {...props}>
-    {#each children as child}
+    {#each children as child ($store.key)}
       <svelte:self {...child} />
     {/each}
   </svelte:component>
