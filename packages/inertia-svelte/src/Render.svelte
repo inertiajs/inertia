@@ -18,7 +18,7 @@
 
 {#if $store.component}
   <svelte:component this={component} {...props}>
-    {#each children as child ($store.key)}
+    {#each children as child, index (component && component.length === index ? $store.key : null)}
       <svelte:self {...child} />
     {/each}
   </svelte:component>
