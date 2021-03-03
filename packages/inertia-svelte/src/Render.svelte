@@ -1,14 +1,25 @@
+<script context="module">
+  export const h = (component, props, children) => {
+    return {
+      component,
+      ...(props ? { props } : {}),
+      ...(children ? { children } : {})
+    }
+  }
+</script>
+
 <script>
   import store from './store'
 
-  export let index = 0
-  $: component = $store.layout[index]
-    ? $store.layout[index]
-    : $store.component.default
+  export let component
+  export let props = {}
+  export let children = []
 </script>
 
-<svelte:component this={component} {...$store.page.props}>
-  {#each $store.layout as _, childIndex ($store.key)}
-    <svelte:self index={childIndex + 1} />
-  {/each}
-</svelte:component>
+{#if $store.component}
+  <svelte:component this={component} {...props}>
+    {#each children as child}
+      <svelte:self {...child} />
+    {/each}
+  </svelte:component>
+{/if}
