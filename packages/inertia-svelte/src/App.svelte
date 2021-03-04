@@ -3,10 +3,11 @@
   import store from './store'
   import Render, { h } from './Render.svelte'
 
-  export let initialPage, resolveComponent, resolveErrors, transformProps
+  export let initialPage, axiosConfig, resolveComponent, resolveErrors, transformProps
 
   Inertia.init({
     initialPage,
+    axiosConfig
     resolveComponent,
     resolveErrors,
     transformProps,
