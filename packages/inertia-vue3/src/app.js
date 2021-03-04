@@ -15,6 +15,10 @@ export default {
       type: Object,
       required: true,
     },
+    axiosConfig: {
+      type: Object,
+      required: false,
+    },
     resolveComponent: {
       type: Function,
       required: true,
@@ -28,30 +32,38 @@ export default {
       required: false,
     },
   },
-  setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
+  setup({ initialPage, axiosConfig, resolveComponent, transformProps, resolveErrors })
+  {
     Inertia.init({
       initialPage,
+      axiosConfig,
       resolveComponent,
       resolveErrors,
       transformProps,
-      swapComponent: async (args) => {
+      swapComponent: async (args) =>
+      {
         component.value = markRaw(args.component)
         page.value = args.page
         key.value = args.preserveState ? key.value : Date.now()
       },
     })
 
-    return () => {
-      if (component.value) {
+    return () =>
+    {
+      if (component.value)
+      {
         const child = h(component.value, {
           ...page.value.props,
           key: key.value,
         })
 
-        if (component.value.layout) {
-          if (typeof component.value.layout === 'function') {
+        if (component.value.layout)
+        {
+          if (typeof component.value.layout === 'function')
+          {
             return component.value.layout(h, child)
-          } else if (Array.isArray(component.value.layout)) {
+          } else if (Array.isArray(component.value.layout))
+          {
             return component.value.layout
               .concat(child)
               .reverse()
@@ -68,7 +80,8 @@ export default {
 }
 
 export const plugin = {
-  install(app) {
+  install(app)
+  {
     Inertia.form = form
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
@@ -77,7 +90,8 @@ export const plugin = {
   },
 }
 
-export function usePage() {
+export function usePage()
+{
   return {
     props: computed(() => page.value.props),
     url: computed(() => page.value.url),

@@ -12,6 +12,10 @@ export default {
       type: Object,
       required: true,
     },
+    axiosConfig: {
+      type: Object,
+      required: false,
+    },
     resolveComponent: {
       type: Function,
       required: true,
@@ -25,39 +29,48 @@ export default {
       required: false,
     },
   },
-  data() {
+  data()
+  {
     return {
       component: null,
       page: {},
       key: null,
     }
   },
-  created() {
+  created()
+  {
     app = this
     Inertia.init({
       initialPage: this.initialPage,
+      axiosConfig: this.axiosConfig,
       resolveComponent: this.resolveComponent,
       resolveErrors: this.resolveErrors,
       transformProps: this.transformProps,
-      swapComponent: async ({ component, page, preserveState }) => {
+      swapComponent: async ({ component, page, preserveState }) =>
+      {
         this.component = component
         this.page = page
         this.key = preserveState ? this.key : Date.now()
       },
     })
   },
-  render(h) {
-    if (this.component) {
+  render(h)
+  {
+    if (this.component)
+    {
       const child = h(this.component, {
         key: this.key,
         props: this.page.props,
         scopedSlots: this.$scopedSlots,
       })
 
-      if (this.component.layout) {
-        if (typeof this.component.layout === 'function') {
+      if (this.component.layout)
+      {
+        if (typeof this.component.layout === 'function')
+        {
           return this.component.layout(h, child)
-        } else if (Array.isArray(this.component.layout)) {
+        } else if (Array.isArray(this.component.layout))
+        {
           return this.component.layout
             .concat(child)
             .reverse()
@@ -70,14 +83,16 @@ export default {
       return child
     }
   },
-  install(Vue) {
+  install(Vue)
+  {
     console.warn('Registering the Inertia Vue plugin via the "app" component has been deprecated. Use the new "plugin" named export instead.\n\nimport { plugin } from \'@inertiajs/inertia-vue\'\n\nVue.use(plugin)')
     plugin.install(Vue)
   },
 }
 
 export const plugin = {
-  install(Vue) {
+  install(Vue)
+  {
     Inertia.form = form
     Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
     Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })

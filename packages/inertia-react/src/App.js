@@ -5,23 +5,28 @@ import PageContext from './PageContext'
 export default function App({
   children,
   initialPage,
+  axiosConfig,
   resolveComponent,
   resolveErrors,
   transformProps,
-}) {
+})
+{
   const [current, setCurrent] = useState({
     component: null,
     page: {},
     key: null,
   })
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     Inertia.init({
       initialPage,
+      axiosConfig,
       resolveComponent,
       resolveErrors,
       transformProps,
-      swapComponent: async ({ component, page, preserveState }) => {
+      swapComponent: async ({ component, page, preserveState }) =>
+      {
         setCurrent(current => ({
           component,
           page,
@@ -31,18 +36,22 @@ export default function App({
     })
   }, [initialPage, resolveComponent, resolveErrors, transformProps])
 
-  if (!current.component) {
+  if (!current.component)
+  {
     return createElement(PageContext.Provider, { value: current.page }, null)
   }
 
-  const renderChildren = children || (({ Component, props, key }) => {
+  const renderChildren = children || (({ Component, props, key }) =>
+  {
     const child = createElement(Component, { key, ...props })
 
-    if (typeof Component.layout === 'function') {
+    if (typeof Component.layout === 'function')
+    {
       return Component.layout(child)
     }
 
-    if (Array.isArray(Component.layout)) {
+    if (Array.isArray(Component.layout))
+    {
       return Component.layout
         .concat(child)
         .reverse()
