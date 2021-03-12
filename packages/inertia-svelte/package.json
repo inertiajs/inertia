@@ -22,6 +22,7 @@
   "module": "dist/index.umd.js",
   "main": "dist/index.js",
   "devDependencies": {
+    "@inertiajs/inertia": "^0.8.5",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.2.0",
@@ -39,7 +40,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "0.8.5",
+    "@inertiajs/inertia": "^0.8.5",
     "svelte": "3.35.0"
   }
 }
