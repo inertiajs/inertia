@@ -74,7 +74,6 @@ export default function (data = {}) {
         },
         onStart: visit => {
           this.setStore('processing', true)
-          console.log(store.processing)
 
           if (options.onStart) {
             return options.onStart(visit)
