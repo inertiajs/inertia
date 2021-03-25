@@ -84,4 +84,4 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	delete: (url: string, options?: Inertia.VisitOptions) => Promise<void>
 }
 
-export function useForm<TForm = Record<string, any>>(initialValues: TForm | Partial<TForm>): InertiaFormProps<TForm>;
+export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
