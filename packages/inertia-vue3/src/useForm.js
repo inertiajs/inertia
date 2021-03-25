@@ -1,7 +1,7 @@
 import { reactive, toRaw, unref, watch } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-function useForm(data = {}, { remember = true, key = 'form' } = {}) {
+export default function useForm(data = {}, { remember = true, key = 'form' } = {}) {
   const defaults = JSON.parse(JSON.stringify(data))
   const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null
@@ -146,5 +146,3 @@ function useForm(data = {}, { remember = true, key = 'form' } = {}) {
 
   return form
 }
-
-export default useForm
