@@ -48,14 +48,15 @@ export default function (data = {}) {
       return this
     },
     clearErrors(...fields) {
-      this.errors = Object
+      const errors = Object
         .keys(this.errors)
         .reduce((carry, field) => ({
           ...carry,
           ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
         }), {})
 
-      this.hasErrors = Object.keys(this.errors).length > 0
+      this.setStore('errors', errors)
+      this.setStore('hasErrors', Object.keys(errors).length > 0)
 
       return this
     },
@@ -97,7 +98,7 @@ export default function (data = {}) {
           }
         },
         onError: errors => {
-          this.errors = errors
+          this.setStore('errors', errors)
           this.setStore('hasErrors', true)
 
           if (options.onError) {
