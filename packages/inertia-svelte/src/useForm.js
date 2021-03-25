@@ -1,7 +1,8 @@
 import { Inertia } from '@inertiajs/inertia'
 import { writable } from 'svelte/store'
+import useRemember from './useRemember'
 
-function useForm(data = {}) {
+function useForm(data = {}, key) {
   const defaults = data
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
@@ -137,6 +138,10 @@ function useForm(data = {}) {
       this.submit('delete', url, options)
     },
   })
+
+  let remember = useRemember(data, key || 'form')
+  remember.subscribe(remembered => store.update(store => Object.assign({}, store, remembered)))()
+  store.subscribe(form => remember.update(store => ({ ...form.data(), errors: form.errors })))
 
   return store
 }
