@@ -14,7 +14,7 @@ export default function (data = {}) {
     recentlySuccessful: false,
     processing: false,
     setStore(key, val) {
-      store.update(s => Object.assign({}, s, {[key]: val}))
+      store.update(store => Object.assign({}, store, {[key]: val}))
     },
     data() {
       return Object
