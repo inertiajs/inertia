@@ -13,8 +13,10 @@ export default function (data = {}) {
     wasSuccessful: false,
     recentlySuccessful: false,
     processing: false,
-    setStore(key, val) {
-      store.update(store => Object.assign({}, store, {[key]: val}))
+    setStore(key, value) {
+      store.update(store => {
+        return Object.assign({}, store, typeof key === 'string' ? {[key]: value} : key)
+      })
     },
     data() {
       return Object
@@ -31,17 +33,15 @@ export default function (data = {}) {
     },
     reset(...fields) {
       if (fields.length === 0) {
-        Object.assign(this, defaults)
+        this.setStore(defaults)
       } else {
-        Object.assign(
-          this,
-          Object
-            .keys(defaults)
-            .filter(key => fields.includes(key))
-            .reduce((carry, key) => {
-              carry[key] = defaults[key]
-              return carry
-            }, {}),
+        this.setStore(Object
+          .keys(defaults)
+          .filter(key => fields.includes(key))
+          .reduce((carry, key) => {
+            carry[key] = defaults[key]
+            return carry
+          }, {}),
         )
       }
 
