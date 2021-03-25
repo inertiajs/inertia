@@ -6,6 +6,7 @@ function useForm(data = {}, key) {
   const defaults = data
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
+
   const store = writable({
     ...data,
     errors: {},
