@@ -1,7 +1,7 @@
 import { Inertia } from '@inertiajs/inertia'
 import { writable } from 'svelte/store'
 
-export default function (data = {}) {
+function useForm(data = {}) {
   const defaults = data
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
@@ -137,5 +137,8 @@ export default function (data = {}) {
       this.submit('delete', url, options)
     },
   })
+
   return store
 }
+
+export default useForm

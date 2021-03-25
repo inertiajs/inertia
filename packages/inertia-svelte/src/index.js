@@ -3,4 +3,4 @@ export { default as Link, default as link, default as InertiaLink } from './Iner
 export { default as inertia } from './link'
 export { default as page } from './page'
 export { default as remember } from './remember'
-export { default as useForm } from './form'
+export { default as useForm } from './useForm'
