@@ -6,8 +6,8 @@ export default function useForm(defaults, key) {
   let transform = (data) => data
 
   const recentlySuccessfulTimeoutId = useRef(null)
-  const [data, setData] = useRemember(defaults, `${key}-data`)
-  const [errors, setErrors] = useRemember({}, `${key}-errors`)
+  const [data, setData] = useRemember(defaults, key ? `${key}-form-data` : 'form-data')
+  const [errors, setErrors] = useRemember({}, key ? `${key}-form-errors` : 'form-errors')
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
