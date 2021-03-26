@@ -10,11 +10,13 @@ If you're interested in contributing to Inertia.js, please read our [contributin
 
 A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help push Inertia.js development forward! In particular, we'd like to say a special thank you to our gold sponsors:
 
+- [Brook](https://brook.io/)
 - [Ploi](https://ploi.io/)
 - [Forge](https://forge.laravel.com/)
 - [ActivitySource](https://www.activitysource.com/)
 - [Aryeo](https://www.aryeo.com/)
 - [Indigit](https://www.indigit.pt/en)
+- [Scout APM](https://scoutapm.com/?utm_campaign=community_inertisjs_2021_q1&utm_medium=github-sponsorship&utm_source=inertisjs)
 - [ContestKit](https://contestkit.com/)
 
 If you'd like to become a sponsor, please [see here](https://inertiajs.com/sponsors) for more information. 💜

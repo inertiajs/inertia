@@ -1,22 +1,25 @@
-import Vue from 'vue'
-import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
+import { writable } from 'svelte/store'
 
-export default function(data = {}, { key = 'form', remember = true } = {}) {
-  const defaults = cloneDeep(data)
+function useForm(data = {}, { key = 'form', remember = true } = {}) {
+  const defaults = data
   const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
-  const form = Vue.observable({
-    __rememberable: false,
+  const store = writable({
     ...restored ? restored.data : data,
     errors: restored ? restored.errors : {},
     hasErrors: false,
-    processing: false,
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
+    processing: false,
+    setStore(key, value) {
+      store.update(store => {
+        return Object.assign({}, store, typeof key === 'string' ? {[key]: value} : key)
+      })
+    },
     data() {
       return Object
         .keys(data)
@@ -31,33 +34,31 @@ export default function(data = {}, { key = 'form', remember = true } = {}) {
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
-        Object.assign(this, clonedDefaults)
+        this.setStore(defaults)
       } else {
-        Object.assign(
-          this,
-          Object
-            .keys(clonedDefaults)
-            .filter(key => fields.includes(key))
-            .reduce((carry, key) => {
-              carry[key] = clonedDefaults[key]
-              return carry
-            }, {}),
+        this.setStore(Object
+          .keys(defaults)
+          .filter(key => fields.includes(key))
+          .reduce((carry, key) => {
+            carry[key] = defaults[key]
+            return carry
+          }, {}),
         )
       }
 
       return this
     },
     clearErrors(...fields) {
-      this.errors = Object
+      const errors = Object
         .keys(this.errors)
         .reduce((carry, field) => ({
           ...carry,
           ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
         }), {})
 
-      this.hasErrors = Object.keys(this.errors).length > 0
+      this.setStore('errors', errors)
+      this.setStore('hasErrors', Object.keys(errors).length > 0)
 
       return this
     },
@@ -66,8 +67,8 @@ export default function(data = {}, { key = 'form', remember = true } = {}) {
       const _options = {
         ...options,
         onBefore: visit => {
-          this.wasSuccessful = false
-          this.recentlySuccessful = false
+          this.setStore('wasSuccessful', false)
+          this.setStore('recentlySuccessful', false)
           clearTimeout(recentlySuccessfulTimeoutId)
 
           if (options.onBefore) {
@@ -75,39 +76,40 @@ export default function(data = {}, { key = 'form', remember = true } = {}) {
           }
         },
         onStart: visit => {
-          this.processing = true
+          this.setStore('processing', true)
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
         onProgress: event => {
-          this.progress = event
+          this.setStore('progress', event)
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
-        onBeforeRender: page => {
-          this.errors = page.resolvedErrors
-          this.hasErrors = Object.keys(this.errors).length > 0
-          this.wasSuccessful = !this.hasErrors
-          this.recentlySuccessful = !this.hasErrors
-
-          if (options.onBeforeRender) {
-            return options.onBeforeRender(page)
-          }
-        },
         onSuccess: page => {
-          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
+          this.clearErrors()
+          this.setStore('wasSuccessful', true)
+          this.setStore('recentlySuccessful', true)
+          recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
           if (options.onSuccess) {
             return options.onSuccess(page)
           }
         },
+        onError: errors => {
+          this.setStore('errors', errors)
+          this.setStore('hasErrors', true)
+
+          if (options.onError) {
+            return options.onError(errors)
+          }
+        },
         onFinish: () => {
-          this.processing = false
-          this.progress = null
+          this.setStore('processing', false)
+          this.setStore('progress', null)
 
           if (options.onFinish) {
             return options.onFinish()
@@ -139,14 +141,10 @@ export default function(data = {}, { key = 'form', remember = true } = {}) {
   })
 
   if (remember) {
-    new Vue({
-      created() {
-        this.$watch(() => form, (value) => {
-          Inertia.remember({ data: value.data(), errors: value.errors }, key)
-        }, { immediate: true, deep: true })
-      },
-    })
+    store.subscribe(form => Inertia.remember({ data: form.data(), errors: form.errors }, key))
   }
 
-  return form
+  return store
 }
+
+export default useForm

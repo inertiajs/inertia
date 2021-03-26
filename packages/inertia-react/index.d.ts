@@ -17,7 +17,7 @@ type App<
   transformProps?: (props: PagePropsBeforeTransform) => PageProps
 }>
 
-interface InertiaLinkProps {
+interface BaseInertiaLinkProps {
   as?: string
   data?: object
   href: string
@@ -41,9 +41,9 @@ interface InertiaLinkProps {
   onSuccess?: () => void
 }
 
-type InertiaLink = React.FunctionComponent<
-  InertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
->
+type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
+
+type InertiaLink = React.FunctionComponent<InertiaLinkProps>
 
 export function usePage<
   Page extends Inertia.Page = Inertia.Page
@@ -59,3 +59,29 @@ export const InertiaLink: InertiaLink
 export const Link: InertiaLink
 
 export const InertiaApp: App
+
+type setDataByObject<TForm> = (data: TForm) => void
+type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
+
+export interface InertiaFormProps<TForm = Record<string, any>> {
+	data: TForm
+	errors: Record<keyof TForm, string>
+	hasErrors: boolean
+	processing: boolean
+	progress: number
+	wasSuccessful: boolean
+	recentlySuccessful: boolean
+	setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
+	transform: (callback: (data: TForm) => TForm) => void
+	reset: (...fields: (keyof TForm)[]) => void
+	clearErrors: (...fields: (keyof TForm)[]) => void
+	submit: (method: () => void, url: string, options?: Inertia.VisitOptions) => Promise<void>
+	get: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	patch: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	post: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	put: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	delete: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+}
+
+export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;

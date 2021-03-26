@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia-vue",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "license": "MIT",
   "description": "The Vue adapter for Inertia.js",
   "contributors": [
@@ -36,5 +36,8 @@
   "peerDependencies": {
     "@inertiajs/inertia": "^0.8.2",
     "vue": "^2.0.0"
+  },
+  "dependencies": {
+    "lodash.clonedeep": "^4.5.0"
   }
 }

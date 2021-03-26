@@ -31,6 +31,7 @@ type VisitOptions = {
   preserveState?: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only?: string[]
   headers?: object
+  errorBag?: string 
   onCancelToken?: (cancelToken: CancelTokenSource) => void
   onStart?: (visit: VisitOptions & {url: string}) => void | boolean
   onProgress?: (progress: ProgressEvent) => void
