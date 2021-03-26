@@ -2,12 +2,12 @@ import { Inertia } from '@inertiajs/inertia'
 import { useCallback, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export default function useForm(defaults, key) {
+export default function useForm(defaults, { remember = true, key = 'form' } = {}) {
   let transform = (data) => data
 
   const recentlySuccessfulTimeoutId = useRef(null)
-  const [data, setData] = useRemember(defaults, key ? `${key}-form-data` : 'form-data')
-  const [errors, setErrors] = useRemember({}, key ? `${key}-form-errors` : 'form-errors')
+  const [data, setData] = remember ? useRemember(defaults, `${key}-data`) : useState(defaults)
+  const [errors, setErrors] = remember ? useRemember({}, `${key}-errors`) : useState({})
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
