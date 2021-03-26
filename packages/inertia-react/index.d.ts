@@ -60,25 +60,28 @@ export const Link: InertiaLink
 
 export const InertiaApp: App
 
-export interface InertiaFormProps {
-	data: object
-	errors: any
+type setDataByObject<TForm> = (data: TForm) => void
+type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
+
+export interface InertiaFormProps<TForm = Record<string, any>> {
+	data: TForm
+	errors: Record<keyof TForm, string>
 	hasErrors: boolean
 	processing: boolean
 	progress: number
 	wasSuccessful: boolean
 	recentlySuccessful: boolean
-	setData: (...prop: [key?: string | object | (() => void), value?: any]) => void
-	transform: (callback: () => void) => void
-	reset: (fields?: object) => void
-	clearErrors: (fields?: object) => void
+	setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
+	transform: (callback: (data: TForm) => TForm) => void
+	reset: (...fields: (keyof TForm)[]) => void
+	clearErrors: (...fields: (keyof TForm)[]) => void
 	submit: (method: () => void, url: string, options?: Inertia.VisitOptions) => Promise<void>
-	get: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
-	patch: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
-	post: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
-	put: (url: string, data?: object, options?: Inertia.VisitOptions) => Promise<void>
+	get: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	patch: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	post: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+	put: (url: string, options?: Inertia.VisitOptions) => Promise<void>
 	delete: (url: string, options?: Inertia.VisitOptions) => Promise<void>
 }
 
-type InertiaForm = (initialValues: { [key: string]: any }) => InertiaFormProps
-export const useForm:InertiaForm;
+export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
