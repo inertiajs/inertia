@@ -2,7 +2,7 @@ import Vue from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data = {}, { remember = true, key = 'form' } = {}) {
+export default function(data = {}, { key = 'form', remember = true } = {}) {
   const defaults = cloneDeep(data)
   const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null

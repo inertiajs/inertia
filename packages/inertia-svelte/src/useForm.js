@@ -1,7 +1,7 @@
 import { Inertia } from '@inertiajs/inertia'
 import { writable } from 'svelte/store'
 
-function useForm(data = {}, { remember = true, key = 'form' } = {}) {
+function useForm(data = {}, { key = 'form', remember = true } = {}) {
   const defaults = data
   const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null

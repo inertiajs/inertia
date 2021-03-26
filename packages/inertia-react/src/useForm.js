@@ -2,7 +2,7 @@ import { Inertia } from '@inertiajs/inertia'
 import { useCallback, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export default function useForm(defaults, { remember = true, key = 'form' } = {}) {
+export default function useForm(defaults, { key = 'form', remember = true } = {}) {
   let transform = (data) => data
 
   const recentlySuccessfulTimeoutId = useRef(null)
