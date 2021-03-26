@@ -140,9 +140,9 @@ describe('Remember (local state caching)', () => {
   })
 
   describe('form helper', () => {
-    it('does not remember form data as of default', () => {
-      cy.visit('/remember/form-helper/default')
-      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/default')
+    it('does not remember form data when remember is disabled', () => {
+      cy.visit('/remember/form-helper/disabled')
+      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/disabled')
 
       cy.get('#name').clear().type('A')
       cy.get('#handle').clear().type('B')
@@ -153,7 +153,7 @@ describe('Remember (local state caching)', () => {
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
       cy.go(-1)
-      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/default')
+      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/disabled')
 
       cy.get('#name').should('not.have.value', 'A')
       cy.get('#handle').should('not.have.value', 'B')
@@ -161,9 +161,9 @@ describe('Remember (local state caching)', () => {
       cy.get('#untracked').should('not.have.value', 'C')
     })
 
-    it('does not remember form errors as of default', () => {
-      cy.visit('/remember/form-helper/default')
-      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/default')
+    it('does not remember form errors when remember is disabled', () => {
+      cy.visit('/remember/form-helper/disabled')
+      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/disabled')
 
       cy.get('#name').clear().type('A')
       cy.get('#handle').clear().type('B')
@@ -182,7 +182,7 @@ describe('Remember (local state caching)', () => {
       cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
       cy.go(-1)
-      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/default')
+      cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/disabled')
 
       cy.get('#name').should('not.have.value', 'A')
       cy.get('#handle').should('not.have.value', 'B')
@@ -193,7 +193,7 @@ describe('Remember (local state caching)', () => {
       cy.get('.remember_error').should('not.exist')
     })
 
-    it('remembers form data when tracked', () => {
+    it('remembers form data by default', () => {
       cy.visit('/remember/form-helper/remember')
       cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/remember')
 
@@ -214,7 +214,7 @@ describe('Remember (local state caching)', () => {
       cy.get('#untracked').should('not.have.value', 'C')
     })
 
-    it('remembers form errors when tracked', () => {
+    it('remembers form errors by default', () => {
       cy.visit('/remember/form-helper/remember')
       cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/remember')
 
@@ -246,7 +246,7 @@ describe('Remember (local state caching)', () => {
       cy.get('.remember_error').should('not.exist')
     })
 
-    it('remembers the last state of a form when tracked', () => {
+    it('remembers the last state of a form by default', () => {
       cy.visit('/remember/form-helper/remember')
       cy.url().should('eq', Cypress.config().baseUrl + '/remember/form-helper/remember')
 
