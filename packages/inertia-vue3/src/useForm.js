@@ -1,8 +1,9 @@
 import { reactive, toRaw, unref, watch } from 'vue'
+import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function useForm(data = {}, { remember = true, key = 'form' } = {}) {
-  const defaults = JSON.parse(JSON.stringify(data))
+  const defaults = cloneDeep(data)
   const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null
   let transform = data => data

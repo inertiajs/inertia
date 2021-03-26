@@ -36,5 +36,8 @@
   "peerDependencies": {
     "@inertiajs/inertia": "^0.8.2",
     "vue": "^2.0.0"
+  },
+  "dependencies": {
+    "lodash.clonedeep": "^4.5.0"
   }
 }
