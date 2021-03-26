@@ -88,22 +88,21 @@ export default function(data = {}, { key = 'form', remember = true } = {}) {
             return options.onProgress(event)
           }
         },
+        onBeforeRender: page => {
+          this.errors = page.resolvedErrors
+          this.hasErrors = Object.keys(this.errors).length > 0
+          this.wasSuccessful = !this.hasErrors
+          this.recentlySuccessful = !this.hasErrors
+
+          if (options.onBeforeRender) {
+            return options.onBeforeRender(page)
+          }
+        },
         onSuccess: page => {
-          this.clearErrors()
-          this.wasSuccessful = true
-          this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
           if (options.onSuccess) {
             return options.onSuccess(page)
-          }
-        },
-        onError: errors => {
-          this.errors = errors
-          this.hasErrors = true
-
-          if (options.onError) {
-            return options.onError(errors)
           }
         },
         onFinish: () => {
