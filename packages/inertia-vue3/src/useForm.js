@@ -10,7 +10,7 @@ export default function useForm(data = {}, { remember = true, key = 'form' } = {
 
   let form = reactive({
     __rememberable: false,
-    ...restored ? restored.data : defaults,
+    ...restored ? restored.data : data,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
@@ -31,16 +31,17 @@ export default function useForm(data = {}, { remember = true, key = 'form' } = {
       return this
     },
     reset(...fields) {
+      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
-        Object.assign(this, defaults)
+        Object.assign(this, clonedDefaults)
       } else {
         Object.assign(
           this,
           Object
-            .keys(defaults)
+            .keys(clonedDefaults)
             .filter(key => fields.includes(key))
             .reduce((carry, key) => {
-              carry[key] = defaults[key]
+              carry[key] = clonedDefaults[key]
               return carry
             }, {}),
         )
