@@ -1,13 +1,16 @@
+import Vue from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data = {}) {
+export default function(data = {}, { remember = true, key = 'form' } = {}) {
   const defaults = JSON.parse(JSON.stringify(data))
+  const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
-  return {
-    ...defaults,
-    errors: {},
+  const form = Vue.observable({
+    __rememberable: false,
+    ...restored ? restored.data : defaults,
+    errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
     progress: null,
@@ -55,16 +58,6 @@ export default function(data = {}) {
       this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
-    },
-    serialize() {
-      return {
-        errors: this.errors,
-        ...this.data(),
-      }
-    },
-    unserialize(data) {
-      Object.assign(this, data)
-      this.hasErrors = Object.keys(this.errors).length > 0
     },
     submit(method, url, options = {}) {
       const data = transform(this.data())
@@ -142,5 +135,17 @@ export default function(data = {}) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
+  })
+
+  if (remember) {
+    new Vue({
+      created() {
+        this.$watch(() => form, (value) => {
+          Inertia.remember({ data: value.data(), errors: value.errors }, key)
+        }, { immediate: true, deep: true })
+      },
+    })
   }
+
+  return form
 }
