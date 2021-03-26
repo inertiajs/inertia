@@ -1,13 +1,17 @@
+import Vue from 'vue'
+import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data = {}) {
-  const defaults = JSON.parse(JSON.stringify(data))
+export default function(data = {}, { key = 'form', remember = true } = {}) {
+  const defaults = cloneDeep(data)
+  const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
-  return {
-    ...defaults,
-    errors: {},
+  const form = Vue.observable({
+    __rememberable: false,
+    ...restored ? restored.data : data,
+    errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
     progress: null,
@@ -27,16 +31,17 @@ export default function(data = {}) {
       return this
     },
     reset(...fields) {
+      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
-        Object.assign(this, defaults)
+        Object.assign(this, clonedDefaults)
       } else {
         Object.assign(
           this,
           Object
-            .keys(defaults)
+            .keys(clonedDefaults)
             .filter(key => fields.includes(key))
             .reduce((carry, key) => {
-              carry[key] = defaults[key]
+              carry[key] = clonedDefaults[key]
               return carry
             }, {}),
         )
@@ -55,16 +60,6 @@ export default function(data = {}) {
       this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
-    },
-    serialize() {
-      return {
-        errors: this.errors,
-        ...this.data(),
-      }
-    },
-    unserialize(data) {
-      Object.assign(this, data)
-      this.hasErrors = Object.keys(this.errors).length > 0
     },
     submit(method, url, options = {}) {
       const data = transform(this.data())
@@ -141,5 +136,17 @@ export default function(data = {}) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
+  })
+
+  if (remember) {
+    new Vue({
+      created() {
+        this.$watch(() => form, (value) => {
+          Inertia.remember({ data: value.data(), errors: value.errors }, key)
+        }, { immediate: true, deep: true })
+      },
+    })
   }
+
+  return form
 }

@@ -1,14 +1,17 @@
-import { ref } from 'vue'
+import { reactive, toRaw, unref, watch } from 'vue'
+import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function form(data = {}) {
-  const defaults = JSON.parse(JSON.stringify(data))
+export default function useForm(data = {}, { key = 'form', remember = true } = {}) {
+  const defaults = cloneDeep(data)
+  const restored = Inertia.restore(key)
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
-  return {
-    ...defaults,
-    errors: {},
+  let form = reactive({
+    __rememberable: false,
+    ...restored ? restored.data : data,
+    errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
     progress: null,
@@ -28,16 +31,17 @@ export default function form(data = {}) {
       return this
     },
     reset(...fields) {
+      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
-        Object.assign(this, defaults)
+        Object.assign(this, clonedDefaults)
       } else {
         Object.assign(
           this,
           Object
-            .keys(defaults)
+            .keys(clonedDefaults)
             .filter(key => fields.includes(key))
             .reduce((carry, key) => {
-              carry[key] = defaults[key]
+              carry[key] = clonedDefaults[key]
               return carry
             }, {}),
         )
@@ -55,19 +59,6 @@ export default function form(data = {}) {
 
       this.hasErrors = Object.keys(this.errors).length > 0
 
-      return this
-    },
-    serialize() {
-      return {
-        errors: {
-          ...this.errors,
-        },
-        ...this.data(),
-      }
-    },
-    unserialize(data) {
-      Object.assign(this, data)
-      this.hasErrors = Object.keys(this.errors).length > 0
       return this
     },
     submit(method, url, options = {}) {
@@ -145,9 +136,14 @@ export default function form(data = {}) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
-  }
-}
+  })
 
-export function useForm(data) {
-  return ref(form(data))
+  if (remember) {
+    watch(form, (value) => {
+      const raw = toRaw(unref(value))
+      Inertia.remember({ data: raw.data(), errors: raw.errors }, key)
+    }, { immediate: true, deep: true })
+  }
+
+  return form
 }
