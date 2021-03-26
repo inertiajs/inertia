@@ -8,7 +8,7 @@ function useForm(data = {}, { key = 'form', remember = true } = {}) {
   let transform = data => data
 
   const store = writable({
-    ...restored ? restored.data : defaults,
+    ...restored ? restored.data : data,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     progress: null,
