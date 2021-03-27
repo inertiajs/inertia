@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
   },
-  "source": "src/index.js",
+  "source": "src/index.ts",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
@@ -33,7 +33,10 @@
     "qs": "^6.9.0"
   },
   "devDependencies": {
-    "eslint": "^7.0.0",
-    "microbundle": "^0.12.0"
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
+    "eslint": "^7.23.0",
+    "microbundle": "^0.12.0",
+    "typescript": "^4.2.3"
   }
 }
