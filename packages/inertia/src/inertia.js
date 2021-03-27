@@ -188,15 +188,15 @@ export default {
     onSuccess = () => ({}),
     onError = () => ({}),
   } = {}) {
-    method = method.toLowerCase();
-    [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+    method = method.toLowerCase()
+    url = mergeDataIntoQueryString(method, url, data)
 
     const visitHasFiles = hasFiles(data)
     if (method !== 'get' && (visitHasFiles || forceFormData)) {
       data = objectToFormData(data)
     }
 
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, forceFormData, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
+    const visit = { url: url.href, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, forceFormData, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
@@ -216,7 +216,7 @@ export default {
     return new Proxy(
       Axios({
         method,
-        url: urlWithoutHash(url).href,
+        url: url.hrefWithoutHash,
         data: method === 'get' ? {} : data,
         params: method === 'get' ? data : {},
         cancelToken: this.activeVisit.cancelToken.token,

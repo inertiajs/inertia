@@ -27,24 +27,26 @@ export default {
   },
   data() {
     return {
-      component: null,
-      page: {},
+      component: this.resolveComponent(this.initialPage.component),
+      page: this.initialPage,
       key: null,
     }
   },
   created() {
     app = this
-    Inertia.init({
-      initialPage: this.initialPage,
-      resolveComponent: this.resolveComponent,
-      resolveErrors: this.resolveErrors,
-      transformProps: this.transformProps,
-      swapComponent: async ({ component, page, preserveState }) => {
-        this.component = component
-        this.page = page
-        this.key = preserveState ? this.key : Date.now()
-      },
-    })
+    if (typeof window !== 'undefined') {
+      Inertia.init({
+        initialPage: this.initialPage,
+        resolveComponent: this.resolveComponent,
+        resolveErrors: this.resolveErrors,
+        transformProps: this.transformProps,
+        swapComponent: async ({ component, page, preserveState }) => {
+          this.component = component
+          this.page = page
+          this.key = preserveState ? this.key : Date.now()
+        },
+      })
+    }
   },
   render(h) {
     if (this.component) {
