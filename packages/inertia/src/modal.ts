@@ -1,13 +1,13 @@
 export default {
-  modal: null,
-  listener: null,
+  modal: HTMLDivElement,
+  listener: KeyboardEvent,
 
-  show(html) {
+  show(html: Record<string, unknown>|string): void {
     if (typeof html === 'object') {
       html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(html)}`
     }
 
-    let page = document.createElement('html')
+    const page = document.createElement('html')
     page.innerHTML = html
     page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
 
@@ -21,7 +21,7 @@ export default {
     this.modal.style.zIndex = 200000
     this.modal.addEventListener('click', () => this.hide())
 
-    let iframe = document.createElement('iframe')
+    const iframe = document.createElement('iframe')
     iframe.style.backgroundColor = 'white'
     iframe.style.borderRadius = '5px'
     iframe.style.width = '100%'
@@ -30,6 +30,9 @@ export default {
 
     document.body.prepend(this.modal)
     document.body.style.overflow = 'hidden'
+    if (!iframe.contentWindow) {
+      throw new Error('iframe not yet ready.')
+    }
     iframe.contentWindow.document.open()
     iframe.contentWindow.document.write(page.outerHTML)
     iframe.contentWindow.document.close()
@@ -38,14 +41,14 @@ export default {
     document.addEventListener('keydown', this.listener)
   },
 
-  hide() {
+  hide(): void {
     this.modal.outerHTML = ''
     this.modal = null
     document.body.style.overflow = 'visible'
     document.removeEventListener('keydown', this.listener)
   },
 
-  hideOnEscape(event) {
+  hideOnEscape(event: KeyboardEvent): void {
     if (event.keyCode === 27) {
       this.hide()
     }
