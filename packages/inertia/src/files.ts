@@ -1,4 +1,4 @@
-export function hasFiles(data) {
+export function hasFiles(data: File|FileList|Blob|unknown): boolean {
   return data instanceof File
     || data instanceof Blob
     || data instanceof FileList
