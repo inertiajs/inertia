@@ -1,4 +1,4 @@
-export type FormDataConvertible = Date|File|Blob|boolean|string|number|null|undefined
+import { FormDataConvertible } from './types'
 
 export function objectToFormData(
   source: Record<string, FormDataConvertible>|null|undefined,

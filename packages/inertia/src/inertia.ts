@@ -1,30 +1,65 @@
-import Axios from 'axios'
+import { ActiveVisit, ErrorResolver, Errors, HttpMethod, LocationVisit, Page, PageHandler, PageResolver, PropTransformer, RequestPayload, Visit, VisitId } from './types'
+import { AxiosResponse, default as Axios} from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events' // prettier-ignore
+import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 
-export default {
-  resolveComponent: null,
-  resolveErrors: page => (page.props.errors || {}),
-  swapComponent: null,
-  transformProps: props => props,
-  activeVisit: null,
-  visitId: null,
-  page: null,
+export class Inertia {
+  protected resolveComponent: PageResolver
+  protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
+  protected swapComponent: PageHandler
+  protected transformProps: PropTransformer = props => props
+  protected activeVisit: ActiveVisit
+  protected visitId: VisitId = null
+  protected page: Page = null
 
-  init({ initialPage, resolveComponent, resolveErrors, swapComponent, transformProps }) {
+  constructor({
+    initialPage,
+    resolveComponent,
+    resolveErrors,
+    swapComponent,
+    transformProps,
+  }: {
+    initialPage: Page,
+    resolveComponent: PageResolver,
+    resolveErrors: ErrorResolver,
+    swapComponent: PageHandler,
+    transformProps: PropTransformer
+  }) {
     this.resolveComponent = resolveComponent
     this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
     this.transformProps = transformProps || this.transformProps
     this.handleInitialPageVisit(initialPage)
     this.setupEventListeners()
-  },
+  }
 
-  handleInitialPageVisit(page) {
+  public static init({
+    initialPage,
+    resolveComponent,
+    resolveErrors,
+    swapComponent,
+    transformProps,
+  }: {
+    initialPage: Page,
+    resolveComponent: PageResolver,
+    resolveErrors: ErrorResolver,
+    swapComponent: PageHandler,
+    transformProps: PropTransformer
+  }) {
+    return new this({
+      initialPage,
+      resolveComponent,
+      resolveErrors,
+      swapComponent,
+      transformProps,
+    })
+  }
+
+  protected handleInitialPageVisit(page: Page): void {
     if (this.isBackForwardVisit()) {
       this.handleBackForwardVisit(page)
     } else if (this.isLocationVisit()) {
@@ -34,36 +69,36 @@ export default {
       this.setPage(page)
     }
     fireNavigateEvent(page)
-  },
+  }
 
-  setupEventListeners() {
+  protected setupEventListeners(): void {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
-  },
+  }
 
-  scrollRegions() {
+  protected scrollRegions(): NodeListOf<Element> {
     return document.querySelectorAll('[scroll-region]')
-  },
+  }
 
-  handleScrollEvent(event) {
-    if (typeof event.target.hasAttribute === 'function' && event.target.hasAttribute('scroll-region')) {
+  protected handleScrollEvent(event: Event): void {
+    if (typeof (event.target as Element).hasAttribute === 'function' && (event.target as Element).hasAttribute('scroll-region')) {
       this.saveScrollPositions()
     }
-  },
+  }
 
-  saveScrollPositions() {
+  protected saveScrollPositions(): void {
     this.replaceState({
       ...this.page,
-      scrollRegions: Array.prototype.slice.call(this.scrollRegions()).map(region => {
+      scrollRegions: Array.from(this.scrollRegions()).map(region => {
         return {
           top: region.scrollTop,
           left: region.scrollLeft,
         }
       }),
     })
-  },
+  }
 
-  resetScrollPositions() {
+  protected resetScrollPositions(): void {
     document.documentElement.scrollTop = 0
     document.documentElement.scrollLeft = 0
     this.scrollRegions().forEach(region => {
@@ -71,38 +106,38 @@ export default {
       region.scrollLeft = 0
     })
     this.saveScrollPositions()
-
     if (window.location.hash) {
       document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
     }
-  },
+  }
 
-  restoreScrollPositions() {
+  protected restoreScrollPositions(): void {
     if (this.page.scrollRegions) {
-      this.scrollRegions().forEach((region, index) => {
+      this.scrollRegions().forEach((region: Element, index: number) => {
         region.scrollTop = this.page.scrollRegions[index].top
         region.scrollLeft = this.page.scrollRegions[index].left
       })
     }
-  },
+  }
 
-  isBackForwardVisit() {
+  protected isBackForwardVisit(): boolean {
     return window.history.state
       && window.performance
       && window.performance.getEntriesByType('navigation').length
-      && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'
-  },
+      && (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type === 'back_forward'
+  }
 
-  handleBackForwardVisit(page) {
+  protected handleBackForwardVisit(page: Page): void {
     window.history.state.version = page.version
     this.setPage(window.history.state, { preserveScroll: true }).then(() => {
       this.restoreScrollPositions()
     })
-  },
+  }
 
-  locationVisit(url, preserveScroll) {
+  locationVisit(url: URL, preserveScroll: boolean): boolean|void {
     try {
-      window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify({ preserveScroll }))
+      const locationVisit: LocationVisit = { preserveScroll }
+      window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify(locationVisit))
       window.location.href = url.href
       if (urlWithoutHash(window.location).href === urlWithoutHash(url).href) {
         window.location.reload()
@@ -110,18 +145,18 @@ export default {
     } catch (error) {
       return false
     }
-  },
+  }
 
-  isLocationVisit() {
+  protected isLocationVisit(): boolean {
     try {
       return window.sessionStorage.getItem('inertiaLocationVisit') !== null
     } catch (error) {
       return false
     }
-  },
+  }
 
-  handleLocationVisit(page) {
-    const locationVisit = JSON.parse(window.sessionStorage.getItem('inertiaLocationVisit'))
+  protected handleLocationVisit(page: Page): void {
+    const locationVisit: LocationVisit = JSON.parse(window.sessionStorage.getItem('inertiaLocationVisit') || '')
     window.sessionStorage.removeItem('inertiaLocationVisit')
     page.url += window.location.hash
     page.rememberedState = window.history.state?.rememberedState ?? {}
@@ -131,34 +166,37 @@ export default {
         this.restoreScrollPositions()
       }
     })
-  },
+  }
 
-  isLocationVisitResponse(response) {
+  protected isLocationVisitResponse(response: AxiosResponse): boolean {
     return response && response.status === 409 && response.headers['x-inertia-location']
-  },
+  }
 
-  isInertiaResponse(response) {
+  protected isInertiaResponse(response: AxiosResponse): boolean {
     return response?.headers['x-inertia']
-  },
+  }
 
-  createVisitId() {
+  protected createVisitId(): VisitId {
     this.visitId = {}
     return this.visitId
-  },
+  }
 
-  cancelVisit(visit, { cancelled = false, interrupted = false }) {
-    if (visit && !visit.completed && !visit.cancelled && !visit.interrupted) {
-      visit.cancelToken.cancel()
-      visit.onCancel()
-      visit.completed = false
-      visit.cancelled = cancelled
-      visit.interrupted = interrupted
-      fireFinishEvent(visit)
-      visit.onFinish(visit)
+  protected cancelVisit(
+    activeVisit: ActiveVisit,
+    { cancelled = false, interrupted = false}: { cancelled?: boolean, interrupted?: boolean },
+  ): void {
+    if (activeVisit && !activeVisit.completed && !activeVisit.cancelled && !activeVisit.interrupted) {
+      activeVisit.cancelToken.cancel()
+      activeVisit.onCancel()
+      activeVisit.completed = false
+      activeVisit.cancelled = cancelled
+      activeVisit.interrupted = interrupted
+      fireFinishEvent(activeVisit)
+      activeVisit.onFinish(activeVisit)
     }
-  },
+  }
 
-  finishVisit(visit) {
+  protected finishVisit(visit: ActiveVisit): void {
     if (!visit.cancelled && !visit.interrupted) {
       visit.completed = true
       visit.cancelled = false
@@ -166,9 +204,9 @@ export default {
       fireFinishEvent(visit)
       visit.onFinish(visit)
     }
-  },
+  }
 
-  visit(url, {
+  public visit(url: URL, {
     method = 'get',
     data = {},
     replace = false,
@@ -176,27 +214,62 @@ export default {
     preserveState = false,
     only = [],
     headers = {},
-    errorBag = null,
+    errorBag = '',
     forceFormData = false,
-    onCancelToken = () => ({}),
-    onBefore = () => ({}),
-    onStart = () => ({}),
-    onProgress = () => ({}),
-    onFinish = () => ({}),
-    onCancel = () => ({}),
-    onBeforeRender = () => ({}),
-    onSuccess = () => ({}),
-    onError = () => ({}),
-  } = {}) {
-    method = method.toLowerCase();
-    [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+    onCancelToken = () => {},
+    onBefore = () => {},
+    onStart = () => {},
+    onProgress = () => {},
+    onFinish = () => {},
+    onCancel = () => {},
+    onBeforeRender = () => {},
+    onSuccess = () => {},
+    onError = () => {},
+  }: {
+    method?: HttpMethod,
+    data?: RequestPayload,
+    replace?: boolean,
+    preserveScroll?: boolean,
+    preserveState?: boolean
+    only?: Array<string>,
+    headers?: Record<string, string>,
+    errorBag?: string,
+    forceFormData?: boolean,
+    onCancelToken?: { ({ cancel }: { cancel: VoidFunction }): void },
+    onBefore?: (visit: Visit) => boolean|void,
+    onStart?: (visit: Visit) => void,
+    onProgress?: (event: { percentage: number }|void) => void,
+    onFinish?: (visit: Visit) => void,
+    onCancel?: () => void,
+    onBeforeRender?: (page: Page) => void,
+    onSuccess?: (page: Page) => void,
+    onError?: (errors: Record<string, unknown>) => void,
+  } = {}): void {
+    if (method === 'get' && !(data instanceof FormData)) {
+      url = mergeDataIntoQueryString(method, hrefToUrl(url), data)
+      data = {}
+    }
 
     const visitHasFiles = hasFiles(data)
-    if (method !== 'get' && (visitHasFiles || forceFormData)) {
+    if (method !== 'get' && !(data instanceof FormData) && (visitHasFiles || forceFormData)) {
       data = objectToFormData(data)
     }
 
-    const visit = { url, method, data, replace, preserveScroll, preserveState, only, headers, errorBag, forceFormData, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError }
+    const visit: Visit = {
+      url,
+      method,
+      data,
+      replace,
+      preserveScroll,
+      preserveState,
+      only,
+      headers,
+      errorBag,
+      forceFormData,
+      cancelled: false,
+      completed: false,
+      interrupted: false,
+    }
 
     if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
@@ -205,14 +278,14 @@ export default {
     this.cancelVisit(this.activeVisit, { interrupted: true })
     this.saveScrollPositions()
 
-    let visitId = this.createVisitId()
-    this.activeVisit = visit
-    this.activeVisit.cancelToken = Axios.CancelToken.source()
+    const visitId = this.createVisitId()
+    this.activeVisit = { ... visit, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError, cancelToken: Axios.CancelToken.source() }
     onCancelToken({ cancel: () => this.cancelVisit(this.activeVisit, { cancelled: true }) })
 
     fireStartEvent(visit)
     onStart(visit)
 
+    // @ts-ignore, as chaining onto the visit was already deprecated pre-TypeScript.
     return new Proxy(
       Axios({
         method,
@@ -229,7 +302,7 @@ export default {
             'X-Inertia-Partial-Component': this.page.component,
             'X-Inertia-Partial-Data': only.join(','),
           } : {}),
-          ...(errorBag ? { 'X-Inertia-Error-Bag': errorBag } : {}),
+          ...(errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
           ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
         },
         onUploadProgress: progress => {
@@ -243,20 +316,22 @@ export default {
         if (!this.isInertiaResponse(response)) {
           return Promise.reject({ response })
         }
-        if (only.length && response.data.component === this.page.component) {
-          response.data.props = { ...this.page.props, ...response.data.props }
+
+        const pageResponse: Page = response.data
+        if (only.length && pageResponse.component === this.page.component) {
+          pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
-        if (preserveState && window.history.state?.rememberedState && response.data.component === this.page.component) {
-          response.data.rememberedState = window.history.state.rememberedState
+        if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
+          pageResponse.rememberedState = window.history.state.rememberedState
         }
-        const responseUrl = hrefToUrl(response.data.url)
+        const responseUrl = hrefToUrl(pageResponse.url)
         if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
           responseUrl.hash = url.hash
-          response.data.url = responseUrl.href
+          pageResponse.url = responseUrl.href
         }
-        response.data.resolvedErrors = ((errors) => errors[errorBag] || errors)(this.resolveErrors(response.data))
-        onBeforeRender(response.data)
-        return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
+        pageResponse.resolvedErrors = ((errors: Errors) => (errors[errorBag] as Errors) || errors)(this.resolveErrors(pageResponse))
+        onBeforeRender(pageResponse)
+        return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
         if (Object.keys(this.page.resolvedErrors).length > 0) {
           fireErrorEvent(this.page.resolvedErrors)
@@ -268,7 +343,7 @@ export default {
         if (this.isInertiaResponse(error.response)) {
           return this.setPage(error.response.data, { visitId })
         } else if (this.isLocationVisitResponse(error.response)) {
-          let locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
+          const locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
           if (url.hash && !locationUrl.hash && urlWithoutHash(url).href === locationUrl.href) {
             locationUrl.hash = url.hash
           }
@@ -281,29 +356,38 @@ export default {
           return Promise.reject(error)
         }
       }).then(() => {
-        this.finishVisit(visit)
+        this.finishVisit(this.activeVisit)
       }).catch(error => {
         if (!Axios.isCancel(error)) {
           const throwException = fireExceptionEvent(error)
-          this.finishVisit(visit)
+          this.finishVisit(this.activeVisit)
           if (throwException) {
             return Promise.reject(error)
           }
         }
       }), {
-        get: function(target, prop) {
+        get: function(target: Promise<Page|unknown>, prop: string) {
           if (['then', 'catch', 'finally'].includes(prop)) {
             console.warn('Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/manual-visits#promise-deprecation')
           }
-          return typeof target[prop] === 'function'
-            ? target[prop].bind(target)
-            : target[prop]
+          // @ts-ignore
+          return typeof target[prop] === 'function' ? target[prop].bind(target) : target[prop]
         },
       },
     )
-  },
+  }
 
-  setPage(page, { visitId = this.createVisitId(), replace = false, preserveScroll = false, preserveState = false } = {}) {
+  protected setPage(page: Page, {
+    visitId = this.createVisitId(),
+    replace = false,
+    preserveScroll = false,
+    preserveState = false,
+  }: {
+    visitId?: VisitId,
+    replace?: boolean,
+    preserveScroll?: boolean|((page: Page) => boolean)
+    preserveState?: boolean|((page: Page) => boolean)
+  } = {}): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
@@ -324,23 +408,23 @@ export default {
         })
       }
     })
-  },
+  }
 
-  pushState(page) {
+  protected pushState(page: Page): void {
     this.page = page
     window.history.pushState(page, '', page.url)
-  },
+  }
 
-  replaceState(page) {
+  protected replaceState(page: Page): void {
     this.page = page
     window.history.replaceState(page, '', page.url)
-  },
+  }
 
-  handlePopstateEvent(event) {
+  protected handlePopstateEvent(event: PopStateEvent): void {
     if (event.state !== null) {
       const page = event.state
-      let visitId = this.createVisitId()
-      return Promise.resolve(this.resolveComponent(page.component)).then(component => {
+      const visitId = this.createVisitId()
+      Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
           this.page = page
           this.swapComponent({ component, page, preserveState: false }).then(() => {
@@ -355,38 +439,38 @@ export default {
       this.replaceState({ ...this.page, url: url.href })
       this.resetScrollPositions()
     }
-  },
+  }
 
-  get(url, data = {}, options = {}) {
+  public get(url: URL, data: RequestPayload = {}, options : Record<string, unknown> = {}): void {
     return this.visit(url, { ...options, method: 'get', data })
-  },
+  }
 
-  reload(options = {}) {
+  public reload(options: Record<string, unknown> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
-  },
+  }
 
-  replace(url, options = {}) {
+  public replace(url: URL, options: Record<string, unknown> = {}): void {
     console.warn(`Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${options.method ?? 'get'}() instead.`)
     return this.visit(url, { preserveState: true, ...options, replace: true })
-  },
+  }
 
-  post(url, data = {}, options = {}) {
+  public post(url: URL, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
-  },
+  }
 
-  put(url, data = {}, options = {}) {
+  public put(url: URL, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
-  },
+  }
 
-  patch(url, data = {}, options = {}) {
+  public patch(url: URL, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
-  },
+  }
 
-  delete(url, options = {}) {
+  public delete(url: URL, options: Record<string, unknown> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
-  },
+  }
 
-  remember(data, key = 'default') {
+  public remember(data: RequestPayload, key = 'default'): void {
     this.replaceState({
       ...this.page,
       rememberedState: {
@@ -394,14 +478,14 @@ export default {
         [key]: data,
       },
     })
-  },
+  }
 
-  restore(key = 'default') {
+  public restore(key = 'default'): unknown {
     return window.history.state?.rememberedState?.[key]
-  },
+  }
 
-  on(type, callback) {
-    const listener = event => {
+  public on(type: string, callback: CallableFunction): VoidFunction {
+    const listener: EventListener = event => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
@@ -410,5 +494,5 @@ export default {
 
     document.addEventListener(`inertia:${type}`, listener)
     return () => document.removeEventListener(`inertia:${type}`, listener)
-  },
+  }
 }

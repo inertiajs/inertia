@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios'
-import { Page, PendingVisit } from './types'
+import { Visit, Page } from './types'
 
 function fireEvent(name: string, options: CustomEventInit): boolean {
   return document.dispatchEvent(
@@ -7,7 +7,7 @@ function fireEvent(name: string, options: CustomEventInit): boolean {
   )
 }
 
-export function fireBeforeEvent(visit: PendingVisit): boolean {
+export function fireBeforeEvent(visit: Visit): boolean {
   return fireEvent('before', { cancelable: true, detail: { visit } } )
 }
 
@@ -19,7 +19,7 @@ export function fireExceptionEvent(exception: unknown): boolean {
   return fireEvent('exception', { cancelable: true, detail: { exception } })
 }
 
-export function fireFinishEvent(visit: PendingVisit): boolean {
+export function fireFinishEvent(visit: Visit): boolean {
   return fireEvent('finish', { detail: { visit } } )
 }
 
@@ -35,7 +35,7 @@ export function fireProgressEvent(progress: Record<string, unknown>): boolean {
   return fireEvent('progress', { detail: { progress } })
 }
 
-export function fireStartEvent(visit: PendingVisit): boolean {
+export function fireStartEvent(visit: Visit): boolean {
   return fireEvent('start', { detail: { visit } } )
 }
 
