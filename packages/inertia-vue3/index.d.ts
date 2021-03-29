@@ -63,8 +63,6 @@ interface Form<Data> {
   delete(url: string, options?: Inertia.VisitOptions): void
 }
 
-type FormWithData<Data> = Data & Form<Data>
-
 export const App: InertiaApp
 
 export const Link: InertiaLink
@@ -80,9 +78,9 @@ export declare function usePage<CustomPageProps extends Inertia.PageProps = Iner
   version: ComputedRef<string | null>
 }
 
-export declare function useRemember(data: object, key?: string): Ref<object>
+export declare function useRemember(data: object, key?: string): object | Ref<object>
 
-export declare function useForm<Data>(data: Data): Ref<FormWithData<Data>>
+export declare function useForm<Data>(data: Data, options: { key?: string, remember?: boolean }): Data & Form<Data>
 
 declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
