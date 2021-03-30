@@ -1,5 +1,5 @@
-import { toRaw, unref } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
+import cloneDeep from 'lodash.clonedeep'
 
 export default {
   created() {
@@ -38,7 +38,7 @@ export default {
         Inertia.remember(
           rememberable.reduce((data, key) => ({
             ...data,
-            [key]: toRaw(unref(this[key])),
+            [key]: cloneDeep(this[key]),
           }), {}),
           stateKey,
         )
