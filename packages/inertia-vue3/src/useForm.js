@@ -1,4 +1,4 @@
-import { reactive, toRaw, unref, watch } from 'vue'
+import { reactive, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
@@ -140,7 +140,7 @@ export default function useForm(data = {}, { key = 'form', remember = true } = {
 
   if (remember) {
     watch(form, (value) => {
-      const raw = toRaw(unref(value))
+      const raw = cloneDeep(value)
       Inertia.remember({ data: raw.data(), errors: raw.errors }, key)
     }, { immediate: true, deep: true })
   }
