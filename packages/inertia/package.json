@@ -19,7 +19,7 @@
   "source": "src/index.ts",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
-  "typings": "index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run build:cjs && npm run build:umd",
     "build:cjs": "microbundle --format cjs",

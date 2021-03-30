@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ES2020",
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "Node",
-    "strict": true,
     "noImplicitThis": false,
-    "allowSyntheticDefaultImports": true
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "strict": true,
+    "target": "ES6",
+    "outDir": "dist"
   }
 }
