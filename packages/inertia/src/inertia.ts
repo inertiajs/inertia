@@ -1,20 +1,69 @@
-import { ActiveVisit, ErrorResolver, Errors, HttpMethod, LocationVisit, Page, PageHandler, PageResolver, PropTransformer, RequestPayload, Visit, VisitId } from './types'
-import { AxiosResponse, default as Axios} from 'axios'
+import {
+  ActiveVisit,
+  ErrorResolver,
+  Errors,
+  LocationVisit,
+  Method,
+  Page,
+  PageHandler,
+  PageResolver,
+  PropTransformer,
+  RequestPayload,
+  Visit,
+  VisitId,
+} from './types'
+import {AxiosResponse, default as Axios} from 'axios'
 import debounce from './debounce'
 import modal from './modal'
-import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
-import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import { hasFiles } from './files'
-import { objectToFormData } from './formData'
+import {
+  fireBeforeEvent,
+  fireErrorEvent,
+  fireExceptionEvent,
+  fireFinishEvent,
+  fireInvalidEvent,
+  fireNavigateEvent,
+  fireProgressEvent,
+  fireStartEvent,
+  fireSuccessEvent,
+} from './events'
+import {hrefToUrl, mergeDataIntoQueryString, urlWithoutHash} from './url'
+import {hasFiles} from './files'
+import {objectToFormData} from './formData'
+
+const NullVisit: ActiveVisit = {
+  cancelToken: Axios.CancelToken.source(),
+  url: hrefToUrl('/null'),
+  method: Method.GET,
+  data: {},
+  replace: false,
+  preserveScroll: false,
+  preserveState: false,
+  only: [],
+  headers: {},
+  errorBag: '',
+  forceFormData: false,
+  onCancelToken: () => {},
+  onBefore: () => {},
+  onStart: () => {},
+  onProgress: () => {},
+  onFinish: () => {},
+  onCancel: () => {},
+  onBeforeRender: () => {},
+  onSuccess: () => {},
+  onError: () => {},
+  completed: true,
+  cancelled: false,
+  interrupted: false,
+}
 
 export class Inertia {
   protected resolveComponent: PageResolver
   protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
   protected swapComponent: PageHandler
   protected transformProps: PropTransformer = props => props
-  protected activeVisit: ActiveVisit
+  protected activeVisit: ActiveVisit = NullVisit
   protected visitId: VisitId = null
-  protected page: Page = null
+  protected page: Page
 
   constructor({
     initialPage,
@@ -29,11 +78,12 @@ export class Inertia {
     swapComponent: PageHandler,
     transformProps: PropTransformer
   }) {
+    this.page = initialPage
     this.resolveComponent = resolveComponent
     this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
     this.transformProps = transformProps || this.transformProps
-    this.handleInitialPageVisit(initialPage)
+    this.handleInitialPageVisit()
     this.setupEventListeners()
   }
 
@@ -49,7 +99,7 @@ export class Inertia {
     resolveErrors: ErrorResolver,
     swapComponent: PageHandler,
     transformProps: PropTransformer
-  }) {
+  }): Inertia {
     return new this({
       initialPage,
       resolveComponent,
@@ -59,16 +109,16 @@ export class Inertia {
     })
   }
 
-  protected handleInitialPageVisit(page: Page): void {
+  protected handleInitialPageVisit(): void {
     if (this.isBackForwardVisit()) {
-      this.handleBackForwardVisit(page)
+      this.handleBackForwardVisit(this.page)
     } else if (this.isLocationVisit()) {
-      this.handleLocationVisit(page)
+      this.handleLocationVisit(this.page)
     } else {
-      page.url += window.location.hash
-      this.setPage(page)
+      this.page.url += window.location.hash
+      this.setPage(this.page)
     }
-    fireNavigateEvent(page)
+    fireNavigateEvent(this.page)
   }
 
   protected setupEventListeners(): void {
@@ -122,9 +172,9 @@ export class Inertia {
 
   protected isBackForwardVisit(): boolean {
     return window.history.state
-      && window.performance
-      && window.performance.getEntriesByType('navigation').length
-      && (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type === 'back_forward'
+        && window.performance
+        && window.performance.getEntriesByType('navigation').length > 0
+        && (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type === 'back_forward'
   }
 
   protected handleBackForwardVisit(page: Page): void {
@@ -134,7 +184,7 @@ export class Inertia {
     })
   }
 
-  locationVisit(url: URL, preserveScroll: boolean): boolean|void {
+  protected locationVisit(url: URL, preserveScroll: boolean): boolean|void {
     try {
       const locationVisit: LocationVisit = { preserveScroll }
       window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify(locationVisit))
@@ -206,8 +256,8 @@ export class Inertia {
     }
   }
 
-  public visit(url: URL, {
-    method = 'get',
+  public visit(href: URL|string, {
+    method = Method.GET,
     data = {},
     replace = false,
     preserveScroll = false,
@@ -226,7 +276,7 @@ export class Inertia {
     onSuccess = () => {},
     onError = () => {},
   }: {
-    method?: HttpMethod,
+    method?: Method,
     data?: RequestPayload,
     replace?: boolean,
     preserveScroll?: boolean,
@@ -245,13 +295,14 @@ export class Inertia {
     onSuccess?: (page: Page) => void,
     onError?: (errors: Record<string, unknown>) => void,
   } = {}): void {
-    if (method === 'get' && !(data instanceof FormData)) {
-      url = mergeDataIntoQueryString(method, hrefToUrl(url), data)
-      data = {}
+    let url: URL = href instanceof URL ? href : hrefToUrl(href)
+
+    if (!(data instanceof FormData)) {
+      [url, data] = mergeDataIntoQueryString(method, url, data)
     }
 
     const visitHasFiles = hasFiles(data)
-    if (method !== 'get' && !(data instanceof FormData) && (visitHasFiles || forceFormData)) {
+    if (method !== Method.GET && !(data instanceof FormData) && (visitHasFiles || forceFormData)) {
       data = objectToFormData(data)
     }
 
@@ -290,8 +341,8 @@ export class Inertia {
       Axios({
         method,
         url: urlWithoutHash(url).href,
-        data: method === 'get' ? {} : data,
-        params: method === 'get' ? data : {},
+        data: method === Method.GET ? {} : data,
+        params: method === Method.GET ? data : {},
         cancelToken: this.activeVisit.cancelToken.token,
         headers: {
           ...headers,
@@ -441,36 +492,36 @@ export class Inertia {
     }
   }
 
-  public get(url: URL, data: RequestPayload = {}, options : Record<string, unknown> = {}): void {
-    return this.visit(url, { ...options, method: 'get', data })
+  public get(url: URL|string, data: RequestPayload = {}, options : Record<string, unknown> = {}): void {
+    return this.visit(url, { ...options, method: Method.GET, data })
   }
 
   public reload(options: Record<string, unknown> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL, options: Record<string, unknown> = {}): void {
+  public replace(url: URL|string, options: Record<string, unknown> = {}): void {
     console.warn(`Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${options.method ?? 'get'}() instead.`)
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(url: URL, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
+  public post(url: URL|string, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: Method.POST, data })
   }
 
-  public put(url: URL, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
+  public put(url: URL|string, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: Method.PUT, data })
   }
 
-  public patch(url: URL, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
+  public patch(url: URL|string, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: Method.PATCH, data })
   }
 
-  public delete(url: URL, options: Record<string, unknown> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
+  public delete(url: URL|string, options: Record<string, unknown> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: Method.DELETE })
   }
 
-  public remember(data: RequestPayload, key = 'default'): void {
+  public remember(data: unknown, key = 'default'): void {
     this.replaceState({
       ...this.page,
       rememberedState: {
@@ -484,7 +535,7 @@ export class Inertia {
     return window.history.state?.rememberedState?.[key]
   }
 
-  public on(type: string, callback: CallableFunction): VoidFunction {
+  public static on(type: string, callback: CallableFunction): VoidFunction {
     const listener: EventListener = event => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {

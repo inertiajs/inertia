@@ -20,5 +20,6 @@ module.exports = {
     quotes: ['warn', 'single'],
     semi: ['warn', 'never'],
     'comma-dangle': ['warn', 'always-multiline'],
+    '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
   },
 }

@@ -1,13 +1,13 @@
 import { CancelTokenSource } from 'axios'
-import {Errors, HttpMethod, Page, RequestPayload} from '.'
+import { Errors, Method, Page } from '.'
 
 export type LocationVisit = {
   preserveScroll: boolean
 }
 
 export interface Visit {
-  url: URL|string,
-  method: HttpMethod,
+  url: URL,
+  method: Method,
   data: Record<string, unknown>|FormData,
   replace: boolean,
   preserveScroll: boolean,
