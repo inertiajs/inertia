@@ -87,28 +87,6 @@ export class Inertia {
     this.setupEventListeners()
   }
 
-  public static init({
-    initialPage,
-    resolveComponent,
-    resolveErrors,
-    swapComponent,
-    transformProps,
-  }: {
-    initialPage: Page,
-    resolveComponent: PageResolver,
-    resolveErrors: ErrorResolver,
-    swapComponent: PageHandler,
-    transformProps: PropTransformer
-  }): Inertia {
-    return new this({
-      initialPage,
-      resolveComponent,
-      resolveErrors,
-      swapComponent,
-      transformProps,
-    })
-  }
-
   protected handleInitialPageVisit(): void {
     if (this.isBackForwardVisit()) {
       this.handleBackForwardVisit(this.page)
