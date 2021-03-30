@@ -17,16 +17,14 @@ export default {
     swapComponent: PageHandler,
     transformProps: PropTransformer
     }): Inertia {
-    const handler: PageHandler = ({ component, page, preserveState}): Promise<unknown> => {
-      this.page = page
-      return swapComponent({ component, page, preserveState })
-    }
-
     inertia = new Inertia({
       initialPage,
       resolveComponent,
       resolveErrors,
-      swapComponent: handler,
+      swapComponent: ({ component, page, preserveState}) => {
+        this.page = page
+        return swapComponent({ component, page, preserveState })
+      },
       transformProps,
     })
 
