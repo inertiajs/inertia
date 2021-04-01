@@ -8,8 +8,13 @@ export default function useRemember(data, key) {
   }
 
   const restored = Inertia.restore(key)
-  const remembered = restored === undefined ? data : (isReactive(data) ? reactive(restored) : ref(restored))
-  watch(remembered, (value) => Inertia.remember(cloneDeep(value), key), { immediate: true, deep: true })
+  const type = isReactive(data) ? reactive : ref
+  const hasCallbacks = typeof data.__remember === 'function' && typeof data.__restore === 'function'
+  const remembered = restored === undefined ? data : type(hasCallbacks ? data.__restore(restored) : restored)
+
+  watch(remembered, (newValue) => {
+    Inertia.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key)
+  }, { immediate: true, deep: true })
 
   return remembered
 }

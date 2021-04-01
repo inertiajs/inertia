@@ -2,14 +2,15 @@ import Vue from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data = {}, { key = 'form', remember = true } = {}) {
+export default function(...args) {
+  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const data = typeof args[0] === 'string' ? args[1] : args[0]
   const defaults = cloneDeep(data)
-  const restored = Inertia.restore(key)
+  const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   const form = Vue.observable({
-    __rememberable: false,
     ...restored ? restored.data : data,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -136,13 +137,23 @@ export default function(data = {}, { key = 'form', remember = true } = {}) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
+    __rememberable: rememberKey === null,
+    __remember() {
+      return { data: this.data(), errors: this.errors }
+    },
+    __restore(restored) {
+      Object.assign(this, restored.data)
+      Object.assign(this.errors, restored.errors)
+      this.hasErrors = Object.keys(this.errors).length > 0
+      return this
+    },
   })
 
-  if (remember) {
+  if (rememberKey) {
     new Vue({
       created() {
-        this.$watch(() => form, (value) => {
-          Inertia.remember({ data: value.data(), errors: value.errors }, key)
+        this.$watch(() => form, newValue => {
+          Inertia.remember(newValue.__remember(), rememberKey)
         }, { immediate: true, deep: true })
       },
     })
