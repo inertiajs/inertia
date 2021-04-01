@@ -8,7 +8,7 @@ export default function useRemember(data, key) {
   }
 
   const restored = Inertia.restore(key)
-  const remembered = restored === undefined ? data : (isReactive(data) ? reactive(data) : ref(restored))
+  const remembered = restored === undefined ? data : (isReactive(data) ? reactive(restored) : ref(restored))
   watch(remembered, (value) => Inertia.remember(cloneDeep(value), key), { immediate: true, deep: true })
 
   return remembered
