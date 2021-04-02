@@ -2,14 +2,15 @@ import { reactive, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function useForm(data = {}, { key = 'form', remember = true } = {}) {
+export default function useForm(...args) {
+  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const data = typeof args[0] === 'string' ? args[1] : args[0]
   const defaults = cloneDeep(data)
-  const restored = Inertia.restore(key)
+  const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   let form = reactive({
-    __rememberable: false,
     ...restored ? restored.data : data,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -136,12 +137,20 @@ export default function useForm(data = {}, { key = 'form', remember = true } = {
     delete(url, options) {
       this.submit('delete', url, options)
     },
+    __rememberable: rememberKey === null,
+    __remember() {
+      return { data: this.data(), errors: this.errors }
+    },
+    __restore(restored) {
+      Object.assign(this, restored.data)
+      Object.assign(this.errors, restored.errors)
+      this.hasErrors = Object.keys(this.errors).length > 0
+    },
   })
 
-  if (remember) {
-    watch(form, (value) => {
-      const raw = cloneDeep(value)
-      Inertia.remember({ data: raw.data(), errors: raw.errors }, key)
+  if (rememberKey) {
+    watch(form, newValue => {
+      Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
     }, { immediate: true, deep: true })
   }
 
