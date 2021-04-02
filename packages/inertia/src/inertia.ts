@@ -513,7 +513,7 @@ export class Core {
     return window.history.state?.rememberedState?.[key]
   }
 
-  public static on(type: string, callback: CallableFunction): VoidFunction {
+  public on(type: string, callback: CallableFunction): VoidFunction {
     const listener: EventListener = event => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
