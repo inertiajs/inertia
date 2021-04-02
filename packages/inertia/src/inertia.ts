@@ -56,16 +56,16 @@ const NullVisit: ActiveVisit = {
   interrupted: false,
 }
 
-export class Inertia {
-  protected resolveComponent: PageResolver
+export class Core {
+  protected resolveComponent!: PageResolver
   protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
-  protected swapComponent: PageHandler
+  protected swapComponent!: PageHandler
   protected transformProps: PropTransformer = props => props
   protected activeVisit: ActiveVisit = NullVisit
   protected visitId: VisitId = null
-  protected page: Page
+  protected page!: Page
 
-  constructor({
+  public init({
     initialPage,
     resolveComponent,
     resolveErrors,
@@ -77,7 +77,7 @@ export class Inertia {
     resolveErrors: ErrorResolver,
     swapComponent: PageHandler,
     transformProps: PropTransformer
-  }) {
+  }): void {
     this.page = initialPage
     this.resolveComponent = resolveComponent
     this.resolveErrors = resolveErrors || this.resolveErrors
@@ -525,3 +525,5 @@ export class Inertia {
     return () => document.removeEventListener(`inertia:${type}`, listener)
   }
 }
+
+export const Inertia = new Core()
