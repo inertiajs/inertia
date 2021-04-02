@@ -145,7 +145,6 @@ export default function(...args) {
       Object.assign(this, restored.data)
       Object.assign(this.errors, restored.errors)
       this.hasErrors = Object.keys(this.errors).length > 0
-      return this
     },
   })
 
