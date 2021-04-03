@@ -9,5 +9,8 @@
 
   export default {
     layout: Layout,
+    created() {
+      window._inertia_page_props = this.$vnode.data.props;
+    }
   }
 </script>

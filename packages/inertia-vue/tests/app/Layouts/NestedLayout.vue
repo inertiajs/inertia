@@ -14,6 +14,7 @@
     }),
     created() {
       this.createdAt = Date.now();
+      window._inertia_nested_layout_props = this.$vnode.data.props;
     }
   }
 </script>
