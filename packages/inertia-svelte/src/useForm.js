@@ -1,9 +1,11 @@
 import { Inertia } from '@inertiajs/inertia'
 import { writable } from 'svelte/store'
 
-function useForm(data = {}, { key = 'form', remember = true } = {}) {
+function useForm(...args) {
+  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const defaults = data
-  const restored = Inertia.restore(key)
+  const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
@@ -140,8 +142,8 @@ function useForm(data = {}, { key = 'form', remember = true } = {}) {
     },
   })
 
-  if (remember) {
-    store.subscribe(form => Inertia.remember({ data: form.data(), errors: form.errors }, key))
+  if (rememberKey) {
+    store.subscribe(form => Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey))
   }
 
   return store

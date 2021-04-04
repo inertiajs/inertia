@@ -55,7 +55,6 @@ app.post('/visits/events-errors', (req, res) => inertia.render(req, res, { compo
 app.get('/visits/headers/version', (req, res) => inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }))
 
 app.post('/remember/form-helper/default', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Default', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
-app.post('/remember/form-helper/disabled', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Disabled', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
 app.post('/remember/form-helper/remember', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Remember', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
 
 app.post('/form-helper/data', (req, res) => inertia.render(req, res, { component: 'FormHelper/Data', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } }}))
