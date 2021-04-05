@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
 export default function useForm(...args) {
-  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)

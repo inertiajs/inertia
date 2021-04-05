@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function(...args) {
-  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const defaults = cloneDeep(data)
   const restored = rememberKey ? Inertia.restore(rememberKey) : null

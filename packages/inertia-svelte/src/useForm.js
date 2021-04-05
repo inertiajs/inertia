@@ -2,7 +2,7 @@ import { Inertia } from '@inertiajs/inertia'
 import { writable } from 'svelte/store'
 
 function useForm(...args) {
-  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const defaults = data
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
