@@ -41,7 +41,7 @@ interface BaseInertiaLinkProps {
   onSuccess?: () => void
 }
 
-type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
+type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> & Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
 
