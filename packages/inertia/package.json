@@ -18,13 +18,15 @@
   },
   "source": "src/index.js",
   "main": "dist/index.js",
+  "exports": "./dist/index.modern.js",
+  "module": "dist/index.module.js",
   "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "npm run build:cjs && npm run build:umd",
-    "build:cjs": "microbundle --format cjs",
-    "build:umd": "microbundle --format umd --name Inertia --external none",
     "prepublishOnly": "npm run build",
+    "build": "npm run build:bundler && npm run build:browser",
+    "build:bundler": "microbundle --format es,cjs",
+    "build:browser": "microbundle --format modern,umd --name Inertia --external none",
     "watch": "microbundle watch --format cjs"
   },
   "dependencies": {
