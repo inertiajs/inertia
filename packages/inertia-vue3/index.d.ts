@@ -37,6 +37,14 @@ interface InertiaLinkProps {
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
 
+export const App: InertiaApp
+
+export const Link: InertiaLink
+
+export const plugin: {
+  install(app: App): void
+}
+
 type ProgressEvent = {
   percentage: number
 }
@@ -63,13 +71,11 @@ interface InertiaFormProps<TForm> {
 
 type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
-export const App: InertiaApp
+export declare function useForm<TForm>(data: TForm): InertiaForm<TForm>
 
-export const Link: InertiaLink
+export declare function useForm<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 
-export const plugin: {
-  install(app: App): void
-}
+export declare function useRemember(data: object, key?: string): Ref<object>
 
 export declare function usePage<CustomPageProps extends Inertia.PageProps = Inertia.PageProps>(): {
   props: ComputedRef<CustomPageProps>
@@ -77,12 +83,6 @@ export declare function usePage<CustomPageProps extends Inertia.PageProps = Iner
   component: ComputedRef<string>
   version: ComputedRef<string | null>
 }
-
-export declare function useRemember(data: object, key?: string): Ref<object>
-
-export declare function useForm<TForm>(data: TForm): InertiaForm<TForm>
-
-export declare function useForm<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 
 declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
