@@ -105,7 +105,6 @@ export default function useForm(...args) {
           this.hasErrors = Object.keys(this.errors).length > 0
           this.wasSuccessful = !this.hasErrors
           this.recentlySuccessful = !this.hasErrors
-
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
           if (options.onBeforeRender) {
