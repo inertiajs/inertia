@@ -39,31 +39,29 @@ type InertiaLink = DefineComponent<InertiaLinkProps>
 
 type ProgressEvent = {
   percentage: number
-  [key: string]: any
 }
 
-interface Form<Data> {
-  errors: { [K in keyof Data]: string | undefined }
+interface InertiaFormProps<TForm> {
+  errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
   progress: ProgressEvent | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  data(): Data
-  transform(callback: (data: Data) => object): this
-  reset(...fields: (keyof Data)[]): this
-  clearErrors(...fields: (keyof Data)[]): this
-  serialize(): { errors: { [K in keyof Data]: string | undefined }, [key: string]: any }
-  unserialize(data: object): this
+  data(): TForm
+  transform(callback: (data: TForm) => object): this
+  reset(...fields: (keyof TForm)[]): this
+  clearErrors(...fields: (keyof TForm)[]): this
   submit(method: string, url: string, options?: Inertia.VisitOptions): void
   get(url: string, options?: Inertia.VisitOptions): void
   post(url: string, options?: Inertia.VisitOptions): void
   put(url: string, options?: Inertia.VisitOptions): void
   patch(url: string, options?: Inertia.VisitOptions): void
   delete(url: string, options?: Inertia.VisitOptions): void
+  cancel(): void
 }
 
-type FormWithData<Data> = Data & Form<Data>
+type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
 export const App: InertiaApp
 
@@ -82,7 +80,9 @@ export declare function usePage<CustomPageProps extends Inertia.PageProps = Iner
 
 export declare function useRemember(data: object, key?: string): Ref<object>
 
-export declare function useForm<Data>(data: Data): Ref<FormWithData<Data>>
+export declare function useForm<TForm>(data: TForm): InertiaForm<TForm>
+
+export declare function useForm<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 
 declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
