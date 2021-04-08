@@ -18,28 +18,30 @@ export default {
       this.$options.remember = { data: [this.$options.remember.data] }
     }
 
-    const stateKey = this.$options.remember.key instanceof Function
+    const rememberKey = this.$options.remember.key instanceof Function
       ? this.$options.remember.key.call(this)
       : this.$options.remember.key
 
-    const restored = Inertia.restore(stateKey)
+    const restored = Inertia.restore(rememberKey)
 
-    this.$options.remember.data.forEach(key => {
+    const rememberable = this.$options.remember.data.filter(key => {
+      return !(typeof this[key] === 'object' && this[key] !== null && this[key].__rememberable === false)
+    })
+
+    rememberable.forEach(key => {
+      const hasCallacks = typeof this[key].__remember === 'function' && typeof this[key].__restore === 'function'
+
       if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
-        typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
-          ? this[key].unserialize(restored[key])
-          : (this[key] = restored[key])
+        hasCallacks ? this[key].__restore(restored[key]) : (this[key] = restored[key])
       }
 
       this.$watch(key, () => {
         Inertia.remember(
-          this.$options.remember.data.reduce((carry, key) => ({
-            ...carry,
-            [key]: typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
-              ? this[key].serialize()
-              : this[key],
+          rememberable.reduce((data, key) => ({
+            ...data,
+            [key]: hasCallacks ? this[key].__remember(): this[key],
           }), {}),
-          stateKey,
+          rememberKey,
         )
       }, { immediate: true, deep: true })
     })

@@ -184,6 +184,7 @@ export default {
     onProgress = () => ({}),
     onFinish = () => ({}),
     onCancel = () => ({}),
+    onBeforeRender = () => ({}),
     onSuccess = () => ({}),
     onError = () => ({}),
   } = {}) {
@@ -253,12 +254,13 @@ export default {
           responseUrl.hash = url.hash
           response.data.url = responseUrl.href
         }
+        response.data.resolvedErrors = ((errors) => errors[errorBag] || errors)(this.resolveErrors(response.data))
+        onBeforeRender(response.data)
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
-        const errors = this.resolveErrors(this.page)
-        if (Object.keys(errors).length > 0) {
-          fireErrorEvent(errors[errorBag] || errors)
-          return onError(errors[errorBag] || errors)
+        if (Object.keys(this.page.resolvedErrors).length > 0) {
+          fireErrorEvent(this.page.resolvedErrors)
+          return onError(this.page.resolvedErrors)
         }
         fireSuccessEvent(this.page)
         return onSuccess(this.page)

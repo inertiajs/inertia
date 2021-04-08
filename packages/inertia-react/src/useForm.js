@@ -2,22 +2,31 @@ import { Inertia } from '@inertiajs/inertia'
 import { useCallback, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export default function useForm(defaults, key) {
-  let transform = (data) => data
-
+export default function useForm(...args) {
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
+  const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
-  const [data, setData] = useRemember(defaults, `${key}-data`)
-  const [errors, setErrors] = useRemember({}, `${key}-errors`)
+  const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
+  const [errors, setErrors] = rememberKey ? useRemember({}, `${rememberKey}:errors`) : useState({})
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
+  let transform = (data) => data
 
   const submit = useCallback(
     (method, url, options = {}) => {
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken.current = token
+
+          if (options.cancelToken) {
+            return options.cancelToken(token)
+          }
+        },
         onBefore: (visit) => {
           setWasSuccessful(false)
           setRecentlySuccessful(false)
@@ -61,6 +70,7 @@ export default function useForm(defaults, key) {
           }
         },
         onFinish: () => {
+          cancelToken.current = null
           setProcessing(false)
           setProgress(null)
 
@@ -140,6 +150,11 @@ export default function useForm(defaults, key) {
     },
     delete(url, options) {
       submit('delete', url, options)
+    },
+    cancel() {
+      if (cancelToken.current) {
+        cancelToken.current.cancel()
+      }
     },
   }
 }

@@ -1,4 +1,4 @@
-import form from './form'
+import useForm from './useForm'
 import link from './link'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
@@ -55,7 +55,7 @@ export default {
             return component.value.layout
               .concat(child)
               .reverse()
-              .reduce((child, layout) => h(layout, [child]))
+              .reduce((child, layout) => h(layout, () => child))
           }
 
           return h(component.value.layout, () => child)
@@ -69,7 +69,7 @@ export default {
 
 export const plugin = {
   install(app) {
-    Inertia.form = form
+    Inertia.form = useForm
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     app.mixin(remember)

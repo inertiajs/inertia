@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "cli": "start-server-and-test server:run http://localhost:13714 cypress:run",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "gui": "start-server-and-test server:run http://localhost:13714 cypress:open",
+    "server:run": "webpack && node app/server.js",
+    "test": "yarn cli"
+  },
+  "devDependencies": {
+    "body-parser": "^1.19.0",
+    "css-loader": "^5.0.1",
+    "cypress": "^6.2.1",
+    "eslint": "^7.17.0",
+    "eslint-plugin-cypress": "^2.11.2",
+    "express": "^4.17.1",
+    "multer": "^1.4.2",
+    "start-server-and-test": "^1.11.5",
+    "vue": "^2.0.0",
+    "vue-loader": "^15.9.3",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
+  }
+}
