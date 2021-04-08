@@ -5,6 +5,7 @@ import useRemember from './useRemember'
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey ? useRemember({}, `${rememberKey}:errors`) : useState({})
@@ -19,6 +20,13 @@ export default function useForm(...args) {
     (method, url, options = {}) => {
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken.current = token
+
+          if (options.cancelToken) {
+            return options.cancelToken(token)
+          }
+        },
         onBefore: (visit) => {
           setWasSuccessful(false)
           setRecentlySuccessful(false)
@@ -62,6 +70,7 @@ export default function useForm(...args) {
           }
         },
         onFinish: () => {
+          cancelToken.current = null
           setProcessing(false)
           setProgress(null)
 
@@ -141,6 +150,11 @@ export default function useForm(...args) {
     },
     delete(url, options) {
       submit('delete', url, options)
+    },
+    cancel() {
+      if (cancelToken.current) {
+        cancelToken.current.cancel()
+      }
     },
   }
 }
