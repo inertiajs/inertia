@@ -3,10 +3,11 @@ import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function useForm(...args) {
-  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const defaults = cloneDeep(data)
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
@@ -66,6 +67,13 @@ export default function useForm(...args) {
       const data = transform(this.data())
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken = token
+
+          if (options.cancelToken) {
+            return options.cancelToken(token)
+          }
+        },
         onBefore: visit => {
           this.wasSuccessful = false
           this.recentlySuccessful = false
@@ -90,28 +98,26 @@ export default function useForm(...args) {
           }
         },
         onBeforeRender: page => {
+          cancelToken = null
+          this.processing = false
+          this.progress = null
           this.errors = page.resolvedErrors
           this.hasErrors = Object.keys(this.errors).length > 0
           this.wasSuccessful = !this.hasErrors
           this.recentlySuccessful = !this.hasErrors
+          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
           if (options.onBeforeRender) {
             return options.onBeforeRender(page)
           }
         },
-        onSuccess: page => {
-          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
-
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
-        },
-        onFinish: () => {
+        onCancel: () => {
+          cancelToken = null
           this.processing = false
           this.progress = null
 
-          if (options.onFinish) {
-            return options.onFinish()
+          if (options.onCancel) {
+            return options.onCancel()
           }
         },
       }
@@ -136,6 +142,11 @@ export default function useForm(...args) {
     },
     delete(url, options) {
       this.submit('delete', url, options)
+    },
+    cancel() {
+      if (cancelToken) {
+        cancelToken.cancel()
+      }
     },
     __rememberable: rememberKey === null,
     __remember() {

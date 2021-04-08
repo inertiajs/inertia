@@ -2,10 +2,11 @@ import { Inertia } from '@inertiajs/inertia'
 import { writable } from 'svelte/store'
 
 function useForm(...args) {
-  const rememberKey = typeof args[0] === 'string' ? typeof args[0] : null
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const defaults = data
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
@@ -68,6 +69,13 @@ function useForm(...args) {
       const data = transform(this.data())
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken = token
+
+          if (options.cancelToken) {
+            return options.cancelToken(token)
+          }
+        },
         onBefore: visit => {
           this.setStore('wasSuccessful', false)
           this.setStore('recentlySuccessful', false)
@@ -110,6 +118,7 @@ function useForm(...args) {
           }
         },
         onFinish: () => {
+          cancelToken = null
           this.setStore('processing', false)
           this.setStore('progress', null)
 
@@ -139,6 +148,11 @@ function useForm(...args) {
     },
     delete(url, options) {
       this.submit('delete', url, options)
+    },
+    cancel() {
+      if (cancelToken) {
+        cancelToken.cancel()
+      }
     },
   })
 
