@@ -1,7 +1,7 @@
 import form from './form'
 import link from './link'
 import remember from './remember'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia, MetaManager } from '@inertiajs/inertia'
 
 let app = {}
 
@@ -34,7 +34,9 @@ export default {
   },
   created() {
     app = this
-    if (typeof window !== 'undefined') {
+    if (this.$isServer) {
+      MetaManager.onSsrUpdate(elements => this.$ssrContext.head = elements)
+    } else {
       Inertia.init({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
