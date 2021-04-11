@@ -11,7 +11,7 @@ const Renderer = {
     return element.nodeType === Node.ELEMENT_NODE && element.getAttribute('inertia') !== null
   },
 
-  findElementIndex(element, elements) {
+  findMatchingElementIndex(element, elements) {
     const key = element.getAttribute('inertia')
     if (key !== null) {
       return elements.findIndex(element => element.getAttribute('inertia') === key)
@@ -24,11 +24,16 @@ const Renderer = {
     const sourceElements = elements.map(element => this.buildDOMElement(element))
     const targetElements = Array.from(document.head.childNodes).filter(element => this.isInertiaManagedElement(element))
 
-    targetElements.forEach(element => {
-      const index = this.findElementIndex(element, sourceElements)
-      index > -1
-        ? element.parentNode.replaceChild(sourceElements.splice(index, 1)[0], element)
-        : element.parentNode.removeChild(element)
+    targetElements.forEach(targetElement => {
+      const index = this.findMatchingElementIndex(targetElement, sourceElements)
+      if (index === -1) {
+        targetElement.parentNode.removeChild(targetElement)
+      }
+
+      const sourceElement = sourceElements.splice(index, 1)[0]
+      if (sourceElement && ! targetElement.isEqualNode(sourceElement)) {
+        targetElement.parentNode.replaceChild(sourceElement, targetElement)
+      }
     })
 
     sourceElements.forEach(element => document.head.appendChild(element))
@@ -48,7 +53,7 @@ const Manager = {
   },
 
   disconnect(id) {
-    if (id === null || Object.keys(this.states).indexOf(id) > -1) {
+    if (id === null || Object.keys(this.states).indexOf(id) === -1) {
       return
     }
 
