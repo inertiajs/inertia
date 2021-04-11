@@ -5,8 +5,11 @@ import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, f
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
+import meta from './meta'
 
 export default {
+  meta,
+  serverMode: false,
   resolveComponent: null,
   resolveErrors: page => (page.props.errors || {}),
   swapComponent: null,
@@ -15,13 +18,19 @@ export default {
   visitId: null,
   page: null,
 
-  init({ initialPage, resolveComponent, resolveErrors, swapComponent, transformProps }) {
-    this.resolveComponent = resolveComponent
-    this.resolveErrors = resolveErrors || this.resolveErrors
-    this.swapComponent = swapComponent
-    this.transformProps = transformProps || this.transformProps
-    this.handleInitialPageVisit(initialPage)
-    this.setupEventListeners()
+  init({ serverMode, onMetaUpdate, initialPage, resolveComponent, resolveErrors, swapComponent, transformProps }) {
+    this.serverMode = !!serverMode
+    this.meta.init(this)
+    if (this.serverMode) {
+      this.meta.onUpdate(onMetaUpdate)
+    } else {
+      this.resolveComponent = resolveComponent
+      this.resolveErrors = resolveErrors || this.resolveErrors
+      this.swapComponent = swapComponent
+      this.transformProps = transformProps || this.transformProps
+      this.handleInitialPageVisit(initialPage)
+      this.setupEventListeners()
+    }
   },
 
   handleInitialPageVisit(page) {

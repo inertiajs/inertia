@@ -1,19 +1,11 @@
-<script>
-import { MetaManager } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/inertia'
 
 export default {
   data: () => ({
-    id: null,
+    provider: Inertia.meta.createProvider(),
   }),
-  created() {
-    if (! this.$isServer) {
-      this.id = MetaManager.connect()
-    }
-  },
   beforeDestroy() {
-    if (! this.$isServer) {
-      MetaManager.disconnect(this.id)
-    }
+    this.provider.disconnect()
   },
   methods: {
     ensureVnodeAttrs(vnode) {
@@ -61,41 +53,22 @@ export default {
       }
       return html
     },
-    injectVNodeInertiaAttribute(vnode, value, force) {
+    ensureVNodeInertiaAttribute(vnode) {
       this.ensureVnodeAttrs(vnode)
-      value = value || ''
-      vnode.data.attrs['inertia'] = force ? value : (vnode.data.attrs.inertia || value)
+      vnode.data.attrs['inertia'] = vnode.data.attrs.inertia || ''
       return vnode
     },
-    injectVNodeInertiaSSRAttribute(vnode) {
-      return this.injectVNodeInertiaAttribute(vnode, 'ssr', true)
-    },
     renderVNode(vnode) {
-      if (this.$isServer) {
-        this.injectVNodeInertiaSSRAttribute(vnode)
-        return this.renderFullTag(vnode)
-      } else {
-        this.injectVNodeInertiaAttribute(vnode)
-        const template = document.createElement('template')
-        template.innerHTML = this.renderFullTag(vnode)
-        return template.content.firstChild
-      }
+      this.ensureVNodeInertiaAttribute(vnode)
+      return this.renderFullTag(vnode)
     },
     renderVNodes(vnodes) {
-      const elements = vnodes.map(vnode => this.renderVNode(vnode))
-      return this.$isServer
-          ? elements.filter(element => element.indexOf('<') > -1)
-          : elements
+      return vnodes.map(vnode => this.renderVNode(vnode))
     },
   },
-  // eslint-disable-next-line vue/require-render-return
   render() {
-    const elements = this.renderVNodes(this.$scopedSlots.default())
-    if (this.$isServer) {
-      this.$ssrContext.head.push(... elements)
-    } else {
-      MetaManager.update(this.id, elements)
+    if (this.$scopedSlots.default) {
+      this.provider.update(this.renderVNodes(this.$scopedSlots.default()))
     }
   },
 }
-</script>

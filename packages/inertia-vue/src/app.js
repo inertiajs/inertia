@@ -1,7 +1,8 @@
 import form from './form'
 import link from './link'
 import remember from './remember'
-import { Inertia, MetaManager } from '@inertiajs/inertia'
+import inertiaHead from './inertiaHead'
+import { Inertia } from '@inertiajs/inertia'
 
 let app = {}
 
@@ -35,7 +36,10 @@ export default {
   created() {
     app = this
     if (this.$isServer) {
-      MetaManager.onSsrUpdate(elements => this.$ssrContext.head = elements)
+      Inertia.init({
+        serverMode: true,
+        onMetaUpdate: elements => (this.$ssrContext.head = elements),
+      })
     } else {
       Inertia.init({
         initialPage: this.initialPage,
@@ -87,5 +91,6 @@ export const plugin = {
     Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })
     Vue.mixin(remember)
     Vue.component('InertiaLink', link)
+    Vue.component('InertiaHead', inertiaHead)
   },
 }
