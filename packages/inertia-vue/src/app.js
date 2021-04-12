@@ -86,7 +86,6 @@ export const plugin = {
         Object.defineProperty(this, '$inertia', {
           get: function () { return Inertia },
         })
-
         Object.defineProperty(this, '$page', {
           get: function () { return app.page },
         })
