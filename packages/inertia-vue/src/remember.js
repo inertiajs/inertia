@@ -29,7 +29,7 @@ export default {
     })
 
     rememberable.forEach(key => {
-      const hasCallacks = typeof this[key].__remember === 'function' && typeof this[key].__restore === 'function'
+      const hasCallacks = this[key] !== null && typeof this[key].__remember === 'function' && typeof this[key].__restore === 'function'
 
       if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
         hasCallacks ? this[key].__restore(restored[key]) : (this[key] = restored[key])
