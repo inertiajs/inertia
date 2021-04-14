@@ -97,27 +97,31 @@ export default function(...args) {
             return options.onProgress(event)
           }
         },
-        onBeforeRender: page => {
-          cancelToken = null
-          this.processing = false
-          this.progress = null
-          this.errors = page.resolvedErrors
-          this.hasErrors = Object.keys(this.errors).length > 0
-          this.wasSuccessful = !this.hasErrors
-          this.recentlySuccessful = !this.hasErrors
+        onSuccess: page => {
+          this.clearErrors()
+          this.wasSuccessful = true
+          this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
-          if (options.onBeforeRender) {
-            return options.onBeforeRender(page)
+          if (options.onSuccess) {
+            return options.onSuccess(page)
           }
         },
-        onCancel: () => {
+        onError: errors => {
+          this.errors = errors
+          this.hasErrors = true
+
+          if (options.onError) {
+            return options.onError(errors)
+          }
+        },
+        onFinish: () => {
           cancelToken = null
           this.processing = false
           this.progress = null
 
-          if (options.onCancel) {
-            return options.onCancel()
+          if (options.onFinish) {
+            return options.onFinish()
           }
         },
       }
