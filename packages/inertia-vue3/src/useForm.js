@@ -98,6 +98,8 @@ export default function useForm(...args) {
           }
         },
         onSuccess: page => {
+          this.processing = false
+          this.progress = null
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
@@ -108,6 +110,8 @@ export default function useForm(...args) {
           }
         },
         onError: errors => {
+          this.processing = false
+          this.progress = null
           this.errors = errors
           this.hasErrors = true
 
@@ -115,10 +119,16 @@ export default function useForm(...args) {
             return options.onError(errors)
           }
         },
-        onFinish: () => {
-          cancelToken = null
+        onCancel: () => {
           this.processing = false
           this.progress = null
+
+          if (options.onCancel) {
+            return options.onCancel()
+          }
+        },
+        onFinish: () => {
+          cancelToken = null
 
           if (options.onFinish) {
             return options.onFinish()
