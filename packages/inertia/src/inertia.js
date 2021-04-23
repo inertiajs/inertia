@@ -8,7 +8,7 @@ import { objectToFormData } from './formData'
 
 export default {
   resolveComponent: null,
-  resolveErrors: page => (page.props.errors || {}),
+  resolveErrors: page => (page.dialog?.props?.errors || page.props.errors || {}),
   swapComponent: null,
   transformProps: props => props,
   activeVisit: null,
@@ -234,6 +234,7 @@ export default {
           Accept: 'text/html, application/xhtml+xml',
           'X-Requested-With': 'XMLHttpRequest',
           'X-Inertia': true,
+          'X-Inertia-Context': this.page.context,
           ...(only.length ? {
             'X-Inertia-Partial-Component': this.page.component,
             'X-Inertia-Partial-Data': only.join(','),
@@ -252,20 +253,29 @@ export default {
         if (!this.isInertiaResponse(response)) {
           return Promise.reject({ response })
         }
-        if (only.length && response.data.component === this.page.component) {
-          response.data.props = { ...this.page.props, ...response.data.props }
+        let page = response.data
+        if (response.data.type === 'dialog') {
+          page = this.page
+          page.dialog = {
+            component: response.data.component,
+            props: response.data.props,
+            url: response.data.url,
+          }
         }
-        preserveScroll = this.resolvePreserveOption(preserveScroll, response.data)
-        preserveState = this.resolvePreserveOption(preserveState, response.data)
-        if (preserveState && window.history.state?.rememberedState && response.data.component === this.page.component) {
-          response.data.rememberedState = window.history.state.rememberedState
+        if (only.length && page.component === this.page.component) {
+          page.props = { ...this.page.props, ...page.props }
         }
-        const responseUrl = hrefToUrl(response.data.url)
+        preserveScroll = this.resolvePreserveOption(preserveScroll, page)
+        preserveState = this.resolvePreserveOption(preserveState, page)
+        if (preserveState && window.history.state?.rememberedState && page.component === this.page.component) {
+          page.rememberedState = window.history.state.rememberedState
+        }
+        const responseUrl = hrefToUrl(page.url)
         if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
           responseUrl.hash = url.hash
-          response.data.url = responseUrl.href
+          page.url = responseUrl.href
         }
-        return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
+        return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
         const errors = this.resolveErrors(this.page)
         if (Object.keys(errors).length > 0) {
@@ -318,17 +328,17 @@ export default {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        replace = replace || hrefToUrl(page.url).href === window.location.href
+        replace = replace || hrefToUrl(page.dialog?.url || page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
-        const clone = JSON.parse(JSON.stringify(page))
-        clone.props = this.transformProps(clone.props)
-        this.swapComponent({ component, page: clone, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
-          if (!replace) {
-            fireNavigateEvent(page)
-          }
+        Promise.resolve(page.dialog ? this.resolveComponent(page.dialog.component) : null).then(dialogComponent => {
+          this.swapComponent({ component, page, preserveState, dialogComponent }).then(() => {
+            if (!preserveScroll) {
+              this.resetScrollPositions()
+            }
+            if (!replace) {
+              fireNavigateEvent(page)
+            }
+          })
         })
       }
     })
@@ -336,12 +346,12 @@ export default {
 
   pushState(page) {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(page, '', page.dialog ? page.dialog.url : page.url)
   },
 
   replaceState(page) {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(page, '', page.dialog ? page.dialog.url : page.url)
   },
 
   handlePopstateEvent(event) {
@@ -351,9 +361,11 @@ export default {
       return Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
           this.page = page
-          this.swapComponent({ component, page, preserveState: false }).then(() => {
-            this.restoreScrollPositions()
-            fireNavigateEvent(page)
+          Promise.resolve(page.dialog ? this.resolveComponent(page.dialog.component) : null).then(dialogComponent => {
+            this.swapComponent({ component, page, preserveState: false, dialogComponent }).then(() => {
+              this.restoreScrollPositions()
+              fireNavigateEvent(page)
+            })
           })
         }
       })
@@ -392,6 +404,12 @@ export default {
 
   delete(url, options = {}) {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
+  },
+
+  closeDialog() {
+    delete this.page.dialog
+    delete this.page.rememberedState
+    this.setPage(this.page)
   },
 
   remember(data, key = 'default') {
