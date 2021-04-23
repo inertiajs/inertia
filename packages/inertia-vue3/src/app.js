@@ -47,7 +47,17 @@ export default {
         pageComponent.value = markRaw(args.component)
 
         if (args.dialogComponent) {
-          dialog.value = { ...cloneDeep(_dialog), open: true }
+          function shouldAppear() {
+            const newKey = [args.dialogComponent, ...Object.values(args.dialogComponent.components)].find(component => component.dialogKey)?.dialogKey
+            const currentKey = [dialogComponent.value || {}, ...Object.values(dialogComponent.value?.components || {})].find(component => component.dialogKey)?.dialogKey
+
+            return !_dialog.eager &&
+              !(dialog.value.open &&
+                (_dialog.component === dialog.value.component || (newKey && currentKey && newKey === currentKey))
+             )
+          }
+
+          dialog.value = { ...cloneDeep(_dialog), open: true, appear: shouldAppear() }
           dialogKey.value = (args.preserveState && args.dialogComponent) ? dialogKey.value : Date.now()
           dialogComponent.value = markRaw(args.dialogComponent)
         } else if (dialog.value.open === true) {

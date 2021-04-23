@@ -260,6 +260,7 @@ export default {
             component: response.data.component,
             props: response.data.props,
             url: response.data.url,
+            eager: false,
           }
         }
         if (only.length && page.component === this.page.component) {
