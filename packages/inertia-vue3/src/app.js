@@ -3,10 +3,15 @@ import link from './link'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
+import cloneDeep from 'lodash.clonedeep'
 
-const component = ref(null)
 const page = ref({})
-const key = ref(null)
+const pageKey = ref(null)
+const pageComponent = ref(null)
+
+const dialog = ref({})
+const dialogKey = ref(null)
+const dialogComponent = ref(null)
 
 export default {
   name: 'Inertia',
@@ -35,33 +40,59 @@ export default {
       resolveErrors,
       transformProps,
       swapComponent: async (args) => {
-        component.value = markRaw(args.component)
-        page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
+        const { dialog: _dialog, ..._page } = args.page
+
+        page.value = _page
+        pageKey.value = (args.preserveState || args.dialogComponent) ? pageKey.value : Date.now()
+        pageComponent.value = markRaw(args.component)
+
+        if (args.dialogComponent) {
+          dialog.value = { ...cloneDeep(_dialog), open: true }
+          dialogKey.value = (args.preserveState && args.dialogComponent) ? dialogKey.value : Date.now()
+          dialogComponent.value = markRaw(args.dialogComponent)
+        } else if (dialog.value.open === true) {
+          dialog.value.open = false
+        }
       },
     })
 
+    function renderPage() {
+      return h(pageComponent.value, {
+        ...page.value.props,
+        dialog: false,
+        key: pageKey.value,
+      })
+    }
+
+    function renderLayout(page) {
+      if (typeof pageComponent.value.layout === 'function') {
+        return pageComponent.value.layout(h, page)
+      } else if (Array.isArray(pageComponent.value.layout)) {
+        return pageComponent.value.layout
+          .concat(page)
+          .reverse()
+          .reduce((child, layout) => h(layout, () => child))
+      }
+
+      return [h(pageComponent.value.layout, () => page), renderDialog()]
+    }
+
+    function renderDialog() {
+      return dialogComponent.value ? h(dialogComponent.value, {
+        ...dialog.value.props,
+        key: dialogKey.value,
+      }) : null
+    }
+
     return () => {
-      if (component.value) {
-        const child = h(component.value, {
-          ...page.value.props,
-          key: key.value,
-        })
+      if (pageComponent.value) {
+        const page = renderPage()
 
-        if (component.value.layout) {
-          if (typeof component.value.layout === 'function') {
-            return component.value.layout(h, child)
-          } else if (Array.isArray(component.value.layout)) {
-            return component.value.layout
-              .concat(child)
-              .reverse()
-              .reduce((child, layout) => h(layout, () => child))
-          }
-
-          return h(component.value.layout, () => child)
+        if (pageComponent.value.layout) {
+          return renderLayout(page)
         }
 
-        return child
+        return [page, renderDialog()]
       }
     }
   },
@@ -72,6 +103,7 @@ export const plugin = {
     Inertia.form = useForm
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    Object.defineProperty(app.config.globalProperties, '$dialog', { get: () => dialog.value })
     app.mixin(remember)
     app.component('InertiaLink', link)
   },
