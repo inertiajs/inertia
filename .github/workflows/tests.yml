@@ -51,7 +51,4 @@ jobs:
           working-directory: packages/inertia-${{ matrix.adapter }}/tests
           browser: ${{ matrix.browser }}
           install: false
-          start: yarn server:run
-          wait-on: 'http://localhost:13714'
-          config-file: cypress.json
-
+          command: 'yarn ci'

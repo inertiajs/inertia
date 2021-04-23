@@ -439,7 +439,7 @@ describe('Form Helper', () => {
       })
 
       it('marks the form as processing', () => {
-        cy.get('.processing')
+        cy.get('.success-processing')
           .click()
           .wait(30)
           .then(() => {
@@ -488,7 +488,7 @@ describe('Form Helper', () => {
       })
 
       it('updates the progress property of the form', () => {
-        cy.get('.progress-property')
+        cy.get('.success-progress')
           .click()
           .wait(30)
           .then(() => {
@@ -534,6 +534,39 @@ describe('Form Helper', () => {
               expect(page).to.have.property('url')
               expect(page).to.have.property('version')
             })
+          })
+      })
+
+      it('marks the form as no longer processing', () => {
+        cy.get('.success-processing')
+          .click()
+          .wait(30)
+          .then(() => {
+
+            expect(alert.getCall(4)).to.be.calledWith('onStart')
+            expect(alert.getCall(5)).to.be.calledWith(true)
+
+            expect(alert.getCall(6)).to.be.calledWith('onSuccess')
+            expect(alert.getCall(7)).to.be.calledWith(false)
+          })
+      })
+
+      it('resets the progress property back to null', () => {
+        cy.get('.success-progress')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCall(6)).to.be.calledWith('onProgress')
+            tap(alert.getCall(7).lastArg, event => {
+              expect(event).to.have.property('isTrusted')
+              expect(event).to.have.property('percentage')
+              expect(event).to.have.property('total')
+              expect(event).to.have.property('loaded')
+              expect(event.percentage).to.be.gte(0).and.lte(100)
+            })
+
+            expect(alert.getCall(8)).to.be.calledWith('onSuccess')
+            expect(alert.getCall(9)).to.be.calledWith(null)
           })
       })
 
@@ -618,17 +651,36 @@ describe('Form Helper', () => {
           })
       })
 
-      it('can delay onFinish from firing by returning a promise', () => {
-        cy.get('.error-promise')
+      it('marks the form as no longer processing', () => {
+        cy.get('.error-processing')
           .click()
-          .wait(50)
+          .wait(30)
           .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onError')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
-            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+
+            expect(alert.getCall(4)).to.be.calledWith('onStart')
+            expect(alert.getCall(5)).to.be.calledWith(true)
+
+            expect(alert.getCall(6)).to.be.calledWith('onError')
+            expect(alert.getCall(7)).to.be.calledWith(false)
+          })
+      })
+
+      it('resets the progress property back to null', () => {
+        cy.get('.error-progress')
+          .click()
+          .wait(30)
+          .then(() => {
+            expect(alert.getCall(6)).to.be.calledWith('onProgress')
+            tap(alert.getCall(7).lastArg, event => {
+              expect(event).to.have.property('isTrusted')
+              expect(event).to.have.property('percentage')
+              expect(event).to.have.property('total')
+              expect(event).to.have.property('loaded')
+              expect(event.percentage).to.be.gte(0).and.lte(100)
+            })
+
+            expect(alert.getCall(8)).to.be.calledWith('onError')
+            expect(alert.getCall(9)).to.be.calledWith(null)
           })
       })
 
@@ -649,6 +701,20 @@ describe('Form Helper', () => {
             })
           })
       })
+
+      it('can delay onFinish from firing by returning a promise', () => {
+        cy.get('.error-promise')
+          .click()
+          .wait(50)
+          .then(() => {
+            expect(alert.getCall(0)).to.be.calledWith('onBefore')
+            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+            expect(alert.getCall(2)).to.be.calledWith('onStart')
+            expect(alert.getCall(3)).to.be.calledWith('onError')
+            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(5)).to.be.calledWith('onFinish')
+          })
+      })
     })
 
     describe('onFinish', () => {
@@ -658,38 +724,6 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(4)).to.be.calledWith('onFinish')
-          })
-      })
-
-      it('marks the form as no longer processing', () => {
-        cy.get('.processing')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(6)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(7)).to.be.calledWith(true)
-
-            expect(alert.getCall(8)).to.be.calledWith('onFinish')
-            expect(alert.getCall(9)).to.be.calledWith(false)
-          })
-      })
-
-      it('resets the progress property back to null', () => {
-        cy.get('.progress-property')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(8)).to.be.calledWith('onSuccess')
-            tap(alert.getCall(9).lastArg, event => {
-              expect(event).to.have.property('isTrusted')
-              expect(event).to.have.property('percentage')
-              expect(event).to.have.property('total')
-              expect(event).to.have.property('loaded')
-              expect(event.percentage).to.be.gte(0).and.lte(100)
-            })
-
-            expect(alert.getCall(10)).to.be.calledWith('onFinish')
-            expect(alert.getCall(11)).to.be.calledWith(null)
           })
       })
     })

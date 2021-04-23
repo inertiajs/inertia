@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia-vue3",
-  "version": "0.3.12",
+  "version": "0.3.14",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -27,13 +27,13 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.8.6",
+    "@inertiajs/inertia": "^0.8.7",
     "eslint": "^7.0.0",
     "microbundle": "^0.12.0",
     "vue": "^3.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.8.6",
+    "@inertiajs/inertia": "^0.8.7",
     "vue": "^3.0.0"
   },
   "dependencies": {

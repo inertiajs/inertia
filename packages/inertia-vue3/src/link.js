@@ -2,6 +2,7 @@ import { h } from 'vue'
 import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
+  name: 'InertiaLink',
   props: {
     as: {
       type: String,

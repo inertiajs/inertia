@@ -168,6 +168,16 @@ export default {
     }
   },
 
+  resolvePreserveOption(value, page) {
+    if (typeof value === 'function') {
+      return value(page)
+    } else if (value === 'errors') {
+      return Object.keys(this.resolveErrors(page)).length > 0
+    } else {
+      return value
+    }
+  },
+
   visit(url, {
     method = 'get',
     data = {},
@@ -184,7 +194,6 @@ export default {
     onProgress = () => ({}),
     onFinish = () => ({}),
     onCancel = () => ({}),
-    onBeforeRender = () => ({}),
     onSuccess = () => ({}),
     onError = () => ({}),
   } = {}) {
@@ -246,6 +255,8 @@ export default {
         if (only.length && response.data.component === this.page.component) {
           response.data.props = { ...this.page.props, ...response.data.props }
         }
+        preserveScroll = this.resolvePreserveOption(preserveScroll, response.data)
+        preserveState = this.resolvePreserveOption(preserveState, response.data)
         if (preserveState && window.history.state?.rememberedState && response.data.component === this.page.component) {
           response.data.rememberedState = window.history.state.rememberedState
         }
@@ -254,13 +265,12 @@ export default {
           responseUrl.hash = url.hash
           response.data.url = responseUrl.href
         }
-        response.data.resolvedErrors = ((errors) => errors[errorBag] || errors)(this.resolveErrors(response.data))
-        onBeforeRender(response.data)
         return this.setPage(response.data, { visitId, replace, preserveScroll, preserveState })
       }).then(() => {
-        if (Object.keys(this.page.resolvedErrors).length > 0) {
-          fireErrorEvent(this.page.resolvedErrors)
-          return onError(this.page.resolvedErrors)
+        const errors = this.resolveErrors(this.page)
+        if (Object.keys(errors).length > 0) {
+          fireErrorEvent(errors[errorBag] || errors)
+          return onError(errors[errorBag] || errors)
         }
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
@@ -308,8 +318,6 @@ export default {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
-        preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
