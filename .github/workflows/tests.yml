@@ -48,9 +48,6 @@ jobs:
           yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
 
       - name: Run Cypress (${{ matrix.browser }} / inertia-${{ matrix.adapter }})
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: packages/inertia-${{ matrix.adapter }}/tests
-          browser: ${{ matrix.browser }}
-          install: false
-          command: 'yarn ci'
+        run: |
+          cd packages/inertia-${{ matrix.adapter }}/tests
+          yarn ci
