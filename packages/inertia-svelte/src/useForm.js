@@ -72,8 +72,8 @@ function useForm(...args) {
         onCancelToken: (token) => {
           cancelToken = token
 
-          if (options.cancelToken) {
-            return options.cancelToken(token)
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
           }
         },
         onBefore: visit => {
