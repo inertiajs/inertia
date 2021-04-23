@@ -23,8 +23,8 @@ export default function useForm(...args) {
         onCancelToken: (token) => {
           cancelToken.current = token
 
-          if (options.cancelToken) {
-            return options.cancelToken(token)
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
           }
         },
         onBefore: (visit) => {
