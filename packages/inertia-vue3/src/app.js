@@ -74,7 +74,10 @@ export default {
           .reduce((child, layout) => h(layout, () => child))
       }
 
-      return [h(pageComponent.value.layout, () => page), renderDialog()]
+      return [
+        h(pageComponent.value.layout, () => page),
+        renderDialog()
+      ]
     }
 
     function renderDialog() {
