@@ -46,6 +46,29 @@ interface InertiaLinkProps {
   onSuccess?: () => void
 }
 
+interface Form<Data> {
+  errors: { [K in keyof Data]: string | undefined }
+  hasErrors: boolean
+  processing: boolean
+  progress: ProgressEvent | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  data(): Data
+  transform(callback: (data: Data) => object): this
+  reset(...fields: (keyof Data)[]): this
+  clearErrors(...fields: (keyof Data)[]): this
+  serialize(): { errors: { [K in keyof Data]: string | undefined }, [key: string]: any }
+  unserialize(data: object): this
+  submit(method: string, url: string, options?: Inertia.VisitOptions): void
+  get(url: string, options?: Inertia.VisitOptions): void
+  post(url: string, options?: Inertia.VisitOptions): void
+  put(url: string, options?: Inertia.VisitOptions): void
+  patch(url: string, options?: Inertia.VisitOptions): void
+  delete(url: string, options?: Inertia.VisitOptions): void
+}
+
+type FormWithData<Data> = Data & Form<Data>
+
 type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 
 export const InertiaLink: InertiaLink
@@ -55,3 +78,10 @@ export const InertiaApp: App
 export const App: App
 
 export const plugin: PluginObject<any>
+
+declare module 'vue/types/vue' {
+  export interface Vue {
+    $inertia: Inertia.Inertia & {form<Data>(formData: Data) : FormWithData<Data>},
+    $page: Inertia.Page,
+  }
+}

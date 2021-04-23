@@ -72,8 +72,8 @@ function useForm(...args) {
         onCancelToken: (token) => {
           cancelToken = token
 
-          if (options.cancelToken) {
-            return options.cancelToken(token)
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
           }
         },
         onBefore: visit => {
@@ -100,6 +100,8 @@ function useForm(...args) {
           }
         },
         onSuccess: page => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
           this.clearErrors()
           this.setStore('wasSuccessful', true)
           this.setStore('recentlySuccessful', true)
@@ -110,6 +112,8 @@ function useForm(...args) {
           }
         },
         onError: errors => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
           this.setStore('errors', errors)
           this.setStore('hasErrors', true)
 
@@ -117,10 +121,16 @@ function useForm(...args) {
             return options.onError(errors)
           }
         },
-        onFinish: () => {
-          cancelToken = null
+        onCancel: () => {
           this.setStore('processing', false)
           this.setStore('progress', null)
+
+          if (options.onCancel) {
+            return options.onCancel()
+          }
+        },
+        onFinish: () => {
+          cancelToken = null
 
           if (options.onFinish) {
             return options.onFinish()
