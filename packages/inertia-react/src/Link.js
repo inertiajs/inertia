@@ -1,4 +1,4 @@
-import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 import { createElement, useCallback, forwardRef } from 'react'
 
 const noop = () => undefined
@@ -74,9 +74,9 @@ export default forwardRef(function InertiaLink({
 
   as = as.toLowerCase()
   method = method.toLowerCase()
-  const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
+  const url = mergeDataIntoQueryString(method, href, data)
   href = url.href
-  data = _data
+  data = url.data
 
   if (as === 'a' && method !== 'get') {
     console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<InertiaLink href="${href}" method="${method}" as="button">...</InertiaLink>`)

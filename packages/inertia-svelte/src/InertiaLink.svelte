@@ -1,5 +1,5 @@
 <script>
-  import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+  import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
   import { beforeUpdate, createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
@@ -16,12 +16,12 @@
 
   beforeUpdate(() => {
     method = method.toLowerCase()
-    const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
+    const url = mergeDataIntoQueryString(method, href, data)
     href = url.href
-    data = _data
+    data = url.data
 
     if (method !== 'get') {
-      console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "inertia" directive. For example:\n\n<button use:inertia={{ method: 'post', href: '${url.href}' }}>...</button>`)
+      console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "inertia" directive. For example:\n\n<button use:inertia={{ method: 'post', href: '${href}' }}>...</button>`)
     }
   })
 
