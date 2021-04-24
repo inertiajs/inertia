@@ -1,9 +1,9 @@
-import { Inertia } from '@inertiajs/inertia'
-
 export default {
-  data: () => ({
-    provider: Inertia.meta.createProvider(),
-  }),
+  data() {
+    return {
+      provider: this._$inertia.meta.createProvider(),
+    }
+  },
   beforeDestroy() {
     this.provider.disconnect()
   },

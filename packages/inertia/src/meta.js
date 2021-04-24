@@ -28,6 +28,7 @@ const Renderer = {
       const index = this.findMatchingElementIndex(targetElement, sourceElements)
       if (index === -1) {
         targetElement.parentNode.removeChild(targetElement)
+        return
       }
 
       const sourceElement = sourceElements.splice(index, 1)[0]
@@ -40,89 +41,83 @@ const Renderer = {
   }),
 }
 
-const Manager = {
-  inertia: null,
-  onUpdate: null,
-  states: {},
-  lastProviderId: 0,
+export default function (isServer) {
+  const manager = {
+    onUpdate: null,
+    states: {},
+    lastProviderId: 0,
 
-  connect() {
-    const id = (this.lastProviderId += 1)
-    this.states[id] = []
-    return id.toString()
-  },
+    connect() {
+      const id = (this.lastProviderId += 1)
+      this.states[id] = []
+      return id.toString()
+    },
 
-  disconnect(id) {
-    if (id === null || Object.keys(this.states).indexOf(id) === -1) {
-      return
-    }
+    disconnect(id) {
+      if (id === null || Object.keys(this.states).indexOf(id) === -1) {
+        return
+      }
 
-    delete this.states[id]
-    this.commit()
-  },
+      delete this.states[id]
+      this.commit()
+    },
 
-  update(id, elements = []) {
-    if (id !== null && Object.keys(this.states).indexOf(id) > -1) {
-      this.states[id] = elements
-    }
+    update(id, elements = []) {
+      if (id !== null && Object.keys(this.states).indexOf(id) > -1) {
+        this.states[id] = elements
+      }
 
-    this.commit()
-  },
+      this.commit()
+    },
 
-  collect() {
-    const elements = Object.values(this.states)
-      .reduce((carry, elements) => carry.concat(elements))
-      .reduce((carry, element) => {
-        if (element.indexOf('<') === -1) {
+    collect() {
+      const elements = Object.values(this.states)
+        .reduce((carry, elements) => carry.concat(elements))
+        .reduce((carry, element) => {
+          if (element.indexOf('<') === -1) {
+            return carry
+          }
+
+          if (element.indexOf('<title ') === 0 ) {
+            carry.title = element
+            return carry
+          }
+
+          const match = element.match(/ inertia="[^"]+"/)
+          if (match) {
+            carry[match[0]] = element
+          } else {
+            carry[Object.keys(carry).length] = element
+          }
+
           return carry
-        }
+        }, {})
 
-        if (element.indexOf('<title ') === 0 ) {
-          carry.title = element
-          return carry
-        }
+      return Object.values(elements)
+    },
 
-        const match = element.match(/ inertia="[^"]+"/)
-        if (match) {
-          carry[match[0]] = element
-        } else {
-          carry[Object.keys(carry).length] = element
-        }
+    commit() {
+      if (this.onUpdate instanceof Function) {
+        this.onUpdate(this.collect())
+      }
 
-        return carry
-      }, {})
+      if (isServer !== undefined && !isServer) {
+        Renderer.update(this.collect())
+      }
+    },
+  }
 
-    return Object.values(elements)
-  },
+  return {
+    onUpdate(callback) {
+      manager.onUpdate = callback
+    },
+    createProvider: function () {
+      const id = manager.connect()
 
-  commit() {
-    if (this.onUpdate instanceof Function) {
-      this.onUpdate(this.collect())
-    }
-
-    if (this.inertia && !this.inertia.serverMode) {
-      Renderer.update(this.collect())
-    }
-  },
-}
-
-export default {
-  init(inertia) {
-    Manager.inertia = inertia
-  },
-  onUpdate(callback) {
-    Manager.onUpdate = callback
-  },
-  createProvider: function () {
-    const id = Manager.connect()
-
-    return {
-      disconnect() {
-        Manager.disconnect(id)
-      },
-      update(elements) {
-        Manager.update(id, elements)
-      },
-    }
-  },
+      return {
+        disconnect: () => manager.disconnect(id),
+        update: (elements) => manager.update(id, elements),
+      }
+    },
+  }
 }

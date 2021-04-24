@@ -5,6 +5,7 @@ import inertiaHead from './inertiaHead'
 import { Inertia } from '@inertiajs/inertia'
 
 let app = {}
+let inertia = null
 
 export default {
   name: 'Inertia',
@@ -35,11 +36,9 @@ export default {
   },
   created() {
     app = this
+    inertia = Inertia.initInstance(this.$isServer)
     if (this.$isServer) {
-      Inertia.init({
-        serverMode: true,
-        onMetaUpdate: elements => (this.$ssrContext.head = elements),
-      })
+      inertia.meta.onUpdate(elements => (this.$ssrContext.head = elements))
     } else {
       Inertia.init({
         initialPage: this.initialPage,
@@ -92,6 +91,9 @@ export const plugin = {
     Vue.component('InertiaHead', inertiaHead)
     Vue.mixin({
       beforeCreate() {
+        Object.defineProperty(this, '_$inertia', {
+          get: function () { return inertia },
+        })
         Object.defineProperty(this, '$inertia', {
           get: function () { return Inertia },
         })
