@@ -2,6 +2,7 @@ name: End-to-end tests
 on: [push, pull_request]
 jobs:
   tests:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-20.04
 
     strategy:
@@ -46,9 +47,9 @@ jobs:
           yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
 
       - name: Run Cypress (${{ matrix.browser }} / inertia-${{ matrix.adapter }})
-        uses: cypress-io/github-action@v2
+        uses: nick-invision/retry@v2
         with:
-          working-directory: packages/inertia-${{ matrix.adapter }}/tests
-          browser: ${{ matrix.browser }}
-          install: false
-          command: 'yarn ci'
+          timeout_minutes: 15
+          max_attempts: 5
+          retry_on: error
+          command: cd packages/inertia-${{ matrix.adapter }}/tests && yarn ci

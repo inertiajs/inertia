@@ -1,7 +1,7 @@
 {
   "scripts": {
     "ci": "start-server-and-test server:run http://localhost:13714 cypress:run",
-    "cypress:run": "cypress-repeat run -n 5 --until-passes",
+    "cypress:run": "cypress run",
     "gui": "start-server-and-test server:run http://localhost:13714 cypress:open",
     "cypress:open": "CYPRESS_FAIL_FAST_PLUGIN=false cypress open",
     "server:run": "webpack && node app/server.js",
@@ -14,7 +14,6 @@
     "cypress": "^6.2.1",
     "eslint": "^7.17.0",
     "cypress-fail-fast": "^2.3.1",
-    "cypress-repeat": "^2.2.1",
     "eslint-plugin-cypress": "^2.11.2",
     "express": "^4.17.1",
     "multer": "^1.4.2",
