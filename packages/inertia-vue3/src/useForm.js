@@ -70,8 +70,8 @@ export default function useForm(...args) {
         onCancelToken: (token) => {
           cancelToken = token
 
-          if (options.cancelToken) {
-            return options.cancelToken(token)
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
           }
         },
         onBefore: visit => {
@@ -97,27 +97,41 @@ export default function useForm(...args) {
             return options.onProgress(event)
           }
         },
-        onBeforeRender: page => {
-          cancelToken = null
+        onSuccess: page => {
           this.processing = false
           this.progress = null
-          this.errors = page.resolvedErrors
-          this.hasErrors = Object.keys(this.errors).length > 0
-          this.wasSuccessful = !this.hasErrors
-          this.recentlySuccessful = !this.hasErrors
+          this.clearErrors()
+          this.wasSuccessful = true
+          this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
-          if (options.onBeforeRender) {
-            return options.onBeforeRender(page)
+          if (options.onSuccess) {
+            return options.onSuccess(page)
+          }
+        },
+        onError: errors => {
+          this.processing = false
+          this.progress = null
+          this.errors = errors
+          this.hasErrors = true
+
+          if (options.onError) {
+            return options.onError(errors)
           }
         },
         onCancel: () => {
-          cancelToken = null
           this.processing = false
           this.progress = null
 
           if (options.onCancel) {
             return options.onCancel()
+          }
+        },
+        onFinish: () => {
+          cancelToken = null
+
+          if (options.onFinish) {
+            return options.onFinish()
           }
         },
       }

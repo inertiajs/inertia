@@ -23,8 +23,8 @@ export default function useForm(...args) {
         onCancelToken: (token) => {
           cancelToken.current = token
 
-          if (options.cancelToken) {
-            return options.cancelToken(token)
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
           }
         },
         onBefore: (visit) => {
@@ -51,6 +51,8 @@ export default function useForm(...args) {
           }
         },
         onSuccess: (page) => {
+          setProcessing(false)
+          setProgress(null)
           setErrors({})
           setHasErrors(false)
           setWasSuccessful(true)
@@ -62,6 +64,8 @@ export default function useForm(...args) {
           }
         },
         onError: (errors) => {
+          setProcessing(false)
+          setProgress(null)
           setErrors(errors)
           setHasErrors(true)
 
@@ -69,10 +73,16 @@ export default function useForm(...args) {
             return options.onError(errors)
           }
         },
-        onFinish: () => {
-          cancelToken.current = null
+        onCancel: () => {
           setProcessing(false)
           setProgress(null)
+
+          if (options.onCancel) {
+            return options.onCancel()
+          }
+        },
+        onFinish: () => {
+          cancelToken.current = null
 
           if (options.onFinish) {
             return options.onFinish()
