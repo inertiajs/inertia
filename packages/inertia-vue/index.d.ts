@@ -26,6 +26,12 @@ type App<
   AppProps<PagePropsBeforeTransform, PageProps>
 >
 
+export const InertiaApp: App
+
+export const App: App
+
+export const plugin: PluginObject<any>
+
 interface InertiaLinkProps {
   as?: string
   data?: object
@@ -45,6 +51,10 @@ interface InertiaLinkProps {
   onCancel?: () => void
   onSuccess?: () => void
 }
+
+type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
+
+export const InertiaLink: InertiaLink
 
 interface InertiaFormProps<TForm> {
   errors: Record<keyof TForm, string>
@@ -73,19 +83,9 @@ interface InertiaFormTrait {
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }
 
-type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
-
-export const InertiaLink: InertiaLink
-
-export const InertiaApp: App
-
-export const App: App
-
-export const plugin: PluginObject<any>
-
 declare module 'vue/types/vue' {
   export interface Vue {
-    $inertia: Inertia.Inertia & InertiaFormTrait,
-    $page: Inertia.Page,
+    $inertia: Inertia.Inertia & InertiaFormTrait
+    $page: Inertia.Page
   }
 }

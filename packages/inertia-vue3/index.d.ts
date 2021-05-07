@@ -15,6 +15,8 @@ type InertiaApp<
   PageProps extends Inertia.PageProps = Inertia.PageProps
 > = DefineComponent<InertiaAppProps<PagePropsBeforeTransform, PageProps>>
 
+export const App: InertiaApp
+
 interface InertiaLinkProps {
   as?: string
   data?: object
@@ -36,8 +38,6 @@ interface InertiaLinkProps {
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
-
-export const App: InertiaApp
 
 export const Link: InertiaLink
 
@@ -95,7 +95,7 @@ declare module '@vue/runtime-core' {
       string |
       string[] |
       {
-        data: string | string[],
+        data: string | string[]
         key?: string | (() => string)
       }
   }
