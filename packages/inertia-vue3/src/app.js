@@ -1,7 +1,7 @@
 import useForm from './useForm'
 import link from './link'
 import remember from './remember'
-import { computed, h, markRaw, ref } from 'vue'
+import { computed, h, markRaw, ref, nextTick } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 import cloneDeep from 'lodash.clonedeep'
 
@@ -47,19 +47,21 @@ export default {
         pageComponent.value = markRaw(args.component)
 
         if (args.dialogComponent) {
-          function shouldAppear() {
-            const newKey = [args.dialogComponent, ...Object.values(args.dialogComponent.components)].find(component => component.dialogKey)?.dialogKey
-            const currentKey = [dialogComponent.value || {}, ...Object.values(dialogComponent.value?.components || {})].find(component => component.dialogKey)?.dialogKey
+          nextTick(() => {
+            function shouldAppear() {
+              const newKey = [args.dialogComponent, ...Object.values(args.dialogComponent.components)].find(component => component.dialogKey)?.dialogKey
+              const currentKey = [dialogComponent.value || {}, ...Object.values(dialogComponent.value?.components || {})].find(component => component.dialogKey)?.dialogKey
 
-            return !_dialog.eager &&
-              !(dialog.value.open &&
-                (_dialog.component === dialog.value.component || (newKey && currentKey && newKey === currentKey))
-             )
-          }
+              return !_dialog.eager &&
+                !(dialog.value.open &&
+                  (_dialog.component === dialog.value.component || (newKey && currentKey && newKey === currentKey))
+               )
+            }
 
-          dialog.value = { ...cloneDeep(_dialog), open: true, appear: shouldAppear() }
-          dialogKey.value = (args.preserveState && args.dialogComponent) ? dialogKey.value : Date.now()
-          dialogComponent.value = markRaw(args.dialogComponent)
+            dialog.value = { ...cloneDeep(_dialog), open: true, appear: shouldAppear() }
+            dialogKey.value = (args.preserveState && args.dialogComponent) ? dialogKey.value : Date.now()
+            dialogComponent.value = markRaw(args.dialogComponent)
+          })
         } else if (dialog.value.open === true) {
           dialog.value.open = false
         }
