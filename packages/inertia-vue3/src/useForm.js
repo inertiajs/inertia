@@ -5,14 +5,15 @@ import { Inertia } from '@inertiajs/inertia'
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const defaults = cloneDeep(data)
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   let form = reactive({
+    __defaults: cloneDeep(data),
     ...restored ? restored.data : data,
+    isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
@@ -33,7 +34,7 @@ export default function useForm(...args) {
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(defaults)
+      let clonedDefaults = cloneDeep(this.__defaults)
       if (fields.length === 0) {
         Object.assign(this, clonedDefaults)
       } else {
@@ -97,7 +98,7 @@ export default function useForm(...args) {
             return options.onProgress(event)
           }
         },
-        onSuccess: page => {
+        onSuccess: async page => {
           this.processing = false
           this.progress = null
           this.clearErrors()
@@ -105,9 +106,9 @@ export default function useForm(...args) {
           this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          this.__defaults = cloneDeep(this.data())
+          return onSuccess
         },
         onError: errors => {
           this.processing = false
@@ -173,11 +174,12 @@ export default function useForm(...args) {
     },
   })
 
-  if (rememberKey) {
-    watch(form, newValue => {
+  watch(form, newValue => {
+    form.isDirty = JSON.stringify(form.data()) !== JSON.stringify(form.__defaults)
+    if (rememberKey) {
       Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
-    }, { immediate: true, deep: true })
-  }
+    }
+  }, { immediate: true, deep: true })
 
   return form
 }
