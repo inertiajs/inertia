@@ -57,6 +57,7 @@ type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 export const InertiaLink: InertiaLink
 
 interface InertiaFormProps<TForm> {
+  isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
