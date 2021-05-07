@@ -19,9 +19,7 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
   url: string
   version: string | null
   scrollRegions: { top: number, left: number }[]
-  rememberedState: {
-    [key: string]: any
-  }
+  rememberedState: Record<string, any>
 }
 
 type VisitOptions = {
