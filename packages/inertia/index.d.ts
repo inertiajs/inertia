@@ -30,7 +30,9 @@ type VisitOptions = {
   only?: string[]
   headers?: object
   errorBag?: string
+  forceFormData?: boolean
   onCancelToken?: (cancelToken: CancelTokenSource) => void
+  onBefore?: (visit: VisitOptions & {url: string}) => void | boolean
   onStart?: (visit: VisitOptions & {url: string}) => void | boolean
   onProgress?: (progress: ProgressEvent) => void
   onFinish?: () => void
