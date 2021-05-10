@@ -75,7 +75,9 @@ type InertiaEventMap = {
   finish: (event: CustomEvent<{
     visit: Visit
   }>) => void
-  navigate: (event: CustomEvent<Page>) => void
+  navigate: (event: CustomEvent<{
+    page: Page
+  }>) => void
 }
 
 interface Inertia {
