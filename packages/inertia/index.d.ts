@@ -48,7 +48,7 @@ export interface Visit {
   preserveScroll: boolean | ((props: Page<Inertia.PageProps>) => boolean)
   preserveState: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only: string[]
-  headers: Record<string, string>
+  headers: Record<string, string | undefined>
   errorBag?: string 
   onCancelToken: (cancelToken: CancelTokenSource) => void
   onStart: (visit: VisitOptions & {url: string}) => void | boolean
@@ -75,7 +75,7 @@ type InertiaEventMap = {
   finish: (event: CustomEvent<{
     visit: Visit
   }>) => void
-  navigate: (event: CustomEvent) => void
+  navigate: (event: CustomEvent<Page>) => void
 }
 
 interface Inertia {
