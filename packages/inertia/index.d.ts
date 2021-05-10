@@ -30,7 +30,7 @@ type VisitOptions = {
   preserveScroll?: boolean | ((props: Page<Inertia.PageProps>) => boolean)
   preserveState?: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only?: string[]
-  headers?: object
+  headers?: Record<string, string>
   errorBag?: string 
   onCancelToken?: (cancelToken: CancelTokenSource) => void
   onStart?: (visit: VisitOptions & {url: string}) => void | boolean
@@ -41,9 +41,22 @@ type VisitOptions = {
   onError?: (errors: Record<string, string>) => void
 }
 
-export interface Visit extends VisitOptions {
+export interface Visit {
   url: string
+  method: string
+  replace: boolean
+  preserveScroll: boolean | ((props: Page<Inertia.PageProps>) => boolean)
+  preserveState: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
+  only: string[]
   headers: Record<string, string>
+  errorBag?: string 
+  onCancelToken: (cancelToken: CancelTokenSource) => void
+  onStart: (visit: VisitOptions & {url: string}) => void | boolean
+  onProgress: (progress: ProgressEvent) => void
+  onFinish: () => void
+  onCancel: () => void
+  onSuccess: (page: Page) => void | Promise<any>
+  onError: (errors: Record<string, string>) => void
 }
 
 type InertiaEvent = 'before' | 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
