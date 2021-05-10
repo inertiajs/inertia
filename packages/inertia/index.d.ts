@@ -41,7 +41,29 @@ type VisitOptions = {
   onError?: (errors: Record<string, string>) => void
 }
 
+export interface Visit extends VisitOptions {
+  url: string
+  headers: Record<string, string>
+}
+
 type InertiaEvent = 'before' | 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
+  
+type InertiaEventMap = {
+  before: (event: CustomEvent<{
+    visit: Visit
+  }>) => boolean | void
+  start: (event: CustomEvent<{
+    visit: Visit
+  }>) => void
+  progress: (event: CustomEvent) => void
+  success: (event: CustomEvent) => void
+  invalid: (event: CustomEvent) => void
+  error: (event: CustomEvent) => void
+  finish: (event: CustomEvent<{
+    visit: Visit
+  }>) => void
+  navigate: (event: CustomEvent) => void
+}
 
 interface Inertia {
   init: <
@@ -82,7 +104,10 @@ interface Inertia {
 
   restore: (key?: string) => object
 
-  on: (type: InertiaEvent, callback: (event: Event) => boolean | void) => () => void
+  on: <TType extends InertiaEvent>(
+    type: TType,
+    callback: InertiaEventMap[TType],
+  ) => () => void
 }
 
 export const Inertia: Inertia
