@@ -70,7 +70,7 @@ type InertiaEventMap = {
   }>) => void
   progress: (event: CustomEvent) => void
   success: (event: CustomEvent<{
-    visit: Visit
+    page: Page
   }>) => void
   invalid: (event: CustomEvent) => void
   error: (event: CustomEvent) => void
