@@ -201,7 +201,7 @@ export default {
     [url, data] = mergeDataIntoQueryString(method, hrefToUrl(url), data)
 
     const visitHasFiles = hasFiles(data)
-    if (method !== 'get' && (visitHasFiles || forceFormData)) {
+    if (method !== 'get' && (visitHasFiles || forceFormData) && !(data instanceof FormData)) {
       data = objectToFormData(data)
     }
 

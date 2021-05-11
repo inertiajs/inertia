@@ -3,4 +3,5 @@ export function hasFiles(data) {
     || data instanceof Blob
     || data instanceof FileList
     || (typeof data === 'object' && data !== null && Object.values(data).find(value => hasFiles(value)) !== undefined)
+    || data instanceof FormData && Array.from(data.values()).some(value => hasFiles(value))
 }
