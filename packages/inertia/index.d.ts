@@ -74,7 +74,7 @@ interface Inertia {
 
   delete: (url: string, options?: VisitOptions) => Promise<void>
 
-  reload: (options?: VisitOptions) => Promise<void>
+  reload: (options?: VisitOptions & { data?: object }) => Promise<void>
 
   replace: (url: string, options?: VisitOptions) => Promise<void>
 
