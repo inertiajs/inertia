@@ -100,7 +100,6 @@ function useForm(...args) {
           }
         },
         onSuccess: page => {
-          this.setStore('processing', false)
           this.setStore('progress', null)
           this.clearErrors()
           this.setStore('wasSuccessful', true)
@@ -112,7 +111,6 @@ function useForm(...args) {
           }
         },
         onError: errors => {
-          this.setStore('processing', false)
           this.setStore('progress', null)
           this.setStore('errors', errors)
           this.setStore('hasErrors', true)
@@ -122,7 +120,6 @@ function useForm(...args) {
           }
         },
         onCancel: () => {
-          this.setStore('processing', false)
           this.setStore('progress', null)
 
           if (options.onCancel) {
@@ -130,6 +127,7 @@ function useForm(...args) {
           }
         },
         onFinish: () => {
+          this.setStore('processing', false)
           cancelToken = null
 
           if (options.onFinish) {

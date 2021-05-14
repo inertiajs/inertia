@@ -51,7 +51,6 @@ export default function useForm(...args) {
           }
         },
         onSuccess: (page) => {
-          setProcessing(false)
           setProgress(null)
           setErrors({})
           setHasErrors(false)
@@ -64,7 +63,6 @@ export default function useForm(...args) {
           }
         },
         onError: (errors) => {
-          setProcessing(false)
           setProgress(null)
           setErrors(errors)
           setHasErrors(true)
@@ -74,7 +72,6 @@ export default function useForm(...args) {
           }
         },
         onCancel: () => {
-          setProcessing(false)
           setProgress(null)
 
           if (options.onCancel) {
@@ -82,6 +79,7 @@ export default function useForm(...args) {
           }
         },
         onFinish: () => {
+          setProcessing(false)
           cancelToken.current = null
 
           if (options.onFinish) {
