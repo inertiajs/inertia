@@ -1,8 +1,19 @@
 import { Inertia } from '@inertiajs/inertia'
-import { useCallback, useRef, useState } from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import useRemember from './useRemember'
 
 export default function useForm(...args) {
+
+  const isMounted = useRef(null)
+
+  useEffect(() => {
+    isMounted.current = true
+
+    return () => {
+      isMounted.current = false
+    }
+  }, [])
+
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const cancelToken = useRef(null)
@@ -57,7 +68,13 @@ export default function useForm(...args) {
           setHasErrors(false)
           setWasSuccessful(true)
           setRecentlySuccessful(true)
-          recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
+          recentlySuccessfulTimeoutId.current = setTimeout(() => {
+            if (!isMounted.current) {
+              return true
+            }
+
+            setRecentlySuccessful(false)
+          }, 2000)
 
           if (options.onSuccess) {
             return options.onSuccess(page)
