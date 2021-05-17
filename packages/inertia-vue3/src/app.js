@@ -43,6 +43,8 @@ export default {
 
     return () => {
       if (component.value) {
+        component.value.inheritAttrs = false
+
         const child = h(component.value, {
           ...page.value.props,
           key: key.value,
