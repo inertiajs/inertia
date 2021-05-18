@@ -7,12 +7,12 @@ export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   let form = reactive({
-    __defaults: cloneDeep(data),
     ...restored ? restored.data : data,
     isDirty: false,
     errors: restored ? restored.errors : {},
@@ -35,7 +35,7 @@ export default function useForm(...args) {
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(this.__defaults)
+      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
         Object.assign(this, clonedDefaults)
       } else {
@@ -108,7 +108,8 @@ export default function useForm(...args) {
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          this.__defaults = cloneDeep(this.data())
+          defaults = cloneDeep(this.data())
+          this.isDirty = false
           return onSuccess
         },
         onError: errors => {
@@ -178,7 +179,7 @@ export default function useForm(...args) {
   })
 
   watch(form, newValue => {
-    form.isDirty = !isEqual(form.data(), form.__defaults)
+    form.isDirty = !isEqual(form.data(), defaults)
     if (rememberKey) {
       Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
     }
