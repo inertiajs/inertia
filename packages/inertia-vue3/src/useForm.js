@@ -1,3 +1,4 @@
+import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
@@ -5,14 +6,15 @@ import { Inertia } from '@inertiajs/inertia'
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const defaults = cloneDeep(data)
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   let form = reactive({
     ...restored ? restored.data : data,
+    isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
@@ -97,7 +99,7 @@ export default function useForm(...args) {
             return options.onProgress(event)
           }
         },
-        onSuccess: page => {
+        onSuccess: async page => {
           this.processing = false
           this.progress = null
           this.clearErrors()
@@ -105,9 +107,10 @@ export default function useForm(...args) {
           this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          defaults = cloneDeep(this.data())
+          this.isDirty = false
+          return onSuccess
         },
         onError: errors => {
           this.processing = false
@@ -175,11 +178,12 @@ export default function useForm(...args) {
     },
   })
 
-  if (rememberKey) {
-    watch(form, newValue => {
+  watch(form, newValue => {
+    form.isDirty = !isEqual(form.data(), defaults)
+    if (rememberKey) {
       Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
-    }, { immediate: true, deep: true })
-  }
+    }
+  }, { immediate: true, deep: true })
 
   return form
 }
