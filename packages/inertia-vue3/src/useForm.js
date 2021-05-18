@@ -129,6 +129,8 @@ export default function useForm(...args) {
           }
         },
         onFinish: () => {
+          this.processing = false
+          this.progress = null
           cancelToken = null
 
           if (options.onFinish) {
