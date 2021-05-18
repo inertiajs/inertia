@@ -130,6 +130,8 @@ function useForm(...args) {
           }
         },
         onFinish: () => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
           cancelToken = null
 
           if (options.onFinish) {
