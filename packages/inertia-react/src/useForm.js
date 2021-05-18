@@ -1,3 +1,4 @@
+import isEqual from 'lodash.isequal'
 import { Inertia } from '@inertiajs/inertia'
 import { useCallback, useRef, useState } from 'react'
 import useRemember from './useRemember'
@@ -112,6 +113,7 @@ export default function useForm(...args) {
         setData(key)
       }
     },
+    isDirty: !isEqual(data, defaults),
     errors,
     hasErrors,
     processing,
