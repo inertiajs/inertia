@@ -19,9 +19,7 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
   url: string
   version: string | null
   scrollRegions: { top: number, left: number }[]
-  rememberedState: {
-    [key: string]: any
-  }
+  rememberedState: Record<string, any>
 }
 
 type VisitOptions = {
@@ -31,8 +29,10 @@ type VisitOptions = {
   preserveState?: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only?: string[]
   headers?: object
-  errorBag?: string 
+  errorBag?: string
+  forceFormData?: boolean
   onCancelToken?: (cancelToken: CancelTokenSource) => void
+  onBefore?: (visit: VisitOptions & {url: string}) => void | boolean
   onStart?: (visit: VisitOptions & {url: string}) => void | boolean
   onProgress?: (progress: ProgressEvent) => void
   onFinish?: () => void
