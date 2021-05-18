@@ -19,9 +19,7 @@ export interface Page<CustomPageProps extends PageProps = PageProps> {
   url: string
   version: string | null
   scrollRegions: { top: number, left: number }[]
-  rememberedState: {
-    [key: string]: any
-  }
+  rememberedState: Record<string, any>
 }
 
 type VisitOptions = {
@@ -30,9 +28,11 @@ type VisitOptions = {
   preserveScroll?: boolean | ((props: Page<Inertia.PageProps>) => boolean)
   preserveState?: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
   only?: string[]
-  headers?: object
-  errorBag?: string 
+  headers?: Record<string, string>
+  errorBag?: string
+  forceFormData?: boolean
   onCancelToken?: (cancelToken: CancelTokenSource) => void
+  onBefore?: (visit: VisitOptions & {url: string}) => void | boolean
   onStart?: (visit: VisitOptions & {url: string}) => void | boolean
   onProgress?: (progress: ProgressEvent) => void
   onFinish?: () => void
@@ -41,7 +41,46 @@ type VisitOptions = {
   onError?: (errors: Record<string, string>) => void
 }
 
+export interface Visit {
+  url: string
+  method: string
+  replace: boolean
+  preserveScroll: boolean | ((props: Page<Inertia.PageProps>) => boolean)
+  preserveState: boolean | ((props: Page<Inertia.PageProps>) => boolean) | null
+  only: string[]
+  headers: Record<string, string | undefined>
+  errorBag?: string 
+  onCancelToken: (cancelToken: CancelTokenSource) => void
+  onStart: (visit: VisitOptions & {url: string}) => void | boolean
+  onProgress: (progress: ProgressEvent) => void
+  onFinish: () => void
+  onCancel: () => void
+  onSuccess: (page: Page) => void | Promise<any>
+  onError: (errors: Record<string, string>) => void
+}
+
 type InertiaEvent = 'before' | 'start' | 'progress' | 'success' | 'invalid' | 'error' | 'finish' | 'navigate'
+  
+type InertiaEventMap = {
+  before: (event: CustomEvent<{
+    visit: Visit
+  }>) => boolean | void
+  start: (event: CustomEvent<{
+    visit: Visit
+  }>) => void
+  progress: (event: CustomEvent) => void
+  success: (event: CustomEvent<{
+    page: Page
+  }>) => void
+  invalid: (event: CustomEvent) => void
+  error: (event: CustomEvent) => void
+  finish: (event: CustomEvent<{
+    visit: Visit
+  }>) => void
+  navigate: (event: CustomEvent<{
+    page: Page
+  }>) => void
+}
 
 interface Inertia {
   init: <
@@ -74,7 +113,7 @@ interface Inertia {
 
   delete: (url: string, options?: VisitOptions) => Promise<void>
 
-  reload: (options?: VisitOptions) => Promise<void>
+  reload: (options?: VisitOptions & { data?: object }) => Promise<void>
 
   replace: (url: string, options?: VisitOptions) => Promise<void>
 
@@ -82,7 +121,10 @@ interface Inertia {
 
   restore: (key?: string) => object
 
-  on: (type: InertiaEvent, callback: (event: Event) => boolean | void) => () => void
+  on: <TType extends InertiaEvent>(
+    type: TType,
+    callback: InertiaEventMap[TType],
+  ) => () => void
 }
 
 export const Inertia: Inertia

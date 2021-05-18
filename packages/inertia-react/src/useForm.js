@@ -1,3 +1,4 @@
+import isEqual from 'lodash.isequal'
 import { Inertia } from '@inertiajs/inertia'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import useRemember from './useRemember'
@@ -99,6 +100,8 @@ export default function useForm(...args) {
           }
         },
         onFinish: () => {
+          setProcessing(false)
+          setProgress(null)
           cancelToken.current = null
 
           if (options.onFinish) {
@@ -127,6 +130,7 @@ export default function useForm(...args) {
         setData(key)
       }
     },
+    isDirty: !isEqual(data, defaults),
     errors,
     hasErrors,
     processing,

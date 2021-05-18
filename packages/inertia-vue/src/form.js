@@ -1,18 +1,20 @@
 import Vue from 'vue'
+import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const defaults = cloneDeep(data)
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   const form = Vue.observable({
     ...restored ? restored.data : data,
+    isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
@@ -97,7 +99,7 @@ export default function(...args) {
             return options.onProgress(event)
           }
         },
-        onSuccess: page => {
+        onSuccess: async page => {
           this.processing = false
           this.progress = null
           this.clearErrors()
@@ -105,9 +107,10 @@ export default function(...args) {
           this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          defaults = cloneDeep(this.data())
+          this.isDirty = false
+          return onSuccess
         },
         onError: errors => {
           this.processing = false
@@ -128,6 +131,8 @@ export default function(...args) {
           }
         },
         onFinish: () => {
+          this.processing = false
+          this.progress = null
           cancelToken = null
 
           if (options.onFinish) {
@@ -173,15 +178,16 @@ export default function(...args) {
     },
   })
 
-  if (rememberKey) {
-    new Vue({
-      created() {
-        this.$watch(() => form, newValue => {
+  new Vue({
+    created() {
+      this.$watch(() => form, newValue => {
+        form.isDirty = !isEqual(form.data(), defaults)
+        if (rememberKey) {
           Inertia.remember(newValue.__remember(), rememberKey)
-        }, { immediate: true, deep: true })
-      },
-    })
-  }
+        }
+      }, { immediate: true, deep: true })
+    },
+  })
 
   return form
 }
