@@ -1,6 +1,6 @@
 export function objectToFormData(object, formData = new FormData(), parent = null) {
   if (object instanceof FormData) {
-    return object;
+    return object
   }
 
   if (object === null || object === 'undefined' || object.length === 0) {
