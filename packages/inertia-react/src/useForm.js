@@ -82,6 +82,8 @@ export default function useForm(...args) {
           }
         },
         onFinish: () => {
+          setProcessing(false)
+          setProgress(null)
           cancelToken.current = null
 
           if (options.onFinish) {
