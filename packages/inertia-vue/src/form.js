@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
@@ -179,7 +180,7 @@ export default function(...args) {
   new Vue({
     created() {
       this.$watch(() => form, newValue => {
-        form.isDirty = JSON.stringify(form.data()) !== JSON.stringify(form.__defaults)
+        form.isDirty = !isEqual(form.data(), form.__defaults)
         if (rememberKey) {
           Inertia.remember(newValue.__remember(), rememberKey)
         }
