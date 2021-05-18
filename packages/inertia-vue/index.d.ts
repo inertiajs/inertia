@@ -26,6 +26,12 @@ type App<
   AppProps<PagePropsBeforeTransform, PageProps>
 >
 
+export const InertiaApp: App
+
+export const App: App
+
+export const plugin: PluginObject<any>
+
 interface InertiaLinkProps {
   as?: string
   data?: object
@@ -46,42 +52,41 @@ interface InertiaLinkProps {
   onSuccess?: () => void
 }
 
-interface Form<Data> {
-  errors: { [K in keyof Data]: string | undefined }
+type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
+
+export const InertiaLink: InertiaLink
+
+interface InertiaFormProps<TForm> {
+  isDirty: boolean
+  errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
   progress: ProgressEvent | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  data(): Data
-  transform(callback: (data: Data) => object): this
-  reset(...fields: (keyof Data)[]): this
-  clearErrors(...fields: (keyof Data)[]): this
-  serialize(): { errors: { [K in keyof Data]: string | undefined }, [key: string]: any }
-  unserialize(data: object): this
+  data(): TForm
+  transform(callback: (data: TForm) => object): this
+  reset(...fields: (keyof TForm)[]): this
+  clearErrors(...fields: (keyof TForm)[]): this
   submit(method: string, url: string, options?: Inertia.VisitOptions): void
   get(url: string, options?: Inertia.VisitOptions): void
   post(url: string, options?: Inertia.VisitOptions): void
   put(url: string, options?: Inertia.VisitOptions): void
   patch(url: string, options?: Inertia.VisitOptions): void
   delete(url: string, options?: Inertia.VisitOptions): void
+  cancel(): void
 }
 
-type FormWithData<Data> = Data & Form<Data>
+type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
-type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
-
-export const InertiaLink: InertiaLink
-
-export const InertiaApp: App
-
-export const App: App
-
-export const plugin: PluginObject<any>
+interface InertiaFormTrait {
+  form<TForm>(data: TForm): InertiaForm<TForm>
+  form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
+}
 
 declare module 'vue/types/vue' {
   export interface Vue {
-    $inertia: Inertia.Inertia & {form<Data>(formData: Data) : FormWithData<Data>},
-    $page: Inertia.Page,
+    $inertia: Inertia.Inertia & InertiaFormTrait
+    $page: Inertia.Page
   }
 }
