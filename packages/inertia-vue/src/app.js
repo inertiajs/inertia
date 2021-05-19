@@ -1,9 +1,11 @@
 import form from './form'
 import link from './link'
 import remember from './remember'
+import inertiaHead from './inertiaHead'
 import { Inertia } from '@inertiajs/inertia'
 
 let app = {}
+let inertia = null
 
 export default {
   name: 'Inertia',
@@ -27,24 +29,29 @@ export default {
   },
   data() {
     return {
-      component: null,
-      page: {},
+      component: this.resolveComponent(this.initialPage.component),
+      page: this.initialPage,
       key: null,
     }
   },
   created() {
     app = this
-    Inertia.init({
-      initialPage: this.initialPage,
-      resolveComponent: this.resolveComponent,
-      resolveErrors: this.resolveErrors,
-      transformProps: this.transformProps,
-      swapComponent: async ({ component, page, preserveState }) => {
-        this.component = component
-        this.page = page
-        this.key = preserveState ? this.key : Date.now()
-      },
-    })
+    inertia = Inertia.initInstance(this.$isServer)
+    if (this.$isServer) {
+      inertia.meta.onUpdate(elements => (this.$ssrContext.head = elements))
+    } else {
+      Inertia.init({
+        initialPage: this.initialPage,
+        resolveComponent: this.resolveComponent,
+        resolveErrors: this.resolveErrors,
+        transformProps: this.transformProps,
+        swapComponent: async ({ component, page, preserveState }) => {
+          this.component = component
+          this.page = page
+          this.key = preserveState ? this.key : Date.now()
+        },
+      })
+    }
   },
   render(h) {
     if (this.component) {
@@ -81,8 +88,12 @@ export const plugin = {
     Inertia.form = form
     Vue.mixin(remember)
     Vue.component('InertiaLink', link)
+    Vue.component('InertiaHead', inertiaHead)
     Vue.mixin({
       beforeCreate() {
+        Object.defineProperty(this, '_$inertia', {
+          get: function () { return inertia },
+        })
         Object.defineProperty(this, '$inertia', {
           get: function () { return Inertia },
         })

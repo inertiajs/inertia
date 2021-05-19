@@ -5,6 +5,7 @@ import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, f
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
+import createMetaManager from './meta'
 
 export default {
   resolveComponent: null,
@@ -22,6 +23,12 @@ export default {
     this.transformProps = transformProps || this.transformProps
     this.handleInitialPageVisit(initialPage)
     this.setupEventListeners()
+  },
+
+  initInstance(isServer) {
+    return {
+      meta: createMetaManager(isServer),
+    }
   },
 
   handleInitialPageVisit(page) {
