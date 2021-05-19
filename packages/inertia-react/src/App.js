@@ -46,7 +46,7 @@ export default function App({
       return Component.layout
         .concat(child)
         .reverse()
-        .reduce((children, Layout) => createElement(Layout, { children }))
+        .reduce((children, Layout) => createElement(Layout, { children, ...props }))
     }
 
     return child
