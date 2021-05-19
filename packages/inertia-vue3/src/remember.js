@@ -29,7 +29,7 @@ export default {
       return !(this[key] !== null && typeof this[key] === 'object' && this[key].__rememberable === false)
     })
 
-    const hasCallacks = (key) => {
+    const hasCallbacks = (key) => {
       return this[key] !== null
         && typeof this[key] === 'object'
         && typeof this[key].__remember === 'function'
@@ -38,14 +38,14 @@ export default {
 
     rememberable.forEach(key => {
       if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
-        hasCallacks(key) ? this[key].__restore(restored[key]) : (this[key] = restored[key])
+        hasCallbacks(key) ? this[key].__restore(restored[key]) : (this[key] = restored[key])
       }
 
       this.$watch(key, () => {
         Inertia.remember(
           rememberable.reduce((data, key) => ({
             ...data,
-            [key]: cloneDeep(hasCallacks(key) ? this[key].__remember(): this[key]),
+            [key]: cloneDeep(hasCallbacks(key) ? this[key].__remember(): this[key]),
           }), {}),
           rememberKey,
         )

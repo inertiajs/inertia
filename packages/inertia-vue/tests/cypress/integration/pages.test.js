@@ -95,7 +95,21 @@ describe('Pages', () => {
         })
       })
 
-      it('can create more complex layout arrangements using nested layouts', () => {
+      it('has the page props available within the persistent layout', () => {
+        cy.visit('/persistent-layouts/shorthand/simple/page-a')
+
+        cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/simple/page-a')
+        cy.window().should('have.property', '_inertia_page_props')
+        cy.window().should('have.property', '_inertia_site_layout_props')
+        cy.window().then(window => {
+          expect(window._inertia_page_props).to.not.be.undefined
+          expect(window._inertia_page_props).to.have.keys('foo', 'baz')
+          expect(window._inertia_site_layout_props).to.not.be.undefined
+          expect(window._inertia_site_layout_props).to.have.keys('foo', 'baz')
+        })
+      })
+
+      it('can create more complex layout arrangements using nested persistent layouts', () => {
         cy.visit('/persistent-layouts/shorthand/nested/page-a')
 
         cy.window().then(window => {
@@ -122,6 +136,23 @@ describe('Pages', () => {
               expect(siteLayoutB._uid).to.eq(siteLayoutAUid)
               expect(nestedLayoutB._uid).to.eq(nestedLayoutAUid)
             })
+        })
+      })
+
+      it('has the page props available within all nested persistent layouts', () => {
+        cy.visit('/persistent-layouts/shorthand/nested/page-a')
+
+        cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/nested/page-a')
+        cy.window().should('have.property', '_inertia_page_props')
+        cy.window().should('have.property', '_inertia_site_layout_props')
+        cy.window().should('have.property', '_inertia_nested_layout_props')
+        cy.window().then(window => {
+          expect(window._inertia_page_props).to.not.be.undefined
+          expect(window._inertia_page_props).to.have.keys('foo', 'baz')
+          expect(window._inertia_site_layout_props).to.not.be.undefined
+          expect(window._inertia_site_layout_props).to.have.keys('foo', 'baz')
+          expect(window._inertia_nested_layout_props).to.not.be.undefined
+          expect(window._inertia_nested_layout_props).to.have.keys('foo', 'baz')
         })
       })
     })
