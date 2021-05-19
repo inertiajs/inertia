@@ -395,13 +395,15 @@ export default {
   },
 
   remember(data, key = 'default') {
-    this.replaceState({
-      ...this.page,
-      rememberedState: {
-        ...this.page.rememberedState,
-        [key]: data,
-      },
-    })
+    if (this.page) {
+      this.replaceState({
+        ...this.page,
+        rememberedState: {
+          ...this.page.rememberedState,
+          [key]: data,
+        },
+      })
+    }
   },
 
   restore(key = 'default') {

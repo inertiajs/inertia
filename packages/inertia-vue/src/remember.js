@@ -2,7 +2,7 @@ import { Inertia } from '@inertiajs/inertia'
 
 export default {
   created() {
-    if (!this.$options.remember) {
+    if (!this.$options.remember || this.$isServer) {
       return
     }
 
