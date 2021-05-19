@@ -26,6 +26,12 @@ type App<
   AppProps<PagePropsBeforeTransform, PageProps>
 >
 
+export const InertiaApp: App
+
+export const App: App
+
+export const plugin: PluginObject<any>
+
 interface InertiaLinkProps {
   as?: string
   data?: object
@@ -50,8 +56,37 @@ type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 
 export const InertiaLink: InertiaLink
 
-export const InertiaApp: App
+interface InertiaFormProps<TForm> {
+  isDirty: boolean
+  errors: Record<keyof TForm, string>
+  hasErrors: boolean
+  processing: boolean
+  progress: ProgressEvent | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  data(): TForm
+  transform(callback: (data: TForm) => object): this
+  reset(...fields: (keyof TForm)[]): this
+  clearErrors(...fields: (keyof TForm)[]): this
+  submit(method: string, url: string, options?: Inertia.VisitOptions): void
+  get(url: string, options?: Inertia.VisitOptions): void
+  post(url: string, options?: Inertia.VisitOptions): void
+  put(url: string, options?: Inertia.VisitOptions): void
+  patch(url: string, options?: Inertia.VisitOptions): void
+  delete(url: string, options?: Inertia.VisitOptions): void
+  cancel(): void
+}
 
-export const App: App
+type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
-export const plugin: PluginObject<any>
+interface InertiaFormTrait {
+  form<TForm>(data: TForm): InertiaForm<TForm>
+  form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
+}
+
+declare module 'vue/types/vue' {
+  export interface Vue {
+    $inertia: Inertia.Inertia & InertiaFormTrait
+    $page: Inertia.Page
+  }
+}

@@ -9,15 +9,19 @@
     <span @click="onBeforeVisitCancelled" class="before-cancel">onBefore cancellation</span>
     <span @click="onStartVisit" class="start">onStart</span>
     <span @click="onProgressVisit" class="progress">onProgress</span>
+
     <span @click="onSuccessVisit" class="success">onSuccess</span>
+    <span @click="onSuccessProgress" class="success-progress">onSuccess progress property</span>
+    <span @click="onSuccessProcessing" class="success-processing">onSuccess resets processing</span>
     <span @click="onSuccessResetErrors" class="success-reset-errors">onSuccess resets errors</span>
     <span @click="onSuccessPromiseVisit" class="success-promise">onSuccess promise</span>
-    <span @click="onErrorVisit" class="error">onError</span>
-    <span @click="onErrorPromiseVisit" class="error-promise">onError promise</span>
-    <span @click="errorsSetOnError" class="errors-set-on-error">Errors set on error</span>
 
-    <span @click="processing" class="processing">processing status</span>
-    <span @click="progress" class="progress-property">progress property</span>
+    <span @click="onErrorVisit" class="error">onError</span>
+    <span @click="onErrorProgress" class="error-progress">onError progress property</span>
+    <span @click="onErrorProcessing" class="error-processing">onError resets processing</span>
+    <span @click="errorsSetOnError" class="errors-set-on-error">Errors set on error</span>
+    <span @click="onErrorPromiseVisit" class="error-promise">onError promise</span>
+
     <span @click="progressNoFiles" class="no-progress">progress no files</span>
 
     <span class="success-status">Form was {{ form.wasSuccessful ? '' : 'not '}}successful</span>
@@ -203,7 +207,7 @@ export default {
         })
       })
     },
-    processing() {
+    onSuccessProcessing() {
       this.form.post(this.$page.url, {
         ...this.callbacks({
           onBefore: () => {
@@ -229,7 +233,33 @@ export default {
         })
       })
     },
-    progress() {
+    onErrorProcessing() {
+      this.form.post('/form-helper/events/errors', {
+        ...this.callbacks({
+          onBefore: () => {
+            alert('onBefore')
+            alert(this.form.processing)
+          },
+          onCancelToken: () => {
+            alert('onCancelToken')
+            alert(this.form.processing)
+          },
+          onStart: () => {
+            alert('onStart')
+            alert(this.form.processing)
+          },
+          onError: () => {
+            alert('onError')
+            alert(this.form.processing)
+          },
+          onFinish: () => {
+            alert('onFinish')
+            alert(this.form.processing)
+          },
+        })
+      })
+    },
+    onSuccessProgress() {
       this.form
         .transform(data => ({
           ... data,
@@ -263,6 +293,41 @@ export default {
             },
           })
         })
+    },
+    onErrorProgress() {
+      this.form
+          .transform(data => ({
+            ... data,
+            file: new File(['foobar'], 'example.bin')
+          }))
+          .post('/form-helper/events/errors', {
+            ...this.callbacks({
+              onBefore: () => {
+                alert('onBefore')
+                alert(this.form.progress)
+              },
+              onCancelToken: () => {
+                alert('onCancelToken')
+                alert(this.form.progress)
+              },
+              onStart: () => {
+                alert('onStart')
+                alert(this.form.progress)
+              },
+              onProgress: () => {
+                alert('onProgress')
+                alert(this.form.progress)
+              },
+              onError: () => {
+                alert('onError')
+                alert(this.form.progress)
+              },
+              onFinish: () => {
+                alert('onFinish')
+                alert(this.form.progress)
+              },
+            })
+          })
     },
     progressNoFiles() {
       this.form.post(this.$page.url, {
