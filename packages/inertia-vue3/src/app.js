@@ -59,10 +59,10 @@ export default {
             return component.value.layout
               .concat(child)
               .reverse()
-              .reduce((child, layout) => h(layout, () => child))
+              .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
           }
 
-          return h(component.value.layout, () => child)
+          return h(component.value.layout, { ...page.value.props }, () => child)
         }
 
         return child

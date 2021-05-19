@@ -61,10 +61,10 @@ export default {
           return this.component.layout
             .concat(child)
             .reverse()
-            .reduce((child, layout) => h(layout, [child]))
+            .reduce((child, layout) => h(layout, { props: this.$page.props }, [child]))
         }
 
-        return h(this.component.layout, [child])
+        return h(this.component.layout, { props: this.page.props }, [child])
       }
 
       return child
