@@ -1,11 +1,11 @@
 import form from './form'
+import head from './head'
 import link from './link'
 import remember from './remember'
-import inertiaHead from './inertiaHead'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia, createHeadManager } from '@inertiajs/inertia'
 
 let app = {}
-let inertia = null
+let headManager = null
 
 export default {
   name: 'Inertia',
@@ -36,9 +36,9 @@ export default {
   },
   created() {
     app = this
-    inertia = Inertia.initInstance(this.$isServer)
+    headManager = createHeadManager(this.$isServer)
     if (this.$isServer) {
-      inertia.meta.onUpdate(elements => (this.$ssrContext.head = elements))
+      headManager.onUpdate(elements => (this.$ssrContext.head = elements))
     } else {
       Inertia.init({
         initialPage: this.initialPage,
@@ -87,12 +87,13 @@ export const plugin = {
   install(Vue) {
     Inertia.form = form
     Vue.mixin(remember)
+    Vue.component('InertiaHead', head)
     Vue.component('InertiaLink', link)
-    Vue.component('InertiaHead', inertiaHead)
+
     Vue.mixin({
       beforeCreate() {
-        Object.defineProperty(this, '_$inertia', {
-          get: function () { return inertia },
+        Object.defineProperty(this, '$headManager', {
+          get: function () { return headManager },
         })
         Object.defineProperty(this, '$inertia', {
           get: function () { return Inertia },

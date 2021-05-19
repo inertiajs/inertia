@@ -1,7 +1,7 @@
 export default {
   data() {
     return {
-      provider: this._$inertia.meta.createProvider(),
+      provider: this.$headManager.createProvider(),
     }
   },
   beforeDestroy() {
