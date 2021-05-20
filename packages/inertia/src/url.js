@@ -20,7 +20,7 @@ export function mergeDataIntoQueryString(method, href, data) {
     url.search = qs.stringify(
       deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
         encodeValuesOnly: true,
-        arrayFormat: 'brackets',
+        arrayFormat: 'indices',
       },
     )
     data = {}
