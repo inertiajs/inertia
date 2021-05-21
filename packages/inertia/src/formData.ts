@@ -1,7 +1,7 @@
 import { FormDataConvertible } from './types'
 
 export function objectToFormData(
-  source: Record<string, FormDataConvertible>|null|undefined,
+  source: Record<string, FormDataConvertible>,
   form: FormData = new FormData(),
   parentKey: string|null = null,
 ): FormData {
