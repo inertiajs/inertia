@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios'
-import { Visit, Page } from './types'
+import { Errors, Visit, Page } from './types'
 
 function fireEvent(name: string, options: CustomEventInit): boolean {
   return document.dispatchEvent(
@@ -11,7 +11,7 @@ export function fireBeforeEvent(visit: Visit): boolean {
   return fireEvent('before', { cancelable: true, detail: { visit } } )
 }
 
-export function fireErrorEvent(errors: Record<string, unknown>): boolean {
+export function fireErrorEvent(errors: Errors): boolean {
   return fireEvent('error', { detail: { errors } })
 }
 

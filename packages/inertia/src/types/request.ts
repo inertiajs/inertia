@@ -1,4 +1,5 @@
-export type Errors = Record<string, Record<string, string>|Array<string>|string>
+export type Errors = Record<string, string>
+export type ErrorBag = Record<string, Errors>
 
 export type FormDataConvertible = Date|File|Blob|boolean|string|number|null|undefined
 
