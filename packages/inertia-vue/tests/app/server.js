@@ -55,7 +55,6 @@ app.post('/visits/events-errors', (req, res) => inertia.render(req, res, { compo
 app.get('/visits/headers/version', (req, res) => inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }))
 
 app.post('/remember/form-helper/default', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Default', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
-app.post('/remember/form-helper/disabled', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Disabled', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
 app.post('/remember/form-helper/remember', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Remember', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
 
 app.post('/form-helper/data', (req, res) => inertia.render(req, res, { component: 'FormHelper/Data', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } }}))
@@ -67,6 +66,9 @@ app.post('/dump/post', upload.any(), (req, res) => inertia.render(req, res, { co
 app.put('/dump/put', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'put', form: req.body, query: req.query, files: req.files }}))
 app.patch('/dump/patch', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files }}))
 app.delete('/dump/delete', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files }}))
+
+app.get('/persistent-layouts/shorthand/simple/page-a', (req, res) => inertia.render(req, res, { props: { foo: 'bar', baz: 'example' }}))
+app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) => inertia.render(req, res, { props: { foo: 'bar', baz: 'example' }}))
 
 app.post('/events/errors', (req, res) => inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } }}))
 

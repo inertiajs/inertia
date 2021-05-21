@@ -1,23 +1,41 @@
+import isEqual from 'lodash.isequal'
 import { Inertia } from '@inertiajs/inertia'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export default function useForm(defaults, { key = 'form', remember = true } = {}) {
-  let transform = (data) => data
-
+export default function useForm(...args) {
+  const isMounted = useRef(null)
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
+  const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
-  const [data, setData] = remember ? useRemember(defaults, `${key}-data`) : useState(defaults)
-  const [errors, setErrors] = remember ? useRemember({}, `${key}-errors`) : useState({})
+  const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
+  const [errors, setErrors] = rememberKey ? useRemember({}, `${rememberKey}:errors`) : useState({})
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
+  let transform = (data) => data
+
+  useEffect(() => {
+    isMounted.current = true
+    return () => {
+      isMounted.current = false
+    }
+  }, [])
 
   const submit = useCallback(
     (method, url, options = {}) => {
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken.current = token
+
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
+          }
+        },
         onBefore: (visit) => {
           setWasSuccessful(false)
           setRecentlySuccessful(false)
@@ -42,27 +60,49 @@ export default function useForm(defaults, { key = 'form', remember = true } = {}
           }
         },
         onSuccess: (page) => {
-          setErrors({})
-          setHasErrors(false)
-          setWasSuccessful(true)
-          setRecentlySuccessful(true)
-          recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+            setErrors({})
+            setHasErrors(false)
+            setWasSuccessful(true)
+            setRecentlySuccessful(true)
+            recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
+          }
 
           if (options.onSuccess) {
             return options.onSuccess(page)
           }
         },
         onError: (errors) => {
-          setErrors(errors)
-          setHasErrors(true)
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+            setErrors(errors)
+            setHasErrors(true)
+          }
 
           if (options.onError) {
             return options.onError(errors)
           }
         },
+        onCancel: () => {
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+          }
+
+          if (options.onCancel) {
+            return options.onCancel()
+          }
+        },
         onFinish: () => {
-          setProcessing(false)
-          setProgress(null)
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+          }
+
+          cancelToken.current = null
 
           if (options.onFinish) {
             return options.onFinish()
@@ -90,6 +130,7 @@ export default function useForm(defaults, { key = 'form', remember = true } = {}
         setData(key)
       }
     },
+    isDirty: !isEqual(data, defaults),
     errors,
     hasErrors,
     processing,
@@ -140,6 +181,11 @@ export default function useForm(defaults, { key = 'form', remember = true } = {}
     },
     delete(url, options) {
       submit('delete', url, options)
+    },
+    cancel() {
+      if (cancelToken.current) {
+        cancelToken.current.cancel()
+      }
     },
   }
 }

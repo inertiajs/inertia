@@ -1,9 +1,11 @@
 import form from './form'
+import head from './head'
 import link from './link'
 import remember from './remember'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia, createHeadManager } from '@inertiajs/inertia'
 
 let app = {}
+let headManager = null
 
 export default {
   name: 'Inertia',
@@ -27,24 +29,29 @@ export default {
   },
   data() {
     return {
-      component: null,
-      page: {},
+      component: this.resolveComponent(this.initialPage.component),
+      page: this.initialPage,
       key: null,
     }
   },
   created() {
     app = this
-    Inertia.init({
-      initialPage: this.initialPage,
-      resolveComponent: this.resolveComponent,
-      resolveErrors: this.resolveErrors,
-      transformProps: this.transformProps,
-      swapComponent: async ({ component, page, preserveState }) => {
-        this.component = component
-        this.page = page
-        this.key = preserveState ? this.key : Date.now()
-      },
-    })
+    headManager = createHeadManager(this.$isServer)
+    if (this.$isServer) {
+      headManager.onUpdate(elements => (this.$ssrContext.head = elements))
+    } else {
+      Inertia.init({
+        initialPage: this.initialPage,
+        resolveComponent: this.resolveComponent,
+        resolveErrors: this.resolveErrors,
+        transformProps: this.transformProps,
+        swapComponent: async ({ component, page, preserveState }) => {
+          this.component = component
+          this.page = page
+          this.key = preserveState ? this.key : Date.now()
+        },
+      })
+    }
   },
   render(h) {
     if (this.component) {
@@ -61,10 +68,10 @@ export default {
           return this.component.layout
             .concat(child)
             .reverse()
-            .reduce((child, layout) => h(layout, [child]))
+            .reduce((child, layout) => h(layout, { props: this.$page.props }, [child]))
         }
 
-        return h(this.component.layout, [child])
+        return h(this.component.layout, { props: this.page.props }, [child])
       }
 
       return child
@@ -79,9 +86,22 @@ export default {
 export const plugin = {
   install(Vue) {
     Inertia.form = form
-    Object.defineProperty(Vue.prototype, '$inertia', { get: () => Inertia })
-    Object.defineProperty(Vue.prototype, '$page', { get: () => app.page })
     Vue.mixin(remember)
+    Vue.component('InertiaHead', head)
     Vue.component('InertiaLink', link)
+
+    Vue.mixin({
+      beforeCreate() {
+        Object.defineProperty(this, '$headManager', {
+          get: function () { return headManager },
+        })
+        Object.defineProperty(this, '$inertia', {
+          get: function () { return Inertia },
+        })
+        Object.defineProperty(this, '$page', {
+          get: function () { return app.page },
+        })
+      },
+    })
   },
 }

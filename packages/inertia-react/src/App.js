@@ -29,7 +29,7 @@ export default function App({
         }))
       },
     })
-  }, [initialPage, resolveComponent, resolveErrors, transformProps])
+  }, [])
 
   if (!current.component) {
     return createElement(PageContext.Provider, { value: current.page }, null)
@@ -46,7 +46,7 @@ export default function App({
       return Component.layout
         .concat(child)
         .reverse()
-        .reduce((children, Layout) => createElement(Layout, { children }))
+        .reduce((children, Layout) => createElement(Layout, { children, ...props }))
     }
 
     return child

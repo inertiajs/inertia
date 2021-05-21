@@ -41,7 +41,7 @@ interface BaseInertiaLinkProps {
   onSuccess?: () => void
 }
 
-type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, 'onProgress'> & React.AllHTMLAttributes<HTMLElement>
+type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> & Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
 
@@ -59,6 +59,8 @@ export const InertiaLink: InertiaLink
 export const Link: InertiaLink
 
 export const InertiaApp: App
+
+export const App: App
 
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
