@@ -29,7 +29,7 @@ import {hrefToUrl, mergeDataIntoQueryString, urlWithoutHash} from './url'
 import {hasFiles} from './files'
 import {objectToFormData} from './formData'
 
-export class Core {
+export class Router {
   protected resolveComponent!: PageResolver
   protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
   protected swapComponent!: PageHandler
@@ -511,5 +511,3 @@ export class Core {
     return () => document.removeEventListener(`inertia:${type}`, listener)
   }
 }
-
-export const Inertia = new Core()
