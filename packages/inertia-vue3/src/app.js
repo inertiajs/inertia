@@ -30,11 +30,11 @@ export default {
     },
   },
   setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
-    if (typeof window === 'undefined') {
-      component.value = markRaw(resolveComponent(initialPage.component))
-      page.value = initialPage
-      key.value = null
-    } else {
+    component.value = markRaw(resolveComponent(initialPage.component))
+    page.value = initialPage
+    key.value = null
+
+    if (!(typeof window === 'undefined')) {
       Inertia.init({
         initialPage,
         resolveComponent,
