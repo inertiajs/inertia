@@ -1,17 +1,17 @@
 import debounce from './debounce'
 
 const Renderer = {
-  buildDOMElement(tag: string) {
+  buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
-    return template.content.firstChild
+    return (template.content.firstChild as ChildNode)
   },
 
-  isInertiaManagedElement(element: any) {
+  isInertiaManagedElement(element: Element): boolean {
     return element.nodeType === Node.ELEMENT_NODE && element.getAttribute('inertia') !== null
   },
 
-  findMatchingElementIndex(element: any, elements: Array<HTMLElement>) {
+  findMatchingElementIndex(element: Element, elements: Array<Element>): number {
     const key = element.getAttribute('inertia')
     if (key !== null) {
       return elements.findIndex(element => element.getAttribute('inertia') === key)
@@ -22,10 +22,10 @@ const Renderer = {
 
   update: debounce(function (elements: Array<string>) {
     const sourceElements = elements.map(element => this.buildDOMElement(element))
-    const targetElements = Array.from(document.head.childNodes).filter(element => this.isInertiaManagedElement(element))
+    const targetElements = Array.from(document.head.childNodes).filter(element => this.isInertiaManagedElement(element as Element))
 
     targetElements.forEach(targetElement => {
-      const index = this.findMatchingElementIndex(targetElement, sourceElements)
+      const index = this.findMatchingElementIndex((targetElement as Element), sourceElements)
       if (index === -1) {
         targetElement?.parentNode?.removeChild(targetElement)
         return
@@ -42,18 +42,24 @@ const Renderer = {
   }, 50),
 }
 
-export default function (isServer: boolean) {
-  let onUpdate: Function|null = null
+export default function (isServer: boolean): ({
+  onUpdate(callback: (elements: string[]) => void): void,
+  createProvider: () => ({
+    update: (elements: Array<string>) => void,
+    disconnect: () => void,
+  })
+}) {
+  let onUpdate: null|((elements: string[]) => void) = null
   const states: Record<string, Array<string>> = {}
   let lastProviderId = 0
 
-  function connect() {
+  function connect(): string {
     const id = (lastProviderId += 1)
     states[id] = []
     return id.toString()
   }
 
-  function disconnect(id: string) {
+  function disconnect(id: string): void {
     if (id === null || Object.keys(states).indexOf(id) === -1) {
       return
     }
@@ -62,7 +68,7 @@ export default function (isServer: boolean) {
     commit()
   }
 
-  function update(id: string, elements: Array<string> = []) {
+  function update(id: string, elements: Array<string> = []): void {
     if (id !== null && Object.keys(states).indexOf(id) > -1) {
       states[id] = elements
     }
@@ -70,7 +76,7 @@ export default function (isServer: boolean) {
     commit()
   }
 
-  function collect() {
+  function collect(): Array<string> {
     const elements = Object.values(states)
       .reduce((carry, elements) => carry.concat(elements), [])
       .reduce((carry, element) => {
@@ -96,8 +102,8 @@ export default function (isServer: boolean) {
     return Object.values(elements)
   }
 
-  function commit() {
-    if (onUpdate instanceof Function) {
+  function commit(): void {
+    if (onUpdate !== null) {
       onUpdate(collect())
     }
 
@@ -107,7 +113,7 @@ export default function (isServer: boolean) {
   }
 
   return {
-    onUpdate(callback: Function): void {
+    onUpdate(callback) {
       onUpdate = callback
     },
     createProvider: function () {
@@ -115,7 +121,7 @@ export default function (isServer: boolean) {
 
       return {
         disconnect: () => disconnect(id),
-        update: (elements: Array<string>) => update(id, elements),
+        update: (elements) => update(id, elements),
       }
     },
   }

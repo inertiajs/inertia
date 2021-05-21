@@ -1,6 +1,8 @@
 import { CancelTokenSource } from 'axios'
 import { Errors, Method, Page } from '.'
 
+export type PreserveStateOption = boolean|string|((page: Page) => boolean)
+
 export type LocationVisit = {
   preserveScroll: boolean
 }
@@ -10,8 +12,8 @@ export interface Visit {
   method: Method,
   data: Record<string, unknown>|FormData,
   replace: boolean,
-  preserveScroll: boolean,
-  preserveState: boolean,
+  preserveScroll: PreserveStateOption,
+  preserveState: PreserveStateOption,
   only: Array<string>,
   headers: Record<string, string>
   errorBag: string|null,

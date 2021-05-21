@@ -7,6 +7,7 @@ import {
   PageHandler,
   PageResolver,
   PropTransformer,
+  PreserveStateOption,
   RequestPayload,
   Visit,
   VisitId,
@@ -135,7 +136,7 @@ export class Router {
     })
   }
 
-  protected locationVisit(url: URL, preserveScroll: boolean): boolean|void {
+  protected locationVisit(url: URL, preserveScroll: LocationVisit['preserveScroll']): boolean|void {
     try {
       const locationVisit: LocationVisit = { preserveScroll }
       window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify(locationVisit))
@@ -207,7 +208,7 @@ export class Router {
     }
   }
 
-  protected resolvePreserveOption(value: Boolean|Function|string, page: Page) {
+  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean|string {
     if (typeof value === 'function') {
       return value(page)
     } else if (value === 'errors') {
@@ -239,8 +240,8 @@ export class Router {
     method?: Method,
     data?: RequestPayload,
     replace?: boolean,
-    preserveScroll?: boolean,
-    preserveState?: boolean
+    preserveScroll?: PreserveStateOption,
+    preserveState?: PreserveStateOption
     only?: Array<string>,
     headers?: Record<string, string>,
     errorBag?: string,
@@ -340,7 +341,7 @@ export class Router {
       if (only.length && pageResponse.component === this.page.component) {
         pageResponse.props = { ...this.page.props, ...pageResponse.props }
       }
-      preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse)
+      preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
       preserveState = this.resolvePreserveOption(preserveState, pageResponse)
       if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
         pageResponse.rememberedState = window.history.state.rememberedState
@@ -369,7 +370,7 @@ export class Router {
         if (requestUrl.hash && !locationUrl.hash && urlWithoutHash(requestUrl).href === locationUrl.href) {
           locationUrl.hash = requestUrl.hash
         }
-        this.locationVisit(locationUrl, preserveScroll)
+        this.locationVisit(locationUrl, preserveScroll === true)
       } else if (error.response) {
         if (fireInvalidEvent(error.response)) {
           modal.show(error.response.data)
@@ -402,8 +403,8 @@ export class Router {
   }: {
     visitId?: VisitId,
     replace?: boolean,
-    preserveScroll?: boolean|((page: Page) => boolean)
-    preserveState?: boolean|((page: Page) => boolean)
+    preserveScroll?: PreserveStateOption
+    preserveState?: PreserveStateOption
   } = {}): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {

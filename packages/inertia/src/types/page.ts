@@ -1,10 +1,10 @@
-import { Errors } from '.'
+import { ErrorBag, Errors } from '.'
 
 export interface Page {
   component: string,
   props: {
     [key: string]: unknown,
-    errors: Errors,
+    errors: Errors & ErrorBag,
   }
   url: string,
   version: string|null
