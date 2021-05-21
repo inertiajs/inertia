@@ -1,8 +1,9 @@
 import useForm from './useForm'
 import link from './link'
+import head from './head'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia, createHeadManager } from '@inertiajs/inertia'
 
 const component = ref(null)
 const page = ref({})
@@ -29,17 +30,23 @@ export default {
     },
   },
   setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
-    Inertia.init({
-      initialPage,
-      resolveComponent,
-      resolveErrors,
-      transformProps,
-      swapComponent: async (args) => {
-        component.value = markRaw(args.component)
-        page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
-      },
-    })
+    component.value = markRaw(resolveComponent(initialPage.component))
+    page.value = initialPage
+    key.value = null
+
+    if (!(typeof window === 'undefined')) {
+      Inertia.init({
+        initialPage,
+        resolveComponent,
+        resolveErrors,
+        transformProps,
+        swapComponent: async (args) => {
+          component.value = markRaw(args.component)
+          page.value = args.page
+          key.value = args.preserveState ? key.value : Date.now()
+        },
+      })
+    }
 
     return () => {
       if (component.value) {
@@ -73,10 +80,23 @@ export default {
 
 export const plugin = {
   install(app) {
+    const isServer = typeof window === 'undefined'
+    const headManager = createHeadManager(isServer)
+
     Inertia.form = useForm
+
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
+
+    if (isServer) {
+      const state = { head: [] }
+      Object.defineProperty(app.config.globalProperties, '$head', { get: () => state.head })
+      headManager.onUpdate(elements => (state.head = elements))
+    }
+
     app.mixin(remember)
+    app.component('InertiaHead', head)
     app.component('InertiaLink', link)
   },
 }

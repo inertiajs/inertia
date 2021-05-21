@@ -107,7 +107,7 @@ describe('Remember (local state caching)', () => {
     cy.get('.b-untracked').should('not.have.value', 'C')
   })
 
-  it.skip('restores remembered data when pressing the back button from another website', () => {
+  it('restores remembered data when pressing the back button from another website', { retries: 10 }, () => {
     cy.visit('/remember/multiple-components')
     cy.url().should('eq', Cypress.config().baseUrl + '/remember/multiple-components')
 

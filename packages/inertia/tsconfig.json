@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Node",
+    "noImplicitThis": false,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "strict": true,
+    "target": "ES6",
+    "outDir": "dist"
+  }
+}
