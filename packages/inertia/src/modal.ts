@@ -1,6 +1,6 @@
 export default {
-  modal: HTMLDivElement,
-  listener: KeyboardEvent,
+  modal: null,
+  listener: null,
 
   show(html: Record<string, unknown>|string): void {
     if (typeof html === 'object') {
