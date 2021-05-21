@@ -1,7 +1,6 @@
 import {
   ActiveVisit,
   ErrorResolver,
-  Errors,
   LocationVisit,
   Method,
   Page,
@@ -30,38 +29,12 @@ import {hrefToUrl, mergeDataIntoQueryString, urlWithoutHash} from './url'
 import {hasFiles} from './files'
 import {objectToFormData} from './formData'
 
-const NullVisit: ActiveVisit = {
-  cancelToken: Axios.CancelToken.source(),
-  url: hrefToUrl('/null'),
-  method: Method.GET,
-  data: {},
-  replace: false,
-  preserveScroll: false,
-  preserveState: false,
-  only: [],
-  headers: {},
-  errorBag: '',
-  forceFormData: false,
-  onCancelToken: () => {},
-  onBefore: () => {},
-  onStart: () => {},
-  onProgress: () => {},
-  onFinish: () => {},
-  onCancel: () => {},
-  onBeforeRender: () => {},
-  onSuccess: () => {},
-  onError: () => {},
-  completed: true,
-  cancelled: false,
-  interrupted: false,
-}
-
 export class Core {
   protected resolveComponent!: PageResolver
   protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
   protected swapComponent!: PageHandler
   protected transformProps: PropTransformer = props => props
-  protected activeVisit: ActiveVisit = NullVisit
+  protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
   protected page!: Page
 
@@ -234,7 +207,17 @@ export class Core {
     }
   }
 
-  public visit(href: URL|string, {
+  protected resolvePreserveOption(value: Boolean|Function|string, page: Page) {
+    if (typeof value === 'function') {
+      return value(page)
+    } else if (value === 'errors') {
+      return Object.keys(this.resolveErrors(page)).length > 0
+    } else {
+      return value
+    }
+  }
+
+  public visit(href: string|URL, {
     method = Method.GET,
     data = {},
     replace = false,
@@ -250,7 +233,6 @@ export class Core {
     onProgress = () => {},
     onFinish = () => {},
     onCancel = () => {},
-    onBeforeRender = () => {},
     onSuccess = () => {},
     onError = () => {},
   }: {
@@ -269,19 +251,19 @@ export class Core {
     onProgress?: (event: { percentage: number }|void) => void,
     onFinish?: (visit: Visit) => void,
     onCancel?: () => void,
-    onBeforeRender?: (page: Page) => void,
     onSuccess?: (page: Page) => void,
     onError?: (errors: Record<string, unknown>) => void,
   } = {}): void {
-    let url: URL = href instanceof URL ? href : hrefToUrl(href)
+    let url = typeof href === 'string' ? hrefToUrl(href) : href
 
-    if (!(data instanceof FormData)) {
-      [url, data] = mergeDataIntoQueryString(method, url, data)
+    if ((hasFiles(data) || forceFormData) && !(data instanceof FormData)) {
+      data = objectToFormData(data)
     }
 
-    const visitHasFiles = hasFiles(data)
-    if (method !== Method.GET && !(data instanceof FormData) && (visitHasFiles || forceFormData)) {
-      data = objectToFormData(data)
+    if (!(data instanceof FormData)) {
+      const { href: _href, data: _data } = mergeDataIntoQueryString(method, url, data)
+      url = hrefToUrl(_href)
+      data = _data
     }
 
     const visit: Visit = {
@@ -304,106 +286,112 @@ export class Core {
       return
     }
 
-    this.cancelVisit(this.activeVisit, { interrupted: true })
+    if (this.activeVisit) {
+      this.cancelVisit(this.activeVisit, { interrupted: true })
+    }
+
     this.saveScrollPositions()
 
     const visitId = this.createVisitId()
     this.activeVisit = { ... visit, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError, cancelToken: Axios.CancelToken.source() }
-    onCancelToken({ cancel: () => this.cancelVisit(this.activeVisit, { cancelled: true }) })
+
+    onCancelToken({
+      cancel: () => {
+        if (this.activeVisit) {
+          this.cancelVisit(this.activeVisit, { cancelled: true })
+        }
+      },
+    })
 
     fireStartEvent(visit)
     onStart(visit)
 
-    // @ts-ignore, as chaining onto the visit was already deprecated pre-TypeScript.
-    return new Proxy(
-      Axios({
-        method,
-        url: urlWithoutHash(url).href,
-        data: method === Method.GET ? {} : data,
-        params: method === Method.GET ? data : {},
-        cancelToken: this.activeVisit.cancelToken.token,
-        headers: {
-          ...headers,
-          Accept: 'text/html, application/xhtml+xml',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-Inertia': true,
-          ...(only.length ? {
-            'X-Inertia-Partial-Component': this.page.component,
-            'X-Inertia-Partial-Data': only.join(','),
-          } : {}),
-          ...(errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
-          ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
-        },
-        onUploadProgress: progress => {
-          if (visitHasFiles) {
-            progress.percentage = Math.round(progress.loaded / progress.total * 100)
-            fireProgressEvent(progress)
-            onProgress(progress)
-          }
-        },
-      }).then(response => {
-        if (!this.isInertiaResponse(response)) {
-          return Promise.reject({ response })
+    Axios({
+      method,
+      url: url.toString().replace(url.hash, ''),
+      data: method === Method.GET ? {} : data,
+      params: method === Method.GET ? data : {},
+      cancelToken: this.activeVisit.cancelToken.token,
+      headers: {
+        ...headers,
+        Accept: 'text/html, application/xhtml+xml',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Inertia': true,
+        ...(only.length ? {
+          'X-Inertia-Partial-Component': this.page.component,
+          'X-Inertia-Partial-Data': only.join(','),
+        } : {}),
+        ...(errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
+        ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
+      },
+      onUploadProgress: progress => {
+        if (data instanceof FormData) {
+          progress.percentage = Math.round(progress.loaded / progress.total * 100)
+          fireProgressEvent(progress)
+          onProgress(progress)
         }
+      },
+    }).then(response => {
+      if (!this.isInertiaResponse(response)) {
+        return Promise.reject({ response })
+      }
 
-        const pageResponse: Page = response.data
-        if (only.length && pageResponse.component === this.page.component) {
-          pageResponse.props = { ...this.page.props, ...pageResponse.props }
+      const pageResponse: Page = response.data
+      if (only.length && pageResponse.component === this.page.component) {
+        pageResponse.props = { ...this.page.props, ...pageResponse.props }
+      }
+      preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse)
+      preserveState = this.resolvePreserveOption(preserveState, pageResponse)
+      if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
+        pageResponse.rememberedState = window.history.state.rememberedState
+      }
+      const requestUrl = url
+      const responseUrl = hrefToUrl(pageResponse.url)
+      if (requestUrl.hash && !responseUrl.hash && urlWithoutHash(requestUrl).href === responseUrl.href) {
+        responseUrl.hash = requestUrl.hash
+        pageResponse.url = responseUrl.href
+      }
+      return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
+    }).then(() => {
+      const errors = this.resolveErrors(this.page)
+      if (Object.keys(errors).length > 0) {
+        fireErrorEvent(errors[errorBag] || errors)
+        return onError(errors[errorBag] || errors)
+      }
+      fireSuccessEvent(this.page)
+      return onSuccess(this.page)
+    }).catch(error => {
+      if (this.isInertiaResponse(error.response)) {
+        return this.setPage(error.response.data, { visitId })
+      } else if (this.isLocationVisitResponse(error.response)) {
+        const locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
+        const requestUrl = url
+        if (requestUrl.hash && !locationUrl.hash && urlWithoutHash(requestUrl).href === locationUrl.href) {
+          locationUrl.hash = requestUrl.hash
         }
-        if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
-          pageResponse.rememberedState = window.history.state.rememberedState
+        this.locationVisit(locationUrl, preserveScroll)
+      } else if (error.response) {
+        if (fireInvalidEvent(error.response)) {
+          modal.show(error.response.data)
         }
-        const responseUrl = hrefToUrl(pageResponse.url)
-        if (url.hash && !responseUrl.hash && urlWithoutHash(url).href === responseUrl.href) {
-          responseUrl.hash = url.hash
-          pageResponse.url = responseUrl.href
+      } else {
+        return Promise.reject(error)
+      }
+    }).then(() => {
+      if (this.activeVisit) {
+        this.finishVisit(this.activeVisit)
+      }
+    }).catch(error => {
+      if (!Axios.isCancel(error)) {
+        const throwException = fireExceptionEvent(error)
+        if (this.activeVisit) {
+          this.finishVisit(this.activeVisit)
         }
-        pageResponse.resolvedErrors = ((errors: Errors) => (errors[errorBag] as Errors) || errors)(this.resolveErrors(pageResponse))
-        onBeforeRender(pageResponse)
-        return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
-      }).then(() => {
-        if (Object.keys(this.page.resolvedErrors).length > 0) {
-          fireErrorEvent(this.page.resolvedErrors)
-          return onError(this.page.resolvedErrors)
-        }
-        fireSuccessEvent(this.page)
-        return onSuccess(this.page)
-      }).catch(error => {
-        if (this.isInertiaResponse(error.response)) {
-          return this.setPage(error.response.data, { visitId })
-        } else if (this.isLocationVisitResponse(error.response)) {
-          const locationUrl = hrefToUrl(error.response.headers['x-inertia-location'])
-          if (url.hash && !locationUrl.hash && urlWithoutHash(url).href === locationUrl.href) {
-            locationUrl.hash = url.hash
-          }
-          this.locationVisit(locationUrl, preserveScroll)
-        } else if (error.response) {
-          if (fireInvalidEvent(error.response)) {
-            modal.show(error.response.data)
-          }
-        } else {
+        if (throwException) {
           return Promise.reject(error)
         }
-      }).then(() => {
-        this.finishVisit(this.activeVisit)
-      }).catch(error => {
-        if (!Axios.isCancel(error)) {
-          const throwException = fireExceptionEvent(error)
-          this.finishVisit(this.activeVisit)
-          if (throwException) {
-            return Promise.reject(error)
-          }
-        }
-      }), {
-        get: function(target: Promise<Page|unknown>, prop: string) {
-          if (['then', 'catch', 'finally'].includes(prop)) {
-            console.warn('Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\nLearn more at https://inertiajs.com/manual-visits#promise-deprecation')
-          }
-          // @ts-ignore
-          return typeof target[prop] === 'function' ? target[prop].bind(target) : target[prop]
-        },
-      },
-    )
+      }
+    })
   }
 
   protected setPage(page: Page, {
@@ -421,8 +409,6 @@ export class Core {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        preserveState = typeof preserveState === 'function' ? preserveState(page) : preserveState
-        preserveScroll = typeof preserveScroll === 'function' ? preserveScroll(page) : preserveScroll
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         const clone = JSON.parse(JSON.stringify(page))
