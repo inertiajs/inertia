@@ -1,6 +1,6 @@
+import PageContext from './PageContext'
 import { Inertia } from '@inertiajs/inertia'
 import { createElement, useEffect, useState } from 'react'
-import PageContext from './PageContext'
 
 export default function App({
   children,

@@ -1,6 +1,6 @@
-import { Inertia } from '@inertiajs/inertia'
 import { onDestroy } from 'svelte'
 import { writable } from 'svelte/store'
+import { Inertia } from '@inertiajs/inertia'
 
 function useRemember(initialState, key) {
   const restored = Inertia.restore(key)

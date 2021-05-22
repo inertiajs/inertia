@@ -2,7 +2,7 @@ import form from './form'
 import head from './head'
 import link from './link'
 import remember from './remember'
-import { Inertia, createHeadManager } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
 let app = {}
 let headManager = null

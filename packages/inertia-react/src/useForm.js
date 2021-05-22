@@ -1,7 +1,7 @@
 import isEqual from 'lodash.isequal'
+import useRemember from './useRemember'
 import { Inertia } from '@inertiajs/inertia'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import useRemember from './useRemember'
 
 export default function useForm(...args) {
   const isMounted = useRef(null)

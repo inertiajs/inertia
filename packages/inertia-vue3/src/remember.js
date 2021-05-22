@@ -1,5 +1,5 @@
-import { Inertia } from '@inertiajs/inertia'
 import cloneDeep from 'lodash.clonedeep'
+import { Inertia } from '@inertiajs/inertia'
 
 export default {
   created() {

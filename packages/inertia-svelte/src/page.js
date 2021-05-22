@@ -1,5 +1,5 @@
-import { derived } from 'svelte/store'
 import store from './store'
+import { derived } from 'svelte/store'
 
 const page = derived(store, $store => $store.page)
 

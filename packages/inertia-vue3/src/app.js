@@ -1,9 +1,9 @@
-import useForm from './useForm'
-import link from './link'
 import head from './head'
+import link from './link'
+import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
-import { Inertia, createHeadManager } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
 const page = ref({})
