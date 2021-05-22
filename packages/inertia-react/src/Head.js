@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
-export default function InertiaLink({ children }) {
+export default function InertiaLink({ children, title }) {
   const headManager = useContext(HeadContext)
   const provider = useMemo(() => headManager.createProvider(), [headManager])
 
@@ -62,7 +62,15 @@ export default function InertiaLink({ children }) {
   }
 
   function renderNodes(nodes) {
-    return (Array.isArray(nodes) ? nodes : [nodes]).map(node => renderNode(node))
+    const computed = (Array.isArray(nodes) ? nodes : [nodes])
+      .filter(node => node)
+      .map(node => renderNode(node))
+
+    if (title && ! computed.find(tag => tag.indexOf('<title') === 0)) {
+      computed.push(`<title inertia>${title}</title>`)
+    }
+
+    return computed
   }
 
   provider.update(renderNodes(children))
