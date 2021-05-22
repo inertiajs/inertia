@@ -10,10 +10,7 @@ export function mergeDataIntoQueryString(
   method: Method,
   href: URL|string,
   data: Record<string, FormDataConvertible>,
-): {
-  href: string,
-  data: Record<string, FormDataConvertible>
-} {
+): [string, Record<string, FormDataConvertible>] {
   const hasHost = href.toString().includes('http')
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
@@ -32,8 +29,8 @@ export function mergeDataIntoQueryString(
     data = {}
   }
 
-  return {
-    href: [
+  return [
+    [
       hasHost ? `${url.protocol}//${url.host}` : '',
       hasAbsolutePath ? url.pathname : '',
       hasRelativePath ? url.pathname.substring(1) : '',
@@ -41,7 +38,7 @@ export function mergeDataIntoQueryString(
       hasHash ? url.hash : '',
     ].join(''),
     data,
-  }
+  ]
 }
 
 export function urlWithoutHash(url: URL|Location): URL {

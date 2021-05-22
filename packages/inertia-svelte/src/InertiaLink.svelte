@@ -16,9 +16,9 @@
 
   beforeUpdate(() => {
     method = method.toLowerCase()
-    const url = mergeDataIntoQueryString(method, href, data)
-    href = url.href
-    data = url.data
+    const [_href, _data] = mergeDataIntoQueryString(method, href, data)
+    href = _href
+    data = _data
 
     if (method !== 'get') {
       console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "inertia" directive. For example:\n\n<button use:inertia={{ method: 'post', href: '${href}' }}>...</button>`)
