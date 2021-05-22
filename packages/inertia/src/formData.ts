@@ -16,15 +16,11 @@ export function objectToFormData(
   return form
 }
 
-function composeKey(parent: string|null, key: string) : string {
+function composeKey(parent: string|null, key: string): string {
   return parent ? parent + '[' + key + ']' : key
 }
 
-function append(
-  form: FormData,
-  key: string,
-  value: FormDataConvertible|Record<string, FormDataConvertible>,
-): void {
+function append(form: FormData, key: string, value: FormDataConvertible|Record<string, FormDataConvertible>): void {
   if (value instanceof Date) {
     return form.append(key, value.toISOString())
   } else if (value instanceof File) {

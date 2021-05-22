@@ -20,12 +20,10 @@ export function mergeDataIntoQueryString(
   const url = new URL(href.toString(), 'http://localhost')
 
   if (method === Method.GET && Object.keys(data).length) {
-    url.search = qs.stringify(
-      deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
-        encodeValuesOnly: true,
-        arrayFormat: 'brackets',
-      },
-    )
+    url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
+      encodeValuesOnly: true,
+      arrayFormat: 'brackets',
+    })
     data = {}
   }
 

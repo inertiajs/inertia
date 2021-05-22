@@ -4,7 +4,7 @@ const Renderer = {
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
-    return (template.content.firstChild as ChildNode)
+    return template.content.firstChild as ChildNode
   },
 
   isInertiaManagedElement(element: Element): boolean {
@@ -32,8 +32,7 @@ const Renderer = {
       }
 
       const sourceElement = sourceElements.splice(index, 1)[0]
-      if (sourceElement && ! targetElement.isEqualNode(sourceElement)) {
-        // TODO: Whatever Claudio was going on about
+      if (sourceElement && !targetElement.isEqualNode(sourceElement)) {
         targetElement?.parentNode?.replaceChild(sourceElement, targetElement)
       }
     })
@@ -84,7 +83,7 @@ export default function (isServer: boolean): ({
           return carry
         }
 
-        if (element.indexOf('<title ') === 0 ) {
+        if (element.indexOf('<title ') === 0) {
           carry.title = element
           return carry
         }

@@ -1,10 +1,10 @@
-import { CancelTokenSource } from 'axios'
 import { Errors, Method, Page } from '.'
+import { CancelTokenSource } from 'axios'
 
 export type PreserveStateOption = boolean|string|((page: Page) => boolean)
 
 export type LocationVisit = {
-  preserveScroll: boolean
+  preserveScroll: boolean,
 }
 
 export interface Visit {

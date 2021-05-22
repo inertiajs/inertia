@@ -1,34 +1,11 @@
-import {
-  ActiveVisit,
-  ErrorResolver,
-  LocationVisit,
-  Method,
-  Page,
-  PageHandler,
-  PageResolver,
-  PropTransformer,
-  PreserveStateOption,
-  RequestPayload,
-  Visit,
-  VisitId,
-} from './types'
-import {AxiosResponse, default as Axios} from 'axios'
-import debounce from './debounce'
 import modal from './modal'
-import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
-} from './events'
-import {hrefToUrl, mergeDataIntoQueryString, urlWithoutHash} from './url'
-import {hasFiles} from './files'
-import {objectToFormData} from './formData'
+import debounce from './debounce'
+import { hasFiles } from './files'
+import { objectToFormData } from './formData'
+import { AxiosResponse, default as Axios } from 'axios'
+import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
+import { ActiveVisit, ErrorResolver, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, PropTransformer, RequestPayload, Visit, VisitId } from './types'
+import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 export class Router {
   protected resolveComponent!: PageResolver
@@ -294,7 +271,7 @@ export class Router {
     this.saveScrollPositions()
 
     const visitId = this.createVisitId()
-    this.activeVisit = { ... visit, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError, cancelToken: Axios.CancelToken.source() }
+    this.activeVisit = { ...visit, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError, cancelToken: Axios.CancelToken.source() }
 
     onCancelToken({
       cancel: () => {
@@ -309,7 +286,7 @@ export class Router {
 
     Axios({
       method,
-      url: url.toString().replace(url.hash, ''),
+      url: urlWithoutHash(url).href,
       data: method === Method.GET ? {} : data,
       params: method === Method.GET ? data : {},
       cancelToken: this.activeVisit.cancelToken.token,

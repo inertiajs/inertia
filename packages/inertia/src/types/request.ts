@@ -8,8 +8,7 @@ export enum Method {
   POST = 'post',
   PUT = 'put',
   PATCH = 'patch',
-  DELETE = 'delete'
+  DELETE = 'delete',
 }
 
-export type RequestPayload = Record<string, FormDataConvertible>|FormData;
-
+export type RequestPayload = Record<string, FormDataConvertible>|FormData

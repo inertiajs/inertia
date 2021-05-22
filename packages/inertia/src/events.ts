@@ -2,13 +2,11 @@ import { AxiosResponse } from 'axios'
 import { Errors, Visit, Page } from './types'
 
 function fireEvent(name: string, options: CustomEventInit): boolean {
-  return document.dispatchEvent(
-    new CustomEvent(`inertia:${name}`, options),
-  )
+  return document.dispatchEvent(new CustomEvent(`inertia:${name}`, options))
 }
 
 export function fireBeforeEvent(visit: Visit): boolean {
-  return fireEvent('before', { cancelable: true, detail: { visit } } )
+  return fireEvent('before', { cancelable: true, detail: { visit } })
 }
 
 export function fireErrorEvent(errors: Errors): boolean {
@@ -20,7 +18,7 @@ export function fireExceptionEvent(exception: unknown): boolean {
 }
 
 export function fireFinishEvent(visit: Visit): boolean {
-  return fireEvent('finish', { detail: { visit } } )
+  return fireEvent('finish', { detail: { visit } })
 }
 
 export function fireInvalidEvent(response: AxiosResponse): boolean {
@@ -36,7 +34,7 @@ export function fireProgressEvent(progress: Record<string, unknown>): boolean {
 }
 
 export function fireStartEvent(visit: Visit): boolean {
-  return fireEvent('start', { detail: { visit } } )
+  return fireEvent('start', { detail: { visit } })
 }
 
 export function fireSuccessEvent(page: Page): boolean {
