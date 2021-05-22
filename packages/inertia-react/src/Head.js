@@ -10,9 +10,10 @@ export default function InertiaLink({ children }) {
   }, [provider])
 
   function renderStartTag(node) {
-    // TODO: Remove children
-    // TODO: Remove dangerouslySetInnerHTML
     const attrs = Object.keys(node.props).reduce((carry, name) => {
+      if (['children', 'dangerouslySetInnerHTML'].includes(name)) {
+        return carry
+      }
       const value = node.props[name]
       if (value === '') {
         return carry + ` ${name}`
@@ -42,6 +43,9 @@ export default function InertiaLink({ children }) {
     let html = renderStartTag(node)
     if (node.props.children) {
       html += renderChildren(node)
+    }
+    if (node.props.dangerouslySetInnerHTML) {
+      html += node.props.dangerouslySetInnerHTML.__html
     }
     if (!isUnaryTag(node)) {
       html += `</${node.type}>`
