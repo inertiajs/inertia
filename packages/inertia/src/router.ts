@@ -401,7 +401,9 @@ export class Router {
         replace = replace || hrefToUrl(page.dialog?.url || page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         Promise.resolve(page.dialog ? this.resolveComponent(page.dialog.component) : null).then(dialogComponent => {
-          this.swapComponent({ component, page, preserveState, dialogComponent }).then(() => {
+          const clone = JSON.parse(JSON.stringify(page))
+          clone.props = this.transformProps(clone.props)
+          this.swapComponent({ component, page: clone, preserveState, dialogComponent }).then(() => {
             if (!preserveScroll) {
               this.resetScrollPositions()
             }
