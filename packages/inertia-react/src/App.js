@@ -1,6 +1,6 @@
+import PageContext from './PageContext'
 import { Inertia } from '@inertiajs/inertia'
 import { createElement, useEffect, useState } from 'react'
-import PageContext from './PageContext'
 
 export default function App({
   children,
@@ -46,7 +46,7 @@ export default function App({
       return Component.layout
         .concat(child)
         .reverse()
-        .reduce((children, Layout) => createElement(Layout, { children }))
+        .reduce((children, Layout) => createElement(Layout, { children, ...props }))
     }
 
     return child

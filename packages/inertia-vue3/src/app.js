@@ -1,8 +1,9 @@
 import useForm from './useForm'
+import head from './head'
 import link from './link'
 import remember from './remember'
 import { computed, h, markRaw, ref, nextTick } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/inertia'
 import cloneDeep from 'lodash.clonedeep'
 
 const page = ref({})
@@ -34,41 +35,50 @@ export default {
     },
   },
   setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
-    Inertia.init({
-      initialPage,
-      resolveComponent,
-      resolveErrors,
-      transformProps,
-      swapComponent: async (args) => {
-        const { dialog: _dialog, ..._page } = args.page
+    pageComponent.value = markRaw(resolveComponent(initialPage.component))
+    pageKey.value = null
+    page.value = initialPage
 
-        page.value = _page
-        pageKey.value = (args.preserveState || args.dialogComponent) ? pageKey.value : Date.now()
-        pageComponent.value = markRaw(args.component)
+    if (!(typeof window === 'undefined')) {
+      Inertia.init({
+        initialPage,
+        resolveComponent,
+        resolveErrors,
+        transformProps,
+        swapComponent: async (args) => {
+          const { dialog: _dialog, ..._page } = args.page
 
-        if (args.dialogComponent) {
-          nextTick(() => {
-            function shouldAppear() {
-              const newKey = [args.dialogComponent, ...Object.values(args.dialogComponent.components)].find(component => component.dialogKey)?.dialogKey
-              const currentKey = [dialogComponent.value || {}, ...Object.values(dialogComponent.value?.components || {})].find(component => component.dialogKey)?.dialogKey
+          page.value = _page
+          pageKey.value = (args.preserveState || args.dialogComponent) ? pageKey.value : Date.now()
+          pageComponent.value = markRaw(args.component)
 
-              return !_dialog.eager &&
-                !(dialog.value.open &&
-                  (_dialog.component === dialog.value.component || (newKey && currentKey && newKey === currentKey))
-               )
-            }
+          if (args.dialogComponent) {
+            nextTick(() => {
+              function shouldAppear() {
+                const newKey = [args.dialogComponent, ...Object.values(args.dialogComponent.components)].find(component => component.dialogKey)?.dialogKey
+                const currentKey = [dialogComponent.value || {}, ...Object.values(dialogComponent.value?.components || {})].find(component => component.dialogKey)?.dialogKey
 
-            dialog.value = { ...cloneDeep(_dialog), open: true, appear: shouldAppear() }
-            dialogKey.value = (args.preserveState && args.dialogComponent) ? dialogKey.value : Date.now()
-            dialogComponent.value = markRaw(args.dialogComponent)
-          })
-        } else if (dialog.value.open === true) {
-          dialog.value.open = false
-        }
-      },
-    })
+                return !_dialog.eager &&
+                    !(dialog.value.open &&
+                      (_dialog.component === dialog.value.component || (newKey && currentKey && newKey === currentKey))
+                    )
+              }
+
+              dialog.value = { ...cloneDeep(_dialog), open: true, appear: shouldAppear() }
+              dialogKey.value = (args.preserveState && args.dialogComponent) ? dialogKey.value : Date.now()
+              dialogComponent.value = markRaw(args.dialogComponent)
+            })
+          } else if (dialog.value.open === true) {
+            dialog.value.open = false
+          }
+        },
+      })
+    }
 
     function renderPage() {
+      if (pageComponent.value.inheritAttrs === undefined) {
+        pageComponent.value.inheritAttrs = false
+      }
       return h(pageComponent.value, {
         ...page.value.props,
         dialog: false,
@@ -83,12 +93,12 @@ export default {
         return pageComponent.value.layout
           .concat(page)
           .reverse()
-          .reduce((child, layout) => h(layout, () => child))
+          .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
       }
 
       return [
-        h(pageComponent.value.layout, () => page),
-        renderDialog()
+        h(pageComponent.value.layout, { ...page.value.props }, () => page),
+        renderDialog(),
       ]
     }
 
@@ -115,11 +125,24 @@ export default {
 
 export const plugin = {
   install(app) {
+    const isServer = typeof window === 'undefined'
+    const headManager = createHeadManager(isServer)
+
     Inertia.form = useForm
+
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     Object.defineProperty(app.config.globalProperties, '$dialog', { get: () => dialog.value })
+    Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
+
+    if (isServer) {
+      const state = { head: [] }
+      Object.defineProperty(app.config.globalProperties, '$head', { get: () => state.head })
+      headManager.onUpdate(elements => (state.head = elements))
+    }
+    
     app.mixin(remember)
+    app.component('InertiaHead', head)
     app.component('InertiaLink', link)
   },
 }

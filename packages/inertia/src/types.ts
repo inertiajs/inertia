@@ -1,0 +1,102 @@
+import { CancelTokenSource } from 'axios'
+
+export type Errors = Record<string, string>
+export type ErrorBag = Record<string, Errors>
+
+export type FormDataConvertible = Date|File|Blob|boolean|string|number|null|undefined
+
+export enum Method {
+    GET = 'get',
+    POST = 'post',
+    PUT = 'put',
+    PATCH = 'patch',
+    DELETE = 'delete',
+}
+
+export type RequestPayload = Record<string, FormDataConvertible>|FormData
+
+export interface PagePayload {
+    component: string,
+    props: {
+        [key: string]: unknown,
+        errors: Errors & ErrorBag,
+    }
+    url: string,
+}
+
+export interface DialogPayload extends PagePayload {
+    eager?: boolean
+}
+
+export interface Page extends PagePayload {
+    type?: string,
+    dialog?: DialogPayload,
+    context: string,
+    version: string|null,
+
+    // Refactor away
+    scrollRegions: Array<{ top: number, left: number }>
+    rememberedState?: Record<string, unknown>
+    resolvedErrors: Errors
+}
+
+export type PreserveStateOption = boolean|string|((page: Page) => boolean)
+
+export type LocationVisit = {
+    preserveScroll: boolean,
+}
+
+export interface Visit {
+    url: URL,
+    method: Method,
+    data: Record<string, unknown>|FormData,
+    replace: boolean,
+    preserveScroll: PreserveStateOption,
+    preserveState: PreserveStateOption,
+    only: Array<string>,
+    headers: Record<string, string>
+    errorBag: string|null,
+    forceFormData: boolean,
+
+    completed: boolean,
+    cancelled: boolean,
+    interrupted: boolean,
+}
+
+export interface LocalEventCallbacks {
+    onCancelToken?: { ({ cancel }: { cancel: VoidFunction }): void },
+    onBefore: (visit: Visit) => boolean|void,
+    onStart: (visit: Visit) => void,
+    onProgress: (progress: { percentage: number }|void) => void,
+    onFinish: (visit: Visit) => void,
+    onCancel: () => void,
+    onBeforeRender?: (page: Page) => void,
+    onSuccess?: (page: Page) => void,
+    onError?: (errors: Errors) => void,
+}
+
+export type VisitOptions = Visit & LocalEventCallbacks
+
+export interface ActiveVisit extends VisitOptions {
+    cancelToken: CancelTokenSource,
+}
+
+export type VisitId = unknown
+
+export type Component = unknown
+export type PageResolver = (name: string) => Component
+export type Props = Record<string, unknown>
+export type PropTransformer = (props: Props) => Props
+export type ErrorResolver = (page: Page) => Errors & ErrorBag
+
+export type PageHandler = ({
+  component,
+  page,
+  preserveState,
+  dialogComponent,
+}: {
+    component: Component,
+    page: Page,
+    preserveState: PreserveStateOption,
+    dialogComponent?: Component|null
+}) => Promise<unknown>

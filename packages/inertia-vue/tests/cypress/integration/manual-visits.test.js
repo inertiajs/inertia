@@ -1125,7 +1125,7 @@ describe('Manual Visits', () => {
           })
       })
 
-      it.skip('restores all tracked scroll regions when pressing the back button from another website', () => {
+      it('restores all tracked scroll regions when pressing the back button from another website', () => {
         cy.get('.off-site')
           .click({ force: true })
           .then(() => {
@@ -1410,109 +1410,6 @@ describe('Manual Visits', () => {
           cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
           expect(alert.getCalls()).to.have.length(1)
           expect(alert.getCall(0)).to.be.calledWith('A location/non-SPA visit was detected')
-        })
-    })
-  })
-
-  describe('Promise Deprecation', () => {
-    beforeEach(() => {
-      cy.visit('/visits/promise-deprecation', {
-        onBeforeLoad: window => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
-    })
-
-    it('does not show any warnings when making a regular visit', () => {
-      cy.get('.no-warning')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy.get('@consoleWarn').should('not.be.called')
-        })
-    })
-
-    it('displays a warning when trying to chain a .then on visit calls (visit method)', () => {
-      cy.get('.then')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy
-            .get('@consoleWarn')
-            .should('be.calledWith',
-              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
-              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
-            )
-        })
-    })
-
-    it('displays a warning when trying to chain a .then on visit calls (GET method)', () => {
-      cy.get('.then-get')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy
-            .get('@consoleWarn')
-            .should('be.calledWith',
-              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
-              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
-            )
-        })
-    })
-
-    it('displays a warning when trying to chain a .catch on visit calls (visit method)', () => {
-      cy.get('.catch')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy
-            .get('@consoleWarn')
-            .should('be.calledWith',
-              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
-              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
-            )
-        })
-    })
-
-    it('displays a warning when trying to chain a .catch on visit calls (GET method)', () => {
-      cy.get('.catch-get')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy
-            .get('@consoleWarn')
-            .should('be.calledWith',
-              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
-              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
-            )
-        })
-    })
-
-    it('displays a warning when trying to chain a .finally on visit calls (visit method)', () => {
-      cy.get('.finally')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy
-            .get('@consoleWarn')
-            .should('be.calledWith',
-              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
-              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
-            )
-        })
-    })
-
-    it('displays a warning when trying to chain a .finally on visit calls (GET method)', () => {
-      cy.get('.finally-get')
-        .click()
-        .wait(20)
-        .then(() => {
-          cy
-            .get('@consoleWarn')
-            .should('be.calledWith',
-              'Inertia.js visit promises have been deprecated and will be removed in a future release. Please use the new visit event callbacks instead.\n\n' +
-              'Learn more at https://inertiajs.com/manual-visits#promise-deprecation',
-            )
         })
     })
   })
