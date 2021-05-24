@@ -11,8 +11,8 @@ export default function App({
   transformProps,
 }) {
   const [current, setCurrent] = useState({
-    component: null,
-    page: {},
+    component: resolveComponent(initialPage.component),
+    page: initialPage,
     key: null,
   })
 
