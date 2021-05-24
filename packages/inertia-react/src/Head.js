@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
-export default function InertiaLink({ children, title }) {
+export default function InertiaHead({ children, title }) {
   const headManager = useContext(HeadContext)
   const provider = useMemo(() => headManager.createProvider(), [headManager])
 
