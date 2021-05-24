@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default {
   name: 'InertiaLink',
@@ -45,20 +45,20 @@ export default {
     return props => {
       const as = props.as.toLowerCase()
       const method = props.method.toLowerCase()
-      const [url, data] = mergeDataIntoQueryString(method, hrefToUrl(props.href), props.data)
+      const [href, data] = mergeDataIntoQueryString(method, props.href, props.data)
 
       if (as === 'a' && method !== 'get') {
-        console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${url.href}" method="${method}" as="button">...</inertia-link>`)
+        console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${href}" method="${method}" as="button">...</inertia-link>`)
       }
 
       return h(props.as, {
         ...attrs,
-        ...as === 'a' ? { href: url.href } : {},
+        ...as === 'a' ? { href } : {},
         onClick: (event) => {
           if (shouldIntercept(event)) {
             event.preventDefault()
 
-            Inertia.visit(url.href, {
+            Inertia.visit(href, {
               data: data,
               method: method,
               replace: props.replace,

@@ -39,5 +39,8 @@
   "peerDependencies": {
     "@inertiajs/inertia": "^0.8.0",
     "react": "^16.9.0 || ^17.0.0"
+  },
+  "dependencies": {
+    "lodash.isequal": "^4.5.0"
   }
 }

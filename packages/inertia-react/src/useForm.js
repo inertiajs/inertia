@@ -1,8 +1,10 @@
-import { Inertia } from '@inertiajs/inertia'
-import { useCallback, useRef, useState } from 'react'
+import isEqual from 'lodash.isequal'
 import useRemember from './useRemember'
+import { Inertia } from '@inertiajs/inertia'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export default function useForm(...args) {
+  const isMounted = useRef(null)
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const cancelToken = useRef(null)
@@ -16,6 +18,13 @@ export default function useForm(...args) {
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
   let transform = (data) => data
 
+  useEffect(() => {
+    isMounted.current = true
+    return () => {
+      isMounted.current = false
+    }
+  }, [])
+
   const submit = useCallback(
     (method, url, options = {}) => {
       const _options = {
@@ -23,8 +32,8 @@ export default function useForm(...args) {
         onCancelToken: (token) => {
           cancelToken.current = token
 
-          if (options.cancelToken) {
-            return options.cancelToken(token)
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
           }
         },
         onBefore: (visit) => {
@@ -51,37 +60,48 @@ export default function useForm(...args) {
           }
         },
         onSuccess: (page) => {
-          setProcessing(false)
-          setProgress(null)
-          setErrors({})
-          setHasErrors(false)
-          setWasSuccessful(true)
-          setRecentlySuccessful(true)
-          recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+            setErrors({})
+            setHasErrors(false)
+            setWasSuccessful(true)
+            setRecentlySuccessful(true)
+            recentlySuccessfulTimeoutId.current = setTimeout(() => setRecentlySuccessful(false), 2000)
+          }
 
           if (options.onSuccess) {
             return options.onSuccess(page)
           }
         },
         onError: (errors) => {
-          setProcessing(false)
-          setProgress(null)
-          setErrors(errors)
-          setHasErrors(true)
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+            setErrors(errors)
+            setHasErrors(true)
+          }
 
           if (options.onError) {
             return options.onError(errors)
           }
         },
         onCancel: () => {
-          setProcessing(false)
-          setProgress(null)
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+          }
 
           if (options.onCancel) {
             return options.onCancel()
           }
         },
         onFinish: () => {
+          if (isMounted.current) {
+            setProcessing(false)
+            setProgress(null)
+          }
+
           cancelToken.current = null
 
           if (options.onFinish) {
@@ -110,6 +130,7 @@ export default function useForm(...args) {
         setData(key)
       }
     },
+    isDirty: !isEqual(data, defaults),
     errors,
     hasErrors,
     processing,

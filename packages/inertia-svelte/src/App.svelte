@@ -1,7 +1,7 @@
 <script>
-  import { Inertia } from '@inertiajs/inertia'
   import store from './store'
   import Render, { h } from './Render.svelte'
+  import { Inertia } from '@inertiajs/inertia'
 
   export let initialPage, resolveComponent, resolveErrors, transformProps
 
@@ -26,8 +26,8 @@
       ? layout
           .concat(child)
           .reverse()
-          .reduce((child, layout) => h(layout, {}, [child]))
-      : h(layout, {}, [child])
+          .reduce((child, layout) => h(layout, $store.page.props, [child]))
+      : h(layout, $store.page.props, [child])
     : child
 </script>
 

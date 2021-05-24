@@ -10,5 +10,8 @@
 
   export default {
     layout: [SiteLayout, NestedLayout],
+    created() {
+      window._inertia_page_props = this.$vnode.data.props;
+    }
   }
 </script>
