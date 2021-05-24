@@ -9,6 +9,7 @@ export default function App({
   resolveComponent,
   resolveErrors,
   transformProps,
+  onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
     component: resolveComponent(initialPage.component),
@@ -17,7 +18,12 @@ export default function App({
   })
 
   const headManager = useMemo(() => {
-    return createHeadManager(typeof window === 'undefined')
+    const isServer = typeof window === 'undefined'
+    const headManager = createHeadManager(isServer)
+    if (isServer && onHeadUpdate) {
+      headManager.onUpdate(onHeadUpdate)
+    }
+    return headManager
   }, [])
 
   useEffect(() => {
