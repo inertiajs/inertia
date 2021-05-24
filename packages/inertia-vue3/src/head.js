@@ -1,4 +1,10 @@
 export default {
+  props: {
+    title: {
+      type: String,
+      required: false,
+    },
+  },
   data() {
     return {
       provider: this.$headManager.createProvider(),
@@ -60,12 +66,18 @@ export default {
       return this.renderFullTag(vnode)
     },
     renderVNodes(vnodes) {
-      return vnodes.map(vnode => this.renderVNode(vnode))
+      const computed = vnodes.map(vnode => this.renderVNode(vnode))
+
+      if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
+        computed.push(`<title inertia>${this.title}</title>`)
+      }
+
+      return computed
     },
   },
   render() {
-    if (this.$slots.default) {
-      this.provider.update(this.renderVNodes(this.$slots.default()))
-    }
+    this.provider.update(
+      this.renderVNodes(this.$slots.default ? this.$slots.default() : [])
+    )
   },
 }
