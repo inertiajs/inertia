@@ -90,9 +90,14 @@ export class Router {
     }
   }
 
-  protected restoreScrollPositions(): void {
+  protected restoreScrollPositions(attempt = 1): void {
     if (this.page.scrollRegions) {
-      this.scrollRegions().forEach((region: Element, index: number) => {
+      const availableRegions = this.scrollRegions()
+      if (attempt <= 20 && (this.page.scrollRegions.length !== availableRegions.length)) {
+        setTimeout(() => this.restoreScrollPositions(attempt + 1), 2)
+        return
+      }
+      return availableRegions.forEach((region: Element, index: number) => {
         region.scrollTop = this.page.scrollRegions[index].top
         region.scrollLeft = this.page.scrollRegions[index].left
       })
