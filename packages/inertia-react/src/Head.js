@@ -66,7 +66,7 @@ export default function InertiaHead({ children, title }) {
       .filter(node => node)
       .map(node => renderNode(node))
 
-    if (title && ! computed.find(tag => tag.indexOf('<title') === 0)) {
+    if (title && !computed.find(tag => tag.startsWith('<title'))) {
       computed.push(`<title inertia>${title}</title>`)
     }
 
