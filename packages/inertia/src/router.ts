@@ -330,7 +330,6 @@ export class Router {
           eager: false,
         }
       }
-
       if (only.length && page.component === this.page.component) {
         page.props = { ...this.page.props, ...page.props }
       }
