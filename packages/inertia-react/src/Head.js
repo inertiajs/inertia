@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
+import React, { useContext, useEffect, useMemo } from 'react'
 
 export default function InertiaHead({ children, title }) {
   const headManager = useContext(HeadContext)
