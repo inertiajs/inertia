@@ -1,16 +1,19 @@
-import { Inertia } from '@inertiajs/inertia'
+import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
+import { Inertia } from '@inertiajs/inertia'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const defaults = data
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let defaults = data
+  let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
   const store = writable({
     ...restored ? restored.data : data,
+    isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     progress: null,
@@ -68,6 +71,13 @@ function useForm(...args) {
       const data = transform(this.data())
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken = token
+
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
+          }
+        },
         onBefore: visit => {
           this.setStore('wasSuccessful', false)
           this.setStore('recentlySuccessful', false)
@@ -91,17 +101,22 @@ function useForm(...args) {
             return options.onProgress(event)
           }
         },
-        onSuccess: page => {
+        onSuccess: async page => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
           this.clearErrors()
           this.setStore('wasSuccessful', true)
           this.setStore('recentlySuccessful', true)
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          defaults = this.data()
+          this.setStore('isDirty', false)
+          return onSuccess
         },
         onError: errors => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
           this.setStore('errors', errors)
           this.setStore('hasErrors', true)
 
@@ -109,9 +124,18 @@ function useForm(...args) {
             return options.onError(errors)
           }
         },
+        onCancel: () => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
+
+          if (options.onCancel) {
+            return options.onCancel()
+          }
+        },
         onFinish: () => {
           this.setStore('processing', false)
           this.setStore('progress', null)
+          cancelToken = null
 
           if (options.onFinish) {
             return options.onFinish()
@@ -140,11 +164,22 @@ function useForm(...args) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
+    cancel() {
+      if (cancelToken) {
+        cancelToken.cancel()
+      }
+    },
   })
 
-  if (rememberKey) {
-    store.subscribe(form => Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey))
-  }
+  store.subscribe(form => {
+    if (form.isDirty === isEqual(form.data(), defaults)) {
+      form.setStore('isDirty', !form.isDirty)
+    }
+
+    if (rememberKey) {
+      Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey)
+    }
+  })
 
   return store
 }

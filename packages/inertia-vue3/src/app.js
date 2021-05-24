@@ -1,8 +1,9 @@
-import useForm from './useForm'
+import head from './head'
 import link from './link'
+import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
 const page = ref({})
@@ -29,20 +30,30 @@ export default {
     },
   },
   setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
-    Inertia.init({
-      initialPage,
-      resolveComponent,
-      resolveErrors,
-      transformProps,
-      swapComponent: async (args) => {
-        component.value = markRaw(args.component)
-        page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
-      },
-    })
+    component.value = markRaw(resolveComponent(initialPage.component))
+    page.value = initialPage
+    key.value = null
+
+    if (!(typeof window === 'undefined')) {
+      Inertia.init({
+        initialPage,
+        resolveComponent,
+        resolveErrors,
+        transformProps,
+        swapComponent: async (args) => {
+          component.value = markRaw(args.component)
+          page.value = args.page
+          key.value = args.preserveState ? key.value : Date.now()
+        },
+      })
+    }
 
     return () => {
       if (component.value) {
+        if (component.value.inheritAttrs === undefined) {
+          component.value.inheritAttrs = false
+        }
+
         const child = h(component.value, {
           ...page.value.props,
           key: key.value,
@@ -55,10 +66,10 @@ export default {
             return component.value.layout
               .concat(child)
               .reverse()
-              .reduce((child, layout) => h(layout, () => child))
+              .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
           }
 
-          return h(component.value.layout, () => child)
+          return h(component.value.layout, { ...page.value.props }, () => child)
         }
 
         return child
@@ -69,10 +80,23 @@ export default {
 
 export const plugin = {
   install(app) {
+    const isServer = typeof window === 'undefined'
+    const headManager = createHeadManager(isServer)
+
     Inertia.form = useForm
+
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
+
+    if (isServer) {
+      const state = { head: [] }
+      Object.defineProperty(app.config.globalProperties, '$head', { get: () => state.head })
+      headManager.onUpdate(elements => (state.head = elements))
+    }
+
     app.mixin(remember)
+    app.component('InertiaHead', head)
     app.component('InertiaLink', link)
   },
 }

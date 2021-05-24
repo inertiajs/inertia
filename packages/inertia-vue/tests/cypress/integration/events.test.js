@@ -6,8 +6,6 @@ const assertVisitObject = visit => {
   expect(visit).to.have.property('method')
   expect(visit).to.have.property('data')
   expect(visit).to.have.property('headers')
-  expect(visit).to.have.property('onBefore')
-  expect(visit).to.have.property('onProgress')
   expect(visit).to.have.property('preserveState')
 }
 const assertPageObject = page => {

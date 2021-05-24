@@ -240,7 +240,7 @@ describe('Links', () => {
       })
     })
 
-    describe.skip('FormData objects', () => {
+    describe('FormData objects', () => {
       beforeEach(() => {
         cy.visit('/links/data/form-data', {
           onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
@@ -822,7 +822,7 @@ describe('Links', () => {
           })
       })
 
-      it.skip('restores all tracked scroll regions when pressing the back button from another website', () => {
+      it('restores all tracked scroll regions when pressing the back button from another website', () => {
         cy.get('.off-site')
           .click({ force: true })
           .then(() => {
@@ -995,7 +995,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="http://localhost:13714/example" method="post" as="button">...</inertia-link>',
+          '<inertia-link href="/example" method="post" as="button">...</inertia-link>',
         )
     })
 
@@ -1021,7 +1021,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="http://localhost:13714/example" method="put" as="button">...</inertia-link>',
+          '<inertia-link href="/example" method="put" as="button">...</inertia-link>',
         )
     })
 
@@ -1047,7 +1047,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="http://localhost:13714/example" method="patch" as="button">...</inertia-link>',
+          '<inertia-link href="/example" method="patch" as="button">...</inertia-link>',
         )
     })
 
@@ -1073,7 +1073,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="http://localhost:13714/example" method="delete" as="button">...</inertia-link>',
+          '<inertia-link href="/example" method="delete" as="button">...</inertia-link>',
         )
     })
 
