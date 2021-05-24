@@ -1,6 +1,7 @@
+import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { Inertia } from '@inertiajs/inertia'
-import { createElement, useEffect, useState } from 'react'
+import { createHeadManager, Inertia } from '@inertiajs/inertia'
+import { createElement, useEffect, useMemo, useState } from 'react'
 
 export default function App({
   children,
@@ -8,12 +9,22 @@ export default function App({
   resolveComponent,
   resolveErrors,
   transformProps,
+  onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
-    component: null,
-    page: {},
+    component: resolveComponent(initialPage.component),
+    page: initialPage,
     key: null,
   })
+
+  const headManager = useMemo(() => {
+    const isServer = typeof window === 'undefined'
+    const headManager = createHeadManager(isServer)
+    if (isServer && onHeadUpdate) {
+      headManager.onUpdate(onHeadUpdate)
+    }
+    return headManager
+  }, [])
 
   useEffect(() => {
     Inertia.init({
@@ -32,7 +43,7 @@ export default function App({
   }, [])
 
   if (!current.component) {
-    return createElement(PageContext.Provider, { value: current.page }, null)
+    return createElement(HeadContext.Provider, { value: headManager }, createElement(PageContext.Provider, { value: current.page }, null))
   }
 
   const renderChildren = children || (({ Component, props, key }) => {
@@ -52,11 +63,11 @@ export default function App({
     return child
   })
 
-  return createElement(
-    PageContext.Provider,
-    { value: current.page },
-    renderChildren({ Component: current.component, key: current.key, props: current.page.props }),
-  )
+  return createElement(HeadContext.Provider, { value: headManager }, createElement(PageContext.Provider, { value: current.page }, renderChildren({
+    Component: current.component,
+    key: current.key,
+    props: current.page.props,
+  })))
 }
 
 App.displayName = 'Inertia'
