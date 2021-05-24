@@ -140,7 +140,7 @@ export const plugin = {
       Object.defineProperty(app.config.globalProperties, '$head', { get: () => state.head })
       headManager.onUpdate(elements => (state.head = elements))
     }
-    
+
     app.mixin(remember)
     app.component('InertiaHead', head)
     app.component('InertiaLink', link)
