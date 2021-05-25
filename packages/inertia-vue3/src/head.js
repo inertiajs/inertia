@@ -14,72 +14,68 @@ export default {
     this.provider.disconnect()
   },
   methods: {
-    ensureVnodeProps(vnode) {
-      vnode.props = vnode.props || {}
+    isUnaryTag(node) {
+      return [
+        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
+        'input', 'keygen', 'link', 'meta', 'param', 'source',
+        'track', 'wbr',
+      ].indexOf(node.type) > -1
     },
-    renderStartTag(vnode) {
-      this.ensureVnodeProps(vnode)
-
-      const attrs = Object.keys(vnode.props).reduce((carry, name) => {
-        const value = vnode.props[name]
+    renderTagStart(node) {
+      this.ensureNodeHasProps(node)
+      const attrs = Object.keys(node.props).reduce((carry, name) => {
+        const value = node.props[name]
         if (value === '') {
           return carry + ` ${name}`
         } else {
           return carry + ` ${name}="${value}"`
         }
       }, '')
-
-      return `<${vnode.type}${attrs}>`
+      return `<${node.type}${attrs}>`
     },
-    renderChildren(vnode) {
-      return typeof vnode.children === 'string'
-        ? vnode.children
-        : vnode.children.reduce((html, child) => html + this.renderFullTag(child), '')
+    renderTagChildren(node) {
+      return typeof node.children === 'string'
+        ? node.children
+        : node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
-    isUnaryTag(vnode) {
-      return [
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-        'input', 'keygen', 'link', 'meta', 'param', 'source',
-        'track', 'wbr',
-      ].indexOf(vnode.type) > -1
-    },
-    renderFullTag(vnode) {
-      if (vnode.type.toString() === 'Symbol(Text)') {
-        return vnode.children
-      } else if (vnode.type.toString() === 'Symbol(Comment)') {
+    renderTag(node) {
+      if (node.type.toString() === 'Symbol(Text)') {
+        return node.children
+      } else if (node.type.toString() === 'Symbol(Comment)') {
         return ''
       }
-      let html = this.renderStartTag(vnode)
-      if (vnode.children) {
-        html += this.renderChildren(vnode)
+      let html = this.renderTagStart(node)
+      if (node.children) {
+        html += this.renderTagChildren(node)
       }
-      if (!this.isUnaryTag(vnode)) {
-        html += `</${vnode.type}>`
+      if (!this.isUnaryTag(node)) {
+        html += `</${node.type}>`
       }
       return html
     },
-    ensureVNodeInertiaAttribute(vnode) {
-      this.ensureVnodeProps(vnode)
-      vnode.props.inertia = vnode.props.inertia || ''
-      return vnode
+    ensureNodeHasProps(node) {
+      node.props = node.props || {}
     },
-    renderVNode(vnode) {
-      this.ensureVNodeInertiaAttribute(vnode)
-      return this.renderFullTag(vnode)
+    ensureNodeHasInertiaAttribute(node) {
+      this.ensureNodeHasProps(node)
+      node.props.inertia = node.props.inertia || ''
+      return node
     },
-    renderVNodes(vnodes) {
-      const computed = vnodes.map(vnode => this.renderVNode(vnode))
-
+    renderNode(node) {
+      this.ensureNodeHasInertiaAttribute(node)
+      return this.renderTag(node)
+    },
+    renderNodes(nodes) {
+      const computed = nodes.map(node => this.renderNode(node)).filter(node => node)
       if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
         computed.push(`<title inertia>${this.title}</title>`)
       }
-
       return computed
     },
   },
   render() {
     this.provider.update(
-      this.renderVNodes(this.$slots.default ? this.$slots.default() : [])
+      this.renderNodes(this.$slots.default ? this.$slots.default() : [])
     )
   },
 }

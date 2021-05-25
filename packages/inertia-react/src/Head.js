@@ -9,7 +9,15 @@ export default function InertiaHead({ children, title }) {
     return () => { provider.disconnect() }
   }, [provider])
 
-  function renderStartTag(node) {
+  function isUnaryTag(node) {
+    return [
+      'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
+      'input', 'keygen', 'link', 'meta', 'param', 'source',
+      'track', 'wbr',
+    ].indexOf(node.type) > -1
+  }
+
+  function renderTagStart(node) {
     const attrs = Object.keys(node.props).reduce((carry, name) => {
       if (['children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
@@ -21,28 +29,19 @@ export default function InertiaHead({ children, title }) {
         return carry + ` ${name}="${value}"`
       }
     }, '')
-
     return `<${node.type}${attrs}>`
   }
 
-  function renderChildren(node) {
+  function renderTagChildren(node) {
     return typeof node.props.children === 'string'
       ? node.props.children
-      : node.props.children.reduce((html, child) => html + renderFullTag(child), '')
+      : node.props.children.reduce((html, child) => html + renderTag(child), '')
   }
 
-  function isUnaryTag(node) {
-    return [
-      'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-      'input', 'keygen', 'link', 'meta', 'param', 'source',
-      'track', 'wbr',
-    ].indexOf(node.type) > -1
-  }
-
-  function renderFullTag(node) {
-    let html = renderStartTag(node)
+  function renderTag(node) {
+    let html = renderTagStart(node)
     if (node.props.children) {
-      html += renderChildren(node)
+      html += renderTagChildren(node)
     }
     if (node.props.dangerouslySetInnerHTML) {
       html += node.props.dangerouslySetInnerHTML.__html
@@ -58,18 +57,14 @@ export default function InertiaHead({ children, title }) {
   }
 
   function renderNode(node) {
-    return renderFullTag(ensureNodeHasInertiaProp(node))
+    return renderTag(ensureNodeHasInertiaProp(node))
   }
 
   function renderNodes(nodes) {
-    const computed = (Array.isArray(nodes) ? nodes : [nodes])
-      .filter(node => node)
-      .map(node => renderNode(node))
-
+    const computed = (Array.isArray(nodes) ? nodes : [nodes]).filter(node => node).map(node => renderNode(node))
     if (title && !computed.find(tag => tag.startsWith('<title'))) {
       computed.push(`<title inertia>${title}</title>`)
     }
-
     return computed
   }
 
