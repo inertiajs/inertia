@@ -18,12 +18,7 @@ export default function App({
   })
 
   const headManager = useMemo(() => {
-    const isServer = typeof window === 'undefined'
-    const headManager = createHeadManager(isServer)
-    if (isServer && onHeadUpdate) {
-      headManager.onUpdate(onHeadUpdate)
-    }
-    return headManager
+    return createHeadManager(typeof window === 'undefined', onHeadUpdate || (() => {}))
   }, [])
 
   useEffect(() => {

@@ -8,6 +8,7 @@ import { createHeadManager, Inertia } from '@inertiajs/inertia'
 const component = ref(null)
 const page = ref({})
 const key = ref(null)
+let headManager = null
 
 export default {
   name: 'Inertia',
@@ -28,13 +29,21 @@ export default {
       type: Function,
       required: false,
     },
+    onHeadUpdate: {
+      type: Function,
+      required: false,
+      default: () => () => {},
+    },
   },
-  setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
+  setup({ initialPage, resolveComponent, resolveErrors, transformProps, onHeadUpdate }) {
     component.value = markRaw(resolveComponent(initialPage.component))
     page.value = initialPage
     key.value = null
 
-    if (!(typeof window === 'undefined')) {
+    const isServer = typeof window === 'undefined'
+    headManager = createHeadManager(isServer, onHeadUpdate)
+
+    if (!isServer) {
       Inertia.init({
         initialPage,
         resolveComponent,
@@ -80,20 +89,11 @@ export default {
 
 export const plugin = {
   install(app) {
-    const isServer = typeof window === 'undefined'
-    const headManager = createHeadManager(isServer)
-
     Inertia.form = useForm
 
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
-
-    if (isServer) {
-      const state = { head: [] }
-      Object.defineProperty(app.config.globalProperties, '$head', { get: () => state.head })
-      headManager.onUpdate(elements => (state.head = elements))
-    }
 
     app.mixin(remember)
     app.component('InertiaHead', head)
