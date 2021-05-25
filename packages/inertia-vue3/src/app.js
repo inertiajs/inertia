@@ -25,17 +25,13 @@ export default {
       type: Function,
       required: false,
     },
-    transformProps: {
-      type: Function,
-      required: false,
-    },
     onHeadUpdate: {
       type: Function,
       required: false,
       default: () => () => {},
     },
   },
-  setup({ initialPage, resolveComponent, resolveErrors, transformProps, onHeadUpdate }) {
+  setup({ initialPage, resolveComponent, resolveErrors, onHeadUpdate }) {
     component.value = markRaw(resolveComponent(initialPage.component))
     page.value = initialPage
     key.value = null
@@ -48,7 +44,6 @@ export default {
         initialPage,
         resolveComponent,
         resolveErrors,
-        transformProps,
         swapComponent: async (args) => {
           component.value = markRaw(args.component)
           page.value = args.page

@@ -4,14 +4,13 @@ import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import { AxiosResponse, default as Axios } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import { ActiveVisit, ErrorResolver, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, PropTransformer, RequestPayload, Visit, VisitId } from './types'
+import { ActiveVisit, ErrorResolver, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, RequestPayload, Visit, VisitId } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 export class Router {
   protected resolveComponent!: PageResolver
   protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
   protected swapComponent!: PageHandler
-  protected transformProps: PropTransformer = props => props
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
   protected page!: Page
@@ -21,19 +20,16 @@ export class Router {
     resolveComponent,
     resolveErrors,
     swapComponent,
-    transformProps,
   }: {
     initialPage: Page,
     resolveComponent: PageResolver,
     resolveErrors: ErrorResolver,
     swapComponent: PageHandler,
-    transformProps: PropTransformer
   }): void {
     this.page = initialPage
     this.resolveComponent = resolveComponent
     this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
-    this.transformProps = transformProps || this.transformProps
     this.handleInitialPageVisit()
     this.setupEventListeners()
   }
@@ -389,9 +385,7 @@ export class Router {
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
-        const clone = JSON.parse(JSON.stringify(page))
-        clone.props = this.transformProps(clone.props)
-        this.swapComponent({ component, page: clone, preserveState }).then(() => {
+        this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }

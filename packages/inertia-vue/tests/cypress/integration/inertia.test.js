@@ -7,25 +7,6 @@ describe('Inertia', () => {
     cy.get('.text').should('have.text', 'This is the Test App Entrypoint page')
   })
 
-  it('allows transforming props before they reach the page', () => {
-    cy.visit('/transform-props', {
-      onLoad: () => cy.on('window:load', () => {
-        throw 'A location/non-SPA visit was detected'
-      }),
-    })
-
-    cy.window().should('have.property', '_inertia_request_dump')
-    cy.window()
-      .then(window => window._inertia_request_dump)
-      .then(({ $page }) => {
-        tap($page.props, props => {
-          expect(props).to.contain.keys(['foo', 'bar'])
-          expect(props.foo).to.eq('bar')
-          expect(props.bar).to.eq('transformed')
-        })
-      })
-  })
-
   it('allows to resolve errors in a custom way by overriding the resolveErrors method', () => {
     cy.visit('/error-resolver', {
       onLoad: () => cy.on('window:load', () => {

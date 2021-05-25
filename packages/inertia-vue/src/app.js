@@ -22,10 +22,6 @@ export default {
       type: Function,
       required: false,
     },
-    transformProps: {
-      type: Function,
-      required: false,
-    },
     onHeadUpdate: {
       type: Function,
       required: false,
@@ -48,7 +44,6 @@ export default {
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
         resolveErrors: this.resolveErrors,
-        transformProps: this.transformProps,
         swapComponent: async ({ component, page, preserveState }) => {
           this.component = component
           this.page = page

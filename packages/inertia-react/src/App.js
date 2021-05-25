@@ -8,7 +8,6 @@ export default function App({
   initialPage,
   resolveComponent,
   resolveErrors,
-  transformProps,
   onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
@@ -26,7 +25,6 @@ export default function App({
       initialPage,
       resolveComponent,
       resolveErrors,
-      transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
         setCurrent(current => ({
           component,

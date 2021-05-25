@@ -7,7 +7,6 @@ interface InertiaAppProps<
 > {
   initialPage: Inertia.Page<PageProps>
   resolveComponent: (name: string) => Component | Promise<Component>
-  transformProps?: (props: PagePropsBeforeTransform) => PageProps
 }
 
 type InertiaApp<
