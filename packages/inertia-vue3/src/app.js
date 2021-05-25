@@ -21,17 +21,13 @@ export default {
       type: Function,
       required: true,
     },
-    resolveErrors: {
-      type: Function,
-      required: false,
-    },
     onHeadUpdate: {
       type: Function,
       required: false,
       default: () => () => {},
     },
   },
-  setup({ initialPage, resolveComponent, resolveErrors, onHeadUpdate }) {
+  setup({ initialPage, resolveComponent, onHeadUpdate }) {
     component.value = markRaw(resolveComponent(initialPage.component))
     page.value = initialPage
     key.value = null
@@ -43,7 +39,6 @@ export default {
       Inertia.init({
         initialPage,
         resolveComponent,
-        resolveErrors,
         swapComponent: async (args) => {
           component.value = markRaw(args.component)
           page.value = args.page

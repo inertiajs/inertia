@@ -18,10 +18,6 @@ export default {
       type: Function,
       required: true,
     },
-    resolveErrors: {
-      type: Function,
-      required: false,
-    },
     onHeadUpdate: {
       type: Function,
       required: false,
@@ -43,7 +39,6 @@ export default {
       Inertia.init({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
-        resolveErrors: this.resolveErrors,
         swapComponent: async ({ component, page, preserveState }) => {
           this.component = component
           this.page = page

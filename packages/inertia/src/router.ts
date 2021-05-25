@@ -4,12 +4,11 @@ import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import { AxiosResponse, default as Axios } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import { ActiveVisit, ErrorResolver, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, RequestPayload, Visit, VisitId } from './types'
+import { ActiveVisit, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, RequestPayload, Visit, VisitId } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 export class Router {
   protected resolveComponent!: PageResolver
-  protected resolveErrors: ErrorResolver = page => (page.props.errors || {})
   protected swapComponent!: PageHandler
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
@@ -18,17 +17,14 @@ export class Router {
   public init({
     initialPage,
     resolveComponent,
-    resolveErrors,
     swapComponent,
   }: {
     initialPage: Page,
     resolveComponent: PageResolver,
-    resolveErrors: ErrorResolver,
     swapComponent: PageHandler,
   }): void {
     this.page = initialPage
     this.resolveComponent = resolveComponent
-    this.resolveErrors = resolveErrors || this.resolveErrors
     this.swapComponent = swapComponent
     this.handleInitialPageVisit()
     this.setupEventListeners()
@@ -185,7 +181,7 @@ export class Router {
     if (typeof value === 'function') {
       return value(page)
     } else if (value === 'errors') {
-      return Object.keys(this.resolveErrors(page)).length > 0
+      return Object.keys(page.props.errors || {}).length > 0
     } else {
       return value
     }
@@ -327,7 +323,7 @@ export class Router {
       }
       return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
     }).then(() => {
-      const errors = this.resolveErrors(this.page)
+      const errors = this.page.props.errors || {}
       if (Object.keys(errors).length > 0) {
         fireErrorEvent(errors[errorBag] || errors)
         return onError(errors[errorBag] || errors)

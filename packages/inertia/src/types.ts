@@ -76,7 +76,6 @@ export type VisitId = unknown
 export type Component = unknown
 export type PageResolver = (name: string) => Component
 export type Props = Record<string, unknown>
-export type ErrorResolver = (page: Page) => Errors & ErrorBag
 
 export type PageHandler = ({
   component,

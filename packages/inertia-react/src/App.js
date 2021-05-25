@@ -7,7 +7,6 @@ export default function App({
   children,
   initialPage,
   resolveComponent,
-  resolveErrors,
   onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
@@ -24,7 +23,6 @@ export default function App({
     Inertia.init({
       initialPage,
       resolveComponent,
-      resolveErrors,
       swapComponent: async ({ component, page, preserveState }) => {
         setCurrent(current => ({
           component,
