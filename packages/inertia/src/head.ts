@@ -38,7 +38,7 @@ const Renderer = {
     })
 
     sourceElements.forEach(element => document.head.appendChild(element))
-  }, 50),
+  }, 1),
 }
 
 export default function (isServer: boolean): ({
