@@ -41,14 +41,12 @@ const Renderer = {
   }, 1),
 }
 
-export default function (isServer: boolean): ({
-  onUpdate(callback: (elements: string[]) => void): void,
+export default function (isServer: boolean, onUpdate: ((elements: string[]) => void)): ({
   createProvider: () => ({
     update: (elements: Array<string>) => void,
     disconnect: () => void,
   })
 }) {
-  let onUpdate: null|((elements: string[]) => void) = null
   const states: Record<string, Array<string>> = {}
   let lastProviderId = 0
 
@@ -102,19 +100,10 @@ export default function (isServer: boolean): ({
   }
 
   function commit(): void {
-    if (onUpdate !== null) {
-      onUpdate(collect())
-    }
-
-    if (isServer !== undefined && !isServer) {
-      Renderer.update(collect())
-    }
+    isServer ? onUpdate(collect()) : Renderer.update(collect())
   }
 
   return {
-    onUpdate(callback) {
-      onUpdate = callback
-    },
     createProvider: function () {
       const id = connect()
 
