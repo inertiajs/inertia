@@ -16,7 +16,10 @@ export default function App({
   })
 
   const headManager = useMemo(() => {
-    return createHeadManager(typeof window === 'undefined', onHeadUpdate || (() => {}))
+    return createHeadManager(
+      typeof window === 'undefined',
+      onHeadUpdate || (() => {})
+    )
   }, [])
 
   useEffect(() => {
