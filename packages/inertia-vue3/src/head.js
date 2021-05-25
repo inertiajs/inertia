@@ -44,8 +44,10 @@ export default {
       ].indexOf(vnode.type) > -1
     },
     renderFullTag(vnode) {
-      if (typeof vnode.type === 'symbol') {
+      if (vnode.type.toString() === 'Symbol(Text)') {
         return vnode.children
+      } else if (vnode.type.toString() === 'Symbol(Comment)') {
+        return ''
       }
       let html = this.renderStartTag(vnode)
       if (vnode.children) {
