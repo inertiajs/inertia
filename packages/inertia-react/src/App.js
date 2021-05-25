@@ -7,8 +7,6 @@ export default function App({
   children,
   initialPage,
   resolveComponent,
-  resolveErrors,
-  transformProps,
   onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
@@ -18,15 +16,16 @@ export default function App({
   })
 
   const headManager = useMemo(() => {
-    return createHeadManager(typeof window === 'undefined', onHeadUpdate || (() => {}))
+    return createHeadManager(
+      typeof window === 'undefined',
+      onHeadUpdate || (() => {})
+    )
   }, [])
 
   useEffect(() => {
     Inertia.init({
       initialPage,
       resolveComponent,
-      resolveErrors,
-      transformProps,
       swapComponent: async ({ component, page, preserveState }) => {
         setCurrent(current => ({
           component,

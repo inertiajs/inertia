@@ -14,7 +14,6 @@ type App<
   resolveComponent: (
     name: string
   ) => React.ComponentType | Promise<React.ComponentType>
-  transformProps?: (props: PagePropsBeforeTransform) => PageProps
 }>
 
 interface BaseInertiaLinkProps {
