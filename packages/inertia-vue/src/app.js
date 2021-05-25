@@ -26,6 +26,11 @@ export default {
       type: Function,
       required: false,
     },
+    onHeadUpdate: {
+      type: Function,
+      required: false,
+      default: () => () => {},
+    },
   },
   data() {
     return {
@@ -36,10 +41,9 @@ export default {
   },
   created() {
     app = this
-    headManager = createHeadManager(this.$isServer)
-    if (this.$isServer) {
-      headManager.onUpdate(elements => (this.$ssrContext.head = elements))
-    } else {
+    headManager = createHeadManager(this.$isServer, this.onHeadUpdate)
+
+    if (!this.$isServer) {
       Inertia.init({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
