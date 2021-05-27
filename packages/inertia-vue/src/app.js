@@ -14,9 +14,13 @@ export default {
       type: Object,
       required: true,
     },
+    initialComponent: {
+      type: Object,
+      required: false,
+    },
     resolveComponent: {
       type: Function,
-      required: true,
+      required: false,
     },
     onHeadUpdate: {
       type: Function,
@@ -26,8 +30,8 @@ export default {
   },
   data() {
     return {
-      component: this.resolveComponent(this.initialPage.component),
-      page: this.initialPage,
+      component: this.initialComponent || null,
+      page: this.initialComponent ? this.initialPage : null,
       key: null,
     }
   },
