@@ -6,12 +6,13 @@ import { createElement, useEffect, useMemo, useState } from 'react'
 export default function App({
   children,
   initialPage,
+  initialComponent,
   resolveComponent,
   onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
-    component: resolveComponent(initialPage.component),
-    page: initialPage,
+    component: initialComponent || null,
+    page: initialComponent ? initialPage : null,
     key: null,
   })
 
