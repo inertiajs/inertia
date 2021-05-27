@@ -17,9 +17,13 @@ export default {
       type: Object,
       required: true,
     },
+    initialComponent: {
+      type: Object,
+      required: false,
+    },
     resolveComponent: {
       type: Function,
-      required: true,
+      required: false,
     },
     onHeadUpdate: {
       type: Function,
@@ -27,9 +31,9 @@ export default {
       default: () => () => {},
     },
   },
-  setup({ initialPage, resolveComponent, onHeadUpdate }) {
-    component.value = markRaw(resolveComponent(initialPage.component))
-    page.value = initialPage
+  setup({ initialPage, initialComponent, resolveComponent, onHeadUpdate }) {
+    component.value = initialComponent ? markRaw(initialComponent) : null
+    page.value = initialComponent ? initialPage : null
     key.value = null
 
     const isServer = typeof window === 'undefined'
