@@ -33,7 +33,7 @@ export default {
   },
   setup({ initialPage, initialComponent, resolveComponent, onHeadUpdate }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
-    page.value = initialComponent ? initialPage : null
+    page.value = initialPage
     key.value = null
 
     const isServer = typeof window === 'undefined'

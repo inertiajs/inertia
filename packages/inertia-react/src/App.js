@@ -12,7 +12,7 @@ export default function App({
 }) {
   const [current, setCurrent] = useState({
     component: initialComponent || null,
-    page: initialComponent ? initialPage : null,
+    page: initialPage,
     key: null,
   })
 

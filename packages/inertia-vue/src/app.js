@@ -31,7 +31,7 @@ export default {
   data() {
     return {
       component: this.initialComponent || null,
-      page: this.initialComponent ? this.initialPage : null,
+      page: this.initialPage,
       key: null,
     }
   },
