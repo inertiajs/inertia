@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import app, { plugin } from './app'
 
-export default function createInertiaApp({ id = 'app', page, resolve, onHeadUpdate, setup }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, page, renderer }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -9,7 +9,9 @@ export default function createInertiaApp({ id = 'app', page, resolve, onHeadUpda
 
   Vue.use(plugin)
 
-  return resolveComponent(initialPage.component).then(initialComponent => {
+  let head = []
+
+  const vueApp = await resolveComponent(initialPage.component).then(initialComponent => {
     return setup({
       el,
       app,
@@ -22,9 +24,20 @@ export default function createInertiaApp({ id = 'app', page, resolve, onHeadUpda
           initialPage,
           initialComponent,
           resolveComponent,
-          onHeadUpdate,
+          onHeadUpdate: isServer ? elements => (head = elements) : null,
         },
       },
     })
+  })
+
+  if (! isServer) {
+    return vueApp
+  }
+
+  return new Promise((resolve, reject) => {
+    return renderer
+      .renderToString(vueApp)
+      .then(body => resolve({ head, body }))
+      .catch(error => reject(error))
   })
 }
