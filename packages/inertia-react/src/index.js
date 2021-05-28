@@ -1,5 +1,6 @@
 export { default as useForm } from './useForm'
 export { default as usePage } from './usePage'
+export { default as createInertiaApp } from './createInertiaApp'
 export { default as Head, default as InertiaHead } from './Head'
 export { default as useRemember, useRememberedState } from './useRemember'
 export { default as App, default as app, default as InertiaApp } from './App'
