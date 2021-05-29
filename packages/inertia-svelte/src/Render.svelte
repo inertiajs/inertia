@@ -9,7 +9,7 @@
 </script>
 
 <script>
-  import store from './store'
+  import { store } from './'
 
   export let component
   export let props = {}

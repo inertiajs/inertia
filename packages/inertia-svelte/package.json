@@ -20,9 +20,16 @@
     "svelte"
   ],
   "main": "src/index.js",
+  "scripts": {
+    "build": "npm run build:ssr",
+    "build:ssr": "node build/compile.js && microbundle --no-compress --format cjs src/ssr/index.js -o ./ssr/index.js",
+    "prepublishOnly": "npm run build"
+  },
   "devDependencies": {
     "@inertiajs/inertia": "^0.9.0",
-    "eslint": "^7.0.0"
+    "eslint": "^7.0.0",
+    "microbundle": "^0.12.0",
+    "svelte": "^3.20.0"
   },
   "peerDependencies": {
     "@inertiajs/inertia": "^0.9.0",
