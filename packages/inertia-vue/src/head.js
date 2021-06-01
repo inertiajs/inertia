@@ -25,7 +25,9 @@ export default {
       this.ensureNodeHasAttrs(node)
       const attrs = Object.keys(node.data.attrs).reduce((carry, name) => {
         const value = node.data.attrs[name]
-        if (value === '') {
+        if (name === 'head-key') {
+          return carry
+        } else if (value === '') {
           return carry + ` ${name}`
         } else {
           return carry + ` ${name}="${value}"`
@@ -59,7 +61,7 @@ export default {
     },
     ensureNodeHasInertiaAttribute(node) {
       this.ensureNodeHasAttrs(node)
-      node.data.attrs['inertia'] = node.data.attrs.inertia || ''
+      node.data.attrs['inertia'] = node.data.attrs['head-key'] !== undefined ? node.data.attrs['head-key'] : ''
       return node
     },
     renderNode(node) {
