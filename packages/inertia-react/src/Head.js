@@ -19,7 +19,7 @@ export default function InertiaHead({ children, title }) {
 
   function renderTagStart(node) {
     const attrs = Object.keys(node.props).reduce((carry, name) => {
-      if (['children', 'dangerouslySetInnerHTML'].includes(name)) {
+      if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
       }
       const value = node.props[name]
@@ -53,7 +53,9 @@ export default function InertiaHead({ children, title }) {
   }
 
   function ensureNodeHasInertiaProp(node) {
-    return React.cloneElement(node, { inertia: node.props.inertia || '' })
+    return React.cloneElement(node, {
+      inertia: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
+    })
   }
 
   function renderNode(node) {
