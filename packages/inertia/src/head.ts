@@ -4,7 +4,19 @@ const Renderer = {
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
-    return template.content.firstChild as ChildNode
+    const node = (template.content.firstChild as Element)
+
+    if (!tag.startsWith('<script ')) {
+      return node
+    }
+
+    const script = document.createElement('script')
+    script.innerHTML = node.innerHTML
+    node.getAttributeNames().forEach(name => {
+      script.setAttribute(name, node.getAttribute(name) || '')
+    })
+
+    return script
   },
 
   isInertiaManagedElement(element: Element): boolean {
