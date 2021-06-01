@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
