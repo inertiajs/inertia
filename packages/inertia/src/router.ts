@@ -469,7 +469,7 @@ export class Router {
 
   public on(type: string, callback: CallableFunction): VoidFunction {
     if (typeof document === 'undefined') {
-      return () => void
+      return () => undefined
     }
   
     const listener: EventListener = event => {
