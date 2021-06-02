@@ -2,6 +2,10 @@ import { AxiosResponse } from 'axios'
 import { Errors, Visit, Page } from './types'
 
 function fireEvent(name: string, options: CustomEventInit): boolean {
+  if (typeof document === 'undefined') {
+    return false
+  }
+
   return document.dispatchEvent(new CustomEvent(`inertia:${name}`, options))
 }
 
