@@ -468,6 +468,10 @@ export class Router {
   }
 
   public on(type: string, callback: CallableFunction): VoidFunction {
+    if (typeof document === 'undefined') {
+      return
+    }
+  
     const listener: EventListener = event => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
