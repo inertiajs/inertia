@@ -94,7 +94,8 @@ export class Router {
   }
 
   protected isBackForwardVisit(): boolean {
-    return window.history.state
+    return typeof window !== 'undefined'
+        && window.history.state
         && window.performance
         && window.performance.getEntriesByType('navigation').length > 0
         && (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type === 'back_forward'
