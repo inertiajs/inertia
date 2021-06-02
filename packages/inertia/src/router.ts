@@ -4,7 +4,7 @@ import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import { AxiosResponse, default as Axios } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import { ActiveVisit, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, RequestPayload, Visit, VisitId } from './types'
+import { ActiveVisit, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, RequestPayload, Visit, VisitId, GlobalEventCallbacks } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 export class Router {
@@ -467,13 +467,13 @@ export class Router {
     return window.history.state?.rememberedState?.[key]
   }
 
-  public on(type: string, callback: CallableFunction): VoidFunction {
-    const listener: EventListener = event => {
+  public on<TType extends keyof GlobalEventCallbacks>(type: TType, callback: GlobalEventCallbacks[TType]): VoidFunction {
+    const listener = ((event: CustomEvent) => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
-    }
+    }) as EventListener
 
     document.addEventListener(`inertia:${type}`, listener)
     return () => document.removeEventListener(`inertia:${type}`, listener)
