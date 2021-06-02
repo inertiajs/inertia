@@ -53,6 +53,27 @@ export interface Visit {
   interrupted: boolean,
 }
 
+export interface GlobalEventCallbacks {
+  before: (event: CustomEvent<{
+    visit: Visit
+  }>) => boolean | void
+  start: (event: CustomEvent<{
+    visit: Visit
+  }>) => void
+  progress: (event: CustomEvent) => void
+  success: (event: CustomEvent<{
+    page: Page
+  }>) => void
+  invalid: (event: CustomEvent) => void
+  error: (event: CustomEvent) => void
+  finish: (event: CustomEvent<{
+    visit: Visit
+  }>) => void
+  navigate: (event: CustomEvent<{
+    page: Page
+  }>) => void
+}
+
 export interface LocalEventCallbacks {
   onCancelToken?: { ({ cancel }: { cancel: VoidFunction }): void },
   onBefore: (visit: Visit) => boolean|void,
