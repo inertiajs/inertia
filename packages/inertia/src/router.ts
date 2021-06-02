@@ -36,7 +36,9 @@ export class Router {
     } else if (this.isLocationVisit()) {
       this.handleLocationVisit(this.page)
     } else {
-      this.page.url += window.location.hash
+      if (typeof window !== 'undefined') {
+        this.page.url += window.location.hash
+      }
       this.setPage(this.page)
     }
     fireNavigateEvent(this.page)
