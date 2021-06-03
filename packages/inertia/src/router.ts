@@ -4,7 +4,19 @@ import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import { AxiosResponse, default as Axios } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import { ActiveVisit, LocationVisit, Method, Page, PageHandler, PageResolver, PreserveStateOption, RequestPayload, Visit, VisitId } from './types'
+import {
+  ActiveVisit,
+  LocationVisit,
+  Method,
+  Page,
+  PageHandler,
+  PageResolver,
+  PendingVisit,
+  PreserveStateOption,
+  RequestPayload,
+  VisitId,
+  VisitOptions,
+} from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 export class Router {
@@ -205,25 +217,7 @@ export class Router {
     onCancel = () => {},
     onSuccess = () => {},
     onError = () => {},
-  }: {
-    method?: Method,
-    data?: RequestPayload,
-    replace?: boolean,
-    preserveScroll?: PreserveStateOption,
-    preserveState?: PreserveStateOption
-    only?: Array<string>,
-    headers?: Record<string, string>,
-    errorBag?: string,
-    forceFormData?: boolean,
-    onCancelToken?: { ({ cancel }: { cancel: VoidFunction }): void },
-    onBefore?: (visit: Visit) => boolean|void,
-    onStart?: (visit: Visit) => void,
-    onProgress?: (event: { percentage: number }|void) => void,
-    onFinish?: (visit: Visit) => void,
-    onCancel?: () => void,
-    onSuccess?: (page: Page) => void,
-    onError?: (errors: Record<string, unknown>) => void,
-  } = {}): void {
+  }: Partial<VisitOptions> = {}): void {
     let url = typeof href === 'string' ? hrefToUrl(href) : href
 
     if ((hasFiles(data) || forceFormData) && !(data instanceof FormData)) {
@@ -236,7 +230,7 @@ export class Router {
       data = _data
     }
 
-    const visit: Visit = {
+    const visit: PendingVisit = {
       url,
       method,
       data,
@@ -291,7 +285,7 @@ export class Router {
           'X-Inertia-Partial-Component': this.page.component,
           'X-Inertia-Partial-Data': only.join(','),
         } : {}),
-        ...(errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
+        ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
       onUploadProgress: progress => {
@@ -325,8 +319,9 @@ export class Router {
     }).then(() => {
       const errors = this.page.props.errors || {}
       if (Object.keys(errors).length > 0) {
-        fireErrorEvent(errors[errorBag] || errors)
-        return onError(errors[errorBag] || errors)
+        const scopedErrors = errorBag ? (errors[errorBag] ? errors[errorBag] : {}) : errors
+        fireErrorEvent(scopedErrors)
+        return onError(scopedErrors)
       }
       fireSuccessEvent(this.page)
       return onSuccess(this.page)

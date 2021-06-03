@@ -15,6 +15,10 @@ export enum Method {
 
 export type RequestPayload = Record<string, FormDataConvertible>|FormData
 
+export interface PageProps {
+  [key: string]: unknown
+}
+
 export interface Page {
   component: string,
   props: PageProps & {
@@ -29,52 +33,7 @@ export interface Page {
   resolvedErrors: Errors
 }
 
-export type PreserveStateOption = boolean|string|((page: Page) => boolean)
-
-export type LocationVisit = {
-  preserveScroll: boolean,
-}
-
-export interface Visit {
-  url: URL,
-  method: Method,
-  data: Record<string, unknown>|FormData,
-  replace: boolean,
-  preserveScroll: PreserveStateOption,
-  preserveState: PreserveStateOption,
-  only: Array<string>,
-  headers: Record<string, string>
-  errorBag: string|null,
-  forceFormData: boolean,
-
-  completed: boolean,
-  cancelled: boolean,
-  interrupted: boolean,
-}
-
-export interface LocalEventCallbacks {
-  onCancelToken?: { ({ cancel }: { cancel: VoidFunction }): void },
-  onBefore: (visit: Visit) => boolean|void,
-  onStart: (visit: Visit) => void,
-  onProgress: (progress: { percentage: number }|void) => void,
-  onFinish: (visit: Visit) => void,
-  onCancel: () => void,
-  onBeforeRender?: (page: Page) => void,
-  onSuccess?: (page: Page) => void,
-  onError?: (errors: Errors) => void,
-}
-
-export type VisitOptions = Visit & LocalEventCallbacks
-
-export interface ActiveVisit extends VisitOptions {
-  cancelToken: CancelTokenSource,
-}
-
-export type VisitId = unknown
-
-export type Component = unknown
 export type PageResolver = (name: string) => Component
-export type Props = Record<string, unknown>
 
 export type PageHandler = ({
   component,
@@ -86,4 +45,45 @@ export type PageHandler = ({
   preserveState: PreserveStateOption,
 }) => Promise<unknown>
 
-export interface PageProps {}
+export type PreserveStateOption = boolean|string|((page: Page) => boolean)
+
+export type LocationVisit = {
+  preserveScroll: boolean,
+}
+
+export type Visit = {
+  method: Method,
+  data: Record<string, FormDataConvertible>|FormData,
+  replace: boolean,
+  preserveScroll: PreserveStateOption,
+  preserveState: PreserveStateOption,
+  only: Array<string>,
+  headers: Record<string, string>
+  errorBag: string|null,
+  forceFormData: boolean,
+}
+
+export type VisitOptions = Visit & {
+  onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void },
+  onBefore: (visit: PendingVisit) => boolean|void,
+  onStart: (visit: PendingVisit) => void,
+  onProgress: (progress: { percentage: number }|void) => void,
+  onFinish: (visit: ActiveVisit) => void,
+  onCancel: () => void,
+  onSuccess: (page: Page) => void,
+  onError: (errors: Errors) => void,
+}
+
+export type PendingVisit = Visit & {
+  url: URL,
+  completed: boolean,
+  cancelled: boolean,
+  interrupted: boolean,
+};
+
+export type ActiveVisit = PendingVisit & VisitOptions & {
+  cancelToken: CancelTokenSource,
+}
+
+export type VisitId = unknown
+export type Component = unknown

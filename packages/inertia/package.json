@@ -5,6 +5,7 @@
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
+    "Claudio Dekker <claudio@ubient.net>",
     "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
   ],
   "homepage": "https://inertiajs.com/",
