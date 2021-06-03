@@ -68,11 +68,11 @@ interface InertiaFormProps<TForm> {
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   submit(method: string, url: string, options?: Inertia.VisitOptions): void
-  get(url: string, options?: Inertia.VisitOptions): void
-  post(url: string, options?: Inertia.VisitOptions): void
-  put(url: string, options?: Inertia.VisitOptions): void
-  patch(url: string, options?: Inertia.VisitOptions): void
-  delete(url: string, options?: Inertia.VisitOptions): void
+  get(url: string, options?: Partial<Inertia.VisitOptions>): void
+  post(url: string, options?: Partial<Inertia.VisitOptions>): void
+  put(url: string, options?: Partial<Inertia.VisitOptions>): void
+  patch(url: string, options?: Partial<Inertia.VisitOptions>): void
+  delete(url: string, options?: Partial<Inertia.VisitOptions>): void
   cancel(): void
 }
 
