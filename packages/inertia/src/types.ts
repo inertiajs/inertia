@@ -86,3 +86,5 @@ export type PageHandler = ({
   page: Page,
   preserveState: PreserveStateOption,
 }) => Promise<unknown>
+
+export interface PageProps {}
