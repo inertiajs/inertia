@@ -17,9 +17,8 @@ export type RequestPayload = Record<string, FormDataConvertible>|FormData
 
 export interface Page {
   component: string,
-  props: {
-    [key: string]: unknown,
-    errors: Errors & ErrorBag,
+  props: PageProps & {
+    errors: Errors & ErrorBag;
   }
   url: string,
   version: string|null
@@ -86,3 +85,5 @@ export type PageHandler = ({
   page: Page,
   preserveState: PreserveStateOption,
 }) => Promise<unknown>
+
+export interface PageProps {}
