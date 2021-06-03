@@ -15,7 +15,7 @@ export default {
       required: true,
     },
     initialComponent: {
-      type: [Object, Function],
+      type: [Object, Function, String],
       required: false,
     },
     resolveComponent: {
