@@ -85,7 +85,7 @@ interface InertiaFormTrait {
 
 declare module 'vue/types/vue' {
   export interface Vue {
-    $inertia: Inertia.Inertia & InertiaFormTrait
+    $inertia: typeof Inertia.Inertia & InertiaFormTrait
     $page: Inertia.Page
   }
 }
