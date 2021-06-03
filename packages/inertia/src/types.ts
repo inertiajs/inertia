@@ -137,13 +137,15 @@ export type GlobalEventsMap = {
 
 export type GlobalEventNames = keyof GlobalEventsMap
 
+export type GlobalEvent<TEventName extends GlobalEventNames> = CustomEvent<GlobalEventDetails<TEventName>>
+
 export type GlobalEventParameters<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['parameters']
 
 export type GlobalEventResult<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['result']
 
 export type GlobalEventDetails<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['details']
 
-export type GlobalEventTrigger<TEventName extends GlobalEventNames> = (...params: GlobalEventsMap[TEventName]['parameters']) => GlobalEventResult<TEventName>
+export type GlobalEventTrigger<TEventName extends GlobalEventNames> = (...params: GlobalEventParameters<TEventName>) => GlobalEventResult<TEventName>
 
 export type GlobalEventCallback<TEventName extends GlobalEventNames> = (...params: GlobalEventParameters<TEventName>) => GlobalEventResult<TEventName>
 
