@@ -41,7 +41,9 @@ export default {
         : node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
     renderTag(node) {
-      if (node.type.toString() === 'Symbol(Text)') {
+      if (node.type.toString() === 'Symbol(Fragment)') {
+        return this.renderTagChildren(node)
+      } else if (node.type.toString() === 'Symbol(Text)') {
         return node.children
       } else if (node.type.toString() === 'Symbol(Comment)') {
         return ''
