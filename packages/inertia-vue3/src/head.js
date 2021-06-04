@@ -22,7 +22,8 @@ export default {
       ].indexOf(node.type) > -1
     },
     renderTagStart(node) {
-      this.ensureNodeHasProps(node)
+      node.props = node.props || {}
+      node.props.inertia = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
       const attrs = Object.keys(node.props).reduce((carry, name) => {
         const value = node.props[name]
         if (['key', 'head-key'].includes(name)) {
@@ -41,9 +42,7 @@ export default {
         : node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
     renderTag(node) {
-      if (node.type.toString() === 'Symbol(Fragment)') {
-        return this.renderTagChildren(node)
-      } else if (node.type.toString() === 'Symbol(Text)') {
+      if (node.type.toString() === 'Symbol(Text)') {
         return node.children
       } else if (node.type.toString() === 'Symbol(Comment)') {
         return ''
@@ -57,24 +56,19 @@ export default {
       }
       return html
     },
-    ensureNodeHasProps(node) {
-      node.props = node.props || {}
-    },
-    ensureNodeHasInertiaAttribute(node) {
-      this.ensureNodeHasProps(node)
-      node.props.inertia = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
-      return node
-    },
-    renderNode(node) {
-      this.ensureNodeHasInertiaAttribute(node)
-      return this.renderTag(node)
+    addTitleElement(elements) {
+      if (this.title && !elements.find(tag => tag.startsWith('<title'))) {
+        elements.push(`<title inertia>${this.title}</title>`)
+      }
+      return elements
     },
     renderNodes(nodes) {
-      const computed = nodes.map(node => this.renderNode(node)).filter(node => node)
-      if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
-        computed.push(`<title inertia>${this.title}</title>`)
-      }
-      return computed
+      return this.addTitleElement(
+        nodes
+          .flatMap(node => node.type.toString() === 'Symbol(Fragment)' ? node.children : node)
+          .map(node => this.renderTag(node))
+          .filter(node => node)
+      )
     },
   },
   render() {
