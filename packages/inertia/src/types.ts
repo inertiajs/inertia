@@ -3,7 +3,7 @@ import { CancelTokenSource } from 'axios'
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertible = Date|File|Blob|boolean|string|number|null|undefined
+export type FormDataConvertible = Date|File|Blob|Array<any>|boolean|string|number|null|undefined
 
 export enum Method {
   GET = 'get',
