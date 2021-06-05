@@ -49,7 +49,7 @@ export class Router {
       this.handleLocationVisit(this.page)
     } else {
       this.page.url += window.location.hash
-      this.setPage(this.page)
+      this.setPage(this.page, { preserveState: true })
     }
     fireNavigateEvent(this.page)
   }
@@ -112,7 +112,7 @@ export class Router {
 
   protected handleBackForwardVisit(page: Page): void {
     window.history.state.version = page.version
-    this.setPage(window.history.state, { preserveScroll: true }).then(() => {
+    this.setPage(window.history.state, { preserveScroll: true, preserveState: true }).then(() => {
       this.restoreScrollPositions()
     })
   }
@@ -144,7 +144,7 @@ export class Router {
     page.url += window.location.hash
     page.rememberedState = window.history.state?.rememberedState ?? {}
     page.scrollRegions = window.history.state?.scrollRegions ?? []
-    this.setPage(page, { preserveScroll: locationVisit.preserveScroll }).then(() => {
+    this.setPage(page, { preserveScroll: locationVisit.preserveScroll, preserveState: true }).then(() => {
       if (locationVisit.preserveScroll) {
         this.restoreScrollPositions()
       }
