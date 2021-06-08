@@ -1,4 +1,4 @@
-import App from './App'
+import App from './App.svelte'
 
 export default async function createInertiaApp({ id = 'app', resolve, setup, page, render }) {
   const isServer = typeof window === 'undefined'
