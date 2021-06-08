@@ -44,6 +44,8 @@ export default {
     renderTag(node) {
       if (node.type.toString() === 'Symbol(Text)') {
         return node.children
+      } else if (node.type.toString() === 'Symbol()') {
+        return ''
       } else if (node.type.toString() === 'Symbol(Comment)') {
         return ''
       }
