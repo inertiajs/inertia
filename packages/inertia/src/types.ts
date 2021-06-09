@@ -1,5 +1,13 @@
 import { CancelTokenSource } from 'axios'
 
+declare global {
+  // These open interfaces may be extended in an application-specific manner via
+  // declaration merging / interface augmentation.
+  namespace Inertia {
+    interface PageProps {}
+  }
+}
+
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
@@ -15,9 +23,9 @@ export enum Method {
 
 export type RequestPayload = Record<string, FormDataConvertible>|FormData
 
-export interface PageProps {
+export type PageProps = {
   [key: string]: unknown
-}
+} & Inertia.PageProps
 
 export interface Page {
   component: string,
