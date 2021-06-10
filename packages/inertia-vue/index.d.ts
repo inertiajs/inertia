@@ -1,13 +1,13 @@
 import * as Inertia from '@inertiajs/inertia'
 import Vue, { Component, ComponentOptions, FunctionalComponentOptions, PluginObject } from 'vue'
 
-interface InertiaData {
+export interface InertiaData {
   component: Component | null
   key: number | null
   props: Inertia.PageProps
 }
 
-interface InertiaProps {
+export interface InertiaProps {
   initialPage: Inertia.Page
   initialComponent?: object
   resolveComponent?: (name: string) => Component
@@ -16,13 +16,13 @@ interface InertiaProps {
 
 type InertiaApp = ComponentOptions<never, InertiaData, never, never, InertiaProps>
 
-export const InertiaApp: InertiaApp
+export declare const InertiaApp: InertiaApp
 
-export const App: InertiaApp
+export declare const App: InertiaApp
 
-export const plugin: PluginObject<any>
+export declare const plugin: PluginObject<any>
 
-interface CreateInertiaAppProps {
+export interface CreateInertiaAppProps {
   id?: string
   resolve: (name: string) => 
     Component |
@@ -42,7 +42,7 @@ interface CreateInertiaAppProps {
 
 export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
 
-interface InertiaLinkProps {
+export interface InertiaLinkProps {
   as?: string
   data?: object
   href: string
@@ -64,9 +64,9 @@ interface InertiaLinkProps {
 
 type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 
-export const InertiaLink: InertiaLink
+export declare const InertiaLink: InertiaLink
 
-interface InertiaFormProps<TForm> {
+export interface InertiaFormProps<TForm> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
@@ -87,11 +87,11 @@ interface InertiaFormProps<TForm> {
   cancel(): void
 }
 
-type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
 type InertiaHeadManager = ReturnType<typeof Inertia.createHeadManager>
 
-interface InertiaFormTrait {
+export interface InertiaFormTrait {
   form<TForm>(data: TForm): InertiaForm<TForm>
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }

@@ -1,7 +1,7 @@
 import * as Inertia from '@inertiajs/inertia'
 import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
 
-interface InertiaAppProps {
+export interface InertiaAppProps {
   initialPage: Inertia.Page
   initialComponent?: object
   resolveComponent?: (name: string) => DefineComponent
@@ -10,11 +10,11 @@ interface InertiaAppProps {
 
 type InertiaApp = DefineComponent<InertiaAppProps>
 
-export const App: InertiaApp
+export declare const App: InertiaApp
 
-export const plugin: Plugin
+export declare const plugin: Plugin
 
-interface CreateInertiaAppProps {
+export interface CreateInertiaAppProps {
   id?: string
   resolve: (name: string) => 
     DefineComponent |
@@ -32,7 +32,7 @@ interface CreateInertiaAppProps {
 
 export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
 
-interface InertiaLinkProps {
+export interface InertiaLinkProps {
   as?: string
   data?: object
   href: string
@@ -54,13 +54,13 @@ interface InertiaLinkProps {
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
 
-export const Link: InertiaLink
+export declare const Link: InertiaLink
 
-type ProgressEvent = {
+export declare type ProgressEvent = {
   percentage: number
 }
 
-interface InertiaFormProps<TForm> {
+export interface InertiaFormProps<TForm> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
@@ -81,7 +81,7 @@ interface InertiaFormProps<TForm> {
   cancel(): void
 }
 
-type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
+export declare type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
 export declare function useForm<TForm>(data: TForm): InertiaForm<TForm>
 
@@ -96,7 +96,7 @@ export declare function usePage<PageProps>(): {
   version: ComputedRef<string | null>
 }
 
-type InertiaHead = DefineComponent<{
+export declare type InertiaHead = DefineComponent<{
   title?: string
 }>
 
