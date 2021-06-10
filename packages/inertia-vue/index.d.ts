@@ -1,33 +1,24 @@
 import * as Inertia from '@inertiajs/inertia'
-import { Component, FunctionalComponentOptions, PluginObject } from 'vue'
+import { Component, ComponentOptions, FunctionalComponentOptions, PluginObject } from 'vue'
 
-interface AppData<PageProps extends Inertia.PageProps = Inertia.PageProps> {
+interface InertiaData {
   component: Component | null
   key: number | null
-  props: PageProps | {}
+  props: Inertia.PageProps
 }
 
-interface AppProps<
-  PagePropsBeforeTransform extends Inertia.PagePropsBeforeTransform = Inertia.PagePropsBeforeTransform,
-  PageProps extends Inertia.PageProps = Inertia.PageProps
-> {
-  initialPage: Inertia.Page<PageProps>
-  resolveComponent: (name: string) => Component | Promise<Component>
+interface InertiaProps {
+  initialPage: Inertia.Page
+  initialComponent?: object
+  resolveComponent?: (name: string) => Component
+  onHeadUpdate?: (elements: string[]) => void
 }
 
-type App<
-  PagePropsBeforeTransform extends Inertia.PagePropsBeforeTransform = Inertia.PagePropsBeforeTransform,
-  PageProps extends Inertia.PageProps = Inertia.PageProps
-> = Component<
-  AppData<PageProps>,
-  never,
-  never,
-  AppProps<PagePropsBeforeTransform, PageProps>
->
+type InertiaApp = ComponentOptions<never, InertiaData, never, never, InertiaProps>
 
-export const InertiaApp: App
+export const InertiaApp: InertiaApp
 
-export const App: App
+export const App: InertiaApp
 
 export const plugin: PluginObject<any>
 

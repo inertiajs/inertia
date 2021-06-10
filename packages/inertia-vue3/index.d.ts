@@ -1,18 +1,14 @@
 import * as Inertia from '@inertiajs/inertia'
-import { Ref, ComputedRef, App, Component, DefineComponent } from 'vue'
+import { Ref, ComputedRef, App as VueApp, DefineComponent } from 'vue'
 
-interface InertiaAppProps<
-  PagePropsBeforeTransform extends Inertia.PagePropsBeforeTransform = Inertia.PagePropsBeforeTransform,
-  PageProps extends Inertia.PageProps = Inertia.PageProps
-> {
-  initialPage: Inertia.Page<PageProps>
-  resolveComponent: (name: string) => Component | Promise<Component>
+interface InertiaAppProps {
+  initialPage: Inertia.Page
+  initialComponent?: object
+  resolveComponent?: (name: string) => DefineComponent
+  onHeadUpdate?: (elements: string[]) => void
 }
 
-type InertiaApp<
-  PagePropsBeforeTransform extends Inertia.PagePropsBeforeTransform = Inertia.PagePropsBeforeTransform,
-  PageProps extends Inertia.PageProps = Inertia.PageProps
-> = DefineComponent<InertiaAppProps<PagePropsBeforeTransform, PageProps>>
+type InertiaApp = DefineComponent<InertiaAppProps>
 
 export const App: InertiaApp
 
@@ -41,7 +37,7 @@ type InertiaLink = DefineComponent<InertiaLinkProps>
 export const Link: InertiaLink
 
 export const plugin: {
-  install(app: App): void
+  install(app: VueApp): void
 }
 
 type ProgressEvent = {
