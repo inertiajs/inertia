@@ -4,7 +4,7 @@ declare global {
   // These open interfaces may be extended in an application-specific manner via
   // declaration merging / interface augmentation.
   namespace Inertia {
-    interface PageProps {}
+    interface SharedData {}
   }
 }
 
@@ -25,7 +25,7 @@ export type RequestPayload = Record<string, FormDataConvertible>|FormData
 
 export type PageProps = {
   [key: string]: unknown
-} & Inertia.PageProps
+} & Inertia.SharedData
 
 export interface Page {
   component: string,
