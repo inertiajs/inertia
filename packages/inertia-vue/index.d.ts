@@ -1,13 +1,13 @@
 import * as Inertia from '@inertiajs/inertia'
 import { Component, FunctionalComponentOptions, PluginObject } from 'vue'
 
-interface AppData<PageProps extends Inertia.PageProps = Inertia.PageProps> {
+export interface AppData<PageProps extends Inertia.PageProps = Inertia.PageProps> {
   component: Component | null
   key: number | null
   props: PageProps | {}
 }
 
-interface AppProps<
+export interface AppProps<
   PagePropsBeforeTransform extends Inertia.PagePropsBeforeTransform = Inertia.PagePropsBeforeTransform,
   PageProps extends Inertia.PageProps = Inertia.PageProps
 > {
@@ -31,7 +31,7 @@ export const App: App
 
 export const plugin: PluginObject<any>
 
-interface InertiaLinkProps {
+export interface InertiaLinkProps {
   as?: string
   data?: object
   href: string
@@ -55,7 +55,7 @@ type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 
 export const InertiaLink: InertiaLink
 
-interface InertiaFormProps<TForm> {
+export interface InertiaFormProps<TForm> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
@@ -76,9 +76,9 @@ interface InertiaFormProps<TForm> {
   cancel(): void
 }
 
-type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
-interface InertiaFormTrait {
+export interface InertiaFormTrait {
   form<TForm>(data: TForm): InertiaForm<TForm>
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }
