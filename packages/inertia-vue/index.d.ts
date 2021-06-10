@@ -1,5 +1,5 @@
 import * as Inertia from '@inertiajs/inertia'
-import { Component, ComponentOptions, FunctionalComponentOptions, PluginObject } from 'vue'
+import Vue, { Component, ComponentOptions, FunctionalComponentOptions, PluginObject } from 'vue'
 
 interface InertiaData {
   component: Component | null
@@ -21,6 +21,26 @@ export const InertiaApp: InertiaApp
 export const App: InertiaApp
 
 export const plugin: PluginObject<any>
+
+interface CreateInertiaAppProps {
+  id?: string
+  resolve: (name: string) => 
+    Component |
+    Promise<Component> |
+    { default: Component }
+  setup: (props: {
+    el: Element
+    app: InertiaApp
+    props: {
+      attrs: { id: string, 'data-page': string }
+      props: InertiaProps
+    }
+  }) => void | Vue
+  page?: Inertia.Page
+  render?: (vm: Vue) => Promise<string>
+}
+
+export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
 
 interface InertiaLinkProps {
   as?: string

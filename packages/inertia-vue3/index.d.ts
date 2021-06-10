@@ -1,5 +1,5 @@
 import * as Inertia from '@inertiajs/inertia'
-import { Ref, ComputedRef, App as VueApp, DefineComponent } from 'vue'
+import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
 
 interface InertiaAppProps {
   initialPage: Inertia.Page
@@ -11,6 +11,26 @@ interface InertiaAppProps {
 type InertiaApp = DefineComponent<InertiaAppProps>
 
 export const App: InertiaApp
+
+export const plugin: Plugin
+
+interface CreateInertiaAppProps {
+  id?: string
+  resolve: (name: string) => 
+    DefineComponent |
+    Promise<DefineComponent> |
+    { default: DefineComponent }
+  setup: (props: {
+    el: Element
+    app: InertiaApp
+    props: InertiaAppProps
+    plugin: Plugin
+  }) => void | VueApp
+  page?: Inertia.Page
+  render?: (app: VueApp) => Promise<string>
+}
+
+export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
 
 interface InertiaLinkProps {
   as?: string
@@ -35,10 +55,6 @@ interface InertiaLinkProps {
 type InertiaLink = DefineComponent<InertiaLinkProps>
 
 export const Link: InertiaLink
-
-export const plugin: {
-  install(app: VueApp): void
-}
 
 type ProgressEvent = {
   percentage: number
