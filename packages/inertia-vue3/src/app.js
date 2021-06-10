@@ -65,14 +65,13 @@ export default {
         if (component.value.layout) {
           if (typeof component.value.layout === 'function') {
             return component.value.layout(h, child)
-          } else if (Array.isArray(component.value.layout)) {
-            return component.value.layout
-              .concat(child)
-              .reverse()
-              .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
           }
 
-          return h(component.value.layout, { ...page.value.props }, () => child)
+          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
+            .concat(child)
+            .reverse()
+            .map((layout) => ({ ...layout, inheritAttrs: !!layout.inheritAttrs }))
+            .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
         }
 
         return child
