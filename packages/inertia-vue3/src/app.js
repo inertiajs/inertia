@@ -70,8 +70,10 @@ export default {
           return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
             .concat(child)
             .reverse()
-            .map((layout) => ({ ...layout, inheritAttrs: !!layout.inheritAttrs }))
-            .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
+            .reduce((child, layout) => {
+              layout.inheritAttrs = !!layout.inheritAttrs
+              return h(layout, { ...page.value.props }, () => child)
+            })
         }
 
         return child
