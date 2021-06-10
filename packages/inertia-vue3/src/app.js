@@ -70,12 +70,7 @@ export default {
           return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
             .concat(child)
             .reverse()
-            .map((layout) => {
-              if (layout.inheritAttrs === undefined) {
-                layout.inheritAttrs = false
-              }
-              return layout
-            })
+            .map((layout) => ({ ...layout, inheritAttrs: !!layout.inheritAttrs }))
             .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
         }
 
