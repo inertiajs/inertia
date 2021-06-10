@@ -89,6 +89,8 @@ interface InertiaFormProps<TForm> {
 
 type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
+type InertiaHeadManager = ReturnType<typeof Inertia.createHeadManager>
+
 interface InertiaFormTrait {
   form<TForm>(data: TForm): InertiaForm<TForm>
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
@@ -98,5 +100,6 @@ declare module 'vue/types/vue' {
   export interface Vue {
     $inertia: typeof Inertia.Inertia & InertiaFormTrait
     $page: Inertia.Page
+    $headManager: InertiaHeadManager
   }
 }

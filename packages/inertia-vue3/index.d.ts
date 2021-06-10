@@ -96,10 +96,21 @@ export declare function usePage<PageProps>(): {
   version: ComputedRef<string | null>
 }
 
-declare module '@vue/runtime-core' {
+type InertiaHead = DefineComponent<{
+  title?: string
+}>
+
+declare module 'vue' {
+  /** global components is support in Volar */
+  export interface GlobalComponents {
+    InertiaHead: InertiaHead
+    InertiaLink: InertiaLink
+  }
+
   export interface ComponentCustomProperties {
-    $inertia: Inertia.Inertia
+    $inertia: typeof Inertia.Inertia
     $page: Inertia.Page
+    $headManager: ReturnType<typeof Inertia.createHeadManager>
   }
 
   export interface ComponentCustomOptions {
