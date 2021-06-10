@@ -71,7 +71,7 @@ export interface InertiaFormProps<TForm> {
   errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
-  progress: ProgressEvent | null
+  progress: { percentage: number } | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm

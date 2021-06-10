@@ -56,16 +56,12 @@ type InertiaLink = DefineComponent<InertiaLinkProps>
 
 export declare const Link: InertiaLink
 
-export declare type ProgressEvent = {
-  percentage: number
-}
-
 export interface InertiaFormProps<TForm> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
-  progress: ProgressEvent | null
+  progress: { percentage: number } | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm
