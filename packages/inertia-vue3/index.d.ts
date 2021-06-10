@@ -89,8 +89,8 @@ export declare function useForm<TForm>(rememberKey: string, data: TForm): Inerti
 
 export declare function useRemember(data: object, key?: string): Ref<object>
 
-export declare function usePage<CustomPageProps extends Inertia.PageProps = Inertia.PageProps>(): {
-  props: ComputedRef<CustomPageProps>
+export declare function usePage<PageProps>(): {
+  props: ComputedRef<PageProps & Inertia.PageProps>
   url: ComputedRef<string>
   component: ComputedRef<string>
   version: ComputedRef<string | null>
