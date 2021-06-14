@@ -63,7 +63,7 @@ export type Visit = {
   forceFormData: boolean,
 }
 
-export type VisitOptions = Visit & {
+export type VisitOptions = Partial<Visit & {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void },
   onBefore: (visit: PendingVisit) => boolean|void,
   onStart: (visit: PendingVisit) => void,
@@ -72,7 +72,7 @@ export type VisitOptions = Visit & {
   onCancel: () => void,
   onSuccess: (page: Page) => void,
   onError: (errors: Errors) => void,
-}
+}>
 
 export type PendingVisit = Visit & {
   url: URL,
