@@ -60,7 +60,7 @@ export default {
     },
     addTitleElement(elements) {
       if (this.title && !elements.find(tag => tag.startsWith('<title'))) {
-        elements.push(`<title inertia>${this.title}</title>`)
+        elements.push(`<title inertia>${this.provider.titleCallback(this.title)}</title>`)
       }
       return elements
     },
