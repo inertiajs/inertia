@@ -53,8 +53,9 @@ const Renderer = {
   }, 1),
 }
 
-export default function (isServer: boolean, onUpdate: ((elements: string[]) => void)): ({
+export default function createHeadManager(isServer: boolean, titleCallback: ((title: string) => string), onUpdate: ((elements: string[]) => void)): ({
   createProvider: () => ({
+    titleCallback: (title: string) => string,
     update: (elements: Array<string>) => void,
     disconnect: () => void,
   })
@@ -120,6 +121,7 @@ export default function (isServer: boolean, onUpdate: ((elements: string[]) => v
       const id = connect()
 
       return {
+        titleCallback,
         update: (elements) => update(id, elements),
         disconnect: () => disconnect(id),
       }
