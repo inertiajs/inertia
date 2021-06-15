@@ -71,7 +71,7 @@ export default {
     renderNodes(nodes) {
       const computed = nodes.map(node => this.renderNode(node)).filter(node => node)
       if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
-        computed.push(`<title inertia>${this.title}</title>`)
+        computed.push(`<title inertia>${this.provider.titleCallback(this.title)}</title>`)
       }
       return computed
     },

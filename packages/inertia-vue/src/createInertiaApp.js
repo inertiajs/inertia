@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import app, { plugin } from './app'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, page, render }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -24,6 +24,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pag
           initialPage,
           initialComponent,
           resolveComponent,
+          titleCallback: title,
           onHeadUpdate: isServer ? elements => (head = elements) : null,
         },
       },
