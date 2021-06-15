@@ -120,8 +120,8 @@ export default function (isServer: boolean, onUpdate: ((elements: string[]) => v
       const id = connect()
 
       return {
-        disconnect: () => disconnect(id),
         update: (elements) => update(id, elements),
+        disconnect: () => disconnect(id),
       }
     },
   }
