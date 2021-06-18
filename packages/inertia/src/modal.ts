@@ -13,6 +13,8 @@ export default {
 
     this.modal = document.createElement('div')
     this.modal.style.position = 'fixed'
+    this.modal.style.top = '0'
+    this.modal.style.left = '0'
     this.modal.style.width = '100vw'
     this.modal.style.height = '100vh'
     this.modal.style.padding = '50px'
