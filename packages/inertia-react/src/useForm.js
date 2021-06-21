@@ -68,7 +68,9 @@ export default function useForm(...args) {
             setWasSuccessful(true)
             setRecentlySuccessful(true)
             recentlySuccessfulTimeoutId.current = setTimeout(() => {
-              if (isMounted.current) setRecentlySuccessful(false)
+              if (isMounted.current) {
+                setRecentlySuccessful(false)
+              }
             }, 2000)
           }
 
