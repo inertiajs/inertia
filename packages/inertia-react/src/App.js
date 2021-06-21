@@ -8,6 +8,7 @@ export default function App({
   initialPage,
   initialComponent,
   resolveComponent,
+  titleCallback,
   onHeadUpdate,
 }) {
   const [current, setCurrent] = useState({
@@ -19,6 +20,7 @@ export default function App({
   const headManager = useMemo(() => {
     return createHeadManager(
       typeof window === 'undefined',
+      titleCallback || (title => title),
       onHeadUpdate || (() => {})
     )
   }, [])
