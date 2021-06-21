@@ -22,6 +22,11 @@ export default {
       type: Function,
       required: false,
     },
+    titleCallback: {
+      type: Function,
+      required: false,
+      default: title => title,
+    },
     onHeadUpdate: {
       type: Function,
       required: false,
@@ -37,7 +42,7 @@ export default {
   },
   created() {
     app = this
-    headManager = createHeadManager(this.$isServer, this.onHeadUpdate)
+    headManager = createHeadManager(this.$isServer, this.titleCallback, this.onHeadUpdate)
 
     if (!this.$isServer) {
       Inertia.init({

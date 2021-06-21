@@ -53,7 +53,7 @@ const Renderer = {
   }, 1),
 }
 
-export default function (isServer: boolean, onUpdate: ((elements: string[]) => void)): ({
+export default function createHeadManager(isServer: boolean, titleCallback: ((title: string) => string), onUpdate: ((elements: string[]) => void)): ({
   createProvider: () => ({
     update: (elements: Array<string>) => void,
     disconnect: () => void,
@@ -94,7 +94,8 @@ export default function (isServer: boolean, onUpdate: ((elements: string[]) => v
         }
 
         if (element.indexOf('<title ') === 0) {
-          carry.title = element
+          const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/)
+          carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}`: element
           return carry
         }
 
@@ -120,8 +121,8 @@ export default function (isServer: boolean, onUpdate: ((elements: string[]) => v
       const id = connect()
 
       return {
-        disconnect: () => disconnect(id),
         update: (elements) => update(id, elements),
+        disconnect: () => disconnect(id),
       }
     },
   }
