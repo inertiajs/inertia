@@ -1,3 +1,4 @@
+export { default as Head } from './head'
 export { default as useForm } from './useForm'
 export { default as useRemember } from './useRemember'
 export { default as Link, default as link } from './link'

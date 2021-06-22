@@ -1,5 +1,3 @@
-import head from './head'
-import link from './link'
 import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
@@ -94,8 +92,6 @@ export const plugin = {
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 
     app.mixin(remember)
-    app.component('InertiaHead', head)
-    app.component('InertiaLink', link)
   },
 }
 
