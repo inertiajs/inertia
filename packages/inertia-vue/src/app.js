@@ -1,6 +1,4 @@
 import form from './form'
-import head from './head'
-import link from './link'
 import remember from './remember'
 import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
@@ -86,8 +84,6 @@ export const plugin = {
   install(Vue) {
     Inertia.form = form
     Vue.mixin(remember)
-    Vue.component('InertiaHead', head)
-    Vue.component('InertiaLink', link)
 
     Vue.mixin({
       beforeCreate() {
