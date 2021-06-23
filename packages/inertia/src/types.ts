@@ -149,7 +149,7 @@ export type GlobalEventTrigger<TEventName extends GlobalEventNames> = (...params
 
 export type GlobalEventCallback<TEventName extends GlobalEventNames> = (...params: GlobalEventParameters<TEventName>) => GlobalEventResult<TEventName>
 
-export type VisitOptions = Visit & {
+export type VisitOptions = Partial<Visit & {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void },
   onBefore: GlobalEventCallback<'before'>,
   onStart: GlobalEventCallback<'start'>,
@@ -158,7 +158,7 @@ export type VisitOptions = Visit & {
   onCancel: GlobalEventCallback<'cancel'>,
   onSuccess: GlobalEventCallback<'success'>,
   onError: GlobalEventCallback<'error'>,
-}
+}>
 
 export type PendingVisit = Visit & {
   url: URL,
