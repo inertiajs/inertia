@@ -1,6 +1,4 @@
 import form from './form'
-import head from './head'
-import link from './link'
 import remember from './remember'
 import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
@@ -22,6 +20,11 @@ export default {
       type: Function,
       required: false,
     },
+    titleCallback: {
+      type: Function,
+      required: false,
+      default: title => title,
+    },
     onHeadUpdate: {
       type: Function,
       required: false,
@@ -37,7 +40,7 @@ export default {
   },
   created() {
     app = this
-    headManager = createHeadManager(this.$isServer, this.onHeadUpdate)
+    headManager = createHeadManager(this.$isServer, this.titleCallback, this.onHeadUpdate)
 
     if (!this.$isServer) {
       Inertia.init({
@@ -75,18 +78,12 @@ export default {
       return child
     }
   },
-  install(Vue) {
-    console.warn('Registering the Inertia Vue plugin via the "app" component has been deprecated. Use the new "plugin" named export instead.\n\nimport { plugin } from \'@inertiajs/inertia-vue\'\n\nVue.use(plugin)')
-    plugin.install(Vue)
-  },
 }
 
 export const plugin = {
   install(Vue) {
     Inertia.form = form
     Vue.mixin(remember)
-    Vue.component('InertiaHead', head)
-    Vue.component('InertiaLink', link)
 
     Vue.mixin({
       beforeCreate() {

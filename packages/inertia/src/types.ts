@@ -1,9 +1,9 @@
-import { CancelTokenSource } from 'axios'
+import { CancelTokenSource, AxiosResponse } from 'axios'
 
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertible = Date|File|Blob|boolean|string|number|null|undefined
+export type FormDataConvertible = Date|File|Blob|Array<any>|boolean|string|number|null|undefined
 
 export enum Method {
   GET = 'get',
@@ -19,9 +19,9 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page {
+export interface Page<SharedPropsType = Record<string, unknown>> {
   component: string,
-  props: PageProps & {
+  props: PageProps & SharedPropsType & {
     errors: Errors & ErrorBag;
   }
   url: string,
@@ -63,15 +63,101 @@ export type Visit = {
   forceFormData: boolean,
 }
 
+export type GlobalEventsMap = {
+  before: {
+    parameters: [PendingVisit],
+    details: {
+      visit: PendingVisit,
+    },
+    result: boolean|void,
+  },
+  start: {
+    parameters: [PendingVisit],
+    details: {
+      visit: PendingVisit,
+    },
+    result: void,
+  },
+  progress: {
+    parameters: [{ percentage: number }|undefined],
+    details: {
+      progress: { percentage: number }|undefined,
+    },
+    result: void,
+  },
+  finish: {
+    parameters: [ActiveVisit],
+    details: {
+      visit: ActiveVisit,
+    },
+    result: void,
+  },
+  cancel: {
+    parameters: [],
+    details: {
+    },
+    result: void,
+  },
+  navigate: {
+    parameters: [Page],
+    details: {
+        page: Page
+    },
+    result: void,
+  },
+  success: {
+    parameters: [Page],
+    details: {
+        page: Page
+    },
+    result: void,
+  },
+  error: {
+    parameters: [Errors],
+    details: {
+        errors: Errors
+    },
+    result: void,
+  },
+  invalid: {
+    parameters: [AxiosResponse],
+    details: {
+        response: AxiosResponse
+    },
+    result: boolean,
+  },
+  exception: {
+    parameters: [Error],
+    details: {
+        exception: Error
+    },
+    result: boolean,
+  },
+}
+
+export type GlobalEventNames = keyof GlobalEventsMap
+
+export type GlobalEvent<TEventName extends GlobalEventNames> = CustomEvent<GlobalEventDetails<TEventName>>
+
+export type GlobalEventParameters<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['parameters']
+
+export type GlobalEventResult<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['result']
+
+export type GlobalEventDetails<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['details']
+
+export type GlobalEventTrigger<TEventName extends GlobalEventNames> = (...params: GlobalEventParameters<TEventName>) => GlobalEventResult<TEventName>
+
+export type GlobalEventCallback<TEventName extends GlobalEventNames> = (...params: GlobalEventParameters<TEventName>) => GlobalEventResult<TEventName>
+
 export type VisitOptions = Partial<Visit & {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void },
-  onBefore: (visit: PendingVisit) => boolean|void,
-  onStart: (visit: PendingVisit) => void,
-  onProgress: (progress: { percentage: number }|void) => void,
-  onFinish: (visit: ActiveVisit) => void,
-  onCancel: () => void,
-  onSuccess: (page: Page) => void,
-  onError: (errors: Errors) => void,
+  onBefore: GlobalEventCallback<'before'>,
+  onStart: GlobalEventCallback<'start'>,
+  onProgress: GlobalEventCallback<'progress'>,
+  onFinish: GlobalEventCallback<'finish'>,
+  onCancel: GlobalEventCallback<'cancel'>,
+  onSuccess: GlobalEventCallback<'success'>,
+  onError: GlobalEventCallback<'error'>,
 }>
 
 export type PendingVisit = Visit & {

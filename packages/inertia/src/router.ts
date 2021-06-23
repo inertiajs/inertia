@@ -16,6 +16,9 @@ import {
   RequestPayload,
   VisitId,
   VisitOptions,
+  GlobalEventNames,
+  GlobalEvent,
+  GlobalEventResult,
 } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
@@ -419,32 +422,32 @@ export class Router {
     }
   }
 
-  public get(url: URL|string, data: RequestPayload = {}, options : Record<string, unknown> = {}): void {
+  public get(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
     return this.visit(url, { ...options, method: Method.GET, data })
   }
 
-  public reload(options: Record<string, unknown> = {}): void {
+  public reload(options: Exclude<Partial<VisitOptions>, 'preserveScroll'|'preserveState'> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL|string, options: Record<string, unknown> = {}): void {
+  public replace(url: URL|string, options: Exclude<Partial<VisitOptions>, 'replace'> = {}): void {
     console.warn(`Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${options.method ?? 'get'}() instead.`)
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(url: URL|string, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
+  public post(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.POST, data })
   }
 
-  public put(url: URL|string, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
+  public put(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.PUT, data })
   }
 
-  public patch(url: URL|string, data: RequestPayload = {}, options: Record<string, unknown> = {}): void {
+  public patch(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.PATCH, data })
   }
 
-  public delete(url: URL|string, options: Record<string, unknown> = {}): void {
+  public delete(url: URL|string, options: Exclude<Partial<VisitOptions>, 'method'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.DELETE })
   }
 
@@ -462,13 +465,13 @@ export class Router {
     return window.history.state?.rememberedState?.[key]
   }
 
-  public on(type: string, callback: CallableFunction): VoidFunction {
-    const listener: EventListener = event => {
+  public on<TEventName extends GlobalEventNames>(type: TEventName, callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>): VoidFunction {
+    const listener = ((event: GlobalEvent<TEventName>) => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
-    }
+    }) as EventListener
 
     document.addEventListener(`inertia:${type}`, listener)
     return () => document.removeEventListener(`inertia:${type}`, listener)

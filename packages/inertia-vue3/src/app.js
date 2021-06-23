@@ -1,5 +1,3 @@
-import head from './head'
-import link from './link'
 import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
@@ -25,19 +23,24 @@ export default {
       type: Function,
       required: false,
     },
+    titleCallback: {
+      type: Function,
+      required: false,
+      default: title => title,
+    },
     onHeadUpdate: {
       type: Function,
       required: false,
       default: () => () => {},
     },
   },
-  setup({ initialPage, initialComponent, resolveComponent, onHeadUpdate }) {
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
     page.value = initialPage
     key.value = null
 
     const isServer = typeof window === 'undefined'
-    headManager = createHeadManager(isServer, onHeadUpdate)
+    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
 
     if (!isServer) {
       Inertia.init({
@@ -89,8 +92,6 @@ export const plugin = {
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 
     app.mixin(remember)
-    app.component('InertiaHead', head)
-    app.component('InertiaLink', link)
   },
 }
 
