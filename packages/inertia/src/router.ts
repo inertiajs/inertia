@@ -16,6 +16,9 @@ import {
   RequestPayload,
   VisitId,
   VisitOptions,
+  GlobalEventNames,
+  GlobalEvent,
+  GlobalEventResult,
 } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
@@ -462,13 +465,13 @@ export class Router {
     return window.history.state?.rememberedState?.[key]
   }
 
-  public on(type: string, callback: CallableFunction): VoidFunction {
-    const listener: EventListener = event => {
+  public on<TEventName extends GlobalEventNames>(type: TEventName, callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>): VoidFunction {
+    const listener = ((event: GlobalEvent<TEventName>) => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
-    }
+    }) as EventListener
 
     document.addEventListener(`inertia:${type}`, listener)
     return () => document.removeEventListener(`inertia:${type}`, listener)
