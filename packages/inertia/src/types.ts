@@ -19,9 +19,9 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page {
+export interface Page<SharedPropsType = Record<string, unknown>> {
   component: string,
-  props: PageProps & {
+  props: PageProps & SharedPropsType & {
     errors: Errors & ErrorBag;
   }
   url: string,
