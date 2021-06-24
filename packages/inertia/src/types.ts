@@ -19,17 +19,27 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page<SharedProps = PageProps> {
+export interface PagePayload<SharedProps = PageProps> {
   component: string,
   props: PageProps & SharedProps & {
     errors: Errors & ErrorBag;
   }
   url: string,
-  version: string|null
+}
+
+export interface DialogPayload extends PagePayload {
+  eager?: boolean
+}
+
+export interface Page<SharedProps = PageProps> extends PagePayload<SharedProps> {
+  type?: string,
+  dialog?: DialogPayload,
+  context: string,
+  version: string|null,
 
   // Refactor away
   scrollRegions: Array<{ top: number, left: number }>
-  rememberedState: Record<string, unknown>
+  rememberedState?: Record<string, unknown>
   resolvedErrors: Errors
 }
 
@@ -39,10 +49,12 @@ export type PageHandler = ({
   component,
   page,
   preserveState,
+  dialogComponent,
 }: {
   component: Component,
   page: Page,
   preserveState: PreserveStateOption,
+  dialogComponent?: Component|null
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean|string|((page: Page) => boolean)

@@ -82,12 +82,17 @@ export class Router {
     }
   }
 
-  protected restoreScrollPositions(): void {
+  protected restoreScrollPositions(attempt = 1): void {
     if (this.page.scrollRegions) {
-      this.scrollRegions().forEach((region: Element, index: number) => {
-        region.scrollTop = this.page.scrollRegions[index].top
-        region.scrollLeft = this.page.scrollRegions[index].left
-      })
+      const availableRegions = this.scrollRegions()
+      if (attempt <= 20 && (this.page.scrollRegions.length !== availableRegions.length)) {
+        Promise.resolve().then(() => this.restoreScrollPositions(attempt + 1))
+      } else {
+        return availableRegions.forEach((region: Element, index: number) => {
+          region.scrollTop = this.page.scrollRegions[index].top
+          region.scrollLeft = this.page.scrollRegions[index].left
+        })
+      }
     }
   }
 
@@ -269,6 +274,7 @@ export class Router {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
+        'X-Inertia-Context': this.page.context,
         ...(only.length ? {
           'X-Inertia-Partial-Component': this.page.component,
           'X-Inertia-Partial-Data': only.join(','),
@@ -288,22 +294,31 @@ export class Router {
         return Promise.reject({ response })
       }
 
-      const pageResponse: Page = response.data
-      if (only.length && pageResponse.component === this.page.component) {
-        pageResponse.props = { ...this.page.props, ...pageResponse.props }
+      let page: Page = response.data
+      if (response.data.type === 'dialog') {
+        page = this.page
+        page.dialog = {
+          component: response.data.component,
+          props: response.data.props,
+          url: response.data.url,
+          eager: false,
+        }
       }
-      preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
-      preserveState = this.resolvePreserveOption(preserveState, pageResponse)
-      if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
-        pageResponse.rememberedState = window.history.state.rememberedState
+      if (only.length && page.component === this.page.component) {
+        page.props = { ...this.page.props, ...page.props }
+      }
+      preserveScroll = this.resolvePreserveOption(preserveScroll, page)
+      preserveState = this.resolvePreserveOption(preserveState, page)
+      if (preserveState && window.history.state?.rememberedState && page.component === this.page.component) {
+        page.rememberedState = window.history.state.rememberedState
       }
       const requestUrl = url
-      const responseUrl = hrefToUrl(pageResponse.url)
+      const responseUrl = hrefToUrl(page.url)
       if (requestUrl.hash && !responseUrl.hash && urlWithoutHash(requestUrl).href === responseUrl.href) {
         responseUrl.hash = requestUrl.hash
-        pageResponse.url = responseUrl.href
+        page.url = responseUrl.href
       }
-      return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
+      return this.setPage(page, { visitId, replace, preserveScroll, preserveState })
     }).then(() => {
       const errors = this.page.props.errors || {}
       if (Object.keys(errors).length > 0) {
@@ -362,15 +377,17 @@ export class Router {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        replace = replace || hrefToUrl(page.url).href === window.location.href
+        replace = replace || hrefToUrl(page.dialog?.url || page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
-        this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
-          if (!replace) {
-            fireNavigateEvent(page)
-          }
+        Promise.resolve(page.dialog ? this.resolveComponent(page.dialog.component) : null).then(dialogComponent => {
+          this.swapComponent({ component, page, preserveState, dialogComponent }).then(() => {
+            if (!preserveScroll) {
+              this.resetScrollPositions()
+            }
+            if (!replace) {
+              fireNavigateEvent(page)
+            }
+          })
         })
       }
     })
@@ -378,12 +395,12 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(page, '', page.dialog?.url || page.url)
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(page, '', page.dialog?.url || page.url)
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
@@ -393,9 +410,11 @@ export class Router {
       Promise.resolve(this.resolveComponent(page.component)).then(component => {
         if (visitId === this.visitId) {
           this.page = page
-          this.swapComponent({ component, page, preserveState: false }).then(() => {
-            this.restoreScrollPositions()
-            fireNavigateEvent(page)
+          Promise.resolve(page.dialog ? this.resolveComponent(page.dialog.component) : null).then(dialogComponent => {
+            this.swapComponent({component, page, preserveState: false, dialogComponent}).then(() => {
+              this.restoreScrollPositions()
+              fireNavigateEvent(page)
+            })
           })
         }
       })
@@ -434,6 +453,12 @@ export class Router {
 
   public delete(url: URL|string, options: Exclude<VisitOptions, 'method'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.DELETE })
+  }
+
+  public closeDialog(): void {
+    delete this.page.dialog
+    delete this.page.rememberedState
+    this.setPage(this.page)
   }
 
   public remember(data: unknown, key = 'default'): void {

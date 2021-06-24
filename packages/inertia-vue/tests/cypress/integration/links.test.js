@@ -824,6 +824,7 @@ describe('Links', () => {
 
       it('restores all tracked scroll regions when pressing the back button from another website', () => {
         cy.get('.off-site')
+          .wait(50)
           .click({ force: true })
           .then(() => {
             cy.url().should('eq', Cypress.config().baseUrl + '/non-inertia')
