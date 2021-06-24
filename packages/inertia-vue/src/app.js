@@ -13,7 +13,7 @@ export default {
       required: true,
     },
     initialComponent: {
-      type: Object,
+      type: [Object, Function, String],
       required: false,
     },
     resolveComponent: {
