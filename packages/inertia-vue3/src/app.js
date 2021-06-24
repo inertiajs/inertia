@@ -86,18 +86,18 @@ export default {
       })
     }
 
-    function renderLayout(page) {
+    function renderLayout(_page) {
       if (typeof pageComponent.value.layout === 'function') {
-        return pageComponent.value.layout(h, page)
+        return pageComponent.value.layout(h, _page)
       } else if (Array.isArray(pageComponent.value.layout)) {
         return pageComponent.value.layout
-          .concat(page)
+          .concat(_page)
           .reverse()
-          .reduce((child, layout) => h(layout, { ...page.value.props }, () => child))
+          .reduce((child, layout) => h(layout, page.value.props, () => child))
       }
 
       return [
-        h(pageComponent.value.layout, { ...page.value.props }, () => page),
+        h(pageComponent.value.layout, page.value.props, () => _page),
         renderDialog(),
       ]
     }
