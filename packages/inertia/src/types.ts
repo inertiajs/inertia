@@ -1,9 +1,9 @@
-import { CancelTokenSource, AxiosResponse } from 'axios'
+import { AxiosResponse, CancelTokenSource } from 'axios'
 
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertible = Date|File|Blob|Array<any>|boolean|string|number|null|undefined
+export type FormDataConvertible = Array<FormDataConvertible>|Blob|FormDataEntryValue|Date|boolean|number|null
 
 export enum Method {
   GET = 'get',
@@ -19,9 +19,9 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page<SharedPropsType = Record<string, unknown>> {
+export interface Page<SharedProps = PageProps> {
   component: string,
-  props: PageProps & SharedPropsType & {
+  props: PageProps & SharedProps & {
     errors: Errors & ErrorBag;
   }
   url: string,
@@ -53,7 +53,7 @@ export type LocationVisit = {
 
 export type Visit = {
   method: Method,
-  data: Record<string, FormDataConvertible>|FormData,
+  data: RequestPayload,
   replace: boolean,
   preserveScroll: PreserveStateOption,
   preserveState: PreserveStateOption,
@@ -167,7 +167,7 @@ export type PendingVisit = Visit & {
   interrupted: boolean,
 };
 
-export type ActiveVisit = PendingVisit & VisitOptions & {
+export type ActiveVisit = PendingVisit & Required<VisitOptions> & {
   cancelToken: CancelTokenSource,
 }
 

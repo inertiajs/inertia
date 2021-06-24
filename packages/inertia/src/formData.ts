@@ -20,8 +20,10 @@ function composeKey(parent: string|null, key: string): string {
   return parent ? parent + '[' + key + ']' : key
 }
 
-function append(form: FormData, key: string, value: FormDataConvertible|Record<string, FormDataConvertible>): void {
-  if (value instanceof Date) {
+function append(form: FormData, key: string, value: FormDataConvertible): void {
+  if (Array.isArray(value)) {
+    return Array.from(value.keys()).forEach(index => append(form, composeKey(key, index.toString()), value[index]))
+  } else if (value instanceof Date) {
     return form.append(key, value.toISOString())
   } else if (value instanceof File) {
     return form.append(key, value, value.name)

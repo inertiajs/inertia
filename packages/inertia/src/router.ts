@@ -2,24 +2,9 @@ import modal from './modal'
 import debounce from './debounce'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
-import { AxiosResponse, default as Axios } from 'axios'
+import { default as Axios, AxiosResponse } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import {
-  ActiveVisit,
-  LocationVisit,
-  Method,
-  Page,
-  PageHandler,
-  PageResolver,
-  PendingVisit,
-  PreserveStateOption,
-  RequestPayload,
-  VisitId,
-  VisitOptions,
-  GlobalEventNames,
-  GlobalEvent,
-  GlobalEventResult,
-} from './types'
+import { ActiveVisit, GlobalEvent, GlobalEventNames, GlobalEventResult, LocationVisit, Method, Page, PageHandler, PageResolver, PendingVisit, PreserveStateOption, RequestPayload, VisitId, VisitOptions } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 export class Router {
@@ -220,7 +205,7 @@ export class Router {
     onCancel = () => {},
     onSuccess = () => {},
     onError = () => {},
-  }: Partial<VisitOptions> = {}): void {
+  }: VisitOptions = {}): void {
     let url = typeof href === 'string' ? hrefToUrl(href) : href
 
     if ((hasFiles(data) || forceFormData) && !(data instanceof FormData)) {
@@ -422,32 +407,32 @@ export class Router {
     }
   }
 
-  public get(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
+  public get(url: URL|string, data: RequestPayload = {}, options: Exclude<VisitOptions, 'method'|'data'> = {}): void {
     return this.visit(url, { ...options, method: Method.GET, data })
   }
 
-  public reload(options: Exclude<Partial<VisitOptions>, 'preserveScroll'|'preserveState'> = {}): void {
+  public reload(options: Exclude<VisitOptions, 'preserveScroll'|'preserveState'> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL|string, options: Exclude<Partial<VisitOptions>, 'replace'> = {}): void {
+  public replace(url: URL|string, options: Exclude<VisitOptions, 'replace'> = {}): void {
     console.warn(`Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${options.method ?? 'get'}() instead.`)
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
+  public post(url: URL|string, data: RequestPayload = {}, options: Exclude<VisitOptions, 'method'|'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.POST, data })
   }
 
-  public put(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
+  public put(url: URL|string, data: RequestPayload = {}, options: Exclude<VisitOptions, 'method'|'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.PUT, data })
   }
 
-  public patch(url: URL|string, data: RequestPayload = {}, options: Exclude<Partial<VisitOptions>, 'method'|'data'> = {}): void {
+  public patch(url: URL|string, data: RequestPayload = {}, options: Exclude<VisitOptions, 'method'|'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.PATCH, data })
   }
 
-  public delete(url: URL|string, options: Exclude<Partial<VisitOptions>, 'method'> = {}): void {
+  public delete(url: URL|string, options: Exclude<VisitOptions, 'method'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: Method.DELETE })
   }
 
