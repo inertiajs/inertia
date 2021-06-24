@@ -4,7 +4,7 @@ import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import { default as Axios, AxiosResponse } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
-import { ActiveVisit, GlobalEvent, GlobalEventNames, GlobalEventResult, LocationVisit, Method, Page, PageHandler, PageResolver, PendingVisit, PreserveStateOption, RequestPayload, VisitId, VisitParams, VisitOptions } from './types'
+import { ActiveVisit, FormFactory, GlobalEvent, GlobalEventNames, GlobalEventResult, LocationVisit, Method, Page, PageHandler, PageResolver, PendingVisit, PreserveStateOption, RequestPayload, VisitId, VisitParams, VisitOptions } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
 const isServer = typeof window === 'undefined'
@@ -16,6 +16,7 @@ export class Router {
   protected visitOptions!: VisitOptions
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
+  public form?: FormFactory
 
   public init({
     initialPage,
