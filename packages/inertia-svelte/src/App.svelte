@@ -3,13 +3,11 @@
   import Render, { h } from './Render.svelte'
   import { Inertia } from '@inertiajs/inertia'
 
-  export let initialPage, resolveComponent, resolveErrors, transformProps
+  export let initialPage, resolveComponent
 
   Inertia.init({
     initialPage,
     resolveComponent,
-    resolveErrors,
-    transformProps,
     swapComponent: async ({ component, page, preserveState }) => {
       store.update((current) => ({
         component,

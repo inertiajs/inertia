@@ -1,6 +1,4 @@
 import useForm from './useForm'
-import head from './head'
-import link from './link'
 import remember from './remember'
 import { computed, h, markRaw, ref, nextTick } from 'vue'
 import { createHeadManager, Inertia } from '@inertiajs/inertia'
@@ -13,6 +11,7 @@ const pageComponent = ref(null)
 const dialog = ref({})
 const dialogKey = ref(null)
 const dialogComponent = ref(null)
+let headManager = null
 
 export default {
   name: 'Inertia',
@@ -21,30 +20,37 @@ export default {
       type: Object,
       required: true,
     },
+    initialComponent: {
+      type: Object,
+      required: false,
+    },
     resolveComponent: {
       type: Function,
-      required: true,
-    },
-    resolveErrors: {
-      type: Function,
       required: false,
     },
-    transformProps: {
+    titleCallback: {
       type: Function,
       required: false,
+      default: title => title,
+    },
+    onHeadUpdate: {
+      type: Function,
+      required: false,
+      default: () => () => {},
     },
   },
-  setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
-    pageComponent.value = markRaw(resolveComponent(initialPage.component))
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
+    pageComponent.value = initialComponent ? markRaw(initialComponent) : null
     pageKey.value = null
     page.value = initialPage
 
-    if (!(typeof window === 'undefined')) {
+    const isServer = typeof window === 'undefined'
+    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
+
+    if (!isServer) {
       Inertia.init({
         initialPage,
         resolveComponent,
-        resolveErrors,
-        transformProps,
         swapComponent: async (args) => {
           const { dialog: _dialog, ..._page } = args.page
 
@@ -76,9 +82,8 @@ export default {
     }
 
     function renderPage() {
-      if (pageComponent.value.inheritAttrs === undefined) {
-        pageComponent.value.inheritAttrs = false
-      }
+      pageComponent.value.inheritAttrs = !!pageComponent.value.inheritAttrs
+
       return h(pageComponent.value, {
         ...page.value.props,
         dialog: false,
@@ -86,18 +91,21 @@ export default {
       })
     }
 
-    function renderLayout(_page) {
+    function renderLayout(child) {
       if (typeof pageComponent.value.layout === 'function') {
-        return pageComponent.value.layout(h, _page)
+        return pageComponent.value.layout(h, child)
       } else if (Array.isArray(pageComponent.value.layout)) {
         return pageComponent.value.layout
-          .concat(_page)
+          .concat(child)
           .reverse()
-          .reduce((child, layout) => h(layout, page.value.props, () => child))
+          .reduce((child, layout) => {
+            layout.inheritAttrs = !!layout.inheritAttrs
+            return h(layout, { ...page.value.props }, () => child)
+          })
       }
 
       return [
-        h(pageComponent.value.layout, page.value.props, () => _page),
+        h(pageComponent.value.layout, { ...page.value.props }, () => child),
         renderDialog(),
       ]
     }
@@ -125,9 +133,6 @@ export default {
 
 export const plugin = {
   install(app) {
-    const isServer = typeof window === 'undefined'
-    const headManager = createHeadManager(isServer)
-
     Inertia.form = useForm
 
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
@@ -135,15 +140,7 @@ export const plugin = {
     Object.defineProperty(app.config.globalProperties, '$dialog', { get: () => dialog.value })
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 
-    if (isServer) {
-      const state = { head: [] }
-      Object.defineProperty(app.config.globalProperties, '$head', { get: () => state.head })
-      headManager.onUpdate(elements => (state.head = elements))
-    }
-
     app.mixin(remember)
-    app.component('InertiaHead', head)
-    app.component('InertiaLink', link)
   },
 }
 

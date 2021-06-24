@@ -14,71 +14,71 @@ export default {
     this.provider.disconnect()
   },
   methods: {
-    ensureVnodeAttrs(vnode) {
-      vnode.data = {
-        ...(vnode.data || {}),
-        attrs: {
-          ...((vnode.data || {}).attrs || {}),
-        },
-      }
+    isUnaryTag(node) {
+      return [
+        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
+        'input', 'keygen', 'link', 'meta', 'param', 'source',
+        'track', 'wbr',
+      ].indexOf(node.tag) > -1
     },
-    renderStartTag(vnode) {
-      this.ensureVnodeAttrs(vnode)
-
-      const attrs = Object.keys(vnode.data.attrs).reduce((carry, name) => {
-        const value = vnode.data.attrs[name]
-        if (value === '') {
+    renderTagStart(node) {
+      this.ensureNodeHasAttrs(node)
+      const attrs = Object.keys(node.data.attrs).reduce((carry, name) => {
+        const value = node.data.attrs[name]
+        if (name === 'head-key') {
+          return carry
+        } else if (value === '') {
           return carry + ` ${name}`
         } else {
           return carry + ` ${name}="${value}"`
         }
       }, '')
-
-      return `<${vnode.tag}${attrs}>`
+      return `<${node.tag}${attrs}>`
     },
-    renderChildren(vnode) {
-      return vnode.children.reduce((html, child) => html + this.renderFullTag(child), '')
+    renderTagChildren(node) {
+      return node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
-    isUnaryTag(vnode) {
-      return [
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-        'input', 'keygen', 'link', 'meta', 'param', 'source',
-        'track', 'wbr',
-      ].indexOf(vnode.tag) > -1
-    },
-    renderFullTag(vnode) {
-      if (!vnode.tag) {
-        return vnode.text
+    renderTag(node) {
+      if (!node.tag) {
+        return node.text
       }
-      let html = this.renderStartTag(vnode)
-      if (vnode.children) {
-        html += this.renderChildren(vnode)
+      let html = this.renderTagStart(node)
+      if (node.children) {
+        html += this.renderTagChildren(node)
       }
-      if (!this.isUnaryTag(vnode)) {
-        html += `</${vnode.tag}>`
+      if (!this.isUnaryTag(node)) {
+        html += `</${node.tag}>`
       }
       return html
     },
-    ensureVNodeInertiaAttribute(vnode) {
-      this.ensureVnodeAttrs(vnode)
-      vnode.data.attrs['inertia'] = vnode.data.attrs.inertia || ''
-      return vnode
+    ensureNodeHasAttrs(node) {
+      node.data = {
+        ...(node.data || {}),
+        attrs: {
+          ...((node.data || {}).attrs || {}),
+        },
+      }
     },
-    renderVNode(vnode) {
-      this.ensureVNodeInertiaAttribute(vnode)
-      return this.renderFullTag(vnode)
+    ensureNodeHasInertiaAttribute(node) {
+      this.ensureNodeHasAttrs(node)
+      node.data.attrs['inertia'] = node.data.attrs['head-key'] !== undefined ? node.data.attrs['head-key'] : ''
+      return node
     },
-    renderVNodes(vnodes) {
-      const computed = vnodes.map(vnode => this.renderVNode(vnode))
-      if (this.title && ! computed.find(tag => tag.indexOf('<title') === 0)) {
+    renderNode(node) {
+      this.ensureNodeHasInertiaAttribute(node)
+      return this.renderTag(node)
+    },
+    renderNodes(nodes) {
+      const computed = nodes.map(node => this.renderNode(node)).filter(node => node)
+      if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
         computed.push(`<title inertia>${this.title}</title>`)
       }
       return computed
     },
   },
   render() {
-    if (this.$scopedSlots.default) {
-      this.provider.update(this.renderVNodes(this.$scopedSlots.default()))
-    }
+    this.provider.update(
+      this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default() : [])
+    )
   },
 }

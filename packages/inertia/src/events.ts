@@ -1,42 +1,41 @@
-import { AxiosResponse } from 'axios'
-import { Errors, Visit, Page } from './types'
+import { GlobalEventDetails, GlobalEventNames, GlobalEventTrigger } from './types'
 
-function fireEvent(name: string, options: CustomEventInit): boolean {
+function fireEvent<TEventName extends GlobalEventNames>(name: TEventName, options: CustomEventInit<GlobalEventDetails<TEventName>>): boolean {
   return document.dispatchEvent(new CustomEvent(`inertia:${name}`, options))
 }
 
-export function fireBeforeEvent(visit: Visit): boolean {
+export const fireBeforeEvent: GlobalEventTrigger<'before'> = (visit) => {
   return fireEvent('before', { cancelable: true, detail: { visit } })
 }
 
-export function fireErrorEvent(errors: Errors): boolean {
+export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors) => {
   return fireEvent('error', { detail: { errors } })
 }
 
-export function fireExceptionEvent(exception: unknown): boolean {
+export const fireExceptionEvent: GlobalEventTrigger<'exception'> = (exception) => {
   return fireEvent('exception', { cancelable: true, detail: { exception } })
 }
 
-export function fireFinishEvent(visit: Visit): boolean {
+export const fireFinishEvent: GlobalEventTrigger<'finish'> = (visit) => {
   return fireEvent('finish', { detail: { visit } })
 }
 
-export function fireInvalidEvent(response: AxiosResponse): boolean {
+export const fireInvalidEvent: GlobalEventTrigger<'invalid'> = (response) => {
   return fireEvent('invalid', { cancelable: true, detail: { response } })
 }
 
-export function fireNavigateEvent(page: Page): boolean {
+export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page) => {
   return fireEvent('navigate', { detail: { page } })
 }
 
-export function fireProgressEvent(progress: Record<string, unknown>): boolean {
+export const fireProgressEvent: GlobalEventTrigger<'progress'> = (progress) => {
   return fireEvent('progress', { detail: { progress } })
 }
 
-export function fireStartEvent(visit: Visit): boolean {
+export const fireStartEvent: GlobalEventTrigger<'start'> = (visit) => {
   return fireEvent('start', { detail: { visit } })
 }
 
-export function fireSuccessEvent(page: Page): boolean {
+export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page) => {
   return fireEvent('success', { detail: { page } })
 }

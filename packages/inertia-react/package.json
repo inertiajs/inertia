@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/inertia-react",
-  "version": "0.5.12",
+  "version": "0.6.2",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -28,7 +28,7 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.8.0",
+    "@inertiajs/inertia": "^0.9.0",
     "@types/react": "^16.9.1",
     "eslint": "^7.0.0",
     "eslint-plugin-react": "^7.14.3",
@@ -37,7 +37,7 @@
     "react": "^16.9.0 || ^17.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.8.0",
+    "@inertiajs/inertia": "^0.9.0",
     "react": "^16.9.0 || ^17.0.0"
   },
   "dependencies": {

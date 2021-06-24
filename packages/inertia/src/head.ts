@@ -4,7 +4,19 @@ const Renderer = {
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
-    return template.content.firstChild as ChildNode
+    const node = (template.content.firstChild as Element)
+
+    if (!tag.startsWith('<script ')) {
+      return node
+    }
+
+    const script = document.createElement('script')
+    script.innerHTML = node.innerHTML
+    node.getAttributeNames().forEach(name => {
+      script.setAttribute(name, node.getAttribute(name) || '')
+    })
+
+    return script
   },
 
   isInertiaManagedElement(element: Element): boolean {
@@ -38,17 +50,15 @@ const Renderer = {
     })
 
     sourceElements.forEach(element => document.head.appendChild(element))
-  }, 50),
+  }, 1),
 }
 
-export default function (isServer: boolean): ({
-  onUpdate(callback: (elements: string[]) => void): void,
+export default function createHeadManager(isServer: boolean, titleCallback: ((title: string) => string), onUpdate: ((elements: string[]) => void)): ({
   createProvider: () => ({
     update: (elements: Array<string>) => void,
     disconnect: () => void,
   })
 }) {
-  let onUpdate: null|((elements: string[]) => void) = null
   const states: Record<string, Array<string>> = {}
   let lastProviderId = 0
 
@@ -84,7 +94,8 @@ export default function (isServer: boolean): ({
         }
 
         if (element.indexOf('<title ') === 0) {
-          carry.title = element
+          const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/)
+          carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}`: element
           return carry
         }
 
@@ -102,25 +113,16 @@ export default function (isServer: boolean): ({
   }
 
   function commit(): void {
-    if (onUpdate !== null) {
-      onUpdate(collect())
-    }
-
-    if (isServer !== undefined && !isServer) {
-      Renderer.update(collect())
-    }
+    isServer ? onUpdate(collect()) : Renderer.update(collect())
   }
 
   return {
-    onUpdate(callback) {
-      onUpdate = callback
-    },
     createProvider: function () {
       const id = connect()
 
       return {
-        disconnect: () => disconnect(id),
         update: (elements) => update(id, elements),
+        disconnect: () => disconnect(id),
       }
     },
   }
