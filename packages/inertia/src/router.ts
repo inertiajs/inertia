@@ -86,13 +86,13 @@ export class Router {
     if (this.page.scrollRegions) {
       const availableRegions = this.scrollRegions()
       if (attempt <= 20 && (this.page.scrollRegions.length !== availableRegions.length)) {
-        setTimeout(() => this.restoreScrollPositions(attempt + 1), 2)
-        return
+        Promise.resolve().then(() => this.restoreScrollPositions(attempt + 1))
+      } else {
+        return availableRegions.forEach((region: Element, index: number) => {
+          region.scrollTop = this.page.scrollRegions[index].top
+          region.scrollLeft = this.page.scrollRegions[index].left
+        })
       }
-      return availableRegions.forEach((region: Element, index: number) => {
-        region.scrollTop = this.page.scrollRegions[index].top
-        region.scrollLeft = this.page.scrollRegions[index].left
-      })
     }
   }
 
