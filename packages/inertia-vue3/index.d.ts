@@ -77,7 +77,7 @@ export interface InertiaFormProps<TForm> {
   cancel(): void
 }
 
-export declare type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
 export declare function useForm<TForm>(data: TForm): InertiaForm<TForm>
 
@@ -92,7 +92,7 @@ export declare function usePage<PageProps>(): {
   version: ComputedRef<string | null>
 }
 
-export declare type InertiaHead = DefineComponent<{
+export type InertiaHead = DefineComponent<{
   title?: string
 }>
 
