@@ -17,10 +17,10 @@
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
   },
-  "source": "src/index.js",
+  "source": "src/index.ts",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
-  "typings": "index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:umd",
     "build:cjs": "microbundle --format cjs",
@@ -31,8 +31,13 @@
   },
   "devDependencies": {
     "@inertiajs/inertia": "^0.11.0",
-    "eslint": "^7.0.0",
+    "@types/deepmerge": "^2.2.0",
+    "@types/qs": "^6.9.0",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
+    "eslint": "^7.23.0",
     "microbundle": "^0.12.0",
+    "typescript": "^4.2.3",
     "vue": "^2.6.0"
   },
   "peerDependencies": {
