@@ -13,6 +13,7 @@ export class Router {
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
   protected page!: Page
+  protected ignoreHistoryState: false
 
   public init({
     initialPage,
@@ -387,6 +388,9 @@ export class Router {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
+    if (this.ignoreHistoryState === true) {
+     return 
+    }
     if (event.state !== null) {
       const page = event.state
       const visitId = this.createVisitId()
