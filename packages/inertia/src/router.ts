@@ -13,7 +13,7 @@ export class Router {
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
   protected page!: Page
-  protected ignoreHistoryState: false
+  protected ignoreHistoryState: Boolean
 
   public init({
     initialPage,
@@ -27,6 +27,7 @@ export class Router {
     this.page = initialPage
     this.resolveComponent = resolveComponent
     this.swapComponent = swapComponent
+    this.ignoreHistoryState = false
     this.handleInitialPageVisit()
     this.setupEventListeners()
   }
