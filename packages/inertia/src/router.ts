@@ -378,12 +378,12 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(JSON.stringify(page), '', page.url)
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(JSON.stringify(page), '', page.url)
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
