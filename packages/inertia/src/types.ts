@@ -33,7 +33,7 @@ export interface Page<SharedProps = PageProps> {
   resolvedErrors: Errors
 }
 
-export type PageResolver = (name: string) => Component
+export type PageResolver = (name: string) => Promise<Component>
 
 export type PageHandler = ({
   component,
@@ -182,6 +182,9 @@ export type HeadProvider = {
 export type HeadManager = {
   createProvider: () => HeadProvider
 }
+
+export type HeadManagerOnUpdate = (elements: string[]) => void
+export type HeadManagerTitleCallback = (title: string) => string
 
 export interface FormFactory {
   <Fields>(rememberKey: string, data: Fields): InertiaForm<Fields>;

@@ -4,10 +4,12 @@ import { Page } from '@inertiajs/inertia/types/types'
 import form from './form'
 import remember from './remember'
 
-let app: InstanceType<typeof InertiaComponent>
+export type AppType = typeof App
+let app: InstanceType<AppType>
+
 let headManager: HeadManager
 
-export const InertiaComponent = Vue.extend({
+export const App = Vue.extend({
   name: 'Inertia',
   props: {
     initialPage: {
@@ -61,7 +63,6 @@ export const InertiaComponent = Vue.extend({
     }
   },
   render(h) {
-    this.component
     if (this.component) {
       const child = h(this.component, {
         key: this.key,
