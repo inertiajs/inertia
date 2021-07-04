@@ -1,4 +1,13 @@
-export default {
+import Vue, {VNode, VNodeData} from 'vue'
+import { ScopedSlotChildren } from 'vue/types/vnode'
+
+interface VNodeWithEnsuredDataAttrs extends VNode {
+  data: VNodeData & {
+    attrs: Exclude<VNodeData['attrs'], undefined>
+  }
+}
+
+export default Vue.extend({
   props: {
     title: {
       type: String,
@@ -7,24 +16,28 @@ export default {
   },
   data() {
     return {
-      provider: this.$headManager.createProvider(),
+      provider: this.$headManager?.createProvider(),
     }
   },
   beforeDestroy() {
-    this.provider.disconnect()
+    this.provider?.disconnect()
   },
   methods: {
-    isUnaryTag(node) {
+    isUnaryTag(node: VNode) {
+      if (node.tag === undefined) {
+        return false
+      }
+
       return [
         'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
         'input', 'keygen', 'link', 'meta', 'param', 'source',
         'track', 'wbr',
       ].indexOf(node.tag) > -1
     },
-    renderTagStart(node) {
-      this.ensureNodeHasAttrs(node)
+    renderTagStart(_node: VNode) {
+      const node: VNodeWithEnsuredDataAttrs = this.ensureNodeHasAttrs(_node)
       const attrs = Object.keys(node.data.attrs).reduce((carry, name) => {
-        const value = node.data.attrs[name]
+        const value = node.data.attrs[name] || ''
         if (name === 'head-key') {
           return carry
         } else if (value === '') {
@@ -35,10 +48,10 @@ export default {
       }, '')
       return `<${node.tag}${attrs}>`
     },
-    renderTagChildren(node) {
-      return node.children.reduce((html, child) => html + this.renderTag(child), '')
+    renderTagChildren(node: VNode) {
+      return (node.children || []).reduce((html, child) => html + this.renderTag(child), '')
     },
-    renderTag(node) {
+    renderTag(node: VNode) {
       if (!node.tag) {
         return node.text
       }
@@ -51,24 +64,30 @@ export default {
       }
       return html
     },
-    ensureNodeHasAttrs(node) {
+    ensureNodeHasAttrs(node: VNode): VNodeWithEnsuredDataAttrs {
       node.data = {
         ...(node.data || {}),
-        attrs: {
+        attrs: <VNodeData['attrs']> {
           ...((node.data || {}).attrs || {}),
         },
       }
+
+      return <VNodeWithEnsuredDataAttrs> node
     },
-    ensureNodeHasInertiaAttribute(node) {
-      this.ensureNodeHasAttrs(node)
+    ensureNodeHasInertiaAttribute(_node: VNode) {
+      const node = this.ensureNodeHasAttrs(_node)
       node.data.attrs['inertia'] = node.data.attrs['head-key'] !== undefined ? node.data.attrs['head-key'] : ''
       return node
     },
-    renderNode(node) {
+    renderNode(node: VNode) {
       this.ensureNodeHasInertiaAttribute(node)
       return this.renderTag(node)
     },
-    renderNodes(nodes) {
+    renderNodes(nodes: ScopedSlotChildren) {
+      if (!nodes) {
+        return
+      }
+
       const computed = nodes.map(node => this.renderNode(node)).filter(node => node)
       if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
         computed.push(`<title inertia>${this.title}</title>`)
@@ -76,9 +95,11 @@ export default {
       return computed
     },
   },
-  render() {
-    this.provider.update(
-      this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default() : [])
+  render(h) {
+    this.provider?.update(
+      this.renderNodes(this.$scopedSlots.default),
     )
+
+    return h('template')
   },
-}
+})

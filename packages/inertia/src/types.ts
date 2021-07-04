@@ -33,7 +33,7 @@ export interface Page<SharedProps = PageProps> {
   resolvedErrors: Errors
 }
 
-export type PageResolver = (name: string) => Component
+export type PageResolver = (name: string) => Promise<Component>
 
 export type PageHandler = ({
   component,
@@ -173,3 +173,41 @@ export type ActiveVisit = PendingVisit & Required<VisitOptions> & {
 
 export type VisitId = unknown
 export type Component = unknown
+
+export type HeadProvider = {
+  update: (elements: Array<string>) => void,
+  disconnect: () => void,
+}
+
+export type HeadManager = {
+  createProvider: () => HeadProvider
+}
+
+export type HeadManagerOnUpdate = (elements: string[]) => void
+export type HeadManagerTitleCallback = (title: string) => string
+
+export interface FormFactory {
+  <Fields>(rememberKey: string, data: Fields): InertiaForm<Fields>;
+  <Fields>(data: Fields): InertiaForm<Fields>;
+}
+
+export interface InertiaForm<Fields> {
+  isDirty: boolean
+  errors: Errors & ErrorBag
+  hasErrors: boolean
+  processing: boolean
+  progress: { percentage: number } | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  data(): Fields
+  transform(callback: (data: Fields) => RequestPayload): this
+  reset(...fields: (keyof Fields)[]): this
+  clearErrors(...fields: (keyof Fields)[]): this
+  submit(method: string, url: URL|string, options?: Exclude<VisitOptions, 'method'|'data'>): void
+  get(url: URL|string, options?: Exclude<VisitOptions, 'method'|'data'>): void
+  post(url: URL|string, options?: Exclude<VisitOptions, 'method'|'data'>): void
+  put(url: URL|string, options?: Exclude<VisitOptions, 'method'|'data'>): void
+  patch(url: URL|string, options?: Exclude<VisitOptions, 'method'|'data'> ): void
+  delete(url: URL|string, options?: Exclude<VisitOptions, 'method'|'data'>): void
+  cancel(): void
+}

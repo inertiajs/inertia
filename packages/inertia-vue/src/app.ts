@@ -1,11 +1,15 @@
+import Vue, { VueConstructor } from 'vue'
+import { createHeadManager, HeadManager, Inertia } from '@inertiajs/inertia'
+import { Page } from '@inertiajs/inertia/types/types'
 import form from './form'
 import remember from './remember'
-import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
-let app = {}
-let headManager = null
+export type AppType = typeof App
+let app: InstanceType<AppType>
 
-export default {
+let headManager: HeadManager
+
+export const App = Vue.extend({
   name: 'Inertia',
   props: {
     initialPage: {
@@ -23,19 +27,23 @@ export default {
     titleCallback: {
       type: Function,
       required: false,
-      default: title => title,
+      default: (title: string): string => title,
     },
     onHeadUpdate: {
       type: Function,
       required: false,
-      default: () => () => {},
+      default: (): VoidFunction => () => {},
     },
   },
-  data() {
+  data(): ({
+    component: unknown
+    page: Page
+    key: number
+  }) {
     return {
       component: this.initialComponent || null,
       page: this.initialPage,
-      key: null,
+      key: -1,
     }
   },
   created() {
@@ -47,7 +55,7 @@ export default {
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
         swapComponent: async ({ component, page, preserveState }) => {
-          this.component = component
+          this.component = <InstanceType<VueConstructor>> component
           this.page = page
           this.key = preserveState ? this.key : Date.now()
         },
@@ -78,9 +86,9 @@ export default {
       return child
     }
   },
-}
+})
 
-export const plugin = {
+export const plugin: Vue.PluginObject<Vue> = {
   install(Vue) {
     Inertia.form = form
     Vue.mixin(remember)
