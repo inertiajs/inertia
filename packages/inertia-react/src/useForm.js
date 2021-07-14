@@ -154,7 +154,7 @@ export default function useForm(...args) {
             .reduce((carry, key) => {
               carry[key] = defaults[key]
               return carry
-            }, {...data}),
+            }, { ...data }),
         )
       }
     },
