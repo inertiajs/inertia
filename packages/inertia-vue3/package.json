@@ -27,13 +27,13 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.9.0",
+    "@inertiajs/inertia": "^0.10.0",
     "eslint": "^7.0.0",
     "microbundle": "^0.12.0",
     "vue": "^3.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.9.0",
+    "@inertiajs/inertia": "^0.10.0",
     "vue": "^3.0.0"
   },
   "dependencies": {
