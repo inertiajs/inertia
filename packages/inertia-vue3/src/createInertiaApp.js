@@ -21,7 +21,9 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
         titleCallback: title,
         onHeadUpdate: isServer ? elements => (head = elements) : null,
       },
+      /** @deprecated Use `inertia` instead **/
       plugin,
+      inertia: plugin,
     })
   })
 

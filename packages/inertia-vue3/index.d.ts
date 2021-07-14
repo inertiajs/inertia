@@ -24,7 +24,9 @@ export interface CreateInertiaAppProps {
     el: Element
     app: InertiaApp
     props: InertiaAppProps
+		/** @deprecated Use `inertia` instead */
     plugin: Plugin
+    inertia: Plugin
   }) => void | VueApp
   page?: Inertia.Page
   render?: (app: VueApp) => Promise<string>
