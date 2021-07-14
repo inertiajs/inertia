@@ -9,6 +9,10 @@ export interface InertiaAppProps {
 }
 
 type InertiaApp = DefineComponent<InertiaAppProps>
+type ComponentResolvable = DefineComponent 
+  | Promise<DefineComponent> 
+  | { default: DefineComponent }
+  | (() => Promise<{ [key: string]: any; }>)
 
 export declare const App: InertiaApp
 
@@ -16,10 +20,8 @@ export declare const plugin: Plugin
 
 export interface CreateInertiaAppProps {
   id?: string
-  resolve: (name: string) => 
-    DefineComponent |
-    Promise<DefineComponent> |
-    { default: DefineComponent }
+  components: Record<string, ComponentResolvable>
+  resolve?: (name: string) => ComponentResolvable
   setup: (props: {
     el: Element
     app: InertiaApp

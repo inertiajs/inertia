@@ -1,10 +1,25 @@
 import { createSSRApp, h } from 'vue'
 import App, { plugin } from './app'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
+export default async function createInertiaApp({ id = 'app', resolve, components, setup, title, page, render }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
+
+  if (components) {
+    resolve = (name) => {
+      for (const path in components) {
+        if (path.endsWith(`${name.replace('.', '/')}.vue`)) {
+          return typeof components[path] === 'function'
+            ? components[path]()
+            : components[path]
+        }
+      }
+
+      throw new Error('Page component not found: ' + name)
+    }
+  }
+
   const resolveComponent = name => Promise.resolve(resolve(name)).then(module => module.default || module)
 
   let head = []
