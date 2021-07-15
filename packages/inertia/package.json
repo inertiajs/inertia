@@ -20,12 +20,14 @@
   "files": ["dist", "types"],
   "source": "src/index.ts",
   "main": "dist/index.js",
+  "exports": "./dist/index.modern.js",
+  "module": "dist/index.module.js",
   "unpkg": "dist/index.umd.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "build": "npm run clean && npm run build:cjs && npm run build:umd",
-    "build:cjs": "microbundle --format cjs",
-    "build:umd": "microbundle --format umd --name Inertia --external none",
+    "build": "npm run clean && npm run build:bundler && npm run build:browser",
+    "build:bundler": "microbundle --format es,cjs",
+    "build:browser": "microbundle --format modern,umd --name Inertia --external none",
     "clean": "rm -rf types && rm -rf dist",
     "prepublishOnly": "npm run build",
     "watch": "microbundle watch --format cjs"
