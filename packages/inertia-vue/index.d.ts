@@ -95,6 +95,12 @@ export interface InertiaFormTrait {
   form<TForm>(data: TForm): InertiaForm<TForm>
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }
+  
+type InertiaHead = FunctionalComponentOptions<{
+  title?: string
+}>
+
+export declare const InertiaHead: InertiaHead
 
 declare module 'vue/types/vue' {
   export interface Vue {
