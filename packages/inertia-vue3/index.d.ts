@@ -52,7 +52,7 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
 }
 
-type InertiaLink = DefineComponent<InertiaLinkProps>
+export type InertiaLink = DefineComponent<InertiaLinkProps>
 
 export declare const Link: InertiaLink
 
@@ -96,13 +96,9 @@ export type InertiaHead = DefineComponent<{
   title?: string
 }>
 
-declare module 'vue' {
-  /** global components is support in Volar */
-  export interface GlobalComponents {
-    InertiaHead: InertiaHead
-    InertiaLink: InertiaLink
-  }
+export declare const Head: InertiaHead
 
+declare module 'vue' {
   export interface ComponentCustomProperties {
     $inertia: typeof Inertia.Inertia
     $page: Inertia.Page

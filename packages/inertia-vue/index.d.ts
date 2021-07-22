@@ -62,9 +62,9 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
 }
 
-type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
+export type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
 
-export declare const InertiaLink: InertiaLink
+export declare const Link: InertiaLink
 
 export interface InertiaFormProps<TForm> {
   isDirty: boolean
@@ -89,7 +89,15 @@ export interface InertiaFormProps<TForm> {
 
 export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
-type InertiaHeadManager = ReturnType<typeof Inertia.createHeadManager>
+export type InertiaHeadManager = ReturnType<typeof Inertia.createHeadManager>
+
+export interface InertiaHeadProps {
+  title?: string
+}
+
+export type InertiaHead = ComponentOptions<never, never, never, never, InertiaHeadProps>
+
+export declare const Head: InertiaHead
 
 export interface InertiaFormTrait {
   form<TForm>(data: TForm): InertiaForm<TForm>
