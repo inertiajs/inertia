@@ -36,6 +36,7 @@ export interface CreateInertiaAppProps {
       props: InertiaProps
     }
   }) => void | Vue
+  title?: (title: string) => string
   page?: Inertia.Page
   render?: (vm: Vue) => Promise<string>
 }
