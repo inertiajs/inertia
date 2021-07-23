@@ -37,9 +37,10 @@ export class Router {
       this.handleLocationVisit(this.page)
     } else {
       this.page.url += window.location.hash
-      this.setPage(this.page, { preserveState: true })
+      this.setPage(this.page, { preserveState: true }).then(() => {
+        fireNavigateEvent(this.page)
+      })
     }
-    fireNavigateEvent(this.page)
   }
 
   protected setupEventListeners(): void {
@@ -102,6 +103,7 @@ export class Router {
     window.history.state.version = page.version
     this.setPage(window.history.state, { preserveScroll: true, preserveState: true }).then(() => {
       this.restoreScrollPositions()
+      fireNavigateEvent(page)
     })
   }
 
@@ -136,6 +138,7 @@ export class Router {
       if (locationVisit.preserveScroll) {
         this.restoreScrollPositions()
       }
+      fireNavigateEvent(page)
     })
   }
 
