@@ -86,3 +86,29 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 }
 
 export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
+
+export interface AppSetupPageProps {
+    initialPage: Inertia.PageProps,
+    initialComponent: any,
+    resolveComponent: (name: string) => Promise<any>,
+    titleCallback: (title: string) => string,
+    onHeadUpdate: ((elements: any[]) => boolean) | null,
+}
+
+export interface AppSetupProps {
+    el: HTMLElement | null
+    App: App
+    props: AppSetupPageProps
+}
+
+export interface InertiaAppProps{
+    id: string
+    resolve: (name: string) => any
+    setup: (setupObj: AppSetupProps) => void
+    title: (title: string) => string
+    page: Inertia.PageProps
+    render: (renderProp: React.DetailedReactHTMLElement<{}, HTMLElement>) => Promise<string>
+}
+
+export function createInertiaApp(props: InertiaAppProps): void;
+
