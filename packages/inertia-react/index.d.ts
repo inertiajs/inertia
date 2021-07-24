@@ -97,17 +97,17 @@ export interface AppSetupPageProps {
 
 export interface AppSetupProps {
     el: HTMLElement | null
-    App: App
+    App: (props: AppSetupPageProps) => JSX.Element
     props: AppSetupPageProps
 }
 
 export interface InertiaAppProps{
-    id: string
+    id?: string
     resolve: (name: string) => any
     setup: (setupObj: AppSetupProps) => void
-    title: (title: string) => string
-    page: Inertia.PageProps
-    render: (renderProp: React.DetailedReactHTMLElement<{}, HTMLElement>) => Promise<string>
+    title?: (title: string) => string
+    page?: Inertia.PageProps
+    render?: (renderProp: React.DetailedReactHTMLElement<{}, HTMLElement>) => Promise<string>
 }
 
 export function createInertiaApp(props: InertiaAppProps): void;
