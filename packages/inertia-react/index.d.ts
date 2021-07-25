@@ -88,16 +88,16 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
 
 export interface AppSetupPageProps {
-    initialPage: Inertia.PageProps,
-    initialComponent: any,
-    resolveComponent: (name: string) => Promise<any>,
+    initialPage: Inertia.Page<Inertia.PageProps>,
+    initialComponent: React.ComponentType,
+    resolveComponent: (name: string) => React.ComponentType | Promise<React.ComponentType>,
     titleCallback: (title: string) => string,
-    onHeadUpdate: ((elements: any[]) => boolean) | null,
+    onHeadUpdate: (elements: string[]) => void,
 }
 
 export interface AppSetupProps {
-    el: HTMLElement | null
-    App: (props: AppSetupPageProps) => JSX.Element
+    el: HTMLElement
+    App: App
     props: AppSetupPageProps
 }
 
@@ -110,5 +110,5 @@ export interface InertiaAppProps{
     render?: (renderProp: React.DetailedReactHTMLElement<{}, HTMLElement>) => Promise<string>
 }
 
-export function createInertiaApp(props: InertiaAppProps): void;
+export function createInertiaApp(props: InertiaAppProps): void | { head: string[], body: string };
 
