@@ -67,6 +67,7 @@ type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm
 
 export interface InertiaFormProps<TForm = Record<string, any>> {
 	data: TForm
+	isDirty: boolean
 	errors: Record<keyof TForm, string>
 	hasErrors: boolean
 	processing: boolean
