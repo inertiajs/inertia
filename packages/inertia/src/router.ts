@@ -26,20 +26,21 @@ export class Router {
     this.page = initialPage
     this.resolveComponent = resolveComponent
     this.swapComponent = swapComponent
-    this.handleInitialPageVisit()
-    this.setupEventListeners()
-  }
 
-  protected handleInitialPageVisit(): void {
     if (this.isBackForwardVisit()) {
       this.handleBackForwardVisit(this.page)
     } else if (this.isLocationVisit()) {
       this.handleLocationVisit(this.page)
     } else {
-      this.page.url += window.location.hash
-      this.setPage(this.page, { preserveState: true })
+      this.handleInitialPageVisit(this.page)
     }
-    fireNavigateEvent(this.page)
+
+    this.setupEventListeners()
+  }
+
+  protected handleInitialPageVisit(page: Page): void {
+    this.page.url += window.location.hash
+    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -105,6 +106,7 @@ export class Router {
     window.history.state.version = page.version
     this.setPage(window.history.state, { preserveScroll: true, preserveState: true }).then(() => {
       this.restoreScrollPositions()
+      fireNavigateEvent(page)
     })
   }
 
@@ -139,6 +141,7 @@ export class Router {
       if (locationVisit.preserveScroll) {
         this.restoreScrollPositions()
       }
+      fireNavigateEvent(page)
     })
   }
 
