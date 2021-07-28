@@ -88,7 +88,7 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
 
 export interface AppSetupPageProps {
-    initialPage: Inertia.Page<Inertia.PageProps>,
+    initialPage: Inertia.Page,
     initialComponent: React.ComponentType,
     resolveComponent: (name: string) => React.ComponentType | Promise<React.ComponentType>,
     titleCallback: (title: string) => string,
@@ -111,4 +111,3 @@ export interface InertiaAppProps{
 }
 
 export function createInertiaApp(props: InertiaAppProps): void | { head: string[], body: string };
-
