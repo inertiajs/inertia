@@ -85,8 +85,11 @@ export class Router {
   protected restoreScrollPositions(): void {
     if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region: Element, index: number) => {
-        region.scrollTop = this.page.scrollRegions[index].top
-        region.scrollLeft = this.page.scrollRegions[index].left
+        const scrollPosition = this.page.scrollRegions[index]
+        if (scrollPosition) {
+          region.scrollTop = scrollPosition.top
+          region.scrollLeft = scrollPosition.left
+        }
       })
     }
   }
