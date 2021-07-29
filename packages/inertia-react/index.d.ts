@@ -1,20 +1,21 @@
 import * as Inertia from '@inertiajs/inertia'
 import * as React from 'react'
+import { renderToString } from "react-dom/server";
 
-type App<
-  PagePropsBeforeTransform extends Inertia.PagePropsBeforeTransform = Inertia.PagePropsBeforeTransform,
-  PageProps extends Inertia.PageProps = Inertia.PageProps
-> = React.FunctionComponent<{
+export type ReactInstance = React.ReactElement;
+export type ReactComponent = React.ReactNode;
+
+export type PageResolver = (name: string) => ReactComponent|Promise<ReactComponent>|NodeRequire // TODO: When shipped, replace with: Inertia.PageResolver<ReactComponent>
+export type HeadManagerOnUpdate = (elements: string[]) => void // TODO: When shipped, replace with: Inertia.HeadManagerOnUpdate
+export type HeadManagerTitleCallback = (title: string) => string  // TODO: When shipped, replace with: Inertia.HeadManagerTitleCallback
+
+export type AppType<SharedProps = Inertia.PageProps> = React.FunctionComponent<{
   children?: (props: {
     Component: React.ComponentType
     key: React.Key
-    props: PageProps
+    props: (Inertia.Page<SharedProps>)['props']
   }) => React.ReactNode
-  initialPage: Inertia.Page<PageProps>
-  resolveComponent: (
-    name: string
-  ) => React.ComponentType | Promise<React.ComponentType>
-}>
+} & SetupOptions<unknown, SharedProps>['props']>
 
 interface BaseInertiaLinkProps {
   as?: string
@@ -57,9 +58,9 @@ export const InertiaLink: InertiaLink
 
 export const Link: InertiaLink
 
-export const InertiaApp: App
+export const InertiaApp: AppType
 
-export const App: App
+export const App: AppType
 
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
@@ -87,3 +88,39 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 }
 
 export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
+
+export type SetupOptions<ElementType, SharedProps> = {
+    el: ElementType,
+    App: AppType,
+    props: {
+        initialPage: Inertia.Page<SharedProps>,
+        initialComponent: ReactComponent,
+        resolveComponent: PageResolver,
+        titleCallback?: HeadManagerTitleCallback
+        onHeadUpdate?: HeadManagerOnUpdate
+    },
+}
+
+export type BaseInertiaAppOptions = {
+    title?: HeadManagerTitleCallback,
+    resolve(name: string): PageResolver,
+}
+
+export type CreateInertiaAppSetupReturnType = ReactInstance|void;
+export type InertiaAppOptionsForCSR<SharedProps> = BaseInertiaAppOptions & {
+    id?: string,
+    page?: Inertia.Page|string,
+    render?: undefined,
+    setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
+}
+
+export type CreateInertiaAppSSRContent = { head: string[]; body: string };
+export type InertiaAppOptionsForSSR<SharedProps> = BaseInertiaAppOptions & {
+    id?: undefined,
+    page: Inertia.Page|string,
+    render: typeof renderToString,
+    setup(options: SetupOptions<null, SharedProps>): ReactInstance
+}
+
+export function createInertiaApp<SharedProps = Inertia.PageProps>(options: InertiaAppOptionsForCSR<SharedProps>): Promise<CreateInertiaAppSetupReturnType>
+export function createInertiaApp<SharedProps = Inertia.PageProps>(options: InertiaAppOptionsForSSR<SharedProps>): Promise<CreateInertiaAppSSRContent>
