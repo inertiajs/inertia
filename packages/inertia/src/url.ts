@@ -23,6 +23,7 @@ export function mergeDataIntoQueryString(
     url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
       encodeValuesOnly: true,
       arrayFormat: 'brackets',
+      skipNulls: true,
     })
     data = {}
   }
