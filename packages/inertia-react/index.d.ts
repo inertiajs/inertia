@@ -79,7 +79,7 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	transform: (callback: (data: TForm) => TForm) => void
 	reset: (...fields: (keyof TForm)[]) => void
 	clearErrors: (...fields: (keyof TForm)[]) => void
-	submit: (method: () => void, url: string, options?: Inertia.VisitOptions) => Promise<void>
+	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitOptions) => Promise<void>
 	get: (url: string, options?: Inertia.VisitOptions) => Promise<void>
 	patch: (url: string, options?: Inertia.VisitOptions) => Promise<void>
 	post: (url: string, options?: Inertia.VisitOptions) => Promise<void>
