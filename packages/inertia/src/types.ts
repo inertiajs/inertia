@@ -54,7 +54,7 @@ export type LocationVisit = {
 export type Visit = {
   method: Method,
   data: RequestPayload,
-  replace: boolean,
+  replace: boolean | null,
   preserveScroll: PreserveStateOption,
   preserveState: PreserveStateOption,
   only: Array<string>,
