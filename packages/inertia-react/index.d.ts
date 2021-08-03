@@ -103,7 +103,7 @@ export type SetupOptions<ElementType, SharedProps> = {
 
 export type BaseInertiaAppOptions = {
     title?: HeadManagerTitleCallback,
-    resolve(name: string): PageResolver,
+    resolve: PageResolver,
 }
 
 export type CreateInertiaAppSetupReturnType = ReactInstance|void;
