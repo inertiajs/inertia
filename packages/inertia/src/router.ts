@@ -360,7 +360,7 @@ export class Router {
     preserveState = false,
   }: {
     visitId?: VisitId,
-    replace?: boolean,
+    replace?: boolean | null,
     preserveScroll?: PreserveStateOption
     preserveState?: PreserveStateOption
   } = {}): Promise<void> {
@@ -369,7 +369,11 @@ export class Router {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
-        replace ? this.replaceState(page) : this.pushState(page)
+        if (replace === true) {
+          this.replaceState(page)
+        } else if (replace === false) {
+          this.pushState(page)
+        }
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
