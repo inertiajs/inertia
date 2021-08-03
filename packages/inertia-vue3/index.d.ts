@@ -101,7 +101,7 @@ export declare const Head: InertiaHead
 
 declare module 'vue' {
   export interface ComponentCustomProperties {
-    $inertia: typeof Inertia.Inertia
+    $inertia: typeof Inertia.Inertia & { form: typeof useForm }
     $page: Inertia.Page
     $headManager: ReturnType<typeof Inertia.createHeadManager>
   }
