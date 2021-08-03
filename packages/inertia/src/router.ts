@@ -373,6 +373,8 @@ export class Router {
           this.replaceState(page)
         } else if (replace === false) {
           this.pushState(page)
+        } else {
+          this.keepState(page)
         }
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
@@ -394,6 +396,10 @@ export class Router {
   protected replaceState(page: Page): void {
     this.page = page
     window.history.replaceState(page, '', page.url)
+  }
+
+  protected keepState(page: Page): void {
+    this.page = page
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
