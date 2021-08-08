@@ -99,7 +99,7 @@ export type InertiaHead = DefineComponent<{
 
 export declare const Head: InertiaHead
 
-declare module 'vue' {
+declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
     $inertia: typeof Inertia.Inertia
     $page: Inertia.Page
