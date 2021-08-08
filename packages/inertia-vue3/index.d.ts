@@ -25,10 +25,12 @@ export interface CreateInertiaAppProps {
     app: InertiaApp
     props: InertiaAppProps
     plugin: Plugin
+    provide?(app: VueApp)
   }) => void | VueApp
   title?: (title: string) => string
   page?: Inertia.Page
   render?: (app: VueApp) => Promise<string>
+  rootLess?: boolean
 }
 
 export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>

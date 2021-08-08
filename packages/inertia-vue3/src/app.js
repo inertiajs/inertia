@@ -1,6 +1,6 @@
 import useForm from './useForm'
 import remember from './remember'
-import { computed, h, markRaw, ref } from 'vue'
+import { computed, h, markRaw, ref, inject } from 'vue'
 import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
@@ -68,7 +68,72 @@ export default {
             return component.value.layout(h, child)
           }
 
-          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
+          return (
+            Array.isArray(component.value.layout)
+              ? component.value.layout
+              : [component.value.layout]
+          )
+            .concat(child)
+            .reverse()
+            .reduce((child, layout) => {
+              layout.inheritAttrs = !!layout.inheritAttrs
+              return h(layout, { ...page.value.props }, () => child)
+            })
+        }
+
+        return child
+      }
+    }
+  },
+}
+
+export const InertiaView = {
+  name: 'InertiaView',
+  setup() {
+
+    const initialPage = inject('$initialPage')
+    const resolveComponent = inject('$resolveComponent')
+
+    component.value = inject('$component') ? markRaw(inject('$component')) : null
+    page.value = initialPage
+    key.value = null
+    const titleCallback = inject('$titleCallback')
+    const onHeadUpdate = inject('$onHeadUpdate')
+
+    const isServer = typeof window === 'undefined'
+    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
+
+    if (!isServer) {
+      Inertia.init({
+        initialPage,
+        resolveComponent,
+        swapComponent: async (args) => {
+          component.value = markRaw(args.component)
+          page.value = args.page
+          key.value = args.preserveState ? key.value : Date.now()
+        },
+      })
+    }
+
+    return () => {
+      if (component.value) {
+        component.value.inheritAttrs = !!component.value.inheritAttrs
+
+        const child = h(component.value, {
+          ...page.value.props,
+          key: key.value,
+        })
+
+        if (component.value.layout) {
+          if (typeof component.value.layout === 'function') {
+            return component.value.layout(h, child)
+          }
+
+          return (
+            Array.isArray(component.value.layout)
+              ? component.value.layout
+              : [component.value.layout]
+          )
             .concat(child)
             .reverse()
             .reduce((child, layout) => {
@@ -92,6 +157,8 @@ export const plugin = {
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 
     app.mixin(remember)
+
+    app.component('InertiaView', InertiaView)
   },
 }
 
