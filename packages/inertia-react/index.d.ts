@@ -66,6 +66,8 @@ export const Link: InertiaLink
 
 export const InertiaHead: InertiaHead
 
+export const Head: InertiaHead
+
 export const InertiaApp: AppType
 
 export const App: AppType
