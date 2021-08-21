@@ -22,7 +22,10 @@ function composeKey(parent: string|null, key: string): string {
 
 function append(form: FormData, key: string, value: FormDataConvertible): void {
   if (Array.isArray(value)) {
-    return Array.from(value.keys()).forEach(index => append(form, composeKey(key, index.toString()), value[index]))
+    if (value.length) {
+      return Array.from(value.keys()).forEach(index => append(form, composeKey(key, index.toString()), value[index]))
+    }
+    return form.append(key, '')
   } else if (value instanceof Date) {
     return form.append(key, value.toISOString())
   } else if (value instanceof File) {
@@ -35,7 +38,7 @@ function append(form: FormData, key: string, value: FormDataConvertible): void {
     return form.append(key, value)
   } else if (typeof value === 'number') {
     return form.append(key, `${value}`)
-  } else if (value === null || value === undefined || (Array.isArray(value) && !value.length)) {
+  } else if (value === null || value === undefined) {
     return form.append(key, '')
   }
 
