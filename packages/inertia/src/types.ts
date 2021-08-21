@@ -81,9 +81,9 @@ export type GlobalEventsMap = {
     result: void,
   },
   progress: {
-    parameters: [{ percentage: number }|undefined],
+    parameters: [Progress|undefined],
     details: {
-      progress: { percentage: number }|undefined,
+      progress: Progress|undefined,
     },
     result: void,
   },
