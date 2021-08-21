@@ -35,7 +35,7 @@ function append(form: FormData, key: string, value: FormDataConvertible): void {
     return form.append(key, value)
   } else if (typeof value === 'number') {
     return form.append(key, `${value}`)
-  } else if (value === null || value === undefined) {
+  } else if (value === null || value === undefined || (Array.isArray(value) && !value.length)) {
     return form.append(key, '')
   }
 
