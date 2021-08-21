@@ -47,6 +47,8 @@ export type PageHandler = ({
 
 export type PreserveStateOption = boolean|string|((page: Page) => boolean)
 
+export type Progress = ProgressEvent & { percentage: number }
+
 export type LocationVisit = {
   preserveScroll: boolean,
 }
