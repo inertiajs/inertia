@@ -1,5 +1,5 @@
 import isEqual from 'lodash.isequal'
-import { reactive, watch } from 'vue'
+import { reactive, watch, unref } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
@@ -13,7 +13,7 @@ export default function useForm(...args) {
   let transform = data => data
 
   let form = reactive({
-    ...restored ? restored.data : data,
+    ...restored ? restored.data : unref(data),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -23,7 +23,7 @@ export default function useForm(...args) {
     recentlySuccessful: false,
     data() {
       return Object
-        .keys(data)
+        .keys(unref(data))
         .reduce((carry, key) => {
           carry[key] = this[key]
           return carry
@@ -177,6 +177,19 @@ export default function useForm(...args) {
       this.hasErrors = Object.keys(this.errors).length > 0
     },
   })
+
+  // Watch for end of processing and reset form with server response
+  watch(
+    () => form.processing,
+    (processing) => {
+      if (!processing && !form.hasErrors) {
+        Object.keys(unref(data)).forEach((a) => {
+          form[a] = unref(data)[a];
+        });
+      }
+    },
+  );
+
 
   watch(form, newValue => {
     form.isDirty = !isEqual(form.data(), defaults)
