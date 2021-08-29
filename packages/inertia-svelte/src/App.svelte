@@ -29,4 +29,6 @@
     : child
 </script>
 
-<Render {...components} />
+{#key $store.key}
+  <Render {...components} />
+{/key}
