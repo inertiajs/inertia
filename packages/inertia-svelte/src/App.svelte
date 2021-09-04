@@ -27,8 +27,9 @@
           .reduce((child, layout) => h(layout, $store.page.props, [child]))
       : h(layout, $store.page.props, [child])
     : child
+  $: rerenderKey = `${$store.key}.${$store.component?.default.name}`
 </script>
 
-{#key $store.key}
+{#key rerenderKey}
   <Render {...components} />
 {/key}
