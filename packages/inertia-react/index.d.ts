@@ -76,7 +76,7 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	wasSuccessful: boolean
 	recentlySuccessful: boolean
 	setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
-	transform: (callback: (data: TForm) => TForm) => void
+	transform: (callback: (data: TForm) => unknown) => void
 	reset: (...fields: (keyof TForm)[]) => void
 	clearErrors: (...fields: (keyof TForm)[]) => void
 	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitOptions) => Promise<void>
