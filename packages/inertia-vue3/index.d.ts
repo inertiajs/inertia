@@ -4,7 +4,7 @@ import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
 export interface InertiaAppProps {
   initialPage: Inertia.Page
   initialComponent?: object
-  resolveComponent?: (name: string) => Promise<DefineComponent>
+  resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
   onHeadUpdate?: (elements: string[]) => void
 }
 
