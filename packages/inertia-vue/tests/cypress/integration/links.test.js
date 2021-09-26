@@ -995,7 +995,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="/example" method="post" as="button">...</inertia-link>',
+          '<Link href="/example" method="post" as="button">...</Link>',
         )
     })
 
@@ -1021,7 +1021,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="/example" method="put" as="button">...</inertia-link>',
+          '<Link href="/example" method="put" as="button">...</Link>',
         )
     })
 
@@ -1047,7 +1047,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="/example" method="patch" as="button">...</inertia-link>',
+          '<Link href="/example" method="patch" as="button">...</Link>',
         )
     })
 
@@ -1073,7 +1073,7 @@ describe('Links', () => {
         .should('be.calledWith',
           'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<inertia-link href="/example" method="delete" as="button">...</inertia-link>',
+          '<Link href="/example" method="delete" as="button">...</Link>',
         )
     })
 
