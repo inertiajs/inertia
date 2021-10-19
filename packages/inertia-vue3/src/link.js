@@ -27,6 +27,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    external: {
+      type: Boolean,
+      default: false,
+    },
     preserveState: {
       type: Boolean,
       default: null,
@@ -54,6 +58,10 @@ export default {
         ...attrs,
         ...as === 'a' ? { href } : {},
         onClick: (event) => {
+          if (props.external) {
+            return
+          }
+					
           if (shouldIntercept(event)) {
             event.preventDefault()
 

@@ -22,6 +22,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    external: {
+      type: Boolean,
+      default: false,
+    },
     preserveScroll: {
       type: Boolean,
       default: false,
@@ -70,6 +74,10 @@ export default {
         ...data.on,
         click: event => {
           data.on.click(event)
+					
+          if (props.external) {
+            return
+          }
 
           if (shouldIntercept(event)) {
             event.preventDefault()
