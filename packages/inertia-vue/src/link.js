@@ -18,6 +18,10 @@ export default {
       type: String,
       default: 'get',
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     replace: {
       type: Boolean,
       default: false,
@@ -65,6 +69,7 @@ export default {
       attrs: {
         ...data.attrs,
         ...as === 'a' ? { href } : {},
+        ...props.disabled ? { disabled: props.disabled } : {},
       },
       on: {
         ...data.on,
@@ -73,6 +78,10 @@ export default {
 
           if (shouldIntercept(event)) {
             event.preventDefault()
+            
+            if (props.disabled) {
+              return
+            }
 
             Inertia.visit(href, {
               data: propsData,
