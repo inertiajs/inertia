@@ -446,7 +446,7 @@ export class Router {
     this.replaceState({
       ...this.page,
       rememberedState: {
-        ...this.page.rememberedState,
+        ...this.page?.rememberedState,
         [key]: data,
       },
     })
