@@ -11,7 +11,7 @@ export function mergeDataIntoQueryString(
   href: URL|string,
   data: Record<string, FormDataConvertible>,
 ): [string, Record<string, FormDataConvertible>] {
-  const hasHost = href.toString().includes('http')
+  const hasHost = href.toString().startsWith('http://') ||  href.toString().startsWith('https://')
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasSearch = href.toString().includes('?') || (method === Method.GET && Object.keys(data).length)
