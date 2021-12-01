@@ -44,6 +44,12 @@ interface BaseInertiaLinkProps {
 type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> & Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
+	
+type InertiaHeadProps = {
+    title?: string
+}
+
+type InertiaHead = React.FunctionComponent<InertiaHeadProps>
 
 export function usePage<
   Page extends Inertia.Page = Inertia.Page
@@ -57,6 +63,10 @@ export function useRemember<State>(
 export const InertiaLink: InertiaLink
 
 export const Link: InertiaLink
+
+export const InertiaHead: InertiaHead
+
+export const Head: InertiaHead
 
 export const InertiaApp: AppType
 
