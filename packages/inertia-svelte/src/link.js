@@ -17,6 +17,10 @@ export default (node, options = {}) => {
       throw new Error('Option "href" is required')
     }
 
+    if (node.tagName === 'BUTTON' && node.disabled || options.disabled) {
+      return
+    }
+
     if (shouldIntercept(event)) {
       event.preventDefault()
       Inertia.visit(href, options)
