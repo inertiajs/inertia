@@ -1,10 +1,11 @@
 {
   "name": "@inertiajs/inertia",
-  "version": "0.8.5",
+  "version": "0.10.1",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
+    "Claudio Dekker <claudio@ubient.net>",
     "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
   ],
   "homepage": "https://inertiajs.com/",
@@ -16,14 +17,16 @@
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
   },
-  "source": "src/index.js",
+  "files": ["dist", "types"],
+  "source": "src/index.ts",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
-  "typings": "index.d.ts",
+  "types": "types/index.d.ts",
   "scripts": {
-    "build": "npm run build:cjs && npm run build:umd",
+    "build": "npm run clean && npm run build:cjs && npm run build:umd",
     "build:cjs": "microbundle --format cjs",
     "build:umd": "microbundle --format umd --name Inertia --external none",
+    "clean": "rm -rf types && rm -rf dist",
     "prepublishOnly": "npm run build",
     "watch": "microbundle watch --format cjs"
   },
@@ -33,7 +36,12 @@
     "qs": "^6.9.0"
   },
   "devDependencies": {
-    "eslint": "^7.0.0",
-    "microbundle": "^0.12.0"
+    "@types/deepmerge": "^2.2.0",
+    "@types/qs": "^6.9.0",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
+    "eslint": "^7.23.0",
+    "microbundle": "^0.12.0",
+    "typescript": "^4.2.4"
   }
 }

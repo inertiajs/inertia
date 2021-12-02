@@ -1,5 +1,5 @@
-import { hrefToUrl, Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
-import { createElement, useCallback, forwardRef } from 'react'
+import { createElement, forwardRef, useCallback } from 'react'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 const noop = () => undefined
 
@@ -74,8 +74,8 @@ export default forwardRef(function InertiaLink({
 
   as = as.toLowerCase()
   method = method.toLowerCase()
-  const [url, _data] = mergeDataIntoQueryString(method, hrefToUrl(href), data)
-  href = url.href
+  const [_href, _data] = mergeDataIntoQueryString(method, href || '', data)
+  href = _href
   data = _data
 
   if (as === 'a' && method !== 'get') {

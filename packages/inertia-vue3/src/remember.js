@@ -1,4 +1,4 @@
-import { ref, toRaw, unref, watch } from 'vue'
+import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
 export default {
@@ -19,52 +19,37 @@ export default {
       this.$options.remember = { data: [this.$options.remember.data] }
     }
 
-    const stateKey = this.$options.remember.key instanceof Function
+    const rememberKey = this.$options.remember.key instanceof Function
       ? this.$options.remember.key.call(this)
       : this.$options.remember.key
 
-    const restored = Inertia.restore(stateKey)
+    const restored = Inertia.restore(rememberKey)
 
-    this.$options.remember.data.forEach(key => {
+    const rememberable = this.$options.remember.data.filter(key => {
+      return !(this[key] !== null && typeof this[key] === 'object' && this[key].__rememberable === false)
+    })
+
+    const hasCallbacks = (key) => {
+      return this[key] !== null
+        && typeof this[key] === 'object'
+        && typeof this[key].__remember === 'function'
+        && typeof this[key].__restore === 'function'
+    }
+
+    rememberable.forEach(key => {
       if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
-        typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
-          ? this[key].unserialize(restored[key])
-          : (this[key] = restored[key])
+        hasCallbacks(key) ? this[key].__restore(restored[key]) : (this[key] = restored[key])
       }
 
       this.$watch(key, () => {
         Inertia.remember(
-          this.$options.remember.data.reduce((data, key) => ({
+          rememberable.reduce((data, key) => ({
             ...data,
-            [key]: typeof this[key].serialize === 'function' && typeof this[key].unserialize === 'function'
-              ? this[key].serialize()
-              : toRaw(this[key]),
+            [key]: cloneDeep(hasCallbacks(key) ? this[key].__remember(): this[key]),
           }), {}),
-          stateKey,
+          rememberKey,
         )
       }, { immediate: true, deep: true })
     })
   },
-}
-
-export function useRemember(data, key) {
-  data = toRaw(unref(data))
-  const restored = Inertia.restore(key)
-
-  const remembered = restored === undefined ? ref(data) : ref(
-    typeof data.serialize === 'function' && typeof data.unserialize === 'function'
-      ? data.unserialize(restored)
-      : restored,
-  )
-
-  watch(remembered, (remembered) => {
-    Inertia.remember(
-      typeof data.serialize === 'function' && typeof data.unserialize === 'function'
-        ? data.serialize()
-        : toRaw(remembered),
-      key,
-    )
-  }, { immediate: true, deep: true })
-
-  return remembered
 }

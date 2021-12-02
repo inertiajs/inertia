@@ -1,13 +1,21 @@
+import Vue from 'vue'
+import isEqual from 'lodash.isequal'
+import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
-export default function(data = {}) {
-  const defaults = JSON.parse(JSON.stringify(data))
+export default function(...args) {
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null
+  const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  let defaults = cloneDeep(data)
+  let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
 
-  return {
-    ...defaults,
-    errors: {},
+  const form = Vue.observable({
+    ...restored ? restored.data : data,
+    isDirty: false,
+    errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
     progress: null,
@@ -27,16 +35,17 @@ export default function(data = {}) {
       return this
     },
     reset(...fields) {
+      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
-        Object.assign(this, defaults)
+        Object.assign(this, clonedDefaults)
       } else {
         Object.assign(
           this,
           Object
-            .keys(defaults)
+            .keys(clonedDefaults)
             .filter(key => fields.includes(key))
             .reduce((carry, key) => {
-              carry[key] = defaults[key]
+              carry[key] = clonedDefaults[key]
               return carry
             }, {}),
         )
@@ -56,20 +65,17 @@ export default function(data = {}) {
 
       return this
     },
-    serialize() {
-      return {
-        errors: this.errors,
-        ...this.data(),
-      }
-    },
-    unserialize(data) {
-      Object.assign(this, data)
-      this.hasErrors = Object.keys(this.errors).length > 0
-    },
     submit(method, url, options = {}) {
       const data = transform(this.data())
       const _options = {
         ...options,
+        onCancelToken: (token) => {
+          cancelToken = token
+
+          if (options.onCancelToken) {
+            return options.onCancelToken(token)
+          }
+        },
         onBefore: visit => {
           this.wasSuccessful = false
           this.recentlySuccessful = false
@@ -93,17 +99,22 @@ export default function(data = {}) {
             return options.onProgress(event)
           }
         },
-        onSuccess: page => {
+        onSuccess: async page => {
+          this.processing = false
+          this.progress = null
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          defaults = cloneDeep(this.data())
+          this.isDirty = false
+          return onSuccess
         },
         onError: errors => {
+          this.processing = false
+          this.progress = null
           this.errors = errors
           this.hasErrors = true
 
@@ -111,9 +122,18 @@ export default function(data = {}) {
             return options.onError(errors)
           }
         },
+        onCancel: () => {
+          this.processing = false
+          this.progress = null
+
+          if (options.onCancel) {
+            return options.onCancel()
+          }
+        },
         onFinish: () => {
           this.processing = false
           this.progress = null
+          cancelToken = null
 
           if (options.onFinish) {
             return options.onFinish()
@@ -142,5 +162,32 @@ export default function(data = {}) {
     delete(url, options) {
       this.submit('delete', url, options)
     },
-  }
+    cancel() {
+      if (cancelToken) {
+        cancelToken.cancel()
+      }
+    },
+    __rememberable: rememberKey === null,
+    __remember() {
+      return { data: this.data(), errors: this.errors }
+    },
+    __restore(restored) {
+      Object.assign(this, restored.data)
+      Object.assign(this.errors, restored.errors)
+      this.hasErrors = Object.keys(this.errors).length > 0
+    },
+  })
+
+  new Vue({
+    created() {
+      this.$watch(() => form, newValue => {
+        form.isDirty = !isEqual(form.data(), defaults)
+        if (rememberKey) {
+          Inertia.remember(newValue.__remember(), rememberKey)
+        }
+      }, { immediate: true, deep: true })
+    },
+  })
+
+  return form
 }

@@ -1,0 +1,53 @@
+name: End-to-end tests
+on: [push, pull_request]
+jobs:
+  tests:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    timeout-minutes: 15
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        adapter: ['vue']
+        browser: ['chrome']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.15.3
+
+      - name: Cache Node modules
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.OS }}-yarn-cache-${{ hashFiles('yarn.lock') }}
+          path: |
+            ~/.cache
+            node_modules
+            packages/inertia-vue/tests/node_modules
+
+      - name: Build Inertia
+        run: |
+          yarn install
+          yarn build
+
+      - name: Local-link @inertiajs/inertia
+        run: cd packages/inertia && yarn link
+
+      - name: Local-link @inertiajs/inertia-${{ matrix.adapter }}
+        run: cd packages/inertia-${{ matrix.adapter }} && yarn link
+
+      - name: Install Cypress Dependencies
+        run: |
+          cd packages/inertia-${{ matrix.adapter }}/tests
+          yarn install --frozen-lockfile
+          yarn link "@inertiajs/inertia"
+          yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
+
+      - name: Run Cypress (${{ matrix.browser }} / inertia-${{ matrix.adapter }})
+        run: |
+          cd packages/inertia-${{ matrix.adapter }}/tests
+          yarn ci

@@ -1,12 +1,12 @@
-import form from './form'
-import link from './link'
+import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
-import { Inertia } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/inertia'
 
 const component = ref(null)
 const page = ref({})
 const key = ref(null)
+let headManager = null
 
 export default {
   name: 'Inertia',
@@ -15,34 +15,49 @@ export default {
       type: Object,
       required: true,
     },
+    initialComponent: {
+      type: Object,
+      required: false,
+    },
     resolveComponent: {
       type: Function,
-      required: true,
-    },
-    resolveErrors: {
-      type: Function,
       required: false,
     },
-    transformProps: {
+    titleCallback: {
       type: Function,
       required: false,
+      default: title => title,
+    },
+    onHeadUpdate: {
+      type: Function,
+      required: false,
+      default: () => () => {},
     },
   },
-  setup({ initialPage, resolveComponent, transformProps, resolveErrors }) {
-    Inertia.init({
-      initialPage,
-      resolveComponent,
-      resolveErrors,
-      transformProps,
-      swapComponent: async (args) => {
-        component.value = markRaw(args.component)
-        page.value = args.page
-        key.value = args.preserveState ? key.value : Date.now()
-      },
-    })
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
+    component.value = initialComponent ? markRaw(initialComponent) : null
+    page.value = initialPage
+    key.value = null
+
+    const isServer = typeof window === 'undefined'
+    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
+
+    if (!isServer) {
+      Inertia.init({
+        initialPage,
+        resolveComponent,
+        swapComponent: async (args) => {
+          component.value = markRaw(args.component)
+          page.value = args.page
+          key.value = args.preserveState ? key.value : Date.now()
+        },
+      })
+    }
 
     return () => {
       if (component.value) {
+        component.value.inheritAttrs = !!component.value.inheritAttrs
+
         const child = h(component.value, {
           ...page.value.props,
           key: key.value,
@@ -51,14 +66,15 @@ export default {
         if (component.value.layout) {
           if (typeof component.value.layout === 'function') {
             return component.value.layout(h, child)
-          } else if (Array.isArray(component.value.layout)) {
-            return component.value.layout
-              .concat(child)
-              .reverse()
-              .reduce((child, layout) => h(layout, [child]))
           }
 
-          return h(component.value.layout, () => child)
+          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
+            .concat(child)
+            .reverse()
+            .reduce((child, layout) => {
+              layout.inheritAttrs = !!layout.inheritAttrs
+              return h(layout, { ...page.value.props }, () => child)
+            })
         }
 
         return child
@@ -69,11 +85,13 @@ export default {
 
 export const plugin = {
   install(app) {
-    Inertia.form = form
+    Inertia.form = useForm
+
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
+    Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
+
     app.mixin(remember)
-    app.component('InertiaLink', link)
   },
 }
 
