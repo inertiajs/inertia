@@ -69,7 +69,7 @@ export default {
       attrs: {
         ...data.attrs,
         ...as === 'a' ? { href } : {},
-        ...props.disabled ? { disabled: props.disabled } : {},
+        ...as === 'button' && props.disabled ? { disabled: props.disabled } : {},
       },
       on: {
         ...data.on,
@@ -79,7 +79,7 @@ export default {
           if (shouldIntercept(event)) {
             event.preventDefault()
             
-            if (props.disabled) {
+            if (as === 'button' && props.disabled) {
               return
             }
 

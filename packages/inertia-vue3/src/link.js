@@ -57,12 +57,12 @@ export default {
       return h(props.as, {
         ...attrs,
         ...as === 'a' ? { href } : {},
-        ...props.disabled ? { disabled: props.disabled } : {},
+        ...as === 'button' && props.disabled ? { disabled: props.disabled } : {},
         onClick: (event) => {
           if (shouldIntercept(event)) {
             event.preventDefault()
             
-            if (props.disabled) {
+            if (as === 'button' && props.disabled) {
               return
             }
 
