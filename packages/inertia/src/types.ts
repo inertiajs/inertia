@@ -63,6 +63,7 @@ export type Visit = {
   headers: Record<string, string>
   errorBag: string|null,
   forceFormData: boolean,
+  queryStringArrayFormat: 'indices'|'brackets',
 }
 
 export type GlobalEventsMap = {

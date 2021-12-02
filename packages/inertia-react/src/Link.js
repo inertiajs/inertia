@@ -14,6 +14,7 @@ export default forwardRef(function InertiaLink({
   replace = false,
   only = [],
   headers = {},
+  queryStringArrayFormat = 'brackets',
   onClick = noop,
   onCancelToken = noop,
   onBefore = noop,
@@ -74,7 +75,7 @@ export default forwardRef(function InertiaLink({
 
   as = as.toLowerCase()
   method = method.toLowerCase()
-  const [_href, _data] = mergeDataIntoQueryString(method, href || '', data)
+  const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
   href = _href
   data = _data
 
