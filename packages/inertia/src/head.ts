@@ -4,6 +4,11 @@ const Renderer = {
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
+    if (template.content === undefined) {
+      const fragment = document.createDocumentFragment();
+      fragment.appendChild(template.childNodes[0]);
+      template.content = fragment;
+    }
     const node = (template.content.firstChild as Element)
 
     if (!tag.startsWith('<script ')) {
