@@ -68,6 +68,10 @@ function useForm(...args) {
       return this
     },
     submit(method, url, options = {}) {
+      if (this.processing) {
+        return
+      }
+
       const data = transform(this.data())
       const _options = {
         ...options,

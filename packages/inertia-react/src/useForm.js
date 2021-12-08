@@ -27,6 +27,10 @@ export default function useForm(...args) {
 
   const submit = useCallback(
     (method, url, options = {}) => {
+      if (this.processing) {
+        return
+      }
+
       const _options = {
         ...options,
         onCancelToken: (token) => {
