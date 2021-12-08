@@ -167,6 +167,7 @@ describe('Manual Visits', () => {
   describe('Data', () => {
     describe('plain objects', () => {
       beforeEach(() => {
+        cy.intercept('/dump/**').as('spy')
         cy.visit('/visits/data/object', {
           onLoad: () => cy.on('window:load', () => {
             throw 'A location/non-SPA visit was detected'
@@ -174,42 +175,49 @@ describe('Manual Visits', () => {
         })
       })
 
-      it('passes data as params using the visit method', () => {
+      it('passes data as params by default when using the visit method', () => {
         cy.get('.visit').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
 
-        cy.window().should('have.property', '_inertia_request_dump')
-        cy.window()
-          .then(window => window._inertia_request_dump)
-          .then(({method, headers, form, files, query}) => {
-            expect(headers).to.contain.key('content-type')
-            expect(headers['content-type']).to.contain('application/json')
-
-            expect(method).to.eq('get')
-            expect(query).to.contain.key('foo')
-            expect(query.foo).to.eq('visit')
-            expect(form).to.be.empty
-            expect(files).to.be.empty
-          })
+        cy.wait('@spy').then(({request, response}) => {
+          expect(request.url).to.eq(Cypress.config().baseUrl + '/dump/get?foo=visit')
+          expect(request.headers).to.contain.key('content-type')
+          expect(request.headers['content-type']).to.contain('application/json')
+          expect(request.method).to.eq('GET')
+          expect(response.body.props.form).to.be.empty
+          expect(response.body.props.files).to.be.undefined
+        })
       })
 
-      it('passes data as params using the GET method', () => {
-        cy.get('.get').click()
-        cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
+      describe('GET method', () => {
+        it('passes data as params', () => {
+          cy.get('.get').click()
 
-        cy.window().should('have.property', '_inertia_request_dump')
-        cy.window()
-          .then(window => window._inertia_request_dump)
-          .then(({method, headers, form, files, query}) => {
-            expect(headers).to.contain.key('content-type')
-            expect(headers['content-type']).to.contain('application/json')
-
-            expect(method).to.eq('get')
-            expect(query).to.contain.key('bar')
-            expect(query.bar).to.eq('get')
-            expect(form).to.be.empty
-            expect(files).to.be.empty
+          cy.wait('@spy').then(({request, response}) => {
+            expect(request.url).to.eq(Cypress.config().baseUrl + '/dump/get?bar=get')
+            expect(request.headers).to.contain.key('content-type')
+            expect(request.headers['content-type']).to.contain('application/json')
+            expect(request.method).to.eq('GET')
+            expect(response.body.props.form).to.be.empty
+            expect(response.body.props.files).to.be.undefined
           })
+        })
+
+        describe('query string array formatter', () => {
+          it('can use the brackets query string array formatter', () => {
+            cy.get('.qsaf-brackets').click()
+            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
+          })
+
+          it('can use the indices query string array formatter', () => {
+            cy.get('.qsaf-indices').click()
+            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[0]=b&a[1]=c')
+          })
+
+          it('defaults to using the brackets query string array formatter', () => {
+            cy.get('.qsaf-default').click()
+            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
+          })
+        })
       })
 
       it('can pass data using the POST method', () => {
