@@ -2,7 +2,7 @@ import { createEventDispatcher } from 'svelte'
 import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
 
 export default (node, options = {}) => {
-  const [href, data] = mergeDataIntoQueryString(options.method || 'get', node.href || options.href || '', options.data || {})
+  const [href, data] = mergeDataIntoQueryString(options.method || 'get', node.href || options.href || '', options.data || {}, options.queryStringArrayFormat || 'brackets')
   node.href = href
   options.data = data
 
@@ -27,7 +27,7 @@ export default (node, options = {}) => {
 
   return {
     update(newOptions) {
-      const [href, data] = mergeDataIntoQueryString(newOptions.method || 'get', node.href || newOptions.href, newOptions.data || {})
+      const [href, data] = mergeDataIntoQueryString(newOptions.method || 'get', node.href || newOptions.href, newOptions.data || {}, newOptions.queryStringArrayFormat || 'brackets')
       node.href = href
       newOptions.data = data
       options = newOptions
