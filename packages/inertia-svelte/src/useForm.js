@@ -54,6 +54,17 @@ function useForm(...args) {
 
       return this
     },
+    setError(key, value) {
+      const errors = {
+        ...this.errors,
+        ...(value ? { [key]: value } : key),
+      }
+
+      this.setStore('errors', errors)
+      this.setStore('hasErrors', Object.keys(errors).length > 0)
+
+      return this
+    },
     clearErrors(...fields) {
       const errors = Object
         .keys(this.errors)
@@ -117,8 +128,7 @@ function useForm(...args) {
         onError: errors => {
           this.setStore('processing', false)
           this.setStore('progress', null)
-          this.setStore('errors', errors)
-          this.setStore('hasErrors', true)
+          this.clearErrors().setError(errors)
 
           if (options.onError) {
             return options.onError(errors)

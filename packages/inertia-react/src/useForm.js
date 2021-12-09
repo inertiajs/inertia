@@ -158,6 +158,14 @@ export default function useForm(...args) {
         )
       }
     },
+    setError(key, value) {
+      setErrors({
+        ... errors,
+        ... (value ? { [key]: value } : key),
+      })
+
+      setHasErrors(Object.keys(errors).length > 0)
+    },
     clearErrors(...fields) {
       setErrors(
         Object.keys(errors).reduce(
