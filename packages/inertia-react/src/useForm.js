@@ -137,7 +137,6 @@ export default function useForm(...args) {
     isDirty: !isEqual(data, defaults),
     errors,
     hasErrors,
-    setErrors,
     processing,
     progress,
     wasSuccessful,
