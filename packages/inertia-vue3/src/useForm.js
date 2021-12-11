@@ -53,6 +53,17 @@ export default function useForm(...args) {
 
       return this
     },
+    resetWith(newDefaults) {
+      if (typeof newDefaults === 'object' && Object.keys(newDefaults).length > 0) {
+        Object.keys(newDefaults).forEach(key => {
+          if (this.data().hasOwnProperty(key)) {
+            this[key] = newDefaults[key]
+          }
+        })
+      }
+
+      return this
+    },
     clearErrors(...fields) {
       this.errors = Object
         .keys(this.errors)

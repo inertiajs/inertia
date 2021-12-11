@@ -78,6 +78,7 @@ export interface InertiaFormProps<TForm> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   reset(...fields: (keyof TForm)[]): this
+  resetWith(newDefaults: {[Property in keyof TForm]: string}): this
   clearErrors(...fields: (keyof TForm)[]): this
   submit(method: string, url: string, options?: Partial<Inertia.VisitOptions>): void
   get(url: string, options?: Partial<Inertia.VisitOptions>): void
