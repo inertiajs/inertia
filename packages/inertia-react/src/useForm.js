@@ -18,6 +18,8 @@ export default function useForm(...args) {
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
   let transform = (data) => data
 
+  useEffect(() => setHasErrors(Object.keys(errors).length > 0), [errors])
+
   useEffect(() => {
     isMounted.current = true
     return () => {
@@ -64,7 +66,6 @@ export default function useForm(...args) {
             setProcessing(false)
             setProgress(null)
             setErrors({})
-            setHasErrors(false)
             setWasSuccessful(true)
             setRecentlySuccessful(true)
             recentlySuccessfulTimeoutId.current = setTimeout(() => {
@@ -83,7 +84,6 @@ export default function useForm(...args) {
             setProcessing(false)
             setProgress(null)
             setErrors(errors)
-            setHasErrors(true)
           }
 
           if (options.onError) {
@@ -159,24 +159,19 @@ export default function useForm(...args) {
       }
     },
     setError(key, value) {
-      setErrors({
+      setErrors(errors => ({
         ... errors,
-        ... (value ? { [key]: value } : key),
-      })
-
-      setHasErrors(Object.keys(errors).length > 0)
+        [key]: value,
+      }))
     },
     clearErrors(...fields) {
-      setErrors(
-        Object.keys(errors).reduce(
-          (carry, field) => ({
-            ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
-          }),
-          {},
-        ),
-      )
-      setHasErrors(Object.keys(errors).length > 0)
+      setErrors(errors => Object.keys(errors).reduce(
+        (carry, field) => ({
+          ...carry,
+          ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
+        }),
+        {},
+      ))
     },
     submit,
     get(url, options) {
