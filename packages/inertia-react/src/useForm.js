@@ -3,11 +3,11 @@ import useRemember from './useRemember'
 import { Inertia } from '@inertiajs/inertia'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export default function useForm(initialData, rememberKey) {
+export default function useForm(rememberKeyOrInitialData, initialData) {
   
   const isMounted = useRef(null)
-  const useRememberKey = typeof rememberKey === 'string' ? rememberKey : null
-  const defaults = initialData || {}
+  const useRememberKey = typeof rememberKey === 'string' ? rememberKeyOrInitialData : null
+  const defaults = useRememberKey === null ? rememberKeyOrInitialData:  initialData
   const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = useRememberKey ? useRemember(defaults, `${useRememberKey}:data`) : useState(defaults)
