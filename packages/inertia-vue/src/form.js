@@ -56,6 +56,8 @@ export default function(...args) {
     setError(key, value) {
       Object.assign(this.errors, (value ? { [key]: value } : key))
 
+      this.hasErrors = Object.keys(this.errors).length > 0
+
       return this
     },
     clearErrors(...fields) {
@@ -65,6 +67,8 @@ export default function(...args) {
           ...carry,
           ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
         }), {})
+
+      this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
     },
@@ -182,7 +186,6 @@ export default function(...args) {
   new Vue({
     created() {
       this.$watch(() => form, newValue => {
-        form.hasErrors = Object.keys(newValue.errors).length > 0
         form.isDirty = !isEqual(form.data(), defaults)
         if (rememberKey) {
           Inertia.remember(newValue.__remember(), rememberKey)
