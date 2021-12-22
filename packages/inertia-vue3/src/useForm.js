@@ -180,7 +180,7 @@ export default function useForm(...args) {
   })
 
   watch(form, newValue => {
-    form.hasErrors = Object.keys(form.errors).length > 0
+    form.hasErrors = Object.keys(newValue.errors).length > 0
     form.isDirty = !isEqual(form.data(), defaults)
     if (rememberKey) {
       Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
