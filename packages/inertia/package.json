@@ -20,6 +20,7 @@
   "files": ["dist", "types"],
   "source": "src/index.ts",
   "main": "dist/index.js",
+  "module": "src/index.ts",
   "unpkg": "dist/index.umd.js",
   "types": "types/index.d.ts",
   "scripts": {
