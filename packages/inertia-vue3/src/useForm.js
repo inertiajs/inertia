@@ -53,6 +53,13 @@ export default function useForm(...args) {
 
       return this
     },
+    setError(key, value) {
+      Object.assign(this.errors, (value ? { [key]: value } : key))
+
+      this.hasErrors = Object.keys(this.errors).length > 0
+
+      return this
+    },
     clearErrors(...fields) {
       this.errors = Object
         .keys(this.errors)
@@ -115,8 +122,7 @@ export default function useForm(...args) {
         onError: errors => {
           this.processing = false
           this.progress = null
-          this.errors = errors
-          this.hasErrors = true
+          this.clearErrors().setError(errors)
 
           if (options.onError) {
             return options.onError(errors)
@@ -173,8 +179,7 @@ export default function useForm(...args) {
     },
     __restore(restored) {
       Object.assign(this, restored.data)
-      Object.assign(this.errors, restored.errors)
-      this.hasErrors = Object.keys(this.errors).length > 0
+      this.setError(restored.errors)
     },
   })
 

@@ -20,6 +20,8 @@
 
     <span @click="clearErrors" class="clear">Clear all errors</span>
     <span @click="clearError" class="clear-one">Clear one error</span>
+    <span @click="setErrors" class="set">Set errors</span>
+    <span @click="setError" class="set-one">Set one error</span>
 
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>
@@ -44,6 +46,15 @@ export default {
     },
     clearError() {
       this.form.clearErrors('handle')
+    },
+    setErrors() {
+      this.form.setError({
+        name: 'Manually set Name error',
+        handle: 'Manually set Handle error',
+      })
+    },
+    setError() {
+      this.form.setError('handle', 'Manually set Handle error')
     }
   }
 }

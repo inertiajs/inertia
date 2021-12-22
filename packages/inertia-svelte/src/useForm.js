@@ -54,16 +54,22 @@ function useForm(...args) {
 
       return this
     },
+    setError(key, value) {
+      this.setStore('errors', {
+        ...this.errors,
+        ...(value ? { [key]: value } : key),
+      })
+
+      return this
+    },
     clearErrors(...fields) {
-      const errors = Object
-        .keys(this.errors)
-        .reduce((carry, field) => ({
+      this.setStore('errors', Object.keys(this.errors).reduce(
+        (carry, field) => ({
           ...carry,
           ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
-        }), {})
-
-      this.setStore('errors', errors)
-      this.setStore('hasErrors', Object.keys(errors).length > 0)
+        }), 
+        {},
+      ))
 
       return this
     },
@@ -117,8 +123,7 @@ function useForm(...args) {
         onError: errors => {
           this.setStore('processing', false)
           this.setStore('progress', null)
-          this.setStore('errors', errors)
-          this.setStore('hasErrors', true)
+          this.clearErrors().setError(errors)
 
           if (options.onError) {
             return options.onError(errors)
@@ -174,6 +179,11 @@ function useForm(...args) {
   store.subscribe(form => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
       form.setStore('isDirty', !form.isDirty)
+    }
+
+    const hasErrors = Object.keys(form.errors).length > 0
+    if (form.hasErrors !== hasErrors) {
+      form.setStore('hasErrors', !form.hasErrors)
     }
 
     if (rememberKey) {

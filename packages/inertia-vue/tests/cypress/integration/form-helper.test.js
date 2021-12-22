@@ -169,7 +169,7 @@ describe('Form Helper', () => {
       cy.get('#remember').check()
     })
 
-    it('can displays form errors', () => {
+    it('can display form errors', () => {
       cy.get('.name_error').should('not.exist')
       cy.get('.handle_error').should('not.exist')
       cy.get('.remember_error').should('not.exist')
@@ -261,6 +261,26 @@ describe('Form Helper', () => {
       cy.get('#name').should('have.value', 'A')
       cy.get('#handle').should('have.value', 'B')
       cy.get('#remember').should('be.checked')
+    })
+
+    it('can set a single error', () => {
+      cy.get('.set-one').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/form-helper/errors')
+
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('not.exist')
+      cy.get('.handle_error').should('have.text', 'Manually set Handle error')
+      cy.get('.remember_error').should('not.exist')
+    })
+
+    it('can set multiple errors', () => {
+      cy.get('.set').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/form-helper/errors')
+
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('have.text', 'Manually set Name error')
+      cy.get('.handle_error').should('have.text', 'Manually set Handle error')
+      cy.get('.remember_error').should('not.exist')
     })
   })
 
