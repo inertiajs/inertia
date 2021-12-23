@@ -71,7 +71,6 @@ export interface InertiaFormProps<TForm> {
   defaults(field: keyof TForm, value: string): this
   defaults(fields: Record<keyof TForm, string>): this
   reset(...fields: (keyof TForm)[]): this
-  resetWith(newDefaults: {[Property in keyof TForm]: string}): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
