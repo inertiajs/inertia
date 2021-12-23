@@ -145,10 +145,14 @@ export default function useForm(...args) {
       transform = callback
     },
     setDefaults(key, value) {
-      setDefaults({
-        ... defaults,
-        ... (value ? { [key]: value } : key),
-      })
+      if (typeof key === 'undefined') {
+        setDefaults(() => data)
+      } else {
+        setDefaults(defaults => ({
+          ... defaults,
+          ... (value ? { [key]: value } : key),
+        }))
+      }
     },
     reset(...fields) {
       if (fields.length === 0) {

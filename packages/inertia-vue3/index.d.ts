@@ -67,6 +67,7 @@ export interface InertiaFormProps<TForm> {
   recentlySuccessful: boolean
   data(): TForm
   transform(callback: (data: TForm) => object): this
+  defaults(): this
   defaults(field: keyof TForm, value: string): this
   defaults(fields: Record<keyof TForm, string>): this
   reset(...fields: (keyof TForm)[]): this
