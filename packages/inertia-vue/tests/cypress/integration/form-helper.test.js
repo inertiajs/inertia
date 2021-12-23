@@ -378,24 +378,61 @@ describe('Form Helper', () => {
       cy.get('.remember_error').should('not.exist')
     })
 
-    it('can assign and reset new reset defaults', () => {
-      cy.get('#name').should('have.value', 'foo')
-      cy.get('#handle').should('have.value', 'example')
-      cy.get('#remember').should('not.be.checked')
+    describe('Update "reset" defaults', () => {
+      beforeEach(() => {
+        cy.get('#name').should('have.value', 'foo')
+        cy.get('#handle').should('have.value', 'example')
+        cy.get('#remember').should('not.be.checked')
+      })
 
-      cy.get('.reassign-defaults').click()
+      it('can assign the current values as the new defaults', () => {
+        cy.get('#name').clear().type('A')
+        cy.get('#handle').clear().type('B')
+        cy.get('#remember').check()
 
-      cy.get('#name').should('have.value', 'foo')
-      cy.get('#handle').should('have.value', 'example')
-      cy.get('#remember').should('not.be.checked')
-      cy.get('.reset-one').click()
-      cy.get('#name').should('have.value', 'foo')
-      cy.get('#handle').should('have.value', 'updated handle')
-      cy.get('#remember').should('not.be.checked')
-      cy.get('.reset').click()
-      cy.get('#name').should('have.value', 'foo')
-      cy.get('#handle').should('have.value', 'updated handle')
-      cy.get('#remember').should('be.checked')
+        cy.get('.reassign').click()
+
+        cy.get('#name').clear().type('foo')
+        cy.get('#handle').clear().type('example')
+        cy.get('#remember').uncheck()
+        cy.get('#name').should('have.value', 'foo')
+        cy.get('#handle').should('have.value', 'example')
+        cy.get('#remember').should('not.be.checked')
+
+        cy.get('.reset').click()
+
+        cy.get('#name').should('have.value', 'A')
+        cy.get('#handle').should('have.value', 'B')
+        cy.get('#remember').should('be.checked')
+      })
+
+      it('can assign new defaults for multiple fields', () => {
+        cy.get('.reassign-object').click()
+
+        cy.get('#name').should('have.value', 'foo')
+        cy.get('#handle').should('have.value', 'example')
+        cy.get('#remember').should('not.be.checked')
+        cy.get('.reset-one').click()
+        cy.get('#name').should('have.value', 'foo')
+        cy.get('#handle').should('have.value', 'updated handle')
+        cy.get('#remember').should('not.be.checked')
+        cy.get('.reset').click()
+        cy.get('#name').should('have.value', 'foo')
+        cy.get('#handle').should('have.value', 'updated handle')
+        cy.get('#remember').should('be.checked')
+      })
+
+      it('can assign new default for a single field', () => {
+        cy.get('.reassign-single').click()
+
+        cy.get('#name').should('have.value', 'foo')
+        cy.get('#handle').should('have.value', 'example')
+        cy.get('#remember').should('not.be.checked')
+        cy.get('.reset').click()
+        cy.get('#name').should('have.value', 'single value')
+        cy.get('#handle').should('have.value', 'example')
+        cy.get('#remember').should('not.be.checked')
+      })
     })
   })
 

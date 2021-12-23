@@ -21,7 +21,9 @@
     <span @click="resetAll" class="reset">Reset all data</span>
     <span @click="resetOne" class="reset-one">Reset one field</span>
 
-    <span @click="reassignDefaults" class="reassign-defaults">Reassign default values</span>
+    <span @click="reassign" class="reassign">Reassign current as defaults</span>
+    <span @click="reassignObject" class="reassign-object">Reassign default values</span>
+    <span @click="reassignSingle" class="reassign-single">Reassign single default</span>
 
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>
@@ -47,12 +49,18 @@ export default {
     resetOne() {
       this.form.reset('handle')
     },
-    reassignDefaults() {
+    reassign() {
+      this.form.defaults()
+    },
+    reassignObject() {
       this.form.defaults({
         handle: 'updated handle',
         remember: true
       })
-    }
+    },
+    reassignSingle() {
+      this.form.defaults('name', 'single value')
+    },
   }
 }
 </script>
