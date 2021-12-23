@@ -12,7 +12,7 @@ export function mergeDataIntoQueryString(
   data: Record<string, FormDataConvertible>,
   qsArrayFormat: 'indices'|'brackets' = 'brackets',
 ): [string, Record<string, FormDataConvertible>] {
-  const hasHost = href.toString().startsWith('http://') ||  href.toString().startsWith('https://')
+  const hasHost = /^https?:\/\//.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasSearch = href.toString().includes('?') || (method === Method.GET && Object.keys(data).length)

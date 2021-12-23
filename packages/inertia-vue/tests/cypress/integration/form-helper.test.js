@@ -169,7 +169,7 @@ describe('Form Helper', () => {
       cy.get('#remember').check()
     })
 
-    it('can displays form errors', () => {
+    it('can display form errors', () => {
       cy.get('.name_error').should('not.exist')
       cy.get('.handle_error').should('not.exist')
       cy.get('.remember_error').should('not.exist')
@@ -261,6 +261,26 @@ describe('Form Helper', () => {
       cy.get('#name').should('have.value', 'A')
       cy.get('#handle').should('have.value', 'B')
       cy.get('#remember').should('be.checked')
+    })
+
+    it('can set a single error', () => {
+      cy.get('.set-one').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/form-helper/errors')
+
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('not.exist')
+      cy.get('.handle_error').should('have.text', 'Manually set Handle error')
+      cy.get('.remember_error').should('not.exist')
+    })
+
+    it('can set multiple errors', () => {
+      cy.get('.set').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/form-helper/errors')
+
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('have.text', 'Manually set Name error')
+      cy.get('.handle_error').should('have.text', 'Manually set Handle error')
+      cy.get('.remember_error').should('not.exist')
     })
   })
 
@@ -356,6 +376,26 @@ describe('Form Helper', () => {
       cy.get('.name_error').should('have.text', 'Some name error')
       cy.get('.handle_error').should('have.text', 'The Handle was invalid')
       cy.get('.remember_error').should('not.exist')
+    })
+
+    it('can assign and reset new reset defaults', () => {
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'example')
+      cy.get('#remember').should('not.be.checked')
+
+      cy.get('.reassign-defaults').click()
+
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'example')
+      cy.get('#remember').should('not.be.checked')
+      cy.get('.reset-one').click()
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'updated handle')
+      cy.get('#remember').should('not.be.checked')
+      cy.get('.reset').click()
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'updated handle')
+      cy.get('#remember').should('be.checked')
     })
   })
 

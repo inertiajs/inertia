@@ -4,7 +4,7 @@ import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
 export interface InertiaAppProps {
   initialPage: Inertia.Page
   initialComponent?: object
-  resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
+  resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
   onHeadUpdate?: (elements: string[]) => void
 }
 
@@ -67,9 +67,14 @@ export interface InertiaFormProps<TForm> {
   recentlySuccessful: boolean
   data(): TForm
   transform(callback: (data: TForm) => object): this
+  defaults(): this
+  defaults(field: keyof TForm, value: string): this
+  defaults(fields: Record<keyof TForm, string>): this
   reset(...fields: (keyof TForm)[]): this
   resetWith(newDefaults: {[Property in keyof TForm]: string}): this
   clearErrors(...fields: (keyof TForm)[]): this
+  setError(field: keyof TForm, value: string): this
+  setError(errors: Record<keyof TForm, string>): this
   submit(method: string, url: string, options?: Partial<Inertia.VisitOptions>): void
   get(url: string, options?: Partial<Inertia.VisitOptions>): void
   post(url: string, options?: Partial<Inertia.VisitOptions>): void

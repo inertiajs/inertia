@@ -87,8 +87,13 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	recentlySuccessful: boolean
 	setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
 	transform: (callback: (data: TForm) => TForm) => void
+    setDefaults(): void
+    setDefaults(field: keyof TForm, value: string): void
+    setDefaults(fields: Record<keyof TForm, string>): void
 	reset: (...fields: (keyof TForm)[]) => void
 	clearErrors: (...fields: (keyof TForm)[]) => void
+    setError(field: keyof TForm, value: string): void
+    setError(errors: Record<keyof TForm, string>): void
 	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitOptions) => void
 	get: (url: string, options?: Inertia.VisitOptions) => void
 	patch: (url: string, options?: Inertia.VisitOptions) => void
@@ -97,7 +102,8 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	delete: (url: string, options?: Inertia.VisitOptions) => void
 }
 
-export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
+export function useForm<TForm = Record<string, any>>(initialValues?: TForm): InertiaFormProps<TForm>;
+export function useForm<TForm = Record<string, any>>(rememberKey: string, initialValues?: TForm): InertiaFormProps<TForm>;
 
 export type SetupOptions<ElementType, SharedProps> = {
     el: ElementType,

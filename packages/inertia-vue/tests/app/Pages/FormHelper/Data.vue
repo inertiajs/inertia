@@ -21,6 +21,8 @@
     <span @click="resetAll" class="reset">Reset all data</span>
     <span @click="resetOne" class="reset-one">Reset one field</span>
 
+    <span @click="reassignDefaults" class="reassign-defaults">Reassign default values</span>
+
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>
 </template>
@@ -44,6 +46,12 @@ export default {
     },
     resetOne() {
       this.form.reset('handle')
+    },
+    reassignDefaults() {
+      this.form.defaults({
+        handle: 'updated handle',
+        remember: true
+      })
     }
   }
 }
