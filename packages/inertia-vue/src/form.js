@@ -34,6 +34,19 @@ export default function(...args) {
 
       return this
     },
+    defaults(key, value) {
+      if (typeof key === 'undefined') {
+        defaults = this.data()
+      } else {
+        defaults = Object.assign(
+          {},
+          cloneDeep(defaults),
+          value ? ({[key]: value}) : key,
+        )
+      }
+
+      return this
+    },
     reset(...fields) {
       let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {

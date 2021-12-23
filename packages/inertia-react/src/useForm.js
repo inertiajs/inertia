@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export default function useForm(...args) {
   const isMounted = useRef(null)
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const [defaults, setDefaults] = useState((typeof args[0] === 'string' ? args[1] : args[0]) || {})
   const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
@@ -143,6 +143,16 @@ export default function useForm(...args) {
     recentlySuccessful,
     transform(callback) {
       transform = callback
+    },
+    setDefaults(key, value) {
+      if (typeof key === 'undefined') {
+        setDefaults(() => data)
+      } else {
+        setDefaults(defaults => ({
+          ... defaults,
+          ... (value ? { [key]: value } : key),
+        }))
+      }
     },
     reset(...fields) {
       if (fields.length === 0) {
