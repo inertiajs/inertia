@@ -115,10 +115,9 @@ function useForm(...args) {
           this.setStore('recentlySuccessful', true)
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
-          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = this.data()
-          this.setStore('isDirty', false)
-          return onSuccess
+          if (options.onSuccess) {
+            return options.onSuccess(page)
+          }
         },
         onError: errors => {
           this.setStore('processing', false)
