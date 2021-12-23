@@ -38,6 +38,14 @@ function useForm(...args) {
 
       return this
     },
+    defaults(key, value) {
+      defaults = Object.assign(
+        defaults,
+        value ? ({ [key]: value }) : key,
+      )
+
+      return this
+    },
     reset(...fields) {
       if (fields.length === 0) {
         this.setStore(defaults)

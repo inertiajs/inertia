@@ -377,6 +377,26 @@ describe('Form Helper', () => {
       cy.get('.handle_error').should('have.text', 'The Handle was invalid')
       cy.get('.remember_error').should('not.exist')
     })
+
+    it('can assign and reset new reset defaults', () => {
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'example')
+      cy.get('#remember').should('not.be.checked')
+
+      cy.get('.reassign-defaults').click()
+
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'example')
+      cy.get('#remember').should('not.be.checked')
+      cy.get('.reset-one').click()
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'updated handle')
+      cy.get('#remember').should('not.be.checked')
+      cy.get('.reset').click()
+      cy.get('#name').should('have.value', 'foo')
+      cy.get('#handle').should('have.value', 'updated handle')
+      cy.get('#remember').should('be.checked')
+    })
   })
 
   describe('Events', () => {

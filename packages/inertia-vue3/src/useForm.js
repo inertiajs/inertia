@@ -34,6 +34,15 @@ export default function useForm(...args) {
 
       return this
     },
+    defaults(key, value) {
+      defaults = Object.assign(
+        {},
+        cloneDeep(defaults),
+        value ? ({ [key]: value }) : key,
+      )
+
+      return this
+    },
     reset(...fields) {
       let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {

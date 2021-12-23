@@ -87,6 +87,8 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	recentlySuccessful: boolean
 	setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
 	transform: (callback: (data: TForm) => TForm) => void
+    setDefaults(field: keyof TForm, value: string): this
+    setDefaults(fields: Record<keyof TForm, string>): this
 	reset: (...fields: (keyof TForm)[]) => void
 	clearErrors: (...fields: (keyof TForm)[]) => void
     setError(field: keyof TForm, value: string): void
