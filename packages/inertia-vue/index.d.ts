@@ -35,6 +35,7 @@ export interface CreateInertiaAppProps {
       attrs: { id: string, 'data-page': string }
       props: InertiaProps
     }
+    plugin: PluginObject<any>
   }) => void | Vue
   title?: (title: string) => string
   page?: Inertia.Page
