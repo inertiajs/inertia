@@ -176,3 +176,5 @@ export type ActiveVisit = PendingVisit & Required<VisitOptions> & {
 
 export type VisitId = unknown
 export type Component = unknown
+
+export type InertiaAppResponse = Promise<{ head: string[], body: string } | void>
