@@ -4,8 +4,9 @@ import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
 
 export default function useForm(...args) {
-  const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const rememberKey = typeof args[0] === 'string' ? args[0] : null  
+  const hydratorFunc = typeof args[rememberKey ? 1 : 0] === 'function' ? args[rememberKey ? 1 : 0] : () => args[rememberKey ? 1 : 0]
+  let data = hydratorFunc()
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let defaults = cloneDeep(data)
   let cancelToken = null
@@ -46,6 +47,9 @@ export default function useForm(...args) {
       }
 
       return this
+    },
+    hydrate() {
+      data = hydratorFunc()
     },
     reset(...fields) {
       let clonedDefaults = cloneDeep(defaults)
@@ -129,6 +133,10 @@ export default function useForm(...args) {
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
           defaults = cloneDeep(this.data())
+          
+          if (options.rehydrate) {
+            this.hydrate()
+          }
           this.isDirty = false
           return onSuccess
         },
