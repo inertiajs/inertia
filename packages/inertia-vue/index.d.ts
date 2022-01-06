@@ -58,7 +58,7 @@ export interface InertiaLinkProps {
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: Inertia.Progress) => void
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: () => void
@@ -73,7 +73,7 @@ export interface InertiaFormProps<TForm> {
   errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
-  progress: { percentage: number } | null
+  progress: Inertia.Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm
