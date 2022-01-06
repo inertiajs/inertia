@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - We now keep a changelog here on GitHub :tada: For earlier releases, please see [the releases page of inertiajs.com](https://inertiajs.com/releases?all=true#inertia-vue3).
 - Types: Use `@inertiajs/inertia`'s new 'Progress' type ([#877](https://github.com/inertiajs/inertia/pull/877))
 
-
 ### Fixed
 
 - `resolveComponent` should be able to occur asynchronously ([#911](https://github.com/inertiajs/inertia/pull/911))
