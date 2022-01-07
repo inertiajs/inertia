@@ -7,6 +7,8 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { ActiveVisit, GlobalEvent, GlobalEventNames, GlobalEventResult, LocationVisit, Method, Page, PageHandler, PageResolver, PendingVisit, PreserveStateOption, RequestPayload, VisitId, VisitOptions } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
+const isServer = typeof window === 'undefined'
+
 export class Router {
   protected resolveComponent!: PageResolver
   protected swapComponent!: PageHandler
@@ -445,6 +447,10 @@ export class Router {
   }
 
   public remember(data: unknown, key = 'default'): void {
+    if (isServer) {
+      return
+    }
+
     this.replaceState({
       ...this.page,
       rememberedState: {
@@ -455,6 +461,10 @@ export class Router {
   }
 
   public restore(key = 'default'): unknown {
+    if (isServer) {
+      return
+    }
+
     return window.history.state?.rememberedState?.[key]
   }
 
