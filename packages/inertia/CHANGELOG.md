@@ -22,3 +22,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `<Link>` Component automatically added `http://localhost` as a prefix when it contains 'http' in it's path ([#964](https://github.com/inertiajs/inertia/pull/964))
 - "rememberedState of undefined" occurred on visits where `useRemember` was used ([#949](https://github.com/inertiajs/inertia/pull/949))
+- Forms with remember keys were giving `ReferenceError: window is not defined` during SSR ([#1036](https://github.com/inertiajs/inertia/pull/1036))
