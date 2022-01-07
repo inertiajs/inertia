@@ -127,14 +127,14 @@ export type GlobalEventsMap = {
     details: {
         response: AxiosResponse
     },
-    result: boolean,
+    result: boolean|void,
   },
   exception: {
     parameters: [Error],
     details: {
         exception: Error
     },
-    result: boolean,
+    result: boolean|void,
   },
 }
 
