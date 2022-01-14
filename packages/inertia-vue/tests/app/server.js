@@ -78,4 +78,4 @@ app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 
 app.all('*', (req, res) => inertia.render(req, res))
 
-app.listen(13714)
+app.listen(13715)
