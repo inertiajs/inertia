@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "ci": "start-server-and-test server:run http://localhost:13714 cypress:run",
+    "ci": "start-server-and-test server:run http://localhost:13715 cypress:run",
     "cypress:run": "cypress-repeat run -n 5 --until-passes",
-    "gui": "start-server-and-test server:run http://localhost:13714 cypress:open",
+    "gui": "start-server-and-test server:run http://localhost:13715 cypress:open",
     "cypress:open": "CYPRESS_FAIL_FAST_PLUGIN=false cypress open",
     "server:run": "webpack && node app/server.js",
     "test": "yarn ci",

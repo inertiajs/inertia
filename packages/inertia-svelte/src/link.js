@@ -9,6 +9,10 @@ export default (node, options = {}) => {
   const dispatch = createEventDispatcher()
 
   function visit(event) {
+    if (node.tagName === 'BUTTON' && node.disabled || options.disabled) {
+      return
+    }
+
     dispatch('click', event)
 
     const href = node.href || options.href
