@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import App, { plugin } from './app'
 
 export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
@@ -6,8 +5,6 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
   const resolveComponent = name => Promise.resolve(resolve(name)).then(module => module.default || module)
-
-  Vue.use(plugin)
 
   let head = []
 
@@ -29,6 +26,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
           onHeadUpdate: isServer ? elements => (head = elements) : null,
         },
       },
+      plugin,
     })
   })
 

@@ -43,15 +43,19 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    queryStringArrayFormat: {
+      type: String,
+      default: 'brackets',
+    },
   },
   setup(props, { slots, attrs }) {
     return props => {
       const as = props.as.toLowerCase()
       const method = props.method.toLowerCase()
-      const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data)
+      const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
       if (as === 'a' && method !== 'get') {
-        console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<inertia-link href="${href}" method="${method}" as="button">...</inertia-link>`)
+        console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`)
       }
 
       return h(props.as, {

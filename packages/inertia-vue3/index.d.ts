@@ -4,7 +4,7 @@ import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
 export interface InertiaAppProps {
   initialPage: Inertia.Page
   initialComponent?: object
-  resolveComponent?: (name: string) => DefineComponent
+  resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
   onHeadUpdate?: (elements: string[]) => void
 }
 
@@ -47,7 +47,7 @@ export interface InertiaLinkProps {
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: Inertia.Progress) => void
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: () => void
@@ -62,13 +62,18 @@ export interface InertiaFormProps<TForm> {
   errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
-  progress: { percentage: number } | null
+  progress: Inertia.Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm
   transform(callback: (data: TForm) => object): this
+  defaults(): this
+  defaults(field: keyof TForm, value: string): this
+  defaults(fields: Record<keyof TForm, string>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
+  setError(field: keyof TForm, value: string): this
+  setError(errors: Record<keyof TForm, string>): this
   submit(method: string, url: string, options?: Partial<Inertia.VisitOptions>): void
   get(url: string, options?: Partial<Inertia.VisitOptions>): void
   post(url: string, options?: Partial<Inertia.VisitOptions>): void
@@ -99,7 +104,7 @@ export type InertiaHead = DefineComponent<{
 
 export declare const Head: InertiaHead
 
-declare module 'vue' {
+declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
     $inertia: typeof Inertia.Inertia
     $page: Inertia.Page

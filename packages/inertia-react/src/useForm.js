@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export default function useForm(...args) {
   const isMounted = useRef(null)
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const defaults = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const [defaults, setDefaults] = useState((typeof args[0] === 'string' ? args[1] : args[0]) || {})
   const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
@@ -144,6 +144,16 @@ export default function useForm(...args) {
     transform(callback) {
       transform = callback
     },
+    setDefaults(key, value) {
+      if (typeof key === 'undefined') {
+        setDefaults(() => data)
+      } else {
+        setDefaults(defaults => ({
+          ... defaults,
+          ... (value ? { [key]: value } : key),
+        }))
+      }
+    },
     reset(...fields) {
       if (fields.length === 0) {
         setData(defaults)
@@ -158,17 +168,28 @@ export default function useForm(...args) {
         )
       }
     },
+    setError(key, value) {
+      setErrors(errors => {
+        const newErrors = {
+          ... errors,
+          ... (value ? { [key]: value } : key),
+        }
+        setHasErrors(Object.keys(newErrors).length > 0)
+        return newErrors
+      })
+    },
     clearErrors(...fields) {
-      setErrors(
-        Object.keys(errors).reduce(
+      setErrors(errors => {
+        const newErrors = Object.keys(errors).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
           }),
           {},
-        ),
-      )
-      setHasErrors(Object.keys(errors).length > 0)
+        )
+        setHasErrors(Object.keys(newErrors).length > 0)
+        return newErrors
+      })
     },
     submit,
     get(url, options) {

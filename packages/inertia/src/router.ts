@@ -7,6 +7,8 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { ActiveVisit, GlobalEvent, GlobalEventNames, GlobalEventResult, LocationVisit, Method, Page, PageHandler, PageResolver, PendingVisit, PreserveStateOption, RequestPayload, VisitId, VisitOptions } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
 
+const isServer = typeof window === 'undefined'
+
 export class Router {
   protected resolveComponent!: PageResolver
   protected swapComponent!: PageHandler
@@ -211,6 +213,7 @@ export class Router {
     onCancel = () => {},
     onSuccess = () => {},
     onError = () => {},
+    queryStringArrayFormat = 'brackets',
   }: VisitOptions = {}): void {
     let url = typeof href === 'string' ? hrefToUrl(href) : href
 
@@ -219,7 +222,7 @@ export class Router {
     }
 
     if (!(data instanceof FormData)) {
-      const [_href, _data] = mergeDataIntoQueryString(method, url, data)
+      const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat)
       url = hrefToUrl(_href)
       data = _data
     }
@@ -235,6 +238,7 @@ export class Router {
       headers,
       errorBag,
       forceFormData,
+      queryStringArrayFormat,
       cancelled: false,
       completed: false,
       interrupted: false,
@@ -251,7 +255,7 @@ export class Router {
     this.saveScrollPositions()
 
     const visitId = this.createVisitId()
-    this.activeVisit = { ...visit, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError, cancelToken: Axios.CancelToken.source() }
+    this.activeVisit = { ...visit, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError, queryStringArrayFormat, cancelToken: Axios.CancelToken.source() }
 
     onCancelToken({
       cancel: () => {
@@ -443,16 +447,24 @@ export class Router {
   }
 
   public remember(data: unknown, key = 'default'): void {
+    if (isServer) {
+      return
+    }
+
     this.replaceState({
       ...this.page,
       rememberedState: {
-        ...this.page.rememberedState,
+        ...this.page?.rememberedState,
         [key]: data,
       },
     })
   }
 
   public restore(key = 'default'): unknown {
+    if (isServer) {
+      return
+    }
+
     return window.history.state?.rememberedState?.[key]
   }
 

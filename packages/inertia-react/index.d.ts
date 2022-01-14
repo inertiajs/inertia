@@ -35,7 +35,7 @@ interface BaseInertiaLinkProps {
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: Inertia.Progress) => void
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: () => void
@@ -44,6 +44,12 @@ interface BaseInertiaLinkProps {
 type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> & Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
+	
+type InertiaHeadProps = {
+    title?: string
+}
+
+type InertiaHead = React.FunctionComponent<InertiaHeadProps>
 
 export function usePage<
   Page extends Inertia.Page = Inertia.Page
@@ -57,6 +63,10 @@ export function useRemember<State>(
 export const InertiaLink: InertiaLink
 
 export const Link: InertiaLink
+
+export const InertiaHead: InertiaHead
+
+export const Head: InertiaHead
 
 export const InertiaApp: AppType
 
@@ -72,22 +82,28 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	errors: Record<keyof TForm, string>
 	hasErrors: boolean
 	processing: boolean
-	progress: number
+	progress: Inertia.Progress | null
 	wasSuccessful: boolean
 	recentlySuccessful: boolean
 	setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
 	transform: (callback: (data: TForm) => TForm) => void
+    setDefaults(): void
+    setDefaults(field: keyof TForm, value: string): void
+    setDefaults(fields: Record<keyof TForm, string>): void
 	reset: (...fields: (keyof TForm)[]) => void
 	clearErrors: (...fields: (keyof TForm)[]) => void
-	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitOptions) => Promise<void>
-	get: (url: string, options?: Inertia.VisitOptions) => Promise<void>
-	patch: (url: string, options?: Inertia.VisitOptions) => Promise<void>
-	post: (url: string, options?: Inertia.VisitOptions) => Promise<void>
-	put: (url: string, options?: Inertia.VisitOptions) => Promise<void>
-	delete: (url: string, options?: Inertia.VisitOptions) => Promise<void>
+    setError(field: keyof TForm, value: string): void
+    setError(errors: Record<keyof TForm, string>): void
+	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitOptions) => void
+	get: (url: string, options?: Inertia.VisitOptions) => void
+	patch: (url: string, options?: Inertia.VisitOptions) => void
+	post: (url: string, options?: Inertia.VisitOptions) => void
+	put: (url: string, options?: Inertia.VisitOptions) => void
+	delete: (url: string, options?: Inertia.VisitOptions) => void
 }
 
-export function useForm<TForm = Record<string, any>>(initialValues: TForm): InertiaFormProps<TForm>;
+export function useForm<TForm = Record<string, any>>(initialValues?: TForm): InertiaFormProps<TForm>;
+export function useForm<TForm = Record<string, any>>(rememberKey: string, initialValues?: TForm): InertiaFormProps<TForm>;
 
 export type SetupOptions<ElementType, SharedProps> = {
     el: ElementType,

@@ -35,6 +35,7 @@ export interface CreateInertiaAppProps {
       attrs: { id: string, 'data-page': string }
       props: InertiaProps
     }
+    plugin: PluginObject<any>
   }) => void | Vue
   title?: (title: string) => string
   page?: Inertia.Page
@@ -57,7 +58,7 @@ export interface InertiaLinkProps {
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: Inertia.Progress) => void
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: () => void
@@ -72,13 +73,18 @@ export interface InertiaFormProps<TForm> {
   errors: Record<keyof TForm, string>
   hasErrors: boolean
   processing: boolean
-  progress: { percentage: number } | null
+  progress: Inertia.Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm
   transform(callback: (data: TForm) => object): this
+  defaults(): this
+  defaults(field: keyof TForm, value: string): this
+  defaults(fields: Record<keyof TForm, string>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
+  setError(field: keyof TForm, value: string): this
+  setError(errors: Record<keyof TForm, string>): this
   submit(method: string, url: string, options?: Partial<Inertia.VisitOptions>): void
   get(url: string, options?: Partial<Inertia.VisitOptions>): void
   post(url: string, options?: Partial<Inertia.VisitOptions>): void

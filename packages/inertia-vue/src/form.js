@@ -34,6 +34,19 @@ export default function(...args) {
 
       return this
     },
+    defaults(key, value) {
+      if (typeof key === 'undefined') {
+        defaults = this.data()
+      } else {
+        defaults = Object.assign(
+          {},
+          cloneDeep(defaults),
+          value ? ({[key]: value}) : key,
+        )
+      }
+
+      return this
+    },
     reset(...fields) {
       let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
@@ -50,6 +63,13 @@ export default function(...args) {
             }, {}),
         )
       }
+
+      return this
+    },
+    setError(key, value) {
+      Object.assign(this.errors, (value ? { [key]: value } : key))
+
+      this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
     },
@@ -115,8 +135,7 @@ export default function(...args) {
         onError: errors => {
           this.processing = false
           this.progress = null
-          this.errors = errors
-          this.hasErrors = true
+          this.clearErrors().setError(errors)
 
           if (options.onError) {
             return options.onError(errors)
@@ -173,8 +192,7 @@ export default function(...args) {
     },
     __restore(restored) {
       Object.assign(this, restored.data)
-      Object.assign(this.errors, restored.errors)
-      this.hasErrors = Object.keys(this.errors).length > 0
+      this.setError(restored.errors)
     },
   })
 

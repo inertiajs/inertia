@@ -47,6 +47,8 @@ export type PageHandler = ({
 
 export type PreserveStateOption = boolean|string|((page: Page) => boolean)
 
+export type Progress = ProgressEvent & { percentage: number }
+
 export type LocationVisit = {
   preserveScroll: boolean,
 }
@@ -61,6 +63,7 @@ export type Visit = {
   headers: Record<string, string>
   errorBag: string|null,
   forceFormData: boolean,
+  queryStringArrayFormat: 'indices'|'brackets',
 }
 
 export type GlobalEventsMap = {
@@ -79,9 +82,9 @@ export type GlobalEventsMap = {
     result: void,
   },
   progress: {
-    parameters: [{ percentage: number }|undefined],
+    parameters: [Progress|undefined],
     details: {
-      progress: { percentage: number }|undefined,
+      progress: Progress|undefined,
     },
     result: void,
   },
@@ -124,14 +127,14 @@ export type GlobalEventsMap = {
     details: {
         response: AxiosResponse
     },
-    result: boolean,
+    result: boolean|void,
   },
   exception: {
     parameters: [Error],
     details: {
         exception: Error
     },
-    result: boolean,
+    result: boolean|void,
   },
 }
 
@@ -173,3 +176,5 @@ export type ActiveVisit = PendingVisit & Required<VisitOptions> & {
 
 export type VisitId = unknown
 export type Component = unknown
+
+export type InertiaAppResponse = Promise<{ head: string[], body: string } | void>

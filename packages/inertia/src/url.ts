@@ -10,8 +10,9 @@ export function mergeDataIntoQueryString(
   method: Method,
   href: URL|string,
   data: Record<string, FormDataConvertible>,
+  qsArrayFormat: 'indices'|'brackets' = 'brackets',
 ): [string, Record<string, FormDataConvertible>] {
-  const hasHost = href.toString().includes('http')
+  const hasHost = /^https?:\/\//.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasSearch = href.toString().includes('?') || (method === Method.GET && Object.keys(data).length)
@@ -22,7 +23,7 @@ export function mergeDataIntoQueryString(
   if (method === Method.GET && Object.keys(data).length) {
     url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
       encodeValuesOnly: true,
-      arrayFormat: 'brackets',
+      arrayFormat: qsArrayFormat,
     })
     data = {}
   }

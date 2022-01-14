@@ -38,6 +38,20 @@ function useForm(...args) {
 
       return this
     },
+    defaults(key, value) {
+      if (typeof key === 'undefined') {
+        defaults = Object.assign(defaults, this.data())
+
+        return this
+      }
+
+      defaults = Object.assign(
+        defaults,
+        value ? ({ [key]: value }) : key,
+      )
+
+      return this
+    },
     reset(...fields) {
       if (fields.length === 0) {
         this.setStore(defaults)
@@ -54,16 +68,22 @@ function useForm(...args) {
 
       return this
     },
+    setError(key, value) {
+      this.setStore('errors', {
+        ...this.errors,
+        ...(value ? { [key]: value } : key),
+      })
+
+      return this
+    },
     clearErrors(...fields) {
-      const errors = Object
-        .keys(this.errors)
-        .reduce((carry, field) => ({
+      this.setStore('errors', Object.keys(this.errors).reduce(
+        (carry, field) => ({
           ...carry,
           ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
-        }), {})
-
-      this.setStore('errors', errors)
-      this.setStore('hasErrors', Object.keys(errors).length > 0)
+        }), 
+        {},
+      ))
 
       return this
     },
@@ -109,16 +129,14 @@ function useForm(...args) {
           this.setStore('recentlySuccessful', true)
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
-          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = this.data()
-          this.setStore('isDirty', false)
-          return onSuccess
+          if (options.onSuccess) {
+            return options.onSuccess(page)
+          }
         },
         onError: errors => {
           this.setStore('processing', false)
           this.setStore('progress', null)
-          this.setStore('errors', errors)
-          this.setStore('hasErrors', true)
+          this.clearErrors().setError(errors)
 
           if (options.onError) {
             return options.onError(errors)
@@ -174,6 +192,11 @@ function useForm(...args) {
   store.subscribe(form => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
       form.setStore('isDirty', !form.isDirty)
+    }
+
+    const hasErrors = Object.keys(form.errors).length > 0
+    if (form.hasErrors !== hasErrors) {
+      form.setStore('hasErrors', !form.hasErrors)
     }
 
     if (rememberKey) {
