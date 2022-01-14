@@ -11,7 +11,6 @@ export default forwardRef(function InertiaLink({
   method = 'get',
   preserveScroll = false,
   preserveState = null,
-  disabled = false,
   replace = false,
   only = [],
   headers = {},
@@ -29,10 +28,6 @@ export default forwardRef(function InertiaLink({
 }, ref) {
   const visit = useCallback(
     (event) => {
-      if (as === 'button' && disabled) {
-        return
-      }
-
       onClick(event)
 
       if (shouldIntercept(event)) {
@@ -63,7 +58,6 @@ export default forwardRef(function InertiaLink({
       method,
       preserveScroll,
       preserveState,
-      disabled,
       replace,
       only,
       headers,
@@ -92,7 +86,6 @@ export default forwardRef(function InertiaLink({
   return createElement(as, {
     ...props,
     ...as === 'a' ? { href } : {},
-    ...as === 'button' && disabled ? { disabled } : {},
     ref,
     onClick: visit,
   }, children)
