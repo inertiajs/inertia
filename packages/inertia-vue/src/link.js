@@ -18,10 +18,6 @@ export default {
       type: String,
       default: 'get',
     },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
     replace: {
       type: Boolean,
       default: false,
@@ -73,15 +69,10 @@ export default {
       attrs: {
         ...data.attrs,
         ...as === 'a' ? { href } : {},
-        ...as === 'button' && props.disabled ? { disabled: props.disabled } : {},
       },
       on: {
         ...data.on,
         click: event => {
-          if (as === 'button' && props.disabled) {
-            return
-          }
-
           data.on.click(event)
 
           if (shouldIntercept(event)) {
