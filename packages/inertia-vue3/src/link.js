@@ -59,12 +59,12 @@ export default {
         ...as === 'a' ? { href } : {},
         ...as === 'button' && props.disabled ? { disabled: props.disabled } : {},
         onClick: (event) => {
+          if (as === 'button' && props.disabled) {
+            return
+          }
+
           if (shouldIntercept(event)) {
             event.preventDefault()
-            
-            if (as === 'button' && props.disabled) {
-              return
-            }
 
             Inertia.visit(href, {
               data: data,

@@ -28,11 +28,11 @@ export default forwardRef(function InertiaLink({
 }, ref) {
   const visit = useCallback(
     (event) => {
-      onClick(event)
-
       if (as === 'button' && disabled) {
         return
       }
+
+      onClick(event)
 
       if (shouldIntercept(event)) {
         event.preventDefault()
