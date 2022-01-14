@@ -19,6 +19,10 @@ export default {
       type: String,
       default: 'get',
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     replace: {
       type: Boolean,
       default: false,
@@ -57,7 +61,12 @@ export default {
       return h(props.as, {
         ...attrs,
         ...as === 'a' ? { href } : {},
+        ...as === 'button' && props.disabled ? { disabled: props.disabled } : {},
         onClick: (event) => {
+          if (as === 'button' && props.disabled) {
+            return
+          }
+
           if (shouldIntercept(event)) {
             event.preventDefault()
 
