@@ -47,6 +47,7 @@ export default {
     data.on = {
       click: () => ({}),
       cancelToken: () => ({}),
+      before: () => ({}),
       start: () => ({}),
       progress: () => ({}),
       finish: () => ({}),
