@@ -224,7 +224,7 @@ export class Router {
 
     let url = typeof href === 'string' ? hrefToUrl(href) : href
 
-    const prepared = this.visitOptions({ url, options: options }) || options
+    const prepared = this.visitOptions(options, url) || options
 
     const { method, replace, only, headers, errorBag, forceFormData, queryStringArrayFormat, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError } = prepared
     let { data, preserveScroll, preserveState } = prepared

@@ -163,7 +163,7 @@ export type VisitParams = Partial<Visit & {
   onError: GlobalEventCallback<'error'>,
 }>
 
-export type VisitOptions = ({ url, options }: { url: URL, options: Required<VisitParams> }) => Required<VisitParams>|void;
+export type VisitOptions = (options: Required<VisitParams>, url: URL) => Required<VisitParams>|void;
 
 export type PendingVisit = Visit & {
   url: URL,
