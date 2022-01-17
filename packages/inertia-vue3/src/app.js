@@ -39,7 +39,7 @@ export default {
       default: () => undefined,
     },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate, visitOptions }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
     page.value = initialPage
     key.value = null
@@ -56,7 +56,7 @@ export default {
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
         },
-        visitOptions: this.visitOptions,
+        visitOptions,
       })
     }
 
