@@ -25,7 +25,7 @@ export default {
     },
     preserveScroll: {
       type: Boolean,
-      default: false,
+      default: null,
     },
     preserveState: {
       type: Boolean,
@@ -65,8 +65,8 @@ export default {
               data: data,
               method: method,
               replace: props.replace,
-              preserveScroll: props.preserveScroll,
-              preserveState: props.preserveState ?? (method !== 'get'),
+              preserveScroll: (props.only && props.only.length && props.preserveScroll == null) ? true : props.preserveScroll ?? false,
+              preserveState: (props.only && props.only.length && props.preserveState == null) ? true : props.preserveState ?? (method !== 'get'),
               only: props.only,
               headers: props.headers,
               onCancelToken: attrs.onCancelToken || (() => ({})),
