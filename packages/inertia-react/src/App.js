@@ -21,7 +21,7 @@ export default function App({
     return createHeadManager(
       typeof window === 'undefined',
       titleCallback || (title => title),
-      onHeadUpdate || (() => {})
+      onHeadUpdate || (() => {}),
     )
   }, [])
 
@@ -37,6 +37,8 @@ export default function App({
         }))
       },
     })
+
+    Inertia.on('navigate', () => headManager.forceUpdate())
   }, [])
 
   if (!current.component) {
