@@ -54,8 +54,9 @@ const Renderer = {
 }
 
 export default function createHeadManager(isServer: boolean, titleCallback: ((title: string) => string), onUpdate: ((elements: string[]) => void)): ({
+  forceUpdate: () => void,
   createProvider: () => ({
-    update: (elements: Array<string>) => void,
+    update: (elements: string[]) => void,
     disconnect: () => void,
   })
 }) {
@@ -86,6 +87,12 @@ export default function createHeadManager(isServer: boolean, titleCallback: ((ti
   }
 
   function collect(): Array<string> {
+    const title = titleCallback('')
+
+    const defaults: Record<string, string> = {
+      ... (title ? { title: `<title inertia="">${title}</title>`} : {}),
+    }
+
     const elements = Object.values(states)
       .reduce((carry, elements) => carry.concat(elements), [])
       .reduce((carry, element) => {
@@ -107,7 +114,7 @@ export default function createHeadManager(isServer: boolean, titleCallback: ((ti
         }
 
         return carry
-      }, {} as Record<string, string>)
+      }, defaults)
 
     return Object.values(elements)
   }
@@ -116,7 +123,12 @@ export default function createHeadManager(isServer: boolean, titleCallback: ((ti
     isServer ? onUpdate(collect()) : Renderer.update(collect())
   }
 
+  // By committing during initialization, we can guarantee that the default
+  // tags are set, as well as that they exist during SSR itself.
+  commit()
+
   return {
+    forceUpdate: commit,
     createProvider: function () {
       const id = connect()
 

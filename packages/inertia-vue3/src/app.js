@@ -52,6 +52,8 @@ export default {
           key.value = args.preserveState ? key.value : Date.now()
         },
       })
+
+      Inertia.on('navigate', () => headManager.forceUpdate())
     }
 
     return () => {
