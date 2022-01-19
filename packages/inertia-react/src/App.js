@@ -10,6 +10,7 @@ export default function App({
   resolveComponent,
   titleCallback,
   onHeadUpdate,
+  visitOptions,
 }) {
   const [current, setCurrent] = useState({
     component: initialComponent || null,
@@ -36,6 +37,7 @@ export default function App({
           key: preserveState ? current.key : Date.now(),
         }))
       },
+      visitOptions: visitOptions || (() => undefined),
     })
 
     Inertia.on('navigate', () => headManager.forceUpdate())
