@@ -10,8 +10,8 @@ If you're interested in contributing to Inertia.js, please read our [contributin
 
 A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help push Inertia.js development forward! In particular, we'd like to say a special thank you to our partners:
 
-<a href="https://www.aryeo.com/">
-  <img width="150" alt="Aryeo" src="https://user-images.githubusercontent.com/882133/116239642-e52afa80-a730-11eb-8f3e-c97384db363d.png">
+<a href="https://forge.laravel.com">
+  <img src="./.github/sponsors/forge.svg" width="150" alt="Laravel Forge">
 </a>
 
 If you'd like to become a sponsor, please [see here](https://inertiajs.com/sponsors) for more information. 💜
