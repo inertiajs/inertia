@@ -40,6 +40,7 @@ export interface CreateInertiaAppProps {
   title?: (title: string) => string
   page?: Inertia.Page
   render?: (vm: Vue) => Promise<string>
+  visitOptions?: Inertia.VisitOptions
 }
 
 export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
@@ -85,12 +86,12 @@ export interface InertiaFormProps<TForm> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
-  submit(method: string, url: string, options?: Partial<Inertia.VisitOptions>): void
-  get(url: string, options?: Partial<Inertia.VisitOptions>): void
-  post(url: string, options?: Partial<Inertia.VisitOptions>): void
-  put(url: string, options?: Partial<Inertia.VisitOptions>): void
-  patch(url: string, options?: Partial<Inertia.VisitOptions>): void
-  delete(url: string, options?: Partial<Inertia.VisitOptions>): void
+  submit(method: string, url: string, options?: Partial<Inertia.VisitParams>): void
+  get(url: string, options?: Partial<Inertia.VisitParams>): void
+  post(url: string, options?: Partial<Inertia.VisitParams>): void
+  put(url: string, options?: Partial<Inertia.VisitParams>): void
+  patch(url: string, options?: Partial<Inertia.VisitParams>): void
+  delete(url: string, options?: Partial<Inertia.VisitParams>): void
   cancel(): void
 }
 
