@@ -1,5 +1,5 @@
 import { Inertia } from "@inertiajs/inertia"
-import { onMounted, onUnmounted } from "vue"
+import { onMounted, onUnmounted, watch } from "vue"
 
 export default function usePoll(...args) {
 
@@ -20,7 +20,13 @@ export default function usePoll(...args) {
     // The interval, in ms(miliseconds)
     interval: interval,
     // The 'keepAlive' option is to decide if polling should happen when the app is in the background
-    keepAlive: typeof args[0] === "object" && args[0].keepAlive ? args[0].keepAlive : false,
+    keepAlive: typeof args[0] === "object" && args[0].hasOwnProperty('keepAlive') && typeof args[0].keepAlive === "boolean" ? args[0].keepAlive : false,
+    // The 'startImmediately' option is to decide if polling should start immediately
+    startImmediately: typeof args[0] === "object" && args[0].hasOwnProperty('startImmediately') && typeof args[0].startImmediately === "boolean" ? args[0].startImmediately : true,
+    // The 'startWhen' option is to define the condition for when polling should start
+    startWhen: typeof args[0] === "object" && args[0].hasOwnProperty('startWhen')  ? args[0].startWhen : undefined,
+    // The 'stopWhen' option is to define the condition for when polling should stop
+    stopWhen: typeof args[0] === "object" && args[0].hasOwnProperty('stopWhen') ? args[0].stopWhen : undefined,
     // The reloadOptions is for letting the user pass options directly to the reload method
     reloadOptions: typeof args[0] === "object" && args[0].reloadOptions ? args[0].reloadOptions
                   : only?.length ? { only: only } : undefined,
@@ -34,12 +40,14 @@ export default function usePoll(...args) {
 
   // Function to start the poll
   const startPoll = () => {
-    poll = setInterval(() => {
-      // If the tab is in the background and keepAlive is false, return
-      if ( !options.keepAlive && tabIsInBackground) return
-      // Use Inertia's reload to refresh the props
-      Inertia.reload(options.reloadOptions)
-    }, options.interval)
+    if (poll === null) {
+      poll = setInterval(() => {
+        // If the tab is in the background and keepAlive is false, return
+        if ( !options.keepAlive && tabIsInBackground) return
+        // Use Inertia's reload to refresh the props
+        Inertia.reload(options.reloadOptions)
+      }, options.interval)
+    }
   }
 
   // Function to stop the poll
@@ -56,13 +64,27 @@ export default function usePoll(...args) {
         },
         false
     )
-    startPoll()
+    // If startImmediately is true, start the poll
+    if (options.startImmediately) startPoll()
   })
 
   // Stop the poll on unmount
   onUnmounted(() => {
     clearInterval(poll)
   })
+
+  // Watch stopWhen and stop the poll whenever it's value is true
+  if(options.stopWhen){
+    watch(options.stopWhen, (condition) => {
+      if (condition) stopPoll()
+    }, { immediate: true, deep: true })
+  }
+  // Watch startWhen and start the poll whenever it's value is true
+  if(options.startWhen){
+    watch(options.startWhen, (condition) => {
+      if (condition) startPoll()
+    }, { immediate: true, deep: true })
+  }
 
   return {
     startPoll,
