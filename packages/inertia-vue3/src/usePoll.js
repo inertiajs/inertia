@@ -17,16 +17,27 @@ export default function usePoll(...args) {
 
   // Set the poll options
   const options = {
+    // The interval, in ms(miliseconds)
     interval: interval,
+    // The 'keepAlive' option is to decide if polling should happen when the app is in the background
+    keepAlive: typeof args[0] === "object" && args[0].keepAlive ? args[0].keepAlive : false,
+    // The reloadOptions is for letting the user pass options directly to the reload method
     reloadOptions: typeof args[0] === "object" && args[0].reloadOptions ? args[0].reloadOptions
                   : only?.length ? { only: only } : undefined,
   }
 
+  // Initialize the poll instance
   let poll = null
+
+  // Initialize the variable to check the state of tab's visibility
+  let tabIsInBackground = false
 
   // Function to start the poll
   const startPoll = () => {
     poll = setInterval(() => {
+      // If the tab is in the background and keepAlive is false, return
+      if ( !options.keepAlive && tabIsInBackground) return
+      // Use Inertia's reload to refresh the props
       Inertia.reload(options.reloadOptions)
     }, options.interval)
   }
@@ -38,6 +49,13 @@ export default function usePoll(...args) {
 
   // Start the poll on mount
   onMounted(() => {
+    document.addEventListener(
+        'visibilitychange',
+        () => {
+          tabIsInBackground = document.hidden
+        },
+        false
+    )
     startPoll()
   })
 
