@@ -218,21 +218,23 @@ export default function useForm(...args) {
     let data = form.realtimeValidationOptions.data?.length ? form.realtimeValidationOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
     if (optionsNotEmpty && enabled === true && method && url && data?.length) {
       let changedData = data.filter((element) => newValue[element] != prevValue[element])
-      Inertia[method](url, {
-        _realtimeValidation: true,
-        ...data.reduce((carry, key) => {
-          if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
-          return carry
-        }, {})
-      },{
-        only: ['errors'],
-        onError: errors => {
-          form.setError(errors)
-        },
-        onSuccess: () => {
-          form.clearErrors(changedData.join())
-        },
-      })
+      if(changedData?.length) {
+        Inertia[method](url, {
+          _realtimeValidation: true,
+          ...data.reduce((carry, key) => {
+            if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
+            return carry
+          }, {})
+        },{
+          only: ['errors'],
+          onError: errors => {
+            form.setError(errors)
+          },
+          onSuccess: () => {
+            form.clearErrors(changedData.join())
+          },
+        })
+      }
     }
   }, 150)
 
