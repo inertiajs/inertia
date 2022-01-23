@@ -2,6 +2,7 @@ import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/inertia'
+import debounce from 'lodash.debounce'
 
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
@@ -21,6 +22,7 @@ export default function useForm(...args) {
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
+    realtimeValidationOptions: {},
     data() {
       return Object
         .keys(data)
@@ -194,6 +196,9 @@ export default function useForm(...args) {
       Object.assign(this, restored.data)
       this.setError(restored.errors)
     },
+    realtimeValidation(options) {
+      this.realtimeValidationOptions = options
+    }
   })
 
   watch(form, newValue => {
@@ -202,6 +207,31 @@ export default function useForm(...args) {
       Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
     }
   }, { immediate: true, deep: true })
+
+  const runRealtimeValidation = debounce((newValue, prevValue) => {
+    if (form.realtimeValidationOptions !== {}) {
+      if(form.realtimeValidationOptions.enabled !== false && form.realtimeValidationOptions.method) {
+        let changedData = form.realtimeValidationOptions.data.filter((element) => newValue[element] != prevValue[element])
+        Inertia[form.realtimeValidationOptions.method]('/contacts', {
+          _realtimeValidation: true,
+          ...form.realtimeValidationOptions.data.reduce((carry, key) => {
+            if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
+            return carry
+          }, {})
+        },{
+          only: ['errors'],
+          onError: errors => {
+            form.setError(errors)
+          },
+          onSuccess: () => {
+            form.clearErrors(changedData.join())
+          },
+        })
+      }
+    }
+  }, 150)
+
+  watch(() => form.data(), (newValue, prevValue) => runRealtimeValidation(newValue, prevValue), { immediate: false, deep: true })
 
   return form
 }
