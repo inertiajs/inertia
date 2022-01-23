@@ -215,8 +215,8 @@ export default function useForm(...args) {
     let enabled = typeof form.realtimeValidationOptions.enabled == 'boolean' ? form.realtimeValidationOptions.enabled : optionsNotEmpty
     let method = typeof form.realtimeValidationOptions.method == 'string' && ['get', 'post', 'put', 'patch'].includes(form.realtimeValidationOptions.method) ? form.realtimeValidationOptions.method : undefined
     let url = typeof form.realtimeValidationOptions.url == 'string' ? form.realtimeValidationOptions.url : undefined
-    let data = form.realtimeValidationOptions.data?.length != 0 ? form.realtimeValidationOptions.data : undefined
-    if (optionsNotEmpty && enabled === true && method && url && data) {
+    let data = form.realtimeValidationOptions.data?.length != 0 ? form.realtimeValidationOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
+    if (optionsNotEmpty && enabled === true && method && url && data?.length != 0) {
       let changedData = data.filter((element) => newValue[element] != prevValue[element])
       Inertia[method](url, {
         _realtimeValidation: true,
