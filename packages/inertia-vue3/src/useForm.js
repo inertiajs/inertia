@@ -197,7 +197,9 @@ export default function useForm(...args) {
       this.setError(restored.errors)
     },
     realtimeValidation(options) {
-      this.realtimeValidationOptions = options
+      if(typeof options === 'object') {
+        this.realtimeValidationOptions = options
+      }
     }
   })
 
@@ -209,25 +211,28 @@ export default function useForm(...args) {
   }, { immediate: true, deep: true })
 
   const runRealtimeValidation = debounce((newValue, prevValue) => {
-    if (form.realtimeValidationOptions !== {}) {
-      if(form.realtimeValidationOptions.enabled !== false && form.realtimeValidationOptions.method) {
-        let changedData = form.realtimeValidationOptions.data.filter((element) => newValue[element] != prevValue[element])
-        Inertia[form.realtimeValidationOptions.method]('/contacts', {
-          _realtimeValidation: true,
-          ...form.realtimeValidationOptions.data.reduce((carry, key) => {
-            if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
-            return carry
-          }, {})
-        },{
-          only: ['errors'],
-          onError: errors => {
-            form.setError(errors)
-          },
-          onSuccess: () => {
-            form.clearErrors(changedData.join())
-          },
-        })
-      }
+    let optionsNotEmpty = form.realtimeValidationOptions !== {}
+    let enabled = typeof form.realtimeValidationOptions.enabled == 'boolean' ? form.realtimeValidationOptions.enabled : optionsNotEmpty
+    let method = typeof form.realtimeValidationOptions.method == 'string' && ['get', 'post', 'put', 'patch'].includes(form.realtimeValidationOptions.method) ? form.realtimeValidationOptions.method : undefined
+    let url = typeof form.realtimeValidationOptions.url == 'string' ? form.realtimeValidationOptions.url : undefined
+    let data = form.realtimeValidationOptions.data?.length != 0 ? form.realtimeValidationOptions.data : undefined
+    if (optionsNotEmpty && enabled === true && method && url && data) {
+      let changedData = data.filter((element) => newValue[element] != prevValue[element])
+      Inertia[method](url, {
+        _realtimeValidation: true,
+        ...data.reduce((carry, key) => {
+          if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
+          return carry
+        }, {})
+      },{
+        only: ['errors'],
+        onError: errors => {
+          form.setError(errors)
+        },
+        onSuccess: () => {
+          form.clearErrors(changedData.join())
+        },
+      })
     }
   }, 150)
 
