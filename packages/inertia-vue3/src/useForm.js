@@ -216,7 +216,7 @@ export default function useForm(...args) {
     // Check if realtime validation is enabled.
     let enabled = typeof form.realtimeValidationOptions.enabled == 'boolean' ? form.realtimeValidationOptions.enabled : optionsNotEmpty
     // Check if a valid method is provided.
-    let method = typeof form.realtimeValidationOptions.method == 'string' && ['get', 'post', 'put', 'patch'].includes(form.realtimeValidationOptions.method) ? form.realtimeValidationOptions.method : undefined
+    let method = typeof form.realtimeValidationOptions.method == 'string' && ['get', 'post', 'put', 'patch', 'delete'].includes(form.realtimeValidationOptions.method.toLowerCase()) ? form.realtimeValidationOptions.method : undefined
     // Set the url.
     let url = typeof form.realtimeValidationOptions.url == 'string' ? form.realtimeValidationOptions.url : undefined
     // Set the data. The data needs to exist in the form.
@@ -227,14 +227,15 @@ export default function useForm(...args) {
       let changedData = data.filter((element) => newValue[element] != prevValue[element])
       // Check if the changed data is not empty.
       if(changedData?.length) {
-        Inertia[method](url, {
+        let _data = {
           _realtimeValidation: true,
           ...data.reduce((carry, key) => {
             // Only set the key/value pairs that have changed.
             if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
             return carry
           }, {})
-        },{
+        }
+        let _options = {
           preserveState: true,
           preserveScroll: true,
           realtimeValidation: changedData,
@@ -263,7 +264,12 @@ export default function useForm(...args) {
             form.processing = false
             form.progress = null
           },
-        })
+        }
+        if(method === 'delete') {
+          Inertia.delete(url, { ..._options, _data })
+        } else {
+          Inertia[method](url, _data, _options)
+        }
       }
     }
   }, 150)
