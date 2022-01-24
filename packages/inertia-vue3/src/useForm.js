@@ -211,17 +211,26 @@ export default function useForm(...args) {
   }, { immediate: true, deep: true })
 
   const runRealtimeValidation = debounce((newValue, prevValue) => {
+    // Check if realtimeValidation options are not empty.
     let optionsNotEmpty = form.realtimeValidationOptions !== {}
+    // Check if realtime validation is enabled.
     let enabled = typeof form.realtimeValidationOptions.enabled == 'boolean' ? form.realtimeValidationOptions.enabled : optionsNotEmpty
+    // Check if a valid method is provided.
     let method = typeof form.realtimeValidationOptions.method == 'string' && ['get', 'post', 'put', 'patch'].includes(form.realtimeValidationOptions.method) ? form.realtimeValidationOptions.method : undefined
+    // Set the url.
     let url = typeof form.realtimeValidationOptions.url == 'string' ? form.realtimeValidationOptions.url : undefined
+    // Set the data. The data needs to exist in the form.
     let data = form.realtimeValidationOptions.data?.length ? form.realtimeValidationOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
+    // Check if all necessary arguments are provided.
     if (optionsNotEmpty && enabled === true && method && url && data?.length) {
+      // Find the form data that has changed since last watch update.
       let changedData = data.filter((element) => newValue[element] != prevValue[element])
+      // Check if the changed data is not empty.
       if(changedData?.length) {
         Inertia[method](url, {
           _realtimeValidation: true,
           ...data.reduce((carry, key) => {
+            // Only set the key/value pairs that have changed.
             if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
             return carry
           }, {})
@@ -240,7 +249,7 @@ export default function useForm(...args) {
       }
     }
   }, 150)
-
+  // Watcher for realtime validation.
   watch(() => form.data(), (newValue, prevValue) => runRealtimeValidation(newValue, prevValue), { immediate: false, deep: true })
 
   return form
