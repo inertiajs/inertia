@@ -60,7 +60,7 @@ export type Visit = {
   preserveScroll: PreserveStateOption,
   preserveState: PreserveStateOption,
   only: Array<string>,
-  realtimeValidation: Array<string>,
+  validate: Array<string>,
   headers: Record<string, string>
   errorBag: string|null,
   forceFormData: boolean,

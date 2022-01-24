@@ -22,7 +22,7 @@ export default function useForm(...args) {
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
-    realtimeValidationOptions: {},
+    validateOptions: {},
     data() {
       return Object
         .keys(data)
@@ -196,9 +196,9 @@ export default function useForm(...args) {
       Object.assign(this, restored.data)
       this.setError(restored.errors)
     },
-    realtimeValidation(options) {
+    validate(options) {
       if(typeof options === 'object') {
-        this.realtimeValidationOptions = options
+        this.validateOptions = options
       }
     }
   })
@@ -210,17 +210,17 @@ export default function useForm(...args) {
     }
   }, { immediate: true, deep: true })
 
-  const runRealtimeValidation = debounce((newValue, prevValue) => {
-    // Check if realtimeValidation options are not empty.
-    let optionsNotEmpty = form.realtimeValidationOptions !== {}
+  const runValidate = debounce((newValue, prevValue) => {
+    // Check if validate options are not empty.
+    let optionsNotEmpty = form.validateOptions !== {}
     // Check if realtime validation is enabled.
-    let enabled = typeof form.realtimeValidationOptions.enabled == 'boolean' ? form.realtimeValidationOptions.enabled : optionsNotEmpty
+    let enabled = typeof form.validateOptions.enabled == 'boolean' ? form.validateOptions.enabled : optionsNotEmpty
     // Check if a valid method is provided.
-    let method = typeof form.realtimeValidationOptions.method == 'string' && ['get', 'post', 'put', 'patch', 'delete'].includes(form.realtimeValidationOptions.method.toLowerCase()) ? form.realtimeValidationOptions.method : undefined
+    let method = typeof form.validateOptions.method == 'string' && ['get', 'post', 'put', 'patch', 'delete'].includes(form.validateOptions.method.toLowerCase()) ? form.validateOptions.method : undefined
     // Set the url.
-    let url = typeof form.realtimeValidationOptions.url == 'string' ? form.realtimeValidationOptions.url : undefined
+    let url = typeof form.validateOptions.url == 'string' ? form.validateOptions.url : undefined
     // Set the data. The data needs to exist in the form.
-    let data = form.realtimeValidationOptions.data?.length ? form.realtimeValidationOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
+    let data = form.validateOptions.data?.length ? form.validateOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
     // Check if all necessary arguments are provided.
     if (optionsNotEmpty && enabled === true && method && url && data?.length) {
       // Find the form data that has changed since last watch update.
@@ -237,7 +237,7 @@ export default function useForm(...args) {
         let _options = {
           preserveState: true,
           preserveScroll: true,
-          realtimeValidation: changedData,
+          validate: changedData,
           only: ['errors'],
           onStart: () => {
             form.processing = true
@@ -273,7 +273,7 @@ export default function useForm(...args) {
     }
   }, 150)
   // Watcher for realtime validation.
-  watch(() => form.data(), (newValue, prevValue) => runRealtimeValidation(newValue, prevValue), { immediate: false, deep: true })
+  watch(() => form.data(), (newValue, prevValue) => runValidate(newValue, prevValue), { immediate: false, deep: true })
 
   return form
 }
