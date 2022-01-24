@@ -297,6 +297,9 @@ export class Router {
           'X-Inertia-Partial-Component': this.page.component,
           'X-Inertia-Partial-Data': only.join(','),
         } : {}),
+        ...(realtimeValidation.length ? {
+          'X-Inertia-Real-Time-Validation': realtimeValidation,
+        } : {}),
         ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },

@@ -228,7 +228,6 @@ export default function useForm(...args) {
       // Check if the changed data is not empty.
       if(changedData?.length) {
         let _data = {
-          _realtimeValidation: true,
           ...data.reduce((carry, key) => {
             // Only set the key/value pairs that have changed.
             if(newValue[key] != prevValue[key]) carry[key] = newValue[key]
