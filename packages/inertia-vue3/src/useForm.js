@@ -226,12 +226,15 @@ export default function useForm(...args) {
             return carry
           }, {})
         },{
+          preserveState: true,
+          preserveScroll: true,
+          realtimeValidation: changedData,
           only: ['errors'],
           onError: errors => {
-            form.setError(errors)
+            form.clearErrors(...changedData).setError(errors)
           },
           onSuccess: () => {
-            form.clearErrors(changedData.join())
+            form.clearErrors(...changedData)
           },
         })
       }

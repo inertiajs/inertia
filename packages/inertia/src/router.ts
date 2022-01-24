@@ -207,6 +207,7 @@ export class Router {
       preserveScroll: false,
       preserveState: false,
       only: [],
+      realtimeValidation: [],
       headers: {},
       errorBag: '',
       forceFormData: false,
@@ -226,7 +227,7 @@ export class Router {
 
     const prepared = this.visitOptions(options, url) || options
 
-    const { method, replace, only, headers, errorBag, forceFormData, queryStringArrayFormat, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError } = prepared
+    const { method, replace, only, realtimeValidation, headers, errorBag, forceFormData, queryStringArrayFormat, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError } = prepared
     let { data, preserveScroll, preserveState } = prepared
 
     if ((hasFiles(data) || forceFormData) && !(data instanceof FormData)) {
@@ -247,6 +248,7 @@ export class Router {
       preserveScroll,
       preserveState,
       only,
+      realtimeValidation,
       headers,
       errorBag,
       forceFormData,
@@ -313,6 +315,19 @@ export class Router {
       const pageResponse: Page = response.data
       if (only.length && pageResponse.component === this.page.component) {
         pageResponse.props = { ...this.page.props, ...pageResponse.props }
+        // The reason for this snippet here is that we want to prevent losing non-realtime-validation that were previously set in $page.props.errors
+        // Check if we're doing a realtime validation
+        if (realtimeValidation.length) {
+          // We go through the current page.props.errors and pass it to pageResponse.props.errors key by key
+          // By only 2 conditions:
+          // 1. If the key is not in realtimeValidation, we set the key (it's a non-realtime-validation error)
+          // 2. If the key is in realtimeValidation, and if it's in pageResponse.props.errors, we set the key
+          Object.keys(this.page.props.errors).forEach((key) => {
+            if(!realtimeValidation.includes(key) || realtimeValidation.includes(key) && Object.keys(pageResponse.props.errors).includes(key)) {
+              pageResponse.props.errors[key] = this.page.props.errors[key]
+            }
+          })
+        }
       }
       preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
       preserveState = this.resolvePreserveOption(preserveState, pageResponse)
