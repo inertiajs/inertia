@@ -220,7 +220,7 @@ export default function useForm(...args) {
     // Set the url.
     let url = typeof form.validateOptions.url == 'string' ? form.validateOptions.url : undefined
     // Set the data. The data needs to exist in the form.
-    let data = form.validateOptions.data?.length ? form.validateOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
+    let data = form.validateOptions.data?.length ? form.validateOptions.data.filter((element) => Object.keys(newValue).includes(element)) : Object.keys(form.data())
     // Set the option to control whether the processing state of form should be updated during validation.
     let processing = typeof form.validateOptions.processing == 'boolean' ? form.validateOptions.processing : false
     // Set the option to control whether the progress state of form should be updated during validation.
@@ -275,7 +275,7 @@ export default function useForm(...args) {
         }
       }
     }
-  }, 150)
+  }, 400)
   // Watcher for realtime validation.
   watch(() => form.data(), (newValue, prevValue) => runValidate(newValue, prevValue), { immediate: false, deep: true })
 
