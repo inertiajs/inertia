@@ -221,6 +221,10 @@ export default function useForm(...args) {
     let url = typeof form.validateOptions.url == 'string' ? form.validateOptions.url : undefined
     // Set the data. The data needs to exist in the form.
     let data = form.validateOptions.data?.length ? form.validateOptions.data.filter((element) => Object.keys(newValue).includes(element)) : undefined
+    // Set the option to control whether the processing state of form should be updated during validation.
+    let processing = typeof form.validateOptions.processing == 'boolean' ? form.validateOptions.processing : false
+    // Set the option to control whether the progress state of form should be updated during validation.
+    let progress = typeof form.validateOptions.progress == 'boolean' ? form.validateOptions.progress : false
     // Check if all necessary arguments are provided.
     if (optionsNotEmpty && enabled === true && method && url && data?.length) {
       // Find the form data that has changed since last watch update.
@@ -240,28 +244,28 @@ export default function useForm(...args) {
           validate: changedData,
           only: ['errors'],
           onStart: () => {
-            form.processing = true
+            if (processing) form.processing = true
           },
           onProgress: event => {
-            form.progress = event
+            if (progress) form.progress = event
           },
           onSuccess: () => {
-            form.processing = false
-            form.progress = null
+            if (processing) form.processing = false
+            if (progress) form.progress = null
             form.clearErrors(...changedData)
           },
           onError: errors => {
-            form.processing = false
-            form.progress = null
+            if (processing) form.processing = false
+            if (progress) form.progress = null
             form.clearErrors(...changedData).setError(errors)
           },
           onCancel: () => {
-            form.processing = false
-            form.progress = null
+            if (processing) form.processing = false
+            if (progress) form.progress = null
           },
           onFinish: () => {
-            form.processing = false
-            form.progress = null
+            if (processing) form.processing = false
+            if (progress) form.progress = null
           },
         }
         if(method === 'delete') {
