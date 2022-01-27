@@ -116,11 +116,19 @@ export class Router {
     })
   }
 
-  protected locationVisit(url: URL, preserveScroll: LocationVisit['preserveScroll']): boolean|void {
+  protected locationVisit(url: URL, preserveScroll: LocationVisit['preserveScroll'], newWindow: boolean = false): boolean|void {
     try {
       const locationVisit: LocationVisit = { preserveScroll }
       window.sessionStorage.setItem('inertiaLocationVisit', JSON.stringify(locationVisit))
+
+      if (newWindow) {
+        window.open(url.href, '_blank')
+        // Probably do a inertia.reload()?
+        return
+      }
+
       window.location.href = url.href
+
       if (urlWithoutHash(window.location).href === urlWithoutHash(url).href) {
         window.location.reload()
       }
@@ -344,7 +352,7 @@ export class Router {
         if (requestUrl.hash && !locationUrl.hash && urlWithoutHash(requestUrl).href === locationUrl.href) {
           locationUrl.hash = requestUrl.hash
         }
-        this.locationVisit(locationUrl, preserveScroll === true)
+        this.locationVisit(locationUrl, preserveScroll === true, !!error.response.headers['x-inertia-new-window'])
       } else if (error.response) {
         if (fireInvalidEvent(error.response)) {
           modal.show(error.response.data)
