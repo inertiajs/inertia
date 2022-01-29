@@ -22,7 +22,8 @@ export interface CreateInertiaAppProps {
     { default: DefineComponent }
   setup: (props: {
     el: Element
-    app: InertiaApp
+    app: InertiaApp // deprecated, alias to App
+    App: InertiaApp    
     props: InertiaAppProps
     plugin: Plugin
   }) => void | VueApp
