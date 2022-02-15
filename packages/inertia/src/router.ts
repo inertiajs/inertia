@@ -73,11 +73,18 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    document.documentElement.scrollTop = 0
-    document.documentElement.scrollLeft = 0
+    const canScrollTo = typeof document.documentElement.scrollTo === 'function'
+    if (canScrollTo) document.documentElement.scrollTo({ top: 0, left: 0 })
+    else {
+      document.documentElement.scrollTop = 0
+      document.documentElement.scrollLeft = 0
+    }
     this.scrollRegions().forEach(region => {
-      region.scrollTop = 0
-      region.scrollLeft = 0
+      if (canScrollTo) region.scrollTo({ top: 0, left: 0 })
+      else {
+        region.scrollTop = 0
+        region.scrollLeft = 0
+      }
     })
     this.saveScrollPositions()
     if (window.location.hash) {
@@ -86,10 +93,14 @@ export class Router {
   }
 
   protected restoreScrollPositions(): void {
+    const canScrollTo = typeof document.documentElement.scrollTo === 'function'
     if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
-        if (scrollPosition) {
+        if (scrollPosition && canScrollTo) {
+          region.scrollTo({ top: scrollPosition.top, left: scrollPosition.left })
+        }
+        else if (scrollPosition) {
           region.scrollTop = scrollPosition.top
           region.scrollLeft = scrollPosition.left
         }
