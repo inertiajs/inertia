@@ -11,7 +11,7 @@ export function mergeDataIntoQueryString(
   href: URL|string,
   data: Record<string, FormDataConvertible>,
   qsArrayFormat: 'indices'|'brackets' = 'brackets',
-): [string, Record<string, FormDataConvertible>] {
+): [string | undefined, Record<string, FormDataConvertible>] {
   const hasHost = /^https?:\/\//.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
@@ -35,7 +35,7 @@ export function mergeDataIntoQueryString(
       hasRelativePath ? url.pathname.substring(1) : '',
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
-    ].join(''),
+    ].join('') || undefined,
     data,
   ]
 }

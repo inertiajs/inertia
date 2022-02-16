@@ -235,7 +235,7 @@ export class Router {
 
     if (!(data instanceof FormData)) {
       const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat)
-      url = hrefToUrl(_href)
+      url = hrefToUrl(_href || '')
       data = _data
     }
 
