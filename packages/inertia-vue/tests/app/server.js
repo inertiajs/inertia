@@ -57,6 +57,7 @@ app.post('/remember/form-helper/remember', (req, res) => inertia.render(req, res
 app.post('/form-helper/data', (req, res) => inertia.render(req, res, { component: 'FormHelper/Data', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } }}))
 app.post('/form-helper/errors', (req, res) => inertia.render(req, res, { component: 'FormHelper/Errors', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } }}))
 app.post('/form-helper/events/errors', (req, res) => inertia.render(req, res, { component: 'FormHelper/Events', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } }}))
+app.post('/form-helper/reactivity', (req, res) => inertia.render(req, res, { component: 'FormHelper/Reactivity' }))
 
 app.get('/dump/get', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files }}))
 app.post('/dump/post', upload.any(), (req, res) => inertia.render(req, res, { component: 'Dump', props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files }}))

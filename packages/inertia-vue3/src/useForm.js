@@ -6,6 +6,7 @@ import { Inertia } from '@inertiajs/inertia'
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const config = (typeof args[0] === 'string' ? args[2] : args[1]) || {}
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let defaults = cloneDeep(data)
   let cancelToken = null
@@ -125,7 +126,7 @@ export default function useForm(...args) {
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
-          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
+          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, config.recentlySuccessfulDelay || 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
           defaults = cloneDeep(this.data())

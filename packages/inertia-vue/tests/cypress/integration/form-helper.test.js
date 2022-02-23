@@ -801,4 +801,82 @@ describe('Form Helper', () => {
       })
     })
   })
+
+  describe('Reactivity', () => {
+    beforeEach(() => {
+      cy.visit('/form-helper/reactivity', {
+        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      })
+
+      cy.get('.is-dirty-status').should('have.text', 'Form is not dirty')
+      cy.get('.is-processing').should('have.text', 'Form is not processing')
+      cy.get('.is-recently-successful').should('have.text', 'Form is not recently successful')
+      cy.get('.delayed-is-recently-successful').should('have.text', 'Form is not recently successful')
+    })
+
+    describe('isDirty', () => {
+      it('does set isDirty when values change', () => {
+        cy.get('#name').clear().type('A')
+        cy.get('.is-dirty-status').should('have.text', 'Form is dirty')
+      })
+  
+      it('does reset isDirty when user resets input', () => {
+        cy.get('#name').clear().type('A')
+        cy.get('.is-dirty-status').should('have.text', 'Form is dirty')
+  
+        cy.get('#name').clear().type('foo')
+        cy.get('.is-dirty-status').should('have.text', 'Form is not dirty')
+      })
+  
+      it('does reset isDirty when form.reset() is called', () => {
+        cy.get('#name').clear().type('A')
+        cy.get('.is-dirty-status').should('have.text', 'Form is dirty')
+  
+        cy.get('.reset').click()
+        cy.get('.is-dirty-status').should('have.text', 'Form is not dirty')
+      })
+    })
+
+    describe('processing', () => {
+      it('does change to processing when the form is submitted', () => {
+        let sendResponse;
+        const trigger = new Promise((resolve) => {
+          sendResponse = resolve;
+        });
+  
+        cy.intercept('/form-helper/reactivity', (request) => {
+          return trigger.then(() => {
+            request.reply();
+          });
+        });
+  
+        cy.get('.submit').click().then(() => {
+          cy.get('.is-processing').should('have.text', 'Form is processing').then(() => {
+            sendResponse()
+            cy.get('.is-processing').should('have.text', 'Form is not processing')
+          })
+        })
+      })
+    })
+
+    describe('recentlySuccessful', () => {
+      it('does update recentlySuccesful and resets after 2 seconds', () => {
+        cy.clock()
+        cy.get('.submit').click()
+        cy.get('.is-recently-successful').should('have.text', 'Form is recently successful')
+        cy.tick(2020)
+        cy.get('.is-recently-successful').should('have.text', 'Form is not recently successful')
+      })
+
+      it('allows configurable recentlySuccessful delay of 5 seconds', () => {
+        cy.clock()
+        cy.get('.submit-with-delayed-successful').click()
+        cy.get('.delayed-is-recently-successful').should('have.text', 'Form is recently successful')
+        cy.tick(2020)
+        cy.get('.delayed-is-recently-successful').should('have.text', 'Form is recently successful')
+        cy.tick(3000)
+        cy.get('.delayed-is-recently-successful').should('have.text', 'Form is not recently successful')
+      })
+    })
+  })
 })
