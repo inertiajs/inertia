@@ -67,6 +67,15 @@ export default function useForm(...args) {
 
       return this
     },
+    recentlySuccessfulDelay(value) {
+      if (! value) {
+        return value
+      }
+
+      config.recentlySuccessfulDelay = value
+
+      return this
+    },
     setError(key, value) {
       Object.assign(this.errors, (value ? { [key]: value } : key))
 

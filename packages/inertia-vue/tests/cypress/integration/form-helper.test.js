@@ -877,6 +877,14 @@ describe('Form Helper', () => {
         cy.tick(3000)
         cy.get('.delayed-is-recently-successful').should('have.text', 'Form is not recently successful')
       })
+
+      it('allows configuring recentlySuccessfulDelay on the form object', () => {
+        cy.clock()
+        cy.get('.set-delay-and-submit').click()
+        cy.get('.is-recently-successful').should('have.text', 'Form is recently successful')
+        cy.tick(520)
+        cy.get('.is-recently-successful').should('have.text', 'Form is not recently successful')
+      })
     })
   })
 })

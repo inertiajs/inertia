@@ -7,6 +7,7 @@
     <span class="name_error" v-if="form.errors.name">{{ form.errors.name }}</span>
 
     <span @click="submit" class="submit">Submit form</span>
+    <span @click="submitWithDelay" class="set-delay-and-submit">Set recentlySuccessfulDelay to 500 and submit</span>
     <span @click="submitDelayedSuccessful" class="submit-with-delayed-successful">Submit delayed successful form</span>
 
     <span @click="resetAll" class="reset">Reset all data</span>
@@ -27,7 +28,7 @@ export default {
       formDelayedSuccessful: this.$inertia.form({
         name: 'foo',
       }, {
-          recentlySuccessfulDelay: 5000,
+        recentlySuccessfulDelay: 5000,
       })
     }
   },
@@ -35,10 +36,13 @@ export default {
     submit() {
       this.form.post(this.$page.url)
     },
+    submitWithDelay() {
+      this.form
+        .recentlySuccessfulDelay(500)
+        .post(this.$page.url)
+    },
     submitDelayedSuccessful() {
-      this.formDelayedSuccessful.post(this.$page.url, {
-        recentlySuccessfulDelay: 5000,
-      })
+      this.formDelayedSuccessful.post(this.$page.url)
     },
     resetAll() {
       this.form.reset()

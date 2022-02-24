@@ -74,6 +74,15 @@ export default function(...args) {
 
       return this
     },
+    recentlySuccessfulDelay(value = null) {
+      if (! value) {
+        return value
+      }
+
+      config.recentlySuccessfulDelay = value
+
+      return this
+    },
     clearErrors(...fields) {
       this.errors = Object
         .keys(this.errors)
