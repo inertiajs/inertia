@@ -1,10 +1,11 @@
 import useForm from './useForm'
 import remember from './remember'
-import { computed, h, markRaw, ref } from 'vue'
+import { computed, h, markRaw, ref, shallowRef } from 'vue'
 import { createHeadManager, router } from '@inertiajs/core'
 
 const component = ref(null)
 const page = ref({})
+const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
 
@@ -65,6 +66,11 @@ export default {
           key: key.value,
         })
 
+        if (layout.value) {
+          component.value.layout = layout.value
+          layout.value = null
+        }
+
         if (component.value.layout) {
           if (typeof component.value.layout === 'function') {
             return component.value.layout(h, child)
@@ -104,4 +110,8 @@ export function usePage() {
     component: computed(() => page.value.component),
     version: computed(() => page.value.version),
   }
+}
+
+export function defineLayout(component) {
+  layout.value = component
 }
