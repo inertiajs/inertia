@@ -159,11 +159,11 @@ export class Router {
   }
 
   protected isLocationVisitResponse(response: AxiosResponse): boolean {
-    return response && response.status === 409 && response.headers['x-inertia-location']
+    return !!(response && response.status === 409 && response.headers['x-inertia-location'])
   }
 
   protected isInertiaResponse(response: AxiosResponse): boolean {
-    return response?.headers['x-inertia']
+    return !!response?.headers['x-inertia']
   }
 
   protected createVisitId(): VisitId {
