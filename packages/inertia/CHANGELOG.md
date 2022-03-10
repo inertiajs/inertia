@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update axios version to `0.26.0` ([#1116](https://github.com/inertiajs/inertia/pull/1116))
 - Types: `VisitOptions` is now exported as `VisitParams` instead due to the new Global Visit Options hook ([#1052](https://github.com/inertiajs/inertia/pull/1052))
 
 ## [v0.11.0](https://github.com/inertiajs/inertia/compare/inertia@0.10.1...inertia@0.11.0) - 2022-01-07
