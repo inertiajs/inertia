@@ -24,11 +24,11 @@ export default {
       default: false,
     },
     preserveScroll: {
-      type: Boolean,
+      type: [Boolean, Function],
       default: false,
     },
     preserveState: {
-      type: Boolean,
+      type: [Boolean, Function],
       default: null,
     },
     only: {
