@@ -29,7 +29,8 @@ interface BaseInertiaLinkProps {
   headers?: Record<string, string>
 }
 
-type InertiaLinkProps = BaseInertiaLinkProps & Omit<HTMLAnchorElement, keyof BaseInertiaLinkProps>
+type InertiaLinkProps = BaseInertiaLinkProps &
+    Omit<svelte.JSX.HTMLAttributes<HTMLElementTagNameMap['a']>, keyof BaseInertiaLinkProps>
 interface InertiaLinkEvents {
   click: MouseEvent
 }
@@ -40,8 +41,8 @@ export const page: Readable<Inertia.Page>
 export function useRemember<State>(initialState: State, key?: string): Writable<State>
 export const remember: typeof useRemember
 
-export const InertiaLink: InertiaLink
-export const Link: InertiaLink
+export const InertiaLink: typeof InertiaLink
+export const Link: typeof InertiaLink
 
 export const inertia: Action<Inertia.VisitOptions & { href?: string }>
 
