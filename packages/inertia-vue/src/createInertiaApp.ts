@@ -1,13 +1,12 @@
 import Vue from 'vue'
 import { Renderer } from 'vue-server-renderer'
-import { App, AppType, plugin } from './app'
-import { Component, Page, PageResolver, HeadManagerTitleCallback } from '@inertiajs/inertia/types/types'
-import { HeadManagerOnUpdate, VisitOptions } from '@inertiajs/inertia'
+import { App, plugin } from './app'
+import { Component, Page, PageResolver, VisitOptions, HeadManagerOnUpdate, HeadManagerTitleCallback } from '@inertiajs/inertia'
 
 type SetupOptions<ElementType> = {
   el: ElementType,
-  App: AppType,
-  app: AppType
+  App: typeof App,
+  app: typeof App, // deprecated
   props: {
     attrs: {
       id: string,
@@ -17,15 +16,15 @@ type SetupOptions<ElementType> = {
       initialPage: Page,
       initialComponent: Component,
       resolveComponent: PageResolver,
-      titleCallback?: HeadManagerTitleCallback
-      onHeadUpdate: HeadManagerOnUpdate|null
-    }
+      titleCallback?: HeadManagerTitleCallback,
+      onHeadUpdate: HeadManagerOnUpdate | null,
+    },
   },
 }
 
 type BaseInertiaAppOptions = {
   title?: HeadManagerTitleCallback,
-  resolve: PageResolver
+  resolve: PageResolver,
 }
 
 type InertiaAppOptionsForSSR = BaseInertiaAppOptions & {
@@ -33,7 +32,7 @@ type InertiaAppOptionsForSSR = BaseInertiaAppOptions & {
   page: Page|string,
   render: Renderer['renderToString'],
   visitOptions?: undefined,
-  setup(options: SetupOptions<null>): InstanceType<typeof Vue>
+  setup(options: SetupOptions<null>): InstanceType<typeof Vue>,
 }
 
 type InertiaAppOptionsForCSR = BaseInertiaAppOptions & {
@@ -41,17 +40,16 @@ type InertiaAppOptionsForCSR = BaseInertiaAppOptions & {
   page?: undefined,
   render?: undefined,
   visitOptions?: VisitOptions,
-  setup(options: SetupOptions<HTMLElement>): void
+  setup(options: SetupOptions<HTMLElement>): void,
 }
 
 export function createInertiaApp(options: InertiaAppOptionsForCSR): Promise<void>
 export function createInertiaApp(options: InertiaAppOptionsForSSR): Promise<{ head: string[]; body: string }>
-
 export async function createInertiaApp({ id, resolve, setup, title, visitOptions, page, render }: InertiaAppOptionsForSSR | InertiaAppOptionsForCSR): Promise<{ head: string[]; body: string } | void> {
   const elementId: string = id || 'app'
   const isServer: boolean = typeof window === 'undefined'
-  const el: HTMLElement|null = isServer ? null : document.getElementById(elementId)
-  const initialPage: Page = page || JSON.parse(<string>el?.dataset.page)
+  const el: HTMLElement | null = isServer ? null : document.getElementById(elementId)
+  const initialPage: Page = page || JSON.parse(el?.dataset.page as string)
   const resolveComponent: PageResolver = name => Promise.resolve(resolve(name)).then(module => (module as Record<string, unknown>).default || module)
 
   Vue.use(plugin)
@@ -81,14 +79,14 @@ export async function createInertiaApp({ id, resolve, setup, title, visitOptions
     }
 
     if (isServer) {
-      return (setup as InertiaAppOptionsForSSR['setup'])({ ... options, el: null })
+      return (setup as InertiaAppOptionsForSSR['setup'])({ ...options, el: null })
     }
 
     if (el === null) {
       throw new Error(`Could not find required document element with id [${elementId}].`)
     }
 
-    return (setup as InertiaAppOptionsForCSR['setup'])({... options, el: (el as HTMLElement)})
+    return (setup as InertiaAppOptionsForCSR['setup'])({ ...options, el: el })
   })
 
   if (isServer && vueApp && render) {
