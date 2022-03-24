@@ -1,7 +1,7 @@
-import { h } from 'vue'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { defineComponent, h, PropType } from 'vue'
+import { Inertia, Method, mergeDataIntoQueryString, shouldIntercept, GlobalEventCallback, FormDataConvertible } from '@inertiajs/inertia'
 
-export default {
+export default defineComponent({
   name: 'InertiaLink',
   props: {
     as: {
@@ -9,7 +9,7 @@ export default {
       default: 'a',
     },
     data: {
-      type: Object,
+      type: Object as PropType<Record<string, FormDataConvertible>>,
       default: () => ({}),
     },
     href: {
@@ -17,7 +17,7 @@ export default {
     },
     method: {
       type: String,
-      default: 'get',
+      default: Method.GET,
     },
     replace: {
       type: Boolean,
@@ -32,32 +32,32 @@ export default {
       default: null,
     },
     only: {
-      type: Array,
+      type: Array as PropType<string[]>,
       default: () => [],
     },
     headers: {
-      type: Object,
+      type: Object as PropType<Record<string, string>>,
       default: () => ({}),
     },
     queryStringArrayFormat: {
-      type: String,
+      type: String as PropType<'indices' | 'brackets'>,
       default: 'brackets',
     },
   },
   setup(props, { slots, attrs }) {
-    return props => {
+    return () => {
       const as = props.as.toLowerCase()
-      const method = props.method.toLowerCase()
+      const method = props.method.toLowerCase() as Method
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
-      if (as === 'a' && method !== 'get') {
+      if (as === 'a' && method !== Method.GET) {
         console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`)
       }
 
       return h(props.as, {
         ...attrs,
         ...as === 'a' ? { href } : {},
-        onClick: (event) => {
+        onClick: (event: KeyboardEvent) => {
           if (shouldIntercept(event)) {
             event.preventDefault()
 
@@ -66,21 +66,21 @@ export default {
               method: method,
               replace: props.replace,
               preserveScroll: props.preserveScroll,
-              preserveState: props.preserveState ?? (method !== 'get'),
+              preserveState: props.preserveState ?? (method !== Method.GET),
               only: props.only,
               headers: props.headers,
-              onCancelToken: attrs.onCancelToken || (() => ({})),
-              onBefore: attrs.onBefore || (() => ({})),
-              onStart: attrs.onStart || (() => ({})),
-              onProgress: attrs.onProgress || (() => ({})),
-              onFinish: attrs.onFinish || (() => ({})),
-              onCancel: attrs.onCancel || (() => ({})),
-              onSuccess: attrs.onSuccess || (() => ({})),
-              onError: attrs.onError || (() => ({})),
+              onCancelToken: attrs.onCancelToken as ({ cancel }: { cancel: VoidFunction }) => void || (() => {}),
+              onBefore: attrs.onBefore as GlobalEventCallback<'before'> || (() => {}),
+              onStart: attrs.onStart as GlobalEventCallback<'start'> || (() => {}),
+              onProgress: attrs.onProgress as GlobalEventCallback<'progress'> || (() => {}),
+              onFinish: attrs.onFinish as GlobalEventCallback<'finish'> || (() => {}),
+              onCancel: attrs.onCancel as GlobalEventCallback<'cancel'> || (() => {}),
+              onSuccess: attrs.onSuccess as GlobalEventCallback<'success'> || (() => {}),
+              onError: attrs.onError as GlobalEventCallback<'error'> || (() => {}),
             })
           }
         },
       }, slots)
     }
   },
-}
+})

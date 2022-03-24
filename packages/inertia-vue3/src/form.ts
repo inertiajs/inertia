@@ -1,33 +1,43 @@
-import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
+import { Inertia, VisitParams, InertiaForm, RequestPayload, Errors, ErrorBag } from '@inertiajs/inertia'
+import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/inertia'
 
-export default function useForm(...args) {
+type RestoredData = {
+  data: Record<string, any>,
+  errors: Errors & ErrorBag,
+}
+
+export function useForm<Fields>(rememberKey: string, data: Fields): InertiaForm<Fields>
+export function useForm<Fields>(data: Fields): InertiaForm<Fields>
+export function useForm<Fields extends Record<string, any>>(...args: (string | Fields)[]) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const restored = rememberKey ? Inertia.restore(rememberKey) : null
-  let defaults = cloneDeep(data)
-  let cancelToken = null
-  let recentlySuccessfulTimeoutId = null
-  let transform = data => data
+  const data = ((typeof args[0] === 'string' ? args[1] : args[0]) || {}) as Fields
+  const restored = rememberKey
+    ? Inertia.restore(rememberKey) as RestoredData
+    : undefined
 
-  let form = reactive({
+  let defaults = cloneDeep(data)
+  let cancelToken: { cancel: VoidFunction } | null = null
+  let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout>
+  let transform = (data: Fields): RequestPayload => data
+
+  const form = reactive<InertiaForm<Fields>>({
     ...restored ? restored.data : data,
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
     processing: false,
-    progress: null,
+    progress: undefined,
     wasSuccessful: false,
     recentlySuccessful: false,
     data() {
       return Object
         .keys(data)
         .reduce((carry, key) => {
-          carry[key] = this[key]
+          (carry as Record<string, any>)[key] = this[key]
           return carry
-        }, {})
+        }, {} as Fields)
     },
     transform(callback) {
       transform = callback
@@ -48,7 +58,7 @@ export default function useForm(...args) {
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(defaults)
+      const clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
         Object.assign(this, clonedDefaults)
       } else {
@@ -58,7 +68,7 @@ export default function useForm(...args) {
             .keys(clonedDefaults)
             .filter(key => fields.includes(key))
             .reduce((carry, key) => {
-              carry[key] = clonedDefaults[key]
+              (carry as Record<string, any>)[key] = clonedDefaults[key]
               return carry
             }, {}),
         )
@@ -67,7 +77,7 @@ export default function useForm(...args) {
       return this
     },
     setError(key, value) {
-      Object.assign(this.errors, (value ? { [key]: value } : key))
+      Object.assign(this.errors, (value ? { [key as string]: value } : key))
 
       this.hasErrors = Object.keys(this.errors).length > 0
 
@@ -121,7 +131,7 @@ export default function useForm(...args) {
         },
         onSuccess: async page => {
           this.processing = false
-          this.progress = null
+          this.progress = undefined
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
@@ -134,7 +144,7 @@ export default function useForm(...args) {
         },
         onError: errors => {
           this.processing = false
-          this.progress = null
+          this.progress = undefined
           this.clearErrors().setError(errors)
 
           if (options.onError) {
@@ -143,22 +153,22 @@ export default function useForm(...args) {
         },
         onCancel: () => {
           this.processing = false
-          this.progress = null
+          this.progress = undefined
 
           if (options.onCancel) {
             return options.onCancel()
           }
         },
-        onFinish: () => {
+        onFinish: visit => {
           this.processing = false
-          this.progress = null
+          this.progress = undefined
           cancelToken = null
 
           if (options.onFinish) {
-            return options.onFinish()
+            return options.onFinish(visit)
           }
         },
-      }
+      } as VisitParams
 
       if (method === 'delete') {
         Inertia.delete(url, { ..._options, data  })
@@ -190,13 +200,13 @@ export default function useForm(...args) {
     __remember() {
       return { data: this.data(), errors: this.errors }
     },
-    __restore(restored) {
+    __restore(restored: RestoredData) {
       Object.assign(this, restored.data)
       this.setError(restored.errors)
     },
-  })
+  }) as InertiaForm<Fields>
 
-  watch(form, newValue => {
+  watch(form, (newValue: InertiaForm<Fields>) => {
     form.isDirty = !isEqual(form.data(), defaults)
     if (rememberKey) {
       Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)

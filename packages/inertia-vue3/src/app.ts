@@ -1,48 +1,53 @@
-import useForm from './useForm'
-import remember from './remember'
-import { computed, h, markRaw, ref } from 'vue'
-import { createHeadManager, Inertia } from '@inertiajs/inertia'
+import { defineComponent, computed, h, h as createElement, markRaw, ref, provide, DefineComponent, PropType, Ref, VNode, Plugin } from 'vue'
+import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager, HeadManager, HeadManagerTitleCallback, HeadManagerOnUpdate } from '@inertiajs/inertia'
+import { useForm } from './form'
+import { remember } from './remember'
+import { HeadManagerKey } from './head'
 
-const component = ref(null)
-const page = ref({})
-const key = ref(null)
-let headManager = null
+export type LayoutComponent = DefineComponent | DefineComponent[] | LayoutFunction
+export type LayoutFunction = (h: typeof createElement, child: VNode) => DefineComponent | DefineComponent[]
 
-export default {
+let headManager: HeadManager
+
+const component = ref(null) as Ref<DefineComponent | null>
+const page = ref({}) as Ref<Page>
+const key = ref<number | string | undefined>(undefined)
+
+export const App = defineComponent({
   name: 'Inertia',
   props: {
     initialPage: {
-      type: Object,
+      type: Object as PropType<Page>,
       required: true,
     },
     initialComponent: {
-      type: Object,
+      type: [Object, Function, String] as PropType<DefineComponent>,
       required: false,
     },
     resolveComponent: {
-      type: Function,
-      required: false,
+      type: Function as PropType<PageResolver>,
+      required: true,
     },
     titleCallback: {
-      type: Function,
+      type: Function as PropType<HeadManagerTitleCallback>,
       required: false,
-      default: title => title,
+      default: (title => title) as HeadManagerTitleCallback,
     },
     onHeadUpdate: {
-      type: Function,
+      type: Function as PropType<HeadManagerOnUpdate>,
       required: false,
       default: () => () => {},
     },
     visitOptions: {
-      type: Function,
+      type: Function as PropType<VisitOptions>,
       required: false,
-      default: () => undefined,
+      default: () => {},
     },
   },
   setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate, visitOptions }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
     page.value = initialPage
-    key.value = null
+    key.value = undefined
 
     const isServer = typeof window === 'undefined'
     headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
@@ -52,7 +57,7 @@ export default {
         initialPage,
         resolveComponent,
         swapComponent: async (args) => {
-          component.value = markRaw(args.component)
+          component.value = markRaw(args.component as DefineComponent)
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
         },
@@ -61,6 +66,8 @@ export default {
 
       Inertia.on('navigate', () => headManager.forceUpdate())
     }
+
+    provide(HeadManagerKey, headManager)
 
     return () => {
       if (component.value) {
@@ -73,25 +80,24 @@ export default {
 
         if (component.value.layout) {
           if (typeof component.value.layout === 'function') {
-            return component.value.layout(h, child)
+            return (component.value.layout as LayoutFunction)(h, child)
           }
 
           return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
-            .concat(child)
             .reverse()
             .reduce((child, layout) => {
               layout.inheritAttrs = !!layout.inheritAttrs
               return h(layout, { ...page.value.props }, () => child)
-            })
+            }, child)
         }
 
         return child
       }
     }
   },
-}
+})
 
-export const plugin = {
+export const plugin: Plugin = {
   install(app) {
     Inertia.form = useForm
 
@@ -103,11 +109,14 @@ export const plugin = {
   },
 }
 
-export function usePage() {
+export function usePage<Props>() {
   return {
-    props: computed(() => page.value.props),
+    props: computed(() => (page as Ref<Page<Props & PageProps>>).value.props),
     url: computed(() => page.value.url),
     component: computed(() => page.value.component),
     version: computed(() => page.value.version),
+    scrollRegions: computed(() => page.value.scrollRegions),
+    rememberedState: computed(() => page.value.rememberedState),
+    resolvedErrors: computed(() => page.value.resolvedErrors),
   }
 }
