@@ -83,12 +83,13 @@ export const App = defineComponent({
             return (component.value.layout as LayoutFunction)(h, child)
           }
 
-          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
+          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout] as unknown[])
+            .concat(child)
             .reverse()
             .reduce((child, layout) => {
-              layout.inheritAttrs = !!layout.inheritAttrs
-              return h(layout, { ...page.value.props }, () => child)
-            }, child)
+              (layout as DefineComponent).inheritAttrs = !!(layout as DefineComponent).inheritAttrs
+              return h(layout as DefineComponent, { ...page.value.props }, () => child as VNode)
+            })
         }
 
         return child
