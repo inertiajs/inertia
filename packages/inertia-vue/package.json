@@ -26,7 +26,7 @@
     "build": "npm run clean && npm run build:cjs && npm run build:umd",
     "build:cjs": "microbundle --format cjs",
     "build:umd": "microbundle --format umd --name InertiaVue --globals vue=Vue,@inertiajs/inertia=Inertia",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf types && rm -rf dist",
     "prepublishOnly": "npm run build",
     "watch": "microbundle watch --format cjs"
   },
@@ -45,7 +45,8 @@
   },
   "peerDependencies": {
     "@inertiajs/inertia": "^0.11.0",
-    "@vue/composition-api": "^1.4.9"
+    "@vue/composition-api": "^1.4.9",
+    "vue": "^2.6.0"
   },
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",

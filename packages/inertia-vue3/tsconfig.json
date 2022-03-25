@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
     "noEmitOnError": true,
 
     "lib": ["DOM", "DOM.Iterable", "ES2020"],
@@ -24,5 +23,6 @@
     "skipLibCheck": true,
     "typeRoots": ["./node_modules/@types"],
     "strict": true
-  }
+  },
+  "include": ["src/**/*.ts"]
 }
