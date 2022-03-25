@@ -19,14 +19,14 @@
   "source": "src/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
-  "typings": "index.d.ts",
+  "types": "index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:umd",
-    "build:cjs": "microbundle --format cjs",
-    "build:umd": "microbundle --format umd --name InertiaReact --globals react=React,@inertiajs/inertia=Inertia",
+    "build:cjs": "microbundle --format cjs --generateTypes false",
+    "build:umd": "microbundle --format umd --generateTypes false --name InertiaReact --globals react=React,@inertiajs/inertia=Inertia",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build",
-    "watch": "microbundle watch --format cjs"
+    "watch": "microbundle watch --format cjs --generateTypes false"
   },
   "devDependencies": {
     "@inertiajs/inertia": "^0.11.0",
