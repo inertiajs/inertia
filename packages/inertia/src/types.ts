@@ -198,7 +198,6 @@ export interface FormFactory {
 }
 
 export interface InertiaForm<Fields extends Record<string, any>> {
-  [key: string]: any
   isDirty: boolean
   errors: Errors & ErrorBag
   hasErrors: boolean

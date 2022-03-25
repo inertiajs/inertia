@@ -1,7 +1,23 @@
 import { reactive, watch } from 'vue'
-import { Inertia, VisitParams, InertiaForm, RequestPayload, Errors, ErrorBag } from '@inertiajs/inertia'
+import { Inertia, VisitParams, InertiaForm as InertiaFormProps, RequestPayload, Errors, ErrorBag } from '@inertiajs/inertia'
 import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
+
+/**
+ * Define form factory of Inertia Vue.
+ */
+export interface FormFactory {
+  <Fields extends Record<string, any>>(rememberKey: string, data: Fields): InertiaForm<Fields>
+  <Fields extends Record<string, any>>(data: Fields): InertiaForm<Fields>
+}
+
+/**
+ * Define form type of Inertia Vue.
+ */
+export type InertiaForm<Fields extends Record<string, any>> =
+  Fields &
+  Record<string, any> &
+  InertiaFormProps<Fields>
 
 type RestoredData = {
   data: Record<string, any>,
@@ -22,7 +38,7 @@ export function useForm<Fields extends Record<string, any>>(...args: (string | F
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout>
   let transform = (data: Fields): RequestPayload => data
 
-  const form = reactive<InertiaForm<Fields>>({
+  const form = reactive<InertiaFormProps<Fields> & Record<string, any>>({
     ...restored ? restored.data : data,
     isDirty: false,
     errors: restored ? restored.errors : {},

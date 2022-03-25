@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import { Inertia, HeadManager, Page } from '@inertiajs/inertia'
 import { LayoutComponent } from './app'
+import { FormFactory } from './form'
 
 declare module 'vue/types/vue' {
   interface Vue {
-    $inertia: typeof Inertia
+    $inertia: Omit<typeof Inertia, 'form'> & { form: FormFactory }
     $page: Page
     $headManager?: HeadManager
   }
