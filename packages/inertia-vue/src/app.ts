@@ -1,18 +1,15 @@
-import Vue, { ComponentOptions, CreateElement, VNode } from 'vue'
-import { defineComponent, ref, computed, markRaw, provide, h, PropType, Ref } from '@vue/composition-api'
+import { ComponentOptions, CreateElement, VNode } from 'vue'
+import { defineComponent, ref, computed, PropType, Ref } from '@vue/composition-api'
 import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager, HeadManager, HeadManagerTitleCallback, HeadManagerOnUpdate } from '@inertiajs/inertia'
 import { useForm } from './form'
 import { remember } from './remember'
-import { HeadManagerKey } from './head'
 
-export type LayoutComponent = ComponentOptions<Vue> | ComponentOptions<Vue>[] | LayoutFunction
-export type LayoutFunction = (h: CreateElement, child: VNode) => ComponentOptions<Vue> | ComponentOptions<Vue>[]
+export type LayoutComponent = ComponentOptions<never> | ComponentOptions<never>[] | LayoutFunction
+export type LayoutFunction = (h: CreateElement, child: VNode) => VNode
 
 let headManager: HeadManager
 
-const component = ref(null) as Ref<ComponentOptions<Vue> | null>
 const page = ref({}) as Ref<Page>
-const key = ref<number | string | undefined>(undefined)
 
 export const App = defineComponent({
   name: 'Inertia',
@@ -22,7 +19,7 @@ export const App = defineComponent({
       required: true,
     },
     initialComponent: {
-      type: [Object, Function, String] as PropType<ComponentOptions<Vue>>,
+      type: [Object, Function, String] as PropType<ComponentOptions<never>>,
       required: false,
     },
     resolveComponent: {
@@ -45,60 +42,68 @@ export const App = defineComponent({
       default: () => {},
     },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate, visitOptions }) {
-    component.value = initialComponent ? markRaw(initialComponent) : null
-    page.value = initialPage
-    key.value = undefined
+  data() {
+    return {
+      component: (this.initialComponent || null) as ComponentOptions<never>,
+      page: this.initialPage as Page,
+      key: undefined as number | undefined,
+    }
+  },
+  watch: {
+    page: {
+      handler: newPage => page.value = newPage,
+      immediate: true,
+    },
+  },
+  created() {
+    headManager = createHeadManager(this.$isServer, this.titleCallback, this.onHeadUpdate)
 
-    const isServer = typeof window === 'undefined'
-    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
-
-    if (!isServer) {
+    if (!this.$isServer) {
       Inertia.init({
-        initialPage,
-        resolveComponent,
-        swapComponent: async (args) => {
-          component.value = markRaw(args.component as ComponentOptions<Vue>)
-          page.value = args.page
-          key.value = args.preserveState ? key.value : Date.now()
+        initialPage: this.initialPage,
+        resolveComponent: this.resolveComponent,
+        swapComponent: async ({ component, page, preserveState }) => {
+          this.component = component as ComponentOptions<never>
+          this.page = page
+          this.key = preserveState ? this.key : Date.now()
         },
-        visitOptions,
+        visitOptions: this.visitOptions,
       })
 
       Inertia.on('navigate', () => headManager.forceUpdate())
     }
+  },
+  render(h) {
+    const component = this.component as ComponentOptions<never>
+    const page = this.page as Page
+    const key = this.key as number | undefined
 
-    provide(HeadManagerKey, headManager)
+    if (component) {
+      const child = h(component, {
+        key,
+        props: page.props,
+      })
 
-    return () => {
-      if (component.value) {
-        component.value.inheritAttrs = !!component.value.inheritAttrs
-
-        const child = h(component.value, {
-          key: key.value,
-          props: page.value.props,
-        })
-
-        if (component.value.layout) {
-          if (typeof component.value.layout === 'function') {
-            return component.value.layout(h, child)
-          }
-
-          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
-            .reverse()
-            .reduce((child, layout) => {
-              layout.inheritAttrs = !!layout.inheritAttrs
-              return h(layout, { props: page.value.props }, [child])
-            }, child)
+      if (component.layout) {
+        if (typeof component.layout === 'function') {
+          return component.layout(h, child)
         }
 
-        return child
+        return (Array.isArray(component.layout) ? component.layout : [component.layout])
+          .reverse()
+          .reduce((child, layout) => {
+            return h(layout, { props: page.props }, [child])
+          }, child)
       }
+
+      return child
     }
+
+    return h('template')
   },
 })
 
-export const plugin: Vue.PluginObject<Vue> = {
+export const plugin: Vue.PluginObject<never> = {
   install(Vue) {
     Inertia.form = useForm
 

@@ -1,3 +1,4 @@
+import './installCompositionApi'
 export { useForm } from './form'
 export { useRemember, remember } from './remember'
 export { createInertiaApp } from './createInertiaApp'

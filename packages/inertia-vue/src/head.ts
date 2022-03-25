@@ -1,15 +1,12 @@
 import { VNode, VNodeData } from 'vue'
-import { defineComponent, inject, InjectionKey, onBeforeUnmount } from '@vue/composition-api'
+import { defineComponent } from '@vue/composition-api'
 import { ScopedSlotChildren } from 'vue/types/vnode'
-import { HeadManager } from '@inertiajs/inertia'
 
 interface VNodeWithEnsuredDataAttrs extends VNode {
   data: VNodeData & {
     attrs: Exclude<VNodeData['attrs'], undefined>
   }
 }
-
-export const HeadManagerKey = Symbol() as InjectionKey<HeadManager>
 
 export default defineComponent({
   props: {
@@ -18,19 +15,16 @@ export default defineComponent({
       required: false,
     },
   },
-  setup(props, { slots }) {
-    const headManager = useHeadManager()
-    if (!headManager) {
-      return
+  data() {
+    return {
+      provider: this.$headManager?.createProvider(),
     }
-
-    const provider = headManager.createProvider()
-
-    onBeforeUnmount(() => {
-      provider.disconnect()
-    })
-
-    function isUnaryTag(node: VNode) {
+  },
+  beforeDestroy() {
+    this.provider?.disconnect()
+  },
+  methods: {
+    isUnaryTag(node: VNode) {
       if (node.tag === undefined) {
         return false
       }
@@ -40,10 +34,9 @@ export default defineComponent({
         'input', 'keygen', 'link', 'meta', 'param', 'source',
         'track', 'wbr',
       ].indexOf(node.tag) > -1
-    }
-
-    function renderTagStart(_node: VNode) {
-      const node: VNodeWithEnsuredDataAttrs = ensureNodeHasAttrs(_node)
+    },
+    renderTagStart(_node: VNode) {
+      const node: VNodeWithEnsuredDataAttrs = this.ensureNodeHasAttrs(_node)
       const attrs = Object.keys(node.data.attrs).reduce((carry, name) => {
         const value = node.data.attrs[name] || ''
         if (name === 'head-key') {
@@ -55,27 +48,24 @@ export default defineComponent({
         }
       }, '')
       return `<${node.tag}${attrs}>`
-    }
-
-    function renderTagChildren(node: VNode) {
-      return (node.children || []).reduce((html, child) => html + renderTag(child), '')
-    }
-
-    function renderTag(node: VNode) {
+    },
+    renderTagChildren(node: VNode) {
+      return (node.children || []).reduce((html, child) => html + this.renderTag(child), '')
+    },
+    renderTag(node: VNode) {
       if (!node.tag) {
         return node.text
       }
-      let html = renderTagStart(node)
+      let html = this.renderTagStart(node)
       if (node.children) {
-        html += renderTagChildren(node)
+        html += this.renderTagChildren(node)
       }
-      if (!isUnaryTag(node)) {
+      if (!this.isUnaryTag(node)) {
         html += `</${node.tag}>`
       }
       return html
-    }
-
-    function ensureNodeHasAttrs(node: VNode) {
+    },
+    ensureNodeHasAttrs(node: VNode): VNodeWithEnsuredDataAttrs {
       node.data = {
         ...(node.data || {}),
         attrs: <VNodeData['attrs']> {
@@ -83,40 +73,34 @@ export default defineComponent({
         },
       }
 
-      return node as VNodeWithEnsuredDataAttrs
-    }
-
-    function ensureNodeHasInertiaAttribute(_node: VNode) {
-      const node = ensureNodeHasAttrs(_node)
+      return <VNodeWithEnsuredDataAttrs> node
+    },
+    ensureNodeHasInertiaAttribute(_node: VNode) {
+      const node = this.ensureNodeHasAttrs(_node)
       node.data.attrs['inertia'] = node.data.attrs['head-key'] !== undefined ? node.data.attrs['head-key'] : ''
       return node
-    }
-
-    function renderNode(node: VNode) {
-      ensureNodeHasInertiaAttribute(node)
-      return renderTag(node)
-    }
-
-    function renderNodes(nodes: ScopedSlotChildren) {
+    },
+    renderNode(node: VNode) {
+      this.ensureNodeHasInertiaAttribute(node)
+      return this.renderTag(node)
+    },
+    renderNodes(nodes: ScopedSlotChildren) {
       if (!nodes) {
         return []
       }
 
-      const computed = nodes.map(node => renderNode(node)).filter(node => node) as string[]
-      if (props.title && !computed.find(tag => tag.startsWith('<title'))) {
-        computed.push(`<title inertia>${props.title}</title>`)
+      const computed = nodes.map(node => this.renderNode(node)).filter(node => node) as string[]
+      if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
+        computed.push(`<title inertia>${this.title}</title>`)
       }
       return computed
-    }
+    },
+  },
+  render(h) {
+    this.provider?.update(
+      this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default({}) : []),
+    )
 
-    return () => {
-      provider.update(
-        renderNodes(slots.default ? slots.default() : []),
-      )
-    }
+    return h('template')
   },
 })
-
-export function useHeadManager(): HeadManager | undefined {
-  return inject(HeadManagerKey)
-}
