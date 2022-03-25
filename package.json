@@ -4,8 +4,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "yarn wsrun --exclude-missing build",
-    "watch": "yarn wsrun --exclude-missing watch"
+    "build": "yarn wsrun --stages --exclude-missing build",
+    "watch": "yarn wsrun --stages --exclude-missing watch"
   },
   "dependencies": {
     "wsrun": "^5.2.1"
