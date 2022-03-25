@@ -1,8 +1,7 @@
-import { defineComponent, computed, h, h as createElement, markRaw, ref, provide, DefineComponent, PropType, Ref, VNode, Plugin } from 'vue'
+import { defineComponent, computed, h, h as createElement, markRaw, ref, DefineComponent, PropType, Ref, VNode, Plugin } from 'vue'
 import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager, HeadManager, HeadManagerTitleCallback, HeadManagerOnUpdate } from '@inertiajs/inertia'
 import { useForm } from './form'
 import { remember } from './remember'
-import { HeadManagerKey } from './head'
 
 export type LayoutComponent = DefineComponent | DefineComponent[] | LayoutFunction
 export type LayoutFunction = (h: typeof createElement, child: VNode) => DefineComponent | DefineComponent[]
@@ -66,8 +65,6 @@ export const App = defineComponent({
 
       Inertia.on('navigate', () => headManager.forceUpdate())
     }
-
-    provide(HeadManagerKey, headManager)
 
     return () => {
       if (component.value) {

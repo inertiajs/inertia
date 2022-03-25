@@ -1,7 +1,4 @@
-import { defineComponent, inject, InjectionKey, onBeforeUnmount, VNode } from 'vue'
-import { HeadManager } from '@inertiajs/inertia'
-
-export const HeadManagerKey = Symbol() as InjectionKey<HeadManager>
+import { defineComponent, VNode } from 'vue'
 
 export default defineComponent({
   props: {
@@ -10,27 +7,23 @@ export default defineComponent({
       required: false,
     },
   },
-  setup(props, { slots }) {
-    const headManager = useHeadManager()
-    if (!headManager) {
-      return
+  data() {
+    return {
+      provider: this.$headManager.createProvider(),
     }
-
-    const provider = headManager.createProvider()
-
-    onBeforeUnmount(() => {
-      provider.disconnect()
-    })
-
-    function isUnaryTag(node: VNode) {
+  },
+  beforeUnmount() {
+    this.provider.disconnect()
+  },
+  methods: {
+    isUnaryTag(node: VNode) {
       return [
         'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
         'input', 'keygen', 'link', 'meta', 'param', 'source',
         'track', 'wbr',
       ].indexOf(node.type as string) > -1
-    }
-
-    function renderTagStart(node: VNode) {
+    },
+    renderTagStart(node: VNode) {
       node.props = node.props || {}
       node.props.inertia = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
       const attrs = Object.keys(node.props).reduce((carry, name) => {
@@ -44,15 +37,13 @@ export default defineComponent({
         }
       }, '')
       return `<${node.type as string}${attrs}>`
-    }
-
-    function renderTagChildren(node: VNode) {
+    },
+    renderTagChildren(node: VNode) {
       return typeof node.children === 'string'
         ? node.children
-        : (node.children as VNode[]).reduce((html, child) => html + renderTag(child), '')
-    }
-
-    function renderTag(node: VNode) {
+        : (node.children as VNode[]).reduce((html, child) => html + this.renderTag(child), '')
+    },
+    renderTag(node: VNode) {
       if (node.type.toString() === 'Symbol(Text)') {
         return node.children as string
       } else if (node.type.toString() === 'Symbol()') {
@@ -60,40 +51,33 @@ export default defineComponent({
       } else if (node.type.toString() === 'Symbol(Comment)') {
         return ''
       }
-      let html = renderTagStart(node)
+      let html = this.renderTagStart(node)
       if (node.children) {
-        html += renderTagChildren(node)
+        html += this.renderTagChildren(node)
       }
-      if (!isUnaryTag(node)) {
+      if (!this.isUnaryTag(node)) {
         html += `</${node.type as string}>`
       }
       return html
-    }
-
-    function addTitleElement(elements: string[]) {
-      if (props.title && !elements.find(tag => tag.startsWith('<title'))) {
-        elements.push(`<title inertia>${props.title}</title>`)
+    },
+    addTitleElement(elements: string[]) {
+      if (this.title && !elements.find(tag => tag.startsWith('<title'))) {
+        elements.push(`<title inertia>${this.title}</title>`)
       }
       return elements
-    }
-
-    function renderNodes(nodes: VNode[]) {
-      return addTitleElement(
+    },
+    renderNodes(nodes: VNode[]) {
+      return this.addTitleElement(
         nodes
           .flatMap(node => node.type.toString() === 'Symbol(Fragment)' ? node.children : node)
-          .map(node => renderTag(node as VNode))
+          .map(node => this.renderTag(node as VNode))
           .filter(node => node)
       )
-    }
-
-    return () => {
-      provider.update(
-        renderNodes(slots.default ? slots.default() : [])
-      )
-    }
+    },
+  },
+  render() {
+    this.provider.update(
+      this.renderNodes(this.$slots.default ? this.$slots.default() : [])
+    )
   },
 })
-
-export function useHeadManager(): HeadManager | undefined {
-  return inject(HeadManagerKey)
-}

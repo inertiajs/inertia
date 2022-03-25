@@ -17,11 +17,11 @@ export default defineComponent({
   },
   data() {
     return {
-      provider: this.$headManager?.createProvider(),
+      provider: this.$headManager.createProvider(),
     }
   },
   beforeDestroy() {
-    this.provider?.disconnect()
+    this.provider.disconnect()
   },
   methods: {
     isUnaryTag(node: VNode) {
@@ -97,7 +97,7 @@ export default defineComponent({
     },
   },
   render(h) {
-    this.provider?.update(
+    this.provider.update(
       this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default({}) : []),
     )
 

@@ -7,7 +7,7 @@ declare module 'vue/types/vue' {
   interface Vue {
     $inertia: Omit<typeof Inertia, 'form'> & { form: FormFactory }
     $page: Page
-    $headManager?: HeadManager
+    $headManager: HeadManager
   }
 }
 
