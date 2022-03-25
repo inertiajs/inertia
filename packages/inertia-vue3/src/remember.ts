@@ -27,28 +27,24 @@ export const remember = defineComponent({
     const restored = Inertia.restore(rememberKey) as Record<string, any> | undefined
 
     const rememberable = this.$options.remember.data.filter((key: string) => {
-      const currentData = this[key] as null | Record<string, any>
       return !(
-        currentData !== null &&
-        typeof currentData === 'object' &&
-        currentData.__rememberable === false
+        this[key] !== null &&
+        typeof this[key] === 'object' &&
+        (this[key] as Record<string, any>).__rememberable === false
       )
     })
 
     const hasCallbacks = (key: string) => {
-      const currentData = this[key] as null | Record<string, any>
-      return currentData !== null
-        && typeof currentData === 'object'
-        && typeof currentData.__remember === 'function'
-        && typeof currentData.__restore === 'function'
+      return this[key] !== null
+        && typeof this[key] === 'object'
+        && typeof (this[key] as Record<string, any>).__remember === 'function'
+        && typeof (this[key] as Record<string, any>).__restore === 'function'
     }
 
     rememberable.forEach((key: string) => {
-      const currentData = this[key] as undefined | Record<string, any>
-
-      if (currentData !== undefined && restored !== undefined && restored[key] !== undefined) {
+      if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
         hasCallbacks(key)
-          ? currentData.__restore(restored[key])
+          ? (this[key] as Record<string, any>).__restore(restored[key])
           : (this[key] = restored[key])
       }
 
@@ -56,7 +52,11 @@ export const remember = defineComponent({
         Inertia.remember(
           rememberable.reduce((data, key) => ({
             ...data,
-            [key]: cloneDeep(hasCallbacks(key) ? currentData?.__remember(): currentData),
+            [key]: cloneDeep(
+              hasCallbacks(key)
+                ? (this[key] as Record<string, any>).__remember()
+                : (this[key] as Record<string, any>)
+            ),
           }), {} as Record<string, any>),
           rememberKey,
         )

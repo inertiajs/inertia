@@ -89,11 +89,12 @@ export const App = defineComponent({
           return component.layout(h, child)
         }
 
-        return (Array.isArray(component.layout) ? component.layout : [component.layout])
+        return (Array.isArray(component.layout) ? component.layout : [component.layout] as unknown[])
+          .concat(child)
           .reverse()
           .reduce((child, layout) => {
-            return h(layout, { props: page.props }, [child])
-          }, child)
+            return h(layout as ComponentOptions<never>, { props: page.props }, [child as VNode])
+          }) as VNode
       }
 
       return child

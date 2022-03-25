@@ -548,15 +548,15 @@ describe('Form Helper', () => {
           .then(() => {
             expect(alert.getCalls()).to.have.length(10)
             expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith(null)
+            expect(alert.getCall(1)).to.be.calledWith(undefined)
             expect(alert.getCall(2)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(3)).to.be.calledWith(null)
+            expect(alert.getCall(3)).to.be.calledWith(undefined)
             expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(null)
+            expect(alert.getCall(5)).to.be.calledWith(undefined)
             expect(alert.getCall(6)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(7)).to.be.calledWith(null)
+            expect(alert.getCall(7)).to.be.calledWith(undefined)
             expect(alert.getCall(8)).to.be.calledWith('onFinish')
-            expect(alert.getCall(9)).to.be.calledWith(null)
+            expect(alert.getCall(9)).to.be.calledWith(undefined)
           })
       })
 
@@ -566,7 +566,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(null)
+            expect(alert.getCall(5)).to.be.calledWith(undefined)
 
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
             tap(alert.getCall(7).lastArg, event => {
@@ -624,7 +624,7 @@ describe('Form Helper', () => {
           })
       })
 
-      it('resets the progress property back to null', () => {
+      it('resets the progress property back to undefined', () => {
         cy.get('.success-progress')
           .click()
           .wait(30)
@@ -639,7 +639,7 @@ describe('Form Helper', () => {
             })
 
             expect(alert.getCall(8)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(9)).to.be.calledWith(null)
+            expect(alert.getCall(9)).to.be.calledWith(undefined)
           })
       })
 
@@ -738,7 +738,7 @@ describe('Form Helper', () => {
           })
       })
 
-      it('resets the progress property back to null', () => {
+      it('resets the progress property back to undefined', () => {
         cy.get('.error-progress')
           .click()
           .wait(30)
@@ -753,7 +753,7 @@ describe('Form Helper', () => {
             })
 
             expect(alert.getCall(8)).to.be.calledWith('onError')
-            expect(alert.getCall(9)).to.be.calledWith(null)
+            expect(alert.getCall(9)).to.be.calledWith(undefined)
           })
       })
 

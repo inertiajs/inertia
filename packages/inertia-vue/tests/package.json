@@ -3,13 +3,14 @@
     "ci": "start-server-and-test server:run http://localhost:13715 cypress:run",
     "cypress:run": "cypress-repeat run -n 5 --until-passes",
     "gui": "start-server-and-test server:run http://localhost:13715 cypress:open",
-    "cypress:open": "CYPRESS_FAIL_FAST_PLUGIN=false cypress open",
+    "cypress:open": "cross-env CYPRESS_FAIL_FAST_PLUGIN=false cypress open",
     "server:run": "webpack && node app/server.js",
     "test": "yarn ci",
     "test:gui": "yarn gui"
   },
   "devDependencies": {
     "body-parser": "^1.19.0",
+    "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
     "cypress": "^6.2.1",
     "cypress-fail-fast": "^2.3.1",
