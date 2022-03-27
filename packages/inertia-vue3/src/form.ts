@@ -4,7 +4,7 @@ import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
 
 /**
- * Define form factory of Inertia Vue.
+ * The form factory interface of Inertia Vue.
  */
 export interface FormFactory {
   <Fields extends Record<string, any>>(rememberKey: string, data: Fields): InertiaForm<Fields>
@@ -12,7 +12,7 @@ export interface FormFactory {
 }
 
 /**
- * Define form type of Inertia Vue.
+ * The form type of Inertia Vue.
  */
 export type InertiaForm<Fields extends Record<string, any>> =
   Fields &
