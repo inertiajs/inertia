@@ -20,6 +20,7 @@ type SetupOptions<ElementType> = {
       onHeadUpdate: HeadManagerOnUpdate | null,
     },
   },
+  plugin: typeof plugin,
 }
 
 type BaseInertiaAppOptions = {
@@ -51,8 +52,6 @@ export async function createInertiaApp({ id, resolve, setup, title, visitOptions
   const el: HTMLElement | null = isServer ? null : document.getElementById(elementId)
   const initialPage: Page = page || JSON.parse(el?.dataset.page as string)
   const resolveComponent: PageResolver = name => Promise.resolve(resolve(name)).then(module => (module as Record<string, unknown>).default || module)
-
-  Vue.use(plugin)
 
   let head: string[] = []
 
