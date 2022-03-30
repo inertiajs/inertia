@@ -7,8 +7,8 @@ import { remember } from './remember'
 export type LayoutComponent =
   | VueConstructor
   | VueConstructor[]
-  | ComponentOptions<never>
-  | ComponentOptions<never>[]
+  | ComponentOptions<Vue>
+  | ComponentOptions<Vue>[]
   | LayoutFunction
 
 export type LayoutFunction = (h: CreateElement, child: VNode) => VNode
@@ -25,7 +25,7 @@ export const App = defineComponent({
       required: true,
     },
     initialComponent: {
-      type: [Object, Function, String] as PropType<ComponentOptions<never>>,
+      type: [Object, Function, String] as PropType<ComponentOptions<Vue>>,
       required: false,
     },
     resolveComponent: {
@@ -50,7 +50,7 @@ export const App = defineComponent({
   },
   data() {
     return {
-      component: (this.initialComponent || null) as ComponentOptions<never>,
+      component: (this.initialComponent || null) as VueConstructor | ComponentOptions<Vue>,
       page: this.initialPage as Page,
       key: undefined as number | undefined,
     }
@@ -69,7 +69,7 @@ export const App = defineComponent({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
         swapComponent: async ({ component, page, preserveState }) => {
-          this.component = component as ComponentOptions<never>
+          this.component = component as ComponentOptions<Vue>
           this.page = page
           this.key = preserveState ? this.key : Date.now()
         },
@@ -80,7 +80,7 @@ export const App = defineComponent({
     }
   },
   render(h) {
-    const component = this.component as ComponentOptions<never>
+    const component = this.component as ComponentOptions<Vue>
     const page = this.page as Page
     const key = this.key as number | undefined
 
@@ -99,7 +99,7 @@ export const App = defineComponent({
           .concat(child)
           .reverse()
           .reduce((child, layout) => {
-            return h(layout as ComponentOptions<never>, { props: page.props }, [child as VNode])
+            return h(layout as ComponentOptions<Vue>, { props: page.props }, [child as VNode])
           }) as VNode
       }
 
