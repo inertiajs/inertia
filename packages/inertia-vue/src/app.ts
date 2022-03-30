@@ -1,10 +1,16 @@
-import { ComponentOptions, CreateElement, VNode } from 'vue'
+import { VueConstructor, ComponentOptions, CreateElement, VNode } from 'vue'
 import { defineComponent, ref, computed, PropType, Ref } from '@vue/composition-api'
 import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager, HeadManager, HeadManagerTitleCallback, HeadManagerOnUpdate } from '@inertiajs/inertia'
 import { useForm } from './form'
 import { remember } from './remember'
 
-export type LayoutComponent = ComponentOptions<never> | ComponentOptions<never>[] | LayoutFunction
+export type LayoutComponent =
+  | VueConstructor
+  | VueConstructor[]
+  | ComponentOptions<never>
+  | ComponentOptions<never>[]
+  | LayoutFunction
+
 export type LayoutFunction = (h: CreateElement, child: VNode) => VNode
 
 let headManager: HeadManager
@@ -86,7 +92,7 @@ export const App = defineComponent({
 
       if (component.layout) {
         if (typeof component.layout === 'function') {
-          return component.layout(h, child)
+          return (component.layout as LayoutFunction)(h, child)
         }
 
         return (Array.isArray(component.layout) ? component.layout : [component.layout] as unknown[])
