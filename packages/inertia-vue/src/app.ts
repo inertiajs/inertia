@@ -25,7 +25,7 @@ export const App = defineComponent({
       required: true,
     },
     initialComponent: {
-      type: [Object, Function, String] as PropType<ComponentOptions<Vue>>,
+      type: [Object, Function, String] as PropType<VueConstructor | ComponentOptions<Vue>>,
       required: false,
     },
     resolveComponent: {
@@ -69,7 +69,7 @@ export const App = defineComponent({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
         swapComponent: async ({ component, page, preserveState }) => {
-          this.component = component as ComponentOptions<Vue>
+          this.component = component as VueConstructor | ComponentOptions<Vue>
           this.page = page
           this.key = preserveState ? this.key : Date.now()
         },
@@ -85,13 +85,29 @@ export const App = defineComponent({
     const key = this.key as number | undefined
 
     if (component) {
+      // Support Vue.extend()
+      if (typeof (component as VueConstructor) === 'function') {
+        const layout = (component as {
+          extendOptions: { layout?: LayoutComponent }
+        }).extendOptions.layout
+
+        if (layout) {
+          component.layout = layout
+        }
+      }
+
       const child = h(component, {
         key,
         props: page.props,
       })
 
       if (component.layout) {
-        if (typeof component.layout === 'function') {
+        if (
+          typeof component.layout === 'function' &&
+
+          // is not Vue.extend() component
+          (component.layout as { name: string }).name !== 'VueComponent'
+        ) {
           return (component.layout as LayoutFunction)(h, child)
         }
 
