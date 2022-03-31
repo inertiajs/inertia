@@ -85,7 +85,7 @@ export async function createInertiaApp({ id, resolve, setup, title, visitOptions
   if (isServer && vueApp && render) {
     const body = await render(createSSRApp({
       render: () => h('div', {
-        elementId,
+        id: elementId,
         'data-page': JSON.stringify(initialPage),
         innerHTML: render(vueApp),
       }),
