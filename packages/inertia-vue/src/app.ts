@@ -40,7 +40,7 @@ export const App = defineComponent({
     onHeadUpdate: {
       type: Function as PropType<HeadManagerOnUpdate>,
       required: false,
-      default: () => () => {},
+      default: () => {},
     },
     visitOptions: {
       type: Function as PropType<VisitOptions>,

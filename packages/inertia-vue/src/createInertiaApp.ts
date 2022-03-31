@@ -1,12 +1,13 @@
-import Vue from 'vue'
+import Vue, { VueConstructor, ComponentOptions } from 'vue'
 import { Renderer } from 'vue-server-renderer'
 import { App, plugin } from './app'
-import { Component, Page, PageResolver, VisitOptions, HeadManagerOnUpdate, HeadManagerTitleCallback } from '@inertiajs/inertia'
+import { Page, PageResolver, VisitOptions, HeadManagerOnUpdate, HeadManagerTitleCallback } from '@inertiajs/inertia'
 
 type SetupOptions<ElementType> = {
   el: ElementType,
   App: typeof App,
-  app: typeof App, // deprecated
+  /** @deprecated */
+  app: typeof App,
   props: {
     attrs: {
       id: string,
@@ -14,10 +15,10 @@ type SetupOptions<ElementType> = {
     },
     props: {
       initialPage: Page,
-      initialComponent: Component,
+      initialComponent: VueConstructor | ComponentOptions<Vue>,
       resolveComponent: PageResolver,
       titleCallback?: HeadManagerTitleCallback,
-      onHeadUpdate: HeadManagerOnUpdate | null,
+      onHeadUpdate: HeadManagerOnUpdate,
     },
   },
   plugin: typeof plugin,
@@ -58,8 +59,9 @@ export async function createInertiaApp({ id, resolve, setup, title, visitOptions
   const vueApp = await resolveComponent(initialPage.component).then(initialComponent => {
     const options = {
       el,
-      app: App, // deprecated
       App,
+      /** @deprecated */
+      app: App,
       props: {
         attrs: {
           id: elementId,
@@ -67,10 +69,12 @@ export async function createInertiaApp({ id, resolve, setup, title, visitOptions
         },
         props: {
           initialPage,
-          initialComponent,
+          initialComponent: initialComponent as VueConstructor | ComponentOptions<Vue>,
           resolveComponent,
           titleCallback: title,
-          onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : null,
+          onHeadUpdate: isServer
+            ? ((elements: string[]) => (head = elements)) as HeadManagerOnUpdate
+            : () => {},
           visitOptions,
         },
       },
