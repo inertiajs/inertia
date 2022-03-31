@@ -3,12 +3,16 @@ import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager
 import { useForm } from './form'
 import { remember } from './remember'
 
-export type LayoutComponent = DefineComponent | DefineComponent[] | LayoutFunction
-export type LayoutFunction = (h: typeof createElement, child: VNode) => DefineComponent | DefineComponent[]
+export type LayoutComponent =
+  | DefineComponent<any, any, any>
+  | DefineComponent<any, any, any>[]
+  | LayoutFunction
+
+export type LayoutFunction = (h: typeof createElement, child: VNode) => VNode
 
 let headManager: HeadManager
 
-const component = ref(null) as Ref<DefineComponent | null>
+const component = ref(null) as Ref<DefineComponent<any, any, any> | null>
 const page = ref({}) as Ref<Page>
 const key = ref<number | string | undefined>(undefined)
 
@@ -20,7 +24,7 @@ export const App = defineComponent({
       required: true,
     },
     initialComponent: {
-      type: [Object, Function, String] as PropType<DefineComponent>,
+      type: [Object, Function, String] as PropType<DefineComponent<any, any, any>>,
       required: false,
     },
     resolveComponent: {
@@ -56,7 +60,7 @@ export const App = defineComponent({
         initialPage,
         resolveComponent,
         swapComponent: async (args) => {
-          component.value = markRaw(args.component as DefineComponent)
+          component.value = markRaw(args.component as DefineComponent<any, any, any>)
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
         },
