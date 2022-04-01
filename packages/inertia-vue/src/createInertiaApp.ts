@@ -31,7 +31,7 @@ type BaseInertiaAppOptions = {
 
 type InertiaAppOptionsForSSR = BaseInertiaAppOptions & {
   id?: undefined,
-  page: Page|string,
+  page: Page | string,
   render: Renderer['renderToString'],
   visitOptions?: undefined,
   setup(options: SetupOptions<null>): InstanceType<typeof Vue>,
