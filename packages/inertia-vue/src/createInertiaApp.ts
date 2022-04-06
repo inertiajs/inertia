@@ -1,7 +1,7 @@
 import Vue, { VueConstructor, ComponentOptions } from 'vue'
 import { Renderer } from 'vue-server-renderer'
 import { App, plugin } from './app'
-import { Page, PageResolver, VisitOptions, HeadManagerOnUpdate, HeadManagerTitleCallback } from '@inertiajs/inertia'
+import { InertiaAppResponse, Page, PageResolver, VisitOptions, HeadManagerOnUpdate, HeadManagerTitleCallback } from '@inertiajs/inertia'
 
 type SetupOptions<ElementType> = {
   el: ElementType,
@@ -47,7 +47,7 @@ type InertiaAppOptionsForCSR = BaseInertiaAppOptions & {
 
 export function createInertiaApp(options: InertiaAppOptionsForCSR): Promise<void>
 export function createInertiaApp(options: InertiaAppOptionsForSSR): Promise<{ head: string[]; body: string }>
-export async function createInertiaApp({ id, resolve, setup, title, visitOptions, page, render }: InertiaAppOptionsForSSR | InertiaAppOptionsForCSR): Promise<{ head: string[]; body: string } | void> {
+export async function createInertiaApp({ id, resolve, setup, title, visitOptions, page, render }: InertiaAppOptionsForSSR | InertiaAppOptionsForCSR): InertiaAppResponse {
   const elementId: string = id || 'app'
   const isServer: boolean = typeof window === 'undefined'
   const el: HTMLElement | null = isServer ? null : document.getElementById(elementId)

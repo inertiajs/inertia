@@ -179,6 +179,8 @@ export type ActiveVisit = PendingVisit & Required<VisitParams> & {
 export type VisitId = unknown
 export type Component = unknown
 
+export type InertiaAppResponse = Promise<{ head: string[], body: string } | void>
+
 export type HeadProvider = {
   update: (elements: Array<string>) => void,
   disconnect: () => void,
