@@ -170,7 +170,7 @@ export type PendingVisit = Visit & {
   completed: boolean,
   cancelled: boolean,
   interrupted: boolean,
-};
+}
 
 export type ActiveVisit = PendingVisit & Required<VisitParams> & {
   cancelToken: CancelTokenSource,
@@ -211,11 +211,11 @@ export interface InertiaForm<Fields extends Record<string, any>> {
   reset(...fields: (keyof Fields)[]): this
   setError(key: string | Record<string, string | Errors>, value?: string | Errors): this
   clearErrors(...fields: (keyof Fields)[]): this
-  submit(method: string, url: URL|string, options?: Exclude<VisitParams, 'method'|'data'>): void
-  get(url: URL|string, options?: Exclude<VisitParams, 'method'|'data'>): void
-  post(url: URL|string, options?: Exclude<VisitParams, 'method'|'data'>): void
-  put(url: URL|string, options?: Exclude<VisitParams, 'method'|'data'>): void
-  patch(url: URL|string, options?: Exclude<VisitParams, 'method'|'data'> ): void
-  delete(url: URL|string, options?: Exclude<VisitParams, 'method'|'data'>): void
+  submit(method: string, url: URL | string, options?: Exclude<VisitParams, 'method' | 'data'>): void
+  get(url: URL | string, options?: Exclude<VisitParams, 'method' | 'data'>): void
+  post(url: URL | string, options?: Exclude<VisitParams, 'method' | 'data'>): void
+  put(url: URL | string, options?: Exclude<VisitParams, 'method' | 'data'>): void
+  patch(url: URL | string, options?: Exclude<VisitParams, 'method' | 'data'> ): void
+  delete(url: URL | string, options?: Exclude<VisitParams, 'method' | 'data'>): void
   cancel(): void
 }
