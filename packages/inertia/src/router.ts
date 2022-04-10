@@ -75,8 +75,9 @@ export class Router {
   protected resetScrollPositions(): void {
     window.scrollTo(0, 0)
     this.scrollRegions().forEach(region => {
-      if (canScrollTo) region.scrollTo({ top: 0, left: 0 })
-      else {
+      if (typeof region.scrollTo === 'function') {
+        region.scrollTo(0, 0)
+      } else {
         region.scrollTop = 0
         region.scrollLeft = 0
       }
