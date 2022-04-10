@@ -93,10 +93,13 @@ export class Router {
     if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
-        if (scrollPosition && canScrollTo) {
-          region.scrollTo({ top: scrollPosition.top, left: scrollPosition.left })
+        if (! scrollPosition) {
+          return
         }
-        else if (scrollPosition) {
+
+        if (canScrollTo) {
+          region.scrollTo(scrollPosition.top, scrollPosition.left)
+        } else {
           region.scrollTop = scrollPosition.top
           region.scrollLeft = scrollPosition.left
         }
