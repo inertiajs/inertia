@@ -73,12 +73,7 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    const canScrollTo = typeof document.documentElement.scrollTo === 'function'
-    if (canScrollTo) document.documentElement.scrollTo({ top: 0, left: 0 })
-    else {
-      document.documentElement.scrollTop = 0
-      document.documentElement.scrollLeft = 0
-    }
+    window.scrollTo(0, 0)
     this.scrollRegions().forEach(region => {
       if (canScrollTo) region.scrollTo({ top: 0, left: 0 })
       else {
