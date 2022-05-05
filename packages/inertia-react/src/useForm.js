@@ -16,7 +16,7 @@ export default function useForm(...args) {
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  let transform = (data) => data
+  const transform = useRef((data) => data)
 
   useEffect(() => {
     isMounted.current = true
@@ -115,9 +115,9 @@ export default function useForm(...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data: transform(data) })
+        Inertia.delete(url, { ..._options, data: transform.current(data) })
       } else {
-        Inertia[method](url, transform(data), _options)
+        Inertia[method](url, transform.current(data), _options)
       }
     },
     [data, setErrors],
@@ -142,7 +142,7 @@ export default function useForm(...args) {
     wasSuccessful,
     recentlySuccessful,
     transform(callback) {
-      transform = callback
+      transform.current = callback
     },
     setDefaults(key, value) {
       if (typeof key === 'undefined') {
