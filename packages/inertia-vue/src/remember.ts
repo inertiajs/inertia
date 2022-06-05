@@ -72,12 +72,12 @@ export type UseRememberReturn<T, RefType extends 'reactive' | 'ref'> =
 export function useRemember<
   T extends Record<string, any>,
   RefType extends 'reactive' | 'ref' = 'ref',
->(data: T, key: string): UseRememberReturn<T, RefType> {
+>(data: T, key: keyof T): UseRememberReturn<T, RefType> {
   if (typeof data === 'object' && data !== null && data.__rememberable === false) {
     return data as UseRememberReturn<T, RefType>
   }
 
-  const restored = Inertia.restore(key) as T | undefined
+  const restored = Inertia.restore(key as string) as T | undefined
   const refType = isReactive(data) ? reactive : ref
   const hasCallbacks = typeof data.__remember === 'function' && typeof data.__restore === 'function'
   const remembered = restored === undefined
@@ -85,7 +85,7 @@ export function useRemember<
     : refType(hasCallbacks ? data.__restore(restored) : restored)
 
   watch(remembered, (newValue) => {
-    Inertia.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key)
+    Inertia.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key as string)
   }, { immediate: true, deep: true })
 
   return remembered as UseRememberReturn<T, RefType>

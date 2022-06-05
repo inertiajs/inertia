@@ -107,9 +107,9 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage<Props>() {
+export function usePage<Props extends Record<string, unknown>>() {
   return {
-    props: computed(() => (page as Ref<Page<Props & PageProps>>).value.props),
+    props: computed(() => (page.value as Page<Props & PageProps>).props),
     url: computed(() => page.value.url),
     component: computed(() => page.value.component),
     version: computed(() => page.value.version),
