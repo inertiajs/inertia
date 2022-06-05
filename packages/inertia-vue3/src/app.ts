@@ -1,13 +1,9 @@
-import { defineComponent, computed, h, h as createElement, markRaw, ref, DefineComponent, PropType, Ref, VNode, Plugin } from 'vue'
+import { defineComponent, computed, h, h as createElement, markRaw, ref, Component, DefineComponent, PropType, Ref, VNode, Plugin } from 'vue'
 import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager, HeadManager, HeadManagerTitleCallback, HeadManagerOnUpdate } from '@inertiajs/inertia'
 import { useForm } from './form'
 import { remember } from './remember'
 
-export type LayoutComponent =
-  | DefineComponent<any, any, any>
-  | DefineComponent<any, any, any>[]
-  | LayoutFunction
-
+export type LayoutComponent = Component | Component[] | LayoutFunction
 export type LayoutFunction = (h: typeof createElement, child: VNode) => VNode
 
 let headManager: HeadManager
