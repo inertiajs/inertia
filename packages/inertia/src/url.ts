@@ -1,6 +1,6 @@
 import * as qs from 'qs'
 import deepmerge from 'deepmerge'
-import { FormDataConvertible, Method } from './types'
+import { FormDataConvertibleRecord, Method } from './types'
 
 export function hrefToUrl(href: string|URL): URL {
   return new URL(href.toString(), window.location.toString())
@@ -9,9 +9,9 @@ export function hrefToUrl(href: string|URL): URL {
 export function mergeDataIntoQueryString(
   method: Method,
   href: URL|string,
-  data: Record<string, FormDataConvertible>,
+  data: FormDataConvertibleRecord,
   qsArrayFormat: 'indices'|'brackets' = 'brackets',
-): [string, Record<string, FormDataConvertible>] {
+): [string, FormDataConvertibleRecord] {
   const hasHost = /^https?:\/\//.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')

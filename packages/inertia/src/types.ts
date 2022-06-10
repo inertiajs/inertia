@@ -5,7 +5,7 @@ export type ErrorBag = Record<string, Errors>
 
 export type FormDataConvertible = Array<FormDataConvertible>|FormDataConvertibleRecord|Blob|FormDataEntryValue|Date|boolean|number|null
 
-declare interface FormDataConvertibleRecord {
+export declare interface FormDataConvertibleRecord {
   [key: string] : FormDataConvertible | FormDataConvertibleRecord
 }
 
