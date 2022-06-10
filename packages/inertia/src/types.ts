@@ -3,7 +3,11 @@ import { AxiosResponse, CancelTokenSource } from 'axios'
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertible = Array<FormDataConvertible>|Blob|FormDataEntryValue|Date|boolean|number|null
+export type FormDataConvertible = Array<FormDataConvertible>|FormDataConvertibleRecord|Blob|FormDataEntryValue|Date|boolean|number|null
+
+declare interface FormDataConvertibleRecord {
+  [key: string] : FormDataConvertible | FormDataConvertibleRecord
+}
 
 export enum Method {
   GET = 'get',
@@ -13,7 +17,7 @@ export enum Method {
   DELETE = 'delete',
 }
 
-export type RequestPayload = Record<string, FormDataConvertible>|FormData
+export type RequestPayload = FormDataConvertibleRecord|FormData
 
 export interface PageProps {
   [key: string]: unknown
