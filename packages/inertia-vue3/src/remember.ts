@@ -1,4 +1,4 @@
-import { defineComponent, isReactive, reactive, ref, watch, Ref } from 'vue'
+import { defineComponent, isReactive, reactive, ref, watch } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 import cloneDeep from 'lodash.clonedeep'
 
@@ -65,16 +65,9 @@ export const remember = defineComponent({
   },
 })
 
-export type UseRememberReturn<T, RefType extends 'reactive' | 'ref'> =
-  RefType extends 'reactive' ? T :
-  RefType extends 'ref' ? Ref<T> : never
-
-export function useRemember<
-  T extends Record<string, any>,
-  RefType extends 'reactive' | 'ref' = 'ref',
->(data: T, key: keyof T): UseRememberReturn<T, RefType> {
+export function useRemember<T extends Record<string, any>>(data: T, key: keyof T) {
   if (typeof data === 'object' && data !== null && data.__rememberable === false) {
-    return data as UseRememberReturn<T, RefType>
+    return data
   }
 
   const restored = Inertia.restore(key as string) as T | undefined
@@ -88,5 +81,5 @@ export function useRemember<
     Inertia.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key as string)
   }, { immediate: true, deep: true })
 
-  return remembered as UseRememberReturn<T, RefType>
+  return remembered
 }
