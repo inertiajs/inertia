@@ -11,7 +11,7 @@ export type LayoutComponent =
   | ComponentOptions<Vue>[]
   | LayoutFunction
 
-export type LayoutFunction = (h: CreateElement, child: VNode) => VNode
+export type LayoutFunction = (h: CreateElement, page: VNode) => VNode
 
 let headManager: HeadManager
 

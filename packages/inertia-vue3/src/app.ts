@@ -4,7 +4,7 @@ import { useForm } from './form'
 import { remember } from './remember'
 
 export type LayoutComponent = Component | Component[] | LayoutFunction
-export type LayoutFunction = (h: typeof createElement, child: VNode) => VNode
+export type LayoutFunction = (h: typeof createElement, page: VNode) => VNode
 
 let headManager: HeadManager
 
@@ -49,7 +49,7 @@ export const App = defineComponent({
     key.value = undefined
 
     const isServer = typeof window === 'undefined'
-    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
+    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate!)
 
     if (!isServer) {
       Inertia.init({
