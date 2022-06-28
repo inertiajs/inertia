@@ -93,16 +93,13 @@ export class Router {
   }
 
   protected restoreScrollPositions(): void {
-    const canScrollTo = typeof document.documentElement.scrollTo === 'function'
     if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
         if (! scrollPosition) {
           return
-        }
-
-        if (canScrollTo) {
-          region.scrollTo(scrollPosition.top, scrollPosition.left)
+        } else if (typeof region.scrollTo === 'function') {
+          region.scrollTo(scrollPosition.left, scrollPosition.top)
         } else {
           region.scrollTop = scrollPosition.top
           region.scrollLeft = scrollPosition.left
