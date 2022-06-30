@@ -1,4 +1,5 @@
 import isEqual from 'lodash.isequal'
+import cloneDeep from 'lodash.clonedeep'
 import { writable } from 'svelte/store'
 import { Inertia } from '@inertiajs/inertia'
 
@@ -6,7 +7,7 @@ function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
-  let defaults = data
+  let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = data => data
@@ -22,7 +23,7 @@ function useForm(...args) {
     processing: false,
     setStore(key, value) {
       store.update(store => {
-        return Object.assign({}, store, typeof key === 'string' ? {[key]: value} : key)
+        return Object.assign({}, store, typeof key === 'string' ? {[key]: cloneDeep(value)} : cloneDeep(key))
       })
     },
     data() {
