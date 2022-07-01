@@ -118,7 +118,6 @@ export class Router {
   protected handleBackForwardVisit(page: Page): void {
     window.history.state.version = page.version
     this.setPage(window.history.state, { preserveScroll: true, preserveState: true }).then(() => {
-      this.restoreScrollPositions()
       fireNavigateEvent(page)
     })
   }
@@ -151,9 +150,6 @@ export class Router {
     page.rememberedState = window.history.state?.rememberedState ?? {}
     page.scrollRegions = window.history.state?.scrollRegions ?? []
     this.setPage(page, { preserveScroll: locationVisit.preserveScroll, preserveState: true }).then(() => {
-      if (locationVisit.preserveScroll) {
-        this.restoreScrollPositions()
-      }
       fireNavigateEvent(page)
     })
   }
@@ -394,9 +390,8 @@ export class Router {
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
+
           if (!replace) {
             fireNavigateEvent(page)
           }
