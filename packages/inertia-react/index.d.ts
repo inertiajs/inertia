@@ -47,6 +47,7 @@ type InertiaLink = React.FunctionComponent<InertiaLinkProps>
 	
 type InertiaHeadProps = {
     title?: string
+    children?: any[]
 }
 
 type InertiaHead = React.FunctionComponent<InertiaHeadProps>
