@@ -1,4 +1,4 @@
-import { reactive, watch } from '@vue/composition-api'
+import { reactive, watch } from 'vue-demi'
 import { Inertia, VisitParams, InertiaForm as InertiaFormProps, RequestPayload, Errors, ErrorBag } from '@inertiajs/inertia'
 import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'

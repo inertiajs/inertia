@@ -1,4 +1,4 @@
-import { defineComponent, isReactive, reactive, ref, watch } from '@vue/composition-api'
+import { defineComponent, isReactive, reactive, ref, watch } from 'vue-demi'
 import { Inertia } from '@inertiajs/inertia'
 import cloneDeep from 'lodash.clonedeep'
 

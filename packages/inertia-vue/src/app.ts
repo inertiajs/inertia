@@ -1,5 +1,5 @@
 import { VueConstructor, ComponentOptions, CreateElement, VNode } from 'vue'
-import { defineComponent, ref, computed, PropType, Ref } from '@vue/composition-api'
+import { defineComponent, ref, computed, PropType, Ref } from 'vue-demi'
 import { Inertia, Page, PageProps, PageResolver, VisitOptions, createHeadManager, HeadManager, HeadManagerTitleCallback, HeadManagerOnUpdate } from '@inertiajs/inertia'
 import { useForm } from './form'
 import { remember } from './remember'
@@ -143,8 +143,8 @@ export const plugin: Vue.PluginObject<never> = {
         })
       },
     })
-  
-    Vue.mixin(remember)
+
+    Vue.mixin(remember as object)
   },
 }
 

@@ -1,5 +1,5 @@
 import { VNode, VNodeData } from 'vue'
-import { defineComponent } from '@vue/composition-api'
+import { defineComponent } from 'vue-demi'
 import { ScopedSlotChildren } from 'vue/types/vnode'
 
 interface VNodeWithEnsuredDataAttrs extends VNode {

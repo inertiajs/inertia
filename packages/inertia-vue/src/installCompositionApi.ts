@@ -1,5 +1,3 @@
-import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
+import { install } from 'vue-demi'
 
-Vue.config.productionTip = false
-Vue.use(VueCompositionAPI)
+install()

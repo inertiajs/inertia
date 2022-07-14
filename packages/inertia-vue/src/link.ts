@@ -1,8 +1,9 @@
-import { defineComponent, PropType } from '@vue/composition-api'
+import { defineComponent, PropType } from 'vue-demi'
 import { Inertia, Method, mergeDataIntoQueryString, shouldIntercept, GlobalEventCallback, FormDataConvertible } from '@inertiajs/inertia'
 
 export default defineComponent({
   name: 'InertiaLink',
+  /** @ts-ignore */
   functional: true,
   props: {
     as: {
