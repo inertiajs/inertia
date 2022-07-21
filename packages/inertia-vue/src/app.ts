@@ -57,7 +57,9 @@ export const App = defineComponent({
   },
   watch: {
     page: {
-      handler: newPage => page.value = newPage,
+      handler: newPage => {
+        page.value = newPage
+      },
       immediate: true,
     },
   },
