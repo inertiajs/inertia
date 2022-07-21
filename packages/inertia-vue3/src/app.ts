@@ -8,9 +8,7 @@ export type LayoutFunction = (h: typeof createElement, page: VNode) => VNode
 
 let headManager: HeadManager
 
-const component = ref(null) as Ref<DefineComponent<any, any, any> | null>
 const page = ref({}) as Ref<Page>
-const key = ref<number | string | undefined>(undefined)
 
 export const App = defineComponent({
   name: 'Inertia',
@@ -44,9 +42,9 @@ export const App = defineComponent({
     },
   },
   setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate, visitOptions }) {
-    component.value = initialComponent ? markRaw(initialComponent) : null
+    const component = ref(initialComponent ? markRaw(initialComponent) : null) as Ref<DefineComponent<any, any, any> | null>
     page.value = initialPage
-    key.value = undefined
+    const key = ref<number | string | undefined>(undefined)
 
     const isServer = typeof window === 'undefined'
     headManager = createHeadManager(isServer, titleCallback, onHeadUpdate!)
