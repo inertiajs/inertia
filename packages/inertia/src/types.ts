@@ -3,7 +3,7 @@ import { AxiosResponse, CancelTokenSource } from 'axios'
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertible = Array<FormDataConvertible>|FormDataConvertibleRecord|Blob|FormDataEntryValue|Date|boolean|number|null
+export type FormDataConvertible = Array<FormDataConvertible>|FormDataConvertibleRecord|Blob|FormDataEntryValue|Date|boolean|number|null|undefined
 
 export declare interface FormDataConvertibleRecord {
   [key: string] : FormDataConvertible | FormDataConvertibleRecord

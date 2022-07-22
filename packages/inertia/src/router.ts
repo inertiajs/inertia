@@ -77,11 +77,14 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    document.documentElement.scrollTop = 0
-    document.documentElement.scrollLeft = 0
+    window.scrollTo(0, 0)
     this.scrollRegions().forEach(region => {
-      region.scrollTop = 0
-      region.scrollLeft = 0
+      if (typeof region.scrollTo === 'function') {
+        region.scrollTo(0, 0)
+      } else {
+        region.scrollTop = 0
+        region.scrollLeft = 0
+      }
     })
     this.saveScrollPositions()
     if (window.location.hash) {
@@ -93,7 +96,11 @@ export class Router {
     if (this.page.scrollRegions) {
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
-        if (scrollPosition) {
+        if (! scrollPosition) {
+          return
+        } else if (typeof region.scrollTo === 'function') {
+          region.scrollTo(scrollPosition.left, scrollPosition.top)
+        } else {
           region.scrollTop = scrollPosition.top
           region.scrollLeft = scrollPosition.left
         }
