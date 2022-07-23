@@ -1,3 +1,4 @@
+import { Inertia } from '@inertiajs/inertia'
 import App from './App.svelte'
 import store from './store'
 
