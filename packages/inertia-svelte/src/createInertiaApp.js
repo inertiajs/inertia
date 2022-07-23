@@ -1,4 +1,5 @@
 import App from './App.svelte'
+import store from './store'
 
 export default async function createInertiaApp({ id = 'app', resolve, setup, visitOptions, page, render }) {
   const isServer = typeof window === 'undefined'
@@ -6,9 +7,33 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, vis
   const initialPage = page || JSON.parse(el.dataset.page)
   const resolveComponent = name => Promise.resolve(resolve(name))
 
-  let head = []
+  const initialComponent = await resolveComponent(initialPage.component)
 
-  const svelteApp = await resolveComponent(initialPage.component).then(initialComponent => {
+  if (isServer) {
+    store.set({
+      component: initialComponent,
+      page: initialPage,
+      key: null
+    })
+    const { html, head } = App.render()
+    return {
+      body: html,
+      head: [head]
+    }
+  }
+  else {
+    Inertia.init({
+      initialPage,
+      resolveComponent,
+      swapComponent: async ({ component, page, preserveState }) => {
+        store.update((current) => ({
+          component,
+          page,
+          key: preserveState ? current.key : Date.now()
+        }))
+      },
+      visitOptions,
+    })
     return setup({
       el,
       App,
@@ -16,13 +41,8 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, vis
         initialPage,
         initialComponent,
         resolveComponent,
-        onHeadUpdate: isServer ? elements => (head = elements) : null,
         visitOptions,
       },
     })
-  })
-
-  if (isServer) {
-    // TODO
   }
 }
