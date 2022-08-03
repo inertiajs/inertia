@@ -24,8 +24,8 @@
   "types": "types/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:umd",
-    "build:cjs": "microbundle --format cjs",
-    "build:umd": "microbundle --format umd --name Inertia --external none",
+    "build:cjs": "microbundle --format cjs --compress false",
+    "build:umd": "microbundle --format umd --name Inertia --external none --compress false",
     "clean": "rm -rf types && rm -rf dist",
     "prepublishOnly": "npm run build",
     "watch": "microbundle watch --format cjs"
