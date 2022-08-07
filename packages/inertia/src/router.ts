@@ -320,11 +320,12 @@ export class Router {
 
       const pageResponse: Page = response.data
       if (only.length && pageResponse.component === this.page.component) {
-        pageResponse.props = JSON.parse(JSON.stringify(this.page.props)) // Clone old props
+        const props = JSON.parse(JSON.stringify(this.page.props)) // Clone old props
         only.forEach((key) => {
           // Assign the 'only' props to the old props
-          dotSet(pageResponse.props, key, dotGet(key, pageResponse.props))
+          dotSet(props, key, dotGet(key, pageResponse.props))
         })
+        pageResponse.props = props
       }
       preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
       preserveState = this.resolvePreserveOption(preserveState, pageResponse)
