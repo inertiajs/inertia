@@ -1,5 +1,5 @@
 // This is basically split('.') but more thorough as it only splits valid dot notations and prevents splitting things like `foo...bar`
-const dotSplit = (str: string) => str.match(/^\.+[^.]*|[^.]*\.+$|(?:\.{2,}|[^.])+(?:\.+$)?/g) || [str]
+const dotSplit = (str: string) => str.match(/(?:^\.+)?((?:\.{2,}|[^.])+(?:\.+$)?)/g) || [str]
 
 export const dotGet = (str: string, obj: Record<string, unknown>): unknown =>
   dotSplit(str)
