@@ -6,7 +6,7 @@ import { default as Axios, AxiosResponse } from 'axios'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 import { ActiveVisit, GlobalEvent, GlobalEventNames, GlobalEventResult, LocationVisit, Method, Page, PageHandler, PageResolver, PendingVisit, PreserveStateOption, RequestPayload, VisitId, VisitParams, VisitOptions } from './types'
 import { fireBeforeEvent, fireErrorEvent, fireExceptionEvent, fireFinishEvent, fireInvalidEvent, fireNavigateEvent, fireProgressEvent, fireStartEvent, fireSuccessEvent } from './events'
-import {dotGet, dotSet} from './dotter';
+import deepmerge from 'deepmerge'
 
 const isServer = typeof window === 'undefined'
 
@@ -320,12 +320,9 @@ export class Router {
 
       const pageResponse: Page = response.data
       if (only.length && pageResponse.component === this.page.component) {
-        const props = JSON.parse(JSON.stringify(this.page.props)) // Clone old props
-        only.forEach((key) => {
-          // Assign the 'only' props to the old props
-          dotSet(props, key, dotGet(key, pageResponse.props))
-        })
-        pageResponse.props = props
+        const overwriteMerge = (_destinationArray: Array<unknown>, sourceArray: Array<unknown>) => sourceArray
+
+        pageResponse.props = deepmerge(this.page.props, pageResponse.props, { arrayMerge: overwriteMerge })
       }
       preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
       preserveState = this.resolvePreserveOption(preserveState, pageResponse)
