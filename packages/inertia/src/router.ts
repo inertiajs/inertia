@@ -14,6 +14,7 @@ export class Router {
   protected resolveComponent!: PageResolver
   protected swapComponent!: PageHandler
   protected visitOptions!: VisitOptions
+  protected navigationType?: string
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
 
@@ -33,6 +34,9 @@ export class Router {
     this.swapComponent = swapComponent
     this.visitOptions = visitOptions
 
+    this.setNavigationType()
+    this.clearRememberedStateOnReload()
+
     if (this.isBackForwardVisit()) {
       this.handleBackForwardVisit(this.page)
     } else if (this.isLocationVisit()) {
@@ -42,6 +46,18 @@ export class Router {
     }
 
     this.setupEventListeners()
+  }
+
+  protected setNavigationType(): void {
+    this.navigationType = (window.performance && window.performance.getEntriesByType('navigation').length > 0)
+      ? (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
+      : 'navigate'
+  }
+
+  protected clearRememberedStateOnReload(): void {
+    if (this.navigationType === 'reload' && window.history.state?.rememberedState) {
+      delete window.history.state.rememberedState
+    }
   }
 
   protected handleInitialPageVisit(page: Page): void {
@@ -109,10 +125,7 @@ export class Router {
   }
 
   protected isBackForwardVisit(): boolean {
-    return window.history.state
-        && window.performance
-        && window.performance.getEntriesByType('navigation').length > 0
-        && (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type === 'back_forward'
+    return window.history.state && this.navigationType === 'back_forward'
   }
 
   protected handleBackForwardVisit(page: Page): void {
