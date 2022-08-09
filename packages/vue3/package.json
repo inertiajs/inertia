@@ -1,5 +1,5 @@
 {
-  "name": "@inertiajs/inertia-vue3",
+  "name": "@inertiajs/vue3",
   "version": "0.6.0",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
@@ -28,16 +28,15 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.11.0",
     "eslint": "^7.0.0",
     "microbundle": "^0.12.0",
     "vue": "^3.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.11.0",
     "vue": "^3.0.0"
   },
   "dependencies": {
+    "@inertiajs/inertia": "0.12.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   }

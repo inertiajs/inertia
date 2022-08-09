@@ -29,7 +29,6 @@
     "watch": "microbundle watch --format cjs"
   },
   "devDependencies": {
-    "@inertiajs/inertia": "^0.11.0",
     "@types/react": "^16.9.1",
     "@types/react-dom": "^17.0.9",
     "eslint": "^7.0.0",
@@ -39,10 +38,10 @@
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
   },
   "peerDependencies": {
-    "@inertiajs/inertia": "^0.11.0",
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
+    "@inertiajs/inertia": "0.12.0",
     "lodash.isequal": "^4.5.0"
   }
 }

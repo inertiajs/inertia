@@ -7,10 +7,9 @@ assignees: pedroborges
 
 ---
 
-### Versions:
+### Version:
 
-- `@inertiajs/inertia` version: #.#.#
-- `@inertiajs/inertia-svelte` version: #.#.#
+- `@inertiajs/svelte` version: #.#.#
 
 ### Describe the problem:
 
