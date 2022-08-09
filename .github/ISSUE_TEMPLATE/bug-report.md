@@ -10,10 +10,10 @@ assignees: ''
 ### Versions:
 
 - `@inertiajs/inertia` version: #.#.#
-- `@inertiajs/inertia-vue` version: #.#.#
-- `@inertiajs/inertia-vue3` version: #.#.#
-- `@inertiajs/inertia-react` version: #.#.#
-- `@inertiajs/inertia-svelte` version: #.#.#
+- `@inertiajs/vue2` version: #.#.#
+- `@inertiajs/vue3` version: #.#.#
+- `@inertiajs/react` version: #.#.#
+- `@inertiajs/svelte` version: #.#.#
 
 ### Describe the problem:
 
