@@ -2,12 +2,5 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ],
-  "scripts": {
-    "build": "yarn wsrun --exclude-missing build",
-    "watch": "yarn wsrun --exclude-missing watch"
-  },
-  "dependencies": {
-    "wsrun": "^5.2.1"
-  }
+  ]
 }
