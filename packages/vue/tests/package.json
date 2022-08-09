@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "@inertiajs/inertia": "link:../../inertia",
-    "@inertiajs/inertia-vue": "link:.."
+    "@inertiajs/vue2": "link:.."
   }
 }

@@ -37,7 +37,7 @@ jobs:
       - name: Local-link @inertiajs/inertia
         run: cd packages/inertia && yarn link
 
-      - name: Local-link @inertiajs/inertia-${{ matrix.adapter }}
+      - name: Local-link @inertiajs/${{ matrix.adapter }}
         run: cd packages/inertia-${{ matrix.adapter }} && yarn link
 
       - name: Install Cypress Dependencies
@@ -45,7 +45,7 @@ jobs:
           cd packages/inertia-${{ matrix.adapter }}/tests
           yarn install --frozen-lockfile
           yarn link "@inertiajs/inertia"
-          yarn link "@inertiajs/inertia-${{ matrix.adapter }}"
+          yarn link "@inertiajs/${{ matrix.adapter }}"
 
       - name: Run Cypress (${{ matrix.browser }} / inertia-${{ matrix.adapter }})
         run: |

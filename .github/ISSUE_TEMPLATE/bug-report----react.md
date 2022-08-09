@@ -7,10 +7,9 @@ assignees: ''
 
 ---
 
-### Versions:
+### Version:
 
-- `@inertiajs/inertia` version: #.#.#
-- `@inertiajs/inertia-react` version: #.#.#
+- `@inertiajs/react` version: #.#.#
 
 ### Describe the problem:
 

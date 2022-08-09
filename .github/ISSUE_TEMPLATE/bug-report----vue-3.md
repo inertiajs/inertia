@@ -7,10 +7,9 @@ assignees: ''
 
 ---
 
-### Versions:
+### Version:
 
-- `@inertiajs/inertia` version: #.#.#
-- `@inertiajs/inertia-vue3` version: #.#.#
+- `@inertiajs/vue3` version: #.#.#
 
 ### Describe the problem:
 

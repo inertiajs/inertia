@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { App, Link, plugin } from '@inertiajs/inertia-vue'
+import { App, Link, plugin } from '@inertiajs/vue2'
 import { Inertia } from '@inertiajs/inertia'
 
 if (! window.location.pathname.startsWith('/plugin/without')) {
