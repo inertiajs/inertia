@@ -3,7 +3,7 @@
   import Render, { h } from './Render.svelte'
   import { Inertia } from '@inertiajs/inertia'
 
-  export let initialPage, resolveComponent, visitOptions
+  export let initialPage, resolveComponent
 
   Inertia.init({
     initialPage,
@@ -14,8 +14,7 @@
         page,
         key: preserveState ? current.key : Date.now()
       }))
-    },
-    visitOptions,
+    }
   })
 
   $: child = $store.component && h($store.component.default, $store.page.props)
