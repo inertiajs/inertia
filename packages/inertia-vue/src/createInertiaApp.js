@@ -1,6 +1,6 @@
 import App, { plugin } from './app'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, title, visitOptions, page, render }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -24,7 +24,6 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
           resolveComponent,
           titleCallback: title,
           onHeadUpdate: isServer ? elements => (head = elements) : null,
-          visitOptions,
         },
       },
       plugin,
