@@ -94,12 +94,12 @@ export interface InertiaFormProps<TForm = Record<string, any>> {
 	clearErrors: (...fields: (keyof TForm)[]) => void
     setError(field: keyof TForm, value: string): void
     setError(errors: Record<keyof TForm, string>): void
-	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitParams) => void
-	get: (url: string, options?: Inertia.VisitParams) => void
-	patch: (url: string, options?: Inertia.VisitParams) => void
-	post: (url: string, options?: Inertia.VisitParams) => void
-	put: (url: string, options?: Inertia.VisitParams) => void
-	delete: (url: string, options?: Inertia.VisitParams) => void
+	submit: (method: Inertia.Method, url: string, options?: Inertia.VisitOptions) => void
+	get: (url: string, options?: Inertia.VisitOptions) => void
+	patch: (url: string, options?: Inertia.VisitOptions) => void
+	post: (url: string, options?: Inertia.VisitOptions) => void
+	put: (url: string, options?: Inertia.VisitOptions) => void
+	delete: (url: string, options?: Inertia.VisitOptions) => void
 }
 
 export function useForm<TForm = Record<string, any>>(initialValues?: TForm): InertiaFormProps<TForm>;
@@ -127,7 +127,6 @@ export type InertiaAppOptionsForCSR<SharedProps> = BaseInertiaAppOptions & {
     id?: string,
     page?: Inertia.Page|string,
     render?: undefined,
-    visitOptions?: Inertia.VisitOptions,
     setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
 

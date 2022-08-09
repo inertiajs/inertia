@@ -33,13 +33,8 @@ export default {
       required: false,
       default: () => () => {},
     },
-    visitOptions: {
-      type: Function,
-      required: false,
-      default: () => undefined,
-    },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate, visitOptions }) {
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
     page.value = initialPage
     key.value = null
@@ -56,7 +51,6 @@ export default {
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
         },
-        visitOptions,
       })
 
       Inertia.on('navigate', () => headManager.forceUpdate())
