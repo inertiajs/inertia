@@ -30,11 +30,6 @@ export default {
       required: false,
       default: () => () => {},
     },
-    visitOptions: {
-      type: Function,
-      required: false,
-      default: () => undefined,
-    },
   },
   data() {
     return {
@@ -56,7 +51,6 @@ export default {
           this.page = page
           this.key = preserveState ? this.key : Date.now()
         },
-        visitOptions: this.visitOptions,
       })
 
       Inertia.on('navigate', () => headManager.forceUpdate())

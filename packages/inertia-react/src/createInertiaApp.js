@@ -1,7 +1,7 @@
 import App from './App'
 import { createElement } from 'react'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, title, visitOptions, page, render }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -19,7 +19,6 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
         resolveComponent,
         titleCallback: title,
         onHeadUpdate: isServer ? elements => (head = elements) : null,
-        visitOptions,
       },
     })
   })
@@ -29,7 +28,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
       createElement('div', {
         id,
         'data-page': JSON.stringify(initialPage),
-      }, reactApp),
+      }, reactApp)
     )
 
     return { head, body }
