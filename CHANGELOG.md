@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/inertia@0.11.0...HEAD)
 
+### Added
+
 ### Fixed
 
 - The `title` tag is now injected by default when one is defined ([#1055](https://github.com/inertiajs/inertia/pull/1055))
