@@ -409,11 +409,13 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
+    page = JSON.parse(JSON.stringify(page))
     window.history.pushState(page, '', page.url)
   }
 
   protected replaceState(page: Page): void {
     this.page = page
+    page = JSON.parse(JSON.stringify(page))
     window.history.replaceState(page, '', page.url)
   }
 
