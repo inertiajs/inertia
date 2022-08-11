@@ -19,13 +19,17 @@
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server.js"
+  },
   "scripts": {
-    "build": "npm run clean && npm run build:cjs && npm run build:umd",
-    "build:cjs": "microbundle --format cjs",
-    "build:umd": "microbundle --format umd --name InertiaVue --globals vue=Vue,@inertiajs/inertia=Inertia",
+    "build": "npm run clean && npm run build:browser && npm run build:server",
+    "build:browser": "microbundle --format es,cjs",
+    "build:server": "microbundle --format es,cjs --target node --output ./dist/server.js ./src/server.js",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build",
-    "watch": "microbundle watch --format cjs"
+    "watch": "microbundle watch --format es,cjs"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
