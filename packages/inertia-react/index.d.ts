@@ -30,6 +30,7 @@ interface BaseInertiaLinkProps {
   ) => void
   preserveScroll?: boolean | ((props: Inertia.PageProps) => boolean)
   preserveState?: boolean | ((props: Inertia.PageProps) => boolean) | null
+  preserveUrl?: boolean | ((props: Inertia.PageProps) => boolean)
   replace?: boolean
   only?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
@@ -44,7 +45,7 @@ interface BaseInertiaLinkProps {
 type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> & Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
-	
+
 type InertiaHeadProps = {
     title?: string
 }

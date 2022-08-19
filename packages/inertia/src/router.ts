@@ -219,6 +219,7 @@ export class Router {
     method = Method.GET,
     data = {},
     replace = false,
+    preserveUrl = false,
     preserveScroll = false,
     preserveState = false,
     only = [],
@@ -255,6 +256,7 @@ export class Router {
       replace,
       preserveScroll,
       preserveState,
+      preserveUrl,
       only,
       headers,
       errorBag,
@@ -325,6 +327,7 @@ export class Router {
       }
       preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
       preserveState = this.resolvePreserveOption(preserveState, pageResponse)
+      preserveUrl = this.resolvePreserveOption(preserveUrl, pageResponse) as boolean
       if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
         pageResponse.rememberedState = window.history.state.rememberedState
       }
@@ -334,7 +337,7 @@ export class Router {
         responseUrl.hash = requestUrl.hash
         pageResponse.url = responseUrl.href
       }
-      return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
+      return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState, preserveUrl })
     }).then(() => {
       const errors = this.page.props.errors || {}
       if (Object.keys(errors).length > 0) {
@@ -383,18 +386,26 @@ export class Router {
     replace = false,
     preserveScroll = false,
     preserveState = false,
+    preserveUrl = false,
   }: {
     visitId?: VisitId,
     replace?: boolean,
     preserveScroll?: PreserveStateOption
     preserveState?: PreserveStateOption
+    preserveUrl?: PreserveStateOption
   } = {}): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then(component => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
+
+        if (preserveUrl) {
+        	page.url = window.location.href
+        }
+
         replace ? this.replaceState(page) : this.pushState(page)
+
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()

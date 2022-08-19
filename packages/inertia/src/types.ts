@@ -59,6 +59,7 @@ export type Visit = {
   replace: boolean,
   preserveScroll: PreserveStateOption,
   preserveState: PreserveStateOption,
+  preserveUrl: PreserveStateOption,
   only: Array<string>,
   headers: Record<string, string>
   errorBag: string|null,

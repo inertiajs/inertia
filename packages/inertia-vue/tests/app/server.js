@@ -50,6 +50,7 @@ app.all('/visits/preserve-scroll-page-two', (req, res) => inertia.render(req, re
 app.all('/visits/preserve-scroll-false-page-two', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveScrollFalse', props: { foo: req.query.foo }}))
 app.post('/visits/events-errors', (req, res) => inertia.render(req, res, { component: 'Visits/Events', props: { errors: { foo: 'bar' } }}))
 app.get('/visits/headers/version', (req, res) => inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }))
+app.all('/visits/preserve-url', (req, res) => inertia.render(req, res, { component: 'Visits/PreserveUrl' }))
 
 app.post('/remember/form-helper/default', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Default', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
 app.post('/remember/form-helper/remember', (req, res) => inertia.render(req, res, { component: 'Remember/FormHelper/Remember', props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } } }))
