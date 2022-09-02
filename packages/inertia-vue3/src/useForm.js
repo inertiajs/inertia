@@ -36,12 +36,12 @@ export default function useForm(...args) {
     },
     defaults(key, value) {
       if (typeof key === 'undefined') {
-        defaults = this.data()
+        defaults = cloneDeep(this.data())
       } else {
         defaults = Object.assign(
           {},
           cloneDeep(defaults),
-          value ? ({ [key]: value }) : key,
+          value ? ({ [key]: cloneDeep(value) }) : cloneDeep(key),
         )
       }
 
