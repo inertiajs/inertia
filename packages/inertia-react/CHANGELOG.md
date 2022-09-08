@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add React 18 support ([#1159](https://github.com/inertiajs/inertia/pull/1159))
 
-### Added
-
-- Added a Global "Visit" options hook that can be used to _override or set_ instance-provided options ([#1052](https://github.com/inertiajs/inertia/pull/1052))
-
 ### Fixed
 
 - The `title` tag is now injected by default when one is defined ([#1055](https://github.com/inertiajs/inertia/pull/1055))
