@@ -7,9 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/inertia-svelte@0.8.0...HEAD)
 
-### Added
-
-- Added a Global "Visit" options hook that can be used to _override or set_ instance-provided options ([#1052](https://github.com/inertiajs/inertia/pull/1052))
+Nothing!
 
 ## [v0.8.0](https://github.com/inertiajs/inertia/compare/inertia-svelte@0.7.4...inertia-svelte@0.8.0) - 2022-01-07
 
