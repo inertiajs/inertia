@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 
 export default {
   created() {
@@ -23,7 +23,7 @@ export default {
       ? this.$options.remember.key.call(this)
       : this.$options.remember.key
 
-    const restored = Inertia.restore(rememberKey)
+    const restored = router.restore(rememberKey)
 
     const rememberable = this.$options.remember.data.filter(key => {
       return !(this[key] !== null && typeof this[key] === 'object' && this[key].__rememberable === false)
@@ -42,7 +42,7 @@ export default {
       }
 
       this.$watch(key, () => {
-        Inertia.remember(
+        router.remember(
           rememberable.reduce((data, key) => ({
             ...data,
             [key]: cloneDeep(hasCallbacks(key) ? this[key].__remember(): this[key]),

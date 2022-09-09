@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 import { isReactive, reactive, ref, watch } from 'vue'
 
 export default function useRemember(data, key) {
@@ -7,13 +7,13 @@ export default function useRemember(data, key) {
     return data
   }
 
-  const restored = Inertia.restore(key)
+  const restored = router.restore(key)
   const type = isReactive(data) ? reactive : ref
   const hasCallbacks = typeof data.__remember === 'function' && typeof data.__restore === 'function'
   const remembered = restored === undefined ? data : type(hasCallbacks ? data.__restore(restored) : restored)
 
   watch(remembered, (newValue) => {
-    Inertia.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key)
+    router.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key)
   }, { immediate: true, deep: true })
 
   return remembered

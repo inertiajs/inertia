@@ -1,12 +1,12 @@
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  const restored = rememberKey ? router.restore(rememberKey) : null
   let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
@@ -161,9 +161,9 @@ export default function useForm(...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data  })
+        router.delete(url, { ..._options, data  })
       } else {
-        Inertia[method](url, data, _options)
+        router[method](url, data, _options)
       }
     },
     get(url, options) {
@@ -199,7 +199,7 @@ export default function useForm(...args) {
   watch(form, newValue => {
     form.isDirty = !isEqual(form.data(), defaults)
     if (rememberKey) {
-      Inertia.remember(cloneDeep(newValue.__remember()), rememberKey)
+      router.remember(cloneDeep(newValue.__remember()), rememberKey)
     }
   }, { immediate: true, deep: true })
 
