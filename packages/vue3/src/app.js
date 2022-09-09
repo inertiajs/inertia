@@ -1,7 +1,7 @@
 import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
-import { createHeadManager, Inertia } from '@inertiajs/core'
+import { createHeadManager, router } from '@inertiajs/core'
 
 const component = ref(null)
 const page = ref({})
@@ -43,7 +43,7 @@ export default {
     headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
 
     if (!isServer) {
-      Inertia.init({
+      router.init({
         initialPage,
         resolveComponent,
         swapComponent: async (args) => {
@@ -53,7 +53,7 @@ export default {
         },
       })
 
-      Inertia.on('navigate', () => headManager.forceUpdate())
+      router.on('navigate', () => headManager.forceUpdate())
     }
 
     return () => {
@@ -87,9 +87,9 @@ export default {
 
 export const plugin = {
   install(app) {
-    Inertia.form = useForm
+    router.form = useForm
 
-    Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => Inertia })
+    Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => router })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 

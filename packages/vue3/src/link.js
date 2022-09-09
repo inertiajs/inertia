@@ -1,8 +1,8 @@
 import { h } from 'vue'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default {
-  name: 'InertiaLink',
+  name: 'Link',
   props: {
     as: {
       type: String,
@@ -61,7 +61,7 @@ export default {
           if (shouldIntercept(event)) {
             event.preventDefault()
 
-            Inertia.visit(href, {
+            router.visit(href, {
               data: data,
               method: method,
               replace: props.replace,
