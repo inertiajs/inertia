@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/inertia-react@0.8.0...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/inertia-react@0.8.1...HEAD)
+
+- Nothing
+
+## [v0.8.1](https://github.com/inertiajs/inertia/compare/inertia-react@0.8.0...inertia-react@0.8.1) - 2022-09-08
+
+- Add React 18 support ([#1159](https://github.com/inertiajs/inertia/pull/1159))
 
 ## [v0.8.0](https://github.com/inertiajs/inertia/compare/inertia-react@0.7.1...inertia-react@0.8.0) - 2022-01-07
 
