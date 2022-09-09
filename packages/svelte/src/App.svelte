@@ -1,7 +1,7 @@
 <script>
   import store from './store'
   import Render, { h } from './Render.svelte'
-  import { Inertia } from '@inertiajs/inertia'
+  import { Inertia } from '@inertiajs/core'
 
   export let initialPage, resolveComponent
 

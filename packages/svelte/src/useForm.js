@@ -1,6 +1,6 @@
 import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
@@ -81,7 +81,7 @@ function useForm(...args) {
         (carry, field) => ({
           ...carry,
           ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
-        }), 
+        }),
         {},
       ))
 

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { App, Link, plugin } from '@inertiajs/vue2'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 
 if (! window.location.pathname.startsWith('/plugin/without')) {
   Vue.use(plugin)

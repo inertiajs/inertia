@@ -27,27 +27,27 @@ jobs:
           path: |
             ~/.cache
             node_modules
-            packages/inertia-vue/tests/node_modules
+            packages/vue/tests/node_modules
 
       - name: Build Inertia
         run: |
           yarn install
           yarn build
 
-      - name: Local-link @inertiajs/inertia
-        run: cd packages/inertia && yarn link
+      - name: Local-link @inertiajs/core
+        run: cd packages/core && yarn link
 
       - name: Local-link @inertiajs/${{ matrix.adapter }}
-        run: cd packages/inertia-${{ matrix.adapter }} && yarn link
+        run: cd packages/${{ matrix.adapter }} && yarn link
 
       - name: Install Cypress Dependencies
         run: |
-          cd packages/inertia-${{ matrix.adapter }}/tests
+          cd packages/${{ matrix.adapter }}/tests
           yarn install --frozen-lockfile
-          yarn link "@inertiajs/inertia"
+          yarn link "@inertiajs/core"
           yarn link "@inertiajs/${{ matrix.adapter }}"
 
-      - name: Run Cypress (${{ matrix.browser }} / inertia-${{ matrix.adapter }})
+      - name: Run Cypress (${{ matrix.browser }} / ${{ matrix.adapter }})
         run: |
-          cd packages/inertia-${{ matrix.adapter }}/tests
+          cd packages/${{ matrix.adapter }}/tests
           yarn ci

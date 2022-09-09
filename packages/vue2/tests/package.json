@@ -26,7 +26,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@inertiajs/inertia": "link:../../inertia",
+    "@inertiajs/core": "link:../../core",
     "@inertiajs/vue2": "link:.."
   }
 }

@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default {
   name: 'InertiaLink',

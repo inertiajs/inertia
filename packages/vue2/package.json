@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue2",
-  "version": "0.8.0",
+  "version": "0.12.0",
   "license": "MIT",
   "description": "The Vue adapter for Inertia.js",
   "contributors": [
@@ -12,22 +12,25 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/inertiajs/inertia.git",
-    "directory": "packages/inertia-vue"
+    "directory": "packages/vue2"
   },
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
   },
   "source": "src/index.js",
   "main": "dist/index.js",
-  "unpkg": "dist/index.umd.js",
   "typings": "index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server.js"
+  },
   "scripts": {
-    "build": "npm run clean && npm run build:cjs && npm run build:umd",
-    "build:cjs": "microbundle --format cjs",
-    "build:umd": "microbundle --format umd --name InertiaVue --globals vue=Vue,@inertiajs/inertia=Inertia",
+    "build": "npm run clean && npm run build:browser && npm run build:server",
+    "build:browser": "microbundle --format es,cjs",
+    "build:server": "microbundle --format es,cjs --target node --output ./dist/server.js ./src/server.js",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build",
-    "watch": "microbundle watch --format cjs"
+    "watch": "microbundle watch --format es,cjs"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
@@ -38,7 +41,7 @@
     "vue": "^2.6.0"
   },
   "dependencies": {
-    "@inertiajs/inertia": "0.12.0",
+    "@inertiajs/core": "0.12.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   }

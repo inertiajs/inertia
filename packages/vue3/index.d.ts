@@ -1,4 +1,4 @@
-import * as Inertia from '@inertiajs/inertia'
+import * as Inertia from '@inertiajs/core'
 import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
 
 export interface InertiaAppProps {
@@ -16,7 +16,7 @@ export declare const plugin: Plugin
 
 export interface CreateInertiaAppProps {
   id?: string
-  resolve: (name: string) => 
+  resolve: (name: string) =>
     DefineComponent |
     Promise<DefineComponent> |
     { default: DefineComponent }

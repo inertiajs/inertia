@@ -1,7 +1,7 @@
 import useForm from './useForm'
 import remember from './remember'
 import { computed, h, markRaw, ref } from 'vue'
-import { createHeadManager, Inertia } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/core'
 
 const component = ref(null)
 const page = ref({})
