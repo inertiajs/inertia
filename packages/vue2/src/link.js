@@ -1,4 +1,4 @@
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default {
   functional: true,

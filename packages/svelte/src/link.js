@@ -1,5 +1,5 @@
 import { createEventDispatcher } from 'svelte'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default (node, options = {}) => {
   const [href, data] = mergeDataIntoQueryString(options.method || 'get', node.href || options.href || '', options.data || {}, options.queryStringArrayFormat || 'brackets')

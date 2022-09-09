@@ -1,5 +1,5 @@
 import { createElement, forwardRef, useCallback } from 'react'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/inertia'
+import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 const noop = () => undefined
 

@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 import { isReactive, reactive, ref, watch } from 'vue'
 
 export default function useRemember(data, key) {

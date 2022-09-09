@@ -1,6 +1,6 @@
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { createHeadManager, Inertia } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/core'
 import { createElement, useEffect, useMemo, useState } from 'react'
 
 export default function App({

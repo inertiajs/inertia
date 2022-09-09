@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 
 export default function useRemember(initialState, key) {
   const [state, setState] = useState(() => {
