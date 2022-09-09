@@ -1,4 +1,4 @@
-import * as Inertia from '@inertiajs/inertia'
+import * as Inertia from '@inertiajs/core'
 import Vue, { Component, ComponentOptions, FunctionalComponentOptions, PluginObject } from 'vue'
 
 export interface InertiaData {
@@ -24,7 +24,7 @@ export declare const plugin: PluginObject<any>
 
 export interface CreateInertiaAppProps {
   id?: string
-  resolve: (name: string) => 
+  resolve: (name: string) =>
     Component |
     Promise<Component> |
     { default: Component }

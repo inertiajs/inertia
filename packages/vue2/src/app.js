@@ -1,6 +1,6 @@
 import form from './form'
 import remember from './remember'
-import { createHeadManager, Inertia } from '@inertiajs/inertia'
+import { createHeadManager, Inertia } from '@inertiajs/core'
 
 let app = {}
 let headManager = null

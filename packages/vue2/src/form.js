@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 
 export default function(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null

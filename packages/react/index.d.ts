@@ -1,4 +1,4 @@
-import * as Inertia from '@inertiajs/inertia'
+import * as Inertia from '@inertiajs/core'
 import * as React from 'react'
 import { renderToString } from "react-dom/server";
 
@@ -44,7 +44,7 @@ interface BaseInertiaLinkProps {
 type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> & Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
-	
+
 type InertiaHeadProps = {
     title?: string
 }

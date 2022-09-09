@@ -1,7 +1,7 @@
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null

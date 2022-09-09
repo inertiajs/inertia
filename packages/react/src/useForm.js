@@ -1,6 +1,6 @@
 import isEqual from 'lodash.isequal'
 import useRemember from './useRemember'
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export default function useForm(...args) {

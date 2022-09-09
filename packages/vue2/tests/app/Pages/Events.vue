@@ -63,7 +63,7 @@
   </div>
 </template>
 <script>
-import { Inertia } from '@inertiajs/inertia'
+import { Inertia } from '@inertiajs/core'
 
 export default {
   data: () => ({
