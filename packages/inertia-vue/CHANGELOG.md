@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `title` tag is now injected by default when one is defined ([#1055](https://github.com/inertiajs/inertia/pull/1055))
 
-### Changed
-
-- Types: `VisitOptions` is now exported as `VisitParams` instead due to the new Global Visit Options hook ([#1052](https://github.com/inertiajs/inertia/pull/1052))
-
 ## [v0.8.0](https://github.com/inertiajs/inertia/compare/inertia-vue@0.7.2...inertia-vue@0.8.0) - 2022-01-07
 
 ### Added
