@@ -200,7 +200,12 @@ function useForm(...args) {
     }
 
     if (rememberKey) {
-      Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      const currentState = Inertia.restore(rememberKey)
+      const newState = { data: form.data(), errors: form.errors }
+
+      if (!isEqual(currentState, newState)) {
+        Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      }
     }
   })
 
