@@ -108,3 +108,8 @@ export const plugin = {
     })
   },
 }
+
+export function defineLayout(component) {
+  app.component.layout = component
+  app.$forceUpdate()
+}
