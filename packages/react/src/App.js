@@ -1,6 +1,6 @@
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { createHeadManager, Inertia } from '@inertiajs/core'
+import { createHeadManager, router } from '@inertiajs/core'
 import { createElement, useEffect, useMemo, useState } from 'react'
 
 export default function App({
@@ -26,7 +26,7 @@ export default function App({
   }, [])
 
   useEffect(() => {
-    Inertia.init({
+    router.init({
       initialPage,
       resolveComponent,
       swapComponent: async ({ component, page, preserveState }) => {
@@ -38,7 +38,7 @@ export default function App({
       },
     })
 
-    Inertia.on('navigate', () => headManager.forceUpdate())
+    router.on('navigate', () => headManager.forceUpdate())
   }, [])
 
   if (!current.component) {

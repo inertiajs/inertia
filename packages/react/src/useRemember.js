@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 
 export default function useRemember(initialState, key) {
   const [state, setState] = useState(() => {
-    const restored = Inertia.restore(key)
+    const restored = router.restore(key)
 
     return restored !== undefined ? restored : initialState
   })
 
   useEffect(() => {
-    Inertia.remember(state, key)
+    router.remember(state, key)
   }, [state, key])
 
   return [state, setState]
