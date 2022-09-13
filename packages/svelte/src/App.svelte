@@ -1,7 +1,7 @@
 <script>
-  import store from './store'
-  import Render, { h } from './Render.svelte'
   import { router } from '@inertiajs/core'
+  import Render,{ h } from './Render.svelte'
+  import store from './store'
 
   export let initialPage, resolveComponent
 

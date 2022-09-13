@@ -1,5 +1,5 @@
+import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
 import { createEventDispatcher } from 'svelte'
-import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default (node, options = {}) => {
   const [href, data] = mergeDataIntoQueryString(

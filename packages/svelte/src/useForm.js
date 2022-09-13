@@ -1,6 +1,6 @@
+import { router } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
-import { router } from '@inertiajs/core'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null

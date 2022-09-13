@@ -1,6 +1,6 @@
 <script>
-  import { beforeUpdate, createEventDispatcher } from 'svelte'
-  import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+  import { mergeDataIntoQueryString,router,shouldIntercept } from '@inertiajs/core'
+  import { beforeUpdate,createEventDispatcher } from 'svelte'
 
   const dispatch = createEventDispatcher()
 
