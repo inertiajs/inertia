@@ -1,11 +1,11 @@
 <script>
   import store from './store'
   import Render, { h } from './Render.svelte'
-  import { Inertia } from '@inertiajs/core'
+  import { router } from '@inertiajs/core'
 
   export let initialPage, resolveComponent
 
-  Inertia.init({
+  router.init({
     initialPage,
     resolveComponent,
     swapComponent: async ({ component, page, preserveState }) => {

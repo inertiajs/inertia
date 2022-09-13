@@ -1,7 +1,7 @@
 export { router } from '@inertiajs/core'
 export { default as App } from './App.svelte'
 export { default as createInertiaApp } from './createInertiaApp'
-export { default as Link } from './InertiaLink.svelte'
+export { default as Link } from './Link.svelte'
 export { default as inertia } from './link'
 export { default as page } from './page'
 export { default as useForm } from './useForm'
