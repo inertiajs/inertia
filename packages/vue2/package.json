@@ -33,7 +33,6 @@
     "watch": "microbundle watch --format es,cjs"
   },
   "devDependencies": {
-    "eslint": "^7.0.0",
     "microbundle": "^0.12.0",
     "vue": "^2.6.0"
   },

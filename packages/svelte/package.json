@@ -20,9 +20,6 @@
     "svelte"
   ],
   "main": "src/index.js",
-  "devDependencies": {
-    "eslint": "^7.0.0"
-  },
   "peerDependencies": {
     "svelte": "^3.20.0"
   },
