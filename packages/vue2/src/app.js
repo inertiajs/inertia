@@ -1,4 +1,4 @@
-import form from './form'
+import useForm from './useForm'
 import remember from './remember'
 import { createHeadManager, router } from '@inertiajs/core'
 
@@ -84,7 +84,7 @@ export default {
 
 export const plugin = {
   install(Vue) {
-    router.form = form // needed so that we can access the form helper at this.$inertia.form
+    router.form = useForm // needed so that we can access the form helper at this.$inertia.form
     Vue.mixin(remember)
 
     Vue.mixin({

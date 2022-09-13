@@ -3,7 +3,7 @@ import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
 import { router } from '@inertiajs/core'
 
-export default function (...args) {
+export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? router.restore(rememberKey) : null
