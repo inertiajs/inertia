@@ -2,5 +2,8 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "prettier": "^2.7.1"
+  }
 }
