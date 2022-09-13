@@ -5,10 +5,10 @@
   </div>
 </template>
 <script>
-  import SiteLayout from "@/Layouts/SiteLayout"
-  import NestedLayout from "@/Layouts/NestedLayout"
+import SiteLayout from '@/Layouts/SiteLayout'
+import NestedLayout from '@/Layouts/NestedLayout'
 
-  export default {
-    layout: [SiteLayout, NestedLayout],
-  }
+export default {
+  layout: [SiteLayout, NestedLayout],
+}
 </script>

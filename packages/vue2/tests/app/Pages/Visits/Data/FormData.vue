@@ -10,43 +10,43 @@
   </div>
 </template>
 <script>
-  export default {
-    methods: {
-      visitMethod() {
-        const formData = new FormData;
-        formData.append('foo', 'visit')
+export default {
+  methods: {
+    visitMethod() {
+      const formData = new FormData()
+      formData.append('foo', 'visit')
 
-        this.$inertia.visit('/dump/post', {
-          method: 'post',
-          data: formData
-        });
-      },
-      postMethod() {
-        const formData = new FormData;
-        formData.append('baz', 'post')
+      this.$inertia.visit('/dump/post', {
+        method: 'post',
+        data: formData,
+      })
+    },
+    postMethod() {
+      const formData = new FormData()
+      formData.append('baz', 'post')
 
-        this.$inertia.post('/dump/post', formData)
-      },
-      putMethod() {
-        const formData = new FormData;
-        formData.append('foo', 'put')
+      this.$inertia.post('/dump/post', formData)
+    },
+    putMethod() {
+      const formData = new FormData()
+      formData.append('foo', 'put')
 
-        this.$inertia.put('/dump/put', formData)
-      },
-      patchMethod() {
-        const formData = new FormData;
-        formData.append('bar', 'patch')
+      this.$inertia.put('/dump/put', formData)
+    },
+    patchMethod() {
+      const formData = new FormData()
+      formData.append('bar', 'patch')
 
-        this.$inertia.patch('/dump/patch', formData)
-      },
-      deleteMethod() {
-        const formData = new FormData;
-        formData.append('baz', 'delete')
+      this.$inertia.patch('/dump/patch', formData)
+    },
+    deleteMethod() {
+      const formData = new FormData()
+      formData.append('baz', 'delete')
 
-        this.$inertia.delete('/dump/delete', {
-          data: formData
-        })
-      },
-    }
-  }
+      this.$inertia.delete('/dump/delete', {
+        data: formData,
+      })
+    },
+  },
+}
 </script>

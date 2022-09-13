@@ -19,17 +19,17 @@
 export default {
   methods: {
     visitsMethod() {
-      this.$inertia.visit('/visits/method');
+      this.$inertia.visit('/visits/method')
     },
     visitsReplace() {
-      this.$inertia.get('/visits/replace');
+      this.$inertia.get('/visits/replace')
     },
     redirect() {
       this.$inertia.post('/redirect')
     },
     redirectExternal() {
       this.$inertia.post('/redirect-external')
-    }
-  }
+    },
+  },
 }
 </script>

@@ -18,58 +18,78 @@
 export default {
   methods: {
     defaultHeadersMethod() {
-      this.$inertia.visit('/dump/get');
+      this.$inertia.visit('/dump/get')
     },
     visitWithCustomHeaders() {
       this.$inertia.visit('/dump/get', {
         headers: {
-          foo: 'bar'
-        }
-      });
+          foo: 'bar',
+        },
+      })
     },
     getMethod() {
-      this.$inertia.get('/dump/get', {}, {
-        headers: {
-          bar: 'baz'
-        }
-      });
+      this.$inertia.get(
+        '/dump/get',
+        {},
+        {
+          headers: {
+            bar: 'baz',
+          },
+        },
+      )
     },
     postMethod() {
-      this.$inertia.post('/dump/post', {}, {
-        headers: {
-          baz: 'foo'
-        }
-      });
+      this.$inertia.post(
+        '/dump/post',
+        {},
+        {
+          headers: {
+            baz: 'foo',
+          },
+        },
+      )
     },
     putMethod() {
-      this.$inertia.put('/dump/put', {}, {
-        headers: {
-          foo: 'bar'
-        }
-      });
+      this.$inertia.put(
+        '/dump/put',
+        {},
+        {
+          headers: {
+            foo: 'bar',
+          },
+        },
+      )
     },
     patchMethod() {
-      this.$inertia.patch('/dump/patch', {}, {
-        headers: {
-          bar: 'baz'
-        }
-      });
+      this.$inertia.patch(
+        '/dump/patch',
+        {},
+        {
+          headers: {
+            bar: 'baz',
+          },
+        },
+      )
     },
     deleteMethod() {
       this.$inertia.delete('/dump/delete', {
         headers: {
-          baz: 'foo'
-        }
-      });
+          baz: 'foo',
+        },
+      })
     },
     overridden() {
-      this.$inertia.post('/dump/post', {}, {
-        headers: {
-          bar: 'baz',
-          'X-Requested-With': 'custom'
-        }
-      })
-    }
-  }
+      this.$inertia.post(
+        '/dump/post',
+        {},
+        {
+          headers: {
+            bar: 'baz',
+            'X-Requested-With': 'custom',
+          },
+        },
+      )
+    },
+  },
 }
 </script>

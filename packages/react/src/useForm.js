@@ -1,6 +1,6 @@
 import isEqual from 'lodash.isequal'
 import useRemember from './useRemember'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export default function useForm(...args) {
@@ -115,9 +115,9 @@ export default function useForm(...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data: transform(data) })
+        router.delete(url, { ..._options, data: transform(data) })
       } else {
-        Inertia[method](url, transform(data), _options)
+        router[method](url, transform(data), _options)
       }
     },
     [data, setErrors],
@@ -129,7 +129,7 @@ export default function useForm(...args) {
       if (typeof key === 'string') {
         setData({ ...data, [key]: value })
       } else if (typeof key === 'function') {
-        setData(data => key(data))
+        setData((data) => key(data))
       } else {
         setData(key)
       }
@@ -148,9 +148,9 @@ export default function useForm(...args) {
       if (typeof key === 'undefined') {
         setDefaults(() => data)
       } else {
-        setDefaults(defaults => ({
-          ... defaults,
-          ... (value ? { [key]: value } : key),
+        setDefaults((defaults) => ({
+          ...defaults,
+          ...(value ? { [key]: value } : key),
         }))
       }
     },
@@ -161,25 +161,28 @@ export default function useForm(...args) {
         setData(
           Object.keys(defaults)
             .filter((key) => fields.includes(key))
-            .reduce((carry, key) => {
-              carry[key] = defaults[key]
-              return carry
-            }, { ...data }),
+            .reduce(
+              (carry, key) => {
+                carry[key] = defaults[key]
+                return carry
+              },
+              { ...data },
+            ),
         )
       }
     },
     setError(key, value) {
-      setErrors(errors => {
+      setErrors((errors) => {
         const newErrors = {
-          ... errors,
-          ... (value ? { [key]: value } : key),
+          ...errors,
+          ...(value ? { [key]: value } : key),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
       })
     },
     clearErrors(...fields) {
-      setErrors(errors => {
+      setErrors((errors) => {
         const newErrors = Object.keys(errors).reduce(
           (carry, field) => ({
             ...carry,

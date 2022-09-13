@@ -2,7 +2,7 @@ describe('Pages', () => {
   it('receives data from the controllers as props', () => {
     cy.visit('/')
 
-    cy.window().then(window => {
+    cy.window().then((window) => {
       const inertiaRoot = window.testing.vue.$children[0]
       const page = inertiaRoot.$children[0]
 
@@ -16,7 +16,7 @@ describe('Pages', () => {
       it('can have a persistent layout', () => {
         cy.visit('/persistent-layouts/render-function/simple/page-a')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           const inertiaRoot = window.testing.vue.$children[0]
           const layoutA = inertiaRoot.$children[0]
           const layoutAUid = layoutA._uid
@@ -27,8 +27,7 @@ describe('Pages', () => {
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/render-function/simple/page-b')
 
-          cy
-            .get('.text')
+          cy.get('.text')
             .should('have.text', 'Simple Persistent Layout - Page B')
             .then(() => {
               const layoutB = inertiaRoot.$children[0]
@@ -41,7 +40,7 @@ describe('Pages', () => {
       it('can create more complex layout arrangements using nested layouts', () => {
         cy.visit('/persistent-layouts/render-function/nested/page-a')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           const inertiaRoot = window.testing.vue.$children[0]
           const siteLayoutA = inertiaRoot.$children[0]
           const siteLayoutAUid = siteLayoutA._uid
@@ -55,8 +54,7 @@ describe('Pages', () => {
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/render-function/nested/page-b')
 
-          cy
-            .get('.text')
+          cy.get('.text')
             .should('have.text', 'Nested Persistent Layout - Page B')
             .then(() => {
               const siteLayoutB = inertiaRoot.$children[0]
@@ -73,7 +71,7 @@ describe('Pages', () => {
       it('can have a persistent layout', () => {
         cy.visit('/persistent-layouts/shorthand/simple/page-a')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           const inertiaRoot = window.testing.vue.$children[0]
           const layoutA = inertiaRoot.$children[0]
           const layoutAUid = layoutA._uid
@@ -84,8 +82,7 @@ describe('Pages', () => {
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/simple/page-b')
 
-          cy
-            .get('.text')
+          cy.get('.text')
             .should('have.text', 'Simple Persistent Layout - Page B')
             .then(() => {
               const layoutB = inertiaRoot.$children[0]
@@ -101,7 +98,7 @@ describe('Pages', () => {
         cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/simple/page-a')
         cy.window().should('have.property', '_inertia_page_props')
         cy.window().should('have.property', '_inertia_site_layout_props')
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(window._inertia_page_props).to.not.be.undefined
           expect(window._inertia_page_props).to.have.keys('foo', 'baz')
           expect(window._inertia_site_layout_props).to.not.be.undefined
@@ -112,7 +109,7 @@ describe('Pages', () => {
       it('can create more complex layout arrangements using nested persistent layouts', () => {
         cy.visit('/persistent-layouts/shorthand/nested/page-a')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           const inertiaRoot = window.testing.vue.$children[0]
           const siteLayoutA = inertiaRoot.$children[0]
           const siteLayoutAUid = siteLayoutA._uid
@@ -126,8 +123,7 @@ describe('Pages', () => {
           cy.get('a').click()
           cy.url().should('eq', Cypress.config().baseUrl + '/persistent-layouts/shorthand/nested/page-b')
 
-          cy
-            .get('.text')
+          cy.get('.text')
             .should('have.text', 'Nested Persistent Layout - Page B')
             .then(() => {
               const siteLayoutB = inertiaRoot.$children[0]
@@ -146,7 +142,7 @@ describe('Pages', () => {
         cy.window().should('have.property', '_inertia_page_props')
         cy.window().should('have.property', '_inertia_site_layout_props')
         cy.window().should('have.property', '_inertia_nested_layout_props')
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(window._inertia_page_props).to.not.be.undefined
           expect(window._inertia_page_props).to.have.keys('foo', 'baz')
           expect(window._inertia_site_layout_props).to.not.be.undefined

@@ -1,6 +1,6 @@
 <script>
   import { beforeUpdate, createEventDispatcher } from 'svelte'
-  import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+  import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
   const dispatch = createEventDispatcher()
 
@@ -31,7 +31,7 @@
     if (shouldIntercept(event)) {
       event.preventDefault()
 
-      Inertia.visit(href, {
+      router.visit(href, {
         data,
         method,
         preserveScroll,

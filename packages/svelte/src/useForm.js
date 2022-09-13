@@ -1,18 +1,18 @@
 import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  const restored = rememberKey ? router.restore(rememberKey) : null
   let defaults = data
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
-  let transform = data => data
+  let transform = (data) => data
 
   const store = writable({
-    ...restored ? restored.data : data,
+    ...(restored ? restored.data : data),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -21,17 +21,15 @@ function useForm(...args) {
     recentlySuccessful: false,
     processing: false,
     setStore(key, value) {
-      store.update(store => {
-        return Object.assign({}, store, typeof key === 'string' ? {[key]: value} : key)
+      store.update((store) => {
+        return Object.assign({}, store, typeof key === 'string' ? { [key]: value } : key)
       })
     },
     data() {
-      return Object
-        .keys(data)
-        .reduce((carry, key) => {
-          carry[key] = this[key]
-          return carry
-        }, {})
+      return Object.keys(data).reduce((carry, key) => {
+        carry[key] = this[key]
+        return carry
+      }, {})
     },
     transform(callback) {
       transform = callback
@@ -45,10 +43,7 @@ function useForm(...args) {
         return this
       }
 
-      defaults = Object.assign(
-        defaults,
-        value ? ({ [key]: value }) : key,
-      )
+      defaults = Object.assign(defaults, value ? { [key]: value } : key)
 
       return this
     },
@@ -56,13 +51,13 @@ function useForm(...args) {
       if (fields.length === 0) {
         this.setStore(defaults)
       } else {
-        this.setStore(Object
-          .keys(defaults)
-          .filter(key => fields.includes(key))
-          .reduce((carry, key) => {
-            carry[key] = defaults[key]
-            return carry
-          }, {}),
+        this.setStore(
+          Object.keys(defaults)
+            .filter((key) => fields.includes(key))
+            .reduce((carry, key) => {
+              carry[key] = defaults[key]
+              return carry
+            }, {}),
         )
       }
 
@@ -77,13 +72,16 @@ function useForm(...args) {
       return this
     },
     clearErrors(...fields) {
-      this.setStore('errors', Object.keys(this.errors).reduce(
-        (carry, field) => ({
-          ...carry,
-          ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
-        }),
-        {},
-      ))
+      this.setStore(
+        'errors',
+        Object.keys(this.errors).reduce(
+          (carry, field) => ({
+            ...carry,
+            ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
+          }),
+          {},
+        ),
+      )
 
       return this
     },
@@ -98,7 +96,7 @@ function useForm(...args) {
             return options.onCancelToken(token)
           }
         },
-        onBefore: visit => {
+        onBefore: (visit) => {
           this.setStore('wasSuccessful', false)
           this.setStore('recentlySuccessful', false)
           clearTimeout(recentlySuccessfulTimeoutId)
@@ -107,21 +105,21 @@ function useForm(...args) {
             return options.onBefore(visit)
           }
         },
-        onStart: visit => {
+        onStart: (visit) => {
           this.setStore('processing', true)
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
-        onProgress: event => {
+        onProgress: (event) => {
           this.setStore('progress', event)
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
-        onSuccess: async page => {
+        onSuccess: async (page) => {
           this.setStore('processing', false)
           this.setStore('progress', null)
           this.clearErrors()
@@ -133,7 +131,7 @@ function useForm(...args) {
             return options.onSuccess(page)
           }
         },
-        onError: errors => {
+        onError: (errors) => {
           this.setStore('processing', false)
           this.setStore('progress', null)
           this.clearErrors().setError(errors)
@@ -162,9 +160,9 @@ function useForm(...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data  })
+        router.delete(url, { ..._options, data })
       } else {
-        Inertia[method](url, data, _options)
+        router[method](url, data, _options)
       }
     },
     get(url, options) {
@@ -189,7 +187,7 @@ function useForm(...args) {
     },
   })
 
-  store.subscribe(form => {
+  store.subscribe((form) => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
       form.setStore('isDirty', !form.isDirty)
     }
@@ -200,7 +198,7 @@ function useForm(...args) {
     }
 
     if (rememberKey) {
-      Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      router.remember({ data: form.data(), errors: form.errors }, rememberKey)
     }
   })
 

@@ -27,7 +27,7 @@ export default {
     titleCallback: {
       type: Function,
       required: false,
-      default: title => title,
+      default: (title) => title,
     },
     onHeadUpdate: {
       type: Function,

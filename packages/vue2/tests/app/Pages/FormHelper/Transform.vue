@@ -22,42 +22,42 @@ export default {
       form: this.$inertia.form({
         name: 'foo',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
     postForm() {
       this.form
-          .transform(data => ({
-            ...data,
-            name: 'bar',
-          }))
-          .post('/dump/post')
+        .transform((data) => ({
+          ...data,
+          name: 'bar',
+        }))
+        .post('/dump/post')
     },
     putForm() {
       this.form
-          .transform(data => ({
-            ...data,
-            name: 'baz',
-          }))
-          .put('/dump/put')
+        .transform((data) => ({
+          ...data,
+          name: 'baz',
+        }))
+        .put('/dump/put')
     },
     patchForm() {
       this.form
-          .transform(data => ({
-            ...data,
-            name: 'foo',
-          }))
-          .patch('/dump/patch')
+        .transform((data) => ({
+          ...data,
+          name: 'foo',
+        }))
+        .patch('/dump/patch')
     },
     deleteForm() {
       this.form
-          .transform(data => ({
-            ...data,
-            name: 'bar',
-          }))
-          .delete('/dump/delete')
-    }
-  }
+        .transform((data) => ({
+          ...data,
+          name: 'bar',
+        }))
+        .delete('/dump/delete')
+    },
+  },
 }
 </script>

@@ -5,11 +5,11 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
-  const resolveComponent = name => Promise.resolve(resolve(name)).then(module => module.default || module)
+  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
 
-  const reactApp = await resolveComponent(initialPage.component).then(initialComponent => {
+  const reactApp = await resolveComponent(initialPage.component).then((initialComponent) => {
     return setup({
       el,
       App,
@@ -18,17 +18,21 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
         initialComponent,
         resolveComponent,
         titleCallback: title,
-        onHeadUpdate: isServer ? elements => (head = elements) : null,
+        onHeadUpdate: isServer ? (elements) => (head = elements) : null,
       },
     })
   })
 
   if (isServer) {
     const body = await render(
-      createElement('div', {
-        id,
-        'data-page': JSON.stringify(initialPage),
-      }, reactApp)
+      createElement(
+        'div',
+        {
+          id,
+          'data-page': JSON.stringify(initialPage),
+        },
+        reactApp,
+      ),
     )
 
     return { head, body }

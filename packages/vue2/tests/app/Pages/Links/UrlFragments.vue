@@ -2,10 +2,14 @@
   <div>
     <span class="text">This is the links page that demonstrates url fragment behaviour</span>
     <div style="width: 200vw; height: 200vh; margin-top: 50vh">
-      <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
+      <div class="document-position">
+        Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}
+      </div>
       <inertia-link href="/links/url-fragments#target" class="basic">Basic link</inertia-link>
       <inertia-link href="#target" class="fragment">Fragment link</inertia-link>
-      <inertia-link href="/links/url-fragments#non-existent-fragment" class="non-existent-fragment">Non-existent fragment link</inertia-link>
+      <inertia-link href="/links/url-fragments#non-existent-fragment" class="non-existent-fragment"
+        >Non-existent fragment link</inertia-link
+      >
 
       <div id="target">This is the element with id 'target'</div>
     </div>
@@ -25,9 +29,9 @@ export default {
   },
   methods: {
     handleScrollEvent() {
-      this.documentScrollTop = document.documentElement.scrollTop;
-      this.documentScrollLeft = document.documentElement.scrollLeft;
-    }
-  }
+      this.documentScrollTop = document.documentElement.scrollTop
+      this.documentScrollLeft = document.documentElement.scrollLeft
+    },
+  },
 }
 </script>

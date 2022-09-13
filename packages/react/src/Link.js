@@ -1,31 +1,34 @@
 import { createElement, forwardRef, useCallback } from 'react'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 const noop = () => undefined
 
-export default forwardRef(function InertiaLink({
-  children,
-  as = 'a',
-  data = {},
-  href,
-  method = 'get',
-  preserveScroll = false,
-  preserveState = null,
-  replace = false,
-  only = [],
-  headers = {},
-  queryStringArrayFormat = 'brackets',
-  onClick = noop,
-  onCancelToken = noop,
-  onBefore = noop,
-  onStart = noop,
-  onProgress = noop,
-  onFinish = noop,
-  onCancel = noop,
-  onSuccess = noop,
-  onError = noop,
-  ...props
-}, ref) {
+export default forwardRef(function Link(
+  {
+    children,
+    as = 'a',
+    data = {},
+    href,
+    method = 'get',
+    preserveScroll = false,
+    preserveState = null,
+    replace = false,
+    only = [],
+    headers = {},
+    queryStringArrayFormat = 'brackets',
+    onClick = noop,
+    onCancelToken = noop,
+    onBefore = noop,
+    onStart = noop,
+    onProgress = noop,
+    onFinish = noop,
+    onCancel = noop,
+    onSuccess = noop,
+    onError = noop,
+    ...props
+  },
+  ref,
+) {
   const visit = useCallback(
     (event) => {
       onClick(event)
@@ -33,11 +36,11 @@ export default forwardRef(function InertiaLink({
       if (shouldIntercept(event)) {
         event.preventDefault()
 
-        Inertia.visit(href, {
+        router.visit(href, {
           data,
           method,
           preserveScroll,
-          preserveState: preserveState ?? (method !== 'get'),
+          preserveState: preserveState ?? method !== 'get',
           replace,
           only,
           headers,
@@ -80,13 +83,19 @@ export default forwardRef(function InertiaLink({
   data = _data
 
   if (as === 'a' && method !== 'get') {
-    console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`)
+    console.warn(
+      `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
+    )
   }
 
-  return createElement(as, {
-    ...props,
-    ...as === 'a' ? { href } : {},
-    ref,
-    onClick: visit,
-  }, children)
+  return createElement(
+    as,
+    {
+      ...props,
+      ...(as === 'a' ? { href } : {}),
+      ref,
+      onClick: visit,
+    },
+    children,
+  )
 })

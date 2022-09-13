@@ -34,7 +34,7 @@ export default {
         name: 'foo',
         handle: 'example',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
@@ -55,7 +55,7 @@ export default {
     },
     setError() {
       this.form.setError('handle', 'Manually set Handle error')
-    }
-  }
+    },
+  },
 }
 </script>

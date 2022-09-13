@@ -36,7 +36,7 @@ export default {
         name: 'foo',
         handle: 'example',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
@@ -55,12 +55,12 @@ export default {
     reassignObject() {
       this.form.defaults({
         handle: 'updated handle',
-        remember: true
+        remember: true,
       })
     },
     reassignSingle() {
       this.form.defaults('name', 'single value')
     },
-  }
+  },
 }
 </script>

@@ -20,8 +20,8 @@ export default {
   props: {
     foo: {
       type: String,
-      default: 'default'
-    }
+      default: 'default',
+    },
   },
   mounted() {
     window._inertia_page_key = this.$vnode.key
@@ -30,51 +30,67 @@ export default {
     preserve() {
       this.$inertia.visit('/visits/preserve-state-page-two', {
         data: { foo: 'bar' },
-        preserveState: true
+        preserveState: true,
       })
     },
     preserveFalse() {
       this.$inertia.visit('/visits/preserve-state-page-two', {
         data: { foo: 'baz' },
-        preserveState: false
+        preserveState: false,
       })
     },
     preserveCallback() {
-      this.$inertia.get('/visits/preserve-state-page-two', {
-        foo: 'callback-bar'
-      }, {
-        preserveState: page => {
-          alert(page)
+      this.$inertia.get(
+        '/visits/preserve-state-page-two',
+        {
+          foo: 'callback-bar',
+        },
+        {
+          preserveState: (page) => {
+            alert(page)
 
-          return true
-        }
-      })
+            return true
+          },
+        },
+      )
     },
     preserveCallbackFalse() {
-      this.$inertia.get('/visits/preserve-state-page-two', {
-        foo: 'callback-baz'
-      }, {
-        preserveState: page => {
-          alert(page)
+      this.$inertia.get(
+        '/visits/preserve-state-page-two',
+        {
+          foo: 'callback-baz',
+        },
+        {
+          preserveState: (page) => {
+            alert(page)
 
-          return false
-        }
-      })
+            return false
+          },
+        },
+      )
     },
     preserveGet() {
-      this.$inertia.get('/visits/preserve-state-page-two', {
-        foo: 'get-bar'
-      }, {
-        preserveState: true
-      })
+      this.$inertia.get(
+        '/visits/preserve-state-page-two',
+        {
+          foo: 'get-bar',
+        },
+        {
+          preserveState: true,
+        },
+      )
     },
     preserveGetFalse() {
-      this.$inertia.get('/visits/preserve-state-page-two', {
-        foo: 'get-baz'
-      }, {
-        preserveState: false
-      })
+      this.$inertia.get(
+        '/visits/preserve-state-page-two',
+        {
+          foo: 'get-baz',
+        },
+        {
+          preserveState: false,
+        },
+      )
     },
-  }
+  },
 }
 </script>

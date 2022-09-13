@@ -16,22 +16,14 @@ export declare const plugin: Plugin
 
 export interface CreateInertiaAppProps {
   id?: string
-  resolve: (name: string) =>
-    DefineComponent |
-    Promise<DefineComponent> |
-    { default: DefineComponent }
-  setup: (props: {
-    el: Element
-    app: InertiaApp
-    props: InertiaAppProps
-    plugin: Plugin
-  }) => void | VueApp
+  resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
+  setup: (props: { el: Element; app: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: (title: string) => string
   page?: Inertia.Page
   render?: (app: VueApp) => Promise<string>
 }
 
-export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
+export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[]; body: string } | void>
 
 export interface InertiaLinkProps {
   as?: string
@@ -98,7 +90,7 @@ export declare function usePage<PageProps>(): {
   version: ComputedRef<string | null>
 }
 
-export declare function defineLayout(component: object): void;
+export declare function defineLayout(component: object): void
 
 export type InertiaHead = DefineComponent<{
   title?: string
@@ -115,11 +107,11 @@ declare module '@vue/runtime-core' {
 
   export interface ComponentCustomOptions {
     remember?:
-      string |
-      string[] |
-      {
-        data: string | string[]
-        key?: string | (() => string)
-      }
+      | string
+      | string[]
+      | {
+          data: string | string[]
+          key?: string | (() => string)
+        }
   }
 }

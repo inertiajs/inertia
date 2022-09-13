@@ -19,12 +19,12 @@
 export default {
   remember: {
     data: ['name', 'remember'],
-    key: () => 'Example/ComponentB'
+    key: () => 'Example/ComponentB',
   },
   data: () => ({
     name: '',
     remember: false,
     untracked: '',
-  })
+  }),
 }
 </script>

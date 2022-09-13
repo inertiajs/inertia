@@ -3,7 +3,10 @@ import { tap } from '../support/commands'
 describe('Manual Visits', () => {
   it('visits a different page', () => {
     cy.visit('/', {
-      onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      onLoad: () =>
+        cy.on('window:load', () => {
+          throw 'A location/non-SPA visit was detected'
+        }),
     })
 
     cy.get('.visits-method').click()
@@ -14,7 +17,10 @@ describe('Manual Visits', () => {
 
   it('can make a location visit', () => {
     cy.visit('/visits/location', {
-      onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+      onLoad: () =>
+        cy.on('window:load', () => {
+          alert('A location/non-SPA visit was detected')
+        }),
     })
 
     const alert = cy.stub()
@@ -29,7 +35,7 @@ describe('Manual Visits', () => {
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ headers }) => {
             expect(headers).to.not.have.property('x-inertia')
           })
@@ -39,7 +45,10 @@ describe('Manual Visits', () => {
   describe('Auto-cancellation', () => {
     it('will automatically cancel a pending visits when a new request is made', () => {
       cy.visit('/visits/automatic-cancellation', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       const alert = cy.stub()
@@ -61,7 +70,10 @@ describe('Manual Visits', () => {
   describe('Method', () => {
     beforeEach(() => {
       cy.visit('/visits/method', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
     })
 
@@ -71,7 +83,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('get')
           expect(query).to.be.empty
@@ -85,7 +97,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('patch')
           expect(query).to.be.empty
@@ -99,7 +111,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('get')
           expect(query).to.be.empty
@@ -113,7 +125,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('post')
           expect(query).to.be.empty
@@ -127,7 +139,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('put')
           expect(query).to.be.empty
@@ -141,7 +153,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('patch')
           expect(query).to.be.empty
@@ -155,7 +167,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('delete')
           expect(query).to.be.empty
@@ -169,16 +181,17 @@ describe('Manual Visits', () => {
       beforeEach(() => {
         cy.intercept('/dump/**').as('spy')
         cy.visit('/visits/data/object', {
-          onLoad: () => cy.on('window:load', () => {
-            throw 'A location/non-SPA visit was detected'
-          }),
+          onLoad: () =>
+            cy.on('window:load', () => {
+              throw 'A location/non-SPA visit was detected'
+            }),
         })
       })
 
       it('passes data as params by default when using the visit method', () => {
         cy.get('.visit').click()
 
-        cy.wait('@spy').then(({request, response}) => {
+        cy.wait('@spy').then(({ request, response }) => {
           expect(request.url).to.eq(Cypress.config().baseUrl + '/dump/get?foo=visit')
           expect(request.headers).to.contain.key('content-type')
           expect(request.headers['content-type']).to.contain('application/json')
@@ -192,7 +205,7 @@ describe('Manual Visits', () => {
         it('passes data as params', () => {
           cy.get('.get').click()
 
-          cy.wait('@spy').then(({request, response}) => {
+          cy.wait('@spy').then(({ request, response }) => {
             expect(request.url).to.eq(Cypress.config().baseUrl + '/dump/get?bar=get')
             expect(request.headers).to.contain.key('content-type')
             expect(request.headers['content-type']).to.contain('application/json')
@@ -205,17 +218,23 @@ describe('Manual Visits', () => {
         describe('query string array formatter', () => {
           it('can use the brackets query string array formatter', () => {
             cy.get('.qsaf-brackets').click()
-            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
+            cy.wait('@spy')
+              .its('request.url')
+              .should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
           })
 
           it('can use the indices query string array formatter', () => {
             cy.get('.qsaf-indices').click()
-            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[0]=b&a[1]=c')
+            cy.wait('@spy')
+              .its('request.url')
+              .should('eq', Cypress.config().baseUrl + '/dump/get?a[0]=b&a[1]=c')
           })
 
           it('defaults to using the brackets query string array formatter', () => {
             cy.get('.qsaf-default').click()
-            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
+            cy.wait('@spy')
+              .its('request.url')
+              .should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
           })
         })
       })
@@ -226,8 +245,8 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
-          .then(({method, headers, form, files, query}) => {
+          .then((window) => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
 
@@ -245,8 +264,8 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
-          .then(({method, headers, form, files, query}) => {
+          .then((window) => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
 
@@ -264,8 +283,8 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
-          .then(({method, headers, form, files, query}) => {
+          .then((window) => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
 
@@ -283,8 +302,8 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
-          .then(({method, headers, form, files, query}) => {
+          .then((window) => window._inertia_request_dump)
+          .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
 
@@ -300,7 +319,10 @@ describe('Manual Visits', () => {
     describe('FormData objects', () => {
       beforeEach(() => {
         cy.visit('/visits/data/form-data', {
-          onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+          onLoad: () =>
+            cy.on('window:load', () => {
+              throw 'A location/non-SPA visit was detected'
+            }),
         })
       })
 
@@ -310,7 +332,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -329,7 +351,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -348,7 +370,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -367,7 +389,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -386,7 +408,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -403,7 +425,10 @@ describe('Manual Visits', () => {
     describe('auto-converted objects (when files are present)', () => {
       beforeEach(() => {
         cy.visit('/visits/data/auto-converted', {
-          onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+          onLoad: () =>
+            cy.on('window:load', () => {
+              throw 'A location/non-SPA visit was detected'
+            }),
         })
       })
 
@@ -413,7 +438,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -432,7 +457,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -451,7 +476,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -470,7 +495,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -488,7 +513,10 @@ describe('Manual Visits', () => {
   describe('Headers', () => {
     it('has the default set of headers', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.default').click()
@@ -496,7 +524,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia'])
           expect(headers).to.not.contain.key('x-inertia-version')
@@ -508,7 +536,10 @@ describe('Manual Visits', () => {
 
     it('starts using the x-inertia-version header when a version was given from the back-end', () => {
       cy.visit('/visits/headers/version', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.default').click()
@@ -516,7 +547,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.key('x-inertia-version')
           expect(headers['x-inertia-version']).to.eq('example-version-header')
@@ -525,7 +556,10 @@ describe('Manual Visits', () => {
 
     it('allows to set custom headers using the visit method', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.visit').click()
@@ -533,7 +567,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'foo'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -545,7 +579,10 @@ describe('Manual Visits', () => {
 
     it('allows to set custom headers using the GET method', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.get').click()
@@ -553,7 +590,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -565,7 +602,10 @@ describe('Manual Visits', () => {
 
     it('allows to set custom headers using the POST method', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.post').click()
@@ -573,7 +613,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'baz'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -585,7 +625,10 @@ describe('Manual Visits', () => {
 
     it('allows to set custom headers using the PUT method', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.put').click()
@@ -593,7 +636,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'foo'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -605,7 +648,10 @@ describe('Manual Visits', () => {
 
     it('allows to set custom headers using the PATCH method', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.patch').click()
@@ -613,7 +659,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -625,7 +671,10 @@ describe('Manual Visits', () => {
 
     it('allows to set custom headers using the DELETE method', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.delete').click()
@@ -633,7 +682,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'baz'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -645,7 +694,10 @@ describe('Manual Visits', () => {
 
     it('cannot override built-in Inertia headers', () => {
       cy.visit('/visits/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.overridden').click()
@@ -653,7 +705,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -667,7 +719,10 @@ describe('Manual Visits', () => {
   describe('Replace', () => {
     beforeEach(() => {
       cy.visit('/', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.get('.visits-replace').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/visits/replace')
@@ -721,22 +776,25 @@ describe('Manual Visits', () => {
   describe('Preserve state', () => {
     beforeEach(() => {
       cy.visit('/visits/preserve-state', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
     })
 
-    it('preserves the page\'s local state (visit method)', () => {
+    it("preserves the page's local state (visit method)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Example value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now bar')
           cy.get('.field').should('have.value', 'Example value')
@@ -744,18 +802,18 @@ describe('Manual Visits', () => {
       })
     })
 
-    it('preserves the page\'s local state (GET method)', () => {
+    it("preserves the page's local state (GET method)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Example value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-get').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now get-bar')
           cy.get('.field').should('have.value', 'Example value')
@@ -763,18 +821,18 @@ describe('Manual Visits', () => {
       })
     })
 
-    it('preserves the page\'s local state (callback)', () => {
+    it("preserves the page's local state (callback)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Example value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-callback').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now callback-bar')
           cy.get('.field').should('have.value', 'Example value')
@@ -782,18 +840,18 @@ describe('Manual Visits', () => {
       })
     })
 
-    it('does not preserve the page\'s local state (visit method)', () => {
+    it("does not preserve the page's local state (visit method)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Another value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-false').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.not.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now baz')
           cy.get('.field').should('have.value', '')
@@ -801,18 +859,18 @@ describe('Manual Visits', () => {
       })
     })
 
-    it('does not preserve the page\'s local state (GET method)', () => {
+    it("does not preserve the page's local state (GET method)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Another value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-get-false').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.not.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now get-baz')
           cy.get('.field').should('have.value', '')
@@ -820,18 +878,18 @@ describe('Manual Visits', () => {
       })
     })
 
-    it('does not preserve the page\'s local state (callback)', () => {
+    it("does not preserve the page's local state (callback)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Another value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-callback-false').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.not.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now callback-baz')
           cy.get('.field').should('have.value', '')
@@ -894,7 +952,7 @@ describe('Manual Visits', () => {
 
             // Assert that the page is passed in to the callback
             expect(alert.getCalls()).to.have.length(1)
-            tap(alert.getCall(0).lastArg, page => {
+            tap(alert.getCall(0).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -955,7 +1013,7 @@ describe('Manual Visits', () => {
 
             // Assert that the page is passed in to the callback
             expect(alert.getCalls()).to.have.length(1)
-            tap(alert.getCall(0).lastArg, page => {
+            tap(alert.getCall(0).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -1015,7 +1073,7 @@ describe('Manual Visits', () => {
 
       it('resets scroll regions to the top when doing a regular visit (GET method)', () => {
         cy.get('.reset-get')
-          .click({ force: true})
+          .click({ force: true })
           .then(() => {
             cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-scroll-page-two')
             cy.get('.foo').should('have.text', 'Foo is now baz')
@@ -1037,7 +1095,7 @@ describe('Manual Visits', () => {
 
             // Assert that the page is passed in to the callback
             expect(alert.getCalls()).to.have.length(1)
-            tap(alert.getCall(0).lastArg, page => {
+            tap(alert.getCall(0).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -1084,7 +1142,7 @@ describe('Manual Visits', () => {
             cy.then(() => {
               // Assert that the page is passed in to the callback
               expect(alert.getCalls()).to.have.length(1)
-              tap(alert.getCall(0).lastArg, page => {
+              tap(alert.getCall(0).lastArg, (page) => {
                 expect(page).to.be.an('object')
                 expect(page).to.have.property('component')
                 expect(page).to.have.property('props')
@@ -1156,7 +1214,10 @@ describe('Manual Visits', () => {
 
     beforeEach(() => {
       cy.visit('/visits/url-fragments', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.url().should('eq', Cypress.config().baseUrl + '/visits/url-fragments')
       cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
@@ -1206,7 +1267,10 @@ describe('Manual Visits', () => {
   describe('Partial Reloads', () => {
     beforeEach(() => {
       cy.visit('/visits/partial-reloads', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
       cy.get('.foo-text').should('have.text', 'Foo is now 1')
@@ -1221,7 +1285,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_props')
         cy.window()
-          .then(window => window._inertia_props)
+          .then((window) => window._inertia_props)
           .then(({ headers }) => {
             expect(headers).to.not.contain.keys(['x-inertia-partial-component', 'x-inertia-partial-data'])
           })
@@ -1233,9 +1297,15 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_props')
         cy.window()
-          .then(window => window._inertia_props)
+          .then((window) => window._inertia_props)
           .then(({ headers }) => {
-            expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'x-inertia-partial-component', 'x-inertia-partial-data'])
+            expect(headers).to.contain.keys([
+              'accept',
+              'x-requested-with',
+              'x-inertia',
+              'x-inertia-partial-component',
+              'x-inertia-partial-data',
+            ])
             expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
             expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
             expect(headers['x-inertia']).to.eq('true')
@@ -1281,7 +1351,7 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_props')
         cy.window()
-          .then(window => window._inertia_props)
+          .then((window) => window._inertia_props)
           .then(({ headers }) => {
             expect(headers).to.not.contain.keys(['x-inertia-partial-component', 'x-inertia-partial-data'])
           })
@@ -1293,9 +1363,15 @@ describe('Manual Visits', () => {
 
         cy.window().should('have.property', '_inertia_props')
         cy.window()
-          .then(window => window._inertia_props)
+          .then((window) => window._inertia_props)
           .then(({ headers }) => {
-            expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'x-inertia-partial-component', 'x-inertia-partial-data'])
+            expect(headers).to.contain.keys([
+              'accept',
+              'x-requested-with',
+              'x-inertia',
+              'x-inertia-partial-component',
+              'x-inertia-partial-data',
+            ])
             expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
             expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
             expect(headers['x-inertia']).to.eq('true')
@@ -1338,7 +1414,10 @@ describe('Manual Visits', () => {
   describe('Error bags', () => {
     beforeEach(() => {
       cy.visit('/visits/error-bags', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.url().should('eq', Cypress.config().baseUrl + '/visits/error-bags')
     })
@@ -1349,7 +1428,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, headers }) => {
           expect(method).to.eq('post')
           expect(headers).to.not.contain.key('x-inertia-error-bag')
@@ -1362,7 +1441,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, headers }) => {
           expect(method).to.eq('post')
           expect(form).to.contain.key('foo')
@@ -1378,7 +1457,7 @@ describe('Manual Visits', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, headers }) => {
           expect(method).to.eq('post')
           expect(form).to.contain.key('foo')
@@ -1393,7 +1472,10 @@ describe('Manual Visits', () => {
     let alert = null
     beforeEach(() => {
       cy.visit('/', {
-        onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            alert('A location/non-SPA visit was detected')
+          }),
       })
 
       alert = cy.stub()
