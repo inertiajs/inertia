@@ -1,9 +1,9 @@
 import { createElement, forwardRef, useCallback } from 'react'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 const noop = () => undefined
 
-export default forwardRef(function InertiaLink(
+export default forwardRef(function Link(
   {
     children,
     as = 'a',
@@ -36,7 +36,7 @@ export default forwardRef(function InertiaLink(
       if (shouldIntercept(event)) {
         event.preventDefault()
 
-        Inertia.visit(href, {
+        router.visit(href, {
           data,
           method,
           preserveScroll,
