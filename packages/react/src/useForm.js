@@ -1,7 +1,7 @@
-import isEqual from 'lodash.isequal'
-import useRemember from './useRemember'
 import { router } from '@inertiajs/core'
+import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import useRemember from './useRemember'
 
 export default function useForm(...args) {
   const isMounted = useRef(null)

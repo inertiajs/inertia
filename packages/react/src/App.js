@@ -1,7 +1,7 @@
-import HeadContext from './HeadContext'
-import PageContext from './PageContext'
 import { createHeadManager, router } from '@inertiajs/core'
 import { createElement, useEffect, useMemo, useState } from 'react'
+import HeadContext from './HeadContext'
+import PageContext from './PageContext'
 
 export default function App({
   children,

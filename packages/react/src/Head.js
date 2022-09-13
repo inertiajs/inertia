@@ -1,5 +1,5 @@
-import HeadContext from './HeadContext'
 import React, { useContext, useEffect, useMemo } from 'react'
+import HeadContext from './HeadContext'
 
 export default function Head({ children, title }) {
   const headManager = useContext(HeadContext)
