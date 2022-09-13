@@ -1,5 +1,5 @@
+import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
 import { h } from 'vue'
-import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default {
   name: 'Link',
