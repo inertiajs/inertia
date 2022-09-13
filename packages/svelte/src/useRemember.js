@@ -1,6 +1,6 @@
+import { router } from '@inertiajs/core'
 import { onDestroy } from 'svelte'
 import { writable } from 'svelte/store'
-import { router } from '@inertiajs/core'
 
 function useRemember(initialState, key) {
   const restored = router.restore(key)
