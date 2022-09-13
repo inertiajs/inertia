@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import isEqual from 'lodash.isequal'
-import cloneDeep from 'lodash.clonedeep'
 import { router } from '@inertiajs/core'
+import cloneDeep from 'lodash.clonedeep'
+import isEqual from 'lodash.isequal'
+import Vue from 'vue'
 
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
