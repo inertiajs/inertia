@@ -1,6 +1,6 @@
 import { FormDataConvertible, RequestPayload } from './types'
 
-export function hasFiles(data: RequestPayload|FormDataConvertible): boolean {
+export function hasFiles(data: RequestPayload | FormDataConvertible): boolean {
   return (
     data instanceof File ||
     data instanceof Blob ||

@@ -5,12 +5,12 @@
   </div>
 </template>
 <script>
-  import Layout from "@/Layouts/SiteLayout"
+import Layout from '@/Layouts/SiteLayout'
 
-  export default {
-    layout: Layout,
-    created() {
-      window._inertia_page_props = this.$vnode.data.props;
-    }
-  }
+export default {
+  layout: Layout,
+  created() {
+    window._inertia_page_props = this.$vnode.data.props
+  },
+}
 </script>

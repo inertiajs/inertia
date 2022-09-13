@@ -1,6 +1,6 @@
 import { tap } from '../support/commands'
 
-const assertVisitObject = visit => {
+const assertVisitObject = (visit) => {
   expect(visit).to.be.an('object')
   expect(visit).to.have.property('url')
   expect(visit).to.have.property('method')
@@ -8,14 +8,14 @@ const assertVisitObject = visit => {
   expect(visit).to.have.property('headers')
   expect(visit).to.have.property('preserveState')
 }
-const assertPageObject = page => {
+const assertPageObject = (page) => {
   expect(page).to.be.an('object')
   expect(page).to.have.property('component')
   expect(page).to.have.property('props')
   expect(page).to.have.property('url')
   expect(page).to.have.property('version')
 }
-const assertProgressObject = progress => {
+const assertProgressObject = (progress) => {
   expect(progress).to.have.property('isTrusted')
   expect(progress).to.have.property('percentage')
   expect(progress).to.have.property('total')
@@ -27,9 +27,10 @@ describe('Events', () => {
   let alert = null
   beforeEach(() => {
     cy.visit('/events', {
-      onLoad: () => cy.on('window:load', () => {
-        throw 'A location/non-SPA visit was detected'
-      }),
+      onLoad: () =>
+        cy.on('window:load', () => {
+          throw 'A location/non-SPA visit was detected'
+        }),
     })
 
     alert = cy.stub()
@@ -64,7 +65,7 @@ describe('Events', () => {
   describe('Hooks', () => {
     describe('before', () => {
       it('fires the event when a request is about to be made', () => {
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:before')
 
@@ -72,7 +73,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.true
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('visit')
             assertVisitObject(detail.visit)
@@ -169,7 +170,7 @@ describe('Events', () => {
 
     describe('cancelToken', () => {
       it('fires when the request is starting', () => {
-        const assertCancelToken = token => {
+        const assertCancelToken = (token) => {
           expect(token).to.be.an('object')
           expect(token).to.have.property('cancel')
         }
@@ -222,7 +223,7 @@ describe('Events', () => {
 
     describe('start', () => {
       it('fires when the request has started', () => {
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:start')
 
@@ -230,7 +231,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.false
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('visit')
             assertVisitObject(detail.visit)
@@ -258,7 +259,7 @@ describe('Events', () => {
           .get('.link-start')
           .click()
           .wait(30)
-          .then(() =>{
+          .then(() => {
             expect(alert.getCalls()).to.have.length(12)
 
             // Global Inertia Event Listener
@@ -278,7 +279,7 @@ describe('Events', () => {
 
     describe('progress', () => {
       it('fires when the request has files and upload progression occurs', () => {
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:progress')
 
@@ -286,7 +287,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.false
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('progress')
             assertProgressObject(detail.progress)
@@ -350,12 +351,12 @@ describe('Events', () => {
 
       describe('error', () => {
         it('fires when the request finishes with validation errors', () => {
-          const assertErrorsObject = errors => {
+          const assertErrorsObject = (errors) => {
             expect(errors).to.be.an('object')
             expect(errors).to.have.property('foo')
             expect(errors.foo).to.eq('bar')
           }
-          const assertGlobalEvent = event => {
+          const assertGlobalEvent = (event) => {
             expect(event).to.be.an('CustomEvent')
             expect(event.type).to.eq('inertia:error')
 
@@ -363,7 +364,7 @@ describe('Events', () => {
             expect(event.cancelable).to.be.false
 
             expect(event).to.have.property('detail')
-            tap(event.detail, detail => {
+            tap(event.detail, (detail) => {
               expect(detail).to.be.an('object')
               expect(detail).to.have.property('errors')
               assertErrorsObject(detail.errors)
@@ -417,7 +418,9 @@ describe('Events', () => {
             .then(() => {
               expect(alert.getCalls()).to.have.length(3)
               expect(alert.getCall(0)).to.be.calledWith('onError')
-              expect(alert.getCall(1)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+              expect(alert.getCall(1)).to.be.calledWith(
+                'onFinish should have been fired by now if Promise functionality did not work',
+              )
               expect(alert.getCall(2)).to.be.calledWith('onFinish')
             })
             .get('.link-error-promise')
@@ -426,7 +429,9 @@ describe('Events', () => {
             .then(() => {
               expect(alert.getCalls()).to.have.length(6)
               expect(alert.getCall(3)).to.be.calledWith('linkOnError')
-              expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+              expect(alert.getCall(4)).to.be.calledWith(
+                'onFinish should have been fired by now if Promise functionality did not work',
+              )
               expect(alert.getCall(5)).to.be.calledWith('linkOnFinish')
             })
         })
@@ -435,7 +440,7 @@ describe('Events', () => {
 
     describe('success', () => {
       it('fires when the request finished without validation errors', () => {
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:success')
 
@@ -443,7 +448,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.false
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('page')
             assertPageObject(detail.page)
@@ -496,7 +501,9 @@ describe('Events', () => {
             .then(() => {
               expect(alert.getCalls()).to.have.length(3)
               expect(alert.getCall(0)).to.be.calledWith('onSuccess')
-              expect(alert.getCall(1)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+              expect(alert.getCall(1)).to.be.calledWith(
+                'onFinish should have been fired by now if Promise functionality did not work',
+              )
               expect(alert.getCall(2)).to.be.calledWith('onFinish')
             })
             .get('.link-success-promise')
@@ -505,7 +512,9 @@ describe('Events', () => {
             .then(() => {
               expect(alert.getCalls()).to.have.length(6)
               expect(alert.getCall(3)).to.be.calledWith('linkOnSuccess')
-              expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+              expect(alert.getCall(4)).to.be.calledWith(
+                'onFinish should have been fired by now if Promise functionality did not work',
+              )
               expect(alert.getCall(5)).to.be.calledWith('linkOnFinish')
             })
         })
@@ -514,13 +523,13 @@ describe('Events', () => {
 
     describe('invalid', () => {
       it('gets fired when a non-Inertia response is received', () => {
-        const assertResponseObject = response => {
+        const assertResponseObject = (response) => {
           expect(response).to.be.an('object')
           expect(response).to.have.property('headers')
           expect(response).to.have.property('data')
           expect(response).to.have.property('status')
         }
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:invalid')
 
@@ -528,7 +537,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.true
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('response')
             assertResponseObject(detail.response)
@@ -554,12 +563,12 @@ describe('Events', () => {
 
     describe('exception', () => {
       it('gets fired when an unexpected situation occurs (e.g. network disconnect)', () => {
-        const assertExceptionObject = detail => {
+        const assertExceptionObject = (detail) => {
           expect(detail).to.be.an('object')
           expect(detail).to.have.property('exception')
           expect(detail.exception).to.be.an('Error')
         }
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:exception')
 
@@ -589,7 +598,7 @@ describe('Events', () => {
 
     describe('finish', () => {
       it('fires when the request completes', () => {
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:finish')
 
@@ -597,7 +606,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.false
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('visit')
             assertVisitObject(detail.visit)
@@ -645,7 +654,7 @@ describe('Events', () => {
 
     describe('navigate', () => {
       it('fires when the page navigates away after a successful request', () => {
-        const assertGlobalEvent = event => {
+        const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
           expect(event.type).to.eq('inertia:navigate')
 
@@ -653,7 +662,7 @@ describe('Events', () => {
           expect(event.cancelable).to.be.false
 
           expect(event).to.have.property('detail')
-          tap(event.detail, detail => {
+          tap(event.detail, (detail) => {
             expect(detail).to.be.an('object')
             expect(detail).to.have.property('page')
             assertPageObject(detail.page)

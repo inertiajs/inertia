@@ -4,7 +4,10 @@ describe('Form Helper', () => {
   describe('Methods', () => {
     beforeEach(() => {
       cy.visit('/form-helper/methods', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('#remember').check()
@@ -16,7 +19,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('post')
           expect(query).to.be.empty
@@ -33,7 +36,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('put')
           expect(query).to.be.empty
@@ -50,7 +53,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('patch')
           expect(query).to.be.empty
@@ -67,7 +70,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('delete')
           expect(query).to.be.empty
@@ -82,7 +85,10 @@ describe('Form Helper', () => {
   describe('Transform', () => {
     beforeEach(() => {
       cy.visit('/form-helper/transform', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('#remember').check()
@@ -94,7 +100,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('post')
           expect(query).to.be.empty
@@ -111,7 +117,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('put')
           expect(query).to.be.empty
@@ -128,7 +134,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('patch')
           expect(query).to.be.empty
@@ -145,7 +151,7 @@ describe('Form Helper', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('delete')
           expect(query).to.be.empty
@@ -160,7 +166,10 @@ describe('Form Helper', () => {
   describe('Errors', () => {
     beforeEach(() => {
       cy.visit('/form-helper/errors', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.errors-status').should('have.text', 'Form has no errors')
@@ -287,7 +296,10 @@ describe('Form Helper', () => {
   describe('Data', () => {
     beforeEach(() => {
       cy.visit('/form-helper/data', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
     })
 
@@ -440,9 +452,10 @@ describe('Form Helper', () => {
     let alert = null
     beforeEach(() => {
       cy.visit('/form-helper/events', {
-        onLoad: () => cy.on('window:load', () => {
-          throw 'A location/non-SPA visit was detected'
-        }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       alert = cy.stub()
@@ -456,7 +469,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            tap(alert.getCall(1).lastArg, visit => {
+            tap(alert.getCall(1).lastArg, (visit) => {
               // Assert this is the request/visit object.
               expect(visit).to.be.an('object')
               expect(visit).to.have.property('url')
@@ -499,7 +512,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(2)).to.be.calledWith('onStart')
-            tap(alert.getCall(3).lastArg, visit => {
+            tap(alert.getCall(3).lastArg, (visit) => {
               // Assert this is the request/visit object.
               expect(visit).to.be.an('object')
               expect(visit).to.have.property('url')
@@ -531,7 +544,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(3)).to.be.calledWith('onProgress')
-            tap(alert.getCall(4).lastArg, event => {
+            tap(alert.getCall(4).lastArg, (event) => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
@@ -569,7 +582,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(5)).to.be.calledWith(null)
 
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            tap(alert.getCall(7).lastArg, event => {
+            tap(alert.getCall(7).lastArg, (event) => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
@@ -593,14 +606,15 @@ describe('Form Helper', () => {
 
     describe('onSuccess', () => {
       it('fires the request succeeds without validation errors', () => {
-        cy.get('.success').click()
+        cy.get('.success')
+          .click()
           .wait(30)
           .then(() => {
             expect(alert.getCall(0)).to.be.calledWith('onBefore')
             expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
             expect(alert.getCall(2)).to.be.calledWith('onStart')
             expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            tap(alert.getCall(4).lastArg, page => {
+            tap(alert.getCall(4).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -615,7 +629,6 @@ describe('Form Helper', () => {
           .click()
           .wait(30)
           .then(() => {
-
             expect(alert.getCall(4)).to.be.calledWith('onStart')
             expect(alert.getCall(5)).to.be.calledWith(true)
 
@@ -630,7 +643,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            tap(alert.getCall(7).lastArg, event => {
+            tap(alert.getCall(7).lastArg, (event) => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
@@ -644,20 +657,24 @@ describe('Form Helper', () => {
       })
 
       it('can delay onFinish from firing by returning a promise', () => {
-        cy.get('.success-promise').click()
+        cy.get('.success-promise')
+          .click()
           .wait(50)
           .then(() => {
             expect(alert.getCall(0)).to.be.calledWith('onBefore')
             expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
             expect(alert.getCall(2)).to.be.calledWith('onStart')
             expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(4)).to.be.calledWith(
+              'onFinish should have been fired by now if Promise functionality did not work',
+            )
             expect(alert.getCall(5)).to.be.calledWith('onFinish')
           })
       })
 
       it('clears all existing errors and resets the hasErrors prop', () => {
-        cy.get('.success-reset-errors').click()
+        cy.get('.success-reset-errors')
+          .click()
           .wait(50)
           .then(() => {
             expect(alert.getCalls()).to.have.length(10)
@@ -670,7 +687,7 @@ describe('Form Helper', () => {
 
             expect(alert.getCall(4)).to.be.calledWith('onStart')
             expect(alert.getCall(5)).to.be.calledWith(true)
-            tap(alert.getCall(6).lastArg, errors => {
+            tap(alert.getCall(6).lastArg, (errors) => {
               expect(errors).to.be.an('object')
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
@@ -716,7 +733,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
             expect(alert.getCall(2)).to.be.calledWith('onStart')
             expect(alert.getCall(3)).to.be.calledWith('onError')
-            tap(alert.getCall(4).lastArg, errors => {
+            tap(alert.getCall(4).lastArg, (errors) => {
               expect(errors).to.be.an('object')
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
@@ -729,7 +746,6 @@ describe('Form Helper', () => {
           .click()
           .wait(30)
           .then(() => {
-
             expect(alert.getCall(4)).to.be.calledWith('onStart')
             expect(alert.getCall(5)).to.be.calledWith(true)
 
@@ -744,7 +760,7 @@ describe('Form Helper', () => {
           .wait(30)
           .then(() => {
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            tap(alert.getCall(7).lastArg, event => {
+            tap(alert.getCall(7).lastArg, (event) => {
               expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
@@ -767,7 +783,7 @@ describe('Form Helper', () => {
             expect(alert.getCall(3).lastArg).to.be.empty
 
             expect(alert.getCall(4)).to.be.calledWith('onError')
-            tap(alert.getCall(5).lastArg, errors => {
+            tap(alert.getCall(5).lastArg, (errors) => {
               expect(errors).to.be.an('object')
               expect(errors).to.have.property('name')
               expect(errors.name).to.eq('Some name error')
@@ -784,7 +800,9 @@ describe('Form Helper', () => {
             expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
             expect(alert.getCall(2)).to.be.calledWith('onStart')
             expect(alert.getCall(3)).to.be.calledWith('onError')
-            expect(alert.getCall(4)).to.be.calledWith('onFinish should have been fired by now if Promise functionality did not work')
+            expect(alert.getCall(4)).to.be.calledWith(
+              'onFinish should have been fired by now if Promise functionality did not work',
+            )
             expect(alert.getCall(5)).to.be.calledWith('onFinish')
           })
       })

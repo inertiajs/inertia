@@ -9,6 +9,6 @@
 export default {
   props: {
     method: String,
-  }
+  },
 }
 </script>

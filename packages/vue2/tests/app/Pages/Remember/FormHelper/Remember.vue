@@ -36,7 +36,7 @@ export default {
         name: 'foo',
         handle: 'example',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
@@ -44,10 +44,8 @@ export default {
       this.form.post('/remember/form-helper/remember')
     },
     reset() {
-      this.form
-          .reset('handle')
-          .clearErrors('name')
-    }
-  }
+      this.form.reset('handle').clearErrors('name')
+    },
+  },
 }
 </script>

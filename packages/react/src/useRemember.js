@@ -16,6 +16,8 @@ export default function useRemember(initialState, key) {
 }
 
 export function useRememberedState(initialState, key) {
-  console.warn('The "useRememberedState" hook has been deprecated and will be removed in a future release. Use "useRemember" instead.')
+  console.warn(
+    'The "useRememberedState" hook has been deprecated and will be removed in a future release. Use "useRemember" instead.',
+  )
   return useRemember(initialState, key)
 }

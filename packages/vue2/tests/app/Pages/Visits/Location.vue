@@ -9,8 +9,8 @@
 export default {
   methods: {
     locationVisit() {
-      this.$inertia.get('/location');
-    }
-  }
+      this.$inertia.get('/location')
+    },
+  },
 }
 </script>

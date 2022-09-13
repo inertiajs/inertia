@@ -12,7 +12,7 @@ export default {
     },
     invalidVisitJson() {
       this.$inertia.post('/json')
-    }
-  }
+    },
+  },
 }
 </script>

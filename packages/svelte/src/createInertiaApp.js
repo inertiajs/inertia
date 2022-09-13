@@ -4,11 +4,11 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pag
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
-  const resolveComponent = name => Promise.resolve(resolve(name))
+  const resolveComponent = (name) => Promise.resolve(resolve(name))
 
   let head = []
 
-  const svelteApp = await resolveComponent(initialPage.component).then(initialComponent => {
+  const svelteApp = await resolveComponent(initialPage.component).then((initialComponent) => {
     return setup({
       el,
       App,
@@ -16,7 +16,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pag
         initialPage,
         initialComponent,
         resolveComponent,
-        onHeadUpdate: isServer ? elements => (head = elements) : null,
+        onHeadUpdate: isServer ? (elements) => (head = elements) : null,
       },
     })
   })

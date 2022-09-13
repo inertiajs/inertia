@@ -2,14 +2,16 @@ export default {
   modal: null,
   listener: null,
 
-  show(html: Record<string, unknown>|string): void {
+  show(html: Record<string, unknown> | string): void {
     if (typeof html === 'object') {
-      html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(html)}`
+      html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(
+        html,
+      )}`
     }
 
     const page = document.createElement('html')
     page.innerHTML = html
-    page.querySelectorAll('a').forEach(a => a.setAttribute('target', '_top'))
+    page.querySelectorAll('a').forEach((a) => a.setAttribute('target', '_top'))
 
     this.modal = document.createElement('div')
     this.modal.style.position = 'fixed'

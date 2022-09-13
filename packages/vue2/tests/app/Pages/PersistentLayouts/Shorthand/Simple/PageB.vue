@@ -5,9 +5,9 @@
   </div>
 </template>
 <script>
-  import Layout from "@/Layouts/SiteLayout"
+import Layout from '@/Layouts/SiteLayout'
 
-  export default {
-    layout: Layout,
-  }
+export default {
+  layout: Layout,
+}
 </script>
