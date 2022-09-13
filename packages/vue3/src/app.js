@@ -1,7 +1,7 @@
-import useForm from './useForm'
-import remember from './remember'
-import { computed, h, markRaw, ref, shallowRef } from 'vue'
 import { createHeadManager, router } from '@inertiajs/core'
+import { computed, h, markRaw, ref, shallowRef } from 'vue'
+import remember from './remember'
+import useForm from './useForm'
 
 const component = ref(null)
 const page = ref({})
