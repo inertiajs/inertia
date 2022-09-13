@@ -1,5 +1,5 @@
 import { createEventDispatcher } from 'svelte'
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default (node, options = {}) => {
   const [href, data] = mergeDataIntoQueryString(
@@ -24,7 +24,7 @@ export default (node, options = {}) => {
 
     if (shouldIntercept(event)) {
       event.preventDefault()
-      Inertia.visit(href, options)
+      router.visit(href, options)
     }
   }
 

@@ -1,11 +1,11 @@
 import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  const restored = rememberKey ? router.restore(rememberKey) : null
   let defaults = data
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
@@ -160,9 +160,9 @@ function useForm(...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data })
+        router.delete(url, { ..._options, data })
       } else {
-        Inertia[method](url, data, _options)
+        router[method](url, data, _options)
       }
     },
     get(url, options) {
@@ -198,7 +198,7 @@ function useForm(...args) {
     }
 
     if (rememberKey) {
-      Inertia.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      router.remember({ data: form.data(), errors: form.errors }, rememberKey)
     }
   })
 
