@@ -1,5 +1,5 @@
-import App from './App'
 import { createElement } from 'react'
+import App from './App'
 
 export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
   const isServer = typeof window === 'undefined'

@@ -1,5 +1,5 @@
+import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
 import { createElement, forwardRef, useCallback } from 'react'
-import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 const noop = () => undefined
 

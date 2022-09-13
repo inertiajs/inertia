@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { router } from '@inertiajs/core'
+import { useEffect, useState } from 'react'
 
 export default function useRemember(initialState, key) {
   const [state, setState] = useState(() => {
