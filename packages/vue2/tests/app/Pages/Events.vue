@@ -144,7 +144,7 @@
   </div>
 </template>
 <script>
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/vue2'
 
 export default {
   data: () => ({
@@ -160,7 +160,7 @@ export default {
       this.$inertia.post(this.$page.url, {})
     },
     removeInertiaListener() {
-      const removeEventListener = Inertia.on('before', () => alert('Inertia.on(before)'))
+      const removeEventListener = router.on('before', () => alert('Inertia.on(before)'))
 
       alert('Removing Inertia.on Listener')
       removeEventListener()
@@ -175,7 +175,7 @@ export default {
       )
     },
     beforeVisit() {
-      Inertia.on('before', (event) => {
+      router.on('before', (event) => {
         alert('Inertia.on(before)')
         alert(event)
       })
@@ -199,7 +199,7 @@ export default {
     },
     beforeVisitPreventLocal() {
       document.addEventListener('inertia:before', () => alert('addEventListener(inertia:before)'))
-      Inertia.on('before', () => alert('Inertia.on(before)'))
+      router.on('before', () => alert('Inertia.on(before)'))
 
       this.$inertia.post(
         this.$page.url,
@@ -215,7 +215,7 @@ export default {
     },
     beforeVisitPreventGlobalInertia() {
       document.addEventListener('inertia:before', () => alert('addEventListener(inertia:before)'))
-      Inertia.on('before', (visit) => {
+      router.on('before', (visit) => {
         alert('Inertia.on(before)')
         return false
       })
@@ -230,7 +230,7 @@ export default {
       )
     },
     beforeVisitPreventGlobalNative() {
-      Inertia.on('before', () => alert('Inertia.on(before)'))
+      router.on('before', () => alert('Inertia.on(before)'))
       document.addEventListener('inertia:before', (event) => {
         alert('addEventListener(inertia:before)')
         event.preventDefault()
@@ -246,7 +246,7 @@ export default {
       )
     },
     cancelTokenVisit() {
-      Inertia.on('cancelToken', () => alert('This listener should not have been called.'))
+      router.on('cancelToken', () => alert('This listener should not have been called.'))
       document.addEventListener('inertia:cancelToken', () => alert('This listener should not have been called.'))
 
       this.$inertia.post(
@@ -261,7 +261,7 @@ export default {
       )
     },
     startVisit() {
-      Inertia.on('start', (event) => {
+      router.on('start', (event) => {
         alert('Inertia.on(start)')
         alert(event)
       })
@@ -283,7 +283,7 @@ export default {
       )
     },
     progressVisit() {
-      Inertia.on('progress', (event) => {
+      router.on('progress', (event) => {
         alert('Inertia.on(progress)')
         alert(event)
       })
@@ -301,7 +301,7 @@ export default {
       })
     },
     progressNoFilesVisit() {
-      Inertia.on('progress', (event) => {
+      router.on('progress', (event) => {
         alert('Inertia.on(progress)')
         alert(event)
       })
@@ -324,7 +324,7 @@ export default {
       )
     },
     cancelVisit() {
-      Inertia.on('cancel', (event) => {
+      router.on('cancel', (event) => {
         alert('Inertia.on(cancel)')
         alert(event)
       })
@@ -347,7 +347,7 @@ export default {
       )
     },
     errorVisit() {
-      Inertia.on('error', (event) => {
+      router.on('error', (event) => {
         alert('Inertia.on(error)')
         alert(event)
       })
@@ -380,7 +380,7 @@ export default {
       )
     },
     successVisit() {
-      Inertia.on('success', (event) => {
+      router.on('success', (event) => {
         alert('Inertia.on(success)')
         alert(event)
       })
@@ -414,7 +414,7 @@ export default {
       )
     },
     finishVisit() {
-      Inertia.on('finish', (event) => {
+      router.on('finish', (event) => {
         alert('Inertia.on(finish)')
         alert(event)
       })
@@ -436,7 +436,7 @@ export default {
       )
     },
     invalidVisit() {
-      Inertia.on('invalid', (event) => {
+      router.on('invalid', (event) => {
         alert('Inertia.on(invalid)')
         alert(event)
       })
@@ -455,7 +455,7 @@ export default {
       )
     },
     exceptionVisit() {
-      Inertia.on('exception', (event) => {
+      router.on('exception', (event) => {
         alert('Inertia.on(exception)')
         alert(event)
       })
@@ -474,7 +474,7 @@ export default {
       )
     },
     navigateVisit() {
-      Inertia.on('navigate', (event) => {
+      router.on('navigate', (event) => {
         alert('Inertia.on(navigate)')
         alert(event)
       })
@@ -493,17 +493,17 @@ export default {
       )
     },
     registerAllListeners() {
-      Inertia.on('before', () => alert('Inertia.on(before)'))
-      Inertia.on('cancelToken', () => alert('Inertia.on(cancelToken)'))
-      Inertia.on('cancel', () => alert('Inertia.on(cancel)'))
-      Inertia.on('start', () => alert('Inertia.on(start)'))
-      Inertia.on('progress', () => alert('Inertia.on(progress)'))
-      Inertia.on('error', () => alert('Inertia.on(error)'))
-      Inertia.on('success', () => alert('Inertia.on(success)'))
-      Inertia.on('invalid', () => alert('Inertia.on(invalid)'))
-      Inertia.on('exception', () => alert('Inertia.on(exception)'))
-      Inertia.on('finish', () => alert('Inertia.on(finish)'))
-      Inertia.on('navigate', () => alert('Inertia.on(navigate)'))
+      router.on('before', () => alert('Inertia.on(before)'))
+      router.on('cancelToken', () => alert('Inertia.on(cancelToken)'))
+      router.on('cancel', () => alert('Inertia.on(cancel)'))
+      router.on('start', () => alert('Inertia.on(start)'))
+      router.on('progress', () => alert('Inertia.on(progress)'))
+      router.on('error', () => alert('Inertia.on(error)'))
+      router.on('success', () => alert('Inertia.on(success)'))
+      router.on('invalid', () => alert('Inertia.on(invalid)'))
+      router.on('exception', () => alert('Inertia.on(exception)'))
+      router.on('finish', () => alert('Inertia.on(finish)'))
+      router.on('navigate', () => alert('Inertia.on(navigate)'))
       document.addEventListener('inertia:before', () => alert('addEventListener(inertia:before)'))
       document.addEventListener('inertia:cancelToken', () => alert('addEventListener(inertia:cancelToken)'))
       document.addEventListener('inertia:cancel', () => alert('addEventListener(inertia:cancel)'))
