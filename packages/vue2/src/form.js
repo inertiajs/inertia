@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
-import { Inertia } from '@inertiajs/core'
+import { router } from '@inertiajs/core'
 
 export default function (...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const restored = rememberKey ? Inertia.restore(rememberKey) : null
+  const restored = rememberKey ? router.restore(rememberKey) : null
   let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
@@ -155,9 +155,9 @@ export default function (...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data })
+        router.delete(url, { ..._options, data })
       } else {
-        Inertia[method](url, data, _options)
+        router[method](url, data, _options)
       }
     },
     get(url, options) {
@@ -197,7 +197,7 @@ export default function (...args) {
         (newValue) => {
           form.isDirty = !isEqual(form.data(), defaults)
           if (rememberKey) {
-            Inertia.remember(newValue.__remember(), rememberKey)
+            router.remember(newValue.__remember(), rememberKey)
           }
         },
         { immediate: true, deep: true },
