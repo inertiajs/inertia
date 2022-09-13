@@ -22,6 +22,6 @@ export default {
     name: '',
     remember: false,
     untracked: '',
-  })
+  }),
 }
 </script>

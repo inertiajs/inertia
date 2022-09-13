@@ -17,9 +17,7 @@ module.exports = {
     path: path.resolve(__dirname, 'tmp'),
     publicPath: '/',
   },
-  plugins: [
-    new VueLoaderPlugin(),
-  ],
+  plugins: [new VueLoaderPlugin()],
   resolve: {
     extensions: ['*', '.js', '.vue'],
     alias: {

@@ -20,12 +20,16 @@ export default {
       })
     },
     postVisit() {
-      this.$inertia.post('/dump/post', {
-        foo: 'baz',
-      }, {
-        errorBag: 'postErrorBag'
-      })
-    }
-  }
+      this.$inertia.post(
+        '/dump/post',
+        {
+          foo: 'baz',
+        },
+        {
+          errorBag: 'postErrorBag',
+        },
+      )
+    },
+  },
 }
 </script>

@@ -13,24 +13,32 @@ export default {
   methods: {
     replace() {
       this.$inertia.visit('/dump/get', {
-        replace: true
+        replace: true,
       })
     },
     replaceFalse() {
       this.$inertia.visit('/dump/get', {
-        replace: false
+        replace: false,
       })
     },
     replaceGet() {
-      this.$inertia.get('/dump/get', {}, {
-        replace: true,
-      })
+      this.$inertia.get(
+        '/dump/get',
+        {},
+        {
+          replace: true,
+        },
+      )
     },
     replaceGetFalse() {
-      this.$inertia.get('/dump/get', {}, {
-        replace: false,
-      })
-    }
-  }
+      this.$inertia.get(
+        '/dump/get',
+        {},
+        {
+          replace: false,
+        },
+      )
+    },
+  },
 }
 </script>

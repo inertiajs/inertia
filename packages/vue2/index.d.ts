@@ -24,15 +24,12 @@ export declare const plugin: PluginObject<any>
 
 export interface CreateInertiaAppProps {
   id?: string
-  resolve: (name: string) =>
-    Component |
-    Promise<Component> |
-    { default: Component }
+  resolve: (name: string) => Component | Promise<Component> | { default: Component }
   setup: (props: {
     el: Element
     app: InertiaApp
     props: {
-      attrs: { id: string, 'data-page': string }
+      attrs: { id: string; 'data-page': string }
       props: InertiaProps
     }
     plugin: PluginObject<any>
@@ -42,7 +39,7 @@ export interface CreateInertiaAppProps {
   render?: (vm: Vue) => Promise<string>
 }
 
-export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[], body: string } | void>
+export declare function createInertiaApp(props: CreateInertiaAppProps): Promise<{ head: string[]; body: string } | void>
 
 export interface InertiaLinkProps {
   as?: string

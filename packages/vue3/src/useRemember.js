@@ -12,9 +12,13 @@ export default function useRemember(data, key) {
   const hasCallbacks = typeof data.__remember === 'function' && typeof data.__restore === 'function'
   const remembered = restored === undefined ? data : type(hasCallbacks ? data.__restore(restored) : restored)
 
-  watch(remembered, (newValue) => {
-    router.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key)
-  }, { immediate: true, deep: true })
+  watch(
+    remembered,
+    (newValue) => {
+      router.remember(cloneDeep(hasCallbacks ? data.__remember() : newValue), key)
+    },
+    { immediate: true, deep: true },
+  )
 
   return remembered
 }

@@ -3,7 +3,7 @@ describe('Plugin', () => {
     it('has the helper injected into the Vue component', () => {
       cy.visit('/')
 
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const inertiaRoot = window.testing.vue.$children[0]
         const page = inertiaRoot.$children[0]
 
@@ -14,7 +14,7 @@ describe('Plugin', () => {
     it('misses the helper when not registered', () => {
       cy.visit('/plugin/without')
 
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const inertiaRoot = window.testing.vue.$children[0]
         const page = inertiaRoot.$children[0]
 
@@ -27,7 +27,7 @@ describe('Plugin', () => {
     it('has the helper injected into the Vue component', () => {
       cy.visit('/')
 
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const inertiaRoot = window.testing.vue.$children[0]
         const page = inertiaRoot.$children[0]
 
@@ -38,7 +38,7 @@ describe('Plugin', () => {
     it('misses the helper when not registered', () => {
       cy.visit('/plugin/without')
 
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const inertiaRoot = window.testing.vue.$children[0]
         const page = inertiaRoot.$children[0]
 
@@ -46,5 +46,4 @@ describe('Plugin', () => {
       })
     })
   })
-
 })

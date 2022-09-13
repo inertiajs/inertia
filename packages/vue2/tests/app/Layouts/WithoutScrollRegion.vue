@@ -26,11 +26,11 @@ export default {
   },
   methods: {
     handleScrollEvent() {
-      this.documentScrollTop = document.documentElement.scrollTop;
-      this.documentScrollLeft = document.documentElement.scrollLeft;
-      this.slotScrollTop = document.getElementById('slot').scrollTop;
-      this.slotScrollLeft = document.getElementById('slot').scrollLeft;
-    }
-  }
+      this.documentScrollTop = document.documentElement.scrollTop
+      this.documentScrollLeft = document.documentElement.scrollLeft
+      this.slotScrollTop = document.getElementById('slot').scrollTop
+      this.slotScrollLeft = document.getElementById('slot').scrollLeft
+    },
+  },
 }
 </script>

@@ -6,15 +6,31 @@ export default function InertiaHead({ children, title }) {
   const provider = useMemo(() => headManager.createProvider(), [headManager])
 
   useEffect(() => {
-    return () => { provider.disconnect() }
+    return () => {
+      provider.disconnect()
+    }
   }, [provider])
 
   function isUnaryTag(node) {
-    return [
-      'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-      'input', 'keygen', 'link', 'meta', 'param', 'source',
-      'track', 'wbr',
-    ].indexOf(node.type) > -1
+    return (
+      [
+        'area',
+        'base',
+        'br',
+        'col',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'keygen',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+      ].indexOf(node.type) > -1
+    )
   }
 
   function renderTagStart(node) {
@@ -63,8 +79,8 @@ export default function InertiaHead({ children, title }) {
   }
 
   function renderNodes(nodes) {
-    const computed = (Array.isArray(nodes) ? nodes : [nodes]).filter(node => node).map(node => renderNode(node))
-    if (title && !computed.find(tag => tag.startsWith('<title'))) {
+    const computed = (Array.isArray(nodes) ? nodes : [nodes]).filter((node) => node).map((node) => renderNode(node))
+    if (title && !computed.find((tag) => tag.startsWith('<title'))) {
       computed.push(`<title inertia>${title}</title>`)
     }
     return computed

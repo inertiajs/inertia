@@ -19,51 +19,51 @@ export default {
   methods: {
     visitMethod() {
       this.$inertia.visit('/dump/get', {
-        data: { foo: 'visit' }
-      });
+        data: { foo: 'visit' },
+      })
     },
     getMethod() {
       this.$inertia.get('/dump/get', {
-        bar: 'get'
-      });
+        bar: 'get',
+      })
     },
     postMethod() {
       this.$inertia.post('/dump/post', {
-        baz: 'post'
-      });
+        baz: 'post',
+      })
     },
     putMethod() {
       this.$inertia.put('/dump/put', {
-        foo: 'put'
-      });
+        foo: 'put',
+      })
     },
     patchMethod() {
       this.$inertia.patch('/dump/patch', {
-        bar: 'patch'
-      });
+        bar: 'patch',
+      })
     },
     deleteMethod() {
       this.$inertia.delete('/dump/delete', {
-        data: { baz: 'delete' }
+        data: { baz: 'delete' },
       })
     },
     qsafDefault() {
       this.$inertia.visit('/dump/get', {
         data: { a: ['b', 'c'] },
-      });
+      })
     },
     qsafIndices() {
       this.$inertia.visit('/dump/get', {
         data: { a: ['b', 'c'] },
         queryStringArrayFormat: 'indices',
-      });
+      })
     },
     qsafBrackets() {
       this.$inertia.visit('/dump/get', {
         data: { a: ['b', 'c'] },
         queryStringArrayFormat: 'brackets',
-      });
-    }
-  }
+      })
+    },
+  },
 }
 </script>

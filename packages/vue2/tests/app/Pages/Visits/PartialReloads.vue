@@ -20,14 +20,14 @@ export default {
   props: {
     foo: {
       type: Number,
-      default: 0
+      default: 0,
     },
     bar: Number,
     baz: Number,
     headers: Object,
   },
   created() {
-    window._inertia_props = this.$page.props;
+    window._inertia_props = this.$page.props
   },
   methods: {
     partialReloadVisit() {
@@ -53,19 +53,27 @@ export default {
       })
     },
     partialReloadGetFooBar() {
-      this.$inertia.get('/visits/partial-reloads', {
-         foo: this.foo,
-      }, {
-        only: ['headers', 'foo', 'bar'],
-      })
+      this.$inertia.get(
+        '/visits/partial-reloads',
+        {
+          foo: this.foo,
+        },
+        {
+          only: ['headers', 'foo', 'bar'],
+        },
+      )
     },
     partialReloadGetBaz() {
-      this.$inertia.get('/visits/partial-reloads', {
-        foo: this.foo
-      }, {
-        only: ['headers', 'baz'],
-      })
+      this.$inertia.get(
+        '/visits/partial-reloads',
+        {
+          foo: this.foo,
+        },
+        {
+          only: ['headers', 'baz'],
+        },
+      )
     },
-  }
+  },
 }
 </script>

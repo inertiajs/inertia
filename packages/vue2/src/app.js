@@ -23,7 +23,7 @@ export default {
     titleCallback: {
       type: Function,
       required: false,
-      default: title => title,
+      default: (title) => title,
     },
     onHeadUpdate: {
       type: Function,
@@ -90,13 +90,19 @@ export const plugin = {
     Vue.mixin({
       beforeCreate() {
         Object.defineProperty(this, '$headManager', {
-          get: function () { return headManager },
+          get: function () {
+            return headManager
+          },
         })
         Object.defineProperty(this, '$inertia', {
-          get: function () { return Inertia },
+          get: function () {
+            return Inertia
+          },
         })
         Object.defineProperty(this, '$page', {
-          get: function () { return app.page },
+          get: function () {
+            return app.page
+          },
         })
       },
     })

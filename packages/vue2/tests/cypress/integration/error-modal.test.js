@@ -1,7 +1,10 @@
 describe('Error Modal', () => {
   beforeEach(() => {
     cy.visit('/error-modal', {
-      onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+      onLoad: () =>
+        cy.on('window:load', () => {
+          alert('A location/non-SPA visit was detected')
+        }),
     })
   })
 
@@ -10,7 +13,9 @@ describe('Error Modal', () => {
 
     cy.get('iframe').should('exist')
     cy.get('iframe').should('have.length', 1)
-    cy.get('iframe').its('0.contentDocument').should('have.text', 'This is a page that does not have the Inertia app loaded.')
+    cy.get('iframe')
+      .its('0.contentDocument')
+      .should('have.text', 'This is a page that does not have the Inertia app loaded.')
   })
 
   it('displays the modal with a helpful message when a regular JSON response comes back instead of an Inertia response', () => {
@@ -18,7 +23,12 @@ describe('Error Modal', () => {
 
     cy.get('iframe').should('exist')
     cy.get('iframe').should('have.length', 1)
-    cy.get('iframe').its('0.contentDocument').should('contain.text', 'All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.')
+    cy.get('iframe')
+      .its('0.contentDocument')
+      .should(
+        'contain.text',
+        'All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.',
+      )
     cy.get('iframe').its('0.contentDocument').should('contain.text', '{"foo":"bar"}')
   })
 

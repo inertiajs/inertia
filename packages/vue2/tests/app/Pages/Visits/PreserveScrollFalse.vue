@@ -1,6 +1,8 @@
 <template>
-  <div style="height: 800px; width: 600px;">
-    <span class="text">This is the page that demonstrates scroll preservation without scroll regions when using manual visits</span>
+  <div style="height: 800px; width: 600px">
+    <span class="text"
+      >This is the page that demonstrates scroll preservation without scroll regions when using manual visits</span
+    >
     <span class="foo">Foo is now {{ foo }}</span>
 
     <span @click="preserve" class="preserve">Preserve Scroll</span>
@@ -14,7 +16,7 @@
   </div>
 </template>
 <script>
-import WithoutScrollRegion from "@/Layouts/WithoutScrollRegion";
+import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion'
 
 export default {
   layout: WithoutScrollRegion,
@@ -28,46 +30,50 @@ export default {
     preserve() {
       this.$inertia.visit('/visits/preserve-scroll-false-page-two', {
         data: { foo: 'foo' },
-        preserveScroll: true
+        preserveScroll: true,
       })
     },
     preserveFalse() {
       this.$inertia.visit('/visits/preserve-scroll-false-page-two', {
-        data: { foo: 'bar' }
+        data: { foo: 'bar' },
       })
     },
     preserveCallback() {
       this.$inertia.visit('/visits/preserve-scroll-false-page-two', {
         data: { foo: 'baz' },
-        preserveScroll: page => {
+        preserveScroll: (page) => {
           alert(page)
 
           return true
-        }
+        },
       })
     },
     preserveCallbackFalse() {
       this.$inertia.visit('/visits/preserve-scroll-false-page-two', {
         data: { foo: 'foo' },
-        preserveScroll: page => {
+        preserveScroll: (page) => {
           alert(page)
 
           return false
-        }
+        },
       })
     },
     preserveGet() {
-      this.$inertia.get('/visits/preserve-scroll-false-page-two', {
-        foo: 'bar'
-      }, {
-        preserveScroll: true
-      })
+      this.$inertia.get(
+        '/visits/preserve-scroll-false-page-two',
+        {
+          foo: 'bar',
+        },
+        {
+          preserveScroll: true,
+        },
+      )
     },
     preserveGetFalse() {
       this.$inertia.get('/visits/preserve-scroll-false-page-two', {
-        foo: 'baz'
+        foo: 'baz',
       })
     },
-  }
+  },
 }
 </script>

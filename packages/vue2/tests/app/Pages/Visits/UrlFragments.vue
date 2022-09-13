@@ -2,7 +2,9 @@
   <div>
     <span class="text">This is the page that demonstrates url fragment behaviour using manual visits</span>
     <div style="width: 200vw; height: 200vh; margin-top: 50vh">
-      <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
+      <div class="document-position">
+        Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}
+      </div>
       <span @click="basicVisit" class="basic">Basic visit</span>
       <span @click="fragmentVisit" class="fragment">Fragment visit</span>
       <span @click="nonExistentFragmentVisit" class="non-existent-fragment">Non-existent fragment visit</span>
@@ -29,8 +31,8 @@ export default {
   },
   methods: {
     handleScrollEvent() {
-      this.documentScrollTop = document.documentElement.scrollTop;
-      this.documentScrollLeft = document.documentElement.scrollLeft;
+      this.documentScrollTop = document.documentElement.scrollTop
+      this.documentScrollLeft = document.documentElement.scrollLeft
     },
     basicVisit() {
       this.$inertia.visit('/visits/url-fragments#target')
@@ -49,7 +51,7 @@ export default {
     },
     nonExistentFragmentGetVisit() {
       this.$inertia.get('/visits/url-fragments#non-existent-fragment')
-    }
-  }
+    },
+  },
 }
 </script>

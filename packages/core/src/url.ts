@@ -2,15 +2,15 @@ import * as qs from 'qs'
 import deepmerge from 'deepmerge'
 import { FormDataConvertible, Method } from './types'
 
-export function hrefToUrl(href: string|URL): URL {
+export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), window.location.toString())
 }
 
 export function mergeDataIntoQueryString(
   method: Method,
-  href: URL|string,
+  href: URL | string,
   data: Record<string, FormDataConvertible>,
-  qsArrayFormat: 'indices'|'brackets' = 'brackets',
+  qsArrayFormat: 'indices' | 'brackets' = 'brackets',
 ): [string, Record<string, FormDataConvertible>] {
   const hasHost = /^https?:\/\//.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
@@ -40,7 +40,7 @@ export function mergeDataIntoQueryString(
   ]
 }
 
-export function urlWithoutHash(url: URL|Location): URL {
+export function urlWithoutHash(url: URL | Location): URL {
   url = new URL(url.href)
   url.hash = ''
   return url

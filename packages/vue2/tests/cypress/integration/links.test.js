@@ -3,7 +3,10 @@ import { tap } from '../support/commands'
 describe('Links', () => {
   it('visits a different page', () => {
     cy.visit('/', {
-      onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+      onLoad: () =>
+        cy.on('window:load', () => {
+          throw 'A location/non-SPA visit was detected'
+        }),
     })
 
     cy.get('.links-method').click()
@@ -14,7 +17,10 @@ describe('Links', () => {
 
   it('can make a location visit', () => {
     cy.visit('/links/location', {
-      onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+      onLoad: () =>
+        cy.on('window:load', () => {
+          alert('A location/non-SPA visit was detected')
+        }),
     })
 
     const alert = cy.stub()
@@ -29,7 +35,7 @@ describe('Links', () => {
         cy.url().should('eq', Cypress.config().baseUrl + '/dump/get')
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ headers }) => {
             expect(headers).to.not.have.property('x-inertia')
           })
@@ -39,7 +45,10 @@ describe('Links', () => {
   describe('Auto-cancellation', () => {
     it('will automatically cancel a pending visits when a new request is made', () => {
       cy.visit('/links/automatic-cancellation', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       const alert = cy.stub()
@@ -61,7 +70,10 @@ describe('Links', () => {
   describe('Method', () => {
     beforeEach(() => {
       cy.visit('/links/method', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
     })
 
@@ -71,7 +83,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('get')
           expect(query).to.be.empty
@@ -85,7 +97,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('post')
           expect(query).to.be.empty
@@ -99,7 +111,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('put')
           expect(query).to.be.empty
@@ -113,7 +125,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('patch')
           expect(query).to.be.empty
@@ -127,7 +139,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
           expect(method).to.eq('delete')
           expect(query).to.be.empty
@@ -141,9 +153,10 @@ describe('Links', () => {
       beforeEach(() => {
         cy.intercept('/dump/**').as('spy')
         cy.visit('/links/data/object', {
-          onLoad: () => cy.on('window:load', () => {
-            throw 'A location/non-SPA visit was detected'
-          }),
+          onLoad: () =>
+            cy.on('window:load', () => {
+              throw 'A location/non-SPA visit was detected'
+            }),
         })
       })
 
@@ -151,7 +164,7 @@ describe('Links', () => {
         it('passes data as params', () => {
           cy.get('.get').click()
 
-          cy.wait('@spy').then(({request, response}) => {
+          cy.wait('@spy').then(({ request, response }) => {
             expect(request.url).to.eq(Cypress.config().baseUrl + '/dump/get?foo=get')
             expect(request.headers).to.contain.key('content-type')
             expect(request.headers['content-type']).to.contain('application/json')
@@ -164,17 +177,23 @@ describe('Links', () => {
         describe('query string array formatter', () => {
           it('can use the brackets query string array formatter', () => {
             cy.get('.qsaf-brackets').click()
-            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
+            cy.wait('@spy')
+              .its('request.url')
+              .should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
           })
 
           it('can use the indices query string array formatter', () => {
             cy.get('.qsaf-indices').click()
-            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[0]=b&a[1]=c')
+            cy.wait('@spy')
+              .its('request.url')
+              .should('eq', Cypress.config().baseUrl + '/dump/get?a[0]=b&a[1]=c')
           })
 
           it('defaults to using the brackets query string array formatter', () => {
             cy.get('.qsaf-default').click()
-            cy.wait('@spy').its('request.url').should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
+            cy.wait('@spy')
+              .its('request.url')
+              .should('eq', Cypress.config().baseUrl + '/dump/get?a[]=b&a[]=c')
           })
         })
       })
@@ -198,7 +217,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
@@ -217,7 +236,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
@@ -236,7 +255,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('application/json')
@@ -253,7 +272,10 @@ describe('Links', () => {
     describe('FormData objects', () => {
       beforeEach(() => {
         cy.visit('/links/data/form-data', {
-          onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+          onLoad: () =>
+            cy.on('window:load', () => {
+              throw 'A location/non-SPA visit was detected'
+            }),
         })
       })
 
@@ -263,7 +285,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -282,7 +304,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -301,7 +323,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -320,7 +342,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -337,7 +359,10 @@ describe('Links', () => {
     describe('auto-converted objects (when files are present)', () => {
       beforeEach(() => {
         cy.visit('/links/data/auto-converted', {
-          onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+          onLoad: () =>
+            cy.on('window:load', () => {
+              throw 'A location/non-SPA visit was detected'
+            }),
         })
       })
 
@@ -347,7 +372,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -366,7 +391,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -385,7 +410,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -404,7 +429,7 @@ describe('Links', () => {
 
         cy.window().should('have.property', '_inertia_request_dump')
         cy.window()
-          .then(window => window._inertia_request_dump)
+          .then((window) => window._inertia_request_dump)
           .then(({ method, headers, form, files, query }) => {
             expect(headers).to.contain.key('content-type')
             expect(headers['content-type']).to.contain('multipart/form-data; boundary=')
@@ -422,7 +447,10 @@ describe('Links', () => {
   describe('Headers', () => {
     it('has the default set of headers', () => {
       cy.visit('/links/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.default').click()
@@ -430,7 +458,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia'])
           expect(headers).to.not.contain.key('x-inertia-version')
@@ -442,7 +470,10 @@ describe('Links', () => {
 
     it('starts using the x-inertia-version header when a version was given from the back-end', () => {
       cy.visit('/links/headers/version', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.default').click()
@@ -450,7 +481,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.key('x-inertia-version')
           expect(headers['x-inertia-version']).to.eq('example-version-header')
@@ -459,7 +490,10 @@ describe('Links', () => {
 
     it('allows to set custom headers', () => {
       cy.visit('/links/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.custom').click()
@@ -467,7 +501,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'foo'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -479,7 +513,10 @@ describe('Links', () => {
 
     it('cannot override built-in Inertia headers', () => {
       cy.visit('/links/headers', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
 
       cy.get('.overridden').click()
@@ -487,7 +524,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_request_dump')
       cy.window()
-        .then(window => window._inertia_request_dump)
+        .then((window) => window._inertia_request_dump)
         .then(({ headers }) => {
           expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'bar'])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
@@ -501,7 +538,10 @@ describe('Links', () => {
   describe('Replace', () => {
     beforeEach(() => {
       cy.visit('/', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.get('.links-replace').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/links/replace')
@@ -533,22 +573,25 @@ describe('Links', () => {
   describe('Preserve state', () => {
     beforeEach(() => {
       cy.visit('/links/preserve-state', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
     })
 
-    it('preserves the page\'s local state', () => {
+    it("preserves the page's local state", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Example value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now bar')
           cy.get('.field').should('have.value', 'Example value')
@@ -556,18 +599,18 @@ describe('Links', () => {
       })
     })
 
-    it('preserves the page\'s local state (callback)', () => {
+    it("preserves the page's local state (callback)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Example value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-callback').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now callback-bar')
           cy.get('.field').should('have.value', 'Example value')
@@ -575,18 +618,18 @@ describe('Links', () => {
       })
     })
 
-    it('does not preserve the page\'s local state', () => {
+    it("does not preserve the page's local state", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Another value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-false').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.not.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now baz')
           cy.get('.field').should('have.value', '')
@@ -594,18 +637,18 @@ describe('Links', () => {
       })
     })
 
-    it('does not preserve the page\'s local state (callback)', () => {
+    it("does not preserve the page's local state (callback)", () => {
       cy.get('.foo').should('have.text', 'Foo is now default')
       cy.get('.field').type('Another value')
 
       cy.window().should('have.property', '_inertia_page_key')
-      cy.window().then(window => {
+      cy.window().then((window) => {
         const componentKey = window._inertia_page_key
 
         cy.get('.preserve-callback-false').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/links/preserve-state-page-two')
 
-        cy.window().then(window => {
+        cy.window().then((window) => {
           expect(componentKey).to.not.eq(window._inertia_page_key)
           cy.get('.foo').should('have.text', 'Foo is now callback-baz')
           cy.get('.field').should('have.value', '')
@@ -656,7 +699,7 @@ describe('Links', () => {
 
             // Assert that the page is passed in to the callback
             expect(alert.getCalls()).to.have.length(1)
-            tap(alert.getCall(0).lastArg, page => {
+            tap(alert.getCall(0).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -697,7 +740,7 @@ describe('Links', () => {
 
             // Assert that the page is passed in to the callback
             expect(alert.getCalls()).to.have.length(1)
-            tap(alert.getCall(0).lastArg, page => {
+            tap(alert.getCall(0).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -767,7 +810,7 @@ describe('Links', () => {
 
             // Assert that the page is passed in to the callback
             expect(alert.getCalls()).to.have.length(1)
-            tap(alert.getCall(0).lastArg, page => {
+            tap(alert.getCall(0).lastArg, (page) => {
               expect(page).to.be.an('object')
               expect(page).to.have.property('component')
               expect(page).to.have.property('props')
@@ -802,7 +845,7 @@ describe('Links', () => {
             cy.then(() => {
               // Assert that the page is passed in to the callback
               expect(alert.getCalls()).to.have.length(1)
-              tap(alert.getCall(0).lastArg, page => {
+              tap(alert.getCall(0).lastArg, (page) => {
                 expect(page).to.be.an('object')
                 expect(page).to.have.property('component')
                 expect(page).to.have.property('props')
@@ -855,7 +898,10 @@ describe('Links', () => {
 
     beforeEach(() => {
       cy.visit('/links/url-fragments', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.url().should('eq', Cypress.config().baseUrl + '/links/url-fragments')
       cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
@@ -883,7 +929,10 @@ describe('Links', () => {
   describe('Partial Reloads', () => {
     beforeEach(() => {
       cy.visit('/links/partial-reloads', {
-        onLoad: () => cy.on('window:load', () => { throw 'A location/non-SPA visit was detected' }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            throw 'A location/non-SPA visit was detected'
+          }),
       })
       cy.get('.foo-text').should('have.text', 'Foo is now 1')
       cy.get('.bar-text').should('have.text', 'Bar is now 2')
@@ -896,7 +945,7 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_props')
       cy.window()
-        .then(window => window._inertia_props)
+        .then((window) => window._inertia_props)
         .then(({ headers }) => {
           expect(headers).to.not.contain.keys(['x-inertia-partial-component', 'x-inertia-partial-data'])
         })
@@ -908,9 +957,15 @@ describe('Links', () => {
 
       cy.window().should('have.property', '_inertia_props')
       cy.window()
-        .then(window => window._inertia_props)
+        .then((window) => window._inertia_props)
         .then(({ headers }) => {
-          expect(headers).to.contain.keys(['accept', 'x-requested-with', 'x-inertia', 'x-inertia-partial-component', 'x-inertia-partial-data'])
+          expect(headers).to.contain.keys([
+            'accept',
+            'x-requested-with',
+            'x-inertia',
+            'x-inertia-partial-component',
+            'x-inertia-partial-data',
+          ])
           expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
           expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
           expect(headers['x-inertia']).to.eq('true')
@@ -953,7 +1008,10 @@ describe('Links', () => {
     let alert = null
     beforeEach(() => {
       cy.visit('/', {
-        onLoad: () => cy.on('window:load', () => { alert('A location/non-SPA visit was detected') }),
+        onLoad: () =>
+          cy.on('window:load', () => {
+            alert('A location/non-SPA visit was detected')
+          }),
       })
 
       alert = cy.stub()
@@ -985,7 +1043,7 @@ describe('Links', () => {
   describe('"as" warning', () => {
     it('shows no warning when using GET inertia-links', () => {
       cy.visit('/links/as-warning/get', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -995,23 +1053,22 @@ describe('Links', () => {
 
     it('shows a warning when using POST inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/post', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
 
-      cy
-        .get('@consoleWarn')
-        .should('be.calledWith',
-          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+      cy.get('@consoleWarn').should(
+        'be.calledWith',
+        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
           '<Link href="/example" method="post" as="button">...</Link>',
-        )
+      )
     })
 
     it('shows no warning when using POST inertia-links "as" a non-anchor tag', () => {
       cy.visit('/links/as-warning-false/post', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -1021,23 +1078,22 @@ describe('Links', () => {
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/put', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
 
-      cy
-        .get('@consoleWarn')
-        .should('be.calledWith',
-          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+      cy.get('@consoleWarn').should(
+        'be.calledWith',
+        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
           '<Link href="/example" method="put" as="button">...</Link>',
-        )
+      )
     })
 
     it('shows no warning when using PUT inertia-links "as" a non-anchor tag', () => {
       cy.visit('/links/as-warning-false/put', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -1047,23 +1103,22 @@ describe('Links', () => {
 
     it('shows a warning when using PATCH inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/patch', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
 
-      cy
-        .get('@consoleWarn')
-        .should('be.calledWith',
-          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+      cy.get('@consoleWarn').should(
+        'be.calledWith',
+        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
           '<Link href="/example" method="patch" as="button">...</Link>',
-        )
+      )
     })
 
     it('shows no warning when using PATCH inertia-links "as" a non-anchor tag', () => {
       cy.visit('/links/as-warning-false/patch', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
@@ -1073,23 +1128,22 @@ describe('Links', () => {
 
     it('shows a warning when using DELETE inertia-links using the anchor tag', () => {
       cy.visit('/links/as-warning/delete', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })
 
-      cy
-        .get('@consoleWarn')
-        .should('be.calledWith',
-          'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
+      cy.get('@consoleWarn').should(
+        'be.calledWith',
+        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
           'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
           '<Link href="/example" method="delete" as="button">...</Link>',
-        )
+      )
     })
 
     it('shows no warning when using DELETE inertia-links "as" a non-anchor tag', () => {
       cy.visit('/links/as-warning-false/delete', {
-        onBeforeLoad: window => {
+        onBeforeLoad: (window) => {
           cy.spy(window.console, 'warn').as('consoleWarn')
         },
       })

@@ -22,7 +22,7 @@ export default {
       form: this.$inertia.form({
         name: 'foo',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
@@ -37,7 +37,7 @@ export default {
     },
     deleteForm() {
       this.form.delete('/dump/delete')
-    }
-  }
+    },
+  },
 }
 </script>
