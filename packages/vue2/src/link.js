@@ -1,4 +1,4 @@
-import { Inertia, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
 
 export default {
   functional: true,
@@ -87,7 +87,7 @@ export default {
             if (shouldIntercept(event)) {
               event.preventDefault()
 
-              Inertia.visit(href, {
+              router.visit(href, {
                 data: propsData,
                 method: method,
                 replace: props.replace,

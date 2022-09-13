@@ -1,6 +1,6 @@
 import form from './form'
 import remember from './remember'
-import { createHeadManager, Inertia } from '@inertiajs/core'
+import { createHeadManager, router } from '@inertiajs/core'
 
 let app = {}
 let headManager = null
@@ -43,7 +43,7 @@ export default {
     headManager = createHeadManager(this.$isServer, this.titleCallback, this.onHeadUpdate)
 
     if (!this.$isServer) {
-      Inertia.init({
+      router.init({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
         swapComponent: async ({ component, page, preserveState }) => {
@@ -53,7 +53,7 @@ export default {
         },
       })
 
-      Inertia.on('navigate', () => headManager.forceUpdate())
+      router.on('navigate', () => headManager.forceUpdate())
     }
   },
   render(h) {
@@ -84,7 +84,7 @@ export default {
 
 export const plugin = {
   install(Vue) {
-    Inertia.form = form
+    router.form = form // needed so that we can access the form helper at this.$inertia.form
     Vue.mixin(remember)
 
     Vue.mixin({
@@ -96,7 +96,7 @@ export const plugin = {
         })
         Object.defineProperty(this, '$inertia', {
           get: function () {
-            return Inertia
+            return router
           },
         })
         Object.defineProperty(this, '$page', {
