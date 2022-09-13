@@ -24,8 +24,8 @@
 
     <span @click="progressNoFiles" class="no-progress">progress no files</span>
 
-    <span class="success-status">Form was {{ form.wasSuccessful ? '' : 'not '}}successful</span>
-    <span class="recently-status">Form was {{ form.recentlySuccessful ? '' : 'not '}}recently successful</span>
+    <span class="success-status">Form was {{ form.wasSuccessful ? '' : 'not ' }}successful</span>
+    <span class="recently-status">Form was {{ form.recentlySuccessful ? '' : 'not ' }}recently successful</span>
   </div>
 </template>
 <script>
@@ -36,7 +36,7 @@ export default {
       form: this.$inertia.form({
         name: 'foo',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
@@ -53,8 +53,8 @@ export default {
       }
 
       return {
-        ... defaults,
-        ... overrides
+        ...defaults,
+        ...overrides,
       }
     },
     submit() {
@@ -62,7 +62,7 @@ export default {
     },
     successfulRequest() {
       this.form.post(this.$page.url, {
-        ... this.callbacks()
+        ...this.callbacks(),
       })
     },
     onSuccessResetErrors() {
@@ -85,9 +85,9 @@ export default {
               alert('onSuccess')
               alert(this.form.hasErrors)
               alert(this.form.errors)
-            }
+            },
           })
-        }
+        },
       })
     },
     errorsSetOnError() {
@@ -100,111 +100,111 @@ export default {
           onError: () => {
             alert('onError')
             alert(this.form.errors)
-          }
-        })
+          },
+        }),
       })
     },
     onBeforeVisit() {
       this.form.post('/sleep', {
-        ... this.callbacks({
-          onBefore: visit => {
-            alert("onBefore")
-            alert(visit);
-          }
-        })
+        ...this.callbacks({
+          onBefore: (visit) => {
+            alert('onBefore')
+            alert(visit)
+          },
+        }),
       })
     },
     onBeforeVisitCancelled() {
       this.form.post('/sleep', {
-        ... this.callbacks({
-          onBefore: visit => {
-            alert("onBefore")
+        ...this.callbacks({
+          onBefore: (visit) => {
+            alert('onBefore')
             return false
-          }
-        })
+          },
+        }),
       })
     },
     onStartVisit() {
       this.form.post('/form-helper/events', {
-        ... this.callbacks({
-          onStart: visit => {
-            alert('onStart');
+        ...this.callbacks({
+          onStart: (visit) => {
+            alert('onStart')
             alert(visit)
-          }
-        })
+          },
+        }),
       })
     },
     onProgressVisit() {
       this.form
-        .transform(data => ({
-          ... data,
-          file: new File(['foobar'], 'example.bin')
+        .transform((data) => ({
+          ...data,
+          file: new File(['foobar'], 'example.bin'),
         }))
         .post('/dump/post', {
-          ... this.callbacks({
-            onProgress: event => {
-              alert('onProgress');
+          ...this.callbacks({
+            onProgress: (event) => {
+              alert('onProgress')
               alert(event)
-            }
-          })
+            },
+          }),
         })
     },
     cancelledVisit() {
       this.form.post('/sleep', {
-        ... this.callbacks({
-          onCancelToken: token => {
-            alert('onCancelToken');
+        ...this.callbacks({
+          onCancelToken: (token) => {
+            alert('onCancelToken')
 
             setTimeout(() => {
               alert('CANCELLING!')
               token.cancel()
-            }, 10);
+            }, 10)
           },
-        })
+        }),
       })
     },
     onSuccessVisit() {
       this.form.post('/dump/post', {
-        ... this.callbacks({
-          onSuccess: page => {
-            alert('onSuccess');
+        ...this.callbacks({
+          onSuccess: (page) => {
+            alert('onSuccess')
             alert(page)
-          }
-        })
+          },
+        }),
       })
     },
     onSuccessPromiseVisit() {
       this.form.post('/dump/post', {
-        ... this.callbacks({
-          onSuccess: page => {
-            alert('onSuccess');
+        ...this.callbacks({
+          onSuccess: (page) => {
+            alert('onSuccess')
 
             setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
-            return new Promise(resolve => setTimeout(resolve, 20))
-          }
-        })
+            return new Promise((resolve) => setTimeout(resolve, 20))
+          },
+        }),
       })
     },
     onErrorVisit() {
       this.form.post('/form-helper/events/errors', {
-        ... this.callbacks({
-          onError: errors => {
-            alert('onError');
+        ...this.callbacks({
+          onError: (errors) => {
+            alert('onError')
             alert(errors)
-          }
-        })
+          },
+        }),
       })
     },
     onErrorPromiseVisit() {
       this.form.post('/form-helper/events/errors', {
-        ... this.callbacks({
-          onError: errors => {
-            alert('onError');
+        ...this.callbacks({
+          onError: (errors) => {
+            alert('onError')
 
             setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
-            return new Promise(resolve => setTimeout(resolve, 20))
-          }
-        })
+            return new Promise((resolve) => setTimeout(resolve, 20))
+          },
+        }),
       })
     },
     onSuccessProcessing() {
@@ -230,7 +230,7 @@ export default {
             alert('onFinish')
             alert(this.form.processing)
           },
-        })
+        }),
       })
     },
     onErrorProcessing() {
@@ -256,14 +256,14 @@ export default {
             alert('onFinish')
             alert(this.form.processing)
           },
-        })
+        }),
       })
     },
     onSuccessProgress() {
       this.form
-        .transform(data => ({
-          ... data,
-          file: new File(['foobar'], 'example.bin')
+        .transform((data) => ({
+          ...data,
+          file: new File(['foobar'], 'example.bin'),
         }))
         .post(this.$page.url, {
           ...this.callbacks({
@@ -291,43 +291,43 @@ export default {
               alert('onFinish')
               alert(this.form.progress)
             },
-          })
+          }),
         })
     },
     onErrorProgress() {
       this.form
-          .transform(data => ({
-            ... data,
-            file: new File(['foobar'], 'example.bin')
-          }))
-          .post('/form-helper/events/errors', {
-            ...this.callbacks({
-              onBefore: () => {
-                alert('onBefore')
-                alert(this.form.progress)
-              },
-              onCancelToken: () => {
-                alert('onCancelToken')
-                alert(this.form.progress)
-              },
-              onStart: () => {
-                alert('onStart')
-                alert(this.form.progress)
-              },
-              onProgress: () => {
-                alert('onProgress')
-                alert(this.form.progress)
-              },
-              onError: () => {
-                alert('onError')
-                alert(this.form.progress)
-              },
-              onFinish: () => {
-                alert('onFinish')
-                alert(this.form.progress)
-              },
-            })
-          })
+        .transform((data) => ({
+          ...data,
+          file: new File(['foobar'], 'example.bin'),
+        }))
+        .post('/form-helper/events/errors', {
+          ...this.callbacks({
+            onBefore: () => {
+              alert('onBefore')
+              alert(this.form.progress)
+            },
+            onCancelToken: () => {
+              alert('onCancelToken')
+              alert(this.form.progress)
+            },
+            onStart: () => {
+              alert('onStart')
+              alert(this.form.progress)
+            },
+            onProgress: () => {
+              alert('onProgress')
+              alert(this.form.progress)
+            },
+            onError: () => {
+              alert('onError')
+              alert(this.form.progress)
+            },
+            onFinish: () => {
+              alert('onFinish')
+              alert(this.form.progress)
+            },
+          }),
+        })
     },
     progressNoFiles() {
       this.form.post(this.$page.url, {
@@ -356,9 +356,9 @@ export default {
             alert('onFinish')
             alert(this.form.progress)
           },
-        })
+        }),
       })
-    }
-  }
+    },
+  },
 }
 </script>

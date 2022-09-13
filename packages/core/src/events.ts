@@ -1,6 +1,9 @@
 import { GlobalEventDetails, GlobalEventNames, GlobalEventTrigger } from './types'
 
-function fireEvent<TEventName extends GlobalEventNames>(name: TEventName, options: CustomEventInit<GlobalEventDetails<TEventName>>): boolean {
+function fireEvent<TEventName extends GlobalEventNames>(
+  name: TEventName,
+  options: CustomEventInit<GlobalEventDetails<TEventName>>,
+): boolean {
   return document.dispatchEvent(new CustomEvent(`inertia:${name}`, options))
 }
 

@@ -34,13 +34,13 @@ export default {
         name: 'foo',
         handle: 'example',
         remember: false,
-      })
+      }),
     }
   },
   methods: {
     submit() {
       this.form.post('/remember/form-helper/default')
     },
-  }
+  },
 }
 </script>

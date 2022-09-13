@@ -7,8 +7,12 @@
     <pre class="headers">{{ headers }}</pre>
 
     <inertia-link href="/links/partial-reloads" :data="{ foo }" class="all">Update All</inertia-link>
-    <inertia-link href="/links/partial-reloads" :only="['headers', 'foo', 'bar']" :data="{ foo }" class="foo-bar">'Only' foo + bar</inertia-link>
-    <inertia-link href="/links/partial-reloads" :only="['headers', 'baz']" :data="{ foo }" class="baz">'Only' baz</inertia-link>
+    <inertia-link href="/links/partial-reloads" :only="['headers', 'foo', 'bar']" :data="{ foo }" class="foo-bar"
+      >'Only' foo + bar</inertia-link
+    >
+    <inertia-link href="/links/partial-reloads" :only="['headers', 'baz']" :data="{ foo }" class="baz"
+      >'Only' baz</inertia-link
+    >
   </div>
 </template>
 <script>
@@ -16,14 +20,14 @@ export default {
   props: {
     foo: {
       type: Number,
-      default: 0
+      default: 0,
     },
     bar: Number,
     baz: Number,
     headers: Object,
   },
   created() {
-    window._inertia_props = this.$page.props;
-  }
+    window._inertia_props = this.$page.props
+  },
 }
 </script>

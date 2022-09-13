@@ -15,11 +15,25 @@ export default {
   },
   methods: {
     isUnaryTag(node) {
-      return [
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-        'input', 'keygen', 'link', 'meta', 'param', 'source',
-        'track', 'wbr',
-      ].indexOf(node.tag) > -1
+      return (
+        [
+          'area',
+          'base',
+          'br',
+          'col',
+          'embed',
+          'hr',
+          'img',
+          'input',
+          'keygen',
+          'link',
+          'meta',
+          'param',
+          'source',
+          'track',
+          'wbr',
+        ].indexOf(node.tag) > -1
+      )
     },
     renderTagStart(node) {
       this.ensureNodeHasAttrs(node)
@@ -69,16 +83,14 @@ export default {
       return this.renderTag(node)
     },
     renderNodes(nodes) {
-      const computed = nodes.map(node => this.renderNode(node)).filter(node => node)
-      if (this.title && !computed.find(tag => tag.startsWith('<title'))) {
+      const computed = nodes.map((node) => this.renderNode(node)).filter((node) => node)
+      if (this.title && !computed.find((tag) => tag.startsWith('<title'))) {
         computed.push(`<title inertia>${this.title}</title>`)
       }
       return computed
     },
   },
   render() {
-    this.provider.update(
-      this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default() : [])
-    )
+    this.provider.update(this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default() : []))
   },
 }

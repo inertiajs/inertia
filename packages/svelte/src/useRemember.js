@@ -5,7 +5,7 @@ import { Inertia } from '@inertiajs/core'
 function useRemember(initialState, key) {
   const restored = Inertia.restore(key)
   const store = writable(restored !== undefined ? restored : initialState)
-  const unsubscribe = store.subscribe(state => Inertia.remember(state, key))
+  const unsubscribe = store.subscribe((state) => Inertia.remember(state, key))
 
   onDestroy(unsubscribe)
 

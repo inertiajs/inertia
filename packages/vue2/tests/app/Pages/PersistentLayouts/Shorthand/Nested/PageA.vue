@@ -5,13 +5,13 @@
   </div>
 </template>
 <script>
-  import SiteLayout from "@/Layouts/SiteLayout"
-  import NestedLayout from "@/Layouts/NestedLayout"
+import SiteLayout from '@/Layouts/SiteLayout'
+import NestedLayout from '@/Layouts/NestedLayout'
 
-  export default {
-    layout: [SiteLayout, NestedLayout],
-    created() {
-      window._inertia_page_props = this.$vnode.data.props;
-    }
-  }
+export default {
+  layout: [SiteLayout, NestedLayout],
+  created() {
+    window._inertia_page_props = this.$vnode.data.props
+  },
+}
 </script>

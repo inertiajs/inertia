@@ -5,14 +5,12 @@
   </div>
 </template>
 <script>
-  import SiteLayout from "@/Layouts/SiteLayout"
-  import NestedLayout from "@/Layouts/NestedLayout"
+import SiteLayout from '@/Layouts/SiteLayout'
+import NestedLayout from '@/Layouts/NestedLayout'
 
-  export default {
-    layout: (h, page) => {
-      return h(SiteLayout, [
-        h(NestedLayout, [page]),
-      ])
-    },
-  }
+export default {
+  layout: (h, page) => {
+    return h(SiteLayout, [h(NestedLayout, [page])])
+  },
+}
 </script>

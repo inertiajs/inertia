@@ -8,13 +8,13 @@
   </div>
 </template>
 <script>
-  export default {
-    data: () => ({
-      createdAt: null,
-    }),
-    created() {
-      this.createdAt = Date.now();
-      window._inertia_site_layout_props = this.$vnode.data.props;
-    }
-  }
+export default {
+  data: () => ({
+    createdAt: null,
+  }),
+  created() {
+    this.createdAt = Date.now()
+    window._inertia_site_layout_props = this.$vnode.data.props
+  },
+}
 </script>

@@ -8,11 +8,15 @@
 export default {
   methods: {
     visit() {
-      this.$inertia.get('/sleep', {}, {
-        onStart: () => alert('started'),
-        onCancel: () => alert('cancelled')
-      })
-    }
-  }
+      this.$inertia.get(
+        '/sleep',
+        {},
+        {
+          onStart: () => alert('started'),
+          onCancel: () => alert('cancelled'),
+        },
+      )
+    },
+  },
 }
 </script>

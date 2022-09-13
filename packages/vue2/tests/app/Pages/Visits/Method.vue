@@ -15,28 +15,28 @@
 export default {
   methods: {
     standardVisitMethod() {
-      this.$inertia.visit('/dump/get');
+      this.$inertia.visit('/dump/get')
     },
     specificVisitMethod() {
       this.$inertia.visit('/dump/patch', {
-        method: 'patch'
-      });
+        method: 'patch',
+      })
     },
     getMethod() {
-      this.$inertia.get('/dump/get');
+      this.$inertia.get('/dump/get')
     },
     postMethod() {
-      this.$inertia.post('/dump/post');
+      this.$inertia.post('/dump/post')
     },
     putMethod() {
-      this.$inertia.put('/dump/put');
+      this.$inertia.put('/dump/put')
     },
     patchMethod() {
-      this.$inertia.patch('/dump/patch');
+      this.$inertia.patch('/dump/patch')
     },
     deleteMethod() {
-      this.$inertia.delete('/dump/delete');
+      this.$inertia.delete('/dump/delete')
     },
-  }
+  },
 }
 </script>

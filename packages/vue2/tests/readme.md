@@ -6,6 +6,7 @@ Install depenencies:
 yarn
 
 ```
+
 To run it on the command line
 
 ```sh

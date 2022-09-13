@@ -4,7 +4,7 @@ const Renderer = {
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
-    const node = (template.content.firstChild as Element)
+    const node = template.content.firstChild as Element
 
     if (!tag.startsWith('<script ')) {
       return node
@@ -12,7 +12,7 @@ const Renderer = {
 
     const script = document.createElement('script')
     script.innerHTML = node.innerHTML
-    node.getAttributeNames().forEach(name => {
+    node.getAttributeNames().forEach((name) => {
       script.setAttribute(name, node.getAttribute(name) || '')
     })
 
@@ -26,18 +26,20 @@ const Renderer = {
   findMatchingElementIndex(element: Element, elements: Array<Element>): number {
     const key = element.getAttribute('inertia')
     if (key !== null) {
-      return elements.findIndex(element => element.getAttribute('inertia') === key)
+      return elements.findIndex((element) => element.getAttribute('inertia') === key)
     }
 
     return -1
   },
 
   update: debounce(function (elements: Array<string>) {
-    const sourceElements = elements.map(element => this.buildDOMElement(element))
-    const targetElements = Array.from(document.head.childNodes).filter(element => this.isInertiaManagedElement(element as Element))
+    const sourceElements = elements.map((element) => this.buildDOMElement(element))
+    const targetElements = Array.from(document.head.childNodes).filter((element) =>
+      this.isInertiaManagedElement(element as Element),
+    )
 
-    targetElements.forEach(targetElement => {
-      const index = this.findMatchingElementIndex((targetElement as Element), sourceElements)
+    targetElements.forEach((targetElement) => {
+      const index = this.findMatchingElementIndex(targetElement as Element, sourceElements)
       if (index === -1) {
         targetElement?.parentNode?.removeChild(targetElement)
         return
@@ -49,17 +51,21 @@ const Renderer = {
       }
     })
 
-    sourceElements.forEach(element => document.head.appendChild(element))
+    sourceElements.forEach((element) => document.head.appendChild(element))
   }, 1),
 }
 
-export default function createHeadManager(isServer: boolean, titleCallback: ((title: string) => string), onUpdate: ((elements: string[]) => void)): ({
-  forceUpdate: () => void,
-  createProvider: () => ({
-    update: (elements: string[]) => void,
-    disconnect: () => void,
-  })
-}) {
+export default function createHeadManager(
+  isServer: boolean,
+  titleCallback: (title: string) => string,
+  onUpdate: (elements: string[]) => void,
+): {
+  forceUpdate: () => void
+  createProvider: () => {
+    update: (elements: string[]) => void
+    disconnect: () => void
+  }
+} {
   const states: Record<string, Array<string>> = {}
   let lastProviderId = 0
 
@@ -90,7 +96,7 @@ export default function createHeadManager(isServer: boolean, titleCallback: ((ti
     const title = titleCallback('')
 
     const defaults: Record<string, string> = {
-      ... (title ? { title: `<title inertia="">${title}</title>`} : {}),
+      ...(title ? { title: `<title inertia="">${title}</title>` } : {}),
     }
 
     const elements = Object.values(states)
@@ -102,7 +108,7 @@ export default function createHeadManager(isServer: boolean, titleCallback: ((ti
 
         if (element.indexOf('<title ') === 0) {
           const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/)
-          carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}`: element
+          carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}` : element
           return carry
         }
 

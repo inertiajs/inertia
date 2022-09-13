@@ -3,17 +3,17 @@ import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
 import { Inertia } from '@inertiajs/core'
 
-export default function(...args) {
+export default function (...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? Inertia.restore(rememberKey) : null
   let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
-  let transform = data => data
+  let transform = (data) => data
 
   const form = Vue.observable({
-    ...restored ? restored.data : data,
+    ...(restored ? restored.data : data),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -22,12 +22,10 @@ export default function(...args) {
     wasSuccessful: false,
     recentlySuccessful: false,
     data() {
-      return Object
-        .keys(data)
-        .reduce((carry, key) => {
-          carry[key] = this[key]
-          return carry
-        }, {})
+      return Object.keys(data).reduce((carry, key) => {
+        carry[key] = this[key]
+        return carry
+      }, {})
     },
     transform(callback) {
       transform = callback
@@ -38,11 +36,7 @@ export default function(...args) {
       if (typeof key === 'undefined') {
         defaults = this.data()
       } else {
-        defaults = Object.assign(
-          {},
-          cloneDeep(defaults),
-          value ? ({[key]: value}) : key,
-        )
+        defaults = Object.assign({}, cloneDeep(defaults), value ? { [key]: value } : key)
       }
 
       return this
@@ -54,9 +48,8 @@ export default function(...args) {
       } else {
         Object.assign(
           this,
-          Object
-            .keys(clonedDefaults)
-            .filter(key => fields.includes(key))
+          Object.keys(clonedDefaults)
+            .filter((key) => fields.includes(key))
             .reduce((carry, key) => {
               carry[key] = clonedDefaults[key]
               return carry
@@ -67,19 +60,20 @@ export default function(...args) {
       return this
     },
     setError(key, value) {
-      Object.assign(this.errors, (value ? { [key]: value } : key))
+      Object.assign(this.errors, value ? { [key]: value } : key)
 
       this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
     },
     clearErrors(...fields) {
-      this.errors = Object
-        .keys(this.errors)
-        .reduce((carry, field) => ({
+      this.errors = Object.keys(this.errors).reduce(
+        (carry, field) => ({
           ...carry,
-          ...(fields.length > 0 && !fields.includes(field) ? { [field] : this.errors[field] } : {}),
-        }), {})
+          ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
+        }),
+        {},
+      )
 
       this.hasErrors = Object.keys(this.errors).length > 0
 
@@ -96,7 +90,7 @@ export default function(...args) {
             return options.onCancelToken(token)
           }
         },
-        onBefore: visit => {
+        onBefore: (visit) => {
           this.wasSuccessful = false
           this.recentlySuccessful = false
           clearTimeout(recentlySuccessfulTimeoutId)
@@ -105,34 +99,34 @@ export default function(...args) {
             return options.onBefore(visit)
           }
         },
-        onStart: visit => {
+        onStart: (visit) => {
           this.processing = true
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
-        onProgress: event => {
+        onProgress: (event) => {
           this.progress = event
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
-        onSuccess: async page => {
+        onSuccess: async (page) => {
           this.processing = false
           this.progress = null
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
-          recentlySuccessfulTimeoutId = setTimeout(() => this.recentlySuccessful = false, 2000)
+          recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
           defaults = cloneDeep(this.data())
           this.isDirty = false
           return onSuccess
         },
-        onError: errors => {
+        onError: (errors) => {
           this.processing = false
           this.progress = null
           this.clearErrors().setError(errors)
@@ -161,7 +155,7 @@ export default function(...args) {
       }
 
       if (method === 'delete') {
-        Inertia.delete(url, { ..._options, data  })
+        Inertia.delete(url, { ..._options, data })
       } else {
         Inertia[method](url, data, _options)
       }
@@ -198,12 +192,16 @@ export default function(...args) {
 
   new Vue({
     created() {
-      this.$watch(() => form, newValue => {
-        form.isDirty = !isEqual(form.data(), defaults)
-        if (rememberKey) {
-          Inertia.remember(newValue.__remember(), rememberKey)
-        }
-      }, { immediate: true, deep: true })
+      this.$watch(
+        () => form,
+        (newValue) => {
+          form.isDirty = !isEqual(form.data(), defaults)
+          if (rememberKey) {
+            Inertia.remember(newValue.__remember(), rememberKey)
+          }
+        },
+        { immediate: true, deep: true },
+      )
     },
   })
 

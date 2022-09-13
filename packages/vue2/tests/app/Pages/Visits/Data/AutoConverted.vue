@@ -1,6 +1,8 @@
 <template>
   <div>
-    <span class="text">This is the page that demonstrates automatic conversion of plain objects to form-data using manual visits</span>
+    <span class="text"
+      >This is the page that demonstrates automatic conversion of plain objects to form-data using manual visits</span
+    >
 
     <span @click="visitMethod" class="visit">Visit Link</span>
     <span @click="postMethod" class="post">POST Link</span>
@@ -14,15 +16,15 @@ export default {
   data: () => ({
     formData: {
       file: new File([], 'example.jpg'),
-      foo: 'bar'
+      foo: 'bar',
     },
   }),
   methods: {
     visitMethod() {
       this.$inertia.visit('/dump/post', {
         method: 'post',
-        data: this.formData
-      });
+        data: this.formData,
+      })
     },
     postMethod() {
       this.$inertia.post('/dump/post', this.formData)
@@ -35,9 +37,9 @@ export default {
     },
     deleteMethod() {
       this.$inertia.delete('/dump/delete', {
-        data: this.formData
+        data: this.formData,
       })
     },
-  }
+  },
 }
 </script>

@@ -17,7 +17,10 @@
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
   },
-  "files": ["dist", "types"],
+  "files": [
+    "dist",
+    "types"
+  ],
   "source": "src/index.ts",
   "main": "dist/index.js",
   "unpkg": "dist/index.umd.js",

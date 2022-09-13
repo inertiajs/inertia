@@ -15,11 +15,25 @@ export default {
   },
   methods: {
     isUnaryTag(node) {
-      return [
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img',
-        'input', 'keygen', 'link', 'meta', 'param', 'source',
-        'track', 'wbr',
-      ].indexOf(node.type) > -1
+      return (
+        [
+          'area',
+          'base',
+          'br',
+          'col',
+          'embed',
+          'hr',
+          'img',
+          'input',
+          'keygen',
+          'link',
+          'meta',
+          'param',
+          'source',
+          'track',
+          'wbr',
+        ].indexOf(node.type) > -1
+      )
     },
     renderTagStart(node) {
       node.props = node.props || {}
@@ -59,7 +73,7 @@ export default {
       return html
     },
     addTitleElement(elements) {
-      if (this.title && !elements.find(tag => tag.startsWith('<title'))) {
+      if (this.title && !elements.find((tag) => tag.startsWith('<title'))) {
         elements.push(`<title inertia>${this.title}</title>`)
       }
       return elements
@@ -67,15 +81,13 @@ export default {
     renderNodes(nodes) {
       return this.addTitleElement(
         nodes
-          .flatMap(node => node.type.toString() === 'Symbol(Fragment)' ? node.children : node)
-          .map(node => this.renderTag(node))
-          .filter(node => node)
+          .flatMap((node) => (node.type.toString() === 'Symbol(Fragment)' ? node.children : node))
+          .map((node) => this.renderTag(node))
+          .filter((node) => node),
       )
     },
   },
   render() {
-    this.provider.update(
-      this.renderNodes(this.$slots.default ? this.$slots.default() : [])
-    )
+    this.provider.update(this.renderNodes(this.$slots.default ? this.$slots.default() : []))
   },
 }
