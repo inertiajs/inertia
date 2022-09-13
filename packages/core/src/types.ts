@@ -178,3 +178,17 @@ export type VisitId = unknown
 export type Component = unknown
 
 export type InertiaAppResponse = Promise<{ head: string[], body: string } | void>
+
+declare global {
+  interface DocumentEventMap {
+    'inertia:before': GlobalEvent<'before'>
+    'inertia:start': GlobalEvent<'start'>
+    'inertia:progress': GlobalEvent<'progress'>
+    'inertia:success': GlobalEvent<'success'>
+    'inertia:error': GlobalEvent<'error'>
+    'inertia:invalid': GlobalEvent<'invalid'>
+    'inertia:exception': GlobalEvent<'exception'>
+    'inertia:finish': GlobalEvent<'finish'>
+    'inertia:navigate': GlobalEvent<'navigate'>
+  }
+}
