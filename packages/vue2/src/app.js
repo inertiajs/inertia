@@ -1,6 +1,6 @@
-import useForm from './useForm'
-import remember from './remember'
 import { createHeadManager, router } from '@inertiajs/core'
+import remember from './remember'
+import useForm from './useForm'
 
 let app = {}
 let headManager = null
