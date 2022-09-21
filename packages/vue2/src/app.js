@@ -113,3 +113,7 @@ export function defineLayout(component) {
   app.component.layout = component
   app.$forceUpdate()
 }
+
+export function usePage() {
+  return app.page
+}
