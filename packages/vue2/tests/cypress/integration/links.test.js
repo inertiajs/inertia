@@ -904,7 +904,7 @@ describe('Links', () => {
           }),
       })
       cy.url().should('eq', Cypress.config().baseUrl + '/links/url-fragments')
-      cy.get('.document-position').should('contain.text', 'Document scroll position is 0 & 0')
+      cy.get('.document-position').should('have.text', 'Document scroll position is 0 & 0')
     })
 
     it('Scrolls to the fragment element when making a visit to a different page', () => {

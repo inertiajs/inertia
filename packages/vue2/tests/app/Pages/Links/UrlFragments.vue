@@ -2,9 +2,8 @@
   <div>
     <span class="text">This is the links page that demonstrates url fragment behaviour</span>
     <div style="width: 200vw; height: 200vh; margin-top: 50vh">
-      <div class="document-position">
-        Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}
-      </div>
+      <!-- prettier-ignore -->
+      <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
       <inertia-link href="/links/url-fragments#target" class="basic">Basic link</inertia-link>
       <inertia-link href="#target" class="fragment">Fragment link</inertia-link>
       <inertia-link href="/links/url-fragments#non-existent-fragment" class="non-existent-fragment"
