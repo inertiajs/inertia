@@ -8,46 +8,46 @@ jobs:
 
     strategy:
       matrix:
-        adapter: ['vue']
+        adapter: ['vue2']
         browser: ['chrome']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Setup NodeJS
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14.15.3
+          node-version: 16.15
 
-      - name: Cache Node modules
+      - name: Cache node modules
         uses: actions/cache@v2
         with:
-          key: ${{ runner.OS }}-yarn-cache-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
           path: |
             ~/.cache
             node_modules
-            packages/vue/tests/node_modules
+            packages/vue2/tests/node_modules
 
       - name: Build Inertia
         run: |
-          yarn install
-          yarn build
+          npm install
+          cd packages/core && npm run build
+          cd ../vue2 && npm run build
 
       - name: Local-link @inertiajs/core
-        run: cd packages/core && yarn link
+        run: cd packages/core && npm link
 
       - name: Local-link @inertiajs/${{ matrix.adapter }}
-        run: cd packages/${{ matrix.adapter }} && yarn link
+        run: cd packages/${{ matrix.adapter }} && npm link
 
       - name: Install Cypress Dependencies
         run: |
           cd packages/${{ matrix.adapter }}/tests
-          yarn install --frozen-lockfile
-          yarn link "@inertiajs/core"
-          yarn link "@inertiajs/${{ matrix.adapter }}"
+          npm install
+          npm link "@inertiajs/core" "@inertiajs/${{ matrix.adapter }}"
 
       - name: Run Cypress (${{ matrix.browser }} / ${{ matrix.adapter }})
         run: |
           cd packages/${{ matrix.adapter }}/tests
-          yarn ci
+          npm run ci
