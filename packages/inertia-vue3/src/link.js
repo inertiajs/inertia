@@ -46,7 +46,7 @@ export default {
   },
   setup(props, { slots, attrs }) {
     return props => {
-      const as = props.as.toLowerCase()
+      const as = typeof props.as === 'string' ? props.as.toLowerCase() : props.as;
       const method = props.method.toLowerCase()
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 

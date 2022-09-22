@@ -56,7 +56,7 @@ export default {
       ...(data.on || {}),
     }
 
-    const as = props.as.toLowerCase()
+    const as = typeof props.as === 'string' ? props.as.toLowerCase() : props.as;
     const method = props.method.toLowerCase()
     const [href, propsData] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 

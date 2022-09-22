@@ -72,8 +72,7 @@ export default forwardRef(function InertiaLink({
       onError,
     ],
   )
-
-  as = as.toLowerCase()
+  as = typeof as === 'string' ? as.toLowerCase() : as;
   method = method.toLowerCase()
   const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
   href = _href
