@@ -46,6 +46,7 @@ type InertiaLinkProps = BaseInertiaLinkProps & Omit<React.HTMLAttributes<HTMLEle
 type InertiaLink = React.FunctionComponent<InertiaLinkProps>
 	
 type InertiaHeadProps = {
+    children?: React.ReactNode
     title?: string
 }
 
