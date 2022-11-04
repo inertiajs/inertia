@@ -30,7 +30,7 @@
     method,
     replace,
     preserveScroll,
-    preserveState,
+    preserveState: preserveState ?? method !== 'get',
     only,
     headers,
     queryStringArrayFormat,
