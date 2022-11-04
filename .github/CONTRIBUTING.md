@@ -32,7 +32,7 @@ npm watch
 It's often helpful to develop Inertia.js within a real application, such as [Ping CRM](https://github.com/inertiajs/pingcrm). To do this, you'll need to use the `npm link` feature to tell your application to use the local versions of the Inertia.js dependencies. To do this, first run `npm link` within each Inertia.js package that you want to develop.
 
 ```sh
-cd packages/inertia
+cd packages/core
 npm link
 cd ../vue3
 npm link
@@ -43,7 +43,7 @@ Finally, within your application, run `npm link` again, but this time specifying
 ```sh
 cd pingcrm
 npm install
-npm link @inertiajs/inertia
+npm link @inertiajs/core
 npm link @inertiajs/vue2
 ```
 
