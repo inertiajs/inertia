@@ -1,5 +1,4 @@
-export { progress, router } from '@inertiajs/core'
-export { default as App } from './App'
+export { router } from '@inertiajs/core'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Head } from './Head'
 export { default as Link } from './Link'
