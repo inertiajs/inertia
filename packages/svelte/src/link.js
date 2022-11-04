@@ -2,29 +2,30 @@ import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/co
 import { createEventDispatcher } from 'svelte'
 
 export default (node, options = {}) => {
-  const [href, data] = mergeDataIntoQueryString(
-    options.method || 'get',
-    node.href || options.href || '',
-    options.data || {},
-    options.queryStringArrayFormat || 'brackets',
-  )
+  const [href, data] = hrefAndData(options)
   node.href = href
   options.data = data
 
-  const dispatch = createEventDispatcher()
+  function hrefAndData(options) {
+    return mergeDataIntoQueryString(
+      options.method || 'get',
+      node.href || options.href || '',
+      options.data || {},
+      options.queryStringArrayFormat || 'brackets',
+    )
+  }
 
   function visit(event) {
     dispatch('click', event)
 
-    const href = node.href || options.href
-
-    if (!href) {
+    if (!node.href) {
       throw new Error('Option "href" is required')
     }
 
     if (shouldIntercept(event)) {
       event.preventDefault()
-      router.visit(href, options)
+
+      router.visit(node.href, options)
     }
   }
 
@@ -32,15 +33,9 @@ export default (node, options = {}) => {
 
   return {
     update(newOptions) {
-      const [href, data] = mergeDataIntoQueryString(
-        newOptions.method || 'get',
-        node.href || newOptions.href,
-        newOptions.data || {},
-        newOptions.queryStringArrayFormat || 'brackets',
-      )
+      const [href, data] = hrefAndData(newOptions)
       node.href = href
-      newOptions.data = data
-      options = newOptions
+      options = { ...newOptions, data }
     },
     destroy() {
       node.removeEventListener('click', visit)
