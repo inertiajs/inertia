@@ -1,7 +1,8 @@
+import { setupProgress } from '@inertiajs/core'
 import { createElement } from 'react'
 import App from './App'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, title, page, render }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, title, progress = {}, page, render }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -22,6 +23,10 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
       },
     })
   })
+
+  if (!isServer && progress) {
+    setupProgress(progress)
+  }
 
   if (isServer) {
     const body = await render(

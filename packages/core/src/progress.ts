@@ -111,14 +111,15 @@ function injectCSS(color: string): void {
   document.head.appendChild(element)
 }
 
-const Progress = {
-  init({ delay = 250, color = '#29d', includeCSS = true, showSpinner = false } = {}): void {
-    addEventListeners(delay)
-    NProgress.configure({ showSpinner })
-    if (includeCSS) {
-      injectCSS(color)
-    }
-  },
+export default function setupProgress({
+  delay = 250,
+  color = '#29d',
+  includeCSS = true,
+  showSpinner = false,
+} = {}): void {
+  addEventListeners(delay)
+  NProgress.configure({ showSpinner })
+  if (includeCSS) {
+    injectCSS(color)
+  }
 }
-
-export default Progress

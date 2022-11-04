@@ -1,6 +1,7 @@
+import { setupProgress } from '@inertiajs/core'
 import App from './App.svelte'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, page, render }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, progress = {}, page, render }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -20,6 +21,10 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pag
       },
     })
   })
+
+  if (!isServer && progress) {
+    setupProgress(progress)
+  }
 
   if (isServer) {
     // TODO
