@@ -875,7 +875,7 @@ describe('Links', () => {
           })
       })
 
-      it('restores all tracked scroll regions when pressing the back button from another website', () => {
+      it.skip('restores all tracked scroll regions when pressing the back button from another website', () => {
         cy.get('.off-site')
           .click({ force: true })
           .then(() => {
