@@ -13,7 +13,6 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
   const vueApp = await resolveComponent(initialPage.component).then((initialComponent) => {
     return setup({
       el,
-      app: App, // deprecated
       App,
       props: {
         initialPage,
