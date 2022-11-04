@@ -1,5 +1,4 @@
 import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
-import { createEventDispatcher } from 'svelte'
 
 export default (node, options = {}) => {
   const [href, data] = hrefAndData(options)
@@ -16,8 +15,6 @@ export default (node, options = {}) => {
   }
 
   function visit(event) {
-    dispatch('click', event)
-
     if (!node.href) {
       throw new Error('Option "href" is required')
     }
