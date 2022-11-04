@@ -46,6 +46,14 @@
   on:mouseout
   on:mouseover
   on:mouseup
+  on:cancel-token
+  on:before
+  on:start
+  on:progress
+  on:finish
+  on:cancel
+  on:success
+  on:error
 >
   <slot />
 </svelte:element>
