@@ -5,6 +5,10 @@ export default (node, options = {}) => {
   node.href = href
   options.data = data
 
+  function fireEvent(name, eventOptions = {}) {
+    return node.dispatchEvent(new CustomEvent(name, eventOptions))
+  }
+
   function hrefAndData(options) {
     return mergeDataIntoQueryString(
       options.method || 'get',
@@ -22,7 +26,17 @@ export default (node, options = {}) => {
     if (shouldIntercept(event)) {
       event.preventDefault()
 
-      router.visit(node.href, options)
+      router.visit(node.href, {
+        onCancelToken: () => fireEvent('cancel-token'),
+        onBefore: (visit) => fireEvent('before', { detail: { visit }}),
+        onStart: (visit) => fireEvent('start', { detail: { visit }}),
+        onProgress: (progress) => fireEvent('progress', { detail: { progress }}),
+        onFinish: (visit) => fireEvent('finish', { detail: { visit }}),
+        onCancel: () => fireEvent('cancel'),
+        onSuccess: (page) => fireEvent('success', { detail: { page }}),
+        onError: (errors) => fireEvent('error', { detail: { errors }}),
+        ...options,
+      })
     }
   }
 
