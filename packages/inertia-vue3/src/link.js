@@ -44,7 +44,8 @@ export default {
       default: 'brackets',
     },
   },
-  setup(props, { slots, attrs }) {
+  emits: ['cancel-token', 'before', 'start', 'progress', 'finish', 'cancel', 'success', 'error'],
+  setup(props, { slots, attrs, emit }) {
     return props => {
       const as = props.as.toLowerCase()
       const method = props.method.toLowerCase()
@@ -69,14 +70,14 @@ export default {
               preserveState: props.preserveState ?? (method !== 'get'),
               only: props.only,
               headers: props.headers,
-              onCancelToken: attrs.onCancelToken || (() => ({})),
-              onBefore: attrs.onBefore || (() => ({})),
-              onStart: attrs.onStart || (() => ({})),
-              onProgress: attrs.onProgress || (() => ({})),
-              onFinish: attrs.onFinish || (() => ({})),
-              onCancel: attrs.onCancel || (() => ({})),
-              onSuccess: attrs.onSuccess || (() => ({})),
-              onError: attrs.onError || (() => ({})),
+              onCancelToken: (...args) => emit('cancel-token', ...args),
+              onBefore: (...args) => emit('before', ...args),
+              onStart: (...args) => emit('start', ...args),
+              onProgress: (...args) => emit('progress', ...args),
+              onFinish: (...args) => emit('finish', ...args),
+              onCancel: (...args) => emit('cancel', ...args),
+              onSuccess: (...args) => emit('success', ...args),
+              onError: (...args) => emit('error', ...args),
             })
           }
         },
