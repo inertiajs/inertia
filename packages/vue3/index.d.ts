@@ -14,10 +14,12 @@ export declare const App: InertiaApp
 
 export declare const plugin: Plugin
 
+export declare const router: typeof Inertia.router
+
 export interface CreateInertiaAppProps {
   id?: string
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
-  setup: (props: { el: Element; app: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
+  setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: (title: string) => string
   page?: Inertia.Page
   render?: (app: VueApp) => Promise<string>
