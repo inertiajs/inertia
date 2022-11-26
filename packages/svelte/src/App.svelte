@@ -12,9 +12,9 @@
       store.update((current) => ({
         component,
         page,
-        key: preserveState ? current.key : Date.now()
+        key: preserveState ? current.key : Date.now(),
       }))
-    }
+    },
   })
 
   $: child = $store.component && h($store.component.default, $store.page.props)

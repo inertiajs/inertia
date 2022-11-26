@@ -1,49 +1,59 @@
 <script>
-  import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
-  import { beforeUpdate, createEventDispatcher } from 'svelte'
+  import { beforeUpdate } from 'svelte'
+  import { default as inertia } from './link'
 
-  const dispatch = createEventDispatcher()
-
-  export let
-    data = {},
-    href,
-    method = 'get',
-    replace = false,
-    preserveScroll = false,
-    preserveState = null,
-    only = [],
-    headers = {}
+  export let href
+  export let as = 'a'
+  export let data = {}
+  export let method = 'get'
+  export let replace = false
+  export let preserveScroll = false
+  export let preserveState = null
+  export let only = []
+  export let headers = {}
+  export let queryStringArrayFormat = 'brackets'
 
   beforeUpdate(() => {
-    method = method.toLowerCase()
-    const [_href, _data] = mergeDataIntoQueryString(method, href, data)
-    href = _href
-    data = _data
-
-    if (method !== 'get') {
-      console.warn(`Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "inertia" directive. For example:\n\n<button use:inertia={{ method: 'post', href: '${href}' }}>...</button>`)
+    if (as === 'a' && method.toLowerCase() !== 'get') {
+      console.warn(
+        `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
+      )
     }
   })
-
-  function visit(event) {
-    dispatch('click', event)
-
-    if (shouldIntercept(event)) {
-      event.preventDefault()
-
-      router.visit(href, {
-        data,
-        method,
-        preserveScroll,
-        preserveState: preserveState !== null ? preserveState : (method !== 'get'),
-        replace,
-        only,
-        headers,
-      })
-    }
-  }
 </script>
 
-<a {...$$restProps} {href} on:click={visit}>
+<svelte:element
+  this={as}
+  use:inertia={{
+    ...(as !== 'a' ? { href } : {}),
+    data,
+    method,
+    replace,
+    preserveScroll,
+    preserveState: preserveState ?? method !== 'get',
+    only,
+    headers,
+    queryStringArrayFormat,
+  }}
+  {...as === 'a' ? { href } : {}}
+  {...$$restProps}
+  on:focus
+  on:blur
+  on:click
+  on:dblclick
+  on:mousedown
+  on:mousemove
+  on:mouseout
+  on:mouseover
+  on:mouseup
+  on:cancel-token
+  on:before
+  on:start
+  on:progress
+  on:finish
+  on:cancel
+  on:success
+  on:error
+>
   <slot />
-</a>
+</svelte:element>
