@@ -4,6 +4,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "prettier-plugin-svelte": "^2.8.1"
   }
 }

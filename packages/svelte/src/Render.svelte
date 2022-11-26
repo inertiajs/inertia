@@ -3,7 +3,7 @@
     return {
       component,
       ...(props ? { props } : {}),
-      ...(children ? { children } : {})
+      ...(children ? { children } : {}),
     }
   }
 </script>

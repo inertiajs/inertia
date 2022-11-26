@@ -28,13 +28,13 @@ export default (node, options = {}) => {
 
       router.visit(node.href, {
         onCancelToken: () => fireEvent('cancel-token'),
-        onBefore: (visit) => fireEvent('before', { detail: { visit }}),
-        onStart: (visit) => fireEvent('start', { detail: { visit }}),
-        onProgress: (progress) => fireEvent('progress', { detail: { progress }}),
-        onFinish: (visit) => fireEvent('finish', { detail: { visit }}),
+        onBefore: (visit) => fireEvent('before', { detail: { visit } }),
+        onStart: (visit) => fireEvent('start', { detail: { visit } }),
+        onProgress: (progress) => fireEvent('progress', { detail: { progress } }),
+        onFinish: (visit) => fireEvent('finish', { detail: { visit } }),
         onCancel: () => fireEvent('cancel'),
-        onSuccess: (page) => fireEvent('success', { detail: { page }}),
-        onError: (errors) => fireEvent('error', { detail: { errors }}),
+        onSuccess: (page) => fireEvent('success', { detail: { page } }),
+        onError: (errors) => fireEvent('error', { detail: { errors } }),
         ...options,
       })
     }
