@@ -1,4 +1,4 @@
-import { router, mergeDataIntoQueryString, shouldIntercept } from '@inertiajs/core'
+import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
 
 export default {
   functional: true,

@@ -1,6 +1,6 @@
-import * as process from 'process'
 import { createServer, IncomingMessage } from 'http'
-import { Page, InertiaAppResponse } from './types'
+import * as process from 'process'
+import { InertiaAppResponse, Page } from './types'
 
 type AppCallback = (page: Page) => InertiaAppResponse
 type RouteHandler = (request: IncomingMessage) => Promise<unknown>

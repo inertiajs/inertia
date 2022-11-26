@@ -1,9 +1,19 @@
-import modal from './modal'
+import { AxiosResponse, default as Axios } from 'axios'
 import debounce from './debounce'
+import {
+  fireBeforeEvent,
+  fireErrorEvent,
+  fireExceptionEvent,
+  fireFinishEvent,
+  fireInvalidEvent,
+  fireNavigateEvent,
+  fireProgressEvent,
+  fireStartEvent,
+  fireSuccessEvent,
+} from './events'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
-import { default as Axios, AxiosResponse } from 'axios'
-import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
+import modal from './modal'
 import {
   ActiveVisit,
   GlobalEvent,
@@ -20,17 +30,7 @@ import {
   VisitId,
   VisitOptions,
 } from './types'
-import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
-} from './events'
+import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
 

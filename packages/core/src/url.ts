@@ -1,5 +1,5 @@
-import * as qs from 'qs'
 import deepmerge from 'deepmerge'
+import * as qs from 'qs'
 import { FormDataConvertible, Method } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
