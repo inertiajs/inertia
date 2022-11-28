@@ -102,7 +102,7 @@ export declare const Head: InertiaHead
 
 declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
-    $inertia: typeof Inertia.Inertia
+    $inertia: typeof Inertia.router
     $page: Inertia.Page
     $headManager: ReturnType<typeof Inertia.createHeadManager>
   }
