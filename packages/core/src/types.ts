@@ -194,6 +194,13 @@ export type Component = unknown
 
 export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
 
+export type ProgressOptions = {
+  delay?: number | undefined
+  color?: string | undefined
+  includeCSS?: boolean | undefined
+  showSpinner?: boolean | undefined
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>

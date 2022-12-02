@@ -127,6 +127,7 @@ export type CreateInertiaAppSetupReturnType = ReactInstance | void
 export type InertiaAppOptionsForCSR<SharedProps> = BaseInertiaAppOptions & {
   id?: string
   page?: Inertia.Page | string
+  progress?: Inertia.ProgressOptions
   render?: undefined
   setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
