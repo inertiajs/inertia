@@ -19,6 +19,10 @@
   "keywords": [
     "svelte"
   ],
+  "exports": {
+    ".": "./src/index.js",
+    "./server": "./src/server.js"
+  },
   "main": "src/index.js",
   "peerDependencies": {
     "svelte": "^3.20.0"

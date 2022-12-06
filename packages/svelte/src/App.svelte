@@ -1,21 +1,6 @@
 <script>
-  import { router } from '@inertiajs/core'
   import Render, { h } from './Render.svelte'
   import store from './store'
-
-  export let initialPage, resolveComponent
-
-  router.init({
-    initialPage,
-    resolveComponent,
-    swapComponent: async ({ component, page, preserveState }) => {
-      store.update((current) => ({
-        component,
-        page,
-        key: preserveState ? current.key : Date.now(),
-      }))
-    },
-  })
 
   $: child = $store.component && h($store.component.default, $store.page.props)
   $: layout = $store.component && $store.component.layout
