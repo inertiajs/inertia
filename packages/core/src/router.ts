@@ -449,9 +449,8 @@ export class Router {
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() ? this.resetScrollPositions()
+          
           if (!replace) {
             fireNavigateEvent(page)
           }
