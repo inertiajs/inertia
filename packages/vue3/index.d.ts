@@ -22,6 +22,7 @@ export interface CreateInertiaAppProps {
   setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: (title: string) => string
   page?: Inertia.Page
+  progress?: Parameters<typeof Inertia.setupProgress>[0]
   render?: (app: VueApp) => Promise<string>
 }
 
