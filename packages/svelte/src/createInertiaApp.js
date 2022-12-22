@@ -3,7 +3,7 @@ import App from './App.svelte'
 import SSR from './SSR.svelte'
 import store from './store'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, progress = {}, page, visitOptions }) {
+export default async function createInertiaApp({ id = 'app', resolve, setup, progress = {}, page }) {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -34,7 +34,6 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
         initialPage,
         initialComponent,
         resolveComponent,
-        visitOptions,
       },
     })
   }
