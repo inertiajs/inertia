@@ -36,7 +36,7 @@ export interface CreateInertiaAppProps {
   }) => void | Vue
   title?: (title: string) => string
   page?: Inertia.Page
-  progress?: Parameters<typeof Inertia.setupProgress>[0]
+  progress?: Parameters<typeof Inertia.setupProgress>[0] | boolean
   render?: (vm: Vue) => Promise<string>
 }
 

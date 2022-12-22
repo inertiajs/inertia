@@ -1,5 +1,5 @@
 import * as Inertia from '@inertiajs/core'
-import { Ref, ComputedRef, App as VueApp, DefineComponent, Plugin } from 'vue'
+import { App as VueApp, ComputedRef, DefineComponent, Plugin, Ref } from 'vue'
 
 export interface InertiaAppProps {
   initialPage: Inertia.Page
@@ -22,7 +22,7 @@ export interface CreateInertiaAppProps {
   setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: (title: string) => string
   page?: Inertia.Page
-  progress?: Parameters<typeof Inertia.setupProgress>[0]
+  progress?: Parameters<typeof Inertia.setupProgress>[0] | boolean
   render?: (app: VueApp) => Promise<string>
 }
 
