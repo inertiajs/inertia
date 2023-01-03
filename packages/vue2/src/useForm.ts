@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/core'
+import { router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import Vue from 'vue'
@@ -6,7 +6,7 @@ import Vue from 'vue'
 export default function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
-  const restored = rememberKey ? router.restore(rememberKey) : null
+  const restored = rememberKey ? (router.restore(rememberKey) as { data: any; errors: any }) : null
   let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
@@ -79,7 +79,7 @@ export default function useForm(...args) {
 
       return this
     },
-    submit(method, url, options = {}) {
+    submit(method, url, options: VisitOptions = {}) {
       const data = transform(this.data())
       const _options = {
         ...options,
@@ -143,13 +143,13 @@ export default function useForm(...args) {
             return options.onCancel()
           }
         },
-        onFinish: () => {
+        onFinish: (visit) => {
           this.processing = false
           this.progress = null
           cancelToken = null
 
           if (options.onFinish) {
-            return options.onFinish()
+            return options.onFinish(visit)
           }
         },
       }

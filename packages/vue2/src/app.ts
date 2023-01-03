@@ -1,8 +1,9 @@
 import { createHeadManager, router } from '@inertiajs/core'
 import remember from './remember'
+import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
-let app = {}
+let app = {} as any
 let headManager = null
 
 export default {
@@ -46,7 +47,7 @@ export default {
       router.init({
         initialPage: this.initialPage,
         resolveComponent: this.resolveComponent,
-        swapComponent: async ({ component, page, preserveState }) => {
+        swapComponent: async ({ component, page, preserveState }: VuePageHandlerArgs) => {
           this.component = component
           this.page = page
           this.key = preserveState ? this.key : Date.now()
@@ -84,7 +85,7 @@ export default {
 
 export const plugin = {
   install(Vue) {
-    router.form = useForm // needed so that we can access the form helper at this.$inertia.form
+    router.form = useForm
     Vue.mixin(remember)
 
     Vue.mixin({
