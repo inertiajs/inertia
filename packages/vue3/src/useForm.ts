@@ -39,7 +39,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
 export default function useForm<TForm extends Record<string, unknown>>(
   rememberKeyOrData: string | TForm,
   maybeData?: TForm,
-) {
+): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const data = typeof rememberKeyOrData === 'object' ? rememberKeyOrData : (maybeData as TForm)
   const restored = rememberKey
@@ -60,21 +60,25 @@ export default function useForm<TForm extends Record<string, unknown>>(
     wasSuccessful: false,
     recentlySuccessful: false,
     data() {
-      return Object.keys(data).reduce((carry, key) => {
+      return (Object.keys(data) as Array<keyof TForm>).reduce((carry, key) => {
         carry[key] = this[key]
         return carry
-      }, {})
+      }, {} as Partial<TForm>) as TForm
     },
     transform(callback) {
       transform = callback
 
       return this
     },
-    defaults(key, value) {
-      if (typeof key === 'undefined') {
+    defaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+      if (typeof fieldOrFields === 'undefined') {
         defaults = this.data()
       } else {
-        defaults = Object.assign({}, cloneDeep(defaults), value ? { [key]: value } : key)
+        defaults = Object.assign(
+          {},
+          cloneDeep(defaults),
+          typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
+        )
       }
 
       return this
@@ -97,8 +101,8 @@ export default function useForm<TForm extends Record<string, unknown>>(
 
       return this
     },
-    setError(key, value) {
-      Object.assign(this.errors, value ? { [key]: value } : key)
+    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+      Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0
 
