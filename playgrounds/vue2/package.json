@@ -1,0 +1,20 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build && vite build --ssr",
+        "ssr:serve": "node bootstrap/ssr/ssr.mjs",
+        "ssr:shutdown": "[ $(curl -s 'http://localhost:13714/shutdown'; echo $?) -eq 52 ]"
+    },
+    "devDependencies": {
+        "@inertiajs/vue2": "^1.0.0-beta.2",
+        "@vitejs/plugin-vue2": "^2.2.0",
+        "axios": "^1.1.2",
+        "laravel-vite-plugin": "^0.7.2",
+        "lodash": "^4.17.19",
+        "postcss": "^8.1.14",
+        "vite": "^4.0.3",
+        "vue": "^2.7.14",
+        "vue-server-renderer": "^2.7.14"
+    }
+}
