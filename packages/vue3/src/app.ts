@@ -1,10 +1,11 @@
-import { createHeadManager, router } from '@inertiajs/core'
+import { createHeadManager, Page, router } from '@inertiajs/core'
 import { computed, h, markRaw, ref, shallowRef } from 'vue'
 import remember from './remember'
+import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
 const component = ref(null)
-const page = ref({})
+const page = ref<Page>({} as unknown as Page)
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
@@ -47,7 +48,7 @@ export default {
       router.init({
         initialPage,
         resolveComponent,
-        swapComponent: async (args) => {
+        swapComponent: async (args: VuePageHandlerArgs) => {
           component.value = markRaw(args.component)
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
