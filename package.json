@@ -1,7 +1,8 @@
 {
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "playgrounds/*"
   ],
   "dependencies": {
     "prettier": "^2.7.1",
