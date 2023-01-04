@@ -1,6 +1,7 @@
 import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
+import Vue from 'vue'
 
-export default {
+export default Vue.extend({
   functional: true,
   props: {
     as: {
@@ -59,6 +60,7 @@ export default {
     const as = props.as.toLowerCase()
     const method = props.method.toLowerCase()
     const [href, propsData] = mergeDataIntoQueryString(
+      // @ts-ignore
       method,
       props.href || '',
       props.data,
@@ -82,6 +84,7 @@ export default {
         on: {
           ...data.on,
           click: (event) => {
+            // @ts-ignore
             data.on.click(event)
 
             if (shouldIntercept(event)) {
@@ -89,19 +92,28 @@ export default {
 
               router.visit(href, {
                 data: propsData,
+                // @ts-ignore
                 method: method,
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
                 only: props.only,
                 headers: props.headers,
+                // @ts-ignore
                 onCancelToken: data.on.cancelToken,
+                // @ts-ignore
                 onBefore: data.on.before,
+                // @ts-ignore
                 onStart: data.on.start,
+                // @ts-ignore
                 onProgress: data.on.progress,
+                // @ts-ignore
                 onFinish: data.on.finish,
+                // @ts-ignore
                 onCancel: data.on.cancel,
+                // @ts-ignore
                 onSuccess: data.on.success,
+                // @ts-ignore
                 onError: data.on.error,
               })
             }
@@ -111,4 +123,4 @@ export default {
       children,
     )
   },
-}
+})

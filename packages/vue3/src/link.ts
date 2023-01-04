@@ -1,7 +1,7 @@
 import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
-import { h } from 'vue'
+import { defineComponent, h } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'Link',
   props: {
     as: {
@@ -32,7 +32,7 @@ export default {
       default: null,
     },
     only: {
-      type: Array,
+      type: Array<string>,
       default: () => [],
     },
     headers: {
@@ -45,9 +45,10 @@ export default {
     },
   },
   setup(props, { slots, attrs }) {
-    return (props) => {
+    return () => {
       const as = props.as.toLowerCase()
       const method = props.method.toLowerCase()
+      // @ts-ignore
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
       if (as === 'a' && method !== 'get') {
@@ -67,19 +68,28 @@ export default {
 
               router.visit(href, {
                 data: data,
+                // @ts-ignore
                 method: method,
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
                 only: props.only,
                 headers: props.headers,
+                // @ts-ignore
                 onCancelToken: attrs.onCancelToken || (() => ({})),
+                // @ts-ignore
                 onBefore: attrs.onBefore || (() => ({})),
+                // @ts-ignore
                 onStart: attrs.onStart || (() => ({})),
+                // @ts-ignore
                 onProgress: attrs.onProgress || (() => ({})),
+                // @ts-ignore
                 onFinish: attrs.onFinish || (() => ({})),
+                // @ts-ignore
                 onCancel: attrs.onCancel || (() => ({})),
+                // @ts-ignore
                 onSuccess: attrs.onSuccess || (() => ({})),
+                // @ts-ignore
                 onError: attrs.onError || (() => ({})),
               })
             }
@@ -89,4 +99,4 @@ export default {
       )
     }
   },
-}
+})
