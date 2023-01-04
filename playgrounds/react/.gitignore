@@ -1,4 +1,5 @@
 /node_modules
+/bootstrap/ssr
 /public/build
 /public/hot
 /public/storage
