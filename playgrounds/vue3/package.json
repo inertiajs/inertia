@@ -1,20 +1,23 @@
 {
-    "private": true,
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build && vite build --ssr",
-        "ssr:serve": "node bootstrap/ssr/ssr.mjs",
-        "ssr:shutdown": "[ $(curl -s 'http://localhost:13714/shutdown'; echo $?) -eq 52 ]"
-    },
-    "devDependencies": {
-        "@inertiajs/vue3": "^1.0.0-beta.2",
-        "@vitejs/plugin-vue": "^4.0.0",
-        "@vue/server-renderer": "^3.2.45",
-        "axios": "^1.1.2",
-        "laravel-vite-plugin": "^0.7.2",
-        "lodash": "^4.17.19",
-        "postcss": "^8.1.14",
-        "vite": "^4.0.3",
-        "vue": "^3.2.45"
-    }
+  "name": "@inertiajs/vue3-playground",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && vite build --ssr",
+    "ssr:serve": "node bootstrap/ssr/ssr.mjs",
+    "ssr:shutdown": "[ $(curl -s 'http://localhost:13714/shutdown'; echo $?) -eq 52 ]"
+  },
+  "devDependencies": {
+    "@inertiajs/vue3": "^1.0.0-beta.2",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/server-renderer": "^3.2.45",
+    "autoprefixer": "^10.4.13",
+    "axios": "^1.1.2",
+    "laravel-vite-plugin": "^0.7.2",
+    "lodash": "^4.17.19",
+    "postcss": "^8.4.20",
+    "tailwindcss": "^3.2.4",
+    "vite": "^4.0.3",
+    "vue": "^3.2.45"
+  }
 }
