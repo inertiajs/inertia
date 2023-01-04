@@ -33,10 +33,10 @@
     }
   },
   "scripts": {
+    "dev": "./build.js --watch",
     "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly",
     "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "npm run build",
-    "watch": "./build.js --watch"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "esbuild": "^0.16.13",
