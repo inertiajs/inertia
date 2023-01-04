@@ -112,7 +112,3 @@ export function usePage() {
     version: computed(() => page.value.version),
   }
 }
-
-export function defineLayout(component) {
-  layout.value = component
-}
