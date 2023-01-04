@@ -1,5 +1,14 @@
+<script>
+import Layout from '../Components/Layout.vue'
+export default { layout: Layout }
+</script>
+
+<script setup>
+defineProps({ users: Array })
+</script>
+
 <template>
-  <Layout>
+  <div>
     <h1 class="text-3xl">Users</h1>
     <table>
       <thead>
@@ -17,19 +26,5 @@
         </tr>
       </tbody>
     </table>
-  </Layout>
+  </div>
 </template>
-
-<script>
-import Layout from '../Components/Layout.vue'
-
-export default {
-  components: { Layout },
-  props: {
-    users: {
-      type: Array,
-      required: true,
-    },
-  },
-}
-</script>
