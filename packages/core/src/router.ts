@@ -129,7 +129,9 @@ export class Router {
     })
     this.saveScrollPositions()
     if (window.location.hash) {
-      document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
+      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
+      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
+      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
     }
   }
 
