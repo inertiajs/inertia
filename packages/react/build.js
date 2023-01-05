@@ -2,7 +2,9 @@
 const esbuild = require('esbuild')
 const { nodeExternalsPlugin } = require('esbuild-node-externals')
 
-let config = {
+const watch = process.argv.slice(1).includes('--watch')
+
+const config = {
   bundle: true,
   minify: true,
   sourcemap: true,
@@ -10,51 +12,29 @@ let config = {
   plugins: [nodeExternalsPlugin()],
 }
 
-if (process.argv.slice(1).includes('--watch')) {
-  config.watch = {
-    onRebuild(error) {
-      if (error) console.error('watch build failed:', error)
-      else console.log('watch build succeeded')
-    },
-  }
+const builds = [
+  { entryPoints: ['src/index.ts'], format: 'esm', outfile: 'dist/index.esm.js', platform: 'browser' },
+  { entryPoints: ['src/index.ts'], format: 'cjs', outfile: 'dist/index.js', platform: 'browser' },
+  { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.esm.js', platform: 'node' },
+  { entryPoints: ['src/server.ts'], format: 'cjs', outfile: 'dist/server.js', platform: 'node' },
+]
+
+builds.forEach((build) => {
+  esbuild
+    .build({ ...config, ...build, ...watcher(build) })
+    .then(() => console.log(`${watch ? 'Watching' : 'Built'} ${build.entryPoints} (${build.format})…`))
+    .catch(() => process.exit(1))
+})
+
+function watcher(build) {
+  return watch
+    ? {
+        watch: {
+          onRebuild: (error) =>
+            error
+              ? console.error('Watch failed:', error)
+              : console.log(`Rebuilding ${build.entryPoints} (${build.format})…`),
+        },
+      }
+    : {}
 }
-
-esbuild
-  .build({
-    ...config,
-    entryPoints: ['src/index.ts'],
-    format: 'esm',
-    outfile: 'dist/index.esm.js',
-    platform: 'browser',
-  })
-  .catch(() => process.exit(1))
-
-esbuild
-  .build({
-    ...config,
-    entryPoints: ['src/index.ts'],
-    format: 'cjs',
-    outfile: 'dist/index.js',
-    platform: 'browser',
-  })
-  .catch(() => process.exit(1))
-
-esbuild
-  .build({
-    ...config,
-    entryPoints: ['src/server.ts'],
-    format: 'esm',
-    outfile: 'dist/server.esm.js',
-    platform: 'node',
-  })
-  .catch(() => process.exit(1))
-
-esbuild
-  .build({
-    ...config,
-    entryPoints: ['src/server.ts'],
-    format: 'cjs',
-    outfile: 'dist/server.js',
-    platform: 'node',
-  })
-  .catch(() => process.exit(1))
