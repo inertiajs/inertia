@@ -1,27 +1,35 @@
+import { Head } from '@inertiajs/react'
 import Layout from '../Components/Layout.jsx'
 
-export default function Users({ users }) {
+const Users = ({ users }) => {
   return (
-    <Layout>
+    <>
+      <Head title="Users" />
       <h1 className="text-3xl">Users</h1>
-      <table>
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Id</th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td className="border px-4 py-2">{user.id}</td>
-              <td className="border px-4 py-2">{user.name}</td>
-              <td className="border px-4 py-2">{user.email}</td>
+      <div className="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
+        <table className="w-full text-left">
+          <thead>
+            <tr>
+              <th className="px-4 py-2">Id</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Email</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </Layout>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id} className="border-t">
+                <td className="px-4 py-2">{user.id}</td>
+                <td className="px-4 py-2">{user.name}</td>
+                <td className="px-4 py-2">{user.email}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }
+
+Users.layout = (page) => <Layout children={page} />
+
+export default Users
