@@ -1,12 +1,19 @@
-<script>
-  import Layout from '../Components/Layout.svelte'
+<script context="module">
+  export { default as layout } from '../Components/Layout.svelte'
+</script>
 
+<script>
   export let users
 </script>
 
-<Layout>
-  <h1 class="text-3xl">Users</h1>
-  <table>
+<svelte:head>
+  <title>Users</title>
+</svelte:head>
+
+<h1 class="text-3xl">Users</h1>
+
+<div class="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
+  <table class="w-full text-left">
     <thead>
       <tr>
         <th class="px-4 py-2">Id</th>
@@ -16,12 +23,12 @@
     </thead>
     <tbody>
       {#each users as user}
-        <tr>
-          <td class="border px-4 py-2">{user.id}</td>
-          <td class="border px-4 py-2">{user.name}</td>
-          <td class="border px-4 py-2">{user.email}</td>
+        <tr class="border-t">
+          <td class=" px-4 py-2">{user.id}</td>
+          <td class=" px-4 py-2">{user.name}</td>
+          <td class=" px-4 py-2">{user.email}</td>
         </tr>
       {/each}
     </tbody>
   </table>
-</Layout>
+</div>
