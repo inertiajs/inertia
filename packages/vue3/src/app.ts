@@ -1,20 +1,41 @@
-import { createHeadManager, Page, router } from '@inertiajs/core'
-import { computed, h, markRaw, ref, shallowRef } from 'vue'
+import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
+import {
+  computed,
+  ComputedRef,
+  DefineComponent,
+  defineComponent,
+  h,
+  markRaw,
+  Plugin,
+  PropType,
+  ref,
+  shallowRef,
+} from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
+export interface InertiaAppProps {
+  initialPage: Page
+  initialComponent?: object
+  resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
+  titleCallback?: (title: string) => string
+  onHeadUpdate?: (elements: string[]) => void
+}
+
+export type InertiaApp = DefineComponent<InertiaAppProps>
+
 const component = ref(null)
-const page = ref<Page>({} as unknown as Page)
+const page = ref<Partial<Page>>({})
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
 
-export default {
+const App: InertiaApp = defineComponent({
   name: 'Inertia',
   props: {
     initialPage: {
-      type: Object,
+      type: Object as PropType<Page>,
       required: true,
     },
     initialComponent: {
@@ -22,16 +43,16 @@ export default {
       required: false,
     },
     resolveComponent: {
-      type: Function,
+      type: Function as PropType<(name: string) => DefineComponent | Promise<DefineComponent>>,
       required: false,
     },
     titleCallback: {
-      type: Function,
+      type: Function as PropType<(title: string) => string>,
       required: false,
       default: (title) => title,
     },
     onHeadUpdate: {
-      type: Function,
+      type: Function as PropType<(elements: string[]) => void>,
       required: false,
       default: () => () => {},
     },
@@ -90,9 +111,10 @@ export default {
       }
     }
   },
-}
+})
+export default App
 
-export const plugin = {
+export const plugin: Plugin = {
   install(app) {
     router.form = useForm
 
@@ -104,7 +126,12 @@ export const plugin = {
   },
 }
 
-export function usePage() {
+export function usePage(): {
+  props: ComputedRef<PageProps>
+  url: ComputedRef<string>
+  component: ComputedRef<string>
+  version: ComputedRef<string | null>
+} {
   return {
     props: computed(() => page.value.props),
     url: computed(() => page.value.url),

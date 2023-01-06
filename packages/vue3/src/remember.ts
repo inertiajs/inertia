@@ -1,7 +1,8 @@
 import { router } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
+import { ComponentOptions } from 'vue'
 
-export default {
+const remember: ComponentOptions = {
   created() {
     if (!this.$options.remember) {
       return
@@ -63,3 +64,5 @@ export default {
     })
   },
 }
+
+export default remember

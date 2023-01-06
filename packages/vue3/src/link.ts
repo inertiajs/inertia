@@ -1,7 +1,29 @@
-import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
-import { defineComponent, h } from 'vue'
+import { mergeDataIntoQueryString, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
+import { defineComponent, DefineComponent, h } from 'vue'
 
-export default defineComponent({
+interface InertiaLinkProps {
+  as?: string
+  data?: object
+  href: string
+  method?: string
+  headers?: object
+  onClick?: (event: MouseEvent | KeyboardEvent) => void
+  preserveScroll?: boolean | ((props: PageProps) => boolean)
+  preserveState?: boolean | ((props: PageProps) => boolean) | null
+  replace?: boolean
+  only?: string[]
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onBefore?: () => void
+  onStart?: () => void
+  onProgress?: (progress: Progress) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: () => void
+}
+
+type InertiaLink = DefineComponent<InertiaLinkProps>
+
+const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
     as: {
@@ -14,6 +36,7 @@ export default defineComponent({
     },
     href: {
       type: String,
+      required: true,
     },
     method: {
       type: String,
@@ -48,7 +71,7 @@ export default defineComponent({
     return () => {
       const as = props.as.toLowerCase()
       const method = props.method.toLowerCase()
-      // @ts-ignore
+      // @ts-expect-error
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
       if (as === 'a' && method !== 'get') {
@@ -68,28 +91,28 @@ export default defineComponent({
 
               router.visit(href, {
                 data: data,
-                // @ts-ignore
+                // @ts-expect-error
                 method: method,
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
                 only: props.only,
                 headers: props.headers,
-                // @ts-ignore
+                // @ts-expect-error
                 onCancelToken: attrs.onCancelToken || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onBefore: attrs.onBefore || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onStart: attrs.onStart || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onProgress: attrs.onProgress || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onFinish: attrs.onFinish || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onCancel: attrs.onCancel || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onSuccess: attrs.onSuccess || (() => ({})),
-                // @ts-ignore
+                // @ts-expect-error
                 onError: attrs.onError || (() => ({})),
               })
             }
@@ -100,3 +123,5 @@ export default defineComponent({
     }
   },
 })
+
+export default Link

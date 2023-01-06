@@ -1,8 +1,26 @@
-import { setupProgress } from '@inertiajs/core'
-import { createSSRApp, h } from 'vue'
-import App, { plugin } from './app'
+import { Page, setupProgress } from '@inertiajs/core'
+import { App as VueApp, createSSRApp, DefineComponent, h, Plugin } from 'vue'
+import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, title, progress = {}, page, render }) {
+interface CreateInertiaAppProps {
+  id?: string
+  resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
+  setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
+  title?: (title: string) => string
+  progress?: any
+  page?: Page
+  render?: (app: VueApp) => Promise<string>
+}
+
+export default async function createInertiaApp({
+  id = 'app',
+  resolve,
+  setup,
+  title,
+  progress = {},
+  page,
+  render,
+}: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -36,7 +54,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
           h('div', {
             id,
             'data-page': JSON.stringify(initialPage),
-            innerHTML: render(vueApp),
+            innerHTML: vueApp ? render(vueApp) : '',
           }),
       }),
     )

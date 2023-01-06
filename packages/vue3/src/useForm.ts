@@ -61,6 +61,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
     recentlySuccessful: false,
     data() {
       return (Object.keys(data) as Array<keyof TForm>).reduce((carry, key) => {
+        // @ts-expect-error
         carry[key] = this[key]
         return carry
       }, {} as Partial<TForm>) as TForm
