@@ -4,7 +4,7 @@ Thanks for your interest in contributing to Inertia.js!
 
 ## Local development
 
-To make local Inertia.js development easier, this project has been setup as a monorepo using [NPM Workspaces]https://docs.npmjs.com/using-npm/workspaces). To set it up, start by cloning the repository on your system.
+To make local Inertia.js development easier, this project has been setup as a monorepo using [NPM Workspaces](https://docs.npmjs.com/using-npm/workspaces). To set it up, start by cloning the repository on your system.
 
 ```sh
 git clone https://github.com/inertiajs/inertia.git inertia
