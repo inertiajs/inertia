@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing to Inertia.js!
 
-## Local development
+## Packages
 
 To make local Inertia.js development easier, this project has been setup as a monorepo using [NPM Workspaces](https://docs.npmjs.com/using-npm/workspaces). To set it up, start by cloning the repository on your system.
 
@@ -29,6 +29,8 @@ If you're making changes to one of the packages that requires a build step (`cor
 cd packages/core
 npm run watch
 ```
+
+## Playgrounds
 
 It's often helpful to develop Inertia.js using a real application. The playground folder contains an example Laravel project for each of the adapters. Here's how to get a playground running:
 
