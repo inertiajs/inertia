@@ -1,11 +1,11 @@
-import { mergeDataIntoQueryString, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h } from 'vue'
+import { mergeDataIntoQueryString, Method, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
+import { defineComponent, DefineComponent, h, PropType } from 'vue'
 
 interface InertiaLinkProps {
   as?: string
   data?: object
   href: string
-  method?: string
+  method?: Method
   headers?: object
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: boolean | ((props: PageProps) => boolean)
@@ -19,6 +19,7 @@ interface InertiaLinkProps {
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: () => void
+  queryStringArrayFormat?: 'brackets' | 'indices'
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -39,7 +40,7 @@ const Link: InertiaLink = defineComponent({
       required: true,
     },
     method: {
-      type: String,
+      type: String as PropType<Method>,
       default: 'get',
     },
     replace: {
@@ -63,15 +64,14 @@ const Link: InertiaLink = defineComponent({
       default: () => ({}),
     },
     queryStringArrayFormat: {
-      type: String,
+      type: String as PropType<'brackets' | 'indices'>,
       default: 'brackets',
     },
   },
   setup(props, { slots, attrs }) {
     return () => {
       const as = props.as.toLowerCase()
-      const method = props.method.toLowerCase()
-      // @ts-expect-error
+      const method = props.method.toLowerCase() as Method
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
       if (as === 'a' && method !== 'get') {
@@ -91,7 +91,6 @@ const Link: InertiaLink = defineComponent({
 
               router.visit(href, {
                 data: data,
-                // @ts-expect-error
                 method: method,
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
