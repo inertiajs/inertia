@@ -10,6 +10,7 @@
   "devDependencies": {
     "@inertiajs/vue2": "^1.0.0-beta.2",
     "@vitejs/plugin-vue2": "^2.2.0",
+    "@volar/vue-typescript": "^1.0.22",
     "autoprefixer": "^10.4.13",
     "axios": "^1.1.2",
     "laravel-vite-plugin": "^0.7.2",

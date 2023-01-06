@@ -44,11 +44,48 @@ Route::get('/users', function () {
                 'id' => 5,
                 'name' => 'Jess Archer',
                 'email' => 'jess@example.com',
-            ]
+            ],
+            [
+                'id' => 6,
+                'name' => 'Claudio Dekker',
+                'email' => 'claudio@example.com',
+            ],
+            [
+                'id' => 7,
+                'name' => 'Sebastian De Deyne',
+                'email' => 'sebastian@example.com',
+            ],
+            [
+                'id' => 8,
+                'name' => 'Pedro Borges',
+                'email' => 'pedro@example.com',
+            ],
         ],
     ]);
 });
 
+Route::get('/article', function () {
+    return inertia('Article');
+});
+
+Route::get('/form', function () {
+    return inertia('Form');
+});
+
+Route::post('/user', function () {
+    return inertia('User', [
+        'user' => request()->validate([
+            'name' => ['required'],
+            'company' => ['required'],
+            'role' => ['required', 'in:User,Admin,Super'],
+        ])
+    ]);
+});
+
+Route::get('/login', function () {
+    return inertia('Login');
+});
+
 Route::post('/logout', function () {
-    return back();
+    return redirect('/login');
 });
