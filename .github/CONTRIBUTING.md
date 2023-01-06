@@ -4,60 +4,55 @@ Thanks for your interest in contributing to Inertia.js!
 
 ## Local development
 
-To make local Inertia.js development easier, the project has been setup as a monorepo using [NPM Workspaces]https://docs.npmjs.com/using-npm/workspaces). To set it up, start by cloning the repository on your system.
+To make local Inertia.js development easier, this project has been setup as a monorepo using [NPM Workspaces]https://docs.npmjs.com/using-npm/workspaces). To set it up, start by cloning the repository on your system.
 
 ```sh
 git clone https://github.com/inertiajs/inertia.git inertia
 cd inertia
 ```
 
-Next, install the dependencies. Note, NPM will automatically install all the package dependencies at the project root and will setup the necessary symlinks.
+Next, install the JavaScript dependencies:
 
 ```sh
 npm install
 ```
 
-Next, you'll need to build the `dist` versions of the packages. This is necessary even if you're working with the `svelte` package (which doesn't have a build step), since it depends on the `inertia` package, which must be built.
+Next, build the packages:
 
 ```sh
-npm build
+npm run build --workspace=packages --if-present
 ```
 
-If you're making changes to one of the packages that requires a build step (`inertia`, `react`, `vue2`, `vue3`), you can setup a watcher to automatically run the build step whenever files are changed.
-
-```sh
-npm watch
-```
-
-It's often helpful to develop Inertia.js within a real application, such as [Ping CRM](https://github.com/inertiajs/pingcrm). To do this, you'll need to use the `npm link` feature to tell your application to use the local versions of the Inertia.js dependencies. To do this, first run `npm link` within each Inertia.js package that you want to develop.
+If you're making changes to one of the packages that requires a build step (`core`, `react`, `vue2`, `vue3`), you can setup a watcher to automatically run the build step whenever files are changed.
 
 ```sh
 cd packages/core
-npm link
-cd ../vue3
-npm link
+npm run watch
 ```
 
-Finally, within your application, run `npm link` again, but this time specifying which local packages you want to use:
+It's often helpful to develop Inertia.js using a real application. The playground folder contains an example Laravel project for each of the adapters. Here's how to get a playground running:
 
 ```sh
-cd pingcrm
-npm install
-npm link @inertiajs/core
-npm link @inertiajs/vue2
+cd playgrounds/react
+npm run build
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan serve
+# visit the site at http://127.0.0.1:8000
 ```
 
-If you're developing the `react` or `svelte` packages, you'll likely run into issues caused by the fact that there are two instances of the framework installed. This happens because there is one copy in the monorepo and another in your application. You can get around this issue by creating a (local only) Webpack alias. For example:
+To automatically see changes to the JavaScript files in the browser, start the development server:
 
-```js
-mix.webpackConfig({
-  resolve: {
-    alias: {
-      react: path.resolve('node_modules', 'react'),
-      svelte: path.resolve('node_modules', 'svelte'),
-    }
-  }
-})
+```sh
+npm run dev
+```
+
+To test the SSR mode, first run the build, and then start the SSR server:
+
+```sh
+npm run build
+npm run ssr:serve
 ```
 
 ## Publishing
