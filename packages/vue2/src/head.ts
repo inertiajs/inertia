@@ -1,4 +1,12 @@
-export default {
+import { ComponentOptions } from 'vue'
+
+export interface InertiaHeadProps {
+  title?: string
+}
+
+export type InertiaHead = ComponentOptions<any, any, any, any, any, InertiaHeadProps>
+
+const Head: InertiaHead = {
   props: {
     title: {
       type: String,
@@ -94,3 +102,4 @@ export default {
     this.provider.update(this.renderNodes(this.$scopedSlots.default ? this.$scopedSlots.default() : []))
   },
 }
+export default Head

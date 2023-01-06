@@ -1,12 +1,24 @@
-import { createHeadManager, router } from '@inertiajs/core'
+import { createHeadManager, Page, router } from '@inertiajs/core'
+import { Component, PluginObject } from 'vue'
+import { ComponentOptions } from 'vue/types/umd'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
+interface InertiaProps {
+  initialPage: Page
+  initialComponent?: object
+  resolveComponent?: (name: string) => Component
+  titleCallback?: (title: string) => string
+  onHeadUpdate?: (elements: string[]) => void
+}
+
+type InertiaApp = ComponentOptions<never, any, never, never, any, InertiaProps>
+
 let app = {} as any
 let headManager = null
 
-export default {
+const App: InertiaApp = {
   name: 'Inertia',
   props: {
     initialPage: {
@@ -82,8 +94,9 @@ export default {
     }
   },
 }
+export default App
 
-export const plugin = {
+export const plugin: PluginObject<any> = {
   install(Vue) {
     router.form = useForm
     Vue.mixin(remember)

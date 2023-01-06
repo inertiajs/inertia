@@ -1,7 +1,38 @@
-import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
-import Vue from 'vue'
+import {
+  FormDataConvertible,
+  mergeDataIntoQueryString,
+  Method,
+  PreserveStateOption,
+  Progress,
+  router,
+  shouldIntercept,
+} from '@inertiajs/core'
+import { FunctionalComponentOptions, PropType } from 'vue'
 
-export default Vue.extend({
+interface InertiaLinkProps {
+  as?: string
+  data?: Record<string, FormDataConvertible>
+  href: string
+  method?: Method
+  headers?: Record<string, string>
+  onClick?: (event: MouseEvent | KeyboardEvent) => void
+  preserveScroll?: PreserveStateOption
+  preserveState?: PreserveStateOption
+  replace?: boolean
+  only?: string[]
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onBefore?: () => void
+  onStart?: () => void
+  onProgress?: (progress: Progress) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onSuccess?: () => void
+  queryStringArrayFormat?: 'brackets' | 'indices'
+}
+
+type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
+
+const Link: InertiaLink = {
   functional: true,
   props: {
     as: {
@@ -16,8 +47,8 @@ export default Vue.extend({
       type: String,
     },
     method: {
-      type: String,
-      default: 'get',
+      type: String as PropType<Method>,
+      default: Method.GET,
     },
     replace: {
       type: Boolean,
@@ -40,7 +71,7 @@ export default Vue.extend({
       default: () => ({}),
     },
     queryStringArrayFormat: {
-      type: String,
+      type: String as PropType<'brackets' | 'indices'>,
       default: 'brackets',
     },
   },
@@ -58,9 +89,8 @@ export default Vue.extend({
     }
 
     const as = props.as.toLowerCase()
-    const method = props.method.toLowerCase()
+    const method = props.method.toLowerCase() as Method
     const [href, propsData] = mergeDataIntoQueryString(
-      // @ts-ignore
       method,
       props.href || '',
       props.data,
@@ -84,7 +114,7 @@ export default Vue.extend({
         on: {
           ...data.on,
           click: (event) => {
-            // @ts-ignore
+            // @ts-expect-error
             data.on.click(event)
 
             if (shouldIntercept(event)) {
@@ -92,28 +122,27 @@ export default Vue.extend({
 
               router.visit(href, {
                 data: propsData,
-                // @ts-ignore
                 method: method,
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
                 only: props.only,
                 headers: props.headers,
-                // @ts-ignore
+                // @ts-expect-error
                 onCancelToken: data.on.cancelToken,
-                // @ts-ignore
+                // @ts-expect-error
                 onBefore: data.on.before,
-                // @ts-ignore
+                // @ts-expect-error
                 onStart: data.on.start,
-                // @ts-ignore
+                // @ts-expect-error
                 onProgress: data.on.progress,
-                // @ts-ignore
+                // @ts-expect-error
                 onFinish: data.on.finish,
-                // @ts-ignore
+                // @ts-expect-error
                 onCancel: data.on.cancel,
-                // @ts-ignore
+                // @ts-expect-error
                 onSuccess: data.on.success,
-                // @ts-ignore
+                // @ts-expect-error
                 onError: data.on.error,
               })
             }
@@ -123,4 +152,5 @@ export default Vue.extend({
       children,
     )
   },
-})
+}
+export default Link
