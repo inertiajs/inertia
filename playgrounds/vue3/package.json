@@ -10,6 +10,7 @@
   "devDependencies": {
     "@inertiajs/vue3": "^1.0.0-beta.2",
     "@vitejs/plugin-vue": "^4.0.0",
+    "@volar/vue-typescript": "^1.0.22",
     "@vue/server-renderer": "^3.2.45",
     "autoprefixer": "^10.4.13",
     "axios": "^1.1.2",
