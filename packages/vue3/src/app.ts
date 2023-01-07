@@ -1,16 +1,5 @@
-import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
-import {
-  computed,
-  ComputedRef,
-  DefineComponent,
-  defineComponent,
-  h,
-  markRaw,
-  Plugin,
-  PropType,
-  ref,
-  shallowRef,
-} from 'vue'
+import { createHeadManager, Page, router } from '@inertiajs/core'
+import { DefineComponent, defineComponent, h, markRaw, Plugin, PropType, ref, shallowRef } from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
@@ -126,16 +115,6 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage(): {
-  props: ComputedRef<PageProps>
-  url: ComputedRef<string>
-  component: ComputedRef<string>
-  version: ComputedRef<string | null>
-} {
-  return {
-    props: computed(() => page.value.props),
-    url: computed(() => page.value.url),
-    component: computed(() => page.value.component),
-    version: computed(() => page.value.version),
-  }
+export function usePage() {
+  return page.value
 }
