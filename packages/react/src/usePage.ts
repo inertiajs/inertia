@@ -1,7 +1,8 @@
+import { Page } from '@inertiajs/core'
 import { useContext } from 'react'
 import PageContext from './PageContext'
 
-export default function usePage() {
+export default function usePage(): Page {
   const page = useContext(PageContext)
 
   if (!page) {

@@ -1,7 +1,13 @@
-import React, { useContext, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
-export default function Head({ children, title }) {
+type InertiaHeadProps = {
+  title?: string
+}
+
+type InertiaHead = FunctionComponent<InertiaHeadProps>
+
+const Head: InertiaHead = function ({ children, title }) {
   const headManager = useContext(HeadContext)
   const provider = useMemo(() => headManager.createProvider(), [headManager])
 
@@ -90,3 +96,4 @@ export default function Head({ children, title }) {
 
   return null
 }
+export default Head

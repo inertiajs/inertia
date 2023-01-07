@@ -1,16 +1,58 @@
-import { router } from '@inertiajs/core'
+import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export default function useForm(...args) {
+type setDataByObject<TForm> = (data: TForm) => void
+type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
+
+export interface InertiaFormProps<TForm extends Record<string, unknown>> {
+  data: TForm
+  isDirty: boolean
+  errors: Partial<Record<keyof TForm, string>>
+  hasErrors: boolean
+  processing: boolean
+  progress: Progress | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
+  transform: (callback: (data: TForm) => TForm) => void
+  setDefaults(): void
+  setDefaults(field: keyof TForm, value: string): void
+  setDefaults(fields: Record<keyof TForm, string>): void
+  reset: (...fields: (keyof TForm)[]) => void
+  clearErrors: (...fields: (keyof TForm)[]) => void
+  setError(field: keyof TForm, value: string): void
+  setError(errors: Record<keyof TForm, string>): void
+  submit: (method: Method, url: string, options?: VisitOptions) => void
+  get: (url: string, options?: VisitOptions) => void
+  patch: (url: string, options?: VisitOptions) => void
+  post: (url: string, options?: VisitOptions) => void
+  put: (url: string, options?: VisitOptions) => void
+  delete: (url: string, options?: VisitOptions) => void
+  cancel: () => void
+}
+export default function useForm<TForm extends Record<string, unknown>>(initialValues?: TForm): InertiaFormProps<TForm>
+export default function useForm<TForm extends Record<string, unknown>>(
+  rememberKey: string,
+  initialValues?: TForm,
+): InertiaFormProps<TForm>
+export default function useForm<TForm extends Record<string, unknown>>(
+  rememberKeyOrInitialValues?: string | TForm,
+  maybeInitialValues?: TForm,
+): InertiaFormProps<TForm> {
   const isMounted = useRef(null)
-  const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const [defaults, setDefaults] = useState((typeof args[0] === 'string' ? args[1] : args[0]) || {})
+  const rememberKey = typeof rememberKeyOrInitialValues === 'string' ? rememberKeyOrInitialValues : null
+  const [defaults, setDefaults] = useState(
+    (typeof rememberKeyOrInitialValues === 'string' ? maybeInitialValues : rememberKeyOrInitialValues) || ({} as TForm),
+  )
   const cancelToken = useRef(null)
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
-  const [errors, setErrors] = rememberKey ? useRemember({}, `${rememberKey}:errors`) : useState({})
+  const [errors, setErrors] = rememberKey
+    ? useRemember({} as Partial<Record<keyof TForm, string>>, `${rememberKey}:errors`)
+    : useState({} as Partial<Record<keyof TForm, string>>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -125,13 +167,13 @@ export default function useForm(...args) {
 
   return {
     data,
-    setData(key, value) {
-      if (typeof key === 'string') {
-        setData({ ...data, [key]: value })
-      } else if (typeof key === 'function') {
-        setData((data) => key(data))
+    setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
+      if (typeof keyOrData === 'string') {
+        setData({ ...data, [keyOrData]: maybeValue })
+      } else if (typeof keyOrData === 'function') {
+        setData((data) => keyOrData(data))
       } else {
-        setData(key)
+        setData(keyOrData as TForm)
       }
     },
     isDirty: !isEqual(data, defaults),
@@ -144,13 +186,13 @@ export default function useForm(...args) {
     transform(callback) {
       transform = callback
     },
-    setDefaults(key, value) {
-      if (typeof key === 'undefined') {
+    setDefaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+      if (typeof fieldOrFields === 'undefined') {
         setDefaults(() => data)
       } else {
         setDefaults((defaults) => ({
           ...defaults,
-          ...(value ? { [key]: value } : key),
+          ...(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : (fieldOrFields as TForm)),
         }))
       }
     },
@@ -159,7 +201,7 @@ export default function useForm(...args) {
         setData(defaults)
       } else {
         setData(
-          Object.keys(defaults)
+          (Object.keys(defaults) as Array<keyof TForm>)
             .filter((key) => fields.includes(key))
             .reduce(
               (carry, key) => {
@@ -171,11 +213,13 @@ export default function useForm(...args) {
         )
       }
     },
-    setError(key, value) {
+    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
-          ...(value ? { [key]: value } : key),
+          ...(typeof fieldOrFields === 'string'
+            ? { [fieldOrFields]: maybeValue }
+            : (fieldOrFields as Record<keyof TForm, string>)),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
@@ -183,7 +227,7 @@ export default function useForm(...args) {
     },
     clearErrors(...fields) {
       setErrors((errors) => {
-        const newErrors = Object.keys(errors).reduce(
+        const newErrors = (Object.keys(errors) as Array<keyof TForm>).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),

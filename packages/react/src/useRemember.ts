@@ -1,9 +1,12 @@
 import { router } from '@inertiajs/core'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
-export default function useRemember(initialState, key) {
+export default function useRemember<State>(
+  initialState: State,
+  key?: string,
+): [State, Dispatch<SetStateAction<State>>] {
   const [state, setState] = useState(() => {
-    const restored = router.restore(key)
+    const restored = router.restore(key) as State
 
     return restored !== undefined ? restored : initialState
   })
@@ -15,7 +18,8 @@ export default function useRemember(initialState, key) {
   return [state, setState]
 }
 
-export function useRememberedState(initialState, key) {
+/** @deprecated use `useRemember` instead */
+export function useRememberedState<State>(initialState: State, key?: string): [State, Dispatch<SetStateAction<State>>] {
   console.warn(
     'The "useRememberedState" hook has been deprecated and will be removed in a future release. Use "useRemember" instead.',
   )
