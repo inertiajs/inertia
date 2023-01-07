@@ -62,19 +62,18 @@ export default forwardRef<unknown, InertiaLinkProps>(function Link(
         event.preventDefault()
 
         router.visit(href, {
-          // @ts-ignore
+          // @ts-expect-error
           data,
-          // @ts-ignore
+          // @ts-expect-error
           method,
-          // @ts-ignore
+          // @ts-expect-error
           preserveScroll,
-          // @ts-ignore
+          // @ts-expect-error
           preserveState: preserveState ?? method !== 'get',
           replace,
           only,
-          // @ts-ignore
+          // @ts-expect-error
           headers,
-          // @ts-ignore
           onCancelToken,
           onBefore,
           onStart,
@@ -82,7 +81,7 @@ export default forwardRef<unknown, InertiaLinkProps>(function Link(
           onFinish,
           onCancel,
           onSuccess,
-          // @ts-ignore
+          // @ts-expect-error
           onError,
         })
       }
@@ -110,7 +109,7 @@ export default forwardRef<unknown, InertiaLinkProps>(function Link(
 
   as = as.toLowerCase()
   method = method.toLowerCase()
-  // @ts-ignore
+  // @ts-expect-error
   const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
   href = _href
   data = _data
