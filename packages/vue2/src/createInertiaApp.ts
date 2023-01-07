@@ -1,10 +1,45 @@
-import { setupProgress } from '@inertiajs/core'
-import App, { plugin } from './app'
+import { Page, setupProgress } from '@inertiajs/core'
+import { Component, PluginObject } from 'vue'
+import App, { InertiaApp, InertiaProps, plugin } from './app'
 
-export default async function createInertiaApp({ id = 'app', resolve, setup, title, progress = {}, page, render }) {
+interface CreateInertiaAppProps {
+  id?: string
+  resolve: (name: string) => Component | Promise<Component> | { default: Component }
+  setup: (props: {
+    el: Element
+    app: InertiaApp
+    props: {
+      attrs: { id: string; 'data-page': string }
+      props: InertiaProps
+    }
+    plugin: PluginObject<any>
+  }) => void | Vue
+  title?: (title: string) => string
+  progress?:
+    | false
+    | {
+        delay?: number
+        color?: string
+        includeCSS?: boolean
+        showSpinner?: boolean
+      }
+  page?: Page
+  render?: (vm: Vue) => Promise<string>
+}
+
+export default async function createInertiaApp({
+  id = 'app',
+  resolve,
+  setup,
+  title,
+  progress = {},
+  page,
+  render,
+}: CreateInertiaAppProps): Promise<{ head: string[]; body: string } | void> {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
+  // @ts-expect-error
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
@@ -21,6 +56,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
         props: {
           initialPage,
           initialComponent,
+          // @ts-expect-error
           resolveComponent,
           titleCallback: title,
           onHeadUpdate: isServer ? (elements) => (head = elements) : null,
@@ -35,6 +71,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, tit
   }
 
   if (isServer) {
+    // @ts-expect-error
     return render(vueApp).then((body) => ({ head, body }))
   }
 }

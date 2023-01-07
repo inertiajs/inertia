@@ -5,7 +5,7 @@ import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
-interface InertiaProps {
+export interface InertiaProps {
   initialPage: Page
   initialComponent?: object
   resolveComponent?: (name: string) => Component
@@ -13,7 +13,7 @@ interface InertiaProps {
   onHeadUpdate?: (elements: string[]) => void
 }
 
-type InertiaApp = ComponentOptions<never, any, never, never, any, InertiaProps>
+export type InertiaApp = ComponentOptions<never, any, never, never, any, InertiaProps>
 
 let app = {} as any
 let headManager = null

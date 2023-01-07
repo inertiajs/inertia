@@ -7,7 +7,14 @@ interface CreateInertiaAppProps {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
   setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: (title: string) => string
-  progress?: any
+  progress?:
+    | false
+    | {
+        delay?: number
+        color?: string
+        includeCSS?: boolean
+        showSpinner?: boolean
+      }
   page?: Page
   render?: (app: VueApp) => Promise<string>
 }
