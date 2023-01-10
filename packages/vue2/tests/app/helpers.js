@@ -42,7 +42,7 @@ module.exports = {
 
     return res.send(
       fs
-        .readFileSync(path.resolve(__dirname, 'inertia.html'))
+        .readFileSync(path.resolve(__dirname, './dist/index.html'))
         .toString()
         .replace("'{{ placeholder }}'", JSON.stringify(data)),
     )

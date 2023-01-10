@@ -29,7 +29,7 @@
   </div>
 </template>
 <script>
-import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion'
+import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion.vue'
 
 export default {
   layout: WithoutScrollRegion,

@@ -29,7 +29,7 @@
   </div>
 </template>
 <script>
-import WithScrollRegion from '@/Layouts/WithScrollRegion'
+import WithScrollRegion from '@/Layouts/WithScrollRegion.vue'
 
 export default {
   layout: WithScrollRegion,

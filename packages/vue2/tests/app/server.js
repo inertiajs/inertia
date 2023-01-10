@@ -13,7 +13,7 @@ const upload = multer()
 app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
 
 // Intercepts all .js assets (including files loaded via code splitting)
-app.get(/.*\.js$/, (req, res) => res.sendFile(path.resolve(__dirname, '../tmp/', req.path.substr(1))))
+app.get(/.*\.js$/, (req, res) => res.sendFile(path.resolve(__dirname, './dist/', req.path.substr(1))))
 
 /**
  * Used for testing the Inertia plugin is registered.

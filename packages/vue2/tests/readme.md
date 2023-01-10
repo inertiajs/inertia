@@ -1,20 +1,19 @@
 # Running tests
 
-Install depenencies:
+Install dependencies:
 
 ```sh
-yarn
-
+npm install
 ```
 
 To run it on the command line
 
 ```sh
-yarn test
+npm run tes
 ```
 
 To run it in the GUI:
 
 ```sh
-yarn test:gui
+npm run test:gui
 ```
