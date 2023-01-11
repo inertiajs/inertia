@@ -246,6 +246,12 @@ export class Router {
     }
   }
 
+  public cancel(): void {
+    if (this.activeVisit) {
+      this.cancelVisit(this.activeVisit, { cancelled: true })
+    }
+  }
+
   public visit(
     href: string | URL,
     {
