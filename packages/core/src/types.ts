@@ -1,4 +1,4 @@
-import { AxiosProgressEvent, AxiosResponse, CancelTokenSource } from 'axios'
+import { AxiosProgressEvent, AxiosResponse } from 'axios'
 
 declare module 'axios' {
   export interface AxiosProgressEvent {
@@ -192,7 +192,7 @@ export type PendingVisit = Visit & {
 
 export type ActiveVisit = PendingVisit &
   Required<VisitOptions> & {
-    cancelToken: CancelTokenSource
+    cancelToken: AbortController
   }
 
 export type VisitId = unknown
