@@ -565,7 +565,7 @@ describe('Events', () => {
         const assertExceptionObject = (detail) => {
           expect(detail).to.be.an('object')
           expect(detail).to.have.property('exception')
-          expect(detail.exception).to.be.an('Error')
+          expect(detail.exception.code).to.eq('ERR_NETWORK')
         }
         const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')
