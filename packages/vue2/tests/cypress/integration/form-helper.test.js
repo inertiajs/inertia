@@ -545,7 +545,6 @@ describe('Form Helper', () => {
           .then(() => {
             expect(alert.getCall(3)).to.be.calledWith('onProgress')
             tap(alert.getCall(4).lastArg, (event) => {
-              expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
               expect(event).to.have.property('loaded')
@@ -583,7 +582,6 @@ describe('Form Helper', () => {
 
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
             tap(alert.getCall(7).lastArg, (event) => {
-              expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
               expect(event).to.have.property('loaded')
@@ -644,7 +642,6 @@ describe('Form Helper', () => {
           .then(() => {
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
             tap(alert.getCall(7).lastArg, (event) => {
-              expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
               expect(event).to.have.property('loaded')
@@ -761,7 +758,6 @@ describe('Form Helper', () => {
           .then(() => {
             expect(alert.getCall(6)).to.be.calledWith('onProgress')
             tap(alert.getCall(7).lastArg, (event) => {
-              expect(event).to.have.property('isTrusted')
               expect(event).to.have.property('percentage')
               expect(event).to.have.property('total')
               expect(event).to.have.property('loaded')

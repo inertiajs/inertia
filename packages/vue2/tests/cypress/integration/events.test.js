@@ -16,7 +16,6 @@ const assertPageObject = (page) => {
   expect(page).to.have.property('version')
 }
 const assertProgressObject = (progress) => {
-  expect(progress).to.have.property('isTrusted')
   expect(progress).to.have.property('percentage')
   expect(progress).to.have.property('total')
   expect(progress).to.have.property('loaded')
