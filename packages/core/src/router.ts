@@ -216,7 +216,7 @@ export class Router {
     { cancelled = false, interrupted = false }: { cancelled?: boolean; interrupted?: boolean },
   ): void {
     if (activeVisit && !activeVisit.completed && !activeVisit.cancelled && !activeVisit.interrupted) {
-      activeVisit.cancelToken.cancel()
+      activeVisit.cancelToken.abort()
       activeVisit.onCancel()
       activeVisit.completed = false
       activeVisit.cancelled = cancelled
@@ -243,6 +243,12 @@ export class Router {
       return Object.keys(page.props.errors || {}).length > 0
     } else {
       return value
+    }
+  }
+
+  public cancel(): void {
+    if (this.activeVisit) {
+      this.cancelVisit(this.activeVisit, { cancelled: true })
     }
   }
 
@@ -320,7 +326,7 @@ export class Router {
       onSuccess,
       onError,
       queryStringArrayFormat,
-      cancelToken: Axios.CancelToken.source(),
+      cancelToken: new AbortController(),
     }
 
     onCancelToken({
@@ -339,7 +345,7 @@ export class Router {
       url: urlWithoutHash(url).href,
       data: method === Method.GET ? {} : data,
       params: method === Method.GET ? data : {},
-      cancelToken: this.activeVisit.cancelToken.token,
+      signal: this.activeVisit.cancelToken.signal,
       headers: {
         ...headers,
         Accept: 'text/html, application/xhtml+xml',
@@ -356,7 +362,7 @@ export class Router {
       },
       onUploadProgress: (progress) => {
         if (data instanceof FormData) {
-          progress.percentage = Math.round((progress.loaded / progress.total) * 100)
+          progress.percentage = progress.progress ? Math.round(progress.progress * 100) : 0
           fireProgressEvent(progress)
           onProgress(progress)
         }

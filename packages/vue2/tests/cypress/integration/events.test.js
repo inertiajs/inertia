@@ -16,7 +16,6 @@ const assertPageObject = (page) => {
   expect(page).to.have.property('version')
 }
 const assertProgressObject = (progress) => {
-  expect(progress).to.have.property('isTrusted')
   expect(progress).to.have.property('percentage')
   expect(progress).to.have.property('total')
   expect(progress).to.have.property('loaded')
@@ -566,7 +565,7 @@ describe('Events', () => {
         const assertExceptionObject = (detail) => {
           expect(detail).to.be.an('object')
           expect(detail).to.have.property('exception')
-          expect(detail.exception).to.be.an('Error')
+          expect(detail.exception.code).to.eq('ERR_NETWORK')
         }
         const assertGlobalEvent = (event) => {
           expect(event).to.be.an('CustomEvent')

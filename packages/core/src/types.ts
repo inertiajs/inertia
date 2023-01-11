@@ -1,4 +1,10 @@
-import { AxiosResponse, CancelTokenSource } from 'axios'
+import { AxiosProgressEvent, AxiosResponse } from 'axios'
+
+declare module 'axios' {
+  export interface AxiosProgressEvent {
+    percentage: number | undefined
+  }
+}
 
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
@@ -56,7 +62,7 @@ export type PageHandler = ({
 
 export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
 
-export type Progress = ProgressEvent & { percentage: number }
+export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
@@ -186,7 +192,7 @@ export type PendingVisit = Visit & {
 
 export type ActiveVisit = PendingVisit &
   Required<VisitOptions> & {
-    cancelToken: CancelTokenSource
+    cancelToken: AbortController
   }
 
 export type VisitId = unknown
