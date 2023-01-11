@@ -355,7 +355,7 @@ export class Router {
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
       onUploadProgress: (progress) => {
-        if (data instanceof FormData) {
+        if (data instanceof FormData && progress.total) {
           progress.percentage = Math.round((progress.loaded / progress.total) * 100)
           fireProgressEvent(progress)
           onProgress(progress)
