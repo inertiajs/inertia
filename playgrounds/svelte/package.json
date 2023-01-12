@@ -4,9 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --ssr",
-    "ssr:serve": "node bootstrap/ssr/ssr.js",
-    "ssr:shutdown": "[ $(curl -s 'http://localhost:13714/shutdown'; echo $?) -eq 52 ]"
+    "build": "vite build && vite build --ssr"
   },
   "devDependencies": {
     "@inertiajs/svelte": "^1.0.0-beta.2",

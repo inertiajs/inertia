@@ -3,9 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --ssr",
-    "ssr:serve": "node bootstrap/ssr/ssr.mjs",
-    "ssr:shutdown": "[ $(curl -s 'http://localhost:13714/shutdown'; echo $?) -eq 52 ]"
+    "build": "vite build && vite build --ssr"
   },
   "devDependencies": {
     "@inertiajs/react": "^1.0.0-beta.2",
