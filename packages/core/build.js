@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const esbuild = require('esbuild')
-const { nodeExternalsPlugin } = require('esbuild-node-externals')
+import esbuild from 'esbuild'
+import { nodeExternalsPlugin } from 'esbuild-node-externals'
 
 const watch = process.argv.slice(1).includes('--watch')
 
