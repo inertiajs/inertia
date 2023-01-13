@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5feae1f7e760b2e218a78416de24bba4",
+    "content-hash": "bb170133de8d70af4db3409789b94ea8",
     "packages": [
         {
             "name": "brick/math",
@@ -899,16 +899,16 @@
         },
         {
             "name": "inertiajs/inertia-laravel",
-            "version": "v0.6.6",
+            "version": "v0.6.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/inertiajs/inertia-laravel.git",
-                "reference": "5b413b2fa90aa65177692b2d4a410c3cbbceb7bf"
+                "reference": "4e5bf5c254d8a6fb8a1049293fb415945c280213"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/5b413b2fa90aa65177692b2d4a410c3cbbceb7bf",
-                "reference": "5b413b2fa90aa65177692b2d4a410c3cbbceb7bf",
+                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/4e5bf5c254d8a6fb8a1049293fb415945c280213",
+                "reference": "4e5bf5c254d8a6fb8a1049293fb415945c280213",
                 "shasum": ""
             },
             "require": {
@@ -956,7 +956,7 @@
             ],
             "support": {
                 "issues": "https://github.com/inertiajs/inertia-laravel/issues",
-                "source": "https://github.com/inertiajs/inertia-laravel/tree/v0.6.6"
+                "source": "https://github.com/inertiajs/inertia-laravel/tree/v0.6.7"
             },
             "funding": [
                 {
@@ -964,7 +964,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-01-12T03:46:20+00:00"
+            "time": "2023-01-13T02:28:35+00:00"
         },
         {
             "name": "laravel/framework",
