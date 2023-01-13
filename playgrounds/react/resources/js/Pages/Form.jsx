@@ -19,7 +19,7 @@ const Form = () => {
       <h1 className="text-3xl">Form</h1>
       <form onSubmit={submit} className="mt-6 max-w-md space-y-4">
         <div>
-          <label className="block" for="name">
+          <label className="block" htmlFor="name">
             Name:
           </label>
           <input
@@ -32,7 +32,7 @@ const Form = () => {
           {form.errors.name && <div className="mt-2 text-sm text-red-600">{form.errors.name}</div>}
         </div>
         <div>
-          <label className="block" for="company">
+          <label className="block" htmlFor="company">
             Company:
           </label>
           <input
@@ -45,7 +45,7 @@ const Form = () => {
           {form.errors.company && <div className="mt-2 text-sm text-red-600">{form.errors.company}</div>}
         </div>
         <div>
-          <label className="block" for="role">
+          <label className="block" htmlFor="role">
             Role:
           </label>
           <select
