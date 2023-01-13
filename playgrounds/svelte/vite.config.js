@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     laravel.default({
       input: ['resources/css/app.css', 'resources/js/app.js'],
-      ssr: ['resources/js/ssr.js'],
+      ssr: 'resources/js/ssr.js',
       refresh: true,
     }),
     svelte({
