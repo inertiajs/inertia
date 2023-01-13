@@ -20,7 +20,6 @@
     "types"
   ],
   "type": "module",
-  "source": "src/index.ts",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "exports": {
