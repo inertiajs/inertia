@@ -5,36 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/inertia@0.11.0...HEAD)
+For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
+
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.0...HEAD)
+
+- Nothing!
+
+## [v1.0.0](https://github.com/inertiajs/inertia/compare/inertia@0.11.0...v1.0.0) - 2023-01-14
 
 ### Added
 
-### Fixed
-
-- Update axios version to `0.27.0` ([#1197](https://github.com/inertiajs/inertia/pull/1197))
-
-### Changed
-
-- The `title` tag is now injected by default when one is defined ([#1055](https://github.com/inertiajs/inertia/pull/1055))
-- Use `element.scrollTo()` for scroll resetting when possible ([#1099](https://github.com/inertiajs/inertia/pull/1099))
-- Add `undefined` as a valid `FormDataConvertable` option ([#1165](https://github.com/inertiajs/inertia/pull/1165))
-
-## [v0.11.0](https://github.com/inertiajs/inertia/compare/inertia@0.10.1...inertia@0.11.0) - 2022-01-07
-
-### Added
-
-- Allow choosing query string 'array' formatters ([#994](https://github.com/inertiajs/inertia/pull/994))
-- New `Progress` type ([#877](https://github.com/inertiajs/inertia/pull/877))
-- New `InertiaAppResponse` type for use in [`@inertiajs/server`](https://github.com/inertiajs/server/) ([`199423`](https://github.com/inertiajs/inertia/commit/19942367b4f728e58decf581cdd93f674c7b35e5))
+- Added SSR support to Svelte library (#1349)
+- Added first-class TypeScript support to React adapter
+- Added first-class TypeScript support to Vue 2 adapter
+- Added first-class TypeScript support to Vue 3 adapter
+- Added new `useForm()` hook to Vue 2 adapter (ff59196)
 
 ### Changed
 
-- We now keep a changelog here on GitHub :tada: For earlier releases, please see [the releases page of inertiajs.com](https://inertiajs.com/releases?all=true#inertia).
-- Types: Use a ProgressEvent instead of a generic object ([#877](https://github.com/inertiajs/inertia/pull/877))
+- Renamed `@inertiajs/inertia` library to `@inertiajs/core` (#1282)
+- Renamed `@inertiajs/inertia-react` library to `@inertiajs/react` (#1282)
+- Renamed `@inertiajs/inertia-svelte` library to `@inertiajs/svelte` (#1282)
+- Renamed `@inertiajs/inertia-vue` library to `@inertiajs/vue2` (#1282)
+- Renamed `@inertiajs/inertia-vue3` library to `@inertiajs/vue3` (#1282)
+- Merged progress library to core and deprecated `@inertiajs/progress` library (#1282, 0b5f773)
+- Merged server library to core and deprecated `@inertiajs/server` library (#1282)
+- Renamed `Inertia` named export to `router` (#1282, e556703)
+- Removed deprecated named exports (#1282, e556703)
+- Removed deprecated `app` argument from `createInertiaApp()` in Vue adapters (#1282, 65f8a5f)
+- Updated axios to 1.x (#1377)
+- Simplified `usePage()` hook in Vue 3 adapter (#1373)
+- Improved Svelte `use:inertia` and `<Link />` component (#1344)
+- Removed global `visitOptions()` hook (#1282, 30908c2)
+- Switched bundler from Microbundle to ESbuild (f711b46, 8093713, 342312d, c9e12b3)
 
 ### Fixed
 
-- `<Link>` Component automatically added `http://localhost` as a prefix when it contains 'http' in it's path ([#964](https://github.com/inertiajs/inertia/pull/964))
-- "rememberedState of undefined" occurred on visits where `useRemember` was used ([#949](https://github.com/inertiajs/inertia/pull/949))
-- Forms with remember keys were giving `ReferenceError: window is not defined` during SSR ([#1036](https://github.com/inertiajs/inertia/pull/1036))
-- Certain events always required 'bool' return types, while 'void' (falsy) should be possible too ([#1037](https://github.com/inertiajs/inertia/pull/1037))
+- Fixed `<title>` tag not always being included when a `title` callback is defined in `createInertiaApp()` (#1055)
+- Fixed types to include `undefined` as a valid `FormDataConvertable` option (#1165)
+- Fixed issue where remembered state wasn't clear on a full page reload (769f643)
