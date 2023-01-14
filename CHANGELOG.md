@@ -11,7 +11,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 - Nothing!
 
-## [v1.0.0](https://github.com/inertiajs/inertia/compare/inertia@0.11.0...v1.0.0) - 2023-01-14
+## [v1.0.0](https://github.com/inertiajs/inertia/compare/7ce91ec...v1.0.0) - 2023-01-14
 
 ### Added
 
