@@ -85,6 +85,15 @@ function useForm(...args) {
 
       return this
     },
+    clearChangedErrors() {
+      const changed = Object.entries(this.data())
+          .filter(([field, value]) => !isEqual(value, defaults[field]))
+          .map(([field]) => field)
+
+      this.clearErrors(...changed)
+
+      return this
+    },
     submit(method, url, options = {}) {
       const data = transform(this.data())
       const _options = {

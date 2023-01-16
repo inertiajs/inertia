@@ -249,6 +249,24 @@ describe('Form Helper', () => {
       cy.get('.remember_error').should('not.exist')
     })
 
+    it('can clear form errors from changed fields', () => {
+      cy.get('.submit').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/form-helper/errors')
+
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('have.text', 'Some name error')
+      cy.get('.handle_error').should('have.text', 'The Handle was invalid')
+      cy.get('.remember_error').should('not.exist')
+
+      cy.get('#name').clear().type('foo')
+      cy.get('.clear-changed').click()
+
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('have.text', 'Some name error')
+      cy.get('.handle_error').should('not.exist')
+      cy.get('.remember_error').should('not.exist')
+    })
+
     it('does not reset fields back to their initial values when it clears a subset of form errors', () => {
       cy.get('.submit').click()
       cy.url().should('eq', Cypress.config().baseUrl + '/form-helper/errors')

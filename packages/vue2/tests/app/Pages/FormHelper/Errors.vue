@@ -22,6 +22,7 @@
     <span @click="clearError" class="clear-one">Clear one error</span>
     <span @click="setErrors" class="set">Set errors</span>
     <span @click="setError" class="set-one">Set one error</span>
+    <span @click="clearChangedErrors" class="clear-changed">Clear changed fields errors</span>
 
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>
@@ -46,6 +47,9 @@ export default {
     },
     clearError() {
       this.form.clearErrors('handle')
+    },
+    clearChangedErrors() {
+      this.form.clearChangedErrors()
     },
     setErrors() {
       this.form.setError({

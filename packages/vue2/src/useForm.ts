@@ -18,6 +18,7 @@ interface InertiaFormProps<TForm> {
   defaults(fields: Record<keyof TForm, string>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
+  clearChangedErrors(): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
   submit(method: string, url: string, options?: Partial<VisitOptions>): void
@@ -111,6 +112,15 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
       )
 
       this.hasErrors = Object.keys(this.errors).length > 0
+
+      return this
+    },
+    clearChangedErrors() {
+      const changed = Object.entries(this.data())
+          .filter(([field, value]) => !isEqual(value, defaults[field]))
+          .map(([field]) => field)
+
+      this.clearErrors(...changed)
 
       return this
     },
