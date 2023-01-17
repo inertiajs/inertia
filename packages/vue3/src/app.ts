@@ -15,7 +15,7 @@ export interface InertiaAppProps {
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
 const component = ref(null)
-const page = ref<Partial<Page>>({})
+const page = ref<Page>(null)
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
@@ -115,6 +115,6 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage() {
+export function usePage<T>(): Page<T> {
   return page.value
 }
