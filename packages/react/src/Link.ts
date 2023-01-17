@@ -7,12 +7,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useCallback } from 'react'
+import { createElement, forwardRef, useCallback, ComponentType } from 'react'
 
 const noop = () => undefined
 
 interface BaseInertiaLinkProps {
-  as?: string
+  as?: string | ComponentType,
   data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
@@ -43,7 +43,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
   (
     {
       children,
-      as = 'a',
+      as: Element = 'a',
       data = {},
       href,
       method = Method.GET,
@@ -113,27 +113,30 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
       ],
     )
 
-    as = as.toLowerCase()
     method = method.toLowerCase() as Method
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
     data = _data
+  
+    if (typeof as === 'string') {
+      Element = Element.toLowerCase()
 
-    if (as === 'a' && method !== 'get') {
-      console.warn(
-        `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
-      )
+      if (Element === 'a' && method !== 'get') {
+        console.warn(
+          `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
+        )
+      }
     }
 
-    return createElement(
-      as,
-      {
-        ...props,
-        ...(as === 'a' ? { href } : {}),
-        ref,
-        onClick: visit,
-      },
-      children,
+    return (
+      <Element
+        {...props}
+        href={Element === 'a' ? href : undefined}
+        ref={ref}
+        onClick={visit}
+      >
+        {children}
+      </Element>
     )
   },
 )
