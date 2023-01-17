@@ -1,4 +1,4 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { HttpMethod, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
@@ -25,7 +25,7 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
   setError(errors: Record<keyof TForm, string>): void
-  submit: (method: Method, url: string, options?: VisitOptions) => void
+  submit: (method: HttpMethod | Method, url: string, options?: VisitOptions) => void
   get: (url: string, options?: VisitOptions) => void
   patch: (url: string, options?: VisitOptions) => void
   post: (url: string, options?: VisitOptions) => void

@@ -1,13 +1,13 @@
 import deepmerge from 'deepmerge'
 import * as qs from 'qs'
-import { FormDataConvertible, Method } from './types'
+import { FormDataConvertible, HttpMethod, Method } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), window.location.toString())
 }
 
 export function mergeDataIntoQueryString(
-  method: Method,
+  method: HttpMethod | Method,
   href: URL | string,
   data: Record<string, FormDataConvertible>,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
@@ -15,12 +15,12 @@ export function mergeDataIntoQueryString(
   const hasHost = /^https?:\/\//.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
-  const hasSearch = href.toString().includes('?') || (method === Method.GET && Object.keys(data).length)
+  const hasSearch = href.toString().includes('?') || (method === 'get' && Object.keys(data).length)
   const hasHash = href.toString().includes('#')
 
   const url = new URL(href.toString(), 'http://localhost')
 
-  if (method === Method.GET && Object.keys(data).length) {
+  if (method === 'get' && Object.keys(data).length) {
     url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
       encodeValuesOnly: true,
       arrayFormat: qsArrayFormat,
