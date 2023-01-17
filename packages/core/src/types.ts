@@ -21,6 +21,7 @@ export type FormDataConvertible =
 
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
+/** @deprecated */
 export enum Method {
   GET = 'get',
   POST = 'post',
