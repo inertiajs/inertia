@@ -240,10 +240,14 @@ export default function useForm<TForm extends Record<string, unknown>>(
       })
     },
     clearChangedErrors() {
-      const changed = (Object.entries(data) as [string, any][])
-          .filter(([field, value]: [string, any]) => !isEqual(value, defaults[field]))
-          .map(([field]: [string, any]) => field)
-      this.clearErrors(...changed)
+      setErrors((errors) => {
+        const newErrors = Object.fromEntries(
+          (Object.entries(errors) as Array<[keyof TForm, string]>)
+              .filter(([field]) => isEqual(data[field], defaults[field]))
+        ) as { [K in keyof TForm]: string }
+        setHasErrors(Object.keys(newErrors).length > 0)
+        return newErrors
+      })
     },
     submit,
     get(url, options) {

@@ -124,11 +124,13 @@ export default function useForm<TForm extends Record<string, unknown>>(
       return this
     },
     clearChangedErrors() {
-      const changed = Object.entries(this.data())
-          .filter(([field, value]) => !isEqual(value, defaults[field]))
-          .map(([field]) => field)
+      const data = this.data()
 
-      this.clearErrors(...changed)
+      this.errors = Object.fromEntries(
+        Object.entries(this.errors).filter(([field]) => isEqual(data[field], defaults[field]))
+      )
+
+      this.hasErrors = Object.keys(this.errors).length > 0
 
       return this
     },

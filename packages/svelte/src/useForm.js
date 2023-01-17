@@ -86,11 +86,13 @@ function useForm(...args) {
       return this
     },
     clearChangedErrors() {
-      const changed = Object.entries(this.data())
-          .filter(([field, value]) => !isEqual(value, defaults[field]))
-          .map(([field]) => field)
-
-      this.clearErrors(...changed)
+      const data = this.data()
+      this.setStore(
+        'errors',
+        Object.fromEntries(
+          Object.entries(this.errors).filter(([field]) => isEqual(data[field], defaults[field]))
+        )
+      )
 
       return this
     },
