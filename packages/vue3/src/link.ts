@@ -1,11 +1,11 @@
 import {
-  HttpMethod,
   mergeDataIntoQueryString,
   Method,
   PageProps,
   Progress,
   router,
   shouldIntercept,
+  VisitMethod,
 } from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, PropType } from 'vue'
 
@@ -13,7 +13,7 @@ interface InertiaLinkProps {
   as?: string
   data?: object
   href: string
-  method?: HttpMethod | Method
+  method?: VisitMethod | Method
   headers?: object
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: boolean | ((props: PageProps) => boolean)
@@ -48,7 +48,7 @@ const Link: InertiaLink = defineComponent({
       required: true,
     },
     method: {
-      type: String as PropType<HttpMethod | Method>,
+      type: String as PropType<VisitMethod | Method>,
       default: 'get',
     },
     replace: {
@@ -79,7 +79,7 @@ const Link: InertiaLink = defineComponent({
   setup(props, { slots, attrs }) {
     return () => {
       const as = props.as.toLowerCase()
-      const method = props.method.toLowerCase() as HttpMethod
+      const method = props.method.toLowerCase() as VisitMethod
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
       if (as === 'a' && method !== 'get') {

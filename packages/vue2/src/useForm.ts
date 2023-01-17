@@ -1,4 +1,4 @@
-import { HttpMethod, Progress, router, VisitOptions } from '@inertiajs/core'
+import { Progress, router, VisitMethod, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import Vue from 'vue'
@@ -20,7 +20,7 @@ interface InertiaFormProps<TForm> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
-  submit(method: HttpMethod, url: string, options?: Partial<VisitOptions>): void
+  submit(method: VisitMethod, url: string, options?: Partial<VisitOptions>): void
   get(url: string, options?: Partial<VisitOptions>): void
   post(url: string, options?: Partial<VisitOptions>): void
   put(url: string, options?: Partial<VisitOptions>): void
