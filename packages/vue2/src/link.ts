@@ -48,7 +48,7 @@ const Link: InertiaLink = {
     },
     method: {
       type: String as PropType<Method>,
-      default: Method.GET,
+      default: 'get',
     },
     replace: {
       type: Boolean,

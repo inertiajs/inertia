@@ -19,13 +19,7 @@ export type FormDataConvertible =
   | null
   | undefined
 
-export enum Method {
-  GET = 'get',
-  POST = 'post',
-  PUT = 'put',
-  PATCH = 'patch',
-  DELETE = 'delete',
-}
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 

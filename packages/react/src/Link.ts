@@ -46,7 +46,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
       as = 'a',
       data = {},
       href,
-      method = Method.GET,
+      method = 'get',
       preserveScroll = false,
       preserveState = null,
       replace = false,

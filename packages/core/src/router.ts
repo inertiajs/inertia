@@ -20,7 +20,6 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   LocationVisit,
-  Method,
   Page,
   PageHandler,
   PageResolver,
@@ -255,7 +254,7 @@ export class Router {
   public visit(
     href: string | URL,
     {
-      method = Method.GET,
+      method = 'get',
       data = {},
       replace = false,
       preserveScroll = false,
@@ -343,8 +342,8 @@ export class Router {
     Axios({
       method,
       url: urlWithoutHash(url).href,
-      data: method === Method.GET ? {} : data,
-      params: method === Method.GET ? data : {},
+      data: method === 'get' ? {} : data,
+      params: method === 'get' ? data : {},
       signal: this.activeVisit.cancelToken.signal,
       headers: {
         ...headers,
@@ -504,7 +503,7 @@ export class Router {
     data: RequestPayload = {},
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
-    return this.visit(url, { ...options, method: Method.GET, data })
+    return this.visit(url, { ...options, method: 'get', data })
   }
 
   public reload(options: Exclude<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
@@ -525,7 +524,7 @@ export class Router {
     data: RequestPayload = {},
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.POST, data })
+    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
 
   public put(
@@ -533,7 +532,7 @@ export class Router {
     data: RequestPayload = {},
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.PUT, data })
+    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
 
   public patch(
@@ -541,11 +540,11 @@ export class Router {
     data: RequestPayload = {},
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.PATCH, data })
+    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
   public delete(url: URL | string, options: Exclude<VisitOptions, 'method'> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.DELETE })
+    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
   public remember(data: unknown, key = 'default'): void {
