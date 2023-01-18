@@ -1,0 +1,35 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    timeout-minutes: 15
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        adapter: ['react', 'vue2', 'vue3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.15
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          path: |
+            ~/.cache
+            node_modules
+            packages/${{ matrix.adapter }}/tests/node_modules
+
+      - name: Build Inertia
+        run: |
+          npm install
+          cd packages/core && npm run build
+          cd ../${{ matrix.adapter }} && npm run build
