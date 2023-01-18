@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.0...HEAD)
 
-- Nothing!
+- Fix Vue type overrides for `$page` and `$inertia`. ([#1393](https://github.com/inertiajs/inertia/pull/1393))
 
 ## [v1.0.0](https://github.com/inertiajs/inertia/compare/7ce91ec...v1.0.0) - 2023-01-14
 
