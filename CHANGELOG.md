@@ -9,7 +9,8 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.0...HEAD)
 
-- Fix Vue type overrides for `$page` and `$inertia`. ([#1393](https://github.com/inertiajs/inertia/pull/1393))
+- Fix Vue type overrides for `$page` and `$inertia` ([#1393](https://github.com/inertiajs/inertia/pull/1393))
+- Restore React `usePage` generic type ([#1396](https://github.com/inertiajs/inertia/pull/1396))
 
 ## [v1.0.0](https://github.com/inertiajs/inertia/compare/7ce91ec...v1.0.0) - 2023-01-14
 
