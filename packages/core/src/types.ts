@@ -72,7 +72,7 @@ export type LocationVisit = {
 }
 
 export type Visit = {
-  method: VisitMethod | Method
+  method: VisitMethod
   data: RequestPayload
   replace: boolean
   preserveScroll: PreserveStateOption

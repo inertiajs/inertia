@@ -1,7 +1,6 @@
 import {
   FormDataConvertible,
   mergeDataIntoQueryString,
-  Method,
   PreserveStateOption,
   Progress,
   router,
@@ -16,7 +15,7 @@ interface BaseInertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string
-  method?: VisitMethod | Method
+  method?: VisitMethod
   headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<HTMLAnchorElement> | React.KeyboardEvent<HTMLAnchorElement>) => void
   preserveScroll?: PreserveStateOption

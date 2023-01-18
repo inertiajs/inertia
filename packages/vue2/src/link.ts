@@ -1,7 +1,6 @@
 import {
   FormDataConvertible,
   mergeDataIntoQueryString,
-  Method,
   PreserveStateOption,
   Progress,
   router,
@@ -14,7 +13,7 @@ interface InertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string
-  method?: VisitMethod | Method
+  method?: VisitMethod
   headers?: Record<string, string>
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: PreserveStateOption
@@ -48,7 +47,7 @@ const Link: InertiaLink = {
       type: String,
     },
     method: {
-      type: String as PropType<VisitMethod | Method>,
+      type: String as PropType<VisitMethod>,
       default: 'get',
     },
     replace: {

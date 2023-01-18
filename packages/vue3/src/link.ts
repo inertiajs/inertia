@@ -1,19 +1,11 @@
-import {
-  mergeDataIntoQueryString,
-  Method,
-  PageProps,
-  Progress,
-  router,
-  shouldIntercept,
-  VisitMethod,
-} from '@inertiajs/core'
+import { mergeDataIntoQueryString, PageProps, Progress, router, shouldIntercept, VisitMethod } from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, PropType } from 'vue'
 
 interface InertiaLinkProps {
   as?: string
   data?: object
   href: string
-  method?: VisitMethod | Method
+  method?: VisitMethod
   headers?: object
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: boolean | ((props: PageProps) => boolean)
@@ -48,7 +40,7 @@ const Link: InertiaLink = defineComponent({
       required: true,
     },
     method: {
-      type: String as PropType<VisitMethod | Method>,
+      type: String as PropType<VisitMethod>,
       default: 'get',
     },
     replace: {
