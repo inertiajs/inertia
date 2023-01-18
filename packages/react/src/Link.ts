@@ -1,11 +1,11 @@
 import {
   FormDataConvertible,
   mergeDataIntoQueryString,
+  Method,
   PreserveStateOption,
   Progress,
   router,
   shouldIntercept,
-  VisitMethod,
 } from '@inertiajs/core'
 import { createElement, forwardRef, useCallback } from 'react'
 
@@ -15,7 +15,7 @@ interface BaseInertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string
-  method?: VisitMethod
+  method?: Method
   headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<HTMLAnchorElement> | React.KeyboardEvent<HTMLAnchorElement>) => void
   preserveScroll?: PreserveStateOption
@@ -114,7 +114,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
     )
 
     as = as.toLowerCase()
-    method = method.toLowerCase() as VisitMethod
+    method = method.toLowerCase() as Method
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
     data = _data

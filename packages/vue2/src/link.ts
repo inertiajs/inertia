@@ -1,11 +1,11 @@
 import {
   FormDataConvertible,
   mergeDataIntoQueryString,
+  Method,
   PreserveStateOption,
   Progress,
   router,
   shouldIntercept,
-  VisitMethod,
 } from '@inertiajs/core'
 import { FunctionalComponentOptions, PropType } from 'vue'
 
@@ -13,7 +13,7 @@ interface InertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string
-  method?: VisitMethod
+  method?: Method
   headers?: Record<string, string>
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: PreserveStateOption
@@ -47,7 +47,7 @@ const Link: InertiaLink = {
       type: String,
     },
     method: {
-      type: String as PropType<VisitMethod>,
+      type: String as PropType<Method>,
       default: 'get',
     },
     replace: {
@@ -89,7 +89,7 @@ const Link: InertiaLink = {
     }
 
     const as = props.as.toLowerCase()
-    const method = props.method.toLowerCase() as VisitMethod
+    const method = props.method.toLowerCase() as Method
     const [href, propsData] = mergeDataIntoQueryString(
       method,
       props.href || '',

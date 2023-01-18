@@ -19,16 +19,7 @@ export type FormDataConvertible =
   | null
   | undefined
 
-export type VisitMethod = 'get' | 'post' | 'put' | 'patch' | 'delete'
-
-/** @deprecated */
-export enum Method {
-  GET = 'get',
-  POST = 'post',
-  PUT = 'put',
-  PATCH = 'patch',
-  DELETE = 'delete',
-}
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
@@ -72,7 +63,7 @@ export type LocationVisit = {
 }
 
 export type Visit = {
-  method: VisitMethod
+  method: Method
   data: RequestPayload
   replace: boolean
   preserveScroll: PreserveStateOption
