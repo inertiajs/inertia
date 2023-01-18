@@ -1,10 +1,10 @@
 import { createInertiaApp } from '@inertiajs/vue3'
-import { createSSRApp, h } from 'vue'
+import { createSSRApp, h, type DefineComponent } from 'vue'
 
 createInertiaApp({
   resolve: (name) => {
     const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
-    return pages[`./Pages/${name}.vue`]
+    return pages[`./Pages/${name}.vue`] as DefineComponent
   },
   setup({ el, App, props, plugin }) {
     createSSRApp({ render: () => h(App, props) })
