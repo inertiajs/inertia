@@ -7,7 +7,7 @@ interface CreateInertiaAppProps {
   resolve: (name: string) => Component | Promise<Component> | { default: Component }
   setup: (props: {
     el: Element
-    app: InertiaApp
+    App: InertiaApp
     props: {
       attrs: { id: string; 'data-page': string }
       props: InertiaProps
