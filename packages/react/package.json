@@ -37,7 +37,9 @@
   },
   "typesVersions": {
     "*": {
-      "server": ["types/server.d.ts"]
+      "server": [
+        "types/server.d.ts"
+      ]
     }
   },
   "scripts": {
