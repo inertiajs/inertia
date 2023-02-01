@@ -24,14 +24,14 @@
   "types": "types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./types/index.d.js"
+      "require": "./dist/index.js"
     },
     "./server": {
+      "types": "./types/server.d.ts",
       "import": "./dist/server.esm.js",
-      "require": "./dist/server.js",
-      "types": "./types/server.d.js"
+      "require": "./dist/server.js"
     }
   },
   "scripts": {
