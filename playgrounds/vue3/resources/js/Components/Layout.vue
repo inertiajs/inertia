@@ -2,7 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
-const appName = computed(() => usePage().props.appName)
+const appName = computed(() => usePage<{ appName: string }>().props.appName)
 </script>
 
 <template>

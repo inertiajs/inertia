@@ -1,4 +1,4 @@
-import { createHeadManager, Page, router } from '@inertiajs/core'
+import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
 import { DefineComponent, defineComponent, h, markRaw, Plugin, PropType, ref, shallowRef } from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -15,7 +15,7 @@ export interface InertiaAppProps {
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
 const component = ref(null)
-const page = ref<Partial<Page>>({})
+const page = ref<Page<any>>(null)
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
@@ -115,6 +115,6 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage() {
+export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
   return page.value
 }
