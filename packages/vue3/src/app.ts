@@ -15,7 +15,7 @@ export interface InertiaAppProps {
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
 const component = ref(null)
-const page = ref<Page>(null)
+const page = ref<Page<any>>(null)
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
