@@ -9,13 +9,13 @@ type ReactComponent = ReactNode
 type HeadManagerOnUpdate = (elements: string[]) => void // TODO: When shipped, replace with: Inertia.HeadManagerOnUpdate
 type HeadManagerTitleCallback = (title: string) => string // TODO: When shipped, replace with: Inertia.HeadManagerTitleCallback
 
-type AppType<SharedProps = PageProps> = FunctionComponent<
+type AppType<SharedProps extends PageProps = PageProps> = FunctionComponent<
   {
     children?: (props: { Component: ComponentType; key: Key; props: Page<SharedProps>['props'] }) => ReactNode
   } & SetupOptions<unknown, SharedProps>['props']
 >
 
-export type SetupOptions<ElementType, SharedProps> = {
+export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
   App: AppType
   props: {
@@ -33,7 +33,7 @@ type BaseInertiaAppOptions = {
 }
 
 type CreateInertiaAppSetupReturnType = ReactInstance | void
-type InertiaAppOptionsForCSR<SharedProps> = BaseInertiaAppOptions & {
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: string
   page?: Page | string
   render?: undefined
@@ -49,7 +49,7 @@ type InertiaAppOptionsForCSR<SharedProps> = BaseInertiaAppOptions & {
 }
 
 type CreateInertiaAppSSRContent = { head: string[]; body: string }
-type InertiaAppOptionsForSSR<SharedProps> = BaseInertiaAppOptions & {
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: undefined
   page: Page | string
   render: typeof renderToString
@@ -57,13 +57,13 @@ type InertiaAppOptionsForSSR<SharedProps> = BaseInertiaAppOptions & {
   setup(options: SetupOptions<null, SharedProps>): ReactInstance
 }
 
-export default async function createInertiaApp<SharedProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
 ): Promise<CreateInertiaAppSetupReturnType>
-export default async function createInertiaApp<SharedProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsForSSR<SharedProps>,
 ): Promise<CreateInertiaAppSSRContent>
-export default async function createInertiaApp<SharedProps = PageProps>({
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
   setup,
