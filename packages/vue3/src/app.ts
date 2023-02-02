@@ -115,6 +115,6 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage<T extends PageProps>(): Page<T> {
+export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
   return page.value
 }
