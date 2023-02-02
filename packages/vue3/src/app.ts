@@ -1,4 +1,4 @@
-import { createHeadManager, Page, router } from '@inertiajs/core'
+import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
 import { DefineComponent, defineComponent, h, markRaw, Plugin, PropType, ref, shallowRef } from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -115,6 +115,6 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage<T>(): Page<T> {
+export function usePage<T extends PageProps>(): Page<T> {
   return page.value
 }

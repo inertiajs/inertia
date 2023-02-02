@@ -27,7 +27,7 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page<SharedProps = PageProps> {
+export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
     SharedProps & {
