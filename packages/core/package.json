@@ -1,5 +1,5 @@
 {
-  "name": "@inertiajs/core",
+  "name": "bliss-jaspis-inertia-core",
   "version": "1.0.0",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
