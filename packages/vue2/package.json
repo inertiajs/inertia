@@ -58,7 +58,7 @@
     "vue": "^2.6.0"
   },
   "dependencies": {
-    "@inertiajs/core": "1.0.0",
+    "@inertiajs/core": "npm:bliss-jaspis-inertia-core@1.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   }
