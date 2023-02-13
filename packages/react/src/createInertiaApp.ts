@@ -53,7 +53,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOpti
   id?: undefined
   page: Page | string
   render: typeof renderToString
-  progress: undefined
+  progress?: undefined
   setup(options: SetupOptions<null, SharedProps>): ReactInstance
 }
 
