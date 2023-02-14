@@ -29,7 +29,7 @@ interface InertiaFormProps<TForm> {
   cancel(): void
 }
 
-type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
 export interface InertiaFormTrait {
   form<TForm>(data: TForm): InertiaForm<TForm>

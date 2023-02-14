@@ -29,7 +29,7 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   cancel(): void
 }
 
-type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
 
 export default function useForm<TForm extends Record<string, unknown>>(data: TForm): InertiaForm<TForm>
 export default function useForm<TForm extends Record<string, unknown>>(
