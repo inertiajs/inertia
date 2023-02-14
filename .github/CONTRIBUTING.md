@@ -63,6 +63,7 @@ npm run ssr:serve
 
 This section is really for the benefit of the core maintainers.
 
-1. Increment the version number in the package `package.json` file.
-2. Run `npm publish`. This will automatically run the necessary build step.
+1. Increment the version numbers in the `package.json` file for each package, making sure to also update the adapter dependencies on `@inertiajs/core`.
+2. Update `CHANGELOG.md`.
+2. Run `npm publish` for each package. This will automatically run the necessary build step.
 3. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).
