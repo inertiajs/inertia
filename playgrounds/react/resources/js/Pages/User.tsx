@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import Layout from '../Components/Layout.jsx'
+import Layout from '../Components/Layout'
 
 const User = ({ user }) => {
   return (
