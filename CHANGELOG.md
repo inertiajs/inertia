@@ -12,6 +12,10 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - Fix Vue type overrides for `$page` and `$inertia` ([#1393](https://github.com/inertiajs/inertia/pull/1393))
 - Restore React `usePage` generic type ([#1396](https://github.com/inertiajs/inertia/pull/1396))
 - Prevent needing to use `Method` enum with the Link component ([#1392](https://github.com/inertiajs/inertia/pull/1392))
+- Restore Vue 3 `usePage` generic type ([#1394](https://github.com/inertiajs/inertia/pull/1394))
+- Fix export of server types ([#1397](https://github.com/inertiajs/inertia/pull/1397))
+- Fix Vue 2 `setup` prop types ([#1418](https://github.com/inertiajs/inertia/pull/1418))
+- Fix issue when passing multiple children to React `Head` component ([#1433](https://github.com/inertiajs/inertia/pull/1433))
 
 ## [v1.0.0](https://github.com/inertiajs/inertia/compare/7ce91ec...v1.0.0) - 2023-01-14
 
