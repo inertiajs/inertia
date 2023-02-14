@@ -3,6 +3,7 @@ import HeadContext from './HeadContext'
 
 type InertiaHeadProps = {
   title?: string
+  children?: React.ReactNode
 }
 
 type InertiaHead = FunctionComponent<InertiaHeadProps>
