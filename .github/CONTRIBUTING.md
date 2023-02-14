@@ -30,6 +30,8 @@ cd packages/core
 npm run watch
 ```
 
+When proposing changes to one of the adapters (`react`, `vue2`, `vue3`, `svelte`), please try to apply the same changes to the other adapters where possible.
+
 ## Playgrounds
 
 It's often helpful to develop Inertia.js using a real application. The playground folder contains an example Laravel project for each of the adapters. Here's how to get a playground running:
