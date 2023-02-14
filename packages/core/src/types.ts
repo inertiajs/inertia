@@ -11,6 +11,7 @@ export type ErrorBag = Record<string, Errors>
 
 export type FormDataConvertible =
   | Array<FormDataConvertible>
+  | { [key: string]: FormDataConvertible }
   | Blob
   | FormDataEntryValue
   | Date
