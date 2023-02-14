@@ -7,17 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.0...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.1...HEAD)
 
-- Fix Vue type overrides for `$page` and `$inertia` ([#1393](https://github.com/inertiajs/inertia/pull/1393))
-- Restore React `usePage` generic type ([#1396](https://github.com/inertiajs/inertia/pull/1396))
-- Prevent needing to use `Method` enum with the Link component ([#1392](https://github.com/inertiajs/inertia/pull/1392))
-- Restore Vue 3 `usePage` generic type ([#1394](https://github.com/inertiajs/inertia/pull/1394))
-- Fix export of server types ([#1397](https://github.com/inertiajs/inertia/pull/1397))
-- Update form types to support nested data ([#1401](https://github.com/inertiajs/inertia/pull/1401))
-- Allowing stronger type support with Vue `useForm` ([#1413](https://github.com/inertiajs/inertia/pull/1413))
-- Fix Vue 2 `setup` prop types ([#1418](https://github.com/inertiajs/inertia/pull/1418))
-- Fix issue when passing multiple children to React `Head` component ([#1433](https://github.com/inertiajs/inertia/pull/1433))
+- Nothing!
+
+## [v1.0.1](https://github.com/inertiajs/inertia/compare/v1.0.0...v1.0.1)
+
+### Fixed
+
+- Fixed Vue type overrides for `$page` and `$inertia` ([#1393](https://github.com/inertiajs/inertia/pull/1393))
+- Restored React `usePage` generic type ([#1396](https://github.com/inertiajs/inertia/pull/1396))
+- Prevented need to use `Method` enum with the Link component ([#1392](https://github.com/inertiajs/inertia/pull/1392))
+- Restored Vue 3 `usePage` generic type ([#1394](https://github.com/inertiajs/inertia/pull/1394))
+- Fixed export of server types ([#1397](https://github.com/inertiajs/inertia/pull/1397))
+- Updated form types to support nested data ([#1401](https://github.com/inertiajs/inertia/pull/1401))
+- Allowed stronger type support with Vue `useForm` ([#1413](https://github.com/inertiajs/inertia/pull/1413))
+- Fixed Vue 2 `setup` prop types ([#1418](https://github.com/inertiajs/inertia/pull/1418))
+- Fixed issue when passing multiple children to React `Head` component ([#1433](https://github.com/inertiajs/inertia/pull/1433))
 
 ## [v1.0.0](https://github.com/inertiajs/inertia/compare/7ce91ec...v1.0.0) - 2023-01-14
 
