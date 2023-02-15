@@ -1,7 +1,7 @@
 import { mergeDataIntoQueryString, Method, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, PropType } from 'vue'
 
-interface InertiaLinkProps {
+export interface InertiaLinkProps {
   as?: string
   data?: object
   href: string

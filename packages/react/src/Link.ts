@@ -33,7 +33,7 @@ interface BaseInertiaLinkProps {
   queryStringArrayFormat?: 'indices' | 'brackets'
 }
 
-type InertiaLinkProps = BaseInertiaLinkProps &
+export type InertiaLinkProps = BaseInertiaLinkProps &
   Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> &
   Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
