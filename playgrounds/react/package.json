@@ -7,6 +7,8 @@
   },
   "devDependencies": {
     "@inertiajs/react": "^1.0.0-beta.2",
+    "@types/react": "^16.14.35",
+    "@types/react-dom": "^16.9.18",
     "@vitejs/plugin-react": "^3.0.0",
     "autoprefixer": "^10.4.13",
     "axios": "^1.1.2",
