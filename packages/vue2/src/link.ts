@@ -9,7 +9,7 @@ import {
 } from '@inertiajs/core'
 import { FunctionalComponentOptions, PropType } from 'vue'
 
-interface InertiaLinkProps {
+export interface InertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string
