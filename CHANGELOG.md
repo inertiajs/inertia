@@ -15,9 +15,9 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ### Fixed
 
-- Add explicit children to `InertiaHeadProps` ([#1448](https://github.com/inertiajs/inertia/pull/1448))
-- Export `InertiaLinkProps` type ([#1450](https://github.com/inertiajs/inertia/pull/1450))
-- Improve React `usePage` generic type ([#1451](https://github.com/inertiajs/inertia/pull/1451))
+- Added explicit children to `InertiaHeadProps` ([#1448](https://github.com/inertiajs/inertia/pull/1448))
+- Exported `InertiaLinkProps` type ([#1450](https://github.com/inertiajs/inertia/pull/1450))
+- Improved React `usePage` generic type ([#1451](https://github.com/inertiajs/inertia/pull/1451))
 
 ## [v1.0.1](https://github.com/inertiajs/inertia/compare/v1.0.0...v1.0.1)
 
