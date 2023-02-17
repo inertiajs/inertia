@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react'
 
 export default function Layout({ children }) {
-  const { appName } = usePage().props
+  const { appName } = usePage<{ appName: string }>().props
 
   return (
     <>
