@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.1...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.2...HEAD)
 
 - Nothing!
+
+## [v1.0.2](https://github.com/inertiajs/inertia/compare/v1.0.1...v1.0.2)
+
+### Fixed
+
+- Add explicit children to `InertiaHeadProps` ([#1448](https://github.com/inertiajs/inertia/pull/1448))
+- Export `InertiaLinkProps` type ([#1450](https://github.com/inertiajs/inertia/pull/1450))
+- Improve React `usePage` generic type ([#1451](https://github.com/inertiajs/inertia/pull/1451))
 
 ## [v1.0.1](https://github.com/inertiajs/inertia/compare/v1.0.0...v1.0.1)
 
