@@ -26,14 +26,12 @@ export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
 export interface PageProps {
   [key: string]: unknown
+  errors: Errors & ErrorBag
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
-  props: PageProps &
-    SharedProps & {
-      errors: Errors & ErrorBag
-    }
+  props: PageProps & SharedProps
   url: string
   version: string | null
 
