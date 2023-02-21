@@ -1,10 +1,9 @@
-import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, PropsWithChildren, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
-type InertiaHeadProps = {
+type InertiaHeadProps = PropsWithChildren<{
   title?: string
-  children?: React.ReactNode
-}
+}>
 
 type InertiaHead = FunctionComponent<InertiaHeadProps>
 
