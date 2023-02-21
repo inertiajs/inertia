@@ -1,4 +1,4 @@
-import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
+import { createHeadManager, Page, router } from '@inertiajs/core'
 import { DefineComponent, defineComponent, h, markRaw, Plugin, PropType, ref, shallowRef } from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -115,6 +115,6 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
+export function usePage<T extends Record<string, unknown>>(): Page<T> {
   return page.value
 }

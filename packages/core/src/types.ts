@@ -24,14 +24,13 @@ export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
-export interface PageProps {
-  [key: string]: unknown
+export type PageProps<T extends Record<string, unknown> = {}> = T & {
   errors: Errors & ErrorBag
 }
 
-export interface Page<SharedProps extends PageProps = PageProps> {
+export interface Page<T extends Record<string, unknown> = {}> {
   component: string
-  props: PageProps & SharedProps
+  props: PageProps<T>
   url: string
   version: string | null
 
