@@ -61,6 +61,7 @@ export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
+  preserveUrl: boolean
 }
 
 export type Visit = {
@@ -69,6 +70,7 @@ export type Visit = {
   replace: boolean
   preserveScroll: PreserveStateOption
   preserveState: PreserveStateOption
+  preserveUrl: PreserveStateOption
   only: Array<string>
   headers: Record<string, string>
   errorBag: string | null

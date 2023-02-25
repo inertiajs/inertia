@@ -9,6 +9,7 @@
   export let replace = false
   export let preserveScroll = false
   export let preserveState = null
+  export let preserveUrl = false
   export let only = []
   export let headers = {}
   export let queryStringArrayFormat = 'brackets'
@@ -31,6 +32,7 @@
     replace,
     preserveScroll,
     preserveState: preserveState ?? method !== 'get',
+    preserveUrl,
     only,
     headers,
     queryStringArrayFormat,

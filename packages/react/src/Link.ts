@@ -20,6 +20,7 @@ interface BaseInertiaLinkProps {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement> | React.KeyboardEvent<HTMLAnchorElement>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
+  preserveUrl?: PreserveStateOption
   replace?: boolean
   only?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
@@ -49,6 +50,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
       method = 'get',
       preserveScroll = false,
       preserveState = null,
+      preserveUrl = false,
       replace = false,
       only = [],
       headers = {},
@@ -78,6 +80,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
             method,
             preserveScroll,
             preserveState: preserveState ?? method !== 'get',
+            preserveUrl,
             replace,
             only,
             headers,
@@ -98,6 +101,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
         method,
         preserveScroll,
         preserveState,
+        preserveUrl,
         replace,
         only,
         headers,

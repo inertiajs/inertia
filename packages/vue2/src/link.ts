@@ -18,6 +18,7 @@ export interface InertiaLinkProps {
   onClick?: (event: MouseEvent | KeyboardEvent) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
+  preserveUrl?: PreserveStateOption
   replace?: boolean
   only?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
@@ -61,6 +62,10 @@ const Link: InertiaLink = {
     preserveState: {
       type: Boolean,
       default: null,
+    },
+    preserveUrl: {
+      type: Boolean,
+      default: false,
     },
     only: {
       type: Array,
@@ -126,6 +131,7 @@ const Link: InertiaLink = {
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
+                preserveUrl: props.preserveUrl,
                 only: props.only,
                 headers: props.headers,
                 // @ts-expect-error
