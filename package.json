@@ -1,5 +1,4 @@
 {
-  "private": true,
   "workspaces": [
     "packages/*",
     "playgrounds/*"
