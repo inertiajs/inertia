@@ -1,5 +1,5 @@
 import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
-import { DefineComponent, defineComponent, h, markRaw, Plugin, PropType, reactive, ref, shallowRef } from 'vue'
+import { computed, DefineComponent, defineComponent, h, markRaw, Plugin, PropType, reactive, ref, shallowRef } from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
@@ -15,7 +15,7 @@ export interface InertiaAppProps {
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
 const component = ref(null)
-const page = reactive({} as Page<any>)
+const page = ref<Page<any>>(null)
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager = null
@@ -48,7 +48,7 @@ const App: InertiaApp = defineComponent({
   },
   setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
-    Object.assign(page, initialPage)
+    page.value = initialPage
     key.value = null
 
     const isServer = typeof window === 'undefined'
@@ -60,7 +60,7 @@ const App: InertiaApp = defineComponent({
         resolveComponent,
         swapComponent: async (args: VuePageHandlerArgs) => {
           component.value = markRaw(args.component)
-          Object.assign(page, args.page)
+          page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
         },
       })
@@ -73,7 +73,7 @@ const App: InertiaApp = defineComponent({
         component.value.inheritAttrs = !!component.value.inheritAttrs
 
         const child = h(component.value, {
-          ...page.props,
+          ...page.value.props,
           key: key.value,
         })
 
@@ -92,7 +92,7 @@ const App: InertiaApp = defineComponent({
             .reverse()
             .reduce((child, layout) => {
               layout.inheritAttrs = !!layout.inheritAttrs
-              return h(layout, { ...page.props }, () => child)
+              return h(layout, { ...page.value.props }, () => child)
             })
         }
 
@@ -108,7 +108,7 @@ export const plugin: Plugin = {
     router.form = useForm
 
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => router })
-    Object.defineProperty(app.config.globalProperties, '$page', { get: () => page })
+    Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
     Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 
     app.mixin(remember)
@@ -116,5 +116,13 @@ export const plugin: Plugin = {
 }
 
 export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
-  return page
+  return reactive({
+    props: computed(() => page.value.props),
+    url: computed(() => page.value.url),
+    component: computed(() => page.value.component),
+    version: computed(() => page.value.version),
+    scrollRegions: computed(() => page.value.scrollRegions),
+    rememberedState: computed(() => page.value.rememberedState),
+    resolvedErrors: computed(() => page.value.resolvedErrors),
+  })
 }
