@@ -22,6 +22,7 @@ interface BaseInertiaLinkProps {
   preserveState?: PreserveStateOption
   replace?: boolean
   only?: string[]
+  except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
@@ -51,6 +52,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
       preserveState = null,
       replace = false,
       only = [],
+      except = [],
       headers = {},
       queryStringArrayFormat = 'brackets',
       onClick = noop,
@@ -80,6 +82,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
             preserveState: preserveState ?? method !== 'get',
             replace,
             only,
+            except,
             headers,
             onCancelToken,
             onBefore,
@@ -100,6 +103,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
         preserveState,
         replace,
         only,
+        except,
         headers,
         onClick,
         onCancelToken,

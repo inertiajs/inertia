@@ -260,6 +260,7 @@ export class Router {
       preserveScroll = false,
       preserveState = false,
       only = [],
+      except = [],
       headers = {},
       errorBag = '',
       forceFormData = false,
@@ -294,6 +295,7 @@ export class Router {
       preserveScroll,
       preserveState,
       only,
+      except,
       headers,
       errorBag,
       forceFormData,
@@ -356,6 +358,12 @@ export class Router {
               'X-Inertia-Partial-Data': only.join(','),
             }
           : {}),
+        ...(except.length
+          ? {
+              'X-Inertia-Partial-Component': this.page.component,
+              'X-Inertia-Partial-Data-Except': except.join(','),
+            }
+          : {}),
         ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
       },
@@ -373,9 +381,10 @@ export class Router {
         }
 
         const pageResponse: Page = response.data
-        if (only.length && pageResponse.component === this.page.component) {
+        if ((except.length || only.length) && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
+    
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
         if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {

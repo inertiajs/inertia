@@ -70,6 +70,7 @@ export type Visit = {
   preserveScroll: PreserveStateOption
   preserveState: PreserveStateOption
   only: Array<string>
+  except: Array<string>
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
