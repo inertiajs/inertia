@@ -1,4 +1,4 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { Method, Progress, RequestPayload, router, VisitOptions } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
@@ -7,7 +7,7 @@ type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
 
-export interface InertiaFormProps<TForm extends Record<string, unknown>> {
+export interface InertiaFormProps<TForm extends RequestPayload> {
   data: TForm
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
@@ -33,12 +33,12 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   delete: (url: string, options?: VisitOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends Record<string, unknown>>(initialValues?: TForm): InertiaFormProps<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends RequestPayload>(initialValues?: TForm): InertiaFormProps<TForm>
+export default function useForm<TForm extends RequestPayload>(
   rememberKey: string,
   initialValues?: TForm,
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends RequestPayload>(
   rememberKeyOrInitialValues?: string | TForm,
   maybeInitialValues?: TForm,
 ): InertiaFormProps<TForm> {
