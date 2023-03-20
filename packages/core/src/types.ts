@@ -25,7 +25,7 @@ export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
 export interface PageProps {
-  [key: string]: unknown
+  [key: string]: any
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
