@@ -19,8 +19,8 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
   transform: (callback: (data: TForm) => TForm) => void
   setDefaults(): void
-  setDefaults(field: keyof TForm, value: string): void
-  setDefaults(fields: Record<keyof TForm, string>): void
+  setDefaults(field: keyof TForm, value: typeof TForm): void
+  setDefaults(fields: TForm): void
   reset: (...fields: (keyof TForm)[]) => void
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
