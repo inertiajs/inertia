@@ -15,7 +15,7 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   transform(callback: (data: TForm) => object): this
   defaults(): this
   defaults(field: keyof TForm, value: typeof TForm): this
-  defaults(fields: TForm>): this
+  defaults(fields: TForm): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
