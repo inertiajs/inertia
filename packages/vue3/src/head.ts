@@ -87,7 +87,7 @@ const Head: InertiaHead = defineComponent({
     renderNodes(nodes) {
       return this.addTitleElement(
         nodes
-          .flatMap((node) => (node.type.toString() === 'Symbol(Fragment)' ? node.children : node))
+          .flatMap((node) => (node.type.toString().startsWith('Symbol') ? node.children : node))
           .map((node) => this.renderTag(node))
           .filter((node) => node),
       )
