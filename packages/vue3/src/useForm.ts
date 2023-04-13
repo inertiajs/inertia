@@ -11,6 +11,7 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
+  init(data: TForm): this
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
@@ -41,7 +42,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
   maybeData?: TForm,
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'object' ? rememberKeyOrData : maybeData
+  const data = typeof rememberKeyOrData === 'object' ? rememberKeyOrData : maybeData || {}
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null
@@ -59,8 +60,13 @@ export default function useForm<TForm extends Record<string, unknown>>(
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
+    init(data) {
+      Object.keys(this.data()).forEach((key) => delete this[key])
+      defaults = cloneDeep(data)
+      Object.keys(data).forEach((key) => (this[key] = data[key]))
+    },
     data() {
-      return (Object.keys(data) as Array<keyof TForm>).reduce((carry, key) => {
+      return (Object.keys(defaults) as Array<keyof TForm>).reduce((carry, key) => {
         // @ts-expect-error
         carry[key] = this[key]
         return carry
