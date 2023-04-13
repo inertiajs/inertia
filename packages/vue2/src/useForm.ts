@@ -11,6 +11,7 @@ interface InertiaFormProps<TForm> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
+  init(data: TForm): this
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
@@ -56,8 +57,13 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
+    init(data) {
+      Object.keys(this.data()).forEach((key) => delete this[key])
+      defaults = cloneDeep(data)
+      Object.keys(data).forEach((key) => Vue.set(this, key, data[key]))
+    },
     data() {
-      return Object.keys(data).reduce((carry, key) => {
+      return Object.keys(defaults).reduce((carry, key) => {
         carry[key] = this[key]
         return carry
       }, {})
