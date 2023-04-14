@@ -9,13 +9,15 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.3...HEAD)
 
-- Nothing!
+### Added
+
+- Added displayName to Link component in React adapter ([#1512](https://github.com/inertiajs/inertia/pull/1512))
 
 ## [v1.0.3](https://github.com/inertiajs/inertia/compare/v1.0.2...v1.0.3)
 
 ### Added
 
-- Added initialization callback to form helper in Vue adapters (#1516)
+- Added initialization callback to form helper in Vue adapters ([#1516](https://github.com/inertiajs/inertia/pull/1516))
 
 ## [v1.0.2](https://github.com/inertiajs/inertia/compare/v1.0.1...v1.0.2)
 
