@@ -32,17 +32,17 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
 
 export type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends Record<string, unknown>>(data: TForm): InertiaForm<TForm>
+export default function useForm<TForm extends Record<string, unknown>>(data?: TForm): InertiaForm<TForm>
 export default function useForm<TForm extends Record<string, unknown>>(
   rememberKey: string,
   data: TForm,
 ): InertiaForm<TForm>
 export default function useForm<TForm extends Record<string, unknown>>(
-  rememberKeyOrData: string | TForm,
+  rememberKeyOrData?: string | TForm,
   maybeData?: TForm,
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'object' ? rememberKeyOrData : maybeData || {}
+  const data = (typeof rememberKeyOrData === 'object' ? rememberKeyOrData : maybeData) || ({} as TForm)
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null
