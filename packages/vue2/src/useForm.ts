@@ -61,6 +61,8 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
       Object.keys(this.data()).forEach((key) => delete this[key])
       defaults = cloneDeep(data)
       Object.keys(data).forEach((key) => Vue.set(this, key, data[key]))
+
+      return this
     },
     data() {
       return Object.keys(defaults).reduce((carry, key) => {

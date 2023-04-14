@@ -64,6 +64,8 @@ export default function useForm<TForm extends Record<string, unknown>>(
       Object.keys(this.data()).forEach((key) => delete this[key])
       defaults = cloneDeep(data)
       Object.keys(data).forEach((key) => (this[key] = data[key]))
+
+      return this
     },
     data() {
       return (Object.keys(defaults) as Array<keyof TForm>).reduce((carry, key) => {
