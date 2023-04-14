@@ -31,27 +31,27 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
 
 export type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends Record<string, unknown>>(data: TForm): InertiaForm<TForm>
+export default function useForm<TForm extends Record<string, unknown>>(data: TForm | (() => TForm)): InertiaForm<TForm>
 export default function useForm<TForm extends Record<string, unknown>>(
   rememberKey: string,
-  data: TForm,
+  data: TForm | (() => TForm),
 ): InertiaForm<TForm>
 export default function useForm<TForm extends Record<string, unknown>>(
-  rememberKeyOrData: string | TForm,
-  maybeData?: TForm,
+  rememberKeyOrData: string | TForm | (() => TForm),
+  maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'object' ? rememberKeyOrData : maybeData
+  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null
-  let defaults = cloneDeep(data)
+  let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
   let form = reactive({
-    ...(restored ? restored.data : data),
+    ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -60,8 +60,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
     wasSuccessful: false,
     recentlySuccessful: false,
     data() {
-      return (Object.keys(data) as Array<keyof TForm>).reduce((carry, key) => {
-        // @ts-expect-error
+      return (Object.keys(defaults) as Array<keyof TForm>).reduce((carry, key) => {
         carry[key] = this[key]
         return carry
       }, {} as Partial<TForm>) as TForm
@@ -72,6 +71,10 @@ export default function useForm<TForm extends Record<string, unknown>>(
       return this
     },
     defaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+      if (typeof data === 'function') {
+        throw new Error('You cannot call `defaults()` when using a function to define your form data.')
+      }
+
       if (typeof fieldOrFields === 'undefined') {
         defaults = this.data()
       } else {
@@ -85,19 +88,18 @@ export default function useForm<TForm extends Record<string, unknown>>(
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(defaults)
+      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
+      const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
-        Object.assign(this, clonedDefaults)
+        defaults = clonedData
+        Object.assign(this, resolvedData)
       } else {
-        Object.assign(
-          this,
-          Object.keys(clonedDefaults)
-            .filter((key) => fields.includes(key))
-            .reduce((carry, key) => {
-              carry[key] = clonedDefaults[key]
-              return carry
-            }, {}),
-        )
+        Object.keys(resolvedData)
+          .filter((key) => fields.includes(key))
+          .forEach((key) => {
+            defaults[key] = clonedData[key]
+            this[key] = resolvedData[key]
+          })
       }
 
       return this
