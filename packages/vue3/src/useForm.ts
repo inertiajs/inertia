@@ -41,7 +41,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData !== 'string' ? rememberKeyOrData : maybeData
+  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null

@@ -40,7 +40,7 @@ export default function useForm<TForm>(data: TForm | (() => TForm)): InertiaForm
 export default function useForm<TForm>(rememberKey: string, data: TForm | (() => TForm)): InertiaForm<TForm>
 export default function useForm<TForm>(...args): InertiaForm<TForm> {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const data = (typeof args[0] !== 'string' ? args[0] : args[1]) || {}
+  const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? (router.restore(rememberKey) as { data: any; errors: any }) : null
   let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
   let cancelToken = null
