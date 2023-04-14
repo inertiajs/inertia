@@ -27,7 +27,7 @@ If you're making changes to one of the packages that requires a build step (`cor
 
 ```sh
 cd packages/core
-npm run watch
+npm run dev
 ```
 
 When proposing changes to one of the adapters (`react`, `vue2`, `vue3`, `svelte`), please try to apply the same changes to the other adapters where possible.
