@@ -11,7 +11,6 @@ interface InertiaFormProps<TForm> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  init(data: TForm): this
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
@@ -37,19 +36,19 @@ export interface InertiaFormTrait {
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }
 
-export default function useForm<TForm>(data: TForm): InertiaForm<TForm>
-export default function useForm<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
+export default function useForm<TForm>(data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm>(rememberKey: string, data: TForm | (() => TForm)): InertiaForm<TForm>
 export default function useForm<TForm>(...args): InertiaForm<TForm> {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
+  const data = (typeof args[0] !== 'string' ? args[0] : args[1]) || {}
   const restored = rememberKey ? (router.restore(rememberKey) as { data: any; errors: any }) : null
-  let defaults = cloneDeep(data)
+  let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
   const form = Vue.observable({
-    ...(restored ? restored.data : data),
+    ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -57,13 +56,6 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
-    init(data) {
-      Object.keys(this.data()).forEach((key) => delete this[key])
-      defaults = cloneDeep(data)
-      Object.keys(data).forEach((key) => Vue.set(this, key, data[key]))
-
-      return this
-    },
     data() {
       return Object.keys(defaults).reduce((carry, key) => {
         carry[key] = this[key]
@@ -76,6 +68,10 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
       return this
     },
     defaults(key, value) {
+      if (typeof data === 'function') {
+        throw new Error('You cannot call `defaults()` when using a function to define your form data.')
+      }
+
       if (typeof key === 'undefined') {
         defaults = this.data()
       } else {
@@ -85,19 +81,18 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(defaults)
+      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
+      const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
-        Object.assign(this, clonedDefaults)
+        defaults = clonedData
+        Object.assign(this, resolvedData)
       } else {
-        Object.assign(
-          this,
-          Object.keys(clonedDefaults)
-            .filter((key) => fields.includes(key))
-            .reduce((carry, key) => {
-              carry[key] = clonedDefaults[key]
-              return carry
-            }, {}),
-        )
+        Object.keys(resolvedData)
+          .filter((key) => fields.includes(key))
+          .forEach((key) => {
+            defaults[key] = clonedData[key]
+            this[key] = resolvedData[key]
+          })
       }
 
       return this
