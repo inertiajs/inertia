@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.2...HEAD)
 
-- Nothing!
+- Add initialization callback to form helper in Vue adapters (#1516)
 
 ## [v1.0.2](https://github.com/inertiajs/inertia/compare/v1.0.1...v1.0.2)
 
