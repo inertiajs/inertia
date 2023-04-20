@@ -13,6 +13,10 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 - Fix `usePage()` reactivity in Vue 2 adapter ([#1527](https://github.com/inertiajs/inertia/pull/1527))
 
+## Changed
+
+- Simplify the Vue 2 form helper ([#1529](https://github.com/inertiajs/inertia/pull/1529))
+
 ## [v1.0.4](https://github.com/inertiajs/inertia/compare/v1.0.3...v1.0.4)
 
 ### Added
