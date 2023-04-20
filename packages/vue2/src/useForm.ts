@@ -1,7 +1,7 @@
 import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
-import Vue from 'vue'
+import { reactive, watch } from 'vue'
 
 interface InertiaFormProps<TForm> {
   isDirty: boolean
@@ -47,7 +47,7 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
-  const form = Vue.observable({
+  const form = reactive({
     ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
     errors: restored ? restored.errors : {},
@@ -228,20 +228,16 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
     },
   })
 
-  new Vue({
-    created() {
-      this.$watch(
-        () => form,
-        (newValue) => {
-          form.isDirty = !isEqual(form.data(), defaults)
-          if (rememberKey) {
-            router.remember(newValue.__remember(), rememberKey)
-          }
-        },
-        { immediate: true, deep: true },
-      )
+  watch(
+    form,
+    (newValue) => {
+      form.isDirty = !isEqual(form.data(), defaults)
+      if (rememberKey) {
+        router.remember(cloneDeep(newValue.__remember()), rememberKey)
+      }
     },
-  })
+    { immediate: true, deep: true },
+  )
 
   return form
 }
