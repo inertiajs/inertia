@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.3...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.4...HEAD)
+
+- Nothing!
+
+## [v1.0.4](https://github.com/inertiajs/inertia/compare/v1.0.3...v1.0.4)
 
 ### Added
 
-- Fix `usePage()` reactivity in Vue 3 adapter ([#1469](https://github.com/inertiajs/inertia/pull/1469))
 - Added `displayName` to `Link` component in React adapter ([#1512](https://github.com/inertiajs/inertia/pull/1512))
+
+### Fixed
+
+- Fix `usePage()` reactivity in Vue 3 adapter ([#1469](https://github.com/inertiajs/inertia/pull/1469))
 
 ## [v1.0.3](https://github.com/inertiajs/inertia/compare/v1.0.2...v1.0.3)
 
