@@ -23,6 +23,9 @@
 <h1 class="text-3xl">Form</h1>
 
 <form on:submit|preventDefault={submit} class="mt-6 max-w-md space-y-4">
+  {#if $form.isDirty}
+    <div class="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">There are unsaved changes!</div>
+  {/if}
   <div>
     <label class="block" for="name">Name:</label>
     <input
@@ -59,9 +62,10 @@
       <div class="mt-2 text-sm text-red-600">{$form.errors.role}</div>
     {/if}
   </div>
-  <div>
+  <div class="flex gap-4">
     <button type="submit" disabled={$form.processing} class="rounded bg-slate-800 px-6 py-2 text-white">
       Submit
     </button>
+    <button type="button" on:click={() => $form.reset()}>Reset</button>
   </div>
 </form>
