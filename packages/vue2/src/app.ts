@@ -1,5 +1,5 @@
 import { createHeadManager, Page, router } from '@inertiajs/core'
-import { Component, PluginObject } from 'vue'
+import { Component, computed, PluginObject, reactive } from 'vue'
 import { ComponentOptions } from 'vue/types/umd'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -124,5 +124,10 @@ export const plugin: PluginObject<any> = {
 }
 
 export function usePage() {
-  return app.page
+  return reactive({
+    props: computed(() => app.page.props),
+    url: computed(() => app.page.url),
+    component: computed(() => app.page.component),
+    version: computed(() => app.page.version),
+  })
 }
