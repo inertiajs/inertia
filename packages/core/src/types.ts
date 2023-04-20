@@ -37,8 +37,9 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   url: string
   version: string | null
 
-  // Refactor away
+  /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
+  /** @internal */
   rememberedState: Record<string, unknown>
 }
 
