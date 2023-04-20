@@ -1,5 +1,16 @@
 import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
-import { computed, DefineComponent, defineComponent, h, markRaw, Plugin, PropType, reactive, ref, shallowRef } from 'vue'
+import {
+  computed,
+  DefineComponent,
+  defineComponent,
+  h,
+  markRaw,
+  Plugin,
+  PropType,
+  reactive,
+  ref,
+  shallowRef,
+} from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
