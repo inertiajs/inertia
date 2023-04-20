@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -28,7 +28,7 @@
     "svelte": "^3.20.0"
   },
   "dependencies": {
-    "@inertiajs/core": "1.0.4",
+    "@inertiajs/core": "1.0.5",
     "lodash.isequal": "^4.5.0"
   }
 }
