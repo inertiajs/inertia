@@ -50,7 +50,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
-  let form = reactive({
+  const form = reactive({
     ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
     errors: restored ? restored.errors : {},
