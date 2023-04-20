@@ -11,7 +11,8 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ### Added
 
-- Added displayName to Link component in React adapter ([#1512](https://github.com/inertiajs/inertia/pull/1512))
+- Fix `usePage()` reactivity in Vue 3 adapter ([#1469](https://github.com/inertiajs/inertia/pull/1469))
+- Added `displayName` to `Link` component in React adapter ([#1512](https://github.com/inertiajs/inertia/pull/1512))
 
 ## [v1.0.3](https://github.com/inertiajs/inertia/compare/v1.0.2...v1.0.3)
 
