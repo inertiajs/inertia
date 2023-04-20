@@ -134,6 +134,5 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     version: computed(() => page.value.version),
     scrollRegions: computed(() => page.value.scrollRegions),
     rememberedState: computed(() => page.value.rememberedState),
-    resolvedErrors: computed(() => page.value.resolvedErrors),
   })
 }

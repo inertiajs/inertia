@@ -40,7 +40,6 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   // Refactor away
   scrollRegions: Array<{ top: number; left: number }>
   rememberedState: Record<string, unknown>
-  resolvedErrors: Errors
 }
 
 export type PageResolver = (name: string) => Component
