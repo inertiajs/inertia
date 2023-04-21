@@ -151,6 +151,11 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
             return options.onProgress(event)
           }
         },
+        onBeforeLeave: () => {
+          if (options.onBeforeLeave) {
+            return options.onBeforeLeave()
+          }
+        },
         onSuccess: async (page) => {
           this.processing = false
           this.progress = null

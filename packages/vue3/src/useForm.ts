@@ -158,6 +158,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
             return options.onProgress(event)
           }
         },
+        onBeforeLeave: () => {
+          if (options.onBeforeLeave) {
+            return options.onBeforeLeave()
+          }
+        },
         onSuccess: async (page) => {
           this.processing = false
           this.progress = null
