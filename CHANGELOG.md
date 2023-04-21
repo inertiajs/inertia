@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.5...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.6...HEAD)
+
+- Nothing
+
+## [v1.0.6](https://github.com/inertiajs/inertia/compare/v1.0.5...v1.0.6)
 
 ### Fixed
 
-- Fix usePage() null object error in Vue 3 adapter ([#1530](https://github.com/inertiajs/inertia/pull/1530))
+- Fix `usePage()` null object error in Vue 3 adapter ([#1530](https://github.com/inertiajs/inertia/pull/1530))
 
 ## [v1.0.5](https://github.com/inertiajs/inertia/compare/v1.0.4...v1.0.5)
 
