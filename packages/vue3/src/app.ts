@@ -128,11 +128,11 @@ export const plugin: Plugin = {
 
 export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
   return reactive({
-    props: computed(() => page.value.props),
-    url: computed(() => page.value.url),
-    component: computed(() => page.value.component),
-    version: computed(() => page.value.version),
-    scrollRegions: computed(() => page.value.scrollRegions),
-    rememberedState: computed(() => page.value.rememberedState),
+    props: computed(() => page.value?.props),
+    url: computed(() => page.value?.url),
+    component: computed(() => page.value?.component),
+    version: computed(() => page.value?.version),
+    scrollRegions: computed(() => page.value?.scrollRegions),
+    rememberedState: computed(() => page.value?.rememberedState),
   })
 }
