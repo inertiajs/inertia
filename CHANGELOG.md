@@ -9,7 +9,9 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.5...HEAD)
 
-- Nothing!
+### Fixed
+
+- Fix usePage() null object error in Vue 3 adapter ([#1530](https://github.com/inertiajs/inertia/pull/1530))
 
 ## [v1.0.5](https://github.com/inertiajs/inertia/compare/v1.0.4...v1.0.5)
 
