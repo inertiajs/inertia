@@ -251,11 +251,11 @@ export class Router {
     }
   }
 
-  public visit(
+  public visit<TData extends RequestPayload = RequestPayload>(
     href: string | URL,
     {
       method = 'get',
-      data = {},
+      data: visitData = {} as TData,
       replace = false,
       preserveScroll = false,
       preserveState = false,
@@ -272,9 +272,10 @@ export class Router {
       onSuccess = () => {},
       onError = () => {},
       queryStringArrayFormat = 'brackets',
-    }: VisitOptions = {},
+    }: VisitOptions<TData> = {},
   ): void {
     let url = typeof href === 'string' ? hrefToUrl(href) : href
+    let data: RequestPayload = visitData;
 
     if ((hasFiles(data) || forceFormData) && !(data instanceof FormData)) {
       data = objectToFormData(data)
@@ -498,19 +499,19 @@ export class Router {
     }
   }
 
-  public get(
+  public get<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
-    data: RequestPayload = {},
+    data: TData = {} as TData,
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { ...options, method: 'get', data })
   }
 
-  public reload(options: Exclude<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
+  public reload<TData extends RequestPayload = RequestPayload>(options: Exclude<VisitOptions<TData>, 'preserveScroll' | 'preserveState'> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL | string, options: Exclude<VisitOptions, 'replace'> = {}): void {
+  public replace<TData extends RequestPayload = RequestPayload>(url: URL | string, options: Exclude<VisitOptions<TData>, 'replace'> = {}): void {
     console.warn(
       `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
         options.method ?? 'get'
@@ -519,31 +520,31 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(
+  public post<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
-    data: RequestPayload = {},
+    data: TData = {} as TData,
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
 
-  public put(
+  public put<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
-    data: RequestPayload = {},
+    data: TData = {} as TData,
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
 
-  public patch(
+  public patch<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
-    data: RequestPayload = {},
+    data: TData = {} as TData,
     options: Exclude<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  public delete(url: URL | string, options: Exclude<VisitOptions, 'method'> = {}): void {
+  public delete<TData extends RequestPayload = RequestPayload>(url: URL | string, options: Exclude<VisitOptions<TData>, 'method'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
