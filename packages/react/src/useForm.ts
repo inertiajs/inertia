@@ -162,7 +162,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
         router[method](url, transform(data), _options)
       }
     },
-    [data, setErrors],
+    [data, setErrors, transform],
   )
 
   return {
