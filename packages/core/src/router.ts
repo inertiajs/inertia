@@ -263,6 +263,7 @@ export class Router {
       headers = {},
       errorBag = '',
       forceFormData = false,
+      frameId = null,
       onCancelToken = () => {},
       onBefore = () => {},
       onStart = () => {},
@@ -296,6 +297,7 @@ export class Router {
       only,
       headers,
       errorBag,
+      frameId,
       forceFormData,
       queryStringArrayFormat,
       cancelled: false,
@@ -387,7 +389,7 @@ export class Router {
           responseUrl.hash = requestUrl.hash
           pageResponse.url = responseUrl.href
         }
-        return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
+        return this.setPage(pageResponse, { frameId, visitId, replace, preserveScroll, preserveState })
       })
       .then(() => {
         const errors = this.page.props.errors || {}
@@ -442,11 +444,13 @@ export class Router {
       replace = false,
       preserveScroll = false,
       preserveState = false,
+      frameId = null,
     }: {
       visitId?: VisitId
       replace?: boolean
       preserveScroll?: PreserveStateOption
       preserveState?: PreserveStateOption
+      frameId?: string | null
     } = {},
   ): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
@@ -455,7 +459,7 @@ export class Router {
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
-        this.swapComponent({ component, page, preserveState }).then(() => {
+        this.swapComponent({ frameId, component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }

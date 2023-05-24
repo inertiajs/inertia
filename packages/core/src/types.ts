@@ -29,6 +29,7 @@ export interface PageProps {
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
+  id: string | null // null for the root/parent frame
   component: string
   props: PageProps &
     SharedProps & {
@@ -49,10 +50,12 @@ export type PageHandler = ({
   component,
   page,
   preserveState,
+  frameId,
 }: {
   component: Component
   page: Page
-  preserveState: PreserveStateOption
+  preserveState: PreserveStateOption,
+  frameId: string | null
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
@@ -73,6 +76,7 @@ export type Visit = {
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
+  frameId: string | null
   queryStringArrayFormat: 'indices' | 'brackets'
 }
 
