@@ -29,7 +29,6 @@ export interface PageProps {
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
-  id: string | null // null for the root/parent frame
   component: string
   props: PageProps &
     SharedProps & {
