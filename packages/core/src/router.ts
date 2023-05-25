@@ -263,7 +263,7 @@ export class Router {
       headers = {},
       errorBag = '',
       forceFormData = false,
-      frameId = null,
+      target = null,
       onCancelToken = () => {},
       onBefore = () => {},
       onStart = () => {},
@@ -297,7 +297,7 @@ export class Router {
       only,
       headers,
       errorBag,
-      frameId,
+      target,
       forceFormData,
       queryStringArrayFormat,
       cancelled: false,
@@ -389,7 +389,7 @@ export class Router {
           responseUrl.hash = requestUrl.hash
           pageResponse.url = responseUrl.href
         }
-        return this.setPage(pageResponse, { frameId, visitId, replace, preserveScroll, preserveState })
+        return this.setPage(pageResponse, { target, visitId, replace, preserveScroll, preserveState })
       })
       .then(() => {
         const errors = this.page.props.errors || {}
@@ -444,22 +444,24 @@ export class Router {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-      frameId = null,
+      target = null,
     }: {
       visitId?: VisitId
       replace?: boolean
       preserveScroll?: PreserveStateOption
       preserveState?: PreserveStateOption
-      frameId?: string | null
+      target?: string | null
     } = {},
   ): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        replace = replace || hrefToUrl(page.url).href === window.location.href
-        replace ? this.replaceState(page) : this.pushState(page)
-        this.swapComponent({ frameId, component, page, preserveState }).then(() => {
+        if (!target) {
+          replace = replace || hrefToUrl(page.url).href === window.location.href
+          replace ? this.replaceState(page) : this.pushState(page)
+        }
+        this.swapComponent({ target, component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }

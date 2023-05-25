@@ -12,7 +12,7 @@
 
   onMount(() => {
     router.visit(src, {
-      frameId: id
+      target: id
     })
   })
 </script>

@@ -49,12 +49,12 @@ export type PageHandler = ({
   component,
   page,
   preserveState,
-  frameId,
+  target,
 }: {
   component: Component
   page: Page
   preserveState: PreserveStateOption,
-  frameId: string | null
+  target?: string | null
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
@@ -75,7 +75,7 @@ export type Visit = {
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
-  frameId: string | null
+  target: string | null
   queryStringArrayFormat: 'indices' | 'brackets'
 }
 
