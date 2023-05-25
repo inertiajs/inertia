@@ -89,6 +89,21 @@ export class Router {
   protected setupEventListeners(): void {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
+    document.addEventListener('click', (event) => {
+      const target = event.target
+      const anchorElement = target.closest('a')
+      const frameId = target.closest('[data-inertia-frame-id]')?.dataset.inertiaFrameId
+      if (!anchorElement || anchorElement.rel == 'external' || anchorElement.target == '_blank') return
+      
+      if (anchorElement.href && anchorElement.href.startsWith(location.origin)) {
+        event.preventDefault()
+        event.stopPropagation()
+        this.visit(anchorElement.href, {
+          method: anchorElement.dataset['method'],
+          target: anchorElement.dataset['target'] || frameId,
+        })
+      }
+    })
   }
 
   protected scrollRegions(): NodeListOf<Element> {
@@ -462,7 +477,7 @@ export class Router {
           replace = replace || hrefToUrl(page.url).href === window.location.href
           replace ? this.replaceState(page) : this.pushState(page)
         }
-      
+        
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()

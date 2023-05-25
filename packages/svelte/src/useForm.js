@@ -2,11 +2,13 @@ import { router } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
 import { writable } from 'svelte/store'
+import { getContext } from 'svelte'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? router.restore(rememberKey) : null
+  const frameId = getContext('inertia:frame-id')
   let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
@@ -91,6 +93,7 @@ function useForm(...args) {
       const data = transform(this.data())
       const _options = {
         ...options,
+        target: typeof(options.target) !== 'undefined' ? options.target : frameId,
         onCancelToken: (token) => {
           cancelToken = token
 
