@@ -31,12 +31,13 @@ export interface PageProps {
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
-    SharedProps & {
-      errors: Errors & ErrorBag
-    }
+  SharedProps & {
+    errors: Errors & ErrorBag
+  }
   url: string
+  target?: string | null
   version: string | null
-
+  
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
   /** @internal */
@@ -49,12 +50,10 @@ export type PageHandler = ({
   component,
   page,
   preserveState,
-  target,
 }: {
   component: Component
   page: Page
   preserveState: PreserveStateOption,
-  target?: string | null
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | string | ((page: Page) => boolean)

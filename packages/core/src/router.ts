@@ -457,11 +457,13 @@ export class Router {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
+        page.target = target
         if (!target) {
           replace = replace || hrefToUrl(page.url).href === window.location.href
           replace ? this.replaceState(page) : this.pushState(page)
         }
-        this.swapComponent({ target, component, page, preserveState }).then(() => {
+      
+        this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
           }
