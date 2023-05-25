@@ -20,6 +20,7 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   LocationVisit,
+  Method,
   Page,
   PageHandler,
   PageResolver,
@@ -90,16 +91,16 @@ export class Router {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
     document.addEventListener('click', (event) => {
-      const target = event.target
+      const target = event.target as Element
       const anchorElement = target.closest('a')
-      const frameId = target.closest('[data-inertia-frame-id]')?.dataset.inertiaFrameId
+      const frameId = (target.closest('[data-inertia-frame-id]') as HTMLElement)?.dataset.inertiaFrameId
       if (!anchorElement || anchorElement.rel == 'external' || anchorElement.target == '_blank') return
       
       if (anchorElement.href && anchorElement.href.startsWith(location.origin)) {
         event.preventDefault()
         event.stopPropagation()
         this.visit(anchorElement.href, {
-          method: anchorElement.dataset['method'],
+          method: anchorElement.dataset['method'] as Method,
           target: anchorElement.dataset['target'] || frameId,
         })
       }
