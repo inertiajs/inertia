@@ -87,10 +87,25 @@ const Head: InertiaHead = defineComponent({
     renderNodes(nodes) {
       return this.addTitleElement(
         nodes
-          .flatMap((node) => (node.type.toString().startsWith('Symbol') && node.children ? node.children : node))
+          .flatMap((node) => this.resolveNode(node))
           .map((node) => this.renderTag(node))
           .filter((node) => node),
       )
+    },
+    resolveNode(node) {
+      const nodeType = node.type && node.type.toString()
+      const isFunctionalComponent = typeof node.type === 'function'
+      if (isFunctionalComponent) return this.resolveNode(node.type())
+      const isSfc = typeof node.type === 'object'
+      if (isSfc) {
+        console.warn(`Using components in the <Head> component is not supported`)
+        return []
+      }
+      const isComment = /(comment|cmt)/i.test(nodeType)
+      const isFragment = /(fragment|fgt)/i.test(nodeType) && node.children
+      if (isFragment) return node.children.flatMap((child) => this.resolveNode(child))
+      else if (!isComment && !node.children) return node
+      else return []
     },
   },
   render() {
