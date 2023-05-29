@@ -104,7 +104,7 @@ const Head: InertiaHead = defineComponent({
       const isComment = /(comment|cmt)/i.test(nodeType)
       const isFragment = /(fragment|fgt)/i.test(nodeType) && node.children
       if (isFragment) return node.children.flatMap((child) => this.resolveNode(child))
-      else if (!isComment && !node.children) return node
+      else if (!isComment) return node
       else return []
     },
   },
