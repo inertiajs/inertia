@@ -22,7 +22,8 @@ function useForm(...args) {
     processing: false,
     setStore(key, value) {
       store.update((store) => {
-        return Object.assign({}, store, typeof key === 'string' ? { [key]: value } : key)
+        const _value = typeof value === 'function' ? value(store) : value
+        return Object.assign({}, store, typeof key === 'string' ? { [key]: _value } : key)
       })
     },
     data() {
@@ -57,30 +58,29 @@ function useForm(...args) {
             .reduce((carry, key) => {
               carry[key] = defaults[key]
               return carry
-            }, {}),
+            }, {})
         )
       }
 
       return this
     },
     setError(key, value) {
-      this.setStore('errors', {
-        ...this.errors,
+      this.setStore('errors', (store) => ({
+        ...store.errors,
         ...(value ? { [key]: value } : key),
-      })
+      }))
 
       return this
     },
     clearErrors(...fields) {
-      this.setStore(
-        'errors',
-        Object.keys(this.errors).reduce(
+      this.setStore('errors', (store) =>
+        Object.keys(store.errors).reduce(
           (carry, field) => ({
             ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
+            ...(fields.length > 0 && !fields.includes(field) ? { [field]: store.errors[field] } : {}),
           }),
-          {},
-        ),
+          {}
+        )
       )
 
       return this
