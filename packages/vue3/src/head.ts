@@ -94,18 +94,18 @@ const Head: InertiaHead = defineComponent({
     },
     resolveNode(node) {
       const nodeType = node.type && node.type.toString()
-      const isFunctionalComponent = typeof node.type === 'function'
-      if (isFunctionalComponent) return this.resolveNode(node.type())
-      const isSfc = typeof node.type === 'object'
-      if (isSfc) {
-        console.warn(`Using components in the <Head> component is not supported`)
+      if (typeof node.type === 'function') {
+        return this.resolveNode(node.type())
+      } else if (typeof node.type === 'object') {
+        console.warn(`Using components in the <Head> component is not supported.`)
         return []
+      } else if (/(fragment|fgt)/i.test(nodeType) && node.children) {
+        return node.children.flatMap((child) => this.resolveNode(child))
+      } else if (/(comment|cmt)/i.test(nodeType)) {
+        return []
+      } else {
+        return node
       }
-      const isComment = /(comment|cmt)/i.test(nodeType)
-      const isFragment = /(fragment|fgt)/i.test(nodeType) && node.children
-      if (isFragment) return node.children.flatMap((child) => this.resolveNode(child))
-      else if (!isComment) return node
-      else return []
     },
   },
   render() {
