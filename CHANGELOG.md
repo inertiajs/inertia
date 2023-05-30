@@ -9,7 +9,10 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.7...HEAD)
 
-- Nothing
+### Fixed
+
+- Fix `<Head>` nVode handling in Vue 3 adapter ([#1570](https://github.com/inertiajs/inertia/pull/1570))
+- Fix watching remembered data in Vue 3 adapter ([#1571](https://github.com/inertiajs/inertia/pull/1571))
 
 ## [v1.0.7](https://github.com/inertiajs/inertia/compare/v1.0.6...v1.0.7)
 
