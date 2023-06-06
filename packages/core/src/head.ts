@@ -41,7 +41,6 @@ const Renderer = {
     targetElements.forEach((targetElement) => {
       const index = this.findMatchingElementIndex(targetElement as Element, sourceElements)
       if (index === -1) {
-        targetElement?.parentNode?.removeChild(targetElement)
         return
       }
 
