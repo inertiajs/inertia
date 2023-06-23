@@ -11,7 +11,7 @@
   setContext('inertia:frame-id', id)
 
   $: components = $store.frames?.[id] && h($store.frames[id].component.default, $store.frames[id].props)
-  
+
   onMount(() => {
     router.visit(src, {
       target: id

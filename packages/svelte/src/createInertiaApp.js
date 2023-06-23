@@ -28,6 +28,7 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
         else store.update((current) => ({
           component,
           page,
+          frames: current.frames,
           key: preserveState ? current.key : Date.now(),
         }))
       },
