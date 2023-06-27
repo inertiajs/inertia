@@ -61,12 +61,27 @@ const Head: InertiaHead = defineComponent({
         ? node.children
         : node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
+    isFunctionNode(node) {
+      return typeof node.type === 'function'
+    },
+    isComponentNode(node) {
+      return typeof node.type === 'object'
+    },
+    isCommentNode(node) {
+      return /(comment|cmt)/i.test(node.type.toString())
+    },
+    isFragmentNode(node) {
+      return /(fragment|fgt|symbol\(\))/i.test(node.type.toString())
+    },
+    isTextNode(node) {
+      return /(text|txt)/i.test(node.type.toString())
+    },
     renderTag(node) {
-      if (node.type.toString() === 'Symbol(Text)') {
+      if (this.isTextNode(node)) {
         return node.children
-      } else if (node.type.toString() === 'Symbol()') {
+      } else if (this.isFragmentNode(node)) {
         return ''
-      } else if (node.type.toString() === 'Symbol(Comment)') {
+      } else if (this.isCommentNode(node)) {
         return ''
       }
       let html = this.renderTagStart(node)
@@ -93,15 +108,16 @@ const Head: InertiaHead = defineComponent({
       )
     },
     resolveNode(node) {
-      const nodeType = node.type && node.type.toString()
-      if (typeof node.type === 'function') {
+      if (this.isFunctionNode(node)) {
         return this.resolveNode(node.type())
-      } else if (typeof node.type === 'object') {
+      } else if (this.isComponentNode(node)) {
         console.warn(`Using components in the <Head> component is not supported.`)
         return []
-      } else if (/(fragment|fgt)/i.test(nodeType) && node.children) {
+      } else if (this.isTextNode(node) && node.children) {
+        return node
+      } else if (this.isFragmentNode(node) && node.children) {
         return node.children.flatMap((child) => this.resolveNode(child))
-      } else if (/(comment|cmt)/i.test(nodeType)) {
+      } else if (this.isCommentNode(node)) {
         return []
       } else {
         return node
