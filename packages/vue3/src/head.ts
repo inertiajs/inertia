@@ -61,6 +61,12 @@ const Head: InertiaHead = defineComponent({
         ? node.children
         : node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
+    isFunctionNode(node) {
+      return typeof node.type === 'function'
+    },
+    isComponentNode(node) {
+      return typeof node.type === 'object'
+    },
     isCommentNode(node) {
       return /(comment|cmt)/i.test(node.type.toString())
     },
@@ -102,15 +108,14 @@ const Head: InertiaHead = defineComponent({
       )
     },
     resolveNode(node) {
-      if (typeof node.type === 'function') {
+      if (this.isFunctionNode(node)) {
         return this.resolveNode(node.type())
-      } else if (typeof node.type === 'object') {
+      } else if (this.isComponentNode(node)) {
         console.warn(`Using components in the <Head> component is not supported.`)
         return []
       } else if (this.isTextNode(node) && node.children) {
-        return node;
-      }
-      else if (this.isFragmentNode(node) && node.children) {
+        return node
+      } else if (this.isFragmentNode(node) && node.children) {
         return node.children.flatMap((child) => this.resolveNode(child))
       } else if (this.isCommentNode(node)) {
         return []
