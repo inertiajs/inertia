@@ -25,7 +25,7 @@
   },
   "main": "src/index.js",
   "peerDependencies": {
-    "svelte": "^3.20.0"
+    "svelte": "^3.20.0 || ^4.0.0"
   },
   "dependencies": {
     "@inertiajs/core": "1.0.8",
