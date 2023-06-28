@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.8...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.9...HEAD)
+
+- Nothing!
+
+## [v1.0.9](https://github.com/inertiajs/inertia/compare/v1.0.8...v1.0.9)
 
 - Fix `<Head>` vNode handling in Vue 3 adapter ([#1590](https://github.com/inertiajs/inertia/pull/1590))
 - Add Svelte 4 support ([60699c7](https://github.com/inertiajs/inertia/commit/60699c7c5978eebd393e0333b567d8e465f4b58f))
