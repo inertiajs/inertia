@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.8...HEAD)
 
-- Nothing!
+- Fix `<Head>` vNode handling in Vue 3 adapter ([#1590](https://github.com/inertiajs/inertia/pull/1590))
 
 ## [v1.0.8](https://github.com/inertiajs/inertia/compare/v1.0.7...v1.0.8)
 
