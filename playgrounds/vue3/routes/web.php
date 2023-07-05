@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +70,9 @@ Route::get('/article', function () {
 });
 
 Route::get('/form', function () {
-    return inertia('Form');
+    return inertia('Form', [
+        'tested' => Session::get('tested'),
+    ]);
 });
 
 Route::post('/user', function () {
@@ -78,8 +81,14 @@ Route::post('/user', function () {
             'name' => ['required'],
             'company' => ['required'],
             'role' => ['required', 'in:User,Admin,Super'],
-        ])
+        ]),
     ]);
+});
+
+Route::post('/test', function () {
+    // test logic 👍
+    sleep(1);
+    Session::flash('tested', !!rand(0, 1));
 });
 
 Route::get('/login', function () {

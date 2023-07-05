@@ -5,12 +5,29 @@ export default { layout: Layout }
 
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3'
+import { ref } from 'vue'
+
+defineProps({
+  tested: {
+    type: Boolean,
+    default: null,
+  },
+})
 
 const form = useForm('NewUser', {
   name: '',
   company: '',
   role: '',
 })
+
+const testing = ref(false)
+
+function test() {
+  form.post('/test', {
+    onBefore: () => (testing.value = true),
+    onFinish: () => (testing.value = false),
+  })
+}
 </script>
 
 <template>
@@ -51,6 +68,12 @@ const form = useForm('NewUser', {
       <div v-if="form.errors.role" class="mt-2 text-sm text-red-600">{{ form.errors.role }}</div>
     </div>
     <div class="flex gap-4">
+      <button @click="test" type="button" class="rounded border border-gray-300 px-6 py-2 text-gray-900">
+        <template v-if="testing">Testing... 🤔</template>
+        <template v-else-if="tested === null">Test</template>
+        <template v-else-if="tested === true">Success ✅</template>
+        <template v-else-if="tested === false">Failed ❌</template>
+      </button>
       <button type="submit" :disabled="form.processing" class="rounded bg-slate-800 px-6 py-2 text-white">
         Submit
       </button>
