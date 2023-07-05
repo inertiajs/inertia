@@ -7,25 +7,18 @@ export default { layout: Layout }
 import { Head, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-defineProps({
-  tested: {
-    type: Boolean,
-    default: null,
-  },
-})
-
 const form = useForm('NewUser', {
   name: '',
   company: '',
   role: '',
 })
 
-const testing = ref(false)
+const testStatus = ref('not-tested')
 
 function test() {
-  form.post('/test', {
-    onBefore: () => (testing.value = true),
-    onFinish: () => (testing.value = false),
+  form.post('/user?test=1', {
+    onBefore: () => (testStatus.value = 'in-progress'),
+    onFinish: () => (testStatus.value = 'completed'),
   })
 }
 </script>
@@ -69,10 +62,10 @@ function test() {
     </div>
     <div class="flex gap-4">
       <button @click="test" type="button" class="rounded border border-gray-300 px-6 py-2 text-gray-900">
-        <template v-if="testing">Testing... 🤔</template>
-        <template v-else-if="tested === null">Test</template>
-        <template v-else-if="tested === true">Success ✅</template>
-        <template v-else-if="tested === false">Failed ❌</template>
+        <template v-if="testStatus === 'in-progress'">Testing... 🤔</template>
+        <template v-else-if="testStatus === 'not-tested'">Test</template>
+        <template v-else-if="testStatus === 'completed' && form.hasErrors">Failed ❌</template>
+        <template v-else-if="testStatus === 'completed'">Success ✅</template>
       </button>
       <button type="submit" :disabled="form.processing" class="rounded bg-slate-800 px-6 py-2 text-white">
         Submit

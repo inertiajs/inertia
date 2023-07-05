@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,25 +71,28 @@ Route::get('/article', function () {
 });
 
 Route::get('/form', function () {
-    return inertia('Form', [
-        'tested' => Session::get('tested'),
-    ]);
+    return inertia('Form');
 });
 
 Route::post('/user', function () {
-    return inertia('User', [
-        'user' => request()->validate([
-            'name' => ['required'],
-            'company' => ['required'],
-            'role' => ['required', 'in:User,Admin,Super'],
-        ]),
+    $input = request()->validate([
+        'name' => ['required'],
+        'company' => ['required'],
+        'role' => ['required', 'in:User,Admin,Super'],
     ]);
-});
 
-Route::post('/test', function () {
-    // test logic 👍
-    sleep(1);
-    Session::flash('tested', !!rand(0, 1));
+    if (request('test')) {
+        // test logic 👍
+        sleep(1);
+
+        if (rand(0, 1)) {
+            throw ValidationException::withMessages(['test' => 'The test failed.']);
+        }
+
+        return back();
+    }
+
+    return inertia('User', ['user' => $input]);
 });
 
 Route::get('/login', function () {
