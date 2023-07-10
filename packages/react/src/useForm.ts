@@ -168,14 +168,14 @@ export default function useForm<TForm extends Record<string, unknown>>(
   const setDataFunction = useCallback(
     (keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) => {
       if (typeof keyOrData === 'string') {
-        setData({ ...data, [keyOrData]: maybeValue })
+        setData((data) => ({ ...data, [keyOrData]: maybeValue }))
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
         setData(keyOrData as TForm)
       }
     },
-    [data, setData],
+    [setData],
   )
 
   const setDefaultsFunction = useCallback(
@@ -197,7 +197,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
       if (fields.length === 0) {
         setData(defaults)
       } else {
-        setData(
+        setData((data) =>
           (Object.keys(defaults) as Array<keyof TForm>)
             .filter((key) => fields.includes(key))
             .reduce(
@@ -210,7 +210,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
         )
       }
     },
-    [data, setData, defaults],
+    [setData, defaults],
   )
 
   const setError = useCallback(
