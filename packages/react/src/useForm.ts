@@ -165,9 +165,8 @@ export default function useForm<TForm extends Record<string, unknown>>(
     [data, setErrors],
   )
 
-  return {
-    data,
-    setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
+  const setDataFunction = useCallback(
+    (keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) => {
       if (typeof keyOrData === 'string') {
         setData({ ...data, [keyOrData]: maybeValue })
       } else if (typeof keyOrData === 'function') {
@@ -176,17 +175,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
         setData(keyOrData as TForm)
       }
     },
-    isDirty: !isEqual(data, defaults),
-    errors,
-    hasErrors,
-    processing,
-    progress,
-    wasSuccessful,
-    recentlySuccessful,
-    transform(callback) {
-      transform = callback
-    },
-    setDefaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    [data, setData],
+  )
+
+  const setDefaultsFunction = useCallback(
+    (fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) => {
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(() => data)
       } else {
@@ -196,7 +189,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
         }))
       }
     },
-    reset(...fields) {
+    [data, setDefaults],
+  )
+
+  const reset = useCallback(
+    (...fields) => {
       if (fields.length === 0) {
         setData(defaults)
       } else {
@@ -213,7 +210,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
         )
       }
     },
-    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    [data, setData, defaults],
+  )
+
+  const setError = useCallback(
+    (fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
@@ -225,7 +226,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
         return newErrors
       })
     },
-    clearErrors(...fields) {
+    [setErrors, setHasErrors],
+  )
+
+  const clearErrors = useCallback(
+    (...fields) => {
       setErrors((errors) => {
         const newErrors = (Object.keys(errors) as Array<keyof TForm>).reduce(
           (carry, field) => ({
@@ -238,26 +243,49 @@ export default function useForm<TForm extends Record<string, unknown>>(
         return newErrors
       })
     },
+    [setErrors, setHasErrors],
+  )
+
+  const createSubmitMethod = (method) => (url, options) => {
+    submit(method, url, options)
+  }
+  const get = useCallback(createSubmitMethod('get'), [submit])
+  const post = useCallback(createSubmitMethod('post'), [submit])
+  const put = useCallback(createSubmitMethod('put'), [submit])
+  const patch = useCallback(createSubmitMethod('patch'), [submit])
+  const deleteMethod = useCallback(createSubmitMethod('delete'), [submit])
+
+  const cancel = useCallback(() => {
+    if (cancelToken.current) {
+      cancelToken.current.cancel()
+    }
+  }, [])
+
+  const transformFunction = useCallback((callback) => {
+    transform = callback
+  }, [])
+
+  return {
+    data,
+    setData: setDataFunction,
+    isDirty: !isEqual(data, defaults),
+    errors,
+    hasErrors,
+    processing,
+    progress,
+    wasSuccessful,
+    recentlySuccessful,
+    transform: transformFunction,
+    setDefaults: setDefaultsFunction,
+    reset,
+    setError,
+    clearErrors,
     submit,
-    get(url, options) {
-      submit('get', url, options)
-    },
-    post(url, options) {
-      submit('post', url, options)
-    },
-    put(url, options) {
-      submit('put', url, options)
-    },
-    patch(url, options) {
-      submit('patch', url, options)
-    },
-    delete(url, options) {
-      submit('delete', url, options)
-    },
-    cancel() {
-      if (cancelToken.current) {
-        cancelToken.current.cancel()
-      }
-    },
+    get,
+    post,
+    put,
+    patch,
+    delete: deleteMethod,
+    cancel,
   }
 }
