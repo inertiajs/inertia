@@ -31,7 +31,16 @@ export default async function createInertiaApp({
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
-  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const resolvedComponentCache = {
+    name: null,
+    component: null
+  }
+  const resolveComponent = (name) => {
+    if (resolvedComponentCache.name == name) return resolvedComponentCache.component
+    let promise = Promise.resolve(resolve(name)).then((module) => module.default || module)
+    Object.assign(resolvedComponentCache, { name, component: promise })
+    return promise
+  }
 
   let head = []
 
