@@ -7,7 +7,7 @@ function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? router.restore(rememberKey) : null
-  let defaults = cloneDeep(data);
+  let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
@@ -49,14 +49,15 @@ function useForm(...args) {
       return this
     },
     reset(...fields) {
+      let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
-        this.setStore(defaults)
+        this.setStore(clonedDefaults)
       } else {
         this.setStore(
-          Object.keys(defaults)
+          Object.keys(clonedDefaults)
             .filter((key) => fields.includes(key))
             .reduce((carry, key) => {
-              carry[key] = defaults[key]
+              carry[key] = clonedDefaults[key]
               return carry
             }, {}),
         )
