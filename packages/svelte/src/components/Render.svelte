@@ -18,7 +18,7 @@
 </script>
 
 <script lang="ts">
-  import { store } from '../index'
+  import store from '../store'
 
   export let component: InertiaComponentType
   export let props: PageProps = {}

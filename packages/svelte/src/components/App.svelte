@@ -2,7 +2,7 @@
   import { Page } from '@inertiajs/core'
   import { ComponentResolver } from '../types'
   import Render, { h } from './Render.svelte'
-  import { store } from '../index'
+  import store from '../store'
 
   export const initialPage: Page = null
   export const resolveComponent: ComponentResolver = null

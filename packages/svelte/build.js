@@ -23,12 +23,26 @@ const builds = [
     format: 'esm',
     outfile: 'dist/index.js',
     platform: 'browser',
+    external: [...config.external, './store'],
   },
   {
     entryPoints: ['src/index.ts'],
     format: 'cjs',
     outfile: 'dist/index.cjs',
     platform: 'browser',
+    external: [...config.external, './store'],
+  },
+  {
+    entryPoints: ['src/store.ts'],
+    format: 'esm',
+    outfile: 'dist/store.js',
+    platform: 'node',
+  },
+  {
+    entryPoints: ['src/store.ts'],
+    format: 'cjs',
+    outfile: 'dist/store.cjs',
+    platform: 'node',
   },
   {
     entryPoints: ['src/server.ts'],
