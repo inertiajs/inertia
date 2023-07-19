@@ -54,7 +54,7 @@ builds.forEach((build) => {
 const componentsSrc = path.join(process.cwd(), 'src/components/')
 const componentsDest = path.join(process.cwd(), 'dist/components/')
 if (!fs.existsSync(componentsDest)) {
-  fs.mkdirSync(componentsDest)
+  fs.mkdirSync(componentsDest, { recursive: true })
 }
 for (const filename of fs.readdirSync(componentsSrc)) {
   const source = fs.readFileSync(path.join(componentsSrc, filename), 'utf8')
