@@ -34,6 +34,10 @@ export interface Page<SharedProps extends PageProps = PageProps> {
     SharedProps & {
       errors: Errors & ErrorBag
     }
+  deferProps?: (keyof (PageProps &
+    SharedProps & {
+      errors: Errors & ErrorBag
+    }))[]
   url: string
   version: string | null
 
