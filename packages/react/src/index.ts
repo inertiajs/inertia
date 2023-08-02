@@ -2,6 +2,7 @@ import { router as Router } from '@inertiajs/core'
 
 export const router = Router
 export { default as createInertiaApp } from './createInertiaApp'
+export { default as App } from './App'
 export { default as Head } from './Head'
 export { default as Link, InertiaLinkProps } from './Link'
 export { default as useForm } from './useForm'
