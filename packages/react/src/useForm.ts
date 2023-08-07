@@ -58,7 +58,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  let transform = (data) => data
+  const transform = useRef((data) => data)
 
   useEffect(() => {
     isMounted.current = true
@@ -157,9 +157,9 @@ export default function useForm<TForm extends Record<string, unknown>>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform(data) })
+        router.delete(url, { ..._options, data: transform.current(data) })
       } else {
-        router[method](url, transform(data), _options)
+        router[method](url, transform.current(data), _options)
       }
     },
     [data, setErrors],
@@ -262,7 +262,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
   }, [])
 
   const transformFunction = useCallback((callback) => {
-    transform = callback
+    transform.current = callback
   }, [])
 
   return {
