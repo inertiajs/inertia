@@ -13,7 +13,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [v1.0.10](https://github.com/inertiajs/inertia/compare/v1.0.9...v1.0.10)
 
-- Fix Svelte's `useForm` helper ([#1610](https://github.com/inertiajs/inertia/pull/1590))
+- Fix Svelte's `useForm` helper ([#1610](https://github.com/inertiajs/inertia/pull/1610))
 
 ## [v1.0.9](https://github.com/inertiajs/inertia/compare/v1.0.8...v1.0.9)
 
