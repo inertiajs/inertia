@@ -3,8 +3,6 @@ import esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import fs from 'node:fs'
 import path from 'node:path'
-import sveltePreprocess from 'svelte-preprocess'
-import * as svelte from 'svelte/compiler'
 
 const watch = process.argv.slice(1).includes('--watch')
 
@@ -72,9 +70,7 @@ if (!fs.existsSync(componentsDest)) {
 }
 for (const filename of fs.readdirSync(componentsSrc)) {
   const source = fs.readFileSync(path.join(componentsSrc, filename), 'utf8')
-  svelte.preprocess(source, sveltePreprocess(), { filename }).then(({ code }) => {
-    fs.writeFileSync(path.join(componentsDest, filename), code)
-  })
+  fs.writeFileSync(path.join(componentsDest, filename), source)
 }
 
 function watcher(build) {

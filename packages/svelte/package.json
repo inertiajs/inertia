@@ -26,15 +26,15 @@
   ],
   "type": "module",
   "main": "dist/index.cjs",
-  "types": "types/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
     "./server": {
-      "types": "./types/server.d.ts",
+      "types": "./dist/server.d.ts",
       "import": "./dist/server.js",
       "require": "./dist/server.cjs"
     }
@@ -42,14 +42,14 @@
   "typesVersions": {
     "*": {
       "server": [
-        "types/server.d.ts"
+        "dist/server.d.ts"
       ]
     }
   },
   "scripts": {
     "dev": "./build.js --watch",
     "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly",
-    "clean": "rm -rf types && rm -rf dist",
+    "clean": "rm -rf dist",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
