@@ -56,7 +56,6 @@
     "@tsconfig/svelte": "^5.0.0",
     "esbuild": "^0.16.13",
     "esbuild-svelte": "^0.7.4",
-    "lodash.clonedeep": "^4.5.0",
     "svelte": "^4.0.0",
     "svelte-preprocess": "^5.0.4",
     "typescript": "^5.0.0"
