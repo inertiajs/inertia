@@ -5,7 +5,8 @@
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
-    "Pedro Borges <oi@pedroborg.es>"
+    "Pedro Borges <oi@pedroborg.es>",
+    "Jakob Bouchard <jakob@jakobbouchard.dev>"
   ],
   "homepage": "https://inertiajs.com/",
   "repository": {
@@ -19,11 +20,46 @@
   "keywords": [
     "svelte"
   ],
+  "files": [
+    "dist",
+    "types"
+  ],
+  "type": "module",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.js",
-    "./server": "./src/server.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
+    }
   },
-  "main": "src/index.js",
+  "typesVersions": {
+    "*": {
+      "server": [
+        "dist/server.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "dev": "./build.js --watch",
+    "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@tsconfig/svelte": "^5.0.0",
+    "esbuild": "^0.16.13",
+    "esbuild-svelte": "^0.7.4",
+    "svelte": "^4.0.0",
+    "svelte-preprocess": "^5.0.4",
+    "typescript": "^5.0.0"
+  },
   "peerDependencies": {
     "svelte": "^3.20.0 || ^4.0.0"
   },
