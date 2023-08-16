@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.10...HEAD)
 
-- Nothing!
+- Fix form helper types for `setDefaults()` method (React) and `defaults()` method (Vue) ([#1504](https://github.com/inertiajs/inertia/pull/1504))
 
 ## [v1.0.10](https://github.com/inertiajs/inertia/compare/v1.0.9...v1.0.10)
 
