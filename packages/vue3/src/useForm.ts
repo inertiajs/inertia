@@ -3,7 +3,11 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-interface InertiaFormProps<TForm extends Record<string, unknown>> {
+type ValidPropsType<T> = T extends {}
+  ? { [K in keyof T]: K extends string ? (T[K] extends FormDataConvertible ? T[K] : never) : never }
+  : never
+
+interface InertiaFormProps<TForm> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -29,16 +33,16 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends Record<string, unknown>>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm>(data: ValidPropsType<TForm> | (() => ValidPropsType<TForm>)): InertiaForm<TForm>
+export default function useForm<TForm>(
   rememberKey: string,
-  data: TForm | (() => TForm),
+  data: ValidPropsType<TForm> | (() => ValidPropsType<TForm>),
 ): InertiaForm<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
-  rememberKeyOrData: string | TForm | (() => TForm),
-  maybeData?: TForm | (() => TForm),
+export default function useForm<TForm>(
+  rememberKeyOrData: string | ValidPropsType<TForm> | (() => ValidPropsType<TForm>),
+  maybeData?: ValidPropsType<TForm> | (() => ValidPropsType<TForm>),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData

@@ -3,6 +3,10 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
+type ValidPropsType<T> = T extends {}
+  ? { [K in keyof T]: K extends string ? (T[K] extends FormDataConvertible ? T[K] : never) : never }
+  : never
+
 interface InertiaFormProps<TForm> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
@@ -36,8 +40,11 @@ export interface InertiaFormTrait {
   form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }
 
-export default function useForm<TForm>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm>(rememberKey: string, data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm>(data: ValidPropsType<TForm> | (() => ValidPropsType<TForm>)): InertiaForm<TForm>
+export default function useForm<TForm>(
+  rememberKey: string,
+  data: ValidPropsType<TForm> | (() => ValidPropsType<TForm>),
+): InertiaForm<TForm>
 export default function useForm<TForm>(...args): InertiaForm<TForm> {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}

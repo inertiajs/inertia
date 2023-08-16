@@ -7,7 +7,11 @@ type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
 
-export interface InertiaFormProps<TForm extends Record<string, unknown>> {
+type ValidPropsType<T> = T extends {}
+  ? { [K in keyof T]: K extends string ? (T[K] extends FormDataConvertible ? T[K] : never) : never }
+  : never
+
+export interface InertiaFormProps<TForm> {
   data: TForm
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
@@ -33,14 +37,14 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   delete: (url: string, options?: VisitOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends Record<string, unknown>>(initialValues?: TForm): InertiaFormProps<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm>(initialValues?: ValidPropsType<TForm>): InertiaFormProps<TForm>
+export default function useForm<TForm>(
   rememberKey: string,
-  initialValues?: TForm,
+  initialValues?: ValidPropsType<TForm>,
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
-  rememberKeyOrInitialValues?: string | TForm,
-  maybeInitialValues?: TForm,
+export default function useForm<TForm>(
+  rememberKeyOrInitialValues?: string | ValidPropsType<TForm>,
+  maybeInitialValues?: ValidPropsType<TForm>,
 ): InertiaFormProps<TForm> {
   const isMounted = useRef(null)
   const rememberKey = typeof rememberKeyOrInitialValues === 'string' ? rememberKeyOrInitialValues : null
@@ -171,6 +175,8 @@ export default function useForm<TForm extends Record<string, unknown>>(
       if (typeof keyOrData === 'string') {
         setData({ ...data, [keyOrData]: maybeValue })
       } else if (typeof keyOrData === 'function') {
+        // TODO: Make types more happy without making developers more sad
+        // @ts-expect-error: No constituent of type
         setData((data) => keyOrData(data))
       } else {
         setData(keyOrData as TForm)
