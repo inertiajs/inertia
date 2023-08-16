@@ -1,4 +1,4 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
@@ -19,8 +19,8 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
   transform: (callback: (data: TForm) => TForm) => void
   setDefaults(): void
-  setDefaults(field: keyof TForm, value: string): void
-  setDefaults(fields: Record<keyof TForm, string>): void
+  setDefaults(field: keyof TForm, value: FormDataConvertible): void
+  setDefaults(fields: Partial<TForm>): void
   reset: (...fields: (keyof TForm)[]) => void
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
@@ -186,7 +186,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
     transform(callback) {
       transform = callback
     },
-    setDefaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    setDefaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(() => data)
       } else {

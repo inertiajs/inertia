@@ -1,4 +1,4 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
@@ -14,8 +14,8 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: keyof TForm, value: string): this
-  defaults(fields: Record<keyof TForm, string>): this
+  defaults(field: keyof TForm, value: FormDataConvertible): this
+  defaults(fields: Partial<TForm>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
@@ -70,7 +70,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
 
       return this
     },
-    defaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
       if (typeof data === 'function') {
         throw new Error('You cannot call `defaults()` when using a function to define your form data.')
       }

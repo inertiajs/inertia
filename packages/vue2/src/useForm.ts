@@ -1,4 +1,4 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
@@ -14,8 +14,8 @@ interface InertiaFormProps<TForm> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: keyof TForm, value: string): this
-  defaults(fields: Record<keyof TForm, string>): this
+  defaults(field: keyof TForm, value: FormDataConvertible): this
+  defaults(fields: Partial<TForm>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
