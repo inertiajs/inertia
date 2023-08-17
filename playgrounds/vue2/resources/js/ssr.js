@@ -7,6 +7,7 @@ createServer((page) =>
   createInertiaApp({
     page,
     render: createRenderer().renderToString,
+    title: (title) => `${title} - Vue 2 Playground`,
     resolve: (name) => {
       const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
       return pages[`./Pages/${name}.vue`]

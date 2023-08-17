@@ -4,10 +4,11 @@
 
 <script>
   import { inertia } from '@inertiajs/svelte'
+  export let appName
 </script>
 
 <svelte:head>
-  <title>Home</title>
+  <title>Home - {appName}</title>
 </svelte:head>
 
 <h1 class="text-3xl">Home</h1>

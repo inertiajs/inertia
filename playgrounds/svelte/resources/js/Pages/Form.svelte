@@ -5,6 +5,8 @@
 <script>
   import { useForm } from '@inertiajs/svelte'
 
+  export let appName
+
   let form = useForm('NewUser', {
     name: '',
     company: '',
@@ -17,7 +19,7 @@
 </script>
 
 <svelte:head>
-  <title>Form</title>
+  <title>Form - {appName}</title>
 </svelte:head>
 
 <h1 class="text-3xl">Form</h1>

@@ -2,8 +2,12 @@
   export { default as layout } from '../Components/Layout.svelte'
 </script>
 
+<script>
+  export let appName
+</script>
+
 <svelte:head>
-  <title>Article</title>
+  <title>Article - {appName}</title>
 </svelte:head>
 
 <h1 class="text-3xl">Article</h1>
