@@ -342,7 +342,7 @@ export class Router {
     Axios({
       method,
       url: urlWithoutHash(url).href,
-      data: method === 'get' ? {} : data,
+      data: method === 'get' ? null : data,
       params: method === 'get' ? data : {},
       signal: this.activeVisit.cancelToken.signal,
       headers: {
