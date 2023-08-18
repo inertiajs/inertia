@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.10...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.11...HEAD)
+
+- Nothing!
+
+## [v1.0.11](https://github.com/inertiajs/inertia/compare/v1.0.10...v1.0.11)
 
 - Fix form helper types for `setDefaults()` method (React) and `defaults()` method (Vue) ([#1504](https://github.com/inertiajs/inertia/pull/1504))
 - Fix interface issue with `useForm()` in React and Vue adapters ([#1649](https://github.com/inertiajs/inertia/pull/1649))
