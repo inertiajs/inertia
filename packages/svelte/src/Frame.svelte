@@ -9,6 +9,7 @@
   
   export let id = Math.random()
   setContext('inertia:frame-id', id)
+  $: setContext('inertia:frame-src', src)
 
   $: components = $store.frames?.[id] && h($store.frames[id].component.default, $store.frames[id].props)
 

@@ -9,6 +9,7 @@ function useForm(...args) {
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? router.restore(rememberKey) : null
   const frameId = getContext('inertia:frame-id')
+  const frameSrc = getContext('inertia:frame-src')
   let defaults = cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
@@ -91,6 +92,7 @@ function useForm(...args) {
     },
     submit(method, url, options = {}) {
       const data = transform(this.data())
+      if (frameSrc) data.frameSrc = frameSrc
       const _options = {
         ...options,
         target: typeof(options.target) !== 'undefined' ? options.target : frameId,
