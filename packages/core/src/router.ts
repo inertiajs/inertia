@@ -391,9 +391,14 @@ export class Router {
         }
 
         const pageResponse: Page = response.data
+
+        // we can overwrite the target frame in the controller by setting a flash
+        if (response.data.props.flash.target_frame) target = response.data.props.flash.target_frame
+
         if (only.length && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
+        
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
         if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
@@ -407,15 +412,15 @@ export class Router {
         }
         return this.setPage(pageResponse, { target, visitId, replace, preserveScroll, preserveState })
       })
-      .then(() => {
-        const errors = this.page.props.errors || {}
+      .then((page: Page) => {
+        const errors = page.props.errors || {}
         if (Object.keys(errors).length > 0) {
           const scopedErrors = errorBag ? (errors[errorBag] ? errors[errorBag] : {}) : errors
           fireErrorEvent(scopedErrors)
           return onError(scopedErrors)
         }
-        fireSuccessEvent(this.page)
-        return onSuccess(this.page)
+        fireSuccessEvent(page)
+        return onSuccess(page)
       })
       .catch((error) => {
         if (this.isInertiaResponse(error.response)) {
@@ -468,15 +473,17 @@ export class Router {
       preserveState?: PreserveStateOption
       target?: string | null
     } = {},
-  ): Promise<void> {
+  ): Promise<Page> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        page.target = target
-        if (!target) {
+        if (!target || target === '_top' || target === '_parent' || target === 'main') {
           replace = replace || hrefToUrl(page.url).href === window.location.href
           replace ? this.replaceState(page) : this.pushState(page)
+        }
+        else {
+          page.target = target
         }
         
         this.swapComponent({ component, page, preserveState }).then(() => {
@@ -488,6 +495,7 @@ export class Router {
           }
         })
       }
+      return page
     })
   }
 
