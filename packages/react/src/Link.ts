@@ -17,7 +17,7 @@ interface BaseInertiaLinkProps {
   href: string
   method?: Method
   headers?: Record<string, string>
-  onClick?: (event: React.MouseEvent<HTMLAnchorElement> | React.KeyboardEvent<HTMLAnchorElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   replace?: boolean
