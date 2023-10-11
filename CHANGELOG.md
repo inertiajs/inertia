@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.11...HEAD)
 
-- Nothing!
+- Fix type of `onClick` for `Link` component in React and Vue ([#1699](https://github.com/inertiajs/inertia/pull/1699), [#1701](https://github.com/inertiajs/inertia/pull/1701))
 
 ## [v1.0.11](https://github.com/inertiajs/inertia/compare/v1.0.10...v1.0.11)
 
