@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.11...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.12...HEAD)
+
+- Nothing!
+
+## [v1.0.12](https://github.com/inertiajs/inertia/compare/v1.0.11...v1.0.12)
 
 - Fix type of `onClick` for `Link` component in React and Vue ([#1699](https://github.com/inertiajs/inertia/pull/1699), [#1701](https://github.com/inertiajs/inertia/pull/1701))
 
