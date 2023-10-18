@@ -1,0 +1,14 @@
+{
+    "include": [
+        "src/**/*"
+    ],
+    "compilerOptions": {
+        "allowJs": true,
+
+        "outDir": "temp",
+
+        "declaration": true,
+        "declarationDir": "types",
+        "declarationMap": true,
+    }
+}
