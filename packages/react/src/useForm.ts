@@ -166,6 +166,20 @@ export default function useForm<TForm extends FormDataType>(
     [data, setErrors],
   )
 
+  function clearErrors(...fields) {
+    setErrors((errors) => {
+      const newErrors = (Object.keys(errors) as Array<keyof TForm>).reduce(
+        (carry, field) => ({
+          ...carry,
+          ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
+        }),
+        {},
+      )
+      setHasErrors(Object.keys(newErrors).length > 0)
+      return newErrors
+    })
+  }
+
   return {
     data,
     setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
@@ -200,6 +214,8 @@ export default function useForm<TForm extends FormDataType>(
     reset(...fields) {
       if (fields.length === 0) {
         setData(defaults)
+        setErrors({})
+        setHasErrors(false)
       } else {
         setData(
           (Object.keys(defaults) as Array<keyof TForm>)
@@ -212,6 +228,7 @@ export default function useForm<TForm extends FormDataType>(
               { ...data },
             ),
         )
+        clearErrors(...fields)
       }
     },
     setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
@@ -226,19 +243,7 @@ export default function useForm<TForm extends FormDataType>(
         return newErrors
       })
     },
-    clearErrors(...fields) {
-      setErrors((errors) => {
-        const newErrors = (Object.keys(errors) as Array<keyof TForm>).reduce(
-          (carry, field) => ({
-            ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
-          }),
-          {},
-        )
-        setHasErrors(Object.keys(newErrors).length > 0)
-        return newErrors
-      })
-    },
+    clearErrors,
     submit,
     get(url, options) {
       submit('get', url, options)

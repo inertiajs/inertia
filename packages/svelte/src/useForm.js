@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/core'
-import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
+import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
 
 function useForm(...args) {
@@ -52,6 +52,7 @@ function useForm(...args) {
       let clonedDefaults = cloneDeep(defaults)
       if (fields.length === 0) {
         this.setStore(clonedDefaults)
+        this.clearErrors()
       } else {
         this.setStore(
           Object.keys(clonedDefaults)
@@ -61,6 +62,7 @@ function useForm(...args) {
               return carry
             }, {}),
         )
+        this.clearErrors(...fields)
       }
 
       return this
