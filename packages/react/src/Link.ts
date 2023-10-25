@@ -37,9 +37,7 @@ export type InertiaLinkProps = BaseInertiaLinkProps &
   Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> &
   Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
-type InertiaLink = ReturnType<typeof forwardRef<unknown, InertiaLinkProps>>
-
-const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
+const Link = forwardRef<unknown, InertiaLinkProps>(
   (
     {
       children,
