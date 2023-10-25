@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.12...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.13...HEAD)
 
 - Nothing
 
