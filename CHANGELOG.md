@@ -10,6 +10,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.12...HEAD)
 
 - Clear errors on form reset ([#1568](https://github.com/inertiajs/inertia/pull/1568))
+- Fix Link type in React ([#1659](https://github.com/inertiajs/inertia/pull/1659))
 
 ## [v1.0.12](https://github.com/inertiajs/inertia/compare/v1.0.11...v1.0.12)
 
