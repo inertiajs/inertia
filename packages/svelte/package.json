@@ -24,6 +24,7 @@
     "./server": "./src/server.js"
   },
   "main": "src/index.js",
+  "types": "types/index.d.ts",
   "peerDependencies": {
     "svelte": "^3.20.0 || ^4.0.0"
   },
