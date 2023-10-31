@@ -13,7 +13,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [v1.0.14](https://github.com/inertiajs/inertia/compare/v1.0.13...v1.0.14)
 
-- Revert: Clear errors on form reset ([#1568](https://github.com/inertiajs/inertia/pull/1568))
+- Revert "Clear errors on form reset (#1568)" ([#1716](https://github.com/inertiajs/inertia/pull/1716))
 
 ## [v1.0.13](https://github.com/inertiajs/inertia/compare/v1.0.12...v1.0.13)
 
