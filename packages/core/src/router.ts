@@ -580,6 +580,10 @@ export class Router {
       }
     }) as EventListener
 
+    if (typeof document === 'undefined') {
+      return () => {};
+    }
+
     document.addEventListener(`inertia:${type}`, listener)
     return () => document.removeEventListener(`inertia:${type}`, listener)
   }
