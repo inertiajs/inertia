@@ -340,7 +340,7 @@ describe('Form Helper', () => {
       cy.get('#remember').should('be.checked')
     })
 
-    it('resets error when it resets a field to its initial value', () => {
+    it('does not reset errors when it resets a field to its initial value', () => {
       cy.get('#name').clear().type('A')
       cy.get('#handle').clear().type('B')
       cy.get('#remember').check()
@@ -361,11 +361,11 @@ describe('Form Helper', () => {
       cy.get('#remember').should('be.checked')
       cy.get('.errors-status').should('have.text', 'Form has errors')
       cy.get('.name_error').should('have.text', 'Some name error')
-      cy.get('.handle_error').should('not.exist')
+      cy.get('.handle_error').should('have.text', 'The Handle was invalid')
       cy.get('.remember_error').should('not.exist')
     })
 
-    it('reset errors when it resets all fields to their initial values', () => {
+    it('does not reset errors when it resets all fields to their initial values', () => {
       cy.get('#name').clear().type('A')
       cy.get('#handle').clear().type('B')
       cy.get('#remember').check()
@@ -379,14 +379,14 @@ describe('Form Helper', () => {
       cy.get('.name_error').should('have.text', 'Some name error')
       cy.get('.handle_error').should('have.text', 'The Handle was invalid')
 
-      cy.get('.reset').click()
+      cy.get('.reset-one').click()
 
-      cy.get('#name').should('have.value', 'foo')
+      cy.get('#name').should('have.value', 'A')
       cy.get('#handle').should('have.value', 'example')
-      cy.get('#remember').should('not.be.checked')
-      cy.get('.errors-status').should('have.text', 'Form has no errors')
-      cy.get('.name_error').should('not.exist')
-      cy.get('.handle_error').should('not.exist')
+      cy.get('#remember').should('be.checked')
+      cy.get('.errors-status').should('have.text', 'Form has errors')
+      cy.get('.name_error').should('have.text', 'Some name error')
+      cy.get('.handle_error').should('have.text', 'The Handle was invalid')
       cy.get('.remember_error').should('not.exist')
     })
 
