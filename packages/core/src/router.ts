@@ -580,7 +580,7 @@ export class Router {
       }
     }) as EventListener
 
-    if (typeof document === 'undefined') {
+    if (isServer) {
       return () => {};
     }
 
