@@ -573,16 +573,16 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
+    if (isServer) {
+      return () => {};
+    }
+
     const listener = ((event: GlobalEvent<TEventName>) => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
         event.preventDefault()
       }
     }) as EventListener
-
-    if (isServer) {
-      return () => {};
-    }
 
     document.addEventListener(`inertia:${type}`, listener)
     return () => document.removeEventListener(`inertia:${type}`, listener)
