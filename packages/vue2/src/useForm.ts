@@ -88,7 +88,6 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
       if (fields.length === 0) {
         defaults = clonedData
         Object.assign(this, resolvedData)
-        this.clearErrors()
       } else {
         Object.keys(resolvedData)
           .filter((key) => fields.includes(key))
@@ -96,7 +95,6 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
             defaults[key] = clonedData[key]
             this[key] = resolvedData[key]
           })
-        this.clearErrors(...fields)
       }
 
       return this

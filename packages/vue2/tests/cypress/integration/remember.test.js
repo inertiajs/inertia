@@ -273,7 +273,7 @@ describe('Remember (local state caching)', () => {
       cy.get('#remember').should('be.checked')
       cy.get('#untracked').should('have.value', 'C') // Unchanged from above
       cy.get('.name_error').should('not.exist')
-      cy.get('.handle_error').should('not.exist')
+      cy.get('.handle_error').should('have.text', 'The Handle was invalid')
       cy.get('.remember_error').should('not.exist')
 
       cy.get('.link').click()
@@ -287,7 +287,7 @@ describe('Remember (local state caching)', () => {
       cy.get('#remember').should('be.checked')
       cy.get('#untracked').should('not.have.value', 'C') // Untracked, so now reset (page state was lost)
       cy.get('.name_error').should('not.exist')
-      cy.get('.handle_error').should('not.exist')
+      cy.get('.handle_error').should('have.text', 'The Handle was invalid')
       cy.get('.remember_error').should('not.exist')
     })
   })
