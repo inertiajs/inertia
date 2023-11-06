@@ -27,7 +27,7 @@ If you're making changes to one of the packages that requires a build step (`cor
 
 ```sh
 cd packages/core
-npm run watch
+npm run dev
 ```
 
 When proposing changes to one of the adapters (`react`, `vue2`, `vue3`, `svelte`), please try to apply the same changes to the other adapters where possible.
@@ -64,6 +64,7 @@ npm run ssr:serve
 This section is really for the benefit of the core maintainers.
 
 1. Increment the version numbers in the `package.json` file for each package, making sure to also update the adapter dependencies on `@inertiajs/core`.
-2. Update `CHANGELOG.md`.
-2. Run `npm publish` for each package. This will automatically run the necessary build step.
-3. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).
+2. Run `npm install` to update the top-laravel `package-lock.json` file.
+3. Update `CHANGELOG.md`.
+4. Run `npm publish` for each package. This will automatically run the necessary build step.
+5. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).

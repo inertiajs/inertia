@@ -18,6 +18,11 @@ const Form = () => {
       <Head title="Form" />
       <h1 className="text-3xl">Form</h1>
       <form onSubmit={submit} className="mt-6 max-w-md space-y-4">
+        {form.isDirty && (
+          <div className="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">
+            There are unsaved changes!
+          </div>
+        )}
         <div>
           <label className="block" htmlFor="name">
             Name:
@@ -61,9 +66,12 @@ const Form = () => {
           </select>
           {form.errors.role && <div className="mt-2 text-sm text-red-600">{form.errors.role}</div>}
         </div>
-        <div>
+        <div className="flex gap-4">
           <button type="submit" disabled={form.processing} className="rounded bg-slate-800 px-6 py-2 text-white">
             Submit
+          </button>
+          <button type="button" onClick={() => form.reset()}>
+            Reset
           </button>
         </div>
       </form>
