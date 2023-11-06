@@ -61,12 +61,27 @@ const Head: InertiaHead = defineComponent({
         ? node.children
         : node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
+    isFunctionNode(node) {
+      return typeof node.type === 'function'
+    },
+    isComponentNode(node) {
+      return typeof node.type === 'object'
+    },
+    isCommentNode(node) {
+      return /(comment|cmt)/i.test(node.type.toString())
+    },
+    isFragmentNode(node) {
+      return /(fragment|fgt|symbol\(\))/i.test(node.type.toString())
+    },
+    isTextNode(node) {
+      return /(text|txt)/i.test(node.type.toString())
+    },
     renderTag(node) {
-      if (node.type.toString() === 'Symbol(Text)') {
+      if (this.isTextNode(node)) {
         return node.children
-      } else if (node.type.toString() === 'Symbol()') {
+      } else if (this.isFragmentNode(node)) {
         return ''
-      } else if (node.type.toString() === 'Symbol(Comment)') {
+      } else if (this.isCommentNode(node)) {
         return ''
       }
       let html = this.renderTagStart(node)
@@ -87,10 +102,26 @@ const Head: InertiaHead = defineComponent({
     renderNodes(nodes) {
       return this.addTitleElement(
         nodes
-          .flatMap((node) => (node.type.toString() === 'Symbol(Fragment)' ? node.children : node))
+          .flatMap((node) => this.resolveNode(node))
           .map((node) => this.renderTag(node))
           .filter((node) => node),
       )
+    },
+    resolveNode(node) {
+      if (this.isFunctionNode(node)) {
+        return this.resolveNode(node.type())
+      } else if (this.isComponentNode(node)) {
+        console.warn(`Using components in the <Head> component is not supported.`)
+        return []
+      } else if (this.isTextNode(node) && node.children) {
+        return node
+      } else if (this.isFragmentNode(node) && node.children) {
+        return node.children.flatMap((child) => this.resolveNode(child))
+      } else if (this.isCommentNode(node)) {
+        return []
+      } else {
+        return node
+      }
     },
   },
   render() {

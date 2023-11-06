@@ -3,11 +3,12 @@
 </script>
 
 <script>
+  export let appName
   export let users
 </script>
 
 <svelte:head>
-  <title>Users</title>
+  <title>Users - {appName}</title>
 </svelte:head>
 
 <h1 class="text-3xl">Users</h1>
