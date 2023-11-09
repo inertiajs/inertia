@@ -1,9 +1,11 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-interface InertiaFormProps<TForm extends Record<string, unknown>> {
+type FormDataType = object;
+
+interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -14,8 +16,8 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: keyof TForm, value: string): this
-  defaults(fields: Record<keyof TForm, string>): this
+  defaults(field: keyof TForm, value: FormDataConvertible): this
+  defaults(fields: Partial<TForm>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
@@ -29,14 +31,14 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends FormDataType> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends Record<string, unknown>>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): InertiaForm<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends FormDataType>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
@@ -70,7 +72,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
 
       return this
     },
-    defaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
       if (typeof data === 'function') {
         throw new Error('You cannot call `defaults()` when using a function to define your form data.')
       }
