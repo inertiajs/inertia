@@ -1,8 +1,17 @@
 import { mergeDataIntoQueryString, Method, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h, PropType } from 'vue'
+import {
+  Component,
+  computed,
+  ComputedRef,
+  defineComponent,
+  DefineComponent,
+  h,
+  PropType,
+  resolveDynamicComponent,
+} from 'vue'
 
 export interface InertiaLinkProps {
-  as?: string
+  as?: string | Component
   data?: object
   href: string
   method?: Method
@@ -28,7 +37,7 @@ const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
     as: {
-      type: String,
+      type: [String, Object] as PropType<string | Component>,
       default: 'a',
     },
     data: {
@@ -70,21 +79,30 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     return () => {
-      const as = props.as.toLowerCase()
+      const resolvedAs: ComputedRef<String | Component> = computed(() => {
+        if (typeof props.as === 'object') return props.as
+        else {
+          const tryResolve = resolveDynamicComponent(props.as)
+          return typeof tryResolve === 'string' ? props.as.toLowerCase() : (tryResolve as Component)
+        }
+      })
       const method = props.method.toLowerCase() as Method
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
+      const resolvedProps: ComputedRef<object> = computed(() =>
+        typeof resolvedAs.value === 'string' && resolvedAs.value !== 'a' ? {} : { href },
+      )
 
-      if (as === 'a' && method !== 'get') {
+      if (resolvedAs.value === 'a' && method !== 'get') {
         console.warn(
           `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
         )
       }
 
       return h(
-        props.as,
+        resolvedAs.value,
         {
           ...attrs,
-          ...(as === 'a' ? { href } : {}),
+          ...resolvedProps.value,
           onClick: (event) => {
             if (shouldIntercept(event)) {
               event.preventDefault()
