@@ -3,6 +3,6 @@ export default function createInertiaApp({ id, resolve, setup, progress, page }:
     resolve: any;
     setup: any;
     progress?: {};
-    page: any;
+    page?: any;
 }): Promise<any>;
 //# sourceMappingURL=createInertiaApp.d.ts.map
