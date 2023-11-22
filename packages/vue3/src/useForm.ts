@@ -5,7 +5,7 @@ import { reactive, watch } from 'vue'
 
 type FormDataType = object
 
-interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
