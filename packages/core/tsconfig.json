@@ -21,6 +21,9 @@
     "preserveConstEnums": true,
     "removeComments": false,
     "typeRoots": ["./node_modules/@types"],
-    "strict": true
-  }
+    "strict": true,
+  	"esModuleInterop": true,
+  },
+
+  "include": ["**/*.d.ts"]
 }

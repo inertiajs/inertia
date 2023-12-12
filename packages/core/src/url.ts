@@ -1,4 +1,4 @@
-import deepmerge from 'deepmerge'
+import * as deepmerge from 'deepmerge'
 import * as qs from 'qs'
 import { FormDataConvertible, Method } from './types'
 
