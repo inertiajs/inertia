@@ -86,6 +86,7 @@ export default function useForm<TForm extends FormDataType>(
           typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
         )
       }
+      form.isDirty = !isEqual(form.data(), defaults)
 
       return this
     },
