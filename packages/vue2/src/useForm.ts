@@ -1,6 +1,6 @@
 import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
-import isEqual from 'lodash.isequal'
+import isEqual from 'fast-deep-equal/es6'
 import { reactive, watch } from 'vue'
 
 type FormDataType = object;

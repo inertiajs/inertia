@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/core'
-import isEqual from 'lodash.isequal'
+import isEqual from 'fast-deep-equal/es6'
 import cloneDeep from 'lodash.clonedeep'
 import { writable } from 'svelte/store'
 
