@@ -393,7 +393,7 @@ export class Router {
         const pageResponse: Page = response.data
 
         // we can overwrite the target frame in the controller by setting a flash
-        if (response.data.props.flash.target_frame) target = response.data.props.flash.target_frame
+        if (response.data.props.flash && response.data.props.flash.target_frame) target = response.data.props.flash.target_frame
 
         if (only.length && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
