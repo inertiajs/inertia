@@ -35,7 +35,7 @@
     headers,
     queryStringArrayFormat,
   }}
-  {...as === 'a' ? { href } : {}}
+  {...as === 'a' ? { href } : {role:'link'}}
   {...$$restProps}
   on:focus
   on:blur
