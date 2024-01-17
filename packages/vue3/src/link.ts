@@ -7,7 +7,7 @@ export interface InertiaLinkProps {
   href: string
   method?: Method
   headers?: object
-  onClick?: (event: MouseEvent | KeyboardEvent) => void
+  onClick?: (event: MouseEvent) => void
   preserveScroll?: boolean | ((props: PageProps) => boolean)
   preserveState?: boolean | ((props: PageProps) => boolean) | null
   replace?: boolean

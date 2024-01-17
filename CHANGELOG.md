@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.11...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.14...HEAD)
 
-- Nothing!
+- Nothing
+
+## [v1.0.14](https://github.com/inertiajs/inertia/compare/v1.0.13...v1.0.14)
+
+- Revert "Clear errors on form reset (#1568)" ([#1716](https://github.com/inertiajs/inertia/pull/1716))
+
+## [v1.0.13](https://github.com/inertiajs/inertia/compare/v1.0.12...v1.0.13)
+
+- Clear errors on form reset ([#1568](https://github.com/inertiajs/inertia/pull/1568))
+- Fix `Link` type in React ([#1659](https://github.com/inertiajs/inertia/pull/1659))
+
+## [v1.0.12](https://github.com/inertiajs/inertia/compare/v1.0.11...v1.0.12)
+
+- Fix type of `onClick` for `Link` component in React and Vue ([#1699](https://github.com/inertiajs/inertia/pull/1699), [#1701](https://github.com/inertiajs/inertia/pull/1701))
 
 ## [v1.0.11](https://github.com/inertiajs/inertia/compare/v1.0.10...v1.0.11)
 

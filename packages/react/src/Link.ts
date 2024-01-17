@@ -17,7 +17,7 @@ interface BaseInertiaLinkProps {
   href: string
   method?: Method
   headers?: Record<string, string>
-  onClick?: (event: React.MouseEvent<HTMLAnchorElement> | React.KeyboardEvent<HTMLAnchorElement>) => void
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   replace?: boolean
@@ -37,9 +37,7 @@ export type InertiaLinkProps = BaseInertiaLinkProps &
   Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> &
   Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
-type InertiaLink = React.FunctionComponent<InertiaLinkProps>
-
-const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
+const Link = forwardRef<unknown, InertiaLinkProps>(
   (
     {
       children,
