@@ -15,7 +15,7 @@
     "lodash": "^4.17.19",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.2.4",
-    "vite": "^4.0.5",
+    "vite": "^4.5.2",
     "vue": "^2.7.14",
     "vue-server-renderer": "^2.7.14"
   }
