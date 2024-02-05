@@ -449,6 +449,10 @@ export class Router {
       preserveState?: PreserveStateOption
     } = {},
   ): Promise<void> {
+    if (!page.component) {
+      return Promise.resolve()
+    }
+
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
