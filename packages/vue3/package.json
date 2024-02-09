@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@inertiajs/core": "1.0.14",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.isequal": "^4.5.0"
+    "just-clone": "^6.2.0",
+    "just-compare": "^2.3.0"
   }
 }

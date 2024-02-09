@@ -1,6 +1,6 @@
 import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import cloneDeep from 'lodash.clonedeep'
-import isEqual from 'lodash.isequal'
+import clone from 'just-clone'
+import compare from 'just-compare'
 import { reactive, watch } from 'vue'
 
 type FormDataType = object;
@@ -44,13 +44,13 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? (router.restore(rememberKey) as { data: any; errors: any }) : null
-  let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
+  let defaults = typeof data === 'object' ? clone(data) : clone(data())
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
   const form = reactive({
-    ...(restored ? restored.data : cloneDeep(defaults)),
+    ...(restored ? restored.data : clone(defaults)),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -77,14 +77,14 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
       if (typeof key === 'undefined') {
         defaults = this.data()
       } else {
-        defaults = Object.assign({}, cloneDeep(defaults), value ? { [key]: value } : key)
+        defaults = Object.assign({}, clone(defaults), value ? { [key]: value } : key)
       }
 
       return this
     },
     reset(...fields) {
-      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
-      const clonedData = cloneDeep(resolvedData)
+      const resolvedData = typeof data === 'object' ? clone(defaults) : clone(data())
+      const clonedData = clone(resolvedData)
       if (fields.length === 0) {
         defaults = clonedData
         Object.assign(this, resolvedData)
@@ -162,7 +162,7 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = cloneDeep(this.data())
+          defaults = clone(this.data())
           this.isDirty = false
           return onSuccess
         },
@@ -233,9 +233,9 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
   watch(
     form,
     (newValue) => {
-      form.isDirty = !isEqual(form.data(), defaults)
+      form.isDirty = !compare(form.data(), defaults)
       if (rememberKey) {
-        router.remember(cloneDeep(newValue.__remember()), rememberKey)
+        router.remember(clone(newValue.__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },

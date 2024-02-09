@@ -1,13 +1,13 @@
 import { router } from '@inertiajs/core'
-import isEqual from 'lodash.isequal'
-import cloneDeep from 'lodash.clonedeep'
+import compare from 'just-compare'
+import clone from 'just-clone'
 import { writable } from 'svelte/store'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? router.restore(rememberKey) : null
-  let defaults = cloneDeep(data)
+  let defaults = clone(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
@@ -39,17 +39,17 @@ function useForm(...args) {
     },
     defaults(key, value) {
       if (typeof key === 'undefined') {
-        defaults = Object.assign(defaults, cloneDeep(this.data()))
+        defaults = Object.assign(defaults, clone(this.data()))
 
         return this
       }
 
-      defaults = Object.assign(defaults, cloneDeep(value ? { [key]: value } : key))
+      defaults = Object.assign(defaults, clone(value ? { [key]: value } : key))
 
       return this
     },
     reset(...fields) {
-      let clonedDefaults = cloneDeep(defaults)
+      let clonedDefaults = clone(defaults)
       if (fields.length === 0) {
         this.setStore(clonedDefaults)
       } else {
@@ -190,7 +190,7 @@ function useForm(...args) {
   })
 
   store.subscribe((form) => {
-    if (form.isDirty === isEqual(form.data(), defaults)) {
+    if (form.isDirty === compare(form.data(), defaults)) {
       form.setStore('isDirty', !form.isDirty)
     }
 
