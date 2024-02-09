@@ -11,7 +11,7 @@
   export let preserveState = null
   export let only = []
   export let headers = {}
-  export let queryStringArrayFormat = 'brackets'
+  export let queryStringArrayFormat = 'bracket'
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {

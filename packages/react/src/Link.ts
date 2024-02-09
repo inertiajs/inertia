@@ -30,7 +30,7 @@ interface BaseInertiaLinkProps {
   onCancel?: () => void
   onSuccess?: () => void
   onError?: () => void
-  queryStringArrayFormat?: 'indices' | 'brackets'
+  queryStringArrayFormat?: 'index' | 'bracket'
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -50,7 +50,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       replace = false,
       only = [],
       headers = {},
-      queryStringArrayFormat = 'brackets',
+      queryStringArrayFormat = 'bracket',
       onClick = noop,
       onCancelToken = noop,
       onBefore = noop,

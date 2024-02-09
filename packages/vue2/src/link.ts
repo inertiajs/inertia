@@ -27,7 +27,7 @@ export interface InertiaLinkProps {
   onFinish?: () => void
   onCancel?: () => void
   onSuccess?: () => void
-  queryStringArrayFormat?: 'brackets' | 'indices'
+  queryStringArrayFormat?: 'bracket' | 'index'
 }
 
 type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
@@ -71,8 +71,8 @@ const Link: InertiaLink = {
       default: () => ({}),
     },
     queryStringArrayFormat: {
-      type: String as PropType<'brackets' | 'indices'>,
-      default: 'brackets',
+      type: String as PropType<'bracket' | 'index'>,
+      default: 'bracket',
     },
   },
   render(h, { props, data, children }) {

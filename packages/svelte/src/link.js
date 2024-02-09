@@ -14,7 +14,7 @@ export default (node, options = {}) => {
       options.method || 'get',
       node.href || options.href || '',
       options.data || {},
-      options.queryStringArrayFormat || 'brackets',
+      options.queryStringArrayFormat || 'bracket',
     )
   }
 

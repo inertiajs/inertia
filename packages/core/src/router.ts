@@ -271,7 +271,7 @@ export class Router {
       onCancel = () => {},
       onSuccess = () => {},
       onError = () => {},
-      queryStringArrayFormat = 'brackets',
+      queryStringArrayFormat = 'bracket',
     }: VisitOptions = {},
   ): void {
     let url = typeof href === 'string' ? hrefToUrl(href) : href
