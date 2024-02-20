@@ -1,5 +1,5 @@
 import { createHeadManager, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createElement, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 
@@ -15,6 +15,7 @@ export default function App({
     component: initialComponent || null,
     page: initialPage,
     key: null,
+    preserveScroll: false,
   })
 
   const headManager = useMemo(() => {
@@ -25,17 +26,25 @@ export default function App({
     )
   }, [])
 
+  useLayoutEffect(() => {
+    if (!current.preserveScroll) {
+      router.resetScrollPositions()
+    }
+  }, [current])
+
   useEffect(() => {
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
+      swapComponent: async ({ component, page, preserveState, preserveScroll }) => {
         setCurrent((current) => ({
           component,
           page,
           key: preserveState ? current.key : Date.now(),
+          preserveScroll: !!preserveScroll,
         }))
       },
+      handleScrollResetExternally: true,
     })
 
     router.on('navigate', () => headManager.forceUpdate())

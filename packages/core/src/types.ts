@@ -49,10 +49,12 @@ export type PageHandler = ({
   component,
   page,
   preserveState,
+  preserveScroll,
 }: {
   component: Component
   page: Page
   preserveState: PreserveStateOption
+  preserveScroll: PreserveStateOption
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
