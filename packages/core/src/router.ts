@@ -120,7 +120,7 @@ export class Router {
     })
   }
 
-  protected resetScrollPositions(): void {
+  public resetScrollPositions(): void {
     window.scrollTo(0, 0)
     this.scrollRegions().forEach((region) => {
       if (typeof region.scrollTo === 'function') {
