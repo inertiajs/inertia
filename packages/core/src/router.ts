@@ -506,7 +506,7 @@ export class Router {
       const url = hrefToUrl(this.page.url)
       url.hash = window.location.hash
       this.replaceState({ ...this.page, url: url.href })
-      this.resetScrollPositionsIfNotHandledExternally()
+      this.resetScrollPositions()
     }
   }
 
