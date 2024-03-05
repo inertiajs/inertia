@@ -30,6 +30,9 @@ export default function App({
       initialPage,
       resolveComponent,
       swapComponent: async ({ component, page, preserveState }) => {
+        // Prevent double render on initial page load.
+        if (current.page === page) return
+
         setCurrent((current) => ({
           component,
           page,
