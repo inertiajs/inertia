@@ -145,6 +145,13 @@ export type GlobalEventsMap = {
     }
     result: boolean | void
   }
+  history: {
+    parameters: [History['state'] | Page]
+    details: {
+      page: Page
+    }
+    result: boolean | void
+  }
 }
 
 export type GlobalEventNames = keyof GlobalEventsMap
@@ -206,5 +213,6 @@ declare global {
     'inertia:exception': GlobalEvent<'exception'>
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:history': GlobalEvent<'history'>
   }
 }
