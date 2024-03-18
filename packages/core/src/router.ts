@@ -40,19 +40,23 @@ export class Router {
   protected navigationType?: string
   protected activeVisit?: ActiveVisit
   protected visitId: VisitId = null
+  protected handleScrollResetExternally: boolean = false
 
   public init({
     initialPage,
     resolveComponent,
     swapComponent,
+    handleScrollResetExternally
   }: {
     initialPage: Page
     resolveComponent: PageResolver
     swapComponent: PageHandler
+    handleScrollResetExternally?: boolean
   }): void {
     this.page = initialPage
     this.resolveComponent = resolveComponent
     this.swapComponent = swapComponent
+    this.handleScrollResetExternally = !!handleScrollResetExternally
 
     this.setNavigationType()
     this.clearRememberedStateOnReload()
@@ -116,7 +120,7 @@ export class Router {
     })
   }
 
-  protected resetScrollPositions(): void {
+  public resetScrollPositions(): void {
     window.scrollTo(0, 0)
     this.scrollRegions().forEach((region) => {
       if (typeof region.scrollTo === 'function') {
@@ -132,6 +136,14 @@ export class Router {
       // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
       setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
     }
+  }
+
+  protected resetScrollPositionsIfNotHandledExternally(): void {
+    if (this.handleScrollResetExternally) {
+      return
+    }
+
+    this.resetScrollPositions()
   }
 
   protected restoreScrollPositions(): void {
@@ -455,9 +467,9 @@ export class Router {
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
-        this.swapComponent({ component, page, preserveState }).then(() => {
+        this.swapComponent({ component, page, preserveState, preserveScroll }).then(() => {
           if (!preserveScroll) {
-            this.resetScrollPositions()
+            this.resetScrollPositionsIfNotHandledExternally()
           }
           if (!replace) {
             fireNavigateEvent(page)
@@ -484,7 +496,7 @@ export class Router {
       Promise.resolve(this.resolveComponent(page.component)).then((component) => {
         if (visitId === this.visitId) {
           this.page = page
-          this.swapComponent({ component, page, preserveState: false }).then(() => {
+          this.swapComponent({ component, page, preserveState: false, preserveScroll: true }).then(() => {
             this.restoreScrollPositions()
             fireNavigateEvent(page)
           })
