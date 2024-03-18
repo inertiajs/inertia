@@ -16,39 +16,37 @@
     "url": "https://github.com/inertiajs/inertia/issues"
   },
   "files": [
-    "dist",
-    "types"
+    "dist"
   ],
   "type": "module",
-  "main": "dist/index.js",
-  "types": "types/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
     },
     "./server": {
-      "types": "./types/server.d.ts",
-      "import": "./dist/server.esm.js",
-      "require": "./dist/server.js"
+      "require": "./dist/server.cjs",
+      "import": "./dist/server.js"
     }
   },
   "typesVersions": {
     "*": {
       "server": [
-        "types/server.d.ts"
+        "./dist/server.d.ts"
       ]
     }
   },
   "scripts": {
-    "dev": "./build.js --watch",
-    "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly",
-    "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "npm run build"
+    "dev": "tsup --watch",
+    "build": "npm run clean && tsup",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "esbuild": "^0.16.13",
     "typescript": "^4.9.4",
     "vue": "^3.0.0"
   },
