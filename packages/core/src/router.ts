@@ -64,6 +64,7 @@ export class Router {
     } else {
       this.handleInitialPageVisit(this.page)
     }
+    this.handleDeferProps(this.page);
 
     this.setupEventListeners()
   }
@@ -84,6 +85,15 @@ export class Router {
   protected handleInitialPageVisit(page: Page): void {
     this.page.url += window.location.hash
     this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+  }
+
+  protected handleDeferProps(page: Page): void {
+    if (page.deferProps && page.deferProps.length) {
+      this.reload({
+        only: page.deferProps.map((key) => key.toString()),
+      })
+      page.deferProps = undefined;
+    }
   }
 
   protected setupEventListeners(): void {
@@ -376,6 +386,13 @@ export class Router {
         if (only.length && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
+
+        if (!only.length && pageResponse.component !== this.page.component) {
+          if (pageResponse.deferProps && pageResponse.deferProps.length) {
+            pageResponse.deferProps = pageResponse.deferProps.map((key) => key.toString());
+          }
+        }
+
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
         if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
@@ -398,6 +415,8 @@ export class Router {
         }
         fireSuccessEvent(this.page)
         return onSuccess(this.page)
+      }).then(() => {
+        this.handleDeferProps(this.page);
       })
       .catch((error) => {
         if (this.isInertiaResponse(error.response)) {
