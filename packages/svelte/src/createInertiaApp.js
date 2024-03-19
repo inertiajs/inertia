@@ -44,11 +44,14 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
   }
 
   if (isServer) {
-    const { html, head } = SSR.render({ id, initialPage })
+    const { html, head, css } = SSR.render({ id, initialPage })
 
     return {
       body: html,
-      head: [head],
+      head: [
+        head,
+        `<style data-vite-css>${css.code}</style>`,
+      ],
     }
   }
 }
