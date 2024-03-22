@@ -21,9 +21,15 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
       initialPage,
       resolveComponent,
       swapComponent: async ({ component, page, preserveState }) => {
-        store.update((current) => ({
+        const targetFrame = page.target
+        if (targetFrame) store.update((current) => ({
+          ...current,
+          frames: { ...current.frames, [targetFrame]: {component, props: page.props} }
+        }))
+        else store.update((current) => ({
           component,
           page,
+          frames: current.frames,
           key: preserveState ? current.key : Date.now(),
         }))
       },
@@ -44,11 +50,14 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
   }
 
   if (isServer) {
-    const { html, head } = SSR.render({ id, initialPage })
+    const { html, head, css } = SSR.render({ id, initialPage })
 
     return {
       body: html,
-      head: [head],
+      head: [
+        head,
+        `<style data-vite-css>${css.code}</style>`,
+      ],
     }
   }
 }

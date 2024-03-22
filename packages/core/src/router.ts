@@ -20,6 +20,7 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   LocationVisit,
+  Method,
   Page,
   PageHandler,
   PageResolver,
@@ -89,6 +90,21 @@ export class Router {
   protected setupEventListeners(): void {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(this.handleScrollEvent.bind(this), 100), true)
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element
+      const anchorElement = target.closest('a')
+      const frameId = (target.closest('[data-inertia-frame-id]') as HTMLElement)?.dataset.inertiaFrameId
+      if (!anchorElement || anchorElement.rel == 'external' || anchorElement.target == '_blank') return
+      
+      if (anchorElement.href && anchorElement.href.startsWith(location.origin)) {
+        event.preventDefault()
+        event.stopPropagation()
+        this.visit(anchorElement.href, {
+          method: anchorElement.dataset['method'] as Method,
+          target: anchorElement.dataset['target'] || frameId,
+        })
+      }
+    })
   }
 
   protected scrollRegions(): NodeListOf<Element> {
@@ -263,6 +279,7 @@ export class Router {
       headers = {},
       errorBag = '',
       forceFormData = false,
+      target = null,
       onCancelToken = () => {},
       onBefore = () => {},
       onStart = () => {},
@@ -296,6 +313,7 @@ export class Router {
       only,
       headers,
       errorBag,
+      target,
       forceFormData,
       queryStringArrayFormat,
       cancelled: false,
@@ -373,9 +391,14 @@ export class Router {
         }
 
         const pageResponse: Page = response.data
+
+        // we can overwrite the target frame in the controller by setting a flash
+        if (response.data.props.flash && response.data.props.flash.target_frame) target = response.data.props.flash.target_frame
+
         if (only.length && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
+        
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
         if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
@@ -387,17 +410,17 @@ export class Router {
           responseUrl.hash = requestUrl.hash
           pageResponse.url = responseUrl.href
         }
-        return this.setPage(pageResponse, { visitId, replace, preserveScroll, preserveState })
+        return this.setPage(pageResponse, { target, visitId, replace, preserveScroll, preserveState })
       })
-      .then(() => {
-        const errors = this.page.props.errors || {}
+      .then((page: Page) => {
+        const errors = page.props.errors || {}
         if (Object.keys(errors).length > 0) {
           const scopedErrors = errorBag ? (errors[errorBag] ? errors[errorBag] : {}) : errors
           fireErrorEvent(scopedErrors)
           return onError(scopedErrors)
         }
-        fireSuccessEvent(this.page)
-        return onSuccess(this.page)
+        fireSuccessEvent(page)
+        return onSuccess(page)
       })
       .catch((error) => {
         if (this.isInertiaResponse(error.response)) {
@@ -442,19 +465,27 @@ export class Router {
       replace = false,
       preserveScroll = false,
       preserveState = false,
+      target = null,
     }: {
       visitId?: VisitId
       replace?: boolean
       preserveScroll?: PreserveStateOption
       preserveState?: PreserveStateOption
+      target?: string | null
     } = {},
-  ): Promise<void> {
+  ): Promise<Page> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
-        replace = replace || hrefToUrl(page.url).href === window.location.href
-        replace ? this.replaceState(page) : this.pushState(page)
+        if (!target || target === '_top' || target === '_parent' || target === 'main') {
+          replace = replace || hrefToUrl(page.url).href === window.location.href
+          replace ? this.replaceState(page) : this.pushState(page)
+        }
+        else {
+          page.target = target
+        }
+        
         this.swapComponent({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
             this.resetScrollPositions()
@@ -464,6 +495,7 @@ export class Router {
           }
         })
       }
+      return page
     })
   }
 

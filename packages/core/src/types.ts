@@ -31,12 +31,13 @@ export interface PageProps {
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
-    SharedProps & {
-      errors: Errors & ErrorBag
-    }
+  SharedProps & {
+    errors: Errors & ErrorBag
+  }
   url: string
+  target?: string | null
   version: string | null
-
+  
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
   /** @internal */
@@ -52,7 +53,7 @@ export type PageHandler = ({
 }: {
   component: Component
   page: Page
-  preserveState: PreserveStateOption
+  preserveState: PreserveStateOption,
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
@@ -73,6 +74,7 @@ export type Visit = {
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
+  target: string | null
   queryStringArrayFormat: 'indices' | 'brackets'
 }
 

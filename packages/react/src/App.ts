@@ -2,6 +2,7 @@ import { createHeadManager, router } from '@inertiajs/core'
 import { createElement, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+import FrameContext from "./FrameContext";
 
 export default function App({
   children,
@@ -14,6 +15,7 @@ export default function App({
   const [current, setCurrent] = useState({
     component: initialComponent || null,
     page: initialPage,
+    frames: null,
     key: null,
   })
 
@@ -21,7 +23,8 @@ export default function App({
     return createHeadManager(
       typeof window === 'undefined',
       titleCallback || ((title) => title),
-      onHeadUpdate || (() => {}),
+      onHeadUpdate || (() => {
+      }),
     )
   }, [])
 
@@ -29,12 +32,21 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
-        setCurrent((current) => ({
-          component,
-          page,
-          key: preserveState ? current.key : Date.now(),
-        }))
+      swapComponent: async ({component, page, preserveState}) => {
+        const targetFrame = page.target;
+        if (targetFrame) {
+          setCurrent((current) => ({
+            ...current,
+            frames: {...current.frames, [targetFrame]: {component, props: page.props}},
+          }))
+        } else {
+          setCurrent((current) => ({
+            component,
+            page,
+            frames: current.frames,
+            key: preserveState ? current.key : Date.now(),
+          }))
+        }
       },
     })
 
@@ -74,11 +86,15 @@ export default function App({
     createElement(
       PageContext.Provider,
       { value: current.page },
-      renderChildren({
-        Component: current.component,
-        key: current.key,
-        props: current.page.props,
-      }),
+      createElement(
+        FrameContext.Provider,
+        { value: current.frames },
+        renderChildren({
+          Component: current.component,
+          key: current.key,
+          props: current.page.props,
+        }),
+      )
     ),
   )
 }

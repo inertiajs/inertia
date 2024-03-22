@@ -5,6 +5,7 @@ const store = writable({
   layout: [],
   page: {},
   key: null,
+  frames: {}
 })
 
 export default store
