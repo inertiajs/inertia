@@ -128,7 +128,12 @@ export const plugin: Plugin = {
 
 export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
   return reactive({
-    props: computed(() => page.value?.props),
+    props: computed({
+      get: () => page.value?.props,
+      set: (value) => {
+        page.value.props = value
+      }
+    }),
     url: computed(() => page.value?.url),
     component: computed(() => page.value?.component),
     version: computed(() => page.value?.version),
