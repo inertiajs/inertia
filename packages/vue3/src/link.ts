@@ -84,7 +84,7 @@ const Link: InertiaLink = defineComponent({
         props.as,
         {
           ...attrs,
-          ...(as === 'a' ? { href } : {}),
+          ...(as === 'a' ? { href } : { role: 'link' }),
           onClick: (event) => {
             if (shouldIntercept(event)) {
               event.preventDefault()

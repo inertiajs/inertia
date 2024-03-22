@@ -127,7 +127,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       as,
       {
         ...props,
-        ...(as === 'a' ? { href } : {}),
+        ...(as === 'a' ? { href } : { role: 'link' }),
         ref,
         onClick: visit,
       },
