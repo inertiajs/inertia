@@ -12,6 +12,8 @@
   export let only = []
   export let headers = {}
   export let queryStringArrayFormat = 'brackets'
+  export let role = 'link'
+  export let tabIndex = 0
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -36,6 +38,7 @@
     queryStringArrayFormat,
   }}
   {...as === 'a' ? { href } : {}}
+  {...(as !== 'a' && as !== 'button' ? { role, tabIndex } : { tabIndex })}
   {...$$restProps}
   on:focus
   on:blur
