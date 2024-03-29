@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.14...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.15...HEAD)
 
 - Nothing
+
+## [v1.0.15](https://github.com/inertiajs/inertia/compare/v1.0.14...v1.0.15)
+
+- Bump axios from `v1.4.0` to `v1.6.0` ([#1723](https://github.com/inertiajs/inertia/pull/1723))
 
 ## [v1.0.14](https://github.com/inertiajs/inertia/compare/v1.0.13...v1.0.14)
 
