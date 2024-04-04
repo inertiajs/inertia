@@ -392,8 +392,10 @@ export class Router {
 
         const pageResponse: Page = response.data
 
-        // we can overwrite the target frame in the controller by setting a flash
-        if (response.data.props.flash && response.data.props.flash.target_frame) target = response.data.props.flash.target_frame
+        // if an X-Inertia-Frame header is present, use its value to override target frame id
+        if (response.headers['x-inertia-frame']) {
+          target = response.headers['x-inertia-frame']
+        }
 
         if (only.length && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
