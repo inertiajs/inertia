@@ -2,7 +2,7 @@
 
 This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames.
 
-This is experimental and currently only supported in Svelte and React.
+The current implementation is experimental (and very hacky) and currently only supported in Svelte and React.
 
 ## Frames
 
