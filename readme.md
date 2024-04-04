@@ -1,8 +1,6 @@
 # Inertia with Frames
 
-This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames.
-
-The current implementation is experimental (and very hacky) and currently only supported in Svelte and React.
+This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames. The current implementation is experimental (and very hacky) and currently only supported in Svelte and React.
 
 ## Frames
 
@@ -17,6 +15,8 @@ By default, hyperlinks and form submissions will render the response within the 
 To target the top (main) frame, use `_top` as the frame ID.
 
 Navigation within frames does not create new history entries. To enable this, a more substantial rewrite of the Inertia router would be required.
+
+Frames are loaded when the component is mounted. That means, that only the initial frame placeholder content will be rendered during SSR.
 
 ### Try locally
 
