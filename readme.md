@@ -8,7 +8,7 @@ This is experimental and currently only supported in Svelte and React.
 
 This fork introduces the `<Frame>` component. This component is used to encapsulate an Inertia page within another Inertia page. This is useful for creating modal dialogs, popovers, etc.
 
-By default, hyperlinks and form submissions will load the response within the frame that contains the link or the form. To load the response in a different frame, add a `target` attribute. To load the response in the top (main) frame, use the `target="_top"` attribute.
+By default, hyperlinks and form submissions will load the response within the frame that contains the link or the form. To load the response in a different frame, add a `data-target` attribute. To load the response in the top (main) frame, use the `data=target="_top"` attribute.
 
 You can overwrite the targeted frame in the server-side response by sending an 'X-Inertia-Frame' header.
 
@@ -24,4 +24,8 @@ import { Frame } from '@inertia/svelte'
 <Frame src="/users/1/edit" id="edit_user">
   Loading...
 </Frame>
+
+<a href="/users/2/edit" data-target="edit_user">
+  Edit a different user
+</a>
 ```
