@@ -18,7 +18,7 @@ Navigation within frames does not create new history entries. To enable this, a 
 
 ```html
 <script>
-import { Frame } from '@inertia/svelte'
+import { Frame } from '@inertiajs/svelte'
 </script>
 
 <Frame src="/users/1/edit" id="edit_user">
