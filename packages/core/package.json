@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -50,7 +50,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "axios": "^1.2.0",
+    "axios": "^1.6.0",
     "deepmerge": "^4.0.0",
     "nprogress": "^0.2.0",
     "qs": "^6.9.0"

@@ -16,4 +16,4 @@ A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help pus
   </a>
 </p>
 
-If you'd like to become a sponsor, please [see here](https://inertiajs.com/sponsors) for more information. 💜
+If you'd like to become a sponsor, please [see here](https://github.com/sponsors/reinink) for more information. 💜
