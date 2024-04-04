@@ -2,7 +2,7 @@
 
 This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames.
 
-This is experimental and currently only supported in Svelte.
+This is experimental and currently only supported in Svelte and React.
 
 ## Frames
 
@@ -11,6 +11,8 @@ This fork introduces the `<Frame>` component. This component is used to encapsul
 By default, hyperlinks and form submissions will load the response within the frame that contains the link or the form. To load the response in a different frame, add a `target` attribute. To load the response in the top (main) frame, use the `target="_top"` attribute.
 
 You can overwrite the targeted frame in the server-side response by sending an 'X-Inertia-Frame' header.
+
+Navigation within frames does not create new history entries. To enable this, a more substantial rewrite of the Inertia router would be required.
 
 ### Example
 
