@@ -1,19 +1,23 @@
-[![Inertia.js](https://raw.githubusercontent.com/inertiajs/inertia/master/.github/LOGO.png)](https://inertiajs.com/)
+# Inertia with Frames
 
-Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers. Find full documentation at [inertiajs.com](https://inertiajs.com/).
+This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames.
 
-## Contributing
+This is experimental and currently only supported in Svelte.
 
-If you're interested in contributing to Inertia.js, please read our [contributing guide](https://github.com/inertiajs/inertia/blob/master/.github/CONTRIBUTING.md).
+## Frames
 
-## Sponsors
+This fork introduces the `<Frame>` component. This component is used to encapsulate an Inertia page within another Inertia page. This is useful for creating modal dialogs, popovers, etc.
 
-A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help push Inertia.js development forward! In particular, we'd like to say a special thank you to our partners:
+By default, hyperlinks and form submissions will load the response within the current frame. To load the response in a different frame, use the `target` attribute. To load the response in the main 
 
-<p>
-  <a href="https://forge.laravel.com">
-    <img src="./.github/sponsors/forge.svg" width="150" alt="Laravel Forge">
-  </a>
-</p>
+### Example
 
-If you'd like to become a sponsor, please [see here](https://github.com/sponsors/reinink) for more information. 💜
+```html
+<script>
+import { Frame } from '@inertia/svelte'
+</script>
+
+<Frame src="/users/1/edit">
+  Loading...
+</Frame>
+```
