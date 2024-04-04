@@ -6,7 +6,7 @@ This is experimental and currently only supported in Svelte and React.
 
 ## Frames
 
-This fork introduces the `<Frame>` component. This component is used to encapsulate an Inertia page within another Inertia page. This is useful for creating modal dialogs, popovers, etc.
+This fork introduces the `<Frame>` component. This component is used to encapsulate an Inertia page within another Inertia page. This is useful for creating modal dialogs, wizards, search sidebars, popovers, etc.
 
 By default, hyperlinks and form submissions will load the response within the frame that contains the link or the form. To load the response in a different frame, add a `data-target` attribute. To load the response in the top (main) frame, use the `data=target="_top"` attribute.
 
