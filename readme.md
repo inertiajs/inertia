@@ -14,6 +14,22 @@ You can overwrite the targeted frame in the server-side response by sending an '
 
 Navigation within frames does not create new history entries. To enable this, a more substantial rewrite of the Inertia router would be required.
 
+### Installation
+
+Clone this repo, [build it](https://github.com/inertiajs/inertia/blob/master/.github/CONTRIBUTING.md#packages), and in your `package.json`, link it like this:
+
+```js
+{
+  "devDependencies": {
+    '@inertiajs/core': 'file:./repo/packages/core',
+    '@inertiajs/svelte': 'file:./repo/packages/svelte',
+    '@inertiajs/react': 'file:./repo/packages/react'
+  }
+}
+```
+
+Then run `npm install` again.
+
 ### Example
 
 ```html
