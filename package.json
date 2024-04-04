@@ -1,4 +1,5 @@
 {
+  "name": "inertia",
   "private": true,
   "workspaces": [
     "packages/*",
