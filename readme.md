@@ -1,10 +1,10 @@
 # Inertia with Frames
 
-This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames. The current implementation is experimental (and very hacky) and currently only supported in Svelte and React.
+This is a modified version of [Inertia](https://github.com/inertiajs/inertia) that adds support for Frames. It's currently supported in Svelte and React.
 
 ## Frames
 
-This fork introduces the `<Frame>` component. This component is used to encapsulate an Inertia page within another Inertia page. This is useful for creating modal dialogs, wizards, search sidebars, popovers, etc.
+This fork introduces the `<Frame>` component. This component is used to encapsulate an Inertia page within another Inertia page. This is useful for creating modal dialogs, wizards, search sidebars, popovers, etc. Don't worry: Besides the name, it has nothing to do with conventional browser frames.
 
 By default, hyperlinks and form submissions will render the response within the frame that contains the link or the form. To change the frame in which an Inertia response is rendered, do one of the following:
 
