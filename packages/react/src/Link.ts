@@ -111,7 +111,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       ],
     )
 
-    as = as.toLowerCase()
     method = method.toLowerCase() as Method
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
