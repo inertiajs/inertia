@@ -1,6 +1,7 @@
 export { router } from '@inertiajs/core'
 export { usePage } from './app'
 export { default as createInertiaApp } from './createInertiaApp'
+export { default as App } from './app'
 export { default as Head } from './head'
 export { default as Link, InertiaLinkProps } from './link'
 export * from './types'
