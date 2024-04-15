@@ -501,16 +501,16 @@ export class Router {
   public get(
     url: URL | string,
     data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { ...options, method: 'get', data })
   }
 
-  public reload(options: Exclude<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
+  public reload(options: Omit<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL | string, options: Exclude<VisitOptions, 'replace'> = {}): void {
+  public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
     console.warn(
       `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
         options.method ?? 'get'
@@ -522,7 +522,7 @@ export class Router {
   public post(
     url: URL | string,
     data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
@@ -530,7 +530,7 @@ export class Router {
   public put(
     url: URL | string,
     data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
@@ -538,12 +538,12 @@ export class Router {
   public patch(
     url: URL | string,
     data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  public delete(url: URL | string, options: Exclude<VisitOptions, 'method'> = {}): void {
+  public delete(url: URL | string, options: Omit<VisitOptions, 'method'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
