@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.15...HEAD)
 
-- Nothing
+- Use `Omit` instead of `Exclude` in router types ([#1857](https://github.com/inertiajs/inertia/pull/1857))
 
 ## [v1.0.15](https://github.com/inertiajs/inertia/compare/v1.0.14...v1.0.15)
 
