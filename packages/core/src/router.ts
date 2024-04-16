@@ -498,11 +498,7 @@ export class Router {
     }
   }
 
-  public get(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Omit<VisitOptions, 'method' | 'data'> = {},
-  ): void {
+  public get(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
     return this.visit(url, { ...options, method: 'get', data })
   }
 
@@ -519,19 +515,11 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Omit<VisitOptions, 'method' | 'data'> = {},
-  ): void {
+  public post(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
 
-  public put(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Omit<VisitOptions, 'method' | 'data'> = {},
-  ): void {
+  public put(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
 
