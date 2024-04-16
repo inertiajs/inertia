@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.15...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.16...HEAD)
+
+- Nothing yet!
+
+## [v1.0.16](https://github.com/inertiajs/inertia/compare/v1.0.15...v1.0.16)
 
 - Fix Svelte 4 slot rendering issues ([#1763](https://github.com/inertiajs/inertia/pull/1763))
 - Fix accessibility warning in Svelte `Link` component ([#1858](https://github.com/inertiajs/inertia/pull/1858))
