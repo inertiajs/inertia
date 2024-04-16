@@ -15,12 +15,12 @@
   export let props = {}
   export let children = []
 
-  let prevComponent;
-  let key;
+  let prevComponent
+  let key
   $: {
     if (prevComponent !== component) {
-      key = Date.now();
-      prevComponent = component;
+      key = Date.now()
+      prevComponent = component
     }
   }
 </script>
