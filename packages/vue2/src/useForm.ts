@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-type FormDataType = object;
+type FormDataType = object
 
 interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
@@ -39,7 +39,10 @@ export interface InertiaFormTrait {
 }
 
 export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(rememberKey: string, data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType>(
+  rememberKey: string,
+  data: TForm | (() => TForm),
+): InertiaForm<TForm>
 export default function useForm<TForm extends FormDataType>(...args): InertiaForm<TForm> {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}

@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-type FormDataType = object;
+type FormDataType = object
 
 interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean

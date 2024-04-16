@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/core'
-import isEqual from 'lodash.isequal'
 import cloneDeep from 'lodash.clonedeep'
+import isEqual from 'lodash.isequal'
 import { writable } from 'svelte/store'
 
 function useForm(...args) {

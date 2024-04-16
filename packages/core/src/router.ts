@@ -1,4 +1,4 @@
-import { AxiosResponse, default as Axios } from 'axios'
+import { default as Axios, AxiosResponse } from 'axios'
 import debounce from './debounce'
 import {
   fireBeforeEvent,
