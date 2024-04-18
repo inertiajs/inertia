@@ -170,7 +170,7 @@ export default function useForm<TForm extends FormDataType>(
     data,
     setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
       if (typeof keyOrData === 'string') {
-        setData({ ...data, [keyOrData]: maybeValue })
+        setData((data) => ({ ...data, [keyOrData]: maybeValue }))
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
