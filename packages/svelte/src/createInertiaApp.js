@@ -9,13 +9,6 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
   const initialPage = page || JSON.parse(el.dataset.page)
   const resolveComponent = (name) => Promise.resolve(resolve(name))
 
-  await resolveComponent(initialPage.component).then((initialComponent) => {
-    store.set({
-      component: initialComponent,
-      page: initialPage,
-    })
-  })
-
   if (!isServer) {
     router.init({
       initialPage,
@@ -44,6 +37,13 @@ export default async function createInertiaApp({ id = 'app', resolve, setup, pro
   }
 
   if (isServer) {
+    await resolveComponent(initialPage.component).then((initialComponent) => {
+      store.set({
+        component: initialComponent,
+        page: initialPage,
+      })
+    })
+
     const { html, head } = SSR.render({ id, initialPage })
 
     return {
