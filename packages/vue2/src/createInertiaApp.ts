@@ -4,7 +4,7 @@ import App, { InertiaApp, InertiaProps, plugin } from './app'
 
 interface CreateInertiaAppProps {
   id?: string
-  resolve: (name: string) => Component | Promise<Component> | { default: Component }
+  resolve: (name: string, page: Page) => Component | Promise<Component> | { default: Component }
   setup: (props: {
     el: Element
     App: InertiaApp
@@ -40,11 +40,11 @@ export default async function createInertiaApp({
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
   // @ts-expect-error
-  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const resolveComponent = (name, page) => Promise.resolve(resolve(name, page)).then((module) => module.default || module)
 
   let head = []
 
-  const vueApp = await resolveComponent(initialPage.component).then((initialComponent) => {
+  const vueApp = await resolveComponent(initialPage.component, initialPage).then((initialComponent) => {
     return setup({
       el,
       App,

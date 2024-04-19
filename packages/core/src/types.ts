@@ -43,7 +43,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   rememberedState: Record<string, unknown>
 }
 
-export type PageResolver = (name: string) => Component
+export type PageResolver = (name: string, page: Page) => Component
 
 export type PageHandler = ({
   component,
