@@ -1,18 +1,21 @@
-<script>
+<script lang="ts">
+  import type { Method, PreserveStateOption, RequestPayload } from '@inertiajs/core'
   import { beforeUpdate } from 'svelte'
-  import { default as inertia } from './link'
+  import { inertia } from '../index'
 
-  export let href
-  export let as = 'a'
-  export let data = {}
-  export let method = 'get'
-  export let replace = false
-  export let preserveScroll = false
-  export let preserveState = null
-  export let only = []
-  export let except = []
-  export let headers = {}
-  export let queryStringArrayFormat = 'brackets'
+  export let href: string
+  export let as: keyof HTMLElementTagNameMap = 'a'
+  export let data: RequestPayload = {}
+  export let method: Method = 'get'
+  export let replace: boolean = false
+  export let preserveScroll: PreserveStateOption = false
+  export let preserveState: PreserveStateOption | null = null
+  export let only: string[] = []
+  export let except: string[] = []
+  export let headers: Record<string, string> = {}
+  export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
+  export let role: string = 'link';
+  export let tabindex: number = 0;
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -25,6 +28,8 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element
+  {role}
+  {tabindex}
   this={as}
   use:inertia={{
     ...(as !== 'a' ? { href } : {}),
