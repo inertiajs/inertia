@@ -14,8 +14,6 @@
   export let except: string[] = []
   export let headers: Record<string, string> = {}
   export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
-  export let role: string = 'link';
-  export let tabindex: number = 0;
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -28,8 +26,6 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element
-  {role}
-  {tabindex}
   this={as}
   use:inertia={{
     ...(as !== 'a' ? { href } : {}),
