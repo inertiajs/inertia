@@ -61,9 +61,17 @@ export default function useForm<TForm extends FormDataType>(
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
   let transform = (data) => data
 
+  // Cleanup function using a ref for cancelToken
+  const cleanupRef = useRef(() => {})
   useEffect(() => {
+    cleanupRef.current = () => {
+      if (cancelToken.current) {
+        cancelToken.current.cancel()
+      }
+    }
     isMounted.current = true
     return () => {
+      cleanupRef.current()
       isMounted.current = false
     }
   }, [])

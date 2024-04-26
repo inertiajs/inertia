@@ -12,31 +12,31 @@ const Head: InertiaHead = function ({ children, title }) {
   const headManager = useContext(HeadContext)
   const provider = useMemo(() => headManager.createProvider(), [headManager])
 
+  // Consider using a cleanup function with a ref for provider.disconnect
+  const providerRef = React.createRef(provider)
   useEffect(() => {
-    return () => {
-      provider.disconnect()
-    }
-  }, [provider])
+    return () => providerRef.current.disconnect()
+  }, [])
 
   function isUnaryTag(node) {
     return (
-      [
-        'area',
-        'base',
-        'br',
-        'col',
-        'embed',
-        'hr',
-        'img',
-        'input',
-        'keygen',
-        'link',
-        'meta',
-        'param',
-        'source',
-        'track',
-        'wbr',
-      ].indexOf(node.type) > -1
+        [
+          'area',
+          'base',
+          'br',
+          'col',
+          'embed',
+          'hr',
+          'img',
+          'input',
+          'keygen',
+          'link',
+          'meta',
+          'param',
+          'source',
+          'track',
+          'wbr',
+        ].indexOf(node.type) > -1
     )
   }
 
@@ -57,8 +57,8 @@ const Head: InertiaHead = function ({ children, title }) {
 
   function renderTagChildren(node) {
     return typeof node.props.children === 'string'
-      ? node.props.children
-      : node.props.children.reduce((html, child) => html + renderTag(child), '')
+        ? node.props.children
+        : node.props.children.reduce((html, child) => html + renderTag(child), '')
   }
 
   function renderTag(node) {
@@ -87,15 +87,16 @@ const Head: InertiaHead = function ({ children, title }) {
 
   function renderNodes(nodes) {
     const computed = React.Children.toArray(nodes)
-      .filter((node) => node)
-      .map((node) => renderNode(node))
+        .filter((node) => node)
+        .map((node) => renderNode(node))
     if (title && !computed.find((tag) => tag.startsWith('<title'))) {
       computed.push(`<title inertia>${title}</title>`)
     }
     return computed
   }
 
-  provider.update(renderNodes(children))
+  // Potentially use React.memo for renderNodes if it doesn't change frequently
+  providerRef.current.update(renderNodes(children))
 
   return null
 }
