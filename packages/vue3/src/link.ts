@@ -10,6 +10,7 @@ export interface InertiaLinkProps {
   onClick?: (event: MouseEvent) => void
   preserveScroll?: boolean | ((props: PageProps) => boolean)
   preserveState?: boolean | ((props: PageProps) => boolean) | null
+  preserveUrl?: boolean | ((props: PageProps) => boolean)
   replace?: boolean
   only?: string[]
   except?: string[]
@@ -56,6 +57,10 @@ const Link: InertiaLink = defineComponent({
       type: Boolean,
       default: null,
     },
+    preserveUrl: {
+      type: Boolean,
+      default: false,
+    },
     only: {
       type: Array<string>,
       default: () => [],
@@ -100,6 +105,7 @@ const Link: InertiaLink = defineComponent({
                 replace: props.replace,
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
+                preserveUrl: props.preserveUrl,
                 only: props.only,
                 except: props.except,
                 headers: props.headers,

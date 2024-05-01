@@ -20,6 +20,7 @@ interface BaseInertiaLinkProps {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
+  preserveUrl?: PreserveStateOption
   replace?: boolean
   only?: string[]
   except?: string[]
@@ -48,6 +49,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       method = 'get',
       preserveScroll = false,
       preserveState = null,
+      preserveUrl = false,
       replace = false,
       only = [],
       except = [],
@@ -78,6 +80,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
             method,
             preserveScroll,
             preserveState: preserveState ?? method !== 'get',
+            preserveUrl,
             replace,
             only,
             except,
@@ -99,6 +102,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         method,
         preserveScroll,
         preserveState,
+        preserveUrl,
         replace,
         only,
         except,
