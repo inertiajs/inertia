@@ -1,9 +1,18 @@
-import type { ActiveVisit, Errors, Method, Page, PendingVisit, Progress, RequestPayload, VisitOptions } from '@inertiajs/core'
+import type {
+  ActiveVisit,
+  Errors,
+  Method,
+  Page,
+  PendingVisit,
+  Progress,
+  RequestPayload,
+  VisitOptions,
+} from '@inertiajs/core'
 import { router } from '@inertiajs/core'
-import cloneDeep from 'lodash/cloneDeep';
-import isEqual from 'lodash/isEqual';
-import { type Writable, writable } from 'svelte/store'
 import type { AxiosProgressEvent } from 'axios'
+import cloneDeep from 'lodash/cloneDeep'
+import isEqual from 'lodash/isEqual'
+import { writable, type Writable } from 'svelte/store'
 
 interface InertiaFormProps<TForm extends Record<string, unknown>> {
   isDirty: boolean
@@ -71,11 +80,14 @@ export default function useForm<TForm extends Record<string, unknown>>(
       })
     },
     data() {
-      return Object.keys((typeof data === 'function' ? data() : data) as Record<string, unknown>).reduce((carry, key) => {
-        // @ts-ignore
-        carry[key] = this[key]
-        return carry
-      }, {} as Record<string, unknown>) as TForm
+      return Object.keys((typeof data === 'function' ? data() : data) as Record<string, unknown>).reduce(
+        (carry, key) => {
+          // @ts-ignore
+          carry[key] = this[key]
+          return carry
+        },
+        {} as Record<string, unknown>,
+      ) as TForm
     },
     transform(callback) {
       transform = callback

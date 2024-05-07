@@ -1,44 +1,40 @@
 <script context="module" lang="ts">
-  import type { PageProps } from "@inertiajs/core";
-  import type { InertiaComponentType } from "../types";
+  import type { PageProps } from '@inertiajs/core'
+  import type { InertiaComponentType } from '../types'
 
   type RenderProps = {
-    component: InertiaComponentType;
-    props?: PageProps;
-    children?: RenderProps[];
-  } | null;
-
-  export const h = (
-    component: InertiaComponentType,
-    props?: PageProps,
+    component: InertiaComponentType
+    props?: PageProps
     children?: RenderProps[]
-  ): RenderProps => {
+  } | null
+
+  export const h = (component: InertiaComponentType, props?: PageProps, children?: RenderProps[]): RenderProps => {
     return {
       component,
       ...(props ? { props } : {}),
       ...(children ? { children } : {}),
-    };
-  };
+    }
+  }
 </script>
 
 <script lang="ts">
-  import store from "../store";
+  import store from '../store'
 
-  export let component: InertiaComponentType;
-  export let props: PageProps = {};
-  export let children: RenderProps[] = [];
+  export let component: InertiaComponentType
+  export let props: PageProps = {}
+  export let children: RenderProps[] = []
 
-  let prev = component;
-  let key = new Date().getTime();
+  let prev = component
+  let key = new Date().getTime()
 
   function updateKey(component: InertiaComponentType) {
     if (prev !== component) {
-      prev = component;
-      key = new Date().getTime();
+      prev = component
+      key = new Date().getTime()
     }
   }
 
-  $: updateKey(component);
+  $: updateKey(component)
 </script>
 
 {#if $store.component}

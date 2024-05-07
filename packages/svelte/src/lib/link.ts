@@ -1,4 +1,4 @@
-import { type VisitOptions, mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
+import { mergeDataIntoQueryString, router, shouldIntercept, type VisitOptions } from '@inertiajs/core'
 import type { Action } from 'svelte/action'
 
 interface ActionElement extends HTMLElement {
@@ -20,7 +20,7 @@ const link: Action<ActionElement, ActionParameters> = (node, options = {}) => {
     return mergeDataIntoQueryString(
       options.method || 'get',
       node.href || options.href || '',
-      options.data || {} as any,
+      options.data || ({} as any),
       options.queryStringArrayFormat || 'brackets',
     )
   }

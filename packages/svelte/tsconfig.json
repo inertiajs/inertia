@@ -20,6 +20,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "preserveConstEnums": true,
-    "removeComments": true,
-  },
+    "removeComments": true
+  }
 }
