@@ -2,19 +2,19 @@
   import { default as inertia } from './link'
 
   let {
-    href, 
-    as = 'a', 
-    data = {}, 
-    method = 'get', 
-    replace = false, 
-    preserveScroll = false, 
-    preserveState = null, 
-    only = [], 
-    headers = {}, 
+    href,
+    as = 'a',
+    data = {},
+    method = 'get',
+    replace = false,
+    preserveScroll = false,
+    preserveState = null,
+    only = [],
+    headers = {},
     queryStringArrayFormat = 'brackets',
     children,
     ...restProps
-  } = $props();
+  } = $props()
 
   $effect.pre(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -42,5 +42,5 @@
   {...as === 'a' ? { href } : {}}
   {...restProps}
 >
-   {@render children()}
+  {@render children()}
 </svelte:element>

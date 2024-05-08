@@ -1,7 +1,7 @@
 <script>
   import { inertia, page } from '@inertiajs/svelte'
 
-  let { children } = $props();
+  let { children } = $props()
 </script>
 
 <nav class="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">

@@ -11,11 +11,7 @@
 <script>
   import store from './store.svelte'
 
-  let {
-    component,
-    props = {},
-    childComponents = [],
-  } = $props()
+  let { component, props = {}, childComponents = [] } = $props()
 
   let prevComponent
   let key
@@ -25,7 +21,7 @@
       key = Date.now()
       prevComponent = component
     }
-  });
+  })
 </script>
 
 {#if store.component}

@@ -67,9 +67,7 @@
     {/if}
   </div>
   <div class="flex gap-4">
-    <button type="submit" disabled={form.processing} class="rounded bg-slate-800 px-6 py-2 text-white">
-      Submit
-    </button>
+    <button type="submit" disabled={form.processing} class="rounded bg-slate-800 px-6 py-2 text-white"> Submit </button>
     <button type="button" onclick={() => form.reset()}>Reset</button>
   </div>
 </form>

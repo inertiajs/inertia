@@ -187,7 +187,6 @@ function useForm(...args) {
   })
 
   $effect(() => {
-
     if (store.isDirty === isEqual(store.data(), defaults)) {
       store.setStore('isDirty', !store.isDirty)
     }
@@ -200,7 +199,6 @@ function useForm(...args) {
     if (rememberKey) {
       router.remember({ data: $state.snapshot(store.data()), errors: $state.snapshot(store.errors) }, rememberKey)
     }
-
   })
 
   return store
