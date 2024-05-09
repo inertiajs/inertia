@@ -171,7 +171,7 @@ export default function useForm<TForm extends FormDataType>(
             return options.onStart(visit)
           }
         },
-        onProgress: (event: AxiosProgressEvent) => {
+        onProgress: (event?: AxiosProgressEvent) => {
           this.setStore('progress', event)
 
           if (options.onProgress) {
