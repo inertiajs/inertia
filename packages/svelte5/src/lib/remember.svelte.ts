@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/core'
 
-function useRemember(initialState, key) {
+function useRemember<State>(initialState: State, key?: string) {
   const restored = router.restore(key)
   const store = $state(restored !== undefined ? restored : initialState)
 

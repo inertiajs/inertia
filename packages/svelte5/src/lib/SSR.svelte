@@ -1,6 +1,12 @@
-<script>
+<script context="module">
+  type SSRProps = { id: string; initialPage: Page }
+</script>
+
+<script lang="ts">
   import App from './App.svelte'
-  export let id, initialPage
+  import type { Page } from '@inertiajs/core'
+
+  let { id, initialPage }: SSRProps = $props()
 </script>
 
 <div data-server-rendered="true" {id} data-page={JSON.stringify(initialPage)}>
