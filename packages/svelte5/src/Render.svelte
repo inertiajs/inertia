@@ -1,34 +1,33 @@
 <script context="module">
-  export const h = (component, props, children) => {
+  export const h = (component, props, childComponents) => {
     return {
       component,
       ...(props ? { props } : {}),
-      ...(children ? { children } : {}),
+      ...(childComponents ? { childComponents } : {}),
     }
   }
 </script>
 
 <script>
-  import store from './store'
+  import store from './store.svelte'
 
-  export let component
-  export let props = {}
-  export let children = []
+  let { component, props = {}, childComponents = [] } = $props()
 
   let prevComponent
   let key
-  $: {
+
+  $effect(() => {
     if (prevComponent !== component) {
       key = Date.now()
       prevComponent = component
     }
-  }
+  })
 </script>
 
-{#if $store.component}
+{#if store.component}
   {#key key}
     <svelte:component this={component} {...props}>
-      {#each children as child, index (component && component.length === index ? $store.key : null)}
+      {#each childComponents as child, index (component && component.length === index ? store.key : null)}
         <svelte:self {...child} />
       {/each}
     </svelte:component>
