@@ -79,7 +79,6 @@ export default function useForm<TForm extends FormDataType>(
     },
     data() {
       return Object.keys((typeof data === 'function' ? data() : data) as FormDataType).reduce((carry, key) => {
-        // @ts-ignore
         carry[key] = this[key]
         return carry
       }, {} as FormDataType) as TForm
@@ -113,10 +112,9 @@ export default function useForm<TForm extends FormDataType>(
           Object.keys(clonedData)
             .filter((key) => fields.includes(key))
             .reduce((carry, key) => {
-              // @ts-ignore
               carry[key] = clonedData[key]
               return carry
-            }, {} as TForm),
+            }, {} as FormDataType) as TForm,
         )
       }
 
@@ -146,7 +144,7 @@ export default function useForm<TForm extends FormDataType>(
     },
     submit(method, url, options = {}) {
       const data = transform(this.data()) as RequestPayload
-      const _options = {
+      const _options: Omit<VisitOptions, 'method'> = {
         ...options,
         onCancelToken: (token: { cancel: () => void }) => {
           cancelToken = token
@@ -221,10 +219,8 @@ export default function useForm<TForm extends FormDataType>(
       }
 
       if (method === 'delete') {
-        // @ts-ignore
         router.delete(url, { ..._options, data })
       } else {
-        // @ts-ignore
         router[method](url, data, _options)
       }
     },
