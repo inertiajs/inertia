@@ -10,28 +10,26 @@ jobs:
       matrix:
         adapter: ['vue2']
         browser: ['chrome']
+        node-version: [18]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: 16.15
+          version: 9
 
-      - name: Cache node modules
-        uses: actions/cache@v2
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
-          path: |
-            ~/.cache
-            node_modules
-            packages/vue2/tests/node_modules
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Build Inertia
         run: |
-          npm install
+          pnpm install
           cd packages/core && npm run build
           cd ../vue2 && npm run build
 
