@@ -4,15 +4,16 @@
 
   type LinkProps = {
     href: string
-    as: keyof HTMLElementTagNameMap
-    data: RequestPayload
-    method: Method
-    replace: boolean
-    preserveScroll: PreserveStateOption
-    preserveState: PreserveStateOption | null
-    only: string[]
-    headers: Record<string, string>
-    queryStringArrayFormat: 'brackets' | 'indices'
+    as?: keyof HTMLElementTagNameMap
+    data?: RequestPayload
+    method?: Method
+    replace?: boolean
+    preserveScroll?: PreserveStateOption
+    preserveState?: PreserveStateOption | null
+    only?: string[]
+    headers?: Record<string, string>
+    queryStringArrayFormat?: 'brackets' | 'indices'
+    class?: string
     children: Snippet
   }
 </script>
