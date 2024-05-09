@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "module": "ESNext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "skipLibCheck": true
   }
 }

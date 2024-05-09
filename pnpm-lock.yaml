@@ -69,10 +69,6 @@ importers:
       lodash.isequal:
         specifier: ^4.5.0
         version: 4.5.0
-    optionalDependencies:
-      '@rollup/rollup-linux-x64-gnu':
-        specifier: 4.6.1
-        version: 4.6.1
     devDependencies:
       '@types/node':
         specifier: ^14.0

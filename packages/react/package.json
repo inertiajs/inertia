@@ -64,8 +64,5 @@
     "@inertiajs/core": "1.0.16",
     "axios": "^1.6.0",
     "lodash.isequal": "^4.5.0"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.6.1"
   }
 }
