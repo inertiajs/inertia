@@ -1,4 +1,23 @@
-<script>
+<script context="module" lang="ts">
+  import type { Snippet } from 'svelte'
+  import type { Method, PreserveStateOption, RequestPayload } from '@inertiajs/core'
+
+  type LinkProps = {
+    href: string
+    as: keyof HTMLElementTagNameMap
+    data: RequestPayload
+    method: Method
+    replace: boolean
+    preserveScroll: PreserveStateOption
+    preserveState: PreserveStateOption | null
+    only: string[]
+    headers: Record<string, string>
+    queryStringArrayFormat: 'brackets' | 'indices'
+    children: Snippet
+  }
+</script>
+
+<script lang="ts">
   import { default as inertia } from './link'
 
   let {
@@ -14,7 +33,7 @@
     queryStringArrayFormat = 'brackets',
     children,
     ...restProps
-  } = $props()
+  }: LinkProps = $props()
 
   $effect.pre(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {

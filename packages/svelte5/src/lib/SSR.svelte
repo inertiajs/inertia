@@ -1,10 +1,11 @@
-<script context="module">
+<script context="module" lang="ts">
+  import type { Page } from '@inertiajs/core'
+
   type SSRProps = { id: string; initialPage: Page }
 </script>
 
 <script lang="ts">
   import App from './App.svelte'
-  import type { Page } from '@inertiajs/core'
 
   let { id, initialPage }: SSRProps = $props()
 </script>

@@ -1,5 +1,18 @@
-<script context="module">
-  export const h = (component, props, childComponents) => {
+<script context="module" lang="ts">
+  import type { InertiaComponentType } from './types'
+  import type { PageProps } from '@inertiajs/core'
+
+  type RenderProps = {
+    component: InertiaComponentType
+    props?: PageProps
+    childComponents?: RenderProps[]
+  }
+
+  export const h = (
+    component: InertiaComponentType,
+    props?: PageProps,
+    childComponents?: RenderProps[],
+  ): RenderProps => {
     return {
       component,
       ...(props ? { props } : {}),
@@ -8,13 +21,13 @@
   }
 </script>
 
-<script>
+<script lang="ts">
   import store from './store.svelte'
 
-  let { component, props = {}, childComponents = [] } = $props()
+  let { component, props = {}, childComponents = [] }: RenderProps = $props()
 
-  let prevComponent
-  let key
+  let prevComponent: InertiaComponentType
+  let key: number | null = $state(null)
 
   $effect(() => {
     if (prevComponent !== component) {
