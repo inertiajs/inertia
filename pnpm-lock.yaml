@@ -63,10 +63,20 @@ importers:
       '@inertiajs/core':
         specifier: 1.0.16
         version: 1.0.16
+      axios:
+        specifier: ^1.6.0
+        version: 1.6.8
       lodash.isequal:
         specifier: ^4.5.0
         version: 4.5.0
+    optionalDependencies:
+      '@rollup/rollup-linux-x64-gnu':
+        specifier: 4.6.1
+        version: 4.6.1
     devDependencies:
+      '@types/node':
+        specifier: ^14.0
+        version: 14.18.63
       '@types/react':
         specifier: ^16.9.1
         version: 16.14.60
@@ -152,6 +162,9 @@ importers:
       '@inertiajs/core':
         specifier: 1.0.16
         version: 1.0.16
+      axios:
+        specifier: ^1.6.0
+        version: 1.6.8
       lodash.clonedeep:
         specifier: ^4.5.0
         version: 4.5.0
@@ -159,6 +172,9 @@ importers:
         specifier: ^4.5.0
         version: 4.5.0
     devDependencies:
+      '@types/node':
+        specifier: ^14.0
+        version: 14.18.63
       esbuild:
         specifier: ^0.16.13
         version: 0.16.17
@@ -177,6 +193,12 @@ importers:
       '@inertiajs/core':
         specifier: 1.0.16
         version: 1.0.16
+      '@vue/runtime-core':
+        specifier: ^3.4.27
+        version: 3.4.27
+      axios:
+        specifier: ^1.6.0
+        version: 1.6.8
       lodash.clonedeep:
         specifier: ^4.5.0
         version: 4.5.0
@@ -184,6 +206,9 @@ importers:
         specifier: ^4.5.0
         version: 4.5.0
     devDependencies:
+      '@types/node':
+        specifier: ^14.0
+        version: 14.18.63
       esbuild:
         specifier: ^0.16.13
         version: 0.16.17
@@ -198,6 +223,10 @@ importers:
         version: 3.4.27(typescript@4.9.5)
 
   playgrounds/react:
+    optionalDependencies:
+      '@rollup/rollup-linux-x64-gnu':
+        specifier: 4.6.1
+        version: 4.6.1
     devDependencies:
       '@inertiajs/react':
         specifier: ^1.0.0
@@ -1032,6 +1061,11 @@ packages:
 
   '@rollup/rollup-linux-x64-gnu@4.17.2':
     resolution: {integrity: sha512-Hy7pLwByUOuyaFC6mAr7m+oMC+V7qyifzs/nW2OJfC8H4hbCzOX07Ov0VFk/zP3kBsELWNFi7rJtgbKYsav9QQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@rollup/rollup-linux-x64-gnu@4.6.1':
+    resolution: {integrity: sha512-DNGZvZDO5YF7jN5fX8ZqmGLjZEXIJRdJEdTFMhiyXqyXubBa0WVLDWSNlQ5JR2PNgDbEV1VQowhVRUh+74D+RA==}
     cpu: [x64]
     os: [linux]
 
@@ -3143,6 +3177,9 @@ snapshots:
     optional: true
 
   '@rollup/rollup-linux-x64-gnu@4.17.2':
+    optional: true
+
+  '@rollup/rollup-linux-x64-gnu@4.6.1':
     optional: true
 
   '@rollup/rollup-linux-x64-musl@4.17.2':
