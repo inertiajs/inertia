@@ -9,7 +9,9 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.16...HEAD)
 
-- Nothing yet!
+- [Breaking] Update to Svelte 5. (Svelte 4 & 3 will not work!)
+- [Breaking] `page` references need to be updated to `page.current` from `import { page } from '@inertiajs/svelte'` because of the way runes work.
+- [Breaking] All callbacks to links are renamed from `on:eventname` to `oneventname` to match Svelte 5 convention.
 
 ## [v1.0.16](https://github.com/inertiajs/inertia/compare/v1.0.15...v1.0.16)
 

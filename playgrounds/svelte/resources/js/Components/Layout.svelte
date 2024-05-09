@@ -1,9 +1,11 @@
 <script>
   import { inertia, page } from '@inertiajs/svelte'
+
+  let { children } = $props()
 </script>
 
 <nav class="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">
-  <div class="rounded-lg bg-slate-700 px-4 py-1">{$page.props.appName}</div>
+  <div class="rounded-lg bg-slate-700 px-4 py-1">{page.current.props.appName}</div>
   <a href="/" use:inertia class="hover:underline">Home</a>
   <a href="/users" use:inertia class="hover:underline">Users</a>
   <a href="/article" use:inertia class="hover:underline">Article</a>
@@ -12,5 +14,5 @@
 </nav>
 
 <main class="px-10 py-8">
-  <slot />
+  {@render children()}
 </main>

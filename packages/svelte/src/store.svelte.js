@@ -1,6 +1,4 @@
-import { writable } from 'svelte/store'
-
-const store = writable({
+const store = $state({
   component: null,
   layout: [],
   page: {},

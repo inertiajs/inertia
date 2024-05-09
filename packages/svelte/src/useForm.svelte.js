@@ -1,7 +1,6 @@
 import { router } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
-import { writable } from 'svelte/store'
 
 function useForm(...args) {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
@@ -12,7 +11,7 @@ function useForm(...args) {
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
-  const store = writable({
+  const store = $state({
     ...(restored ? restored.data : data),
     isDirty: false,
     errors: restored ? restored.errors : {},
@@ -22,9 +21,7 @@ function useForm(...args) {
     recentlySuccessful: false,
     processing: false,
     setStore(key, value) {
-      store.update((store) => {
-        return Object.assign(store, typeof key === 'string' ? { [key]: value } : key)
-      })
+      Object.assign(store, typeof key === 'string' ? { [key]: value } : key)
     },
     data() {
       return Object.keys(data).reduce((carry, key) => {
@@ -189,18 +186,18 @@ function useForm(...args) {
     },
   })
 
-  store.subscribe((form) => {
-    if (form.isDirty === isEqual(form.data(), defaults)) {
-      form.setStore('isDirty', !form.isDirty)
+  $effect(() => {
+    if (store.isDirty === isEqual(store.data(), defaults)) {
+      store.setStore('isDirty', !store.isDirty)
     }
 
-    const hasErrors = Object.keys(form.errors).length > 0
-    if (form.hasErrors !== hasErrors) {
-      form.setStore('hasErrors', !form.hasErrors)
+    const hasErrors = Object.keys(store.errors).length > 0
+    if (store.hasErrors !== hasErrors) {
+      store.setStore('hasErrors', !store.hasErrors)
     }
 
     if (rememberKey) {
-      router.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      router.remember({ data: $state.snapshot(store.data()), errors: $state.snapshot(store.errors) }, rememberKey)
     }
   })
 

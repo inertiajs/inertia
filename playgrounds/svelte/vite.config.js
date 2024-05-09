@@ -9,10 +9,6 @@ export default defineConfig({
       ssr: 'resources/js/ssr.js',
       refresh: true,
     }),
-    svelte({
-      compilerOptions: {
-        hydratable: true,
-      },
-    }),
+    svelte(),
   ],
 })
