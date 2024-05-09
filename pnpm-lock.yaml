@@ -76,6 +76,9 @@ importers:
       esbuild:
         specifier: ^0.16.13
         version: 0.16.17
+      esbuild-node-externals:
+        specifier: ^1.6.0
+        version: 1.13.1(esbuild@0.16.17)
       react:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1
@@ -159,6 +162,9 @@ importers:
       esbuild:
         specifier: ^0.16.13
         version: 0.16.17
+      esbuild-node-externals:
+        specifier: ^1.6.0
+        version: 1.13.1(esbuild@0.16.17)
       typescript:
         specifier: ^4.9.4
         version: 4.9.5
@@ -181,6 +187,9 @@ importers:
       esbuild:
         specifier: ^0.16.13
         version: 0.16.17
+      esbuild-node-externals:
+        specifier: ^1.6.0
+        version: 1.13.1(esbuild@0.16.17)
       typescript:
         specifier: ^4.9.4
         version: 4.9.5
