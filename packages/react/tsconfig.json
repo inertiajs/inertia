@@ -21,7 +21,7 @@
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "removeComments": true,
-    "typeRoots": ["./node_modules/@types"]
+  
     // "strict": true
   }
 }
