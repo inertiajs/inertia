@@ -1,5 +1,5 @@
 import { createInertiaApp, Link, router } from '@inertiajs/vue3'
-import { createApp, createSSRApp, h } from 'vue'
+import { createSSRApp, h } from 'vue'
 
 window.testing = {}
 window.testing.Inertia = router
