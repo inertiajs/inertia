@@ -67,7 +67,7 @@
     }
   },
   "dependencies": {
-    "@inertiajs/core": "^1.1.0",
+    "@inertiajs/core": "workspace:*",
     "lodash": "^4.5.0"
   }
 }

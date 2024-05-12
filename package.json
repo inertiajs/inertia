@@ -1,10 +1,9 @@
 {
   "name": "inertia",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "playgrounds/*"
-  ],
+  "scripts": {
+    "build:all": "pnpm --workspace-concurrency 1 -r build"
+  },
   "dependencies": {
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",

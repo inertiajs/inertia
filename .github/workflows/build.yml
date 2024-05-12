@@ -9,31 +9,32 @@ jobs:
     strategy:
       matrix:
         adapter: ['react', 'vue2', 'vue3', 'svelte']
+        node-version: [20]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: 20
+          version: 9
 
-      - name: Cache node modules
-        uses: actions/cache@v2
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
-          path: |
-            ~/.cache
-            node_modules
-            packages/${{ matrix.adapter }}/tests/node_modules
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install packages
+        run: pnpm install
 
       - name: Build Inertia
         run: |
-          npm install
-          cd packages/core && npm run build
-          cd ../${{ matrix.adapter }} && npm run build
+          cd packages/core && pnpm run build
+          cd ../${{ matrix.adapter }} && pnpm run build
 
       - name: Build Playground
         run: |
-          cd playgrounds/${{ matrix.adapter }} && npm run build
+          cd playgrounds/${{ matrix.adapter }}
+          pnpm run build

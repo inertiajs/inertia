@@ -24,7 +24,7 @@
     "vue": "^2.7.16"
   },
   "dependencies": {
-    "@inertiajs/core": "file:../../core",
-    "@inertiajs/vue2": "file:.."
+    "@inertiajs/core": "workspace:*",
+    "@inertiajs/vue2": "workspace:*"
   }
 }

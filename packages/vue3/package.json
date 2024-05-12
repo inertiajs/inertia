@@ -48,8 +48,11 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@types/node": "^20.12.11",
+    "axios": "^1.6.8",
     "@babel/types": "^7.24.5",
     "esbuild": "^0.21.1",
+    "esbuild-node-externals": "^1.13.1",
     "typescript": "^5.4.5",
     "vue": "^3.4.27"
   },
@@ -57,7 +60,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@inertiajs/core": "1.1.0",
+    "@inertiajs/core": "workspace:*",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   }

@@ -49,9 +49,12 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@types/node": "^20.12.11",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
+    "axios": "^1.6.8",
     "esbuild": "^0.21.1",
+    "esbuild-node-externals": "^1.13.1",
     "react": "^18.3.1",
     "typescript": "^5.4.5"
   },
@@ -59,7 +62,7 @@
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@inertiajs/core": "1.1.0",
+    "@inertiajs/core": "workspace:*",
     "lodash.isequal": "^4.5.0"
   }
 }
