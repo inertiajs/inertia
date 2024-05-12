@@ -1,0 +1,31 @@
+{
+  "private": true,
+  "scripts": {
+    "ci": "start-server-and-test server:run http://localhost:13715 cypress:run",
+    "cypress:run": "cypress-repeat run -n 5 --until-passes",
+    "gui": "start-server-and-test server:run http://localhost:13715 cypress:open",
+    "cypress:open": "CYPRESS_FAIL_FAST_PLUGIN=false cypress open",
+    "server:run": "vite build app && node app/server.js",
+    "test": "npm run ci",
+    "test:gui": "npm run gui",
+    "dev": "npx nodemon --exec 'npm run server:run'"
+  },
+  "dependencies": {
+    "@inertiajs/core": "file:../../core",
+    "@inertiajs/vue3": "file:..",
+    "vue": "^3.4.27"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "body-parser": "^1.20.2",
+    "cypress": "^13.9.0",
+    "cypress-repeat": "^2.3.4",
+    "eslint": "^9.2.0",
+    "eslint-plugin-cypress": "^3.2.0",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.0",
+    "start-server-and-test": "^2.0.3",
+    "vite": "^5.2.0"
+  }
+}

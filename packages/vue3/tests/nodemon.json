@@ -1,0 +1,5 @@
+{
+  "watch": ["server.js", "app/"],
+  "ext": "js, vue",
+  "ignore": ["app/dist/**"]
+}
