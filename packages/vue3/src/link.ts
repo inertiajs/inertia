@@ -12,6 +12,7 @@ export interface InertiaLinkProps {
   preserveState?: boolean | ((props: PageProps) => boolean) | null
   replace?: boolean
   only?: string[]
+  except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
@@ -59,6 +60,10 @@ const Link: InertiaLink = defineComponent({
       type: Array<string>,
       default: () => [],
     },
+    except: {
+      type: Array<string>,
+      default: () => [],
+    },
     headers: {
       type: Object,
       default: () => ({}),
@@ -96,6 +101,7 @@ const Link: InertiaLink = defineComponent({
                 preserveScroll: props.preserveScroll,
                 preserveState: props.preserveState ?? method !== 'get',
                 only: props.only,
+                except: props.except,
                 headers: props.headers,
                 // @ts-expect-error
                 onCancelToken: attrs.onCancelToken || (() => ({})),

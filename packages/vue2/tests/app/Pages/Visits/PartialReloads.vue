@@ -9,10 +9,14 @@
     <span @click="partialReloadVisit" class="visit">Update All (visit)</span>
     <span @click="partialReloadVisitFooBar" class="visit-foo-bar">'Only' foo + bar (visit)</span>
     <span @click="partialReloadVisitBaz" class="visit-baz">'Only' baz (visit)</span>
+    <span @click="partialReloadVisitExceptFooBar" class="visit-except-foo-bar">'Except' foo + bar (visit)</span>
+    <span @click="partialReloadVisitExceptBaz" class="visit-except-baz">'Except' baz (visit)</span>
 
     <span @click="partialReloadGet" class="get">Update All (GET)</span>
     <span @click="partialReloadGetFooBar" class="get-foo-bar">'Only' foo + bar (GET)</span>
     <span @click="partialReloadGetBaz" class="get-baz">'Only' baz (GET)</span>
+    <span @click="partialReloadGetExceptFooBar" class="get-except-foo-bar">'Except' foo + bar (GET)</span>
+    <span @click="partialReloadGetExceptBaz" class="get-except-baz">'Except' baz (GET)</span>
   </div>
 </template>
 <script>
@@ -47,6 +51,18 @@ export default {
         only: ['headers', 'baz'],
       })
     },
+    partialReloadVisitExceptFooBar() {
+      this.$inertia.visit('/visits/partial-reloads', {
+        data: { foo: this.foo },
+        except: ['foo', 'bar'],
+      })
+    },
+    partialReloadVisitExceptBaz() {
+      this.$inertia.visit('/visits/partial-reloads', {
+        data: { foo: this.foo },
+        except: ['baz'],
+      })
+    },
     partialReloadGet() {
       this.$inertia.get('/visits/partial-reloads', {
         foo: this.foo,
@@ -71,6 +87,28 @@ export default {
         },
         {
           only: ['headers', 'baz'],
+        },
+      )
+    },
+    partialReloadGetExceptFooBar() {
+      this.$inertia.get(
+        '/visits/partial-reloads',
+        {
+          foo: this.foo,
+        },
+        {
+          except: ['foo', 'bar'],
+        },
+      )
+    },
+    partialReloadGetExceptBaz() {
+      this.$inertia.get(
+        '/visits/partial-reloads',
+        {
+          foo: this.foo,
+        },
+        {
+          except: ['baz'],
         },
       )
     },
