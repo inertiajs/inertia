@@ -10,6 +10,7 @@
   export let preserveScroll = false
   export let preserveState = null
   export let only = []
+  export let except = []
   export let headers = {}
   export let queryStringArrayFormat = 'brackets'
 
@@ -33,6 +34,7 @@
     preserveScroll,
     preserveState: preserveState ?? method !== 'get',
     only,
+    except,
     headers,
     queryStringArrayFormat,
   }}
