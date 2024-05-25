@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.16...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.1.0...HEAD)
+
+- Nothing yet!
+
+## [v1.1.0](https://github.com/inertiajs/inertia/compare/v1.0.16...v1.1.0)
 
 - Add new `except` visit option to exclude props from partial reloads ([#1876](https://github.com/inertiajs/inertia/pull/1876))
 - Deep merge props from partial reloads ([#1877](https://github.com/inertiajs/inertia/pull/1877))
