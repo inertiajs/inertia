@@ -114,7 +114,7 @@ const Link: InertiaLink = {
         ...data,
         attrs: {
           ...data.attrs,
-          ...(as === 'a' ? { href } : {}),
+          ...(as === 'a' ? { href } : { role: 'link' }),
         },
         on: {
           ...data.on,
