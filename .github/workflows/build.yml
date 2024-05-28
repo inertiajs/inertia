@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        adapter: ['react', 'vue2', 'vue3']
+        adapter: ['react', 'vue2', 'vue3', 'svelte']
 
     steps:
       - name: Checkout
