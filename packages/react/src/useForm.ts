@@ -3,15 +3,17 @@ import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
+type SubmitCallbackFunction = (method: Method, url: string, options: Partial<VisitOptions>) => void;
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
 type FormDataType = object
+type FormErrors<TForm> = Partial<Record<keyof TForm, string>>
 
 export interface InertiaFormProps<TForm extends FormDataType> {
   data: TForm
   isDirty: boolean
-  errors: Partial<Record<keyof TForm, string>>
+  errors: FormErrors<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -25,7 +27,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   reset: (...fields: (keyof TForm)[]) => void
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
-  setError(errors: Record<keyof TForm, string>): void
+  setError(errors: FormErrors<TForm>): void
   submit: (method: Method, url: string, options?: VisitOptions) => void
   get: (url: string, options?: VisitOptions) => void
   patch: (url: string, options?: VisitOptions) => void
@@ -68,9 +70,9 @@ export default function useForm<TForm extends FormDataType>(
     }
   }, [])
 
-  const submit = useCallback(
+  const submit = useCallback<SubmitCallbackFunction>(
     (method, url, options = {}) => {
-      const _options = {
+      const _options: VisitOptions = {
         ...options,
         onCancelToken: (token) => {
           cancelToken.current = token
@@ -125,7 +127,7 @@ export default function useForm<TForm extends FormDataType>(
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
-            setErrors(errors)
+            setErrors(errors as FormErrors<TForm>)
             setHasErrors(true)
           }
 
@@ -143,7 +145,7 @@ export default function useForm<TForm extends FormDataType>(
             return options.onCancel()
           }
         },
-        onFinish: () => {
+        onFinish: (visit) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -152,7 +154,7 @@ export default function useForm<TForm extends FormDataType>(
           cancelToken.current = null
 
           if (options.onFinish) {
-            return options.onFinish()
+            return options.onFinish(visit)
           }
         },
       }
@@ -214,13 +216,13 @@ export default function useForm<TForm extends FormDataType>(
         )
       }
     },
-    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    setError(fieldOrFields: keyof TForm | FormErrors<TForm>, maybeValue?: string) {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
           ...(typeof fieldOrFields === 'string'
             ? { [fieldOrFields]: maybeValue }
-            : (fieldOrFields as Record<keyof TForm, string>)),
+            : (fieldOrFields as FormErrors<TForm>)),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
