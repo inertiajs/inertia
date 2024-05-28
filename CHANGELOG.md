@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.1.0...HEAD)
 
-- Nothing yet!
+- Add Svelte TypeScript support ([#1866](https://github.com/inertiajs/inertia/pull/1866))
 
 ## [v1.1.0](https://github.com/inertiajs/inertia/compare/v1.0.16...v1.1.0)
 
