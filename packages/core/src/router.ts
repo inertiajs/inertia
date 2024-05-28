@@ -236,7 +236,7 @@ export class Router {
     }
   }
 
-  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean | string {
+  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
     if (typeof value === 'function') {
       return value(page)
     } else if (value === 'errors') {
