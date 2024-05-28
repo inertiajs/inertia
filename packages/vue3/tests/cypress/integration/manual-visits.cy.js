@@ -1291,7 +1291,7 @@ describe('Manual Visits', () => {
           })
       })
 
-      it('has headers specific to partial reloads', () => {
+      it('has headers specific to "only" partial reloads', () => {
         cy.get('.visit-foo-bar').click()
         cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
 
@@ -1310,6 +1310,29 @@ describe('Manual Visits', () => {
             expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
             expect(headers['x-inertia']).to.eq('true')
             expect(headers['x-inertia-partial-data']).to.eq('headers,foo,bar')
+            expect(headers['x-inertia-partial-component']).to.eq('Visits/PartialReloads')
+          })
+      })
+
+      it('has headers specific to "except" partial reloads', () => {
+        cy.get('.visit-except-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+
+        cy.window().should('have.property', '_inertia_props')
+        cy.window()
+          .then((window) => window._inertia_props)
+          .then(({ headers }) => {
+            expect(headers).to.contain.keys([
+              'accept',
+              'x-requested-with',
+              'x-inertia',
+              'x-inertia-partial-component',
+              'x-inertia-partial-except',
+            ])
+            expect(headers['accept']).to.eq('text/html, application/xhtml+xml')
+            expect(headers['x-requested-with']).to.eq('XMLHttpRequest')
+            expect(headers['x-inertia']).to.eq('true')
+            expect(headers['x-inertia-partial-except']).to.eq('foo,bar')
             expect(headers['x-inertia-partial-component']).to.eq('Visits/PartialReloads')
           })
       })
@@ -1341,6 +1364,20 @@ describe('Manual Visits', () => {
         cy.get('.foo-text').should('have.text', 'Foo is now 3')
         cy.get('.bar-text').should('have.text', 'Bar is now 4')
         cy.get('.baz-text').should('have.text', 'Baz is now 5')
+      })
+
+      it('it only updates props that are not passed through "except"', () => {
+        cy.get('.visit-except-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 1')
+        cy.get('.bar-text').should('have.text', 'Bar is now 2')
+        cy.get('.baz-text').should('have.text', 'Baz is now 4')
+
+        cy.get('.visit-except-baz').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 4')
       })
     })
 
@@ -1407,6 +1444,20 @@ describe('Manual Visits', () => {
         cy.get('.foo-text').should('have.text', 'Foo is now 3')
         cy.get('.bar-text').should('have.text', 'Bar is now 4')
         cy.get('.baz-text').should('have.text', 'Baz is now 5')
+      })
+
+      it('it only updates props that are not passed through "except"', () => {
+        cy.get('.get-except-foo-bar').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 1')
+        cy.get('.bar-text').should('have.text', 'Bar is now 2')
+        cy.get('.baz-text').should('have.text', 'Baz is now 4')
+
+        cy.get('.get-except-baz').click()
+        cy.url().should('eq', Cypress.config().baseUrl + '/visits/partial-reloads')
+        cy.get('.foo-text').should('have.text', 'Foo is now 2')
+        cy.get('.bar-text').should('have.text', 'Bar is now 3')
+        cy.get('.baz-text').should('have.text', 'Baz is now 4')
       })
     })
   })

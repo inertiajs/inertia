@@ -13,6 +13,12 @@
     <inertia-link href="/links/partial-reloads" :only="['headers', 'baz']" :data="{ foo }" class="baz"
       >'Only' baz</inertia-link
     >
+    <inertia-link href="/links/partial-reloads" :except="['foo', 'bar']" :data="{ foo }" class="except-foo-bar"
+      >'Except' foo + bar</inertia-link
+    >
+    <inertia-link href="/links/partial-reloads" :except="['baz']" :data="{ foo }" class="except-baz"
+      >'Except' baz</inertia-link
+    >
   </div>
 </template>
 <script>
