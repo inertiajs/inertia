@@ -11,8 +11,9 @@ export default defineConfig({
     }),
     svelte({
       compilerOptions: {
-        hydratable: true,
-      },
+        // Svelte 4 only
+        // hydratable: true
+      }
     }),
   ],
 })
