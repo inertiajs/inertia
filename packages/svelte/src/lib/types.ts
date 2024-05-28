@@ -1,10 +1,10 @@
 import type { PageProps } from '@inertiajs/core'
 import type { ComponentType } from 'svelte'
 
-export type ComponentResolver = (name: string) => ComponentType | Promise<ComponentType>
+export type ComponentsResolver = (name: string) => ResolvedComponents | Promise<ResolvedComponents>
 
-export interface InertiaComponentType extends ComponentType {
-  default: InertiaComponentType
-  layout: InertiaComponentType
-  props: PageProps
+export type ResolvedComponents = {
+  default?: ComponentType
+  layout?: ComponentType,
+  props?: PageProps
 }

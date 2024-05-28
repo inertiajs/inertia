@@ -1,14 +1,14 @@
 <script context="module" lang="ts">
   import type { PageProps } from '@inertiajs/core'
-  import type { InertiaComponentType } from '../types'
+  import type { ComponentType } from 'svelte'
 
   type RenderProps = {
-    component: InertiaComponentType
+    component: ComponentType
     props?: PageProps
     children?: RenderProps[]
   } | null
 
-  export const h = (component: InertiaComponentType, props?: PageProps, children?: RenderProps[]): RenderProps => {
+  export const h = (component: ComponentType, props?: PageProps, children?: RenderProps[]): RenderProps => {
     return {
       component,
       ...(props ? { props } : {}),
@@ -20,21 +20,18 @@
 <script lang="ts">
   import store from '../store'
 
-  export let component: InertiaComponentType
+  export let component: ComponentType
   export let props: PageProps = {}
   export let children: RenderProps[] = []
 
-  let prev = component
-  let key = new Date().getTime()
-
-  function updateKey(component: InertiaComponentType) {
-    if (prev !== component) {
-      prev = component
-      key = new Date().getTime()
+  let prevComponent: ComponentType
+  let key: number
+  $: {
+    if (prevComponent !== component) {
+      key = Date.now()
+      prevComponent = component
     }
   }
-
-  $: updateKey(component)
 </script>
 
 {#if $store.component}
