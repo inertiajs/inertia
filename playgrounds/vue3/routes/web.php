@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ Route::get('/', function () {
 
 Route::get('/users', function () {
     return inertia('Users', [
-        'users' => [
+        'users' => Inertia::lazy(fn () => [
             [
                 'id' => 1,
                 'name' => 'Jonathan Reinink',
@@ -60,7 +61,7 @@ Route::get('/users', function () {
                 'name' => 'Pedro Borges',
                 'email' => 'pedro@example.com',
             ],
-        ],
+        ]),
     ]);
 });
 
