@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.1.0...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.2.0...HEAD)
+
+- Nothing yet!
+
+## [v1.2.0](https://github.com/inertiajs/inertia/compare/v1.1.0...v1.2.0)
 
 - Fix `preserveScroll` and `preserveState` types ([#1882](https://github.com/inertiajs/inertia/pull/1882))
 - Revert "merge props from partial reloads" ([#1895](https://github.com/inertiajs/inertia/pull/1895))
