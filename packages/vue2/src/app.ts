@@ -8,7 +8,7 @@ import useForm from './useForm'
 export interface InertiaProps {
   initialPage: Page
   initialComponent?: object
-  resolveComponent?: (name: string) => Component
+  resolveComponent?: (name: string, page: Page) => Component
   titleCallback?: (title: string) => string
   onHeadUpdate?: (elements: string[]) => void
 }

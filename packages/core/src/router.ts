@@ -465,7 +465,7 @@ export class Router {
       preserveState?: PreserveStateOption
     } = {},
   ): Promise<void> {
-    return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
+    return Promise.resolve(this.resolveComponent(page.component, page)).then((component) => {
       if (visitId === this.visitId) {
         page.scrollRegions = page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
@@ -497,7 +497,7 @@ export class Router {
     if (event.state !== null) {
       const page = event.state
       const visitId = this.createVisitId()
-      Promise.resolve(this.resolveComponent(page.component)).then((component) => {
+      Promise.resolve(this.resolveComponent(page.component, page)).then((component) => {
         if (visitId === this.visitId) {
           this.page = page
           this.swapComponent({ component, page, preserveState: false }).then(() => {
