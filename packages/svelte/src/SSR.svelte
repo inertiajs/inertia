@@ -1,9 +1,6 @@
-<script lang="ts">
-  import type { Page } from '@inertiajs/core'
+<script>
   import App from './App.svelte'
-
-  export let id: string
-  export let initialPage: Page
+  export let id, initialPage
 </script>
 
 <div data-server-rendered="true" {id} data-page={JSON.stringify(initialPage)}>

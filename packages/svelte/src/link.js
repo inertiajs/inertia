@@ -1,36 +1,29 @@
-import { mergeDataIntoQueryString, router, shouldIntercept, type VisitOptions } from '@inertiajs/core'
-import type { Action } from 'svelte/action'
+import { mergeDataIntoQueryString, router, shouldIntercept } from '@inertiajs/core'
 
-interface ActionElement extends HTMLElement {
-  href?: string
-}
-
-type ActionParameters = VisitOptions & { href?: string }
-
-const link: Action<ActionElement, ActionParameters> = (node, options = {}) => {
+export default (node, options = {}) => {
   const [href, data] = hrefAndData(options)
   node.href = href
   options.data = data
 
-  function fireEvent(name: string, eventOptions = {}) {
+  function fireEvent(name, eventOptions = {}) {
     return node.dispatchEvent(new CustomEvent(name, eventOptions))
   }
 
-  function hrefAndData(options: ActionParameters) {
+  function hrefAndData(options) {
     return mergeDataIntoQueryString(
       options.method || 'get',
       node.href || options.href || '',
-      options.data || ({} as any),
+      options.data || {},
       options.queryStringArrayFormat || 'brackets',
     )
   }
 
-  function visit(event: Event) {
+  function visit(event) {
     if (!node.href) {
       throw new Error('Option "href" is required')
     }
 
-    if (shouldIntercept(event as KeyboardEvent)) {
+    if (shouldIntercept(event)) {
       event.preventDefault()
 
       router.visit(node.href, {
@@ -60,5 +53,3 @@ const link: Action<ActionElement, ActionParameters> = (node, options = {}) => {
     },
   }
 }
-
-export default link
