@@ -10,7 +10,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.1.0...HEAD)
 
 - Fix `preserveScroll` and `preserveState` types ([#1882](https://github.com/inertiajs/inertia/pull/1882))
-- Add Svelte TypeScript support ([#1866](https://github.com/inertiajs/inertia/pull/1866))
+- Revert "merge props from partial reloads" ([#1895](https://github.com/inertiajs/inertia/pull/1895))
 
 ## [v1.1.0](https://github.com/inertiajs/inertia/compare/v1.0.16...v1.1.0)
 

@@ -1,5 +1,4 @@
 import { default as Axios, AxiosResponse } from 'axios'
-import deepmerge from 'deepmerge'
 import debounce from './debounce'
 import {
   fireBeforeEvent,
@@ -388,9 +387,7 @@ export class Router {
 
         const pageResponse: Page = response.data
         if (isPartial && pageResponse.component === this.page.component) {
-          pageResponse.props = deepmerge(this.page.props, pageResponse.props, {
-            arrayMerge: (_target: any[], source: any[]) => source,
-          })
+          pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
