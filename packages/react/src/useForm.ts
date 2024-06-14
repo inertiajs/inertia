@@ -18,7 +18,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
-  transform: (callback: (data: TForm) => TForm) => void
+  transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
   setDefaults(field: keyof TForm, value: FormDataConvertible): void
   setDefaults(fields: Partial<TForm>): void
