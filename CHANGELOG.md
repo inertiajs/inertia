@@ -10,6 +10,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.2.0...HEAD)
 
 - Add Svelte TypeScript support ([#1866](https://github.com/inertiajs/inertia/pull/1866))
+- Fix form helper `transform` return type in React adapter ([#1896](https://github.com/inertiajs/inertia/pull/1896))
 
 ## [v1.2.0](https://github.com/inertiajs/inertia/compare/v1.1.0...v1.2.0)
 
