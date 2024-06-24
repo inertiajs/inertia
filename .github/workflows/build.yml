@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Inertia
         run: |
-          npm ci
+          npm install
           cd packages/core && npm run build
           cd ../${{ matrix.adapter }} && npm run build
 
