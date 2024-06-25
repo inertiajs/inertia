@@ -8,9 +8,6 @@ export default function shouldIntercept(event: MouseEvent | KeyboardEvent): bool
     (isLink && event.ctrlKey) ||
     (isLink && event.metaKey) ||
     (isLink && event.shiftKey) ||
-    // The auxiliary button (middle button) was pressed. All major browsers
-    // except Safari trigger the `auxclick` instead of `click`, so this is to
-    // ensure we do not intercept middle clicks in Safari.
-    (isLink && 'button' in event && event.button === 1)
+    (isLink && 'button' in event && event.button !== 0)
   )
 }
