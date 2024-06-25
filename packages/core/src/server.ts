@@ -1,8 +1,8 @@
 import { createServer, IncomingMessage } from 'http'
 import * as process from 'process'
 import { InertiaAppResponse, Page } from './types'
-import cluster from 'cluster';
-import { availableParallelism } from 'os';
+import cluster from 'node:cluster';
+import { availableParallelism } from 'node:os';
 
 type AppCallback = (page: Page) => InertiaAppResponse
 type RouteHandler = (request: IncomingMessage) => Promise<unknown>
