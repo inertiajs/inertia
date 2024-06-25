@@ -1,6 +1,8 @@
 import { createServer, IncomingMessage } from 'http'
 import * as process from 'process'
 import { InertiaAppResponse, Page } from './types'
+import cluster from 'cluster';
+import { availableParallelism } from 'os';
 
 type AppCallback = (page: Page) => InertiaAppResponse
 type RouteHandler = (request: IncomingMessage) => Promise<unknown>
@@ -13,8 +15,22 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
     readable.on('error', (err) => reject(err))
   })
 
-export default (render: AppCallback, port?: number): void => {
+export default (render: AppCallback, port?: number, useCluster: boolean = false): void => {
   const _port = port || 13714
+
+  const log = (message: string) => {
+    console.log(useCluster && !cluster.isPrimary ? `[${cluster.worker.id} / ${cluster.worker.process.pid}] ${message}` : message)
+  }
+
+  if (useCluster && cluster.isPrimary) {
+    log('Primary Inertia SSR server process started...')
+
+    for (let i = 0; i < availableParallelism(); i++) {
+      cluster.fork()
+    }
+
+    return
+  }
 
   const routes: Record<string, RouteHandler> = {
     '/health': async () => ({ status: 'OK', timestamp: Date.now() }),
@@ -34,7 +50,7 @@ export default (render: AppCallback, port?: number): void => {
     }
 
     response.end()
-  }).listen(_port, () => console.log('Inertia SSR server started.'))
+  }).listen(_port, () => log('Inertia SSR server started.'))
 
-  console.log(`Starting SSR server on port ${_port}...`)
+  log(`Starting SSR server on port ${_port}...`)
 }
