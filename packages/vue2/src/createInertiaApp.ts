@@ -40,7 +40,7 @@ export default async function createInertiaApp({
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
   // @ts-expect-error
-  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
 
