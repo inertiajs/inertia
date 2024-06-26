@@ -106,8 +106,8 @@ export default function useForm<TForm extends FormDataType>(
       return this
     },
     reset(...fields) {
-      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data!())
-      const clonedData = cloneDeep(resolvedData)
+      const resolvedData: TForm = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data!())
+      const clonedData = cloneDeep(resolvedData) as TForm
       if (fields.length === 0) {
         this.setStore(clonedData)
       } else {
