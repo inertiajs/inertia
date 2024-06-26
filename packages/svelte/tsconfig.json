@@ -8,6 +8,18 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "declaration": true,
+    "declarationDir": "dist",
+
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "preserveConstEnums": true,
+    "removeComments": true
   }
 }
