@@ -1,9 +1,9 @@
 import type { Page } from '@inertiajs/core'
 import { writable } from 'svelte/store'
-import type { ResolvedComponents } from './types'
+import type { ResolvedComponent } from './types'
 
 interface Store {
-  component: ResolvedComponents | null
+  component: ResolvedComponent | null
   page: Page | null
   key?: number | null
 }
