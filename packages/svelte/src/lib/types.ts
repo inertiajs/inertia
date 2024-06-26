@@ -1,8 +1,8 @@
 import type { ComponentType } from 'svelte'
 
-export type ComponentsResolver = (name: string) => ResolvedComponents | Promise<ResolvedComponents>
+export type ComponentResolver = (name: string) => ResolvedComponent | Promise<ResolvedComponent>
 
-export type ResolvedComponents = {
+export type ResolvedComponent = {
   default?: ComponentType
   layout?: ComponentType
 }

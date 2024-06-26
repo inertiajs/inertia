@@ -3,20 +3,20 @@ import type { ComponentType } from 'svelte'
 import App from './components/App.svelte'
 import SSR, { type SSRProps } from './components/SSR.svelte'
 import store from './store'
-import type { ComponentsResolver, ResolvedComponents } from './types'
+import type { ComponentResolver, ResolvedComponent } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css: { code: string } }
 type SSRComponent = ComponentType<SSR> & { render: (props: SSRProps) => SvelteRenderResult }
 
 interface CreateInertiaAppProps {
   id?: string
-  resolve: ComponentsResolver
+  resolve: ComponentResolver
   setup: (props: {
     el: Element
     App: ComponentType<App>
     props: {
       initialPage: Page
-      resolveComponent: ComponentsResolver
+      resolveComponent: ComponentResolver
     }
   }) => void | App
   progress?:
@@ -59,7 +59,7 @@ export default async function createInertiaApp({
       resolveComponent,
       swapComponent: async ({ component, page, preserveState }) => {
         store.update((current) => ({
-          component: component as ResolvedComponents,
+          component: component as ResolvedComponent,
           page,
           key: preserveState ? current.key : Date.now(),
         }))
