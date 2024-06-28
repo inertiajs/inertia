@@ -9,8 +9,10 @@ function addEventListeners(delay: number): void {
   document.addEventListener('inertia:finish', finish)
 }
 
-function start(delay: number): void {
-  timeout = setTimeout(() => NProgress.start(), delay)
+function start(delay: number, event: GlobalEvent<'start'>): void {
+  if (event.detail.visit.showProgress) {
+    timeout = setTimeout(() => NProgress.start(), delay)
+  }
 }
 
 function progress(event: GlobalEvent<'progress'>) {
