@@ -2,9 +2,7 @@
   import Render, { h } from './Render.svelte'
   import store from '../store'
 
-  $$props
-
-  $: child = $store.component && h($store.component.default, $store.page?.props)
+  $: child = $store.component?.default && h($store.component.default, $store.page?.props)
   $: layout = $store.component && $store.component.layout
   $: components = layout
     ? Array.isArray(layout)
@@ -12,7 +10,7 @@
           .concat(child)
           .reverse()
           .reduce((child, layout) => h(layout, $store.page?.props, [child]))
-      : h(layout, $store.page?.props, [child])
+      : h(layout, $store.page?.props, child ? [child] : [])
     : child
 </script>
 
