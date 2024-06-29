@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Method, PreserveStateOption, RequestPayload } from '@inertiajs/core'
+  import type { Method, PreserveStateOption, RequestPayload, SerializationArrayFormat } from '@inertiajs/core'
   import { beforeUpdate } from 'svelte'
   import { inertia } from '../index'
 
@@ -13,7 +13,8 @@
   export let only: string[] = []
   export let except: string[] = []
   export let headers: Record<string, string> = {}
-  export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
+  export let queryStringArrayFormat: SerializationArrayFormat = 'brackets'
+  export let formDataArrayFormat: SerializationArrayFormat = 'indices'
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -38,6 +39,7 @@
     except,
     headers,
     queryStringArrayFormat,
+    formDataArrayFormat,
   }}
   {...as === 'a' ? { href } : {}}
   {...$$restProps}
