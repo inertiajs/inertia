@@ -1209,6 +1209,15 @@ describe('Manual Visits', () => {
     })
   })
 
+  describe('Preserve url', () => {
+    it('does preserves the url if the perserveUrl flag is passed', () => {
+      cy.visit('/visits/preserve-url')
+
+      cy.get('.preserve').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/visits/preserve-url')
+    });
+  })
+
   describe('URL fragment navigation (& automatic scrolling)', () => {
     /** @see https://github.com/inertiajs/inertia/pull/257 */
 

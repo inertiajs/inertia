@@ -97,6 +97,9 @@ app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
 
+app.all('/visits/preserve-url', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/PreserveUrl' }))
+
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
     component: 'Remember/FormHelper/Default',
