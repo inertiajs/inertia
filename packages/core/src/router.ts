@@ -136,7 +136,9 @@ export class Router {
 
   protected restoreScrollPositions(): void {
     if (this.page.scrollRegions) {
-      this.scrollRegions().forEach((region: Element, index: number) => {
+      // Similar to the above, we're using setTimeout to fix a bug in the React adapter where
+      // the rendering isn't fast enough, causing incorrect scroll positions in [scroll-region] elements.
+      setTimeout(() => this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
         if (!scrollPosition) {
           return
@@ -146,7 +148,7 @@ export class Router {
           region.scrollTop = scrollPosition.top
           region.scrollLeft = scrollPosition.left
         }
-      })
+      }))
     }
   }
 
