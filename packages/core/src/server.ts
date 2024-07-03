@@ -19,7 +19,7 @@ export default (render: AppCallback, port?: number, useCluster: boolean = false)
   const _port = port || 13714
 
   const log = (message: string) => {
-    console.log(useCluster && !cluster.isPrimary ? `[${cluster.worker.id} / ${cluster.worker.process.pid}] ${message}` : message)
+    console.log(useCluster && !cluster.isPrimary ? `[${cluster.worker?.id ?? 'N/A'} / ${cluster.worker?.process?.pid ?? 'N/A'}] ${message}` : message)
   }
 
   if (useCluster && cluster.isPrimary) {
