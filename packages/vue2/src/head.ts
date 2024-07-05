@@ -93,7 +93,7 @@ const Head: InertiaHead = {
     renderNodes(nodes) {
       const computed = nodes.map((node) => this.renderNode(node)).filter((node) => node)
       if (this.title && !computed.find((tag) => tag.startsWith('<title'))) {
-        computed.push(`<title inertia>${this.title}</title>`)
+        computed.unshift(`<title inertia>${this.title}</title>`)
       }
       return computed
     },
