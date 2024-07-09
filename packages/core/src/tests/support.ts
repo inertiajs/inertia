@@ -1,5 +1,5 @@
 import { AxiosHeaders, AxiosResponse } from 'axios'
-import { ActiveVisit, Page } from '../src'
+import { ActiveVisit, Page } from '..'
 
 export const getRequestParams = (overrides: Partial<ActiveVisit> = {}): ActiveVisit => ({
   url: new URL('/', 'http://localhost:3000'),

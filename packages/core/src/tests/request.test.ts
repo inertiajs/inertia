@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { beforeEach, expect, test, vi } from 'vitest'
-import * as events from '../src/events'
-import { page } from '../src/page'
-import { Request } from '../src/request'
-import { Response } from '../src/response'
+import * as events from '../events'
+import { page } from '../page'
+import { Request } from '../request'
+import { Response } from '../response'
 import { axiosResponse, getRequestParams, homePage } from './support'
 
 beforeEach(() => {

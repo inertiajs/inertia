@@ -1,13 +1,13 @@
 import { beforeEach, expect, expectTypeOf, suite, test, vi } from 'vitest'
-import * as events from '../src/events'
-import { History } from '../src/history'
-import { navigationType } from '../src/navigationType'
-import { page } from '../src/page'
-import { Request } from '../src/request'
-import { Router } from '../src/router'
-import { Scroll } from '../src/scroll'
-import { SessionStorage } from '../src/sessionStorage'
-import { FormDataConvertible } from '../src/types'
+import * as events from '../events'
+import { History } from '../history'
+import { navigationType } from '../navigationType'
+import { page } from '../page'
+import { Request } from '../request'
+import { Router } from '../router'
+import { Scroll } from '../scroll'
+import { SessionStorage } from '../sessionStorage'
+import { FormDataConvertible } from '../types'
 import { homePage } from './support'
 
 beforeEach(() => {
@@ -15,7 +15,7 @@ beforeEach(() => {
 })
 
 expect.extend({
-  dataToBeFormData(received, expected) {
+  dataToBeFormData(received, _expected) {
     const { isNot } = this
 
     return {
@@ -23,7 +23,7 @@ expect.extend({
       message: () => `data is${isNot ? ' not' : ''} instance of FormData`,
     }
   },
-  dataToBeFormDataConvertible(received, expected) {
+  dataToBeFormDataConvertible(received, _expected) {
     const { isNot } = this
 
     return {
