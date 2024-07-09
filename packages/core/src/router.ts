@@ -205,7 +205,7 @@ export class Router {
     const deferred = currentPage.get().props.deferred
 
     if (deferred) {
-      Object.entries(deferred).forEach(([key, group]) => {
+      Object.entries(deferred).forEach(([_, group]) => {
         this.reload({ only: group })
       })
     }

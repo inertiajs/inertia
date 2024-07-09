@@ -286,6 +286,7 @@ suite('visit', () => {
           file: new File([''], 'file.txt'),
         },
       },
+      // @ts-ignore
       expectation: () => expect.dataToBeFormData(),
     },
     {
@@ -297,6 +298,7 @@ suite('visit', () => {
         },
         forceFormData: true,
       },
+      // @ts-ignore
       expectation: () => expect.dataToBeFormData(),
     },
     {
@@ -307,6 +309,7 @@ suite('visit', () => {
           whatever: 'ok',
         },
       },
+      // @ts-ignore
       expectation: () => expect.dataToBeFormDataConvertible(),
     },
   ])('it can transform incoming data from $from to $to', { todo: true }, async ({ params, expectation }) => {
@@ -407,6 +410,9 @@ suite('visit', () => {
 
     expect(scrollSpy).toHaveBeenCalledOnce()
     expect(scrollSpy).toHaveBeenCalledWith(homePage)
+    expect(pageSpies.set).toHaveBeenCalledOnce()
+    expect(requestSpies.create).toHaveBeenCalledOnce()
+    expect(requestSpies.send).toHaveBeenCalledOnce()
   })
 
   test('start event callbacks are fired', async () => {

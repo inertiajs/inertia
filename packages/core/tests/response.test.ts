@@ -3,7 +3,7 @@ import { ActiveVisit, Page, PreserveStateOption } from '../src'
 import * as events from '../src/events'
 import { History } from '../src/history'
 import modal from '../src/modal'
-import { page as currentPage } from '../src/page'
+import { page as currentPage, page } from '../src/page'
 import { RequestParams } from '../src/requestParams'
 import { Response } from '../src/response'
 import { SessionStorage } from '../src/sessionStorage'
@@ -24,7 +24,7 @@ const requestParams = (overrides: Partial<ActiveVisit> = {}) => {
 }
 
 test('create a response from the helper method', () => {
-  const response = Response.create(requestParams(), axiosResponse())
+  const response = Response.create(requestParams(), axiosResponse(), page.get())
 
   expect(response).toBeInstanceOf(Response)
 })
@@ -58,6 +58,7 @@ test('props are merged for partial request responses', async () => {
         },
       }),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -110,6 +111,7 @@ test.each([
     value: 'errors' as PreserveStateOption,
     expected: true,
     label: 'errors but present',
+    // @ts-ignore
     responseProps: {
       props: {
         // TODO: Why is this type wrong...?
@@ -134,6 +136,7 @@ test.each([
       },
       data: pageComponent({ ...responseProps }),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -187,6 +190,7 @@ test.each([
     expected: true,
     label: 'errors but present',
     historyStateCount: 1,
+    // @ts-ignore
     responseProps: {
       props: {
         // TODO: Why is this type wrong...?
@@ -215,6 +219,7 @@ test.each([
         },
         data: pageComponent({ ...responseProps }),
       }),
+      page.get(),
     )
 
     await response.handle()
@@ -256,6 +261,7 @@ test('remembered state is set after response', async () => {
       },
       data: pageComponent(),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -299,6 +305,7 @@ test('remembered state is not set if preserve state is false', async () => {
       },
       data: pageComponent(),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -340,6 +347,7 @@ test('remembered state is not set if the response component is different', async
         component: 'DifferentComponent',
       }),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -379,6 +387,7 @@ test('preserve url hash if response url is the same', async () => {
       },
       data: pageComponent(),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -421,11 +430,13 @@ test('if there are errors, fire error events', async () => {
         props: {
           errors: {
             // TODO: Why is this type wrong...?
+            // @ts-ignore
             foo: 'bar',
           },
         },
       }),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -468,6 +479,7 @@ test('if there are no errors, fire success events', async () => {
       },
       data: pageComponent(),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -504,6 +516,7 @@ test('handles location responses', async () => {
       },
       data: pageComponent(),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -547,6 +560,7 @@ test.each([
       },
       data: pageComponent(),
     }),
+    page.get(),
   )
 
   await response.handle()
@@ -584,11 +598,13 @@ test.each([
       headers: {},
       data: 'This is not an Inertia response',
     }),
+    page.get(),
   )
 
   await response.handle()
 
   expect(modalSpies.show).toHaveBeenCalledTimes(modalShowCount)
+  expect(fireInvalidEvent).toHaveBeenCalledOnce()
 })
 
 test('will continue to error if there is no response in the error object', { todo: true }, async () => {})
