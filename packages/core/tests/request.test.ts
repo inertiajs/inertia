@@ -18,17 +18,19 @@ beforeEach(() => {
 
 vi.mock('axios')
 
+const axiosMock = vi.mocked(axios)
+
 test('create a request from the helper method', () => {
-  const request = Request.create(getRequestParams())
+  const request = Request.create(getRequestParams(), page.get())
 
   expect(request).toBeInstanceOf(Request)
 })
 
 test('sending the correct headers for partial requests', async () => {
-  axios.mockResolvedValue(axiosResponse())
+  axiosMock.mockResolvedValue(axiosResponse())
   const responseHandleSpy = vi.spyOn(Response.prototype, 'handle').mockResolvedValue()
 
-  const request = Request.create(getRequestParams({ only: ['foo', 'bar'] }))
+  const request = Request.create(getRequestParams({ only: ['foo', 'bar'] }), page.get())
 
   await request.send()
 
@@ -60,9 +62,9 @@ test('including inertia version request header', async () => {
 
   const responseHandleSpy = vi.spyOn(Response.prototype, 'handle').mockResolvedValue()
 
-  axios.mockResolvedValue(axiosResponse())
+  axiosMock.mockResolvedValue(axiosResponse())
 
-  const request = Request.create(getRequestParams())
+  const request = Request.create(getRequestParams(), page.get())
 
   await request.send()
 
@@ -87,12 +89,13 @@ test('including inertia version request header', async () => {
 test('including the error bag in request header', async () => {
   const responseHandleSpy = vi.spyOn(Response.prototype, 'handle').mockResolvedValue()
 
-  axios.mockResolvedValue(axiosResponse())
+  axiosMock.mockResolvedValue(axiosResponse())
 
   const request = Request.create(
     getRequestParams({
       errorBag: 'error-tho',
     }),
+    page.get(),
   )
 
   await request.send()
@@ -152,14 +155,14 @@ test.each([
   const onCancel = vi.fn()
   const onFinish = vi.fn()
 
-  axios.mockResolvedValue(axiosResponse())
+  axiosMock.mockResolvedValue(axiosResponse())
 
   const requestParams = getRequestParams({
     onCancel,
     onFinish,
   })
 
-  const request = Request.create(requestParams)
+  const request = Request.create(requestParams, page.get())
 
   request.send()
   request.cancel(cancelParams)
@@ -189,7 +192,7 @@ test('errors with responses', async () => {
   const fireFinishEventsSpy = vi.spyOn(events, 'fireFinishEvent').mockReturnValue()
   const onFinish = vi.fn()
 
-  axios.mockRejectedValue({
+  axiosMock.mockRejectedValue({
     response: axiosResponse({
       status: 422,
     }),
@@ -199,7 +202,7 @@ test('errors with responses', async () => {
     onFinish,
   })
 
-  const request = Request.create(requestParams)
+  const request = Request.create(requestParams, page.get())
 
   await request.send()
 
@@ -228,13 +231,13 @@ test.each([
   const fireExceptionEventsSpy = vi.spyOn(events, 'fireExceptionEvent').mockReturnValue(shouldThrow)
   const onFinish = vi.fn()
 
-  axios.mockRejectedValue()
+  axiosMock.mockRejectedValue(null)
 
   const requestParams = getRequestParams({
     onFinish,
   })
 
-  const request = Request.create(requestParams)
+  const request = Request.create(requestParams, page.get())
 
   //   if (!shouldThrow) {
   await expect(request.send()).rejects.toThrow()
@@ -262,13 +265,13 @@ test('request cancelled errors are handled gracefully', async () => {
 
   const onFinish = vi.fn()
 
-  axios.mockRejectedValue()
+  axiosMock.mockRejectedValue(null)
 
   const requestParams = getRequestParams({
     onFinish,
   })
 
-  const request = Request.create(requestParams)
+  const request = Request.create(requestParams, page.get())
 
   await request.send()
 
