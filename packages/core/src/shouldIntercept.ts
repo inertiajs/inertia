@@ -3,6 +3,7 @@ export default function shouldIntercept(event: MouseEvent | KeyboardEvent): bool
   return !(
     (event.target && (event?.target as HTMLElement).isContentEditable) ||
     event.defaultPrevented ||
+    (isLink && event.which > 1) ||
     (isLink && event.altKey) ||
     (isLink && event.ctrlKey) ||
     (isLink && event.metaKey) ||

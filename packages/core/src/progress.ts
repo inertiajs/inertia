@@ -4,13 +4,15 @@ import { GlobalEvent } from './types'
 let timeout: NodeJS.Timeout | null = null
 
 function addEventListeners(delay: number): void {
-  document.addEventListener('inertia:start', start.bind(null, delay))
+  document.addEventListener('inertia:start', (e) => start(e, delay))
   document.addEventListener('inertia:progress', progress)
   document.addEventListener('inertia:finish', finish)
 }
 
-function start(delay: number): void {
-  timeout = setTimeout(() => NProgress.start(), delay)
+function start(event: GlobalEvent<'start'>, delay: number): void {
+  if (!event.detail.visit.async) {
+    timeout = setTimeout(() => NProgress.start(), delay)
+  }
 }
 
 function progress(event: GlobalEvent<'progress'>) {

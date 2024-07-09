@@ -33,6 +33,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   props: PageProps &
     SharedProps & {
       errors: Errors & ErrorBag
+      deferred?: Record<string, VisitOptions['only']>
     }
   url: string
   version: string | null
@@ -75,6 +76,7 @@ export type Visit = {
   errorBag: string | null
   forceFormData: boolean
   queryStringArrayFormat: 'indices' | 'brackets'
+  async: boolean
 }
 
 export type GlobalEventsMap = {
@@ -179,6 +181,16 @@ export type VisitOptions = Partial<
   }
 >
 
+export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'preserveState'>
+
+export type VisitHelperOptions = Omit<VisitOptions, 'method' | 'data'>
+
+export type RouterInitParams = {
+  initialPage: Page
+  resolveComponent: PageResolver
+  swapComponent: PageHandler
+}
+
 export type PendingVisit = Visit & {
   url: URL
   completed: boolean
@@ -186,10 +198,7 @@ export type PendingVisit = Visit & {
   interrupted: boolean
 }
 
-export type ActiveVisit = PendingVisit &
-  Required<VisitOptions> & {
-    cancelToken: AbortController
-  }
+export type ActiveVisit = PendingVisit & Required<VisitOptions>
 
 export type VisitId = unknown
 export type Component = unknown

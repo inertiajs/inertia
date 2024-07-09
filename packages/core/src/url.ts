@@ -45,3 +45,13 @@ export function urlWithoutHash(url: URL | Location): URL {
   url.hash = ''
   return url
 }
+
+export const setHashIfSameUrl = (originUrl: URL | Location, destinationUrl: URL | Location) => {
+  if (originUrl.hash && !destinationUrl.hash && urlWithoutHash(originUrl).href === destinationUrl.href) {
+    destinationUrl.hash = originUrl.hash
+  }
+}
+
+export const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boolean => {
+  return urlWithoutHash(url1).href === urlWithoutHash(url2).href
+}

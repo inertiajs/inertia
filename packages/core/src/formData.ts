@@ -1,5 +1,7 @@
 import { FormDataConvertible } from './types'
 
+export const isFormData = (value: any): value is FormData => value instanceof FormData
+
 export function objectToFormData(
   source: Record<string, FormDataConvertible>,
   form: FormData = new FormData(),
