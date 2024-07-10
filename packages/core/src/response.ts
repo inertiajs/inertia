@@ -39,7 +39,7 @@ export class Response {
 
     fireSuccessEvent(currentPage.get())
 
-    this.requestParams.params.onSuccess(currentPage.get())
+    await this.requestParams.params.onSuccess(currentPage.get())
   }
 
   protected async handleNonInertiaResponse() {
