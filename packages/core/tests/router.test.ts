@@ -415,34 +415,6 @@ suite('visit', () => {
     expect(requestSpies.send).toHaveBeenCalledOnce()
   })
 
-  test('start event callbacks are fired', async () => {
-    const requestSpies = {
-      create: vi.spyOn(Request, 'create'),
-      send: vi.spyOn(Request.prototype, 'send').mockResolvedValue(),
-    }
-
-    const globalOnStart = vi.fn()
-    const localOnStart = vi.fn()
-
-    const router = getRouter()
-
-    const stopListening = router.on('start', globalOnStart)
-
-    router.visit('/home', {
-      onStart: localOnStart,
-    })
-
-    await vi.runAllTimersAsync()
-
-    stopListening()
-
-    expect(requestSpies.create).toHaveBeenCalledOnce()
-    expect(requestSpies.send).toHaveBeenCalledOnce()
-
-    expect(globalOnStart).toHaveBeenCalledOnce()
-    expect(localOnStart).toHaveBeenCalledOnce()
-  })
-
   test('verify that request params are passed to the request', { todo: true }, async () => {
     const requestSpies = {
       create: vi.spyOn(Request, 'create'),

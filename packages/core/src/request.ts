@@ -1,5 +1,5 @@
 import { default as axios, AxiosProgressEvent, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { fireExceptionEvent, fireFinishEvent, fireProgressEvent } from './events'
+import { fireExceptionEvent, fireFinishEvent, fireProgressEvent, fireStartEvent } from './events'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
@@ -17,7 +17,6 @@ export class Request {
   ) {
     this.requestParams = RequestParams.create(params)
     this.cancelToken = new AbortController()
-    this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
   }
 
   public static create(params: ActiveVisit, page: Page): Request {
@@ -25,6 +24,11 @@ export class Request {
   }
 
   public async send() {
+    this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
+
+    fireStartEvent(this.requestParams.all())
+    this.requestParams.onStart()
+
     return axios({
       method: this.requestParams.params.method,
       url: urlWithoutHash(this.requestParams.params.url).href,

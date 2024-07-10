@@ -1,5 +1,5 @@
 import debounce from './debounce'
-import { fireBeforeEvent, fireNavigateEvent, fireStartEvent } from './events'
+import { fireBeforeEvent, fireNavigateEvent } from './events'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
 import { History } from './history'
@@ -168,9 +168,6 @@ export class Router {
 
     // Save scroll regions for the current page
     Scroll.save(currentPage.get())
-
-    fireStartEvent(visit)
-    onStart(visit)
 
     const request = Request.create(
       {

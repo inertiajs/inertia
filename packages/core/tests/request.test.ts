@@ -152,14 +152,17 @@ test.each([
 
   const abortSpy = vi.spyOn(AbortController.prototype, 'abort')
   const fireFinishEventsSpy = vi.spyOn(events, 'fireFinishEvent').mockReturnValue()
+  const fireStartEventsSpy = vi.spyOn(events, 'fireStartEvent').mockReturnValue()
   const onCancel = vi.fn()
   const onFinish = vi.fn()
+  const onStart = vi.fn()
 
   axiosMock.mockResolvedValue(axiosResponse())
 
   const requestParams = getRequestParams({
     onCancel,
     onFinish,
+    onStart,
   })
 
   const request = Request.create(requestParams, page.get())
@@ -179,6 +182,12 @@ test.each([
 
   expect(fireFinishEventsSpy).toHaveBeenCalledOnce()
   expect(fireFinishEventsSpy).toHaveBeenCalledWith(finalParams)
+
+  expect(fireStartEventsSpy).toHaveBeenCalledOnce()
+  expect(fireStartEventsSpy).toHaveBeenCalledWith(finalParams)
+
+  expect(onStart).toHaveBeenCalledOnce()
+  expect(onStart).toHaveBeenCalledWith(finalParams)
 
   expect(onFinish).toHaveBeenCalledOnce()
   expect(onFinish).toHaveBeenCalledWith(finalParams)

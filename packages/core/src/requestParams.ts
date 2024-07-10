@@ -51,6 +51,10 @@ export class RequestParams {
     this.params.onFinish(this.params)
   }
 
+  public onStart() {
+    this.params.onStart(this.params)
+  }
+
   public all() {
     return this.params
   }
