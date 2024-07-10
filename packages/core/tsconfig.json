@@ -22,5 +22,6 @@
     "removeComments": false,
     "typeRoots": ["./node_modules/@types"],
     "strict": true
-  }
+  },
+  "exclude": ["tests", "vitest.config.ts"]
 }
