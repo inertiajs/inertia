@@ -562,6 +562,14 @@ describe('Events', () => {
 
     describe('exception', () => {
       it('gets fired when an unexpected situation occurs (e.g. network disconnect)', () => {
+        cy.on('uncaught:exception', (err, runnable) => {
+          if (err.message.includes('Network Error')) {
+            return false
+          }
+
+          return true
+        })
+
         const assertExceptionObject = (detail) => {
           expect(detail).to.be.an('object')
           expect(detail).to.have.property('exception')

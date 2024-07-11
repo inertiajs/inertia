@@ -4,8 +4,13 @@ describe('Plugin', () => {
       cy.visit('/')
 
       cy.window().then((window) => {
+        cy.task('what the')
+        cy.log('--------------------------')
         const inertiaRoot = window.testing.vue.$children[0]
         const page = inertiaRoot.$children[0]
+
+        cy.log('page.$page', page.$page)
+        cy.log('page.$inertia.page', page.$inertia.page)
 
         expect(page.$page).to.deep.equal(page.$inertia.page)
       })
