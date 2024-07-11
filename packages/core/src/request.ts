@@ -10,6 +10,7 @@ export class Request {
   protected response!: AxiosResponse
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
+  protected requestHasFinished = false
 
   constructor(
     params: ActiveVisit,
@@ -72,6 +73,13 @@ export class Request {
   }
 
   protected fireFinishEvents(): void {
+    if (this.requestHasFinished) {
+      // This could be called from multiple places, don't let it re-fire
+      return
+    }
+
+    this.requestHasFinished = true
+
     fireFinishEvent(this.requestParams.all())
     this.requestParams.onFinish()
   }

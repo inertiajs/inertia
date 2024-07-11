@@ -78,6 +78,27 @@ const triggerCancel = () => {
   )
 }
 
+const triggerCancelAfterFinish = () => {
+  let cancelToken
+
+  router.post(
+    '/sleepy/1',
+    {},
+    {
+      onCancelToken: (token) => {
+        console.log('onCancelToken')
+
+        cancelToken = token
+      },
+      onFinish: () => {
+        console.log('onFinish')
+        console.log('CANCELLING!')
+        cancelToken.cancel()
+      },
+    },
+  )
+}
+
 watch(reloadCount, () => {
   console.log('watched reload count value', reloadCount.value)
 })
@@ -124,6 +145,12 @@ watch(reloadCount, () => {
     <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
       <p>Trigger an automatic cancellation from the token.</p>
       <button @click="triggerCancel" class="px-4 py-2 text-white bg-green-600 rounded">Trigger Cancel</button>
+    </div>
+    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+      <p>Trigger an automatic cancellation from the token after finishing request.</p>
+      <button @click="triggerCancelAfterFinish" class="px-4 py-2 text-white bg-green-600 rounded">
+        Trigger Cancel After Finish
+      </button>
     </div>
   </div>
 </template>
