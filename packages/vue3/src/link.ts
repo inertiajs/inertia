@@ -21,6 +21,7 @@ export interface InertiaLinkProps {
   onCancel?: () => void
   onSuccess?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
+  async: boolean
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -72,6 +73,10 @@ const Link: InertiaLink = defineComponent({
       type: String as PropType<'brackets' | 'indices'>,
       default: 'brackets',
     },
+    async: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props, { slots, attrs }) {
     return () => {
@@ -103,6 +108,7 @@ const Link: InertiaLink = defineComponent({
                 only: props.only,
                 except: props.except,
                 headers: props.headers,
+                async: props.async,
                 // @ts-expect-error
                 onCancelToken: attrs.onCancelToken || (() => ({})),
                 // @ts-expect-error

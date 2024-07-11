@@ -14,6 +14,7 @@
   export let except: string[] = []
   export let headers: Record<string, string> = {}
   export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
+  export let async: boolean = false
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -38,6 +39,7 @@
     except,
     headers,
     queryStringArrayFormat,
+    async,
   }}
   {...as === 'a' ? { href } : {}}
   {...$$restProps}
