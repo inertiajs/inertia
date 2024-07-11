@@ -85,6 +85,11 @@ export class Request {
   }
 
   public cancel({ cancelled = false, interrupted = false }: { cancelled?: boolean; interrupted?: boolean }): void {
+    if (this.requestHasFinished) {
+      // If the request has already finished, there's no need to cancel it
+      return
+    }
+
     this.cancelToken.abort()
 
     this.requestParams.markAsCancelled({ cancelled, interrupted })
