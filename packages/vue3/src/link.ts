@@ -21,7 +21,7 @@ export interface InertiaLinkProps {
   onCancel?: () => void
   onSuccess?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
-  async: boolean
+  async?: boolean
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
