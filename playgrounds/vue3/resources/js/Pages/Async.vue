@@ -5,7 +5,7 @@ export default { layout: Layout }
 
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 let timer = null
 const reloadCount = ref(0)
@@ -61,20 +61,25 @@ const triggerLongReload = () => {
   })
 }
 
+const triggerCancel = () => {
+  router.post(
+    '/sleepy/3',
+    {},
+    {
+      onCancelToken: (token) => {
+        console.log('onCancelToken')
+
+        setTimeout(() => {
+          console.log('CANCELLING!')
+          token.cancel()
+        }, 1000)
+      },
+    },
+  )
+}
+
 watch(reloadCount, () => {
   console.log('watched reload count value', reloadCount.value)
-})
-
-onMounted(() => {
-  //   timer = setTimeout(() => {
-  //     router.reload({
-  //       only: ['sleep'],
-  //     })
-  //   }, 1000)
-})
-
-onUnmounted(() => {
-  clearInterval(timer)
 })
 </script>
 
@@ -115,6 +120,10 @@ onUnmounted(() => {
     <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
       <p>Simply trigger a 4 second reload so you can navigate or do whatever you'd like during it.</p>
       <button @click="triggerLongReload" class="px-4 py-2 text-white bg-green-600 rounded">Trigger Long Reload</button>
+    </div>
+    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+      <p>Trigger an automatic cancellation from the token.</p>
+      <button @click="triggerCancel" class="px-4 py-2 text-white bg-green-600 rounded">Trigger Cancel</button>
     </div>
   </div>
 </template>
