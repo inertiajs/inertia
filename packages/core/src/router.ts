@@ -44,7 +44,10 @@ export class Router {
         resolveComponent,
         swapComponent,
       })
-      .onNewComponent(this.loadDeferredProps.bind(this))
+      .onNewComponent(() => {
+        poll.clear()
+        this.loadDeferredProps()
+      })
 
     this.clearRememberedStateOnReload()
     this.initializeVisit()

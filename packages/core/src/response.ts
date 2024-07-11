@@ -3,7 +3,6 @@ import { fireErrorEvent, fireInvalidEvent, fireSuccessEvent } from './events'
 import { History } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
-import { poll } from './poll'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ErrorBag, Errors, LocationVisit, Page } from './types'
@@ -106,10 +105,6 @@ export class Response {
     this.requestParams.setPreserveOptions(pageResponse)
 
     pageResponse.url = this.pageUrl(pageResponse)
-
-    if (!currentPage.isTheSame(pageResponse)) {
-      poll.clear()
-    }
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.params.replace,
