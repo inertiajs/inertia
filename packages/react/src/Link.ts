@@ -32,7 +32,7 @@ interface BaseInertiaLinkProps {
   onSuccess?: () => void
   onError?: () => void
   queryStringArrayFormat?: 'indices' | 'brackets'
-  async: boolean
+  async?: boolean
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
