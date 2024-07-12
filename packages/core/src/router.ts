@@ -38,16 +38,20 @@ export class Router {
   })
 
   public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
-    currentPage
-      .init({
-        initialPage,
-        resolveComponent,
-        swapComponent,
-      })
-      .onNewComponent(() => {
-        poll.clear()
-        this.loadDeferredProps()
-      })
+    currentPage.init({
+      initialPage,
+      resolveComponent,
+      swapComponent,
+    })
+
+    currentPage.on('firstLoad', () => {
+      this.loadDeferredProps()
+    })
+
+    currentPage.on('newComponent', () => {
+      poll.clear()
+      this.loadDeferredProps()
+    })
 
     this.clearRememberedStateOnReload()
     this.initializeVisit()

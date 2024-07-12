@@ -153,6 +153,8 @@ export type GlobalEventsMap = {
   }
 }
 
+export type PageEvent = 'newComponent' | 'firstLoad'
+
 export type GlobalEventNames = keyof GlobalEventsMap
 
 export type GlobalEvent<TEventName extends GlobalEventNames> = CustomEvent<GlobalEventDetails<TEventName>>

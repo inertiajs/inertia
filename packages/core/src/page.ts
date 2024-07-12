@@ -1,7 +1,7 @@
 import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { Scroll } from './scroll'
-import { Component, Page, PageHandler, PageResolver, PreserveStateOption, RouterInitParams } from './types'
+import { Component, Page, PageEvent, PageHandler, PageResolver, PreserveStateOption, RouterInitParams } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
@@ -10,6 +10,11 @@ class CurrentPage {
   protected resolveComponent!: PageResolver
   protected componentId = {}
   protected onNewComponentCallbacks: VoidFunction[] = []
+  protected onFirstLoadCallbacks: VoidFunction[] = []
+  protected listeners: {
+    event: PageEvent
+    callback: VoidFunction
+  }[] = []
   protected firstPageLoad = true
 
   public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
@@ -47,12 +52,18 @@ class CurrentPage {
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), window.location)
       replace ? History.replaceState(page) : History.pushState(page)
 
-      const isNewComponent = !this.isTheSame(page) || this.firstPageLoad
+      const isNewComponent = !this.isTheSame(page)
 
       this.page = page
 
       if (isNewComponent) {
-        this.onNewComponentCallbacks.forEach((cb) => cb())
+        this.listeners
+          .filter((listener) => listener.event === 'newComponent')
+          .forEach((listener) => listener.callback())
+      }
+
+      if (this.firstPageLoad) {
+        this.listeners.filter((listener) => listener.event === 'firstLoad').forEach((listener) => listener.callback())
       }
 
       this.firstPageLoad = false
@@ -105,11 +116,11 @@ class CurrentPage {
     return this.page.component === page.component
   }
 
-  public onNewComponent(cb: VoidFunction): VoidFunction {
-    this.onNewComponentCallbacks.push(cb)
+  public on(event: PageEvent, callback: VoidFunction): VoidFunction {
+    this.listeners.push({ event, callback })
 
     return () => {
-      this.onNewComponentCallbacks = this.onNewComponentCallbacks.filter((callback) => callback !== cb)
+      this.listeners = this.listeners.filter((listener) => listener.event !== event && listener.callback !== callback)
     }
   }
 }
