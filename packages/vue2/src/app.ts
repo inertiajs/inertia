@@ -128,6 +128,8 @@ export function usePage() {
     props: computed(() => app.page.props),
     url: computed(() => app.page.url),
     component: computed(() => app.page.component),
-    version: computed(() => app.page.version),
+    meta: {
+      assetVersion: computed(() => app.page.meta.assetVersion),
+    },
   })
 }
