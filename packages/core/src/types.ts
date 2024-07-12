@@ -36,7 +36,10 @@ export interface Page<SharedProps extends PageProps = PageProps> {
       deferred?: Record<string, VisitOptions['only']>
     }
   url: string
-  version: string | null
+  meta: {
+    assetVersion: string | null
+    deferredProps?: Record<string, VisitOptions['only']>
+  }
 
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>

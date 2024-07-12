@@ -113,8 +113,8 @@ export class Request {
       'X-Inertia': true,
     }
 
-    if (currentPage.get().version) {
-      headers['X-Inertia-Version'] = currentPage.get().version
+    if (currentPage.get().meta.assetVersion) {
+      headers['X-Inertia-Version'] = currentPage.get().meta.assetVersion
     }
 
     return headers

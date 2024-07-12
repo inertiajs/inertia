@@ -202,7 +202,7 @@ export class Router {
   }
 
   protected loadDeferredProps(): void {
-    const deferred = currentPage.get().props.deferred
+    const deferred = currentPage.get().meta.deferredProps
 
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
@@ -272,7 +272,7 @@ export class Router {
   }
 
   protected handleBackForwardVisit(): void {
-    History.setState('version', currentPage.get().version)
+    History.setState('version', currentPage.get().meta.assetVersion)
 
     currentPage.set(History.getAllState(), { preserveScroll: true, preserveState: true }).then(() => {
       Scroll.restore(currentPage.get())
