@@ -21,11 +21,17 @@ export class History {
   }
 
   public static pushState(page: Page): void {
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(this.pageData(page), '', page.url)
   }
 
   public static replaceState(page: Page): void {
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(this.pageData(page), '', page.url)
+  }
+
+  protected static pageData(page: Page): Omit<Page, 'meta'> {
+    const { meta, ...remaining } = page
+
+    return remaining
   }
 
   public static setState(key: string, value: any) {
