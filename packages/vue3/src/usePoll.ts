@@ -1,23 +1,37 @@
-import { ReloadOptions, VoidFunction } from '@inertiajs/core'
+import { PollOptions, ReloadOptions } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
 import { onMounted, onUnmounted } from 'vue'
 
-export default function usePoll(interval: number, options: ReloadOptions, startOnMount = true): VoidFunction {
+export default function usePoll(
+  interval: number,
+  requestOptions: ReloadOptions = {},
+  options: PollOptions & {
+    startOnMount?: boolean
+  } = {
+    keepAlive: false,
+    startOnMount: true,
+  },
+): {
+  stop: VoidFunction
+  start: VoidFunction
+} {
   let stopFunc: VoidFunction
 
-  let stop = () => {
+  options.startOnMount ??= true
+
+  const stop = () => {
     if (stopFunc) {
       stopFunc()
     }
   }
 
-  let start = () => {
+  const start = () => {
     stop()
-    stopFunc = router.poll(interval, options)
+    stopFunc = router.poll(interval, requestOptions, options)
   }
 
   onMounted(() => {
-    if (startOnMount) {
+    if (options.startOnMount) {
       start()
     }
   })
