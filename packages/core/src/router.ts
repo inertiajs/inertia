@@ -79,7 +79,16 @@ export class Router {
   }
 
   public reload(options: ReloadOptions = {}): void {
-    return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true, async: true })
+    return this.visit(window.location.href, {
+      ...options,
+      preserveScroll: true,
+      preserveState: true,
+      async: true,
+      headers: {
+        ...(options.headers || {}),
+        'Cache-Control': 'no-cache',
+      },
+    })
   }
 
   public remember(data: unknown, key = 'default'): void {
