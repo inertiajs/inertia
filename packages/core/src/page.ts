@@ -9,8 +9,6 @@ class CurrentPage {
   protected swapComponent!: PageHandler
   protected resolveComponent!: PageResolver
   protected componentId = {}
-  protected onNewComponentCallbacks: VoidFunction[] = []
-  protected onFirstLoadCallbacks: VoidFunction[] = []
   protected listeners: {
     event: PageEvent
     callback: VoidFunction
