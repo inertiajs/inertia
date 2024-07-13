@@ -27,7 +27,7 @@ export class Poll {
 
     if (this.inBackground) {
       // Throttle requests by 95% when the page is in the background
-      this.currentInterval = Math.round(this.originalInterval / 0.95)
+      this.currentInterval = Math.round(this.originalInterval / 0.05)
     } else {
       this.currentInterval = this.originalInterval
     }
