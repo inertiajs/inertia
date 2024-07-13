@@ -28,7 +28,7 @@ const trigegerAsyncRedirect = () => {
   )
 }
 
-const { stop } = usePoll(
+const { start, stop } = usePoll(
   2000,
   {
     only: ['asdf'],
@@ -36,10 +36,17 @@ const { stop } = usePoll(
       hookPollCount.value++
     },
   },
-  false,
+  {
+    keepAlive: true,
+    startOnMount: false,
+  },
 )
 
 onMounted(() => {
+  setTimeout(() => {
+    start()
+  }, 2000)
+
   const stopUserPolling = router.poll(
     1000,
     {
@@ -80,6 +87,9 @@ onMounted(() => {
       <div v-for="company in companies">
         <div>{{ company }}</div>
       </div>
+    </div>
+    <div>
+      <div class="mb-2 font-bold">Hook Count: {{ hookPollCount }}</div>
     </div>
     <div>
       <button @click="trigegerAsyncRedirect">Trigger Async Redirect</button>
