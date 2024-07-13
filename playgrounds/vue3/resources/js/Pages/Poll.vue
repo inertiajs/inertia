@@ -40,12 +40,16 @@ const { stop } = usePoll(
 )
 
 onMounted(() => {
-  const stopUserPolling = router.poll(1000, {
-    only: ['users'],
-    onFinish() {
-      userPollCount.value++
+  const stopUserPolling = router.poll(
+    1000,
+    {
+      only: ['users'],
+      onFinish() {
+        userPollCount.value++
+      },
     },
-  })
+    { keepAlive: true },
+  )
 
   setTimeout(() => {
     console.log('stopping user polling')

@@ -1,21 +1,48 @@
-class Poll {
-  protected polls: VoidFunction[] = []
+import { PollOptions } from './types'
 
-  add(interval: number, cb: VoidFunction): VoidFunction {
-    const id = setInterval(cb, interval)
+export class Poll {
+  protected id: number | null = null
+  protected inBackground = false
+  protected keepAlive = false
+  protected currentInterval: number
+  protected originalInterval: number
 
-    const stop = () => clearInterval(id)
+  constructor(interval: number, cb: VoidFunction, options: PollOptions) {
+    this.keepAlive = options.keepAlive || false
 
-    this.polls.push(stop)
+    this.currentInterval = interval
+    this.originalInterval = interval
 
-    return stop
+    this.start(interval, cb)
   }
 
-  clear() {
-    this.polls.forEach((stop) => stop())
+  public stop() {
+    if (this.id) {
+      clearInterval(this.id)
+    }
+  }
 
-    this.polls = []
+  public isInBackground(hidden: boolean) {
+    this.inBackground = this.keepAlive ? false : hidden
+
+    if (this.inBackground) {
+      // Throttle requests by 95% when the page is in the background
+      this.currentInterval = Math.round(this.originalInterval / 0.95)
+    } else {
+      this.currentInterval = this.originalInterval
+    }
+  }
+
+  protected start(interval: number, cb: VoidFunction) {
+    this.id = window.setInterval(() => {
+      if (this.currentInterval === interval) {
+        cb()
+        return
+      }
+
+      // The visibility has changed, so we need to adjust the interval
+      this.stop()
+      this.start(this.currentInterval, cb)
+    }, interval)
   }
 }
-
-export const poll = new Poll()

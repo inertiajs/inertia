@@ -188,6 +188,10 @@ export type VisitOptions = Partial<
 
 export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'preserveState'>
 
+export type PollOptions = {
+  keepAlive?: boolean
+}
+
 export type VisitHelperOptions = Omit<VisitOptions, 'method' | 'data'>
 
 export type RouterInitParams = {

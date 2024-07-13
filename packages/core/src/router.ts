@@ -5,7 +5,7 @@ import { isFormData, objectToFormData } from './formData'
 import { History } from './history'
 import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
-import { poll } from './poll'
+import { polls } from './polls'
 import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
@@ -18,6 +18,7 @@ import {
   Method,
   Page,
   PendingVisit,
+  PollOptions,
   ReloadOptions,
   RequestPayload,
   RouterInitParams,
@@ -49,7 +50,7 @@ export class Router {
     })
 
     currentPage.on('newComponent', () => {
-      poll.clear()
+      polls.clear()
       this.loadDeferredProps()
     })
 
@@ -123,8 +124,8 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public poll(interval: number, options: ReloadOptions = {}): VoidFunction {
-    return poll.add(interval, () => this.reload(options))
+  public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}): VoidFunction {
+    return polls.add(interval, () => this.reload(requestOptions), { keepAlive: options.keepAlive || false })
   }
 
   public visit(
