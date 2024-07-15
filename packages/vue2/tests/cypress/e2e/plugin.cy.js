@@ -1,6 +1,5 @@
 describe('Plugin', () => {
   describe('$page helper', () => {
-    it('has the helper injected into the Vue component', () => {
       cy.visit('/')
 
       cy.window().then((window) => {
