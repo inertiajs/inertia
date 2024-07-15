@@ -1,6 +1,8 @@
 <script lang="ts">
 import Deferred from '../../../../../packages/vue3/src/Deferred.vue'
 import Layout from '../Components/Layout.vue'
+import TestGrid from '../Components/TestGrid.vue'
+import TestGridItem from '../Components/TestGridItem.vue'
 export default { layout: Layout }
 </script>
 
@@ -28,12 +30,11 @@ defineProps<{
 <template>
   <Head title="Async Request" />
   <h1 class="text-3xl">Deferred Props</h1>
-  <div class="p-4 mt-6 bg-yellow-200 border border-yellow-500 rounded">
+  <div class="mt-6 rounded border border-yellow-500 bg-yellow-200 p-4">
     <p>Page is loaded!</p>
   </div>
-
-  <div class="flex mt-6 space-x-6">
-    <div class="w-1/2 p-4 border border-black rounded">
+  <TestGrid>
+    <TestGridItem>
       <Deferred :data="users">
         <template #loading>
           <p>Loading Users...</p>
@@ -43,30 +44,30 @@ defineProps<{
           <p>#{{ user.id }}: {{ user.name }} ({{ user.email }})</p>
         </div>
       </Deferred>
-    </div>
+    </TestGridItem>
 
-    <div class="w-1/2 p-4 border border-black rounded">
+    <TestGridItem>
       <Deferred :data="foods">
         <template #loading>
-            <p>Loading Foods...</p>
+          <p>Loading Foods...</p>
         </template>
 
         <div v-for="food in foods">
-            <p>#{{ food.id }}: {{ food.name }}</p>
+          <p>#{{ food.id }}: {{ food.name }}</p>
         </div>
       </Deferred>
-    </div>
+    </TestGridItem>
 
-    <div class="w-1/2 p-4 border border-black rounded">
+    <TestGridItem>
       <Deferred :data="organizations">
         <template #loading>
-            <p>Loading Organizations...</p>
+          <p>Loading Organizations...</p>
         </template>
 
-        <div  v-for="org in organizations">
-            <p>#{{ org.id }}: {{ org.name }} ({{ org.url }})</p>
+        <div v-for="org in organizations">
+          <p>#{{ org.id }}: {{ org.name }} ({{ org.url }})</p>
         </div>
       </Deferred>
-    </div>
-  </div>
+    </TestGridItem>
+  </TestGrid>
 </template>

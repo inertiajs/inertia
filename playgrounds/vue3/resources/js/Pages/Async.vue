@@ -1,5 +1,7 @@
 <script lang="ts">
 import Layout from '../Components/Layout.vue'
+import TestGrid from '../Components/TestGrid.vue'
+import TestGridItem from '../Components/TestGridItem.vue'
 export default { layout: Layout }
 </script>
 
@@ -7,7 +9,6 @@ export default { layout: Layout }
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
-let timer = null
 const reloadCount = ref(0)
 
 const props = defineProps<{
@@ -108,49 +109,54 @@ watch(reloadCount, () => {
   <Head title="Async Request" />
   <h1 class="text-3xl">Async Request</h1>
   <p class="mt-6">Reload Count: {{ reloadCount }}</p>
-  <div class="grid grid-cols-3 gap-4 mt-6">
-    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+  <TestGrid>
+    <TestGridItem class="space-y-4">
       <p>Trigger an async reload that takes a moment and immediately programatically visit another page</p>
-      <button @click="simulateConflict" class="px-4 py-2 text-white bg-green-600 rounded">Reload → Visit</button>
-    </div>
-    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
-      <div class="flex flex-col">
-        <label>
+      <button @click="simulateConflict" class="rounded bg-green-600 px-4 py-2 text-white">Reload → Visit</button>
+    </TestGridItem>
+
+    <TestGridItem class="space-y-4">
+      <div>
+        <label class="block">
           <input v-model="form.jonathan" type="checkbox" class="mr-2" />
           Jonathan
         </label>
-        <label>
+        <label class="block">
           <input v-model="form.taylor" type="checkbox" class="mr-2" />
           Taylor
         </label>
-        <label>
+        <label class="block">
           <input v-model="form.joe" type="checkbox" class="mr-2" />
           Joe
         </label>
       </div>
       <p>You can check these on and off and then navigate to another page and the requests should still complete.</p>
       <p>Toggling "Joe" on will cause a redirect to "Article", simulating an authorized action e.g.</p>
-    </div>
-    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+    </TestGridItem>
+
+    <TestGridItem class="space-y-4">
       <p>Trigger programatic visit and an async reload one after another</p>
 
       <p>Reload should still happen but won't re-direct back to the reloaded component, we should respect the visit</p>
 
-      <button @click="triggerVisitThenReload" class="px-4 py-2 text-white bg-green-600 rounded">Visit → Reload</button>
-    </div>
-    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+      <button @click="triggerVisitThenReload" class="rounded bg-green-600 px-4 py-2 text-white">Visit → Reload</button>
+    </TestGridItem>
+
+    <TestGridItem class="space-y-4">
       <p>Simply trigger a 4 second reload so you can navigate or do whatever you'd like during it.</p>
-      <button @click="triggerLongReload" class="px-4 py-2 text-white bg-green-600 rounded">Trigger Long Reload</button>
-    </div>
-    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+      <button @click="triggerLongReload" class="rounded bg-green-600 px-4 py-2 text-white">Trigger Long Reload</button>
+    </TestGridItem>
+
+    <TestGridItem class="space-y-4">
       <p>Trigger an automatic cancellation from the token.</p>
-      <button @click="triggerCancel" class="px-4 py-2 text-white bg-green-600 rounded">Trigger Cancel</button>
-    </div>
-    <div class="p-4 space-y-4 text-sm text-gray-500 border border-gray-300 rounded">
+      <button @click="triggerCancel" class="rounded bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
+    </TestGridItem>
+
+    <TestGridItem class="space-y-4">
       <p>Trigger an automatic cancellation from the token after finishing request.</p>
-      <button @click="triggerCancelAfterFinish" class="px-4 py-2 text-white bg-green-600 rounded">
+      <button @click="triggerCancelAfterFinish" class="rounded bg-green-600 px-4 py-2 text-white">
         Trigger Cancel After Finish
       </button>
-    </div>
-  </div>
+    </TestGridItem>
+  </TestGrid>
 </template>
