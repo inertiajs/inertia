@@ -5,33 +5,21 @@ import { onMounted, onUnmounted } from 'vue'
 export default function usePoll(
   interval: number,
   requestOptions: ReloadOptions = {},
-  options: PollOptions & {
-    startOnMount?: boolean
-  } = {
+  options: PollOptions = {
     keepAlive: false,
-    startOnMount: true,
+    autoStart: true,
   },
 ): {
   stop: VoidFunction
   start: VoidFunction
 } {
-  let stopFunc: VoidFunction
-
-  options.startOnMount ??= true
-
-  const stop = () => {
-    if (stopFunc) {
-      stopFunc()
-    }
-  }
-
-  const start = () => {
-    stop()
-    stopFunc = router.poll(interval, requestOptions, options)
-  }
+  const { stop, start } = router.poll(interval, requestOptions, {
+    ...options,
+    autoStart: false,
+  })
 
   onMounted(() => {
-    if (options.startOnMount) {
+    if (options.autoStart) {
       start()
     }
   })

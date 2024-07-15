@@ -8,12 +8,22 @@ class Polls {
     this.setupVisibilityListener()
   }
 
-  public add(interval: number, cb: VoidFunction, options: PollOptions): VoidFunction {
+  public add(
+    interval: number,
+    cb: VoidFunction,
+    options: PollOptions,
+  ): {
+    stop: VoidFunction
+    start: VoidFunction
+  } {
     const poll = new Poll(interval, cb, options)
 
     this.polls.push(poll)
 
-    return () => poll.stop()
+    return {
+      stop: () => poll.stop(),
+      start: () => poll.start(),
+    }
   }
 
   public clear() {

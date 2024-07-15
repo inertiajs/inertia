@@ -124,7 +124,7 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}): VoidFunction {
+  public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
     return polls.add(interval, () => this.reload(requestOptions), { keepAlive: options.keepAlive || false })
   }
 

@@ -1,6 +1,8 @@
 <script lang="ts">
 import usePoll from '../../../../../packages/vue3/src/usePoll'
 import Layout from '../Components/Layout.vue'
+import TestGrid from '../Components/TestGrid.vue'
+import TestGridItem from '../Components/TestGridItem.vue'
 export default { layout: Layout }
 </script>
 
@@ -17,7 +19,7 @@ const userPollCount = ref(0)
 const hookPollCount = ref(0)
 const companyPollCount = ref(0)
 
-const trigegerAsyncRedirect = () => {
+const triggerAsyncRedirect = () => {
   router.get(
     '/elsewhere',
     {},
@@ -38,7 +40,7 @@ const { start, stop } = usePoll(
   },
   {
     keepAlive: true,
-    startOnMount: false,
+    autoStart: false,
   },
 )
 
@@ -47,7 +49,7 @@ onMounted(() => {
     start()
   }, 2000)
 
-  const stopUserPolling = router.poll(
+  const { stop: stopUserPolling } = router.poll(
     1000,
     {
       only: ['users'],
@@ -75,24 +77,24 @@ onMounted(() => {
 <template>
   <Head title="Async Request" />
   <h1 class="text-3xl">Poll</h1>
-  <div class="flex mt-6 space-x-6">
-    <div>
-      <div class="mb-2 font-bold">User Poll Request Count: {{ userPollCount }}</div>
+  <TestGrid>
+    <TestGridItem>
+      <template #title> User Poll Request Count: {{ userPollCount }} </template>
       <div v-for="user in users">
         <div>{{ user }}</div>
       </div>
-    </div>
-    <div>
-      <div class="mb-2 font-bold">Companies Poll Request Count: {{ companyPollCount }}</div>
+    </TestGridItem>
+    <TestGridItem>
+      <template #title> Companies Poll Request Count: {{ companyPollCount }} </template>
       <div v-for="company in companies">
         <div>{{ company }}</div>
       </div>
-    </div>
-    <div>
-      <div class="mb-2 font-bold">Hook Count: {{ hookPollCount }}</div>
-    </div>
-    <div>
-      <button @click="trigegerAsyncRedirect">Trigger Async Redirect</button>
-    </div>
-  </div>
+    </TestGridItem>
+    <TestGridItem>
+      <template #title> Hook Poll Request Count: {{ hookPollCount }} </template>
+    </TestGridItem>
+    <TestGridItem>
+      <button @click="triggerAsyncRedirect">Trigger Async Redirect</button>
+    </TestGridItem>
+  </TestGrid>
 </template>

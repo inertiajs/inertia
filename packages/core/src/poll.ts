@@ -2,18 +2,21 @@ import { PollOptions } from './types'
 
 export class Poll {
   protected id: number | null = null
-  protected inBackground = false
+  protected throttle = false
   protected keepAlive = false
-  protected currentInterval: number
-  protected originalInterval: number
+  protected cb: VoidFunction
+  protected interval: number
+  protected cbCount = 0
 
   constructor(interval: number, cb: VoidFunction, options: PollOptions) {
     this.keepAlive = options.keepAlive || false
 
-    this.currentInterval = interval
-    this.originalInterval = interval
+    this.cb = cb
+    this.interval = interval
 
-    this.start(interval, cb)
+    if (options.autoStart || true) {
+      this.start()
+    }
   }
 
   public stop() {
@@ -22,28 +25,25 @@ export class Poll {
     }
   }
 
-  public isInBackground(hidden: boolean) {
-    this.inBackground = this.keepAlive ? false : hidden
+  public start() {
+    this.stop()
 
-    if (this.inBackground) {
-      // Throttle requests by 95% when the page is in the background
-      this.currentInterval = Math.round(this.originalInterval / 0.05)
-    } else {
-      // Otherwise, restore the original interval
-      this.currentInterval = this.originalInterval
-    }
-  }
-
-  protected start(interval: number, cb: VoidFunction) {
     this.id = window.setInterval(() => {
-      if (this.currentInterval === interval) {
-        cb()
-        return
+      if (!this.throttle || this.cbCount % 10 === 0) {
+        this.cb()
       }
 
-      // The visibility has changed, so we need to adjust the interval
-      this.stop()
-      this.start(this.currentInterval, cb)
-    }, interval)
+      if (this.throttle) {
+        this.cbCount++
+      }
+    }, this.interval)
+  }
+
+  public isInBackground(hidden: boolean) {
+    this.throttle = this.keepAlive ? false : hidden
+
+    if (this.throttle) {
+      this.cbCount = 0
+    }
   }
 }
