@@ -147,10 +147,10 @@ export class Response {
   protected setRememberedState(pageResponse: Page): void {
     if (
       this.requestParams.params.preserveState &&
-      History.getState('rememberedState') &&
+      History.getState(History.rememberedState) &&
       pageResponse.component === currentPage.get().component
     ) {
-      pageResponse.rememberedState = History.getState('rememberedState')
+      pageResponse.rememberedState = History.getState(History.rememberedState)
     }
   }
 

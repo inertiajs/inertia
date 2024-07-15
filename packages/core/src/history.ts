@@ -4,6 +4,9 @@ import { Page } from './types'
 const isServer = typeof window === 'undefined'
 
 export class History {
+  public static rememberedState = 'rememberedState'
+  public static scrollRegions = 'scrollRegions'
+
   public static remember(data: unknown, key: string): void {
     History.replaceState({
       ...currentPage.get(),
@@ -16,16 +19,16 @@ export class History {
 
   public static restore(key: string): unknown {
     if (!isServer) {
-      return this.getState<{ [key: string]: any }>('rememberedState', {})?.[key]
+      return History.getState<{ [key: string]: any }>(History.rememberedState, {})?.[key]
     }
   }
 
   public static pushState(page: Page): void {
-    window.history.pushState(this.pageData(page), '', page.url)
+    window.history.pushState(History.pageData(page), '', page.url)
   }
 
   public static replaceState(page: Page): void {
-    window.history.replaceState(this.pageData(page), '', page.url)
+    window.history.replaceState(History.pageData(page), '', page.url)
   }
 
   protected static pageData(page: Page): Omit<Page, 'meta'> {
@@ -39,7 +42,7 @@ export class History {
   }
 
   public static getState<T>(key: string, defaultValue?: T): T {
-    return window.history.state[key] ?? defaultValue
+    return window.history.state?.[key] ?? defaultValue
   }
 
   public static deleteState(key: string) {
@@ -49,7 +52,7 @@ export class History {
   }
 
   public static hasAnyState(): boolean {
-    return !!this.getAllState()
+    return !!History.getAllState()
   }
 
   public static getAllState(): any {

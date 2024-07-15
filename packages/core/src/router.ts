@@ -265,7 +265,7 @@ export class Router {
 
   protected clearRememberedStateOnReload(): void {
     if (navigationType.isReload()) {
-      History.deleteState('rememberedState')
+      History.deleteState(History.rememberedState)
     }
   }
 
@@ -307,8 +307,8 @@ export class Router {
     SessionStorage.remove()
 
     currentPage.setUrlHash(window.location.hash)
-    currentPage.remember(History.getState<Page['rememberedState']>('rememberedState', {}))
-    currentPage.scrollRegions(History.getState<Page['scrollRegions']>('scrollRegions', []))
+    currentPage.remember(History.getState<Page['rememberedState']>(History.rememberedState, {}))
+    currentPage.scrollRegions(History.getState<Page['scrollRegions']>(History.scrollRegions, []))
 
     currentPage
       .set(currentPage.get(), {
