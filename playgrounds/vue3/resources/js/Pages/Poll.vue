@@ -30,7 +30,7 @@ const triggerAsyncRedirect = () => {
   )
 }
 
-const { start, stop } = usePoll(
+const { start: startHookPolling, stop } = usePoll(
   2000,
   {
     only: ['asdf'],
@@ -46,7 +46,7 @@ const { start, stop } = usePoll(
 
 onMounted(() => {
   setTimeout(() => {
-    start()
+    startHookPolling()
   }, 2000)
 
   const { stop: stopUserPolling } = router.poll(
