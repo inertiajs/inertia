@@ -82,6 +82,10 @@ class CurrentPage {
     return this.page
   }
 
+  public merge(data: Partial<Page>): void {
+    this.page = { ...this.page, ...data }
+  }
+
   public setUrlHash(hash: string): void {
     this.page.url += hash
   }

@@ -11,7 +11,7 @@ export class History {
     History.replaceState({
       ...currentPage.get(),
       rememberedState: {
-        ...currentPage.get()?.rememberedState,
+        ...(currentPage.get()?.rememberedState ?? {}),
         [key]: data,
       },
     })
@@ -28,6 +28,7 @@ export class History {
   }
 
   public static replaceState(page: Page): void {
+    currentPage.merge(page)
     window.history.replaceState(History.pageData(page), '', page.url)
   }
 
