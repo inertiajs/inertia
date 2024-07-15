@@ -216,7 +216,7 @@ export class Router {
   }
 
   protected loadDeferredProps(): void {
-    const deferred = currentPage.get().meta.deferredProps
+    const deferred = currentPage.get().meta?.deferredProps
 
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
