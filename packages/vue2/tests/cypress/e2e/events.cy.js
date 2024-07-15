@@ -13,7 +13,8 @@ const assertPageObject = (page) => {
   expect(page).to.have.property('component')
   expect(page).to.have.property('props')
   expect(page).to.have.property('url')
-  expect(page).to.have.property('version')
+  expect(page).to.have.property('meta')
+  expect(page.meta).to.have.property('assetVersion')
 }
 const assertProgressObject = (progress) => {
   expect(progress).to.have.property('percentage')
