@@ -28,7 +28,7 @@ export default function Layout({ children }) {
         <Link href="/poll" className="hover:underline">
           Poll
         </Link>
-        <Link href="/logout" method="post" as="button" type="button" className="hover:underline">
+        <Link href="/logout" method="post" className="hover:underline">
           Logout
         </Link>
       </nav>
