@@ -5,7 +5,7 @@ import modal from './modal'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ErrorBag, Errors, LocationVisit, Page } from './types'
+import { ErrorBag, Errors, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 export class Response {
@@ -47,7 +47,7 @@ export class Response {
 
       setHashIfSameUrl(this.requestParams.params.url, locationUrl)
 
-      return this.locationVisit(locationUrl, this.requestParams.params.preserveScroll === true)
+      return this.locationVisit(locationUrl)
     }
 
     if (fireInvalidEvent(this.response)) {
@@ -78,9 +78,9 @@ export class Response {
   /**
    * @link https://inertiajs.com/redirects#external-redirects
    */
-  protected locationVisit(url: URL, preserveScroll: LocationVisit['preserveScroll']): boolean | void {
+  protected locationVisit(url: URL): boolean | void {
     try {
-      SessionStorage.set({ preserveScroll })
+      SessionStorage.set({ preserveScroll: this.requestParams.params.preserveScroll === true })
 
       if (isSameUrlWithoutHash(window.location, url)) {
         window.location.reload()

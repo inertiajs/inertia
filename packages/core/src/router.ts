@@ -337,12 +337,9 @@ export class Router {
       return
     }
 
-    currentPage
-      .resolve(page.component)
-      .then((component) => currentPage.swap({ component, page, preserveState: false }))
-      .then(() => {
-        Scroll.restore(page)
-        fireNavigateEvent(page)
-      })
+    currentPage.setQuietly(page, { preserveState: false }).then(() => {
+      Scroll.restore(currentPage.get())
+      fireNavigateEvent(currentPage.get())
+    })
   }
 }

@@ -13,7 +13,7 @@ class CurrentPage {
     event: PageEvent
     callback: VoidFunction
   }[] = []
-  protected firstPageLoad = true
+  protected isFirstPageLoad = true
 
   public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
     this.page = initialPage
@@ -48,6 +48,8 @@ class CurrentPage {
       page.scrollRegions ??= []
       page.rememberedState ??= {}
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), window.location)
+      // This is where the actual URL change happens
+      // TODO: When we are remembering the state, "back" doesn't update the URL... why
       replace ? History.replaceState(page) : History.pushState(page)
 
       const isNewComponent = !this.isTheSame(page)
@@ -55,16 +57,14 @@ class CurrentPage {
       this.page = page
 
       if (isNewComponent) {
-        this.listeners
-          .filter((listener) => listener.event === 'newComponent')
-          .forEach((listener) => listener.callback())
+        this.fireEventsFor('newComponent')
       }
 
-      if (this.firstPageLoad) {
-        this.listeners.filter((listener) => listener.event === 'firstLoad').forEach((listener) => listener.callback())
+      if (this.isFirstPageLoad) {
+        this.fireEventsFor('firstLoad')
       }
 
-      this.firstPageLoad = false
+      this.isFirstPageLoad = false
 
       return this.swap({ component, page, preserveState }).then(() => {
         if (!preserveScroll) {
@@ -75,6 +75,20 @@ class CurrentPage {
           fireNavigateEvent(page)
         }
       })
+    })
+  }
+
+  public setQuietly(
+    page: Page,
+    {
+      preserveState = false,
+    }: {
+      preserveState?: PreserveStateOption
+    } = {},
+  ) {
+    return this.resolve(page.component).then((component) => {
+      this.page = page
+      return this.swap({ component, page, preserveState })
     })
   }
 
@@ -124,6 +138,10 @@ class CurrentPage {
     return () => {
       this.listeners = this.listeners.filter((listener) => listener.event !== event && listener.callback !== callback)
     }
+  }
+
+  public fireEventsFor(event: PageEvent): void {
+    this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback())
   }
 }
 
