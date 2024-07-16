@@ -7,7 +7,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useCallback } from 'react'
+import { createElement, forwardRef, useCallback, useState } from 'react'
 
 const noop = () => undefined
 
@@ -68,6 +68,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     },
     ref,
   ) => {
+    const [inFlightCount, setInFlightCount] = useState(0)
+
     const visit = useCallback(
       (event: React.MouseEvent) => {
         onClick(event)
@@ -87,9 +89,15 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
             async,
             onCancelToken,
             onBefore,
-            onStart,
+            onStart() {
+              setInFlightCount((count) => count + 1)
+              onStart()
+            },
             onProgress,
-            onFinish,
+            onFinish() {
+              setInFlightCount((count) => count - 1)
+              onFinish()
+            },
             onCancel,
             onSuccess,
             onError,
@@ -136,6 +144,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         ...(as === 'a' ? { href } : { type: 'button' }),
         ref,
         onClick: visit,
+        'data-loading': inFlightCount > 0 ? '' : undefined,
       },
       children,
     )
