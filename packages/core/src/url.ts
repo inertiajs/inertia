@@ -1,9 +1,33 @@
 import deepmerge from 'deepmerge'
 import * as qs from 'qs'
-import { FormDataConvertible, Method } from './types'
+import { hasFiles } from './files'
+import { isFormData, objectToFormData } from './formData'
+import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), window.location.toString())
+}
+
+export const transformUrlAndData = (
+  href: string | URL,
+  data: RequestPayload,
+  method: Method,
+  forceFormData: VisitOptions['forceFormData'],
+  queryStringArrayFormat: VisitOptions['queryStringArrayFormat'],
+): [URL, RequestPayload] => {
+  let url = typeof href === 'string' ? hrefToUrl(href) : href
+
+  if ((hasFiles(data) || forceFormData) && !isFormData(data)) {
+    data = objectToFormData(data)
+  }
+
+  if (isFormData(data)) {
+    return [url, data]
+  }
+
+  const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat)
+
+  return [hrefToUrl(_href), _data]
 }
 
 export function mergeDataIntoQueryString(

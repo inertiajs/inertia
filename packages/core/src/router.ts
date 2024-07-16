@@ -1,7 +1,5 @@
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
-import { hasFiles } from './files'
-import { isFormData, objectToFormData } from './formData'
 import { History } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
@@ -13,7 +11,6 @@ import {
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
-  Method,
   PendingVisit,
   PollOptions,
   ReloadOptions,
@@ -22,7 +19,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { hrefToUrl, mergeDataIntoQueryString } from './url'
+import { transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -141,7 +138,7 @@ export class Router {
       async = false,
     }: VisitOptions = {},
   ): void {
-    const [url, _data] = this.transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
+    const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
 
     const visit: PendingVisit = {
       url,
@@ -211,27 +208,5 @@ export class Router {
         this.reload({ only: group })
       })
     }
-  }
-
-  protected transformUrlAndData(
-    href: string | URL,
-    data: RequestPayload,
-    method: Method,
-    forceFormData: VisitOptions['forceFormData'],
-    queryStringArrayFormat: VisitOptions['queryStringArrayFormat'],
-  ): [URL, RequestPayload] {
-    let url = typeof href === 'string' ? hrefToUrl(href) : href
-
-    if ((hasFiles(data) || forceFormData) && !isFormData(data)) {
-      data = objectToFormData(data)
-    }
-
-    if (isFormData(data)) {
-      return [url, data]
-    }
-
-    const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat)
-
-    return [hrefToUrl(_href), _data]
   }
 }
