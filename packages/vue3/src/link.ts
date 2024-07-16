@@ -106,8 +106,7 @@ const Link: InertiaLink = defineComponent({
       default: () => {},
     },
     onCancelToken: {
-      // TODO: Fix this type
-      type: Function as PropType<(cancelToken: any) => void>,
+      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
       default: () => {},
     },
   },
