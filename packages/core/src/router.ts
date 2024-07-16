@@ -1,5 +1,5 @@
-import debounce from './debounce'
-import { fireBeforeEvent, fireNavigateEvent } from './events'
+import { eventHandler } from './eventHandler'
+import { fireBeforeEvent } from './events'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
 import { History } from './history'
@@ -52,7 +52,7 @@ export class Router {
     })
 
     InitialVisit.handle()
-    this.setupEventListeners()
+    eventHandler.init()
   }
 
   public get(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
@@ -100,15 +100,7 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
-    const listener = ((event: GlobalEvent<TEventName>) => {
-      const response = callback(event)
-
-      if (event.cancelable && !event.defaultPrevented && response === false) {
-        event.preventDefault()
-      }
-    }) as EventListener
-
-    return this.registerListener(`inertia:${type}`, listener)
+    return eventHandler.onInertiaEvent(type, callback)
   }
 
   public cancel(): void {
@@ -241,35 +233,5 @@ export class Router {
     const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat)
 
     return [hrefToUrl(_href), _data]
-  }
-
-  protected registerListener(type: string, listener: EventListener): VoidFunction {
-    document.addEventListener(type, listener)
-
-    return () => document.removeEventListener(type, listener)
-  }
-
-  protected setupEventListeners(): void {
-    window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
-    document.addEventListener('scroll', debounce(Scroll.onScroll, 100), true)
-  }
-
-  protected handlePopstateEvent(event: PopStateEvent): void {
-    const page = event.state
-
-    if (page === null) {
-      const url = hrefToUrl(currentPage.get().url)
-      url.hash = window.location.hash
-
-      History.replaceState({ ...currentPage.get(), url: url.href })
-      Scroll.reset(currentPage.get())
-
-      return
-    }
-
-    currentPage.setQuietly(page, { preserveState: false }).then(() => {
-      Scroll.restore(currentPage.get())
-      fireNavigateEvent(currentPage.get())
-    })
   }
 }
