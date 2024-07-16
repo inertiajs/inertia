@@ -137,11 +137,16 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       as = 'button'
     }
 
+    const elProps = {
+      a: { href },
+      button: { type: 'button' },
+    }
+
     return createElement(
       as,
       {
         ...props,
-        ...(as === 'a' ? { href } : { type: 'button' }),
+        ...(elProps[as] || {}),
         ref,
         onClick: visit,
         'data-loading': inFlightCount > 0 ? '' : undefined,
