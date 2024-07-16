@@ -1,5 +1,5 @@
 import { mergeDataIntoQueryString, Method, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h, PropType } from 'vue'
+import { defineComponent, DefineComponent, h, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string
@@ -79,6 +79,8 @@ const Link: InertiaLink = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
+    const inFlightCount = ref(0)
+
     return () => {
       const method = props.method.toLowerCase() as Method
       const as = method !== 'get' ? 'button' : props.as.toLowerCase()
@@ -94,6 +96,7 @@ const Link: InertiaLink = defineComponent({
         {
           ...attrs,
           ...(elProps[as] || {}),
+          'data-loading': inFlightCount.value > 0 ? '' : undefined,
           onClick: (event) => {
             if (shouldIntercept(event)) {
               event.preventDefault()
@@ -112,12 +115,16 @@ const Link: InertiaLink = defineComponent({
                 onCancelToken: attrs.onCancelToken || (() => ({})),
                 // @ts-expect-error
                 onBefore: attrs.onBefore || (() => ({})),
-                // @ts-expect-error
-                onStart: attrs.onStart || (() => ({})),
+                onStart: () => {
+                  inFlightCount.value++
+                  attrs.onStart?.()
+                },
                 // @ts-expect-error
                 onProgress: attrs.onProgress || (() => ({})),
-                // @ts-expect-error
-                onFinish: attrs.onFinish || (() => ({})),
+                onFinish: () => {
+                  inFlightCount.value--
+                  attrs.onFinish?.()
+                },
                 // @ts-expect-error
                 onCancel: attrs.onCancel || (() => ({})),
                 // @ts-expect-error
