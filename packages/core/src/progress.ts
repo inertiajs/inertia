@@ -10,7 +10,7 @@ function addEventListeners(delay: number): void {
 }
 
 function start(event: GlobalEvent<'start'>, delay: number): void {
-  if (!event.detail.visit.async) {
+  if (event.detail.visit.showProgress) {
     timeout = setTimeout(() => NProgress.start(), delay)
   }
 }

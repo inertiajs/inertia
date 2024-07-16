@@ -80,6 +80,7 @@ export type Visit = {
   forceFormData: boolean
   queryStringArrayFormat: 'indices' | 'brackets'
   async: boolean
+  showProgress: boolean
 }
 
 export type GlobalEventsMap = {

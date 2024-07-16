@@ -136,6 +136,7 @@ export class Router {
       onError = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
+      showProgress,
     }: VisitOptions = {},
   ): void {
     const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
@@ -157,6 +158,7 @@ export class Router {
       completed: false,
       interrupted: false,
       async,
+      showProgress: showProgress ?? !async,
     }
 
     // If either of these return false, we don't want to continue
