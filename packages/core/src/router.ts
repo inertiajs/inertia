@@ -3,20 +3,17 @@ import { fireBeforeEvent, fireNavigateEvent } from './events'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
 import { History } from './history'
-import { navigationType } from './navigationType'
+import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
-import { SessionStorage } from './sessionStorage'
 import {
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
-  LocationVisit,
   Method,
-  Page,
   PendingVisit,
   PollOptions,
   ReloadOptions,
@@ -54,8 +51,7 @@ export class Router {
       this.loadDeferredProps()
     })
 
-    this.clearRememberedStateOnReload()
-    this.initializeVisit()
+    InitialVisit.handle()
     this.setupEventListeners()
   }
 
@@ -247,81 +243,15 @@ export class Router {
     return [hrefToUrl(_href), _data]
   }
 
-  protected initializeVisit(): void {
-    if (this.isBackForwardVisit()) {
-      this.handleBackForwardVisit()
-    } else if (this.isLocationVisit()) {
-      this.handleLocationVisit()
-    } else {
-      this.handleInitialPageVisit()
-    }
-  }
-
   protected registerListener(type: string, listener: EventListener): VoidFunction {
     document.addEventListener(type, listener)
 
     return () => document.removeEventListener(type, listener)
   }
 
-  protected clearRememberedStateOnReload(): void {
-    if (navigationType.isReload()) {
-      History.deleteState(History.rememberedState)
-    }
-  }
-
-  protected handleInitialPageVisit(): void {
-    currentPage.setUrlHash(window.location.hash)
-    currentPage.set(currentPage.get(), { preserveState: true }).then(() => {
-      fireNavigateEvent(currentPage.get())
-    })
-  }
-
   protected setupEventListeners(): void {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
     document.addEventListener('scroll', debounce(Scroll.onScroll, 100), true)
-  }
-
-  protected isBackForwardVisit(): boolean {
-    return History.hasAnyState() && navigationType.isBackForward()
-  }
-
-  protected handleBackForwardVisit(): void {
-    History.setState('version', currentPage.get().meta.assetVersion)
-
-    currentPage.set(History.getAllState(), { preserveScroll: true, preserveState: true }).then(() => {
-      Scroll.restore(currentPage.get())
-      fireNavigateEvent(currentPage.get())
-    })
-  }
-
-  protected isLocationVisit(): boolean {
-    return SessionStorage.exists()
-  }
-
-  /**
-   * @link https://inertiajs.com/redirects#external-redirects
-   */
-  protected handleLocationVisit(): void {
-    const locationVisit: LocationVisit = JSON.parse(SessionStorage.get() || '{}')
-
-    SessionStorage.remove()
-
-    currentPage.setUrlHash(window.location.hash)
-    currentPage.remember(History.getState<Page['rememberedState']>(History.rememberedState, {}))
-    currentPage.scrollRegions(History.getState<Page['scrollRegions']>(History.scrollRegions, []))
-
-    currentPage
-      .set(currentPage.get(), {
-        preserveScroll: locationVisit.preserveScroll,
-        preserveState: true,
-      })
-      .then(() => {
-        if (locationVisit.preserveScroll) {
-          Scroll.restore(currentPage.get())
-        }
-
-        fireNavigateEvent(currentPage.get())
-      })
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
