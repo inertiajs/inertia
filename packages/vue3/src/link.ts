@@ -77,6 +77,39 @@ const Link: InertiaLink = defineComponent({
       type: Boolean,
       default: false,
     },
+    onStart: {
+      type: Function as PropType<() => void>,
+      default: () => {},
+    },
+    onProgress: {
+      type: Function as PropType<(progress: Progress) => void>,
+      default: () => {},
+    },
+    onFinish: {
+      type: Function as PropType<() => void>,
+      default: () => {},
+    },
+    onBefore: {
+      type: Function as PropType<() => void>,
+      default: () => {},
+    },
+    onCancel: {
+      type: Function as PropType<() => void>,
+      default: () => {},
+    },
+    onSuccess: {
+      type: Function as PropType<() => void>,
+      default: () => {},
+    },
+    onError: {
+      type: Function as PropType<() => void>,
+      default: () => {},
+    },
+    onCancelToken: {
+      // TODO: Fix this type
+      type: Function as PropType<(cancelToken: any) => void>,
+      default: () => {},
+    },
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
@@ -111,26 +144,20 @@ const Link: InertiaLink = defineComponent({
                 except: props.except,
                 headers: props.headers,
                 async: props.async,
-                // @ts-expect-error
-                onCancelToken: attrs.onCancelToken || (() => ({})),
-                // @ts-expect-error
-                onBefore: attrs.onBefore || (() => ({})),
+                onCancelToken: props.onCancelToken,
+                onBefore: props.onBefore,
                 onStart: () => {
                   inFlightCount.value++
-                  attrs.onStart?.()
+                  props.onStart()
                 },
-                // @ts-expect-error
-                onProgress: attrs.onProgress || (() => ({})),
+                onProgress: props.onProgress,
                 onFinish: () => {
                   inFlightCount.value--
-                  attrs.onFinish?.()
+                  props.onFinish()
                 },
-                // @ts-expect-error
-                onCancel: attrs.onCancel || (() => ({})),
-                // @ts-expect-error
-                onSuccess: attrs.onSuccess || (() => ({})),
-                // @ts-expect-error
-                onError: attrs.onError || (() => ({})),
+                onCancel: props.onCancel,
+                onSuccess: props.onSuccess,
+                onError: props.onError,
               })
             }
           },
