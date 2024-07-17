@@ -7,7 +7,8 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { FunctionalComponentOptions, PropType } from 'vue'
+import { PropType } from 'vue'
+import { ComponentOptions } from 'vue/types/umd'
 
 export interface InertiaLinkProps {
   as?: string
@@ -32,10 +33,9 @@ export interface InertiaLinkProps {
   async: boolean
 }
 
-type InertiaLink = FunctionalComponentOptions<InertiaLinkProps>
+type InertiaLink = ComponentOptions<any, any, any, any, any, InertiaLinkProps>
 
 const Link: InertiaLink = {
-  functional: true,
   props: {
     as: {
       type: String,
@@ -85,8 +85,13 @@ const Link: InertiaLink = {
       default: false,
     },
   },
-  render(h, { props, data, children }) {
-    data.on = {
+  data() {
+    return {
+      inFlightCount: 0,
+    }
+  },
+  render(h) {
+    this.data.on = {
       click: () => ({}),
       cancelToken: () => ({}),
       start: () => ({}),
@@ -95,17 +100,12 @@ const Link: InertiaLink = {
       cancel: () => ({}),
       success: () => ({}),
       error: () => ({}),
-      ...(data.on || {}),
+      ...(this.data.on || {}),
     }
 
-    const method = props.method.toLowerCase() as Method
-    const as = method !== 'get' ? 'button' : props.as.toLowerCase()
-    const [href, propsData] = mergeDataIntoQueryString(
-      method,
-      props.href || '',
-      props.data,
-      props.queryStringArrayFormat,
-    )
+    const method = this.method.toLowerCase() as Method
+    const as = method !== 'get' ? 'button' : this.as.toLowerCase()
+    const [href, propsData] = mergeDataIntoQueryString(method, this.href || '', this.data, this.queryStringArrayFormat)
 
     const elProps = {
       a: { href },
@@ -115,16 +115,16 @@ const Link: InertiaLink = {
     return h(
       as,
       {
-        ...data,
+        ...this.data,
         attrs: {
-          ...data.attrs,
+          ...this.data.attrs,
           ...(elProps[as] || {}),
+          'data-loading': this.inFlightCount > 0 ? '' : undefined,
         },
         on: {
-          ...data.on,
+          ...this.data.on,
           click: (event) => {
-            // @ts-expect-error
-            data.on.click(event)
+            this.data.on.click(event)
 
             if (shouldIntercept(event)) {
               event.preventDefault()
@@ -132,35 +132,33 @@ const Link: InertiaLink = {
               router.visit(href, {
                 data: propsData,
                 method: method,
-                replace: props.replace,
-                preserveScroll: props.preserveScroll,
-                preserveState: props.preserveState ?? method !== 'get',
-                only: props.only,
-                except: props.except,
-                headers: props.headers,
-                async: props.async,
-                // @ts-expect-error
-                onCancelToken: data.on.cancelToken,
-                // @ts-expect-error
-                onBefore: data.on.before,
-                // @ts-expect-error
-                onStart: data.on.start,
-                // @ts-expect-error
-                onProgress: data.on.progress,
-                // @ts-expect-error
-                onFinish: data.on.finish,
-                // @ts-expect-error
-                onCancel: data.on.cancel,
-                // @ts-expect-error
-                onSuccess: data.on.success,
-                // @ts-expect-error
-                onError: data.on.error,
+                replace: this.replace,
+                preserveScroll: this.preserveScroll,
+                preserveState: this.preserveState ?? method !== 'get',
+                only: this.only,
+                except: this.except,
+                headers: this.headers,
+                async: this.async,
+                onCancelToken: this.data.on.cancelToken,
+                onBefore: this.data.on.before,
+                onStart: () => {
+                  this.inFlightCount++
+                  this.data.on.start()
+                },
+                onProgress: this.data.on.progress,
+                onFinish: () => {
+                  this.inFlightCount--
+                  this.data.on.finish()
+                },
+                onCancel: this.data.on.cancel,
+                onSuccess: this.data.on.success,
+                onError: this.data.on.error,
               })
             }
           },
         },
       },
-      children,
+      this.$slots.default,
     )
   },
 }
