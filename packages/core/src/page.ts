@@ -14,6 +14,7 @@ class CurrentPage {
     callback: VoidFunction
   }[] = []
   protected isFirstPageLoad = true
+  protected cleared = false
 
   public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
     this.page = initialPage
@@ -55,6 +56,7 @@ class CurrentPage {
       const isNewComponent = !this.isTheSame(page)
 
       this.page = page
+      this.cleared = false
 
       if (isNewComponent) {
         this.fireEventsFor('newComponent')
@@ -88,8 +90,17 @@ class CurrentPage {
   ) {
     return this.resolve(page.component).then((component) => {
       this.page = page
+      this.cleared = false
       return this.swap({ component, page, preserveState })
     })
+  }
+
+  public clear(): void {
+    this.cleared = true
+  }
+
+  public isCleared(): boolean {
+    return this.cleared
   }
 
   public get(): Page {

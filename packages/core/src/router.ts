@@ -49,7 +49,11 @@ export class Router {
     })
 
     InitialVisit.handle()
+
     eventHandler.init()
+    eventHandler.on('missingHistoryItem', () => {
+      this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+    })
   }
 
   public get(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
@@ -97,7 +101,7 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
-    return eventHandler.onInertiaEvent(type, callback)
+    return eventHandler.onGlobalEvent(type, callback)
   }
 
   public cancel(): void {
@@ -170,8 +174,10 @@ export class Router {
 
     requestStream.interruptInFlight()
 
-    // Save scroll regions for the current page
-    Scroll.save(currentPage.get())
+    if (!currentPage.isCleared()) {
+      // Save scroll regions for the current page
+      Scroll.save(currentPage.get())
+    }
 
     const request = Request.create(
       {
@@ -200,6 +206,10 @@ export class Router {
     )
 
     return this.visit(url, { preserveState: true, ...options, replace: true })
+  }
+
+  public clearHistory(): void {
+    History.clear()
   }
 
   protected loadDeferredProps(): void {

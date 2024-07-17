@@ -29,7 +29,7 @@ export class Scroll {
       }
     })
 
-    Scroll.save(page)
+    this.save(page)
 
     if (window.location.hash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
@@ -63,7 +63,7 @@ export class Scroll {
     const target = event.target as Element
 
     if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
-      Scroll.save(currentPage.get())
+      this.save(currentPage.get())
     }
   }
 }

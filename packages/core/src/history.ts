@@ -58,7 +58,7 @@ export class History {
 
   public static deleteState(key: string) {
     this.whenHasId((id) => {
-      SessionStorage.delete(id, key)
+      SessionStorage.removeNested(id, key)
     })
   }
 
@@ -67,6 +67,10 @@ export class History {
       (id) => SessionStorage.exists(id),
       () => false,
     )
+  }
+
+  public static clear() {
+    SessionStorage.clear()
   }
 
   protected static id(): string | undefined {

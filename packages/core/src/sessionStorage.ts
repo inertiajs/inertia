@@ -9,10 +9,6 @@ export class SessionStorage {
     return JSON.parse(window.sessionStorage.getItem(key) || 'null')
   }
 
-  public static remove(key: string): void {
-    window.sessionStorage.removeItem(key)
-  }
-
   public static merge(key: string, value: any): void {
     const existing = this.get(key)
 
@@ -23,7 +19,11 @@ export class SessionStorage {
     }
   }
 
-  public static delete(key: string, nestedKey: string): void {
+  public static remove(key: string): void {
+    window.sessionStorage.removeItem(key)
+  }
+
+  public static removeNested(key: string, nestedKey: string): void {
     const existing = this.get(key)
 
     if (existing !== null) {
@@ -39,5 +39,9 @@ export class SessionStorage {
     } catch (error) {
       return false
     }
+  }
+
+  public static clear(): void {
+    window.sessionStorage.clear()
   }
 }
