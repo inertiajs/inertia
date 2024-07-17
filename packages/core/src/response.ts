@@ -80,7 +80,9 @@ export class Response {
    */
   protected locationVisit(url: URL): boolean | void {
     try {
-      SessionStorage.set({ preserveScroll: this.requestParams.params.preserveScroll === true })
+      SessionStorage.set(SessionStorage.locationVisitKey, {
+        preserveScroll: this.requestParams.params.preserveScroll === true,
+      })
 
       if (isSameUrlWithoutHash(window.location, url)) {
         window.location.reload()

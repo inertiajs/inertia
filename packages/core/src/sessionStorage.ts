@@ -1,21 +1,41 @@
 export class SessionStorage {
-  protected static key = 'inertiaLocationVisit'
+  public static locationVisitKey = 'inertiaLocationVisit'
 
-  public static set(value: any): void {
-    window.sessionStorage.setItem(this.key, JSON.stringify(value))
+  public static set(key: string, value: any): void {
+    window.sessionStorage.setItem(key, JSON.stringify(value))
   }
 
-  public static get(): string | null {
-    return window.sessionStorage.getItem(this.key)
+  public static get(key: string): any {
+    return JSON.parse(window.sessionStorage.getItem(key) || 'null')
   }
 
-  public static remove(): void {
-    window.sessionStorage.removeItem(this.key)
+  public static remove(key: string): void {
+    window.sessionStorage.removeItem(key)
   }
 
-  public static exists(): boolean {
+  public static merge(key: string, value: any): void {
+    const existing = this.get(key)
+
+    if (existing === null) {
+      this.set(key, value)
+    } else {
+      this.set(key, JSON.stringify({ ...existing, ...value }))
+    }
+  }
+
+  public static delete(key: string, nestedKey: string): void {
+    const existing = this.get(key)
+
+    if (existing !== null) {
+      delete existing[nestedKey]
+
+      this.set(key, existing)
+    }
+  }
+
+  public static exists(key: string): boolean {
     try {
-      return this.get() !== null
+      return this.get(key) !== null
     } catch (error) {
       return false
     }

@@ -1,4 +1,6 @@
+import { nanoid } from 'nanoid'
 import { page as currentPage } from './page'
+import { SessionStorage } from './sessionStorage'
 import { Page } from './types'
 
 const isServer = typeof window === 'undefined'
@@ -8,7 +10,7 @@ export class History {
   public static scrollRegions = 'scrollRegions'
 
   public static remember(data: unknown, key: string): void {
-    History.replaceState({
+    this.replaceState({
       ...currentPage.get(),
       rememberedState: {
         ...(currentPage.get()?.rememberedState ?? {}),
@@ -19,44 +21,71 @@ export class History {
 
   public static restore(key: string): unknown {
     if (!isServer) {
-      return History.getState<{ [key: string]: any }>(History.rememberedState, {})?.[key]
+      return this.getState<{ [key: string]: any }>(this.rememberedState, {})?.[key]
     }
   }
 
   public static pushState(page: Page): void {
-    window.history.pushState(History.pageData(page), '', page.url)
+    const id = nanoid()
+
+    window.history.pushState({ id }, '', page.url)
+
+    SessionStorage.set(id, page)
   }
 
   public static replaceState(page: Page): void {
+    const id = this.id() ?? nanoid()
+
     currentPage.merge(page)
-    window.history.replaceState(History.pageData(page), '', page.url)
-  }
 
-  protected static pageData(page: Page): Omit<Page, 'meta'> {
-    const { meta, ...remaining } = page
+    window.history.replaceState({ id }, '', page.url)
 
-    return remaining
+    SessionStorage.set(id, page)
   }
 
   public static setState(key: string, value: any) {
-    window.history.state[key] = value
+    return this.whenHasId((id) => {
+      SessionStorage.merge(id, { [key]: value })
+    })
   }
 
   public static getState<T>(key: string, defaultValue?: T): T {
-    return window.history.state?.[key] ?? defaultValue
+    return this.whenHasId(
+      (id) => SessionStorage.get(id)?.[key] ?? defaultValue,
+      () => defaultValue,
+    )
   }
 
   public static deleteState(key: string) {
-    if (window.history.state?.[key] !== undefined) {
-      delete window.history.state[key]
-    }
+    this.whenHasId((id) => {
+      SessionStorage.delete(id, key)
+    })
   }
 
   public static hasAnyState(): boolean {
-    return !!History.getAllState()
+    return this.whenHasId(
+      (id) => SessionStorage.exists(id),
+      () => false,
+    )
   }
 
-  public static getAllState(): any {
-    return window.history.state
+  protected static id(): string | undefined {
+    return window.history.state?.id
+  }
+
+  protected static whenHasId(callback: (id: string) => any, noIdCallback: VoidFunction = () => {}) {
+    const id = this.id()
+
+    return id ? callback(id) : noIdCallback()
+  }
+
+  public static getAllState(id?: string): any {
+    id ??= this.id()
+
+    if (id) {
+      return SessionStorage.get(id)
+    }
+
+    return {}
   }
 }

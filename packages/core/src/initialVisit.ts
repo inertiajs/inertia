@@ -40,13 +40,13 @@ export class InitialVisit {
    * @link https://inertiajs.com/redirects#external-redirects
    */
   protected static handleLocation(): boolean {
-    if (!SessionStorage.exists()) {
+    if (!SessionStorage.exists(SessionStorage.locationVisitKey)) {
       return false
     }
 
-    const locationVisit: LocationVisit = JSON.parse(SessionStorage.get() || '{}')
+    const locationVisit: LocationVisit = SessionStorage.get(SessionStorage.locationVisitKey) || {}
 
-    SessionStorage.remove()
+    SessionStorage.remove(SessionStorage.locationVisitKey)
 
     currentPage.setUrlHash(window.location.hash)
     currentPage.remember(History.getState<Page['rememberedState']>(History.rememberedState, {}))

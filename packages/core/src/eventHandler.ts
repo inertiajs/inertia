@@ -3,7 +3,7 @@ import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
-import { GlobalEvent, GlobalEventNames, GlobalEventResult } from './types'
+import { GlobalEvent, GlobalEventNames, GlobalEventResult, Page } from './types'
 import { hrefToUrl } from './url'
 
 class EventHandler {
@@ -34,7 +34,7 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
-    const page = event.state
+    const page = this.getPageFromEvent(event)
 
     if (page === null) {
       const url = hrefToUrl(currentPage.get().url)
@@ -50,6 +50,22 @@ class EventHandler {
       Scroll.restore(currentPage.get())
       fireNavigateEvent(currentPage.get())
     })
+  }
+
+  protected getPageFromEvent(event: PopStateEvent): Page | null {
+    const id = event.state?.id || null
+
+    if (id === null) {
+      return null
+    }
+
+    const page = History.getAllState(id)
+
+    if (page === null) {
+      return null
+    }
+
+    return page as Page
   }
 }
 
