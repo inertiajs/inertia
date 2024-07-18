@@ -2,6 +2,7 @@ import {
   FormDataConvertible,
   mergeDataIntoQueryString,
   Method,
+  PendingVisit,
   PreserveStateOption,
   Progress,
   router,
@@ -25,9 +26,9 @@ interface BaseInertiaLinkProps {
   except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
-  onStart?: () => void
+  onStart?: (event: PendingVisit) => void
   onProgress?: (progress: Progress) => void
-  onFinish?: () => void
+  onFinish?: (event: PendingVisit) => void
   onCancel?: () => void
   onSuccess?: () => void
   onError?: () => void
@@ -89,14 +90,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
             async,
             onCancelToken,
             onBefore,
-            onStart() {
+            onStart(event) {
               setInFlightCount((count) => count + 1)
-              onStart()
+              onStart(event)
             },
             onProgress,
-            onFinish() {
+            onFinish(event) {
               setInFlightCount((count) => count - 1)
-              onFinish()
+              onFinish(event)
             },
             onCancel,
             onSuccess,

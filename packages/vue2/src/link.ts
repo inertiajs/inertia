@@ -91,7 +91,7 @@ const Link: InertiaLink = {
     }
   },
   render(h) {
-    this.data.on = {
+    const on = {
       click: () => ({}),
       cancelToken: () => ({}),
       start: () => ({}),
@@ -100,7 +100,7 @@ const Link: InertiaLink = {
       cancel: () => ({}),
       success: () => ({}),
       error: () => ({}),
-      ...(this.data.on || {}),
+      ...(this.$listeners || {}),
     }
 
     const method = this.method.toLowerCase() as Method
@@ -122,9 +122,9 @@ const Link: InertiaLink = {
           'data-loading': this.inFlightCount > 0 ? '' : undefined,
         },
         on: {
-          ...this.data.on,
+          ...on,
           click: (event) => {
-            this.data.on.click(event)
+            on.click(event)
 
             if (shouldIntercept(event)) {
               event.preventDefault()
@@ -139,20 +139,20 @@ const Link: InertiaLink = {
                 except: this.except,
                 headers: this.headers,
                 async: this.async,
-                onCancelToken: this.data.on.cancelToken,
-                onBefore: this.data.on.before,
-                onStart: () => {
+                onCancelToken: on.cancelToken,
+                onBefore: on.before,
+                onStart: (event) => {
                   this.inFlightCount++
-                  this.data.on.start()
+                  on.start(event)
                 },
-                onProgress: this.data.on.progress,
-                onFinish: () => {
+                onProgress: on.progress,
+                onFinish: (event) => {
                   this.inFlightCount--
-                  this.data.on.finish()
+                  on.finish(event)
                 },
-                onCancel: this.data.on.cancel,
-                onSuccess: this.data.on.success,
-                onError: this.data.on.error,
+                onCancel: on.cancel,
+                onSuccess: on.success,
+                onError: on.error,
               })
             }
           },

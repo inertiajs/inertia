@@ -1,4 +1,12 @@
-import { mergeDataIntoQueryString, Method, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
+import {
+  mergeDataIntoQueryString,
+  Method,
+  PageProps,
+  PendingVisit,
+  Progress,
+  router,
+  shouldIntercept,
+} from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
@@ -78,7 +86,7 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     onStart: {
-      type: Function as PropType<() => void>,
+      type: Function as PropType<(visit: PendingVisit) => void>,
       default: () => {},
     },
     onProgress: {
@@ -86,7 +94,7 @@ const Link: InertiaLink = defineComponent({
       default: () => {},
     },
     onFinish: {
-      type: Function as PropType<() => void>,
+      type: Function as PropType<(visit: PendingVisit) => void>,
       default: () => {},
     },
     onBefore: {
@@ -145,14 +153,14 @@ const Link: InertiaLink = defineComponent({
                 async: props.async,
                 onCancelToken: props.onCancelToken,
                 onBefore: props.onBefore,
-                onStart: () => {
+                onStart: (event) => {
                   inFlightCount.value++
-                  props.onStart()
+                  props.onStart(event)
                 },
                 onProgress: props.onProgress,
-                onFinish: () => {
+                onFinish: (event) => {
                   inFlightCount.value--
-                  props.onFinish()
+                  props.onFinish(event)
                 },
                 onCancel: props.onCancel,
                 onSuccess: props.onSuccess,
