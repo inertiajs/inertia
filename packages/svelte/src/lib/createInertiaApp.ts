@@ -49,37 +49,6 @@ export default async function createInertiaApp({
     })
   })
 
-  if (!isServer) {
-    if (!el) {
-      throw new Error(`Element with ID "${id}" not found.`)
-    }
-
-    router.init({
-      initialPage,
-      resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
-        store.update((current) => ({
-          component: component as ResolvedComponent,
-          page,
-          key: preserveState ? current.key : Date.now(),
-        }))
-      },
-    })
-
-    if (progress) {
-      setupProgress(progress)
-    }
-
-    setup({
-      el,
-      App,
-      props: {
-        initialPage,
-        resolveComponent,
-      },
-    })
-  }
-
   if (isServer) {
     const { html, head, css } = (SSR as SSRComponent).render({ id, initialPage })
 
@@ -88,4 +57,33 @@ export default async function createInertiaApp({
       head: [head, `<style data-vite-css>${css.code}</style>`],
     }
   }
+
+  if (!el) {
+    throw new Error(`Element with ID "${id}" not found.`)
+  }
+
+  router.init({
+    initialPage,
+    resolveComponent,
+    swapComponent: async ({ component, page, preserveState }) => {
+      store.update((current) => ({
+        component: component as ResolvedComponent,
+        page,
+        key: preserveState ? current.key : Date.now(),
+      }))
+    },
+  })
+
+  if (progress) {
+    setupProgress(progress)
+  }
+
+  setup({
+    el,
+    App,
+    props: {
+      initialPage,
+      resolveComponent,
+    },
+  })
 }
