@@ -1,6 +1,8 @@
 <script lang="ts">
 import Deferred from '../../../../../packages/vue3/src/Deferred.vue'
+import WhenVisible from '../../../../../packages/vue3/src/WhenVisible.vue'
 import Layout from '../Components/Layout.vue'
+import Spinner from '../Components/Spinner.vue'
 import TestGrid from '../Components/TestGrid.vue'
 import TestGridItem from '../Components/TestGridItem.vue'
 export default { layout: Layout }
@@ -24,6 +26,18 @@ defineProps<{
     id: number
     name: string
   }[]
+  surprise?: {
+    id: number
+    name: string
+  }[]
+  dogs?: {
+    id: number
+    name: string
+  }[]
+  lunch?: {
+    id: number
+    name: string
+  }[]
 }>()
 </script>
 
@@ -37,7 +51,7 @@ defineProps<{
     <TestGridItem>
       <Deferred :data="users">
         <template #loading>
-          <p>Loading Users...</p>
+          <div class="flex items-center"><Spinner /> Loading Users...</div>
         </template>
 
         <div v-for="user in users">
@@ -49,7 +63,7 @@ defineProps<{
     <TestGridItem>
       <Deferred :data="foods">
         <template #loading>
-          <p>Loading Foods...</p>
+          <div class="flex items-center"><Spinner /> Loading Foods...</div>
         </template>
 
         <div v-for="food in foods">
@@ -61,7 +75,7 @@ defineProps<{
     <TestGridItem>
       <Deferred :data="organizations">
         <template #loading>
-          <p>Loading Organizations...</p>
+          <div class="flex items-center"><Spinner /> Loading Organizations...</div>
         </template>
 
         <div v-for="org in organizations">
@@ -70,4 +84,42 @@ defineProps<{
       </Deferred>
     </TestGridItem>
   </TestGrid>
+
+  <div class="mt-72">
+    <WhenVisible data="surprise">
+      <template #loading>
+        <div class="h-24">
+          <div class="flex items-center"><Spinner /> Loading Surprise...</div>
+        </div>
+      </template>
+
+      <div v-for="sur in surprise">
+        <p>#{{ sur.id }}: {{ sur.name }}</p>
+      </div>
+    </WhenVisible>
+  </div>
+
+  <div class="mt-72">
+    <WhenVisible :data="['dogs', 'lunch']" :buffer="20">
+      <template #loading>
+        <div class="h-20">
+          <div class="flex items-center"><Spinner /> Loading Dogs and Lunch...</div>
+        </div>
+      </template>
+
+      <div class="flex space-x-6">
+        <div>
+          <div v-for="dog in dogs">
+            <p>#{{ dog.id }}: {{ dog.name }}</p>
+          </div>
+        </div>
+
+        <div>
+          <div v-for="item in lunch">
+            <p>#{{ item.id }}: {{ item.name }}</p>
+          </div>
+        </div>
+      </div>
+    </WhenVisible>
+  </div>
 </template>
