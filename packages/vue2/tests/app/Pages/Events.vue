@@ -18,7 +18,12 @@
     <inertia-link
       :href="$page.url"
       method="post"
-      @before="(visit) => tap(false, alert('linkOnBefore'))"
+      @before="
+        (visit) => {
+          alert('linkOnBefore')
+          return false
+        }
+      "
       @start="() => alert('This listener should not have been called.')"
       class="link-before-prevent-local"
       >Before Event Link</inertia-link
