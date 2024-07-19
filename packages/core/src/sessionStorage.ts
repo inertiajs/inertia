@@ -15,7 +15,7 @@ export class SessionStorage {
     if (existing === null) {
       this.set(key, value)
     } else {
-      this.set(key, JSON.stringify({ ...existing, ...value }))
+      this.set(key, { ...existing, ...value })
     }
   }
 
