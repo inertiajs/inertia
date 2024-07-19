@@ -15,7 +15,7 @@ class EventHandler {
 
   public init() {
     window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
-    document.addEventListener('scroll', debounce(Scroll.onScroll, 100), true)
+    document.addEventListener('scroll', debounce(Scroll.onScroll.bind(Scroll), 100), true)
   }
 
   public onGlobalEvent<TEventName extends GlobalEventNames>(
