@@ -70,6 +70,14 @@ export default function useForm<TForm extends FormDataType>(
 
   const submit = useCallback(
     (method, url, options = {}) => {
+      const _data = data
+
+      method = method.toLowerCase()
+      if(method != 'get' && method != 'post'){
+        _data['_method'] = method
+        method = 'post'
+      }
+
       const _options = {
         ...options,
         onCancelToken: (token) => {
@@ -158,9 +166,9 @@ export default function useForm<TForm extends FormDataType>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform(data) })
+        router.delete(url, { ..._options, data: transform(_data) })
       } else {
-        router[method](url, transform(data), _options)
+        router[method](url, transform(_data), _options)
       }
     },
     [data, setErrors],
