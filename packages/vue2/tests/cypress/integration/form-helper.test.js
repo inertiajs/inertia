@@ -38,10 +38,11 @@ describe('Form Helper', () => {
       cy.window()
         .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
-          expect(method).to.eq('put')
+          expect(method).to.eq('post')
           expect(query).to.be.empty
           expect(form).to.have.property('name')
           expect(form.name).to.eq('foo')
+          expect(form._method).to.eq('put')
           expect(form).to.have.property('remember')
           expect(form.remember).to.eq(true)
         })
@@ -55,10 +56,11 @@ describe('Form Helper', () => {
       cy.window()
         .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
-          expect(method).to.eq('patch')
+          expect(method).to.eq('post')
           expect(query).to.be.empty
           expect(form).to.have.property('name')
           expect(form.name).to.eq('foo')
+          expect(form._method).to.eq('patch')
           expect(form).to.have.property('remember')
           expect(form.remember).to.eq(true)
         })
@@ -72,10 +74,11 @@ describe('Form Helper', () => {
       cy.window()
         .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
-          expect(method).to.eq('delete')
+          expect(method).to.eq('post')
           expect(query).to.be.empty
           expect(form).to.have.property('name')
           expect(form.name).to.eq('foo')
+          expect(form._method).to.eq('delete')
           expect(form).to.have.property('remember')
           expect(form.remember).to.eq(true)
         })
@@ -119,10 +122,11 @@ describe('Form Helper', () => {
       cy.window()
         .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
-          expect(method).to.eq('put')
+          expect(method).to.eq('post')
           expect(query).to.be.empty
           expect(form).to.have.property('name')
           expect(form.name).to.eq('baz')
+          expect(form._method).to.eq('put')
           expect(form).to.have.property('remember')
           expect(form.remember).to.eq(true)
         })
@@ -136,10 +140,11 @@ describe('Form Helper', () => {
       cy.window()
         .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
-          expect(method).to.eq('patch')
+          expect(method).to.eq('post')
           expect(query).to.be.empty
           expect(form).to.have.property('name')
           expect(form.name).to.eq('foo')
+          expect(form._method).to.eq('patch')
           expect(form).to.have.property('remember')
           expect(form.remember).to.eq(true)
         })
@@ -153,10 +158,11 @@ describe('Form Helper', () => {
       cy.window()
         .then((window) => window._inertia_request_dump)
         .then(({ method, form, query }) => {
-          expect(method).to.eq('delete')
+          expect(method).to.eq('post')
           expect(query).to.be.empty
           expect(form).to.have.property('name')
           expect(form.name).to.eq('bar')
+          expect(form._method).to.eq('delete')
           expect(form).to.have.property('remember')
           expect(form.remember).to.eq(true)
         })

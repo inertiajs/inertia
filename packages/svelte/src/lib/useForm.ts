@@ -156,7 +156,16 @@ export default function useForm<TForm extends Record<string, unknown>>(
       return this
     },
     submit(method, url, options = {}) {
-      const data = transform(this.data()) as RequestPayload
+      const _data = this.data()
+
+      method = method.toLowerCase()
+      if(method != 'get' && method != 'post'){
+        _data['_method'] = method
+        method = 'post'
+      }
+
+      const data = transform(_data) as RequestPayload
+
       const _options = {
         ...options,
         onCancelToken: (token: { cancel: () => void }) => {

@@ -127,7 +127,16 @@ export default function useForm<TForm extends FormDataType>(
       return this
     },
     submit(method, url, options: VisitOptions = {}) {
-      const data = transform(this.data())
+      const _data = this.data()
+
+      method = method.toLowerCase()
+      if(method != 'get' && method != 'post'){
+        _data['_method'] = method
+        method = 'post'
+      }
+
+      const data = transform(_data)
+      
       const _options = {
         ...options,
         onCancelToken: (token) => {
