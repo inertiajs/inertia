@@ -881,7 +881,7 @@ describe('Links', () => {
           })
       })
 
-      it.skip('restores all tracked scroll regions when pressing the back button from another website', () => {
+      it('restores all tracked scroll regions when pressing the back button from another website', () => {
         cy.get('.off-site')
           .click({ force: true })
           .then(() => {
@@ -1060,7 +1060,7 @@ describe('Links', () => {
     })
   })
 
-  describe('"as" warning', () => {
+  describe.skip('"as" warning', () => {
     it('shows no warning when using GET inertia-links', () => {
       cy.visit('/links/as-warning/get', {
         onBeforeLoad: (window) => {
@@ -1071,7 +1071,7 @@ describe('Links', () => {
       cy.get('@consoleWarn').should('not.be.called')
     })
 
-    it.skip('shows a warning when using POST inertia-links using the anchor tag', () => {
+    it('shows a warning when using POST inertia-links using the anchor tag', () => {
       // TODO: Make sure this is a button automatically instead of an anchor
       cy.visit('/links/as-warning/post', {
         onBeforeLoad: (window) => {
@@ -1097,7 +1097,7 @@ describe('Links', () => {
       cy.get('@consoleWarn').should('not.be.called')
     })
 
-    it.skip('shows a warning when using PUT inertia-links using the anchor tag', () => {
+    it('shows a warning when using PUT inertia-links using the anchor tag', () => {
       // TODO: Make sure this is a button automatically instead of an anchor
       cy.visit('/links/as-warning/put', {
         onBeforeLoad: (window) => {
@@ -1123,7 +1123,7 @@ describe('Links', () => {
       cy.get('@consoleWarn').should('not.be.called')
     })
 
-    it.skip('shows a warning when using PATCH inertia-links using the anchor tag', () => {
+    it('shows a warning when using PATCH inertia-links using the anchor tag', () => {
       // TODO: Make sure this is a button automatically instead of an anchor
       cy.visit('/links/as-warning/patch', {
         onBeforeLoad: (window) => {
@@ -1139,7 +1139,7 @@ describe('Links', () => {
       )
     })
 
-    it.skip('shows no warning when using PATCH inertia-links "as" a non-anchor tag', () => {
+    it('shows no warning when using PATCH inertia-links "as" a non-anchor tag', () => {
       // TODO: Make sure this is a button automatically instead of an anchor
       cy.visit('/links/as-warning-false/patch', {
         onBeforeLoad: (window) => {
@@ -1150,7 +1150,7 @@ describe('Links', () => {
       cy.get('@consoleWarn').should('not.be.called')
     })
 
-    it.skip('shows a warning when using DELETE inertia-links using the anchor tag', () => {
+    it('shows a warning when using DELETE inertia-links using the anchor tag', () => {
       // TODO: Make sure this is a button automatically instead of an anchor
       cy.visit('/links/as-warning/delete', {
         onBeforeLoad: (window) => {
@@ -1166,7 +1166,7 @@ describe('Links', () => {
       )
     })
 
-    it.skip('shows no warning when using DELETE inertia-links "as" a non-anchor tag', () => {
+    it('shows no warning when using DELETE inertia-links "as" a non-anchor tag', () => {
       // TODO: Make sure this is a button automatically instead of an anchor
       cy.visit('/links/as-warning-false/delete', {
         onBeforeLoad: (window) => {
