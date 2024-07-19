@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { Response } from './response'
 
 declare module 'axios' {
   export interface AxiosProgressEvent {
@@ -81,6 +82,7 @@ export type Visit = {
   queryStringArrayFormat: 'indices' | 'brackets'
   async: boolean
   showProgress: boolean
+  prefetch: boolean
 }
 
 export type GlobalEventsMap = {
@@ -152,6 +154,13 @@ export type GlobalEventsMap = {
     }
     result: boolean | void
   }
+  prefetched: {
+    parameters: [Response]
+    details: {
+      response: Response
+    }
+    result: void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -184,6 +193,7 @@ export type VisitOptions = Partial<
     onCancel: GlobalEventCallback<'cancel'>
     onSuccess: GlobalEventCallback<'success'>
     onError: GlobalEventCallback<'error'>
+    onPrefetched: GlobalEventCallback<'prefetched'>
   }
 >
 

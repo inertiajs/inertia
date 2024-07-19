@@ -6,6 +6,7 @@ import { page as currentPage } from './page'
 import { polls } from './polls'
 import { Request } from './request'
 import { RequestStream } from './requestStream'
+import { Response } from './response'
 import { Scroll } from './scroll'
 import {
   GlobalEvent,
@@ -138,6 +139,7 @@ export class Router {
       onCancel = () => {},
       onSuccess = () => {},
       onError = () => {},
+      onPrefetched = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
       showProgress,
@@ -163,6 +165,7 @@ export class Router {
       interrupted: false,
       async,
       showProgress: showProgress ?? !async,
+      prefetch: false,
     }
 
     // If either of these return false, we don't want to continue
@@ -190,12 +193,111 @@ export class Router {
         onCancel,
         onSuccess,
         onError,
+        onPrefetched,
         queryStringArrayFormat,
       },
       currentPage.get(),
     )
 
     requestStream.send(request)
+  }
+
+  public prefetch(
+    href: string | URL,
+    {
+      method = 'get',
+      data = {},
+      replace = false,
+      preserveScroll = false,
+      preserveState = false,
+      only = [],
+      except = [],
+      headers = {},
+      errorBag = '',
+      forceFormData = false,
+      onCancelToken = () => {},
+      onBefore = () => {},
+      onStart = () => {},
+      onProgress = () => {},
+      onFinish = () => {},
+      onCancel = () => {},
+      onSuccess = () => {},
+      onError = () => {},
+      onPrefetched = () => {},
+      queryStringArrayFormat = 'brackets',
+      async = false,
+      showProgress,
+    }: VisitOptions = {},
+  ) {
+    const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
+
+    const visit: PendingVisit = {
+      url,
+      method,
+      data: _data,
+      replace,
+      preserveScroll,
+      preserveState,
+      only,
+      except,
+      headers,
+      errorBag,
+      forceFormData,
+      queryStringArrayFormat,
+      cancelled: false,
+      completed: false,
+      interrupted: false,
+      async,
+      showProgress: false,
+      prefetch: true,
+    }
+
+    // If either of these return false, we don't want to continue
+    if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
+      return
+    }
+
+    const requestStream = async ? this.asyncRequestStream : this.syncRequestStream
+
+    requestStream.interruptInFlight()
+
+    if (!currentPage.isCleared()) {
+      // Save scroll regions for the current page
+      Scroll.save(currentPage.get())
+    }
+
+    return new Promise((resolve, reject) => {
+      const request = Request.create(
+        {
+          ...visit,
+          onCancelToken,
+          onBefore,
+          onStart,
+          onProgress,
+          onFinish,
+          onCancel() {
+            onCancel()
+            reject()
+          },
+          onSuccess,
+          onError(error) {
+            onError(error)
+            reject()
+          },
+          onPrefetched(response) {
+            resolve(response)
+          },
+          queryStringArrayFormat,
+        },
+        currentPage.get(),
+      )
+
+      requestStream.send(request)
+    })
+  }
+
+  public loadFromPrefetch(response: Response): void {
+    response.handle()
   }
 
   public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {

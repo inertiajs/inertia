@@ -20,6 +20,12 @@ export class Response {
   }
 
   public async handle() {
+    if (this.requestParams.params.prefetch) {
+      this.requestParams.params.prefetch = false
+      this.requestParams.params.onPrefetched(this)
+      return Promise.resolve()
+    }
+
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
     }
