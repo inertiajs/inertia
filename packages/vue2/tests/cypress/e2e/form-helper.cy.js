@@ -173,8 +173,10 @@ describe('Form Helper', () => {
       })
 
       cy.get('.errors-status').should('have.text', 'Form has no errors')
-      cy.get('#name').clear().type('A')
-      cy.get('#handle').clear().type('B')
+      cy.get('#name').clear()
+      cy.get('#name').type('A')
+      cy.get('#handle').clear()
+      cy.get('#handle').type('B')
       cy.get('#remember').check()
     })
 
@@ -304,7 +306,8 @@ describe('Form Helper', () => {
     })
 
     it('can reset all fields to their initial values', () => {
-      cy.get('#name').clear().type('A')
+      cy.get('#name').clear()
+      cy.get('#name').type('A')
       cy.get('#remember').check()
 
       cy.get('#name').should('have.value', 'A')
@@ -322,8 +325,10 @@ describe('Form Helper', () => {
     })
 
     it('can reset a single field to its initial value', () => {
-      cy.get('#name').clear().type('A')
-      cy.get('#handle').clear().type('B')
+      cy.get('#name').clear()
+      cy.get('#name').type('A')
+      cy.get('#handle').clear()
+      cy.get('#handle').type('B')
       cy.get('#remember').check()
 
       cy.get('.submit').click()
@@ -341,8 +346,10 @@ describe('Form Helper', () => {
     })
 
     it('does not reset errors when it resets a field to its initial value', () => {
-      cy.get('#name').clear().type('A')
-      cy.get('#handle').clear().type('B')
+      cy.get('#name').clear()
+      cy.get('#name').type('A')
+      cy.get('#handle').clear()
+      cy.get('#handle').type('B')
       cy.get('#remember').check()
 
       cy.get('.submit').click()
@@ -366,8 +373,10 @@ describe('Form Helper', () => {
     })
 
     it('does not reset errors when it resets all fields to their initial values', () => {
-      cy.get('#name').clear().type('A')
-      cy.get('#handle').clear().type('B')
+      cy.get('#name').clear()
+      cy.get('#name').type('A')
+      cy.get('#handle').clear()
+      cy.get('#handle').type('B')
       cy.get('#remember').check()
 
       cy.get('.submit').click()
@@ -398,14 +407,18 @@ describe('Form Helper', () => {
       })
 
       it('can assign the current values as the new defaults', () => {
-        cy.get('#name').clear().type('A')
-        cy.get('#handle').clear().type('B')
+        cy.get('#name').clear()
+        cy.get('#name').type('A')
+        cy.get('#handle').clear()
+        cy.get('#handle').type('B')
         cy.get('#remember').check()
 
         cy.get('.reassign').click()
 
-        cy.get('#name').clear().type('foo')
-        cy.get('#handle').clear().type('example')
+        cy.get('#name').clear()
+        cy.get('#name').type('foo')
+        cy.get('#handle').clear()
+        cy.get('#handle').type('example')
         cy.get('#remember').uncheck()
         cy.get('#name').should('have.value', 'foo')
         cy.get('#handle').should('have.value', 'example')
@@ -464,31 +477,27 @@ describe('Form Helper', () => {
 
     describe('onBefore', () => {
       it('fires when a request is about to be made', () => {
-        cy.get('.before')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            tap(alert.getCall(1).lastArg, (visit) => {
-              // Assert this is the request/visit object.
-              expect(visit).to.be.an('object')
-              expect(visit).to.have.property('url')
-              expect(visit).to.have.property('method')
-              expect(visit).to.have.property('data')
-              expect(visit).to.have.property('headers')
-              expect(visit).to.have.property('preserveState')
-            })
+        cy.get('.before').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          tap(alert.getCall(1).lastArg, (visit) => {
+            // Assert this is the request/visit object.
+            expect(visit).to.be.an('object')
+            expect(visit).to.have.property('url')
+            expect(visit).to.have.property('method')
+            expect(visit).to.have.property('data')
+            expect(visit).to.have.property('headers')
+            expect(visit).to.have.property('preserveState')
           })
+        })
       })
 
       it('can prevent the visit from starting by returning false', () => {
-        cy.get('.before-cancel')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCalls()).to.have.length(1)
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-          })
+        cy.get('.before-cancel').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCalls()).to.have.length(1)
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+        })
       })
 
       it('will reset the successful and recently successful statuses immediately when the form gets (re)submitted', () => {
@@ -507,195 +516,173 @@ describe('Form Helper', () => {
 
     describe('onStart', () => {
       it('fires when the request has started', () => {
-        cy.get('.start')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            tap(alert.getCall(3).lastArg, (visit) => {
-              // Assert this is the request/visit object.
-              expect(visit).to.be.an('object')
-              expect(visit).to.have.property('url')
-              expect(visit).to.have.property('method')
-              expect(visit).to.have.property('data')
-              expect(visit).to.have.property('headers')
-              expect(visit).to.have.property('preserveState')
-            })
+        cy.get('.start').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          tap(alert.getCall(3).lastArg, (visit) => {
+            // Assert this is the request/visit object.
+            expect(visit).to.be.an('object')
+            expect(visit).to.have.property('url')
+            expect(visit).to.have.property('method')
+            expect(visit).to.have.property('data')
+            expect(visit).to.have.property('headers')
+            expect(visit).to.have.property('preserveState')
           })
+        })
       })
 
       it('marks the form as processing', () => {
-        cy.get('.success-processing')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(2)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(3)).to.be.calledWith(false)
-            expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(true)
-          })
+        cy.get('.success-processing').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(2)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(3)).to.be.calledWith(false)
+          expect(alert.getCall(4)).to.be.calledWith('onStart')
+          expect(alert.getCall(5)).to.be.calledWith(true)
+        })
       })
     })
 
     describe('onProgress', () => {
       it('fires when the form has files (and upload progression occurs)', () => {
-        cy.get('.progress')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(3)).to.be.calledWith('onProgress')
-            tap(alert.getCall(4).lastArg, (event) => {
-              expect(event).to.have.property('percentage')
-              expect(event).to.have.property('total')
-              expect(event).to.have.property('loaded')
-              expect(event.percentage).to.be.gte(0).and.lte(100)
-            })
+        cy.get('.progress').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(3)).to.be.calledWith('onProgress')
+          tap(alert.getCall(4).lastArg, (event) => {
+            expect(event).to.have.property('percentage')
+            expect(event).to.have.property('total')
+            expect(event).to.have.property('loaded')
+            expect(event.percentage).to.be.gte(0).and.lte(100)
           })
+        })
       })
 
       it('does not fire when the form has no files', () => {
-        cy.get('.no-progress')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCalls()).to.have.length(10)
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith(null)
-            expect(alert.getCall(2)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(3)).to.be.calledWith(null)
-            expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(null)
-            expect(alert.getCall(6)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(7)).to.be.calledWith(null)
-            expect(alert.getCall(8)).to.be.calledWith('onFinish')
-            expect(alert.getCall(9)).to.be.calledWith(null)
-          })
+        cy.get('.no-progress').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCalls()).to.have.length(10)
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith(null)
+          expect(alert.getCall(2)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(3)).to.be.calledWith(null)
+          expect(alert.getCall(4)).to.be.calledWith('onStart')
+          expect(alert.getCall(5)).to.be.calledWith(null)
+          expect(alert.getCall(6)).to.be.calledWith('onSuccess')
+          expect(alert.getCall(7)).to.be.calledWith(null)
+          expect(alert.getCall(8)).to.be.calledWith('onFinish')
+          expect(alert.getCall(9)).to.be.calledWith(null)
+        })
       })
 
       it('updates the progress property of the form', () => {
-        cy.get('.success-progress')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(null)
+        cy.get('.success-progress').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onStart')
+          expect(alert.getCall(5)).to.be.calledWith(null)
 
-            expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            tap(alert.getCall(7).lastArg, (event) => {
-              expect(event).to.have.property('percentage')
-              expect(event).to.have.property('total')
-              expect(event).to.have.property('loaded')
-              expect(event.percentage).to.be.gte(0).and.lte(100)
-            })
+          expect(alert.getCall(6)).to.be.calledWith('onProgress')
+          tap(alert.getCall(7).lastArg, (event) => {
+            expect(event).to.have.property('percentage')
+            expect(event).to.have.property('total')
+            expect(event).to.have.property('loaded')
+            expect(event.percentage).to.be.gte(0).and.lte(100)
           })
+        })
       })
     })
 
     describe('onCancel', () => {
       it('fires when the request was cancelled', () => {
-        cy.get('.cancel')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onCancel')
-          })
+        cy.get('.cancel').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onCancel')
+        })
       })
     })
 
     describe('onSuccess', () => {
       it('fires the request succeeds without validation errors', () => {
-        cy.get('.success')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            tap(alert.getCall(4).lastArg, (page) => {
-              expect(page).to.be.an('object')
-              expect(page).to.have.property('component')
-              expect(page).to.have.property('props')
-              expect(page).to.have.property('url')
-              expect(page).to.have.property('meta')
-              expect(page.meta).to.have.property('assetVersion')
-            })
+        cy.get('.success').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+          tap(alert.getCall(4).lastArg, (page) => {
+            expect(page).to.be.an('object')
+            expect(page).to.have.property('component')
+            expect(page).to.have.property('props')
+            expect(page).to.have.property('url')
+            expect(page).to.have.property('meta')
+            expect(page.meta).to.have.property('assetVersion')
           })
+        })
       })
 
       it('marks the form as no longer processing', () => {
-        cy.get('.success-processing')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(true)
+        cy.get('.success-processing').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onStart')
+          expect(alert.getCall(5)).to.be.calledWith(true)
 
-            expect(alert.getCall(6)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(7)).to.be.calledWith(false)
-          })
+          expect(alert.getCall(6)).to.be.calledWith('onSuccess')
+          expect(alert.getCall(7)).to.be.calledWith(false)
+        })
       })
 
       it('resets the progress property back to null', () => {
-        cy.get('.success-progress')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            tap(alert.getCall(7).lastArg, (event) => {
-              expect(event).to.have.property('percentage')
-              expect(event).to.have.property('total')
-              expect(event).to.have.property('loaded')
-              expect(event.percentage).to.be.gte(0).and.lte(100)
-            })
-
-            expect(alert.getCall(8)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(9)).to.be.calledWith(null)
+        cy.get('.success-progress').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(6)).to.be.calledWith('onProgress')
+          tap(alert.getCall(7).lastArg, (event) => {
+            expect(event).to.have.property('percentage')
+            expect(event).to.have.property('total')
+            expect(event).to.have.property('loaded')
+            expect(event.percentage).to.be.gte(0).and.lte(100)
           })
+
+          expect(alert.getCall(8)).to.be.calledWith('onSuccess')
+          expect(alert.getCall(9)).to.be.calledWith(null)
+        })
       })
 
       it('can delay onFinish from firing by returning a promise', () => {
-        cy.get('.success-promise')
-          .click()
-          .wait(50)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(4)).to.be.calledWith(
-              'onFinish should have been fired by now if Promise functionality did not work',
-            )
-            expect(alert.getCall(5)).to.be.calledWith('onFinish')
-          })
+        cy.get('.success-promise').click()
+        cy.wait(50).then(() => {
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.calledWith('onSuccess')
+          expect(alert.getCall(4)).to.be.calledWith(
+            'onFinish should have been fired by now if Promise functionality did not work',
+          )
+          expect(alert.getCall(5)).to.be.calledWith('onFinish')
+        })
       })
 
       it('clears all existing errors and resets the hasErrors prop', () => {
-        cy.get('.success-reset-errors')
-          .click()
-          .wait(50)
-          .then(() => {
-            expect(alert.getCalls()).to.have.length(10)
+        cy.get('.success-reset-errors').click()
+        cy.wait(50).then(() => {
+          expect(alert.getCalls()).to.have.length(10)
 
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith(false)
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith(false)
 
-            expect(alert.getCall(2)).to.be.calledWith('onError')
-            expect(alert.getCall(3)).to.be.calledWith(true)
+          expect(alert.getCall(2)).to.be.calledWith('onError')
+          expect(alert.getCall(3)).to.be.calledWith(true)
 
-            expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(true)
-            tap(alert.getCall(6).lastArg, (errors) => {
-              expect(errors).to.be.an('object')
-              expect(errors).to.have.property('name')
-              expect(errors.name).to.eq('Some name error')
-            })
-
-            expect(alert.getCall(7)).to.be.calledWith('onSuccess')
-            expect(alert.getCall(8)).to.be.calledWith(false)
-            expect(alert.getCall(9)).to.be.an('object')
-            expect(alert.getCall(9).lastArg).to.be.empty
+          expect(alert.getCall(4)).to.be.calledWith('onStart')
+          expect(alert.getCall(5)).to.be.calledWith(true)
+          tap(alert.getCall(6).lastArg, (errors) => {
+            expect(errors).to.be.an('object')
+            expect(errors).to.have.property('name')
+            expect(errors.name).to.eq('Some name error')
           })
+
+          expect(alert.getCall(7)).to.be.calledWith('onSuccess')
+          expect(alert.getCall(8)).to.be.calledWith(false)
+          expect(alert.getCall(9)).to.be.an('object')
+          expect(alert.getCall(9).lastArg).to.be.empty
+        })
       })
 
       it('will mark the form as being submitted successfully', () => {
@@ -723,96 +710,84 @@ describe('Form Helper', () => {
 
     describe('onError', () => {
       it('fires when the request finishes with validation errors', () => {
-        cy.get('.error')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onError')
-            tap(alert.getCall(4).lastArg, (errors) => {
-              expect(errors).to.be.an('object')
-              expect(errors).to.have.property('name')
-              expect(errors.name).to.eq('Some name error')
-            })
+        cy.get('.error').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.calledWith('onError')
+          tap(alert.getCall(4).lastArg, (errors) => {
+            expect(errors).to.be.an('object')
+            expect(errors).to.have.property('name')
+            expect(errors.name).to.eq('Some name error')
           })
+        })
       })
 
       it('marks the form as no longer processing', () => {
-        cy.get('.error-processing')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onStart')
-            expect(alert.getCall(5)).to.be.calledWith(true)
+        cy.get('.error-processing').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onStart')
+          expect(alert.getCall(5)).to.be.calledWith(true)
 
-            expect(alert.getCall(6)).to.be.calledWith('onError')
-            expect(alert.getCall(7)).to.be.calledWith(false)
-          })
+          expect(alert.getCall(6)).to.be.calledWith('onError')
+          expect(alert.getCall(7)).to.be.calledWith(false)
+        })
       })
 
       it('resets the progress property back to null', () => {
-        cy.get('.error-progress')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(6)).to.be.calledWith('onProgress')
-            tap(alert.getCall(7).lastArg, (event) => {
-              expect(event).to.have.property('percentage')
-              expect(event).to.have.property('total')
-              expect(event).to.have.property('loaded')
-              expect(event.percentage).to.be.gte(0).and.lte(100)
-            })
-
-            expect(alert.getCall(8)).to.be.calledWith('onError')
-            expect(alert.getCall(9)).to.be.calledWith(null)
+        cy.get('.error-progress').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(6)).to.be.calledWith('onProgress')
+          tap(alert.getCall(7).lastArg, (event) => {
+            expect(event).to.have.property('percentage')
+            expect(event).to.have.property('total')
+            expect(event).to.have.property('loaded')
+            expect(event.percentage).to.be.gte(0).and.lte(100)
           })
+
+          expect(alert.getCall(8)).to.be.calledWith('onError')
+          expect(alert.getCall(9)).to.be.calledWith(null)
+        })
       })
 
       it('sets form errors', () => {
-        cy.get('.errors-set-on-error')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.an('object')
-            expect(alert.getCall(3).lastArg).to.be.empty
+        cy.get('.errors-set-on-error').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.an('object')
+          expect(alert.getCall(3).lastArg).to.be.empty
 
-            expect(alert.getCall(4)).to.be.calledWith('onError')
-            tap(alert.getCall(5).lastArg, (errors) => {
-              expect(errors).to.be.an('object')
-              expect(errors).to.have.property('name')
-              expect(errors.name).to.eq('Some name error')
-            })
+          expect(alert.getCall(4)).to.be.calledWith('onError')
+          tap(alert.getCall(5).lastArg, (errors) => {
+            expect(errors).to.be.an('object')
+            expect(errors).to.have.property('name')
+            expect(errors.name).to.eq('Some name error')
           })
+        })
       })
 
       it('can delay onFinish from firing by returning a promise', () => {
-        cy.get('.error-promise')
-          .click()
-          .wait(50)
-          .then(() => {
-            expect(alert.getCall(0)).to.be.calledWith('onBefore')
-            expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
-            expect(alert.getCall(2)).to.be.calledWith('onStart')
-            expect(alert.getCall(3)).to.be.calledWith('onError')
-            expect(alert.getCall(4)).to.be.calledWith(
-              'onFinish should have been fired by now if Promise functionality did not work',
-            )
-            expect(alert.getCall(5)).to.be.calledWith('onFinish')
-          })
+        cy.get('.error-promise').click()
+        cy.wait(50).then(() => {
+          expect(alert.getCall(0)).to.be.calledWith('onBefore')
+          expect(alert.getCall(1)).to.be.calledWith('onCancelToken')
+          expect(alert.getCall(2)).to.be.calledWith('onStart')
+          expect(alert.getCall(3)).to.be.calledWith('onError')
+          expect(alert.getCall(4)).to.be.calledWith(
+            'onFinish should have been fired by now if Promise functionality did not work',
+          )
+          expect(alert.getCall(5)).to.be.calledWith('onFinish')
+        })
       })
     })
 
     describe('onFinish', () => {
       it('fires when the request is completed', () => {
-        cy.get('.successful-request')
-          .click()
-          .wait(30)
-          .then(() => {
-            expect(alert.getCall(4)).to.be.calledWith('onFinish')
-          })
+        cy.get('.successful-request').click()
+        cy.wait(30).then(() => {
+          expect(alert.getCall(4)).to.be.calledWith('onFinish')
+        })
       })
     })
   })
