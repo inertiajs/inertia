@@ -1,4 +1,4 @@
-import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
+import { Page, PageProps, router } from '@inertiajs/core'
 import {
   computed,
   DefineComponent,
@@ -19,8 +19,6 @@ export interface InertiaAppProps {
   initialPage: Page
   initialComponent?: object
   resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
-  titleCallback?: (title: string) => string
-  onHeadUpdate?: (elements: string[]) => void
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -29,7 +27,6 @@ const component = ref(null)
 const page = ref<Page<any>>(null)
 const layout = shallowRef(null)
 const key = ref(null)
-let headManager = null
 
 const App: InertiaApp = defineComponent({
   name: 'Inertia',
@@ -46,24 +43,13 @@ const App: InertiaApp = defineComponent({
       type: Function as PropType<(name: string) => DefineComponent | Promise<DefineComponent>>,
       required: false,
     },
-    titleCallback: {
-      type: Function as PropType<(title: string) => string>,
-      required: false,
-      default: (title) => title,
-    },
-    onHeadUpdate: {
-      type: Function as PropType<(elements: string[]) => void>,
-      required: false,
-      default: () => () => {},
-    },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
+  setup({ initialPage, initialComponent, resolveComponent }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
     page.value = initialPage
     key.value = null
 
     const isServer = typeof window === 'undefined'
-    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
 
     if (!isServer) {
       router.init({
@@ -75,8 +61,6 @@ const App: InertiaApp = defineComponent({
           key.value = args.preserveState ? key.value : Date.now()
         },
       })
-
-      router.on('navigate', () => headManager.forceUpdate())
     }
 
     return () => {
@@ -120,7 +104,6 @@ export const plugin: Plugin = {
 
     Object.defineProperty(app.config.globalProperties, '$inertia', { get: () => router })
     Object.defineProperty(app.config.globalProperties, '$page', { get: () => page.value })
-    Object.defineProperty(app.config.globalProperties, '$headManager', { get: () => headManager })
 
     app.mixin(remember)
   },

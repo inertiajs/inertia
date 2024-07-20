@@ -4,11 +4,13 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { useHead } from 'unhead';
+useHead({
+    title: 'Article'
+})
 </script>
 
 <template>
-  <Head title="Article" />
   <h1 class="text-3xl">Article</h1>
   <article class="max-w-3xl">
     <p class="my-6">

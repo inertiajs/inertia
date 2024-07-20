@@ -4,7 +4,11 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3';
+import { useHead } from 'unhead';
+useHead({
+    title: 'Form'
+})
 
 const form = useForm('NewUser', {
   name: '',
@@ -14,7 +18,6 @@ const form = useForm('NewUser', {
 </script>
 
 <template>
-  <Head title="Form" />
   <h1 class="text-3xl">Form</h1>
   <form @submit.prevent="form.post('/user')" class="mt-6 max-w-md space-y-4">
     <div v-if="form.isDirty" class="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">

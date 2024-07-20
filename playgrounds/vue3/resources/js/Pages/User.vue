@@ -4,13 +4,15 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { useHead } from 'unhead';
+useHead({
+    title: 'User'
+})
 
 defineProps({ user: Object })
 </script>
 
 <template>
-  <Head title="User" />
   <h1 class="text-3xl">User</h1>
   <p class="mt-6">You successfully created a new user! Well not really, there is no persistence in this app.</p>
   <ul class="mt-6 space-y-2">
