@@ -1,4 +1,9 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import type { SSRHeadPayload } from '@unhead/ssr'
+
+export type { getActiveHead } from 'unhead'
+export type { renderSSRHead } from '@unhead/ssr'
+export type { SSRHeadPayload } from '@unhead/ssr'
 
 declare module 'axios' {
   export interface AxiosProgressEvent {
@@ -194,7 +199,7 @@ export type ActiveVisit = PendingVisit &
 export type VisitId = unknown
 export type Component = unknown
 
-export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+export type InertiaAppResponse = Promise<{ head: string[]; body: string, unhead: SSRHeadPayload } | void>
 
 declare global {
   interface DocumentEventMap {

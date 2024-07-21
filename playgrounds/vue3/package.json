@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "@inertiajs/vue3": "^1.0.0",
+    "@unhead/vue": "^1.9.16",
     "@vitejs/plugin-vue": "^4.0.0",
     "@volar/vue-typescript": "^1.0.22",
     "@vue/server-renderer": "^3.3.4",
