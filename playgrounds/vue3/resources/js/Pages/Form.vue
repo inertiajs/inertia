@@ -5,7 +5,7 @@ export default { layout: Layout }
 
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { useHead } from 'unhead';
+import { useHead } from '@unhead/vue';
 useHead({
     title: 'Form'
 })

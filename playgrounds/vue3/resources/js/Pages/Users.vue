@@ -4,7 +4,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { useHead } from 'unhead';
+import { useHead } from '@unhead/vue';
 useHead({
     title: 'Users'
 })
