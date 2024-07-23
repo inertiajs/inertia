@@ -7,7 +7,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h, PropType, ref } from 'vue'
+import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref, watch } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string
@@ -30,7 +30,8 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
-  prefetch?: boolean
+  prefetch?: boolean | 'mount'
+  staleAfter?: number
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -87,8 +88,12 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     prefetch: {
-      type: Boolean,
+      type: Boolean as PropType<boolean | 'mount'>,
       default: false,
+    },
+    staleAfter: {
+      type: Number,
+      default: 3000,
     },
     onStart: {
       type: Function as PropType<(visit: PendingVisit) => void>,
@@ -125,22 +130,97 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
-    const prefetched = ref(null)
     const prefetching = ref(false)
-    const loadAfterPrefetch = ref(false)
-    const timeUntilPrefetchStale = 2000
     const hoverTimeout = ref(null)
+    const progressBarStylesId = 'nprogress-injected-styles'
+
+    const hideProgressBar = () => {
+      if (!document.getElementById(progressBarStylesId)) {
+        const style = document.createElement('style')
+        style.id = progressBarStylesId
+        style.innerHTML = '#nprogress { display: none; }'
+
+        document.head.appendChild(style)
+      }
+    }
+
+    const showProgressBar = () => {
+      if (document.getElementById(progressBarStylesId)) {
+        document.getElementById(progressBarStylesId).remove()
+      }
+    }
+
+    onMounted(() => {
+      if (props.prefetch === 'mount') {
+        prefetch()
+      }
+    })
+
+    onUnmounted(() => {
+      clearTimeout(hoverTimeout.value)
+      showProgressBar()
+    })
+
+    watch(prefetching, () => {
+      if (prefetching.value) {
+        hideProgressBar()
+      } else {
+        setTimeout(() => {
+          // TODO: This is not great, but the progress bar shows for a sec after the request finishes
+          showProgressBar()
+        }, 200)
+      }
+    })
+
+    const method = props.method.toLowerCase() as Method
+    const as = method !== 'get' ? 'button' : props.as.toLowerCase()
+    const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
+
+    const elProps = {
+      a: { href },
+      button: { type: 'button' },
+    }
+
+    const visitParams = {
+      data: data,
+      method: method,
+      replace: props.replace,
+      preserveScroll: props.preserveScroll,
+      preserveState: props.preserveState ?? method !== 'get',
+      only: props.only,
+      except: props.except,
+      headers: props.headers,
+      async: props.async,
+      onCancelToken: props.onCancelToken,
+      onStart: (event) => {
+        if (!prefetching.value) {
+          inFlightCount.value++
+        }
+
+        props.onStart(event)
+      },
+      onProgress: props.onProgress,
+      onFinish: (event) => {
+        if (!prefetching.value) {
+          inFlightCount.value--
+        }
+
+        props.onFinish(event)
+      },
+      onCancel: props.onCancel,
+      onSuccess: props.onSuccess,
+      onError: props.onError,
+    }
+
+    const prefetch = () => {
+      prefetching.value = true
+
+      router.prefetch(href, visitParams, { staleAfter: props.staleAfter }).then(() => {
+        prefetching.value = false
+      })
+    }
 
     return () => {
-      const method = props.method.toLowerCase() as Method
-      const as = method !== 'get' ? 'button' : props.as.toLowerCase()
-      const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
-
-      const elProps = {
-        a: { href },
-        button: { type: 'button' },
-      }
-
       return h(
         as,
         {
@@ -152,105 +232,20 @@ const Link: InertiaLink = defineComponent({
               return
             }
 
-            if (prefetching.value) {
-              console.log('In the process of prefetching')
-              return
-            }
-
-            if (prefetched.value) {
-              console.log('Already prefetched')
-              return
-            }
-
-            // TODO: Cancel these timeouts on unmount
             hoverTimeout.value = setTimeout(() => {
-              console.log('loading!')
-
-              prefetching.value = true
-
-              router
-                .prefetch(href, {
-                  data: data,
-                  method: method,
-                  replace: props.replace,
-                  preserveScroll: props.preserveScroll,
-                  preserveState: props.preserveState ?? method !== 'get',
-                  only: props.only,
-                  except: props.except,
-                  headers: props.headers,
-                  async: props.async,
-                  onCancelToken: props.onCancelToken,
-                  onBefore: props.onBefore,
-                  onStart: props.onStart,
-                  onProgress: props.onProgress,
-                  onFinish: props.onFinish,
-                  onCancel: props.onCancel,
-                  onSuccess: props.onSuccess,
-                  onError: props.onError,
-                })
-                .then((response) => {
-                  console.log('got the prefetch!', response)
-                  prefetched.value = response
-
-                  if (loadAfterPrefetch.value) {
-                    console.log('loading after prefetch!')
-                    router.loadFromPrefetch(response)
-                  }
-
-                  loadAfterPrefetch.value = false
-                  prefetching.value = false
-
-                  setTimeout(() => {
-                    prefetched.value = null
-                  }, timeUntilPrefetchStale)
-                })
+              prefetch()
             }, 75)
           },
           onMouseout: () => {
             clearTimeout(hoverTimeout.value)
           },
           onClick: (event) => {
+            prefetching.value = false
+
             if (shouldIntercept(event)) {
               event.preventDefault()
 
-              if (prefetching.value) {
-                console.log('prefetching in progress')
-                loadAfterPrefetch.value = true
-                return
-              }
-
-              if (prefetched.value) {
-                console.log('loading from prefetch!')
-                router.loadFromPrefetch(prefetched.value)
-                prefetched.value = null
-                return
-              }
-
-              router.visit(href, {
-                data: data,
-                method: method,
-                replace: props.replace,
-                preserveScroll: props.preserveScroll,
-                preserveState: props.preserveState ?? method !== 'get',
-                only: props.only,
-                except: props.except,
-                headers: props.headers,
-                async: props.async,
-                onCancelToken: props.onCancelToken,
-                onBefore: props.onBefore,
-                onStart: (event) => {
-                  inFlightCount.value++
-                  props.onStart(event)
-                },
-                onProgress: props.onProgress,
-                onFinish: (event) => {
-                  inFlightCount.value--
-                  props.onFinish(event)
-                },
-                onCancel: props.onCancel,
-                onSuccess: props.onSuccess,
-                onError: props.onError,
-              })
+              router.visit(href, visitParams)
             }
           },
         },
