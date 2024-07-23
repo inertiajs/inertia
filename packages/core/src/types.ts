@@ -38,6 +38,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   url: string
   meta: {
     assetVersion: string | null
+    clearHistory: boolean
     deferredProps?: Record<string, VisitOptions['only']>
   }
 
