@@ -87,19 +87,22 @@ class PrefetchedRequests {
     })
   }
 
-  public get(params: ActiveVisit): Promise<Response | null> {
+  public get(params: ActiveVisit): Promise<Prefetched | null> {
     return new Promise((resolve) => {
       const prefetched = this.requests.find((prefetched) => {
         return this.paramsAreEqual(prefetched.params, params)
       })
 
-      if (!prefetched) {
-        resolve(null)
-        return
-      }
-
-      prefetched.response.then((response) => resolve(response))
+      resolve(prefetched || null)
     })
+  }
+
+  public use(prefetched: Prefetched) {
+    prefetched.response
+      .then((response) => response.handle())
+      .then(() => {
+        prefetchedRequests.remove(prefetched.params)
+      })
   }
 
   protected paramsAreEqual(params1: ActiveVisit, params2: ActiveVisit): boolean {
