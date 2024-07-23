@@ -4,6 +4,7 @@ import { History } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
+import { prefetchedRequests } from './prefetched'
 import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Response } from './response'
@@ -182,24 +183,27 @@ export class Router {
       Scroll.save(currentPage.get())
     }
 
-    const request = Request.create(
-      {
-        ...visit,
-        onCancelToken,
-        onBefore,
-        onStart,
-        onProgress,
-        onFinish,
-        onCancel,
-        onSuccess,
-        onError,
-        onPrefetched,
-        queryStringArrayFormat,
-      },
-      currentPage.get(),
-    )
+    const requestParams = {
+      ...visit,
+      onCancelToken,
+      onBefore,
+      onStart,
+      onProgress,
+      onFinish,
+      onCancel,
+      onSuccess,
+      onError,
+      onPrefetched,
+      queryStringArrayFormat,
+    }
 
-    requestStream.send(request)
+    prefetchedRequests.get(requestParams).then((response) => {
+      if (response) {
+        prefetchedRequests.use(response)
+      } else {
+        requestStream.send(Request.create(requestParams, currentPage.get()))
+      }
+    })
   }
 
   public prefetch(
@@ -226,9 +230,17 @@ export class Router {
       onPrefetched = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
-      showProgress,
     }: VisitOptions = {},
+    {
+      staleAfter,
+    }: {
+      staleAfter: number
+    },
   ) {
+    if (method !== 'get') {
+      throw new Error('Prefetch requests must use the GET method')
+    }
+
     const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
 
     const visit: PendingVisit = {
@@ -248,7 +260,7 @@ export class Router {
       completed: false,
       interrupted: false,
       async,
-      showProgress: false,
+      showProgress: true,
       prefetch: true,
     }
 
@@ -257,7 +269,7 @@ export class Router {
       return
     }
 
-    const requestStream = async ? this.asyncRequestStream : this.syncRequestStream
+    const requestStream = this.asyncRequestStream
 
     requestStream.interruptInFlight()
 
@@ -266,34 +278,27 @@ export class Router {
       Scroll.save(currentPage.get())
     }
 
-    return new Promise((resolve, reject) => {
-      const request = Request.create(
-        {
-          ...visit,
-          onCancelToken,
-          onBefore,
-          onStart,
-          onProgress,
-          onFinish,
-          onCancel() {
-            onCancel()
-            reject()
-          },
-          onSuccess,
-          onError(error) {
-            onError(error)
-            reject()
-          },
-          onPrefetched(response) {
-            resolve(response)
-          },
-          queryStringArrayFormat,
-        },
-        currentPage.get(),
-      )
+    const requestParams = {
+      ...visit,
+      onCancelToken,
+      onBefore,
+      onStart,
+      onProgress,
+      onFinish,
+      onCancel,
+      onSuccess,
+      onError,
+      onPrefetched,
+      queryStringArrayFormat,
+    }
 
-      requestStream.send(request)
-    })
+    return prefetchedRequests.add(
+      requestParams,
+      (params) => {
+        requestStream.send(Request.create(params, currentPage.get()))
+      },
+      { staleAfter },
+    )
   }
 
   public loadFromPrefetch(response: Response): void {
