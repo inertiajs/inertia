@@ -1,5 +1,6 @@
 import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
+import { timeToMs } from './time'
 import { ActiveVisit } from './types'
 
 type Prefetched = {
@@ -22,12 +23,14 @@ class PrefetchedRequests {
     {
       staleAfter,
     }: {
-      staleAfter: number
+      staleAfter: number | string
     },
   ) {
     if (this.exists(params)) {
       return Promise.resolve()
     }
+
+    staleAfter = timeToMs(staleAfter)
 
     const promise = new Promise((resolve, reject) => {
       sendFunc({
