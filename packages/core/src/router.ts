@@ -234,7 +234,7 @@ export class Router {
     {
       staleAfter,
     }: {
-      staleAfter: number
+      staleAfter: number | string
     },
   ) {
     if (method !== 'get') {
