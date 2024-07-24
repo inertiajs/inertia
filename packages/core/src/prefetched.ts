@@ -10,7 +10,7 @@ type Prefetched = {
 
 type RemovalTimer = {
   params: ActiveVisit
-  timer: NodeJS.Timeout
+  timer: number
 }
 
 class PrefetchedRequests {
@@ -29,8 +29,6 @@ class PrefetchedRequests {
     if (this.exists(params)) {
       return Promise.resolve()
     }
-
-    staleAfter = timeToMs(staleAfter)
 
     const promise = new Promise((resolve, reject) => {
       sendFunc({
@@ -51,7 +49,7 @@ class PrefetchedRequests {
         },
       })
     }).then((response) => {
-      const timer = setTimeout(() => this.remove(params), staleAfter)
+      const timer = window.setTimeout(() => this.remove(params), timeToMs(staleAfter))
 
       this.removalTimers.push({
         params,
