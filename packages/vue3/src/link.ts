@@ -9,6 +9,8 @@ import {
 } from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref, watch } from 'vue'
 
+type PrefetchOption = 'mount' | 'hover' | 'click'
+
 export interface InertiaLinkProps {
   as?: string
   data?: object
@@ -30,8 +32,8 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
-  prefetch?: boolean | 'mount'
-  staleAfter?: number
+  prefetch?: boolean | PrefetchOption | PrefetchOption[]
+  staleAfter?: number | string
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -88,11 +90,11 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     prefetch: {
-      type: Boolean as PropType<boolean | 'mount'>,
+      type: Boolean as PropType<boolean | PrefetchOption | PrefetchOption[]>,
       default: false,
     },
     staleAfter: {
-      type: Number,
+      type: Number as PropType<number | string>,
       default: 3000,
     },
     onStart: {
@@ -134,6 +136,22 @@ const Link: InertiaLink = defineComponent({
     const hoverTimeout = ref(null)
     const progressBarStylesId = 'nprogress-injected-styles'
 
+    const prefetchModes: PrefetchOption[] = (() => {
+      if (props.prefetch === true) {
+        return ['click']
+      }
+
+      if (props.prefetch === false) {
+        return []
+      }
+
+      if (Array.isArray(props.prefetch)) {
+        return props.prefetch
+      }
+
+      return [props.prefetch]
+    })()
+
     const hideProgressBar = () => {
       if (!document.getElementById(progressBarStylesId)) {
         const style = document.createElement('style')
@@ -151,7 +169,7 @@ const Link: InertiaLink = defineComponent({
     }
 
     onMounted(() => {
-      if (props.prefetch === 'mount') {
+      if (prefetchModes.includes('mount')) {
         prefetch()
       }
     })
@@ -220,6 +238,47 @@ const Link: InertiaLink = defineComponent({
       })
     }
 
+    const regularEvents = {
+      onClick: (event) => {
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+
+          router.visit(href, visitParams)
+        }
+      },
+    }
+
+    const prefetchHoverEvents = {
+      onMouseenter: () => {
+        hoverTimeout.value = setTimeout(() => {
+          prefetch()
+        }, 75)
+      },
+      onMouseleave: () => {
+        clearTimeout(hoverTimeout.value)
+      },
+      onClick: regularEvents.onClick,
+    }
+
+    const prefetchClickEvents = {
+      onMousedown: (event) => {
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          prefetch()
+        }
+      },
+      onMouseup: (event) => {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      },
+      onClick: (event) => {
+        if (shouldIntercept(event)) {
+          // Let the mouseup event handle the visit
+          event.preventDefault()
+        }
+      },
+    }
+
     return () => {
       return h(
         as,
@@ -227,27 +286,17 @@ const Link: InertiaLink = defineComponent({
           ...attrs,
           ...(elProps[as] || {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
-          onMouseover: () => {
-            if (!props.prefetch) {
-              return
+          ...(() => {
+            if (prefetchModes.includes('hover')) {
+              return prefetchHoverEvents
             }
 
-            hoverTimeout.value = setTimeout(() => {
-              prefetch()
-            }, 75)
-          },
-          onMouseout: () => {
-            clearTimeout(hoverTimeout.value)
-          },
-          onClick: (event) => {
-            prefetching.value = false
-
-            if (shouldIntercept(event)) {
-              event.preventDefault()
-
-              router.visit(href, visitParams)
+            if (prefetchModes.includes('click')) {
+              return prefetchClickEvents
             }
-          },
+
+            return regularEvents
+          })(),
         },
         slots,
       )
