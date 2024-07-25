@@ -90,11 +90,11 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     prefetch: {
-      type: Boolean as PropType<boolean | PrefetchOption | PrefetchOption[]>,
+      type: [Boolean, String, Array] as PropType<boolean | PrefetchOption | PrefetchOption[]>,
       default: false,
     },
     staleAfter: {
-      type: Number as PropType<number | string>,
+      type: [Number, String] as PropType<number | string>,
       default: 3000,
     },
     onStart: {
