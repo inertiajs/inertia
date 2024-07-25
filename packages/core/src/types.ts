@@ -41,6 +41,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
     assetVersion: string | null
     clearHistory: boolean
     deferredProps?: Record<string, VisitOptions['only']>
+    mergeProps: string[]
   }
 
   /** @internal */
@@ -84,6 +85,8 @@ export type Visit = {
   async: boolean
   showProgress: boolean
   prefetch: boolean
+  fresh: string[]
+  preserveUrl: boolean
 }
 
 export type GlobalEventsMap = {

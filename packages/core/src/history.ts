@@ -8,6 +8,7 @@ const isServer = typeof window === 'undefined'
 export class History {
   public static rememberedState = 'rememberedState'
   public static scrollRegions = 'scrollRegions'
+  public static preserveUrl = false
 
   public static remember(data: unknown, key: string): void {
     this.replaceState({
@@ -28,7 +29,9 @@ export class History {
   public static pushState(page: Page): void {
     const id = nanoid()
 
-    window.history.pushState({ id }, '', page.url)
+    if (!History.preserveUrl) {
+      window.history.pushState({ id }, '', page.url)
+    }
 
     SessionStorage.set(id, page)
   }
@@ -38,7 +41,9 @@ export class History {
 
     currentPage.merge(page)
 
-    window.history.replaceState({ id }, '', page.url)
+    if (!History.preserveUrl) {
+      window.history.replaceState({ id }, '', page.url)
+    }
 
     SessionStorage.set(id, page)
   }

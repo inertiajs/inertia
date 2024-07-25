@@ -5,7 +5,7 @@ import modal from './modal'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ErrorBag, Errors, Page } from './types'
+import { Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 export class Response {
@@ -30,6 +30,8 @@ export class Response {
       return this.handleNonInertiaResponse()
     }
 
+    History.preserveUrl = this.requestParams.params.preserveUrl
+
     await this.setPage()
 
     const errors = currentPage.get().props.errors || {}
@@ -45,6 +47,8 @@ export class Response {
     fireSuccessEvent(currentPage.get())
 
     await this.requestParams.params.onSuccess(currentPage.get())
+
+    History.preserveUrl = false
   }
 
   protected async handleNonInertiaResponse() {
@@ -148,6 +152,19 @@ export class Response {
 
   protected mergeProps(pageResponse: Page): void {
     if (this.requestParams.isPartial() && pageResponse.component === currentPage.get().component) {
+      const propsToMerge = pageResponse.meta.mergeProps || []
+
+      propsToMerge.forEach((prop) => {
+        if (Array.isArray(pageResponse.props[prop])) {
+          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...pageResponse.props[prop]]
+        } else if (typeof pageResponse.props[prop] === 'object') {
+          pageResponse.props[prop] = {
+            ...((currentPage.get().props[prop] || []) as Record<string, any>),
+            ...pageResponse.props[prop],
+          }
+        }
+      })
+
       pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
     }
   }

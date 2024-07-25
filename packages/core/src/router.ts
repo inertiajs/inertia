@@ -144,6 +144,8 @@ export class Router {
       queryStringArrayFormat = 'brackets',
       async = false,
       showProgress,
+      fresh = [],
+      preserveUrl = false,
     }: VisitOptions = {},
   ): void {
     const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
@@ -167,6 +169,8 @@ export class Router {
       async,
       showProgress: showProgress ?? !async,
       prefetch: false,
+      fresh,
+      preserveUrl,
     }
 
     // If either of these return false, we don't want to continue
@@ -178,7 +182,7 @@ export class Router {
 
     requestStream.interruptInFlight()
 
-    if (!currentPage.isCleared()) {
+    if (!currentPage.isCleared() && !preserveUrl) {
       // Save scroll regions for the current page
       Scroll.save(currentPage.get())
     }
@@ -230,6 +234,8 @@ export class Router {
       onPrefetched = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
+      fresh = [],
+      preserveUrl = false,
     }: VisitOptions = {},
     {
       staleAfter,
@@ -262,6 +268,8 @@ export class Router {
       async,
       showProgress: true,
       prefetch: true,
+      fresh,
+      preserveUrl,
     }
 
     // If either of these return false, we don't want to continue
@@ -275,7 +283,7 @@ export class Router {
 
     if (!currentPage.isCleared()) {
       // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
+      //   Scroll.save(currentPage.get())
     }
 
     const requestParams = {

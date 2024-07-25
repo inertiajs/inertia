@@ -58,8 +58,7 @@ class CurrentPage {
       page.scrollRegions ??= []
       page.rememberedState ??= {}
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), window.location)
-      // This is where the actual URL change happens
-      // TODO: When we are remembering the state, "back" doesn't update the URL... why
+
       replace ? History.replaceState(page) : History.pushState(page)
 
       const isNewComponent = !this.isTheSame(page)
