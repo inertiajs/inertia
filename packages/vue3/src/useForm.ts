@@ -169,7 +169,7 @@ export default function useForm<TForm extends FormDataType>(
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = cloneDeep(this.data())
+          
           this.isDirty = false
           return onSuccess
         },
