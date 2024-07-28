@@ -7,6 +7,7 @@ type FormDataType = object
 
 interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
+  isEmpty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
   processing: boolean
@@ -235,6 +236,11 @@ export default function useForm<TForm extends FormDataType>(
       Object.assign(this, restored.data)
       this.setError(restored.errors)
     },
+    get isEmpty(): boolean {
+      return Object.values(this.data()).every(value =>
+          value === null || value === '' || value === undefined
+      );
+    }
   })
 
   watch(
