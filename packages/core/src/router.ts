@@ -8,7 +8,6 @@ import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
 import { Request } from './request'
 import { RequestStream } from './requestStream'
-import { Response } from './response'
 import { Scroll } from './scroll'
 import {
   GlobalEvent,
@@ -304,10 +303,6 @@ export class Router {
       },
       { staleAfter },
     )
-  }
-
-  public loadFromPrefetch(response: Response): void {
-    response.handle()
   }
 
   public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
