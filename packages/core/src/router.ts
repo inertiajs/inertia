@@ -16,6 +16,7 @@ import {
   GlobalEventResult,
   PendingVisit,
   PollOptions,
+  PrefetchOptions,
   ReloadOptions,
   RequestPayload,
   RouterInitParams,
@@ -175,8 +176,6 @@ export class Router {
       return
     }
 
-    revealProgress(true)
-
     const requestStream = async ? this.asyncRequestStream : this.syncRequestStream
 
     requestStream.interruptInFlight()
@@ -200,13 +199,19 @@ export class Router {
       queryStringArrayFormat,
     }
 
-    prefetchedRequests.get(requestParams).then((response) => {
-      if (response) {
-        prefetchedRequests.use(response, requestParams)
-      } else {
-        requestStream.send(Request.create(requestParams, currentPage.get()))
+    const prefetched = prefetchedRequests.get(requestParams)
+
+    if (prefetched) {
+      if (!prefetched.staleTimestamp) {
+        // This prefetch is still in flight, show the progress bar
+        revealProgress(true)
       }
-    })
+
+      prefetchedRequests.use(prefetched, requestParams)
+    } else {
+      revealProgress(true)
+      requestStream.send(Request.create(requestParams, currentPage.get()))
+    }
   }
 
   public prefetch(
@@ -234,11 +239,7 @@ export class Router {
       queryStringArrayFormat = 'brackets',
       async = false,
     }: VisitOptions = {},
-    {
-      staleAfter,
-    }: {
-      staleAfter: number | string
-    },
+    { staleAfter }: PrefetchOptions,
   ) {
     if (method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
@@ -292,7 +293,7 @@ export class Router {
       queryStringArrayFormat,
     }
 
-    return prefetchedRequests.add(
+    prefetchedRequests.add(
       requestParams,
       (params) => {
         requestStream.send(Request.create(params, currentPage.get()))

@@ -229,6 +229,29 @@ export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
+export type StaleAfterOption = number | string
+
+export type PrefetchOptions = {
+  staleAfter: StaleAfterOption | StaleAfterOption[]
+}
+
+export type ActivelyPrefetching = {
+  params: ActiveVisit
+  response: Promise<Response>
+  staleTimestamp: null
+}
+
+export type PrefetchedResponse = {
+  params: ActiveVisit
+  response: Promise<Response>
+  staleTimestamp: number
+}
+
+export type PrefetchRemovalTimer = {
+  params: ActiveVisit
+  timer: number
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>

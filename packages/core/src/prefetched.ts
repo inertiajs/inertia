@@ -1,34 +1,34 @@
 import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'
-import { ActiveVisit } from './types'
-
-type Prefetched = {
-  params: ActiveVisit
-  response: Promise<Response>
-}
-
-type RemovalTimer = {
-  params: ActiveVisit
-  timer: number
-}
+import {
+  ActivelyPrefetching,
+  ActiveVisit,
+  PrefetchedResponse,
+  PrefetchOptions,
+  PrefetchRemovalTimer,
+  StaleAfterOption,
+} from './types'
 
 class PrefetchedRequests {
-  protected requests: Prefetched[] = []
-  protected removalTimers: RemovalTimer[] = []
+  protected cached: PrefetchedResponse[] = []
+  protected activeRequests: ActivelyPrefetching[] = []
+  protected removalTimers: PrefetchRemovalTimer[] = []
 
-  public add(
-    params: ActiveVisit,
-    sendFunc: (params: ActiveVisit) => void,
-    {
-      staleAfter,
-    }: {
-      staleAfter: number | string
-    },
-  ) {
-    if (this.exists(params)) {
+  public add(params: ActiveVisit, sendFunc: (params: ActiveVisit) => void, { staleAfter }: PrefetchOptions) {
+    const inFlight = this.findInFlight(params)
+
+    if (inFlight) {
       return Promise.resolve()
     }
+
+    const existing = this.findCached(params)
+
+    if (existing && existing.staleTimestamp > Date.now()) {
+      return Promise.resolve()
+    }
+
+    const [stale, expires] = this.extractStaleValues(staleAfter)
 
     const promise = new Promise((resolve, reject) => {
       sendFunc({
@@ -49,29 +49,56 @@ class PrefetchedRequests {
         },
       })
     }).then((response) => {
-      const timer = window.setTimeout(() => this.remove(params), timeToMs(staleAfter))
+      this.remove(params)
 
-      this.removalTimers.push({
-        params,
-        timer,
+      this.cached.push({
+        params: { ...params },
+        staleTimestamp: Date.now() + timeToMs(stale),
+        response: promise,
+      })
+
+      this.scheduleForRemoval(params, expires)
+
+      this.activeRequests = this.activeRequests.filter((prefetching) => {
+        return !this.paramsAreEqual(prefetching.params, params)
       })
 
       return response as Response
     })
 
-    this.requests.push({
+    this.activeRequests.push({
       params: { ...params },
       response: promise,
+      staleTimestamp: null,
     })
 
     return promise
   }
 
   public remove(params: ActiveVisit): void {
-    this.requests = this.requests.filter((prefetched) => {
+    this.cached = this.cached.filter((prefetched) => {
       return !this.paramsAreEqual(prefetched.params, params)
     })
 
+    this.clearTimer(params)
+  }
+
+  protected extractStaleValues(staleAfter: PrefetchOptions['staleAfter']): [StaleAfterOption, StaleAfterOption] {
+    if (!Array.isArray(staleAfter)) {
+      return [staleAfter, staleAfter]
+    }
+
+    switch (staleAfter.length) {
+      case 0:
+        return [0, 0]
+      case 1:
+        return [staleAfter[0], staleAfter[0]]
+      default:
+        return [staleAfter[0], staleAfter[1]]
+    }
+  }
+
+  protected clearTimer(params: ActiveVisit) {
     const timer = this.removalTimers.find((removalTimer) => {
       return this.paramsAreEqual(removalTimer.params, params)
     })
@@ -82,32 +109,43 @@ class PrefetchedRequests {
     }
   }
 
-  protected exists(params: ActiveVisit): boolean {
-    return this.requests.some((prefetched) => {
-      return this.paramsAreEqual(prefetched.params, params)
+  protected scheduleForRemoval(params: ActiveVisit, expiresIn: StaleAfterOption) {
+    this.clearTimer(params)
+
+    const timer = window.setTimeout(() => this.remove(params), timeToMs(expiresIn))
+
+    this.removalTimers.push({
+      params,
+      timer,
     })
   }
 
-  public get(params: ActiveVisit): Promise<Prefetched | null> {
-    return new Promise((resolve) => {
-      const prefetched = this.requests.find((prefetched) => {
+  public get(params: ActiveVisit): ActivelyPrefetching | PrefetchedResponse | null {
+    return this.findCached(params) || this.findInFlight(params)
+  }
+
+  public use(prefetched: PrefetchedResponse | ActivelyPrefetching, params: ActiveVisit) {
+    prefetched.response.then((response) => {
+      response.mergeParams({ ...params, onPrefetched: () => {} })
+
+      return response.handle()
+    })
+  }
+
+  protected findCached(params: ActiveVisit): PrefetchedResponse | null {
+    return (
+      this.cached.find((prefetched) => {
         return this.paramsAreEqual(prefetched.params, params)
-      })
-
-      resolve(prefetched || null)
-    })
+      }) || null
+    )
   }
 
-  public use(prefetched: Prefetched, params: ActiveVisit) {
-    prefetched.response
-      .then((response) => {
-        response.mergeParams({ ...params, onPrefetched: () => {} })
-
-        return response.handle()
-      })
-      .then(() => {
-        prefetchedRequests.remove(prefetched.params)
-      })
+  protected findInFlight(params: ActiveVisit): ActivelyPrefetching | null {
+    return (
+      this.activeRequests.find((prefetched) => {
+        return this.paramsAreEqual(prefetched.params, params)
+      }) || null
+    )
   }
 
   protected paramsAreEqual(params1: ActiveVisit, params2: ActiveVisit): boolean {
