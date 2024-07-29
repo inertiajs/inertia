@@ -146,6 +146,7 @@ export class Router {
       queryStringArrayFormat = 'brackets',
       async = false,
       showProgress,
+      fresh = false,
     }: VisitOptions = {},
   ): void {
     const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
@@ -169,6 +170,7 @@ export class Router {
       async,
       showProgress: showProgress ?? !async,
       prefetch: false,
+      fresh,
     }
 
     // If either of these return false, we don't want to continue
@@ -238,6 +240,7 @@ export class Router {
       onPrefetched = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
+      fresh = false,
     }: VisitOptions = {},
     { staleAfter }: PrefetchOptions,
   ) {
@@ -266,6 +269,7 @@ export class Router {
       async,
       showProgress: true,
       prefetch: true,
+      fresh,
     }
 
     // If either of these return false, we don't want to continue

@@ -24,7 +24,7 @@ class PrefetchedRequests {
 
     const existing = this.findCached(params)
 
-    if (existing && existing.staleTimestamp > Date.now()) {
+    if (!params.fresh && existing && existing.staleTimestamp > Date.now()) {
       return Promise.resolve()
     }
 

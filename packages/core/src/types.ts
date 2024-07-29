@@ -84,6 +84,7 @@ export type Visit = {
   async: boolean
   showProgress: boolean
   prefetch: boolean
+  fresh: boolean
 }
 
 export type GlobalEventsMap = {
