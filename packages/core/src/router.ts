@@ -144,7 +144,7 @@ export class Router {
       queryStringArrayFormat = 'brackets',
       async = false,
       showProgress,
-      fresh = [],
+      reset = [],
       preserveUrl = false,
     }: VisitOptions = {},
   ): void {
@@ -169,7 +169,7 @@ export class Router {
       async,
       showProgress: showProgress ?? !async,
       prefetch: false,
-      fresh,
+      reset,
       preserveUrl,
     }
 
@@ -234,7 +234,7 @@ export class Router {
       onPrefetched = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
-      fresh = [],
+      reset = [],
       preserveUrl = false,
     }: VisitOptions = {},
     {
@@ -268,7 +268,7 @@ export class Router {
       async,
       showProgress: true,
       prefetch: true,
-      fresh,
+      reset,
       preserveUrl,
     }
 

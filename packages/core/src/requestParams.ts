@@ -68,7 +68,7 @@ export class RequestParams {
       headers['X-Inertia-Partial-Component'] = currentPage.get().component
     }
 
-    const only = this.params.only.concat(this.params.fresh)
+    const only = this.params.only.concat(this.params.reset)
 
     if (only.length > 0) {
       headers['X-Inertia-Partial-Data'] = only.join(',')
@@ -78,8 +78,8 @@ export class RequestParams {
       headers['X-Inertia-Partial-Except'] = this.params.except.join(',')
     }
 
-    if (this.params.fresh.length > 0) {
-      headers['X-Inertia-Fresh'] = this.params.fresh.join(',')
+    if (this.params.reset.length > 0) {
+      headers['X-Inertia-Reset'] = this.params.reset.join(',')
     }
 
     if (this.params.errorBag && this.params.errorBag.length > 0) {

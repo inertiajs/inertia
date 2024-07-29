@@ -85,7 +85,7 @@ export type Visit = {
   async: boolean
   showProgress: boolean
   prefetch: boolean
-  fresh: string[]
+  reset: string[]
   preserveUrl: boolean
 }
 
