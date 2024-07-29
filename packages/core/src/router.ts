@@ -305,16 +305,6 @@ export class Router {
     )
   }
 
-  public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
-    console.warn(
-      `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
-        options.method ?? 'get'
-      }() instead.`,
-    )
-
-    return this.visit(url, { preserveState: true, ...options, replace: true })
-  }
-
   public clearHistory(): void {
     History.clear()
   }
