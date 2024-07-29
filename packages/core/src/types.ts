@@ -184,19 +184,19 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames> = (
   ...params: GlobalEventParameters<TEventName>
 ) => GlobalEventResult<TEventName>
 
-export type VisitOptions = Partial<
-  Visit & {
-    onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
-    onBefore: GlobalEventCallback<'before'>
-    onStart: GlobalEventCallback<'start'>
-    onProgress: GlobalEventCallback<'progress'>
-    onFinish: GlobalEventCallback<'finish'>
-    onCancel: GlobalEventCallback<'cancel'>
-    onSuccess: GlobalEventCallback<'success'>
-    onError: GlobalEventCallback<'error'>
-    onPrefetched: GlobalEventCallback<'prefetched'>
-  }
->
+export type VisitCallbacks = {
+  onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
+  onBefore: GlobalEventCallback<'before'>
+  onStart: GlobalEventCallback<'start'>
+  onProgress: GlobalEventCallback<'progress'>
+  onFinish: GlobalEventCallback<'finish'>
+  onCancel: GlobalEventCallback<'cancel'>
+  onSuccess: GlobalEventCallback<'success'>
+  onError: GlobalEventCallback<'error'>
+  onPrefetched: GlobalEventCallback<'prefetched'>
+}
+
+export type VisitOptions = Partial<Visit & VisitCallbacks>
 
 export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'preserveState'>
 
@@ -226,6 +226,8 @@ export type VisitId = unknown
 export type Component = unknown
 
 export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+
+export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
 declare global {
   interface DocumentEventMap {

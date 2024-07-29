@@ -1,4 +1,5 @@
 import {
+  LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PageProps,
@@ -7,9 +8,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref, watch } from 'vue'
-
-type PrefetchOption = 'mount' | 'hover' | 'click'
+import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string
@@ -32,7 +31,7 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
-  prefetch?: boolean | PrefetchOption | PrefetchOption[]
+  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
   staleAfter?: number | string
 }
 
@@ -90,12 +89,12 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     prefetch: {
-      type: [Boolean, String, Array] as PropType<boolean | PrefetchOption | PrefetchOption[]>,
+      type: [Boolean, String, Array] as PropType<boolean | LinkPrefetchOption | LinkPrefetchOption[]>,
       default: false,
     },
     staleAfter: {
       type: [Number, String] as PropType<number | string>,
-      default: 3000,
+      default: 30_000,
     },
     onStart: {
       type: Function as PropType<(visit: PendingVisit) => void>,
@@ -132,11 +131,9 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
-    const prefetching = ref(false)
     const hoverTimeout = ref(null)
-    const progressBarStylesId = 'nprogress-injected-styles'
 
-    const prefetchModes: PrefetchOption[] = (() => {
+    const prefetchModes: LinkPrefetchOption[] = (() => {
       if (props.prefetch === true) {
         return ['click']
       }
@@ -152,22 +149,6 @@ const Link: InertiaLink = defineComponent({
       return [props.prefetch]
     })()
 
-    const hideProgressBar = () => {
-      if (!document.getElementById(progressBarStylesId)) {
-        const style = document.createElement('style')
-        style.id = progressBarStylesId
-        style.innerHTML = '#nprogress { display: none; }'
-
-        document.head.appendChild(style)
-      }
-    }
-
-    const showProgressBar = () => {
-      if (document.getElementById(progressBarStylesId)) {
-        document.getElementById(progressBarStylesId).remove()
-      }
-    }
-
     onMounted(() => {
       if (prefetchModes.includes('mount')) {
         prefetch()
@@ -176,18 +157,6 @@ const Link: InertiaLink = defineComponent({
 
     onUnmounted(() => {
       clearTimeout(hoverTimeout.value)
-      showProgressBar()
-    })
-
-    watch(prefetching, () => {
-      if (prefetching.value) {
-        hideProgressBar()
-      } else {
-        setTimeout(() => {
-          // TODO: This is not great, but the progress bar shows for a sec after the request finishes
-          showProgressBar()
-        }, 200)
-      }
     })
 
     const method = props.method.toLowerCase() as Method
@@ -199,7 +168,7 @@ const Link: InertiaLink = defineComponent({
       button: { type: 'button' },
     }
 
-    const visitParams = {
+    const baseParams = {
       data: data,
       method: method,
       replace: props.replace,
@@ -209,20 +178,18 @@ const Link: InertiaLink = defineComponent({
       except: props.except,
       headers: props.headers,
       async: props.async,
+    }
+
+    const visitParams = {
+      ...baseParams,
       onCancelToken: props.onCancelToken,
       onStart: (event) => {
-        if (!prefetching.value) {
-          inFlightCount.value++
-        }
-
+        inFlightCount.value++
         props.onStart(event)
       },
       onProgress: props.onProgress,
       onFinish: (event) => {
-        if (!prefetching.value) {
-          inFlightCount.value--
-        }
-
+        inFlightCount.value--
         props.onFinish(event)
       },
       onCancel: props.onCancel,
@@ -231,18 +198,13 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetch = () => {
-      prefetching.value = true
-
-      router.prefetch(href, visitParams, { staleAfter: props.staleAfter }).then(() => {
-        prefetching.value = false
-      })
+      router.prefetch(href, baseParams, { staleAfter: props.staleAfter })
     }
 
     const regularEvents = {
       onClick: (event) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
-
           router.visit(href, visitParams)
         }
       },

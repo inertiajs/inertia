@@ -1,3 +1,4 @@
+import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { History } from './history'
@@ -174,6 +175,8 @@ export class Router {
       return
     }
 
+    revealProgress(true)
+
     const requestStream = async ? this.asyncRequestStream : this.syncRequestStream
 
     requestStream.interruptInFlight()
@@ -199,7 +202,7 @@ export class Router {
 
     prefetchedRequests.get(requestParams).then((response) => {
       if (response) {
-        prefetchedRequests.use(response)
+        prefetchedRequests.use(response, requestParams)
       } else {
         requestStream.send(Request.create(requestParams, currentPage.get()))
       }
@@ -269,14 +272,11 @@ export class Router {
       return
     }
 
+    hideProgress()
+
     const requestStream = this.asyncRequestStream
 
     requestStream.interruptInFlight()
-
-    if (!currentPage.isCleared()) {
-      // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
-    }
 
     const requestParams = {
       ...visit,

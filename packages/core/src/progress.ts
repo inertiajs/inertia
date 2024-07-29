@@ -1,31 +1,61 @@
 import NProgress from 'nprogress'
 import { GlobalEvent } from './types'
 
-let timeout: NodeJS.Timeout | null = null
+const hideProgressStyleEl = document.createElement('style')
+hideProgressStyleEl.innerHTML = '#nprogress { display: none; }'
+
+let hideCount = 0
+
+const removeStyle = () => {
+  if (!document.querySelector('#nprogress')) {
+    return document.head.removeChild(hideProgressStyleEl)
+  }
+
+  setTimeout(() => removeStyle(), 100)
+}
+
+export const reveal = (force = false) => {
+  hideCount = Math.max(0, hideCount - 1)
+
+  if ((force || hideCount === 0) && document.head.contains(hideProgressStyleEl)) {
+    removeStyle()
+  }
+}
+
+export const hide = () => {
+  hideCount++
+
+  if (!document.head.contains(hideProgressStyleEl)) {
+    document.head.appendChild(hideProgressStyleEl)
+  }
+}
 
 function addEventListeners(delay: number): void {
   document.addEventListener('inertia:start', (e) => start(e, delay))
   document.addEventListener('inertia:progress', progress)
-  document.addEventListener('inertia:finish', finish)
 }
 
 function start(event: GlobalEvent<'start'>, delay: number): void {
   if (event.detail.visit.showProgress) {
-    timeout = setTimeout(() => NProgress.start(), delay)
+    const timeout = setTimeout(() => NProgress.start(), delay)
+    document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
   }
 }
 
-function progress(event: GlobalEvent<'progress'>) {
+function progress(event: GlobalEvent<'progress'>): void {
   if (NProgress.isStarted() && event.detail.progress?.percentage) {
     NProgress.set(Math.max(NProgress.status!, (event.detail.progress.percentage / 100) * 0.9))
   }
 }
 
-function finish(event: GlobalEvent<'finish'>) {
+function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
   clearTimeout(timeout!)
+
   if (!NProgress.isStarted()) {
     return
-  } else if (event.detail.visit.completed) {
+  }
+
+  if (event.detail.visit.completed) {
     NProgress.done()
   } else if (event.detail.visit.interrupted) {
     NProgress.set(0)
@@ -37,7 +67,6 @@ function finish(event: GlobalEvent<'finish'>) {
 
 function injectCSS(color: string): void {
   const element = document.createElement('style')
-  element.type = 'text/css'
   element.textContent = `
     #nprogress {
       pointer-events: none;

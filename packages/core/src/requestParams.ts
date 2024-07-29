@@ -1,9 +1,36 @@
 import { AxiosRequestConfig } from 'axios'
 import { page as currentPage } from './page'
-import { ActiveVisit, Page, PreserveStateOption } from './types'
+import { ActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
 
 export class RequestParams {
-  constructor(public params: ActiveVisit) {
+  protected callbacks: {
+    name: keyof VisitCallbacks
+    args: any[]
+  }[] = []
+
+  protected params: ActiveVisit
+
+  constructor(params: ActiveVisit) {
+    if (!params.prefetch) {
+      this.params = params
+    } else {
+      const wrappedCallbacks: Record<keyof VisitCallbacks, () => any> = {
+        onBefore: this.wrapCallback(params, 'onBefore'),
+        onStart: this.wrapCallback(params, 'onStart'),
+        onProgress: this.wrapCallback(params, 'onProgress'),
+        onFinish: this.wrapCallback(params, 'onFinish'),
+        onCancel: this.wrapCallback(params, 'onCancel'),
+        onSuccess: this.wrapCallback(params, 'onSuccess'),
+        onError: this.wrapCallback(params, 'onError'),
+        onCancelToken: this.wrapCallback(params, 'onCancelToken'),
+        onPrefetched: this.wrapCallback(params, 'onPrefetched'),
+      }
+
+      this.params = {
+        ...params,
+        ...wrappedCallbacks,
+      }
+    }
     //
   }
 
@@ -86,6 +113,33 @@ export class RequestParams {
   public setPreserveOptions(page: Page) {
     this.params.preserveScroll = this.resolvePreserveOption(this.params.preserveScroll, page)
     this.params.preserveState = this.resolvePreserveOption(this.params.preserveState, page)
+  }
+
+  public runCallbacks() {
+    this.callbacks.forEach(({ name, args }) => {
+      // @ts-ignore
+      this.params[name](...args)
+    })
+  }
+
+  public merge(toMerge: Partial<ActiveVisit>) {
+    this.params = {
+      ...this.params,
+      ...toMerge,
+    }
+  }
+
+  protected wrapCallback(params: ActiveVisit, name: keyof VisitCallbacks) {
+    // @ts-ignore
+    return (...args) => {
+      this.recordCallback(name, args)
+      // @ts-ignore
+      params[name](...args)
+    }
+  }
+
+  protected recordCallback(name: keyof VisitCallbacks, args: any[]) {
+    this.callbacks.push({ name, args })
   }
 
   protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {

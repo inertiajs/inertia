@@ -98,16 +98,32 @@ class PrefetchedRequests {
     })
   }
 
-  public use(prefetched: Prefetched) {
+  public use(prefetched: Prefetched, params: ActiveVisit) {
     prefetched.response
-      .then((response) => response.handle())
+      .then((response) => {
+        response.mergeParams({ ...params, onPrefetched: () => {} })
+
+        return response.handle()
+      })
       .then(() => {
         prefetchedRequests.remove(prefetched.params)
       })
   }
 
   protected paramsAreEqual(params1: ActiveVisit, params2: ActiveVisit): boolean {
-    return objectsAreEqual<ActiveVisit>(params1, params2, ['showProgress', 'replace', 'prefetch'])
+    return objectsAreEqual<ActiveVisit>(params1, params2, [
+      'showProgress',
+      'replace',
+      'prefetch',
+      'onBefore',
+      'onStart',
+      'onProgress',
+      'onFinish',
+      'onCancel',
+      'onSuccess',
+      'onError',
+      'onPrefetched',
+    ])
   }
 }
 

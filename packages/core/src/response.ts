@@ -5,7 +5,7 @@ import modal from './modal'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ErrorBag, Errors, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 export class Response {
@@ -20,11 +20,13 @@ export class Response {
   }
 
   public async handle() {
-    if (this.requestParams.params.prefetch) {
-      this.requestParams.params.prefetch = false
-      this.requestParams.params.onPrefetched(this)
+    if (this.requestParams.all().prefetch) {
+      this.requestParams.all().prefetch = false
+      this.requestParams.all().onPrefetched(this)
       return Promise.resolve()
     }
+
+    this.requestParams.runCallbacks()
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
@@ -39,19 +41,23 @@ export class Response {
 
       fireErrorEvent(scopedErrors)
 
-      return this.requestParams.params.onError(scopedErrors)
+      return this.requestParams.all().onError(scopedErrors)
     }
 
     fireSuccessEvent(currentPage.get())
 
-    await this.requestParams.params.onSuccess(currentPage.get())
+    await this.requestParams.all().onSuccess(currentPage.get())
+  }
+
+  public mergeParams(params: ActiveVisit) {
+    this.requestParams.merge(params)
   }
 
   protected async handleNonInertiaResponse() {
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
 
-      setHashIfSameUrl(this.requestParams.params.url, locationUrl)
+      setHashIfSameUrl(this.requestParams.all().url, locationUrl)
 
       return this.locationVisit(locationUrl)
     }
@@ -87,7 +93,7 @@ export class Response {
   protected locationVisit(url: URL): boolean | void {
     try {
       SessionStorage.set(SessionStorage.locationVisitKey, {
-        preserveScroll: this.requestParams.params.preserveScroll === true,
+        preserveScroll: this.requestParams.all().preserveScroll === true,
       })
 
       if (isSameUrlWithoutHash(window.location, url)) {
@@ -115,14 +121,14 @@ export class Response {
     pageResponse.url = this.pageUrl(pageResponse)
 
     return currentPage.set(pageResponse, {
-      replace: this.requestParams.params.replace,
-      preserveScroll: this.requestParams.params.preserveScroll,
-      preserveState: this.requestParams.params.preserveState,
+      replace: this.requestParams.all().replace,
+      preserveScroll: this.requestParams.all().preserveScroll,
+      preserveState: this.requestParams.all().preserveState,
     })
   }
 
   protected shouldSetPage(pageResponse: Page): boolean {
-    if (!this.requestParams.params.async) {
+    if (!this.requestParams.all().async) {
       // If the request is sync, we should always set the page
       return true
     }
@@ -141,7 +147,7 @@ export class Response {
   protected pageUrl(pageResponse: Page) {
     const responseUrl = hrefToUrl(pageResponse.url)
 
-    setHashIfSameUrl(this.requestParams.params.url, responseUrl)
+    setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
     return responseUrl.href
   }
@@ -154,7 +160,7 @@ export class Response {
 
   protected setRememberedState(pageResponse: Page): void {
     if (
-      this.requestParams.params.preserveState &&
+      this.requestParams.all().preserveState &&
       History.getState(History.rememberedState) &&
       pageResponse.component === currentPage.get().component
     ) {
@@ -163,10 +169,10 @@ export class Response {
   }
 
   protected getScopedErrors(errors: Errors & ErrorBag): Errors {
-    if (!this.requestParams.params.errorBag) {
+    if (!this.requestParams.all().errorBag) {
       return errors
     }
 
-    return errors[this.requestParams.params.errorBag] || {}
+    return errors[this.requestParams.all().errorBag] || {}
   }
 }

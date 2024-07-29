@@ -1,5 +1,6 @@
 import {
   FormDataConvertible,
+  LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
@@ -8,7 +9,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useCallback, useState } from 'react'
+import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
@@ -34,6 +35,8 @@ interface BaseInertiaLinkProps {
   onError?: () => void
   queryStringArrayFormat?: 'indices' | 'brackets'
   async?: boolean
+  staleAfter?: number | string
+  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -65,68 +68,122 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onCancel = noop,
       onSuccess = noop,
       onError = noop,
+      prefetch = false,
+      staleAfter = 30_000,
       ...props
     },
     ref,
   ) => {
     const [inFlightCount, setInFlightCount] = useState(0)
+    const hoverTimeout = useRef<number>()
 
-    const visit = useCallback(
-      (event: React.MouseEvent) => {
-        onClick(event)
+    const baseParams = {
+      data,
+      method,
+      preserveScroll,
+      preserveState: preserveState ?? method !== 'get',
+      replace,
+      only,
+      except,
+      headers,
+      async,
+    }
 
-        if (shouldIntercept(event.nativeEvent)) {
+    const visitParams = {
+      ...baseParams,
+      onCancelToken,
+      onBefore,
+      onStart(event) {
+        setInFlightCount((count) => count + 1)
+        onStart(event)
+      },
+      onProgress,
+      onFinish(event) {
+        setInFlightCount((count) => count - 1)
+        onFinish(event)
+      },
+      onCancel,
+      onSuccess,
+      onError,
+    }
+
+    const doPrefetch = () => {
+      router.prefetch(href, baseParams, { staleAfter: staleAfter })
+    }
+
+    const prefetchModes: LinkPrefetchOption[] = useMemo(
+      () => {
+        if (prefetch === true) {
+          return ['click']
+        }
+
+        if (prefetch === false) {
+          return []
+        }
+
+        if (Array.isArray(prefetch)) {
+          return prefetch
+        }
+
+        return [prefetch]
+      },
+      Array.isArray(prefetch) ? prefetch : [prefetch],
+    )
+
+    useEffect(() => {
+      return () => {
+        clearTimeout(hoverTimeout.current)
+      }
+    }, [])
+
+    useEffect(() => {
+      if (prefetchModes.includes('mount')) {
+        setTimeout(() => doPrefetch())
+      }
+    }, prefetchModes)
+
+    const regularEvents = {
+      onClick: (event) => {
+        if (shouldIntercept(event)) {
           event.preventDefault()
 
-          router.visit(href, {
-            data,
-            method,
-            preserveScroll,
-            preserveState: preserveState ?? method !== 'get',
-            replace,
-            only,
-            except,
-            headers,
-            async,
-            onCancelToken,
-            onBefore,
-            onStart(event) {
-              setInFlightCount((count) => count + 1)
-              onStart(event)
-            },
-            onProgress,
-            onFinish(event) {
-              setInFlightCount((count) => count - 1)
-              onFinish(event)
-            },
-            onCancel,
-            onSuccess,
-            onError,
-          })
+          router.visit(href, visitParams)
         }
       },
-      [
-        data,
-        href,
-        method,
-        preserveScroll,
-        preserveState,
-        replace,
-        only,
-        except,
-        headers,
-        async,
-        onClick,
-        onCancelToken,
-        onBefore,
-        onStart,
-        onProgress,
-        onFinish,
-        onCancel,
-        onSuccess,
-        onError,
-      ],
-    )
+    }
+
+    const prefetchHoverEvents = {
+      onMouseEnter: () => {
+        hoverTimeout.current = setTimeout(() => {
+          doPrefetch()
+        }, 75)
+      },
+      onMouseLeave: () => {
+        clearTimeout(hoverTimeout.current)
+      },
+      onClick: regularEvents.onClick,
+    }
+
+    const prefetchClickEvents = {
+      onMouseDown: (event) => {
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          doPrefetch()
+        }
+      },
+      onMouseUp: (event) => {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      },
+      onClick: (event) => {
+        onClick(event)
+
+        if (shouldIntercept(event)) {
+          // Let the mouseup event handle the visit
+          event.preventDefault()
+        }
+      },
+    }
 
     as = as.toLowerCase()
     method = method.toLowerCase() as Method
@@ -149,7 +206,17 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         ...props,
         ...(elProps[as] || {}),
         ref,
-        onClick: visit,
+        ...(() => {
+          if (prefetchModes.includes('hover')) {
+            return prefetchHoverEvents
+          }
+
+          if (prefetchModes.includes('click')) {
+            return prefetchClickEvents
+          }
+
+          return regularEvents
+        })(),
         'data-loading': inFlightCount > 0 ? '' : undefined,
       },
       children,

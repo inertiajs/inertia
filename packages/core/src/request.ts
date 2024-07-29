@@ -31,8 +31,8 @@ export class Request {
     this.requestParams.onStart()
 
     return axios({
-      method: this.requestParams.params.method,
-      url: urlWithoutHash(this.requestParams.params.url).href,
+      method: this.requestParams.all().method,
+      url: urlWithoutHash(this.requestParams.all().url).href,
       data: this.requestParams.data(),
       params: this.requestParams.queryParams(),
       signal: this.cancelToken.signal,
@@ -101,7 +101,7 @@ export class Request {
     if (this.requestParams.data() instanceof FormData) {
       progress.percentage = progress.progress ? Math.round(progress.progress * 100) : 0
       fireProgressEvent(progress)
-      this.requestParams.params.onProgress(progress)
+      this.requestParams.all().onProgress(progress)
     }
   }
 
