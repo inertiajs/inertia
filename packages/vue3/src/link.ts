@@ -94,7 +94,7 @@ const Link: InertiaLink = defineComponent({
     },
     staleAfter: {
       type: [Number, String] as PropType<number | string>,
-      default: 30_000,
+      default: 0,
     },
     onStart: {
       type: Function as PropType<(visit: PendingVisit) => void>,
@@ -149,6 +149,22 @@ const Link: InertiaLink = defineComponent({
       return [props.prefetch]
     })()
 
+    const staleAfterValue = (() => {
+      if (props.staleAfter !== 0) {
+        // If they've provided a value, respect it
+        return props.staleAfter
+      }
+
+      if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
+        // If they've only provided a prefetch mode of 'click',
+        // we should only prefetch for the next request but not keep it around
+        return 0
+      }
+
+      // Otherwise, default to 30 seconds
+      return 30_000
+    })()
+
     onMounted(() => {
       if (prefetchModes.includes('mount')) {
         prefetch()
@@ -198,7 +214,7 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetch = () => {
-      router.prefetch(href, baseParams, { staleAfter: props.staleAfter })
+      router.prefetch(href, baseParams, { staleAfter: staleAfterValue })
     }
 
     const regularEvents = {

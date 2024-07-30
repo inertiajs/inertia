@@ -112,12 +112,16 @@ class PrefetchedRequests {
   protected scheduleForRemoval(params: ActiveVisit, expiresIn: StaleAfterOption) {
     this.clearTimer(params)
 
-    const timer = window.setTimeout(() => this.remove(params), timeToMs(expiresIn))
+    expiresIn = timeToMs(expiresIn)
 
-    this.removalTimers.push({
-      params,
-      timer,
-    })
+    if (expiresIn > 0) {
+      const timer = window.setTimeout(() => this.remove(params), expiresIn)
+
+      this.removalTimers.push({
+        params,
+        timer,
+      })
+    }
   }
 
   public get(params: ActiveVisit): ActivelyPrefetching | PrefetchedResponse | null {
@@ -128,7 +132,21 @@ class PrefetchedRequests {
     prefetched.response.then((response) => {
       response.mergeParams({ ...params, onPrefetched: () => {} })
 
+      // If this was a one-time cache (generally a prefetch="click"
+      // request with no specified stale timeout), remove it
+      this.removeStaleItemFromCache(params)
+
       return response.handle()
+    })
+  }
+
+  protected removeStaleItemFromCache(params: ActiveVisit) {
+    this.cached = this.cached.filter((prefetched) => {
+      if (!this.paramsAreEqual(prefetched.params, params)) {
+        return true
+      }
+
+      return prefetched.staleTimestamp > Date.now()
     })
   }
 

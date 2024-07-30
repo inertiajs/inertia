@@ -69,7 +69,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onSuccess = noop,
       onError = noop,
       prefetch = false,
-      staleAfter = 30_000,
+      staleAfter = 0,
       ...props
     },
     ref,
@@ -108,7 +108,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const doPrefetch = () => {
-      router.prefetch(href, baseParams, { staleAfter: staleAfter })
+      router.prefetch(href, baseParams, { staleAfter: staleAfterValue })
     }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
@@ -129,6 +129,22 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
       Array.isArray(prefetch) ? prefetch : [prefetch],
     )
+
+    const staleAfterValue = useMemo(() => {
+      if (staleAfter !== 0) {
+        // If they've provided a value, respect it
+        return staleAfter
+      }
+
+      if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
+        // If they've only provided a prefetch mode of 'click',
+        // we should only prefetch for the next request but not keep it around
+        return 0
+      }
+
+      // Otherwise, default to 30 seconds
+      return 30_000
+    }, [staleAfter, prefetchModes])
 
     useEffect(() => {
       return () => {
