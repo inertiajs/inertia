@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        adapter: ['vue2']
+        adapter: ['vue3']
         browser: ['chrome']
 
     steps:
@@ -27,13 +27,13 @@ jobs:
           path: |
             ~/.cache
             node_modules
-            packages/vue2/tests/node_modules
+            packages/vue3/tests/node_modules
 
       - name: Build Inertia
         run: |
           npm install
           cd packages/core && npm run build
-          cd ../vue2 && npm run build
+          cd ../vue3 && npm run build
 
       - name: Local-link @inertiajs/core
         run: cd packages/core && npm link
