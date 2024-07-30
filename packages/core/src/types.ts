@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { Response } from './response'
 
 declare module 'axios' {
   export interface AxiosProgressEvent {
@@ -38,6 +39,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   url: string
   meta: {
     assetVersion: string | null
+    clearHistory: boolean
     deferredProps?: Record<string, VisitOptions['only']>
   }
 
@@ -81,6 +83,8 @@ export type Visit = {
   queryStringArrayFormat: 'indices' | 'brackets'
   async: boolean
   showProgress: boolean
+  prefetch: boolean
+  fresh: boolean
 }
 
 export type GlobalEventsMap = {
@@ -152,6 +156,13 @@ export type GlobalEventsMap = {
     }
     result: boolean | void
   }
+  prefetched: {
+    parameters: [Response]
+    details: {
+      response: Response
+    }
+    result: void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -174,18 +185,19 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames> = (
   ...params: GlobalEventParameters<TEventName>
 ) => GlobalEventResult<TEventName>
 
-export type VisitOptions = Partial<
-  Visit & {
-    onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
-    onBefore: GlobalEventCallback<'before'>
-    onStart: GlobalEventCallback<'start'>
-    onProgress: GlobalEventCallback<'progress'>
-    onFinish: GlobalEventCallback<'finish'>
-    onCancel: GlobalEventCallback<'cancel'>
-    onSuccess: GlobalEventCallback<'success'>
-    onError: GlobalEventCallback<'error'>
-  }
->
+export type VisitCallbacks = {
+  onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
+  onBefore: GlobalEventCallback<'before'>
+  onStart: GlobalEventCallback<'start'>
+  onProgress: GlobalEventCallback<'progress'>
+  onFinish: GlobalEventCallback<'finish'>
+  onCancel: GlobalEventCallback<'cancel'>
+  onSuccess: GlobalEventCallback<'success'>
+  onError: GlobalEventCallback<'error'>
+  onPrefetched: GlobalEventCallback<'prefetched'>
+}
+
+export type VisitOptions = Partial<Visit & VisitCallbacks>
 
 export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'preserveState'>
 
@@ -215,6 +227,31 @@ export type VisitId = unknown
 export type Component = unknown
 
 export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+
+export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
+
+export type StaleAfterOption = number | string
+
+export type PrefetchOptions = {
+  staleAfter: StaleAfterOption | StaleAfterOption[]
+}
+
+export type ActivelyPrefetching = {
+  params: ActiveVisit
+  response: Promise<Response>
+  staleTimestamp: null
+}
+
+export type PrefetchedResponse = {
+  params: ActiveVisit
+  response: Promise<Response>
+  staleTimestamp: number
+}
+
+export type PrefetchRemovalTimer = {
+  params: ActiveVisit
+  timer: number
+}
 
 declare global {
   interface DocumentEventMap {

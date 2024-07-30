@@ -1,9 +1,11 @@
+import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { History } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
+import { prefetchedRequests } from './prefetched'
 import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
@@ -13,6 +15,7 @@ import {
   GlobalEventResult,
   PendingVisit,
   PollOptions,
+  PrefetchOptions,
   ReloadOptions,
   RequestPayload,
   RouterInitParams,
@@ -138,9 +141,11 @@ export class Router {
       onCancel = () => {},
       onSuccess = () => {},
       onError = () => {},
+      onPrefetched = () => {},
       queryStringArrayFormat = 'brackets',
       async = false,
       showProgress,
+      fresh = false,
     }: VisitOptions = {},
   ): void {
     const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
@@ -163,6 +168,8 @@ export class Router {
       interrupted: false,
       async,
       showProgress: showProgress ?? !async,
+      prefetch: false,
+      fresh,
     }
 
     // If either of these return false, we don't want to continue
@@ -179,33 +186,123 @@ export class Router {
       Scroll.save(currentPage.get())
     }
 
-    const request = Request.create(
-      {
-        ...visit,
-        onCancelToken,
-        onBefore,
-        onStart,
-        onProgress,
-        onFinish,
-        onCancel,
-        onSuccess,
-        onError,
-        queryStringArrayFormat,
-      },
-      currentPage.get(),
-    )
+    const requestParams = {
+      ...visit,
+      onCancelToken,
+      onBefore,
+      onStart,
+      onProgress,
+      onFinish,
+      onCancel,
+      onSuccess,
+      onError,
+      onPrefetched,
+      queryStringArrayFormat,
+    }
 
-    requestStream.send(request)
+    const prefetched = prefetchedRequests.get(requestParams)
+
+    if (prefetched) {
+      if (!prefetched.staleTimestamp) {
+        // This prefetch is still in flight, show the progress bar
+        revealProgress(true)
+      }
+
+      prefetchedRequests.use(prefetched, requestParams)
+    } else {
+      revealProgress(true)
+      requestStream.send(Request.create(requestParams, currentPage.get()))
+    }
   }
 
-  public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
-    console.warn(
-      `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
-        options.method ?? 'get'
-      }() instead.`,
-    )
+  public prefetch(
+    href: string | URL,
+    {
+      method = 'get',
+      data = {},
+      replace = false,
+      preserveScroll = false,
+      preserveState = false,
+      only = [],
+      except = [],
+      headers = {},
+      errorBag = '',
+      forceFormData = false,
+      onCancelToken = () => {},
+      onBefore = () => {},
+      onStart = () => {},
+      onProgress = () => {},
+      onFinish = () => {},
+      onCancel = () => {},
+      onSuccess = () => {},
+      onError = () => {},
+      onPrefetched = () => {},
+      queryStringArrayFormat = 'brackets',
+      async = false,
+      fresh = false,
+    }: VisitOptions = {},
+    { staleAfter }: PrefetchOptions,
+  ) {
+    if (method !== 'get') {
+      throw new Error('Prefetch requests must use the GET method')
+    }
 
-    return this.visit(url, { preserveState: true, ...options, replace: true })
+    const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
+
+    const visit: PendingVisit = {
+      url,
+      method,
+      data: _data,
+      replace,
+      preserveScroll,
+      preserveState,
+      only,
+      except,
+      headers,
+      errorBag,
+      forceFormData,
+      queryStringArrayFormat,
+      cancelled: false,
+      completed: false,
+      interrupted: false,
+      async,
+      showProgress: true,
+      prefetch: true,
+      fresh,
+    }
+
+    // If either of these return false, we don't want to continue
+    if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
+      return
+    }
+
+    hideProgress()
+
+    const requestStream = this.asyncRequestStream
+
+    requestStream.interruptInFlight()
+
+    const requestParams = {
+      ...visit,
+      onCancelToken,
+      onBefore,
+      onStart,
+      onProgress,
+      onFinish,
+      onCancel,
+      onSuccess,
+      onError,
+      onPrefetched,
+      queryStringArrayFormat,
+    }
+
+    prefetchedRequests.add(
+      requestParams,
+      (params) => {
+        requestStream.send(Request.create(params, currentPage.get()))
+      },
+      { staleAfter },
+    )
   }
 
   public clearHistory(): void {

@@ -7,16 +7,16 @@ export default function Layout({ children }) {
     <>
       <nav className="flex items-center px-10 py-6 space-x-6 text-white bg-slate-800">
         <div className="px-4 py-1 rounded-lg bg-slate-700">{appName}</div>
-        <Link href="/" className="hover:underline">
+        <Link href="/" className="hover:underline" prefetch>
           Home
         </Link>
-        <Link href="/users" className="hover:underline">
+        <Link href="/users" className="hover:underline" prefetch="hover" staleAfter={6000}>
           Users
         </Link>
-        <Link href="/article" className="hover:underline">
+        <Link href="/article" className="hover:underline" prefetch="mount" stale-after="10s">
           Article
         </Link>
-        <Link href="/form" className="hover:underline">
+        <Link href="/form" className="hover:underline" prefetch={['mount', 'click']} stale-after="1m">
           Form
         </Link>
         <Link href="/async" className="hover:underline">

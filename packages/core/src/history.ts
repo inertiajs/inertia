@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
 import { Page } from './types'
@@ -26,70 +25,62 @@ export class History {
   }
 
   public static pushState(page: Page): void {
-    const id = nanoid()
-
-    window.history.pushState({ id }, '', page.url)
-
-    SessionStorage.set(id, page)
+    window.history.pushState(
+      {
+        page,
+        timestamp: Date.now(),
+      },
+      '',
+      page.url,
+    )
   }
 
   public static replaceState(page: Page): void {
-    const id = this.id() ?? nanoid()
-
     currentPage.merge(page)
 
-    window.history.replaceState({ id }, '', page.url)
-
-    SessionStorage.set(id, page)
-  }
-
-  public static setState(key: string, value: any) {
-    return this.whenHasId((id) => {
-      SessionStorage.merge(id, { [key]: value })
-    })
+    window.history.replaceState(
+      {
+        page,
+        timestamp: Date.now(),
+      },
+      '',
+      page.url,
+    )
   }
 
   public static getState<T>(key: string, defaultValue?: T): T {
-    return this.whenHasId(
-      (id) => SessionStorage.get(id)?.[key] ?? defaultValue,
-      () => defaultValue,
-    )
+    return window.history.state?.page?.[key] ?? defaultValue
   }
 
   public static deleteState(key: string) {
-    this.whenHasId((id) => {
-      SessionStorage.removeNested(id, key)
-    })
+    if (window.history.state?.page?.[key] !== undefined) {
+      delete window.history.state.page[key]
+    }
   }
 
   public static hasAnyState(): boolean {
-    return this.whenHasId(
-      (id) => SessionStorage.exists(id),
-      () => false,
-    )
+    return !!History.getAllState()
   }
 
   public static clear() {
-    SessionStorage.clear()
+    SessionStorage.set('historyClearedAt', Date.now())
   }
 
-  protected static id(): string | undefined {
-    return window.history.state?.id
+  public static isValidState(state: any): boolean {
+    return state.page && !this.isExpired(state)
   }
 
-  protected static whenHasId(callback: (id: string) => any, noIdCallback: VoidFunction = () => {}) {
-    const id = this.id()
+  public static isExpired(state: { timestamp?: number }): boolean {
+    const clearedAt = SessionStorage.get('historyClearedAt')
 
-    return id ? callback(id) : noIdCallback()
+    return clearedAt && state.timestamp && state.timestamp < clearedAt
   }
 
-  public static getAllState(id?: string): any {
-    id ??= this.id()
-
-    if (id) {
-      return SessionStorage.get(id)
+  public static getAllState(): any {
+    if (this.isExpired(window.history.state)) {
+      return null
     }
 
-    return {}
+    return window.history.state?.page
   }
 }

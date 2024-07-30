@@ -1,7 +1,16 @@
 import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageHandler, PageResolver, PreserveStateOption, RouterInitParams } from './types'
+import {
+  Component,
+  Page,
+  PageEvent,
+  PageHandler,
+  PageResolver,
+  PreserveStateOption,
+  RouterInitParams,
+  VisitOptions,
+} from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
@@ -30,15 +39,15 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-    }: {
-      replace?: boolean
-      preserveScroll?: PreserveStateOption
-      preserveState?: PreserveStateOption
-    } = {},
+    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
   ): Promise<void> {
     this.componentId = {}
 
     const componentId = this.componentId
+
+    if (page.meta.clearHistory) {
+      History.clear()
+    }
 
     return this.resolve(page.component).then((component) => {
       if (componentId !== this.componentId) {

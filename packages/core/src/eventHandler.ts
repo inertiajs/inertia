@@ -52,9 +52,9 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
-    const id = event.state?.id || null
+    const state = event.state || null
 
-    if (id === null) {
+    if (state === null) {
       const url = hrefToUrl(currentPage.get().url)
       url.hash = window.location.hash
 
@@ -64,25 +64,20 @@ class EventHandler {
       return
     }
 
-    const page = History.getAllState(id)
+    if (History.isValidState(state)) {
+      currentPage.setQuietly(state.page, { preserveState: false }).then(() => {
+        Scroll.restore(currentPage.get())
+        fireNavigateEvent(currentPage.get())
+      })
 
-    if (page === null) {
-      // We have an id, but no page, so we are missing history data.
-      // This happens when the sessionStorage is cleared, for example.
-
-      // Mark the current page as cleared so that we
-      // don't try to write anything to it since the id is not going to match correctly
-      currentPage.clear()
-
-      // Fire an event so that that any listeners can handle this situation
-      this.fireInternalEvent('missingHistoryItem')
       return
     }
 
-    currentPage.setQuietly(page, { preserveState: false }).then(() => {
-      Scroll.restore(currentPage.get())
-      fireNavigateEvent(currentPage.get())
-    })
+    // At this point, the user has probably cleared the state
+    // Mark the current page as cleared so that we don't try to write anything to it.
+    currentPage.clear()
+    // Fire an event so that that any listeners can handle this situation
+    this.fireInternalEvent('missingHistoryItem')
   }
 }
 

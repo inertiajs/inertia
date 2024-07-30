@@ -1,4 +1,5 @@
 import {
+  LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PageProps,
@@ -7,7 +8,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h, PropType, ref } from 'vue'
+import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string
@@ -30,6 +31,8 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
+  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+  staleAfter?: number | string
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -85,6 +88,14 @@ const Link: InertiaLink = defineComponent({
       type: Boolean,
       default: false,
     },
+    prefetch: {
+      type: [Boolean, String, Array] as PropType<boolean | LinkPrefetchOption | LinkPrefetchOption[]>,
+      default: false,
+    },
+    staleAfter: {
+      type: [Number, String] as PropType<number | string>,
+      default: 0,
+    },
     onStart: {
       type: Function as PropType<(visit: PendingVisit) => void>,
       default: () => {},
@@ -120,54 +131,150 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
+    const hoverTimeout = ref(null)
 
-    return () => {
-      const method = props.method.toLowerCase() as Method
-      const as = method !== 'get' ? 'button' : props.as.toLowerCase()
-      const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
-
-      const elProps = {
-        a: { href },
-        button: { type: 'button' },
+    const prefetchModes: LinkPrefetchOption[] = (() => {
+      if (props.prefetch === true) {
+        return ['click']
       }
 
+      if (props.prefetch === false) {
+        return []
+      }
+
+      if (Array.isArray(props.prefetch)) {
+        return props.prefetch
+      }
+
+      return [props.prefetch]
+    })()
+
+    const staleAfterValue = (() => {
+      if (props.staleAfter !== 0) {
+        // If they've provided a value, respect it
+        return props.staleAfter
+      }
+
+      if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
+        // If they've only provided a prefetch mode of 'click',
+        // we should only prefetch for the next request but not keep it around
+        return 0
+      }
+
+      // Otherwise, default to 30 seconds
+      return 30_000
+    })()
+
+    onMounted(() => {
+      if (prefetchModes.includes('mount')) {
+        prefetch()
+      }
+    })
+
+    onUnmounted(() => {
+      clearTimeout(hoverTimeout.value)
+    })
+
+    const method = props.method.toLowerCase() as Method
+    const as = method !== 'get' ? 'button' : props.as.toLowerCase()
+    const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
+
+    const elProps = {
+      a: { href },
+      button: { type: 'button' },
+    }
+
+    const baseParams = {
+      data: data,
+      method: method,
+      replace: props.replace,
+      preserveScroll: props.preserveScroll,
+      preserveState: props.preserveState ?? method !== 'get',
+      only: props.only,
+      except: props.except,
+      headers: props.headers,
+      async: props.async,
+    }
+
+    const visitParams = {
+      ...baseParams,
+      onCancelToken: props.onCancelToken,
+      onStart: (event) => {
+        inFlightCount.value++
+        props.onStart(event)
+      },
+      onProgress: props.onProgress,
+      onFinish: (event) => {
+        inFlightCount.value--
+        props.onFinish(event)
+      },
+      onCancel: props.onCancel,
+      onSuccess: props.onSuccess,
+      onError: props.onError,
+    }
+
+    const prefetch = () => {
+      router.prefetch(href, baseParams, { staleAfter: staleAfterValue })
+    }
+
+    const regularEvents = {
+      onClick: (event) => {
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(href, visitParams)
+        }
+      },
+    }
+
+    const prefetchHoverEvents = {
+      onMouseenter: () => {
+        hoverTimeout.value = setTimeout(() => {
+          prefetch()
+        }, 75)
+      },
+      onMouseleave: () => {
+        clearTimeout(hoverTimeout.value)
+      },
+      onClick: regularEvents.onClick,
+    }
+
+    const prefetchClickEvents = {
+      onMousedown: (event) => {
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          prefetch()
+        }
+      },
+      onMouseup: (event) => {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      },
+      onClick: (event) => {
+        if (shouldIntercept(event)) {
+          // Let the mouseup event handle the visit
+          event.preventDefault()
+        }
+      },
+    }
+
+    return () => {
       return h(
         as,
         {
           ...attrs,
           ...(elProps[as] || {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
-          onClick: (event) => {
-            if (shouldIntercept(event)) {
-              event.preventDefault()
-
-              router.visit(href, {
-                data: data,
-                method: method,
-                replace: props.replace,
-                preserveScroll: props.preserveScroll,
-                preserveState: props.preserveState ?? method !== 'get',
-                only: props.only,
-                except: props.except,
-                headers: props.headers,
-                async: props.async,
-                onCancelToken: props.onCancelToken,
-                onBefore: props.onBefore,
-                onStart: (event) => {
-                  inFlightCount.value++
-                  props.onStart(event)
-                },
-                onProgress: props.onProgress,
-                onFinish: (event) => {
-                  inFlightCount.value--
-                  props.onFinish(event)
-                },
-                onCancel: props.onCancel,
-                onSuccess: props.onSuccess,
-                onError: props.onError,
-              })
+          ...(() => {
+            if (prefetchModes.includes('hover')) {
+              return prefetchHoverEvents
             }
-          },
+
+            if (prefetchModes.includes('click')) {
+              return prefetchClickEvents
+            }
+
+            return regularEvents
+          })(),
         },
         slots,
       )
