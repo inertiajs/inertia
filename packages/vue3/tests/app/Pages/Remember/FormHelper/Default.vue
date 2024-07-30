@@ -4,7 +4,7 @@ import { ref } from 'vue'
 
 const untracked = ref('')
 
-const form = useForm('form', {
+const form = useForm({
   name: 'foo',
   handle: 'example',
   remember: false,

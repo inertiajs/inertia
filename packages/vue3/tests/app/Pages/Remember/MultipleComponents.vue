@@ -1,25 +1,26 @@
 <script setup>
 import ComponentA from '@/Pages/Remember/Components/ComponentA.vue'
 import ComponentB from '@/Pages/Remember/Components/ComponentB.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, useRemember } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const name = ref('')
-const remember = ref(false)
 const untracked = ref('')
 
-//   remember: ['name', 'remember'],
+const form = useRemember({
+  name: '',
+  remember: false,
+})
 </script>
 
 <template>
   <div>
     <label>
       Full Name
-      <input type="text" id="name" name="full_name" v-model="name" />
+      <input type="text" id="name" name="full_name" v-model="form.name" />
     </label>
     <label>
       Remember Me
-      <input type="checkbox" id="remember" name="remember" v-model="remember" />
+      <input type="checkbox" id="remember" name="remember" v-model="form.remember" />
     </label>
     <label>
       Untracked
