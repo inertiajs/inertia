@@ -173,6 +173,6 @@ export class Response {
       return errors
     }
 
-    return errors[this.requestParams.all().errorBag] || {}
+    return errors[this.requestParams.all().errorBag || ''] || {}
   }
 }
