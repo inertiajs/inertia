@@ -1,14 +1,11 @@
 describe('Plugin', () => {
   describe('$page helper', () => {
-    // TODO: Is this still relevant? There is no page prop on the router anymore...
-    it.skip('has the helper injected into the Vue component', () => {
+    it('has the helper injected into the Vue component', () => {
       cy.visit('/')
 
       cy.window().then((window) => {
-        const inertiaRoot = window.testing.vue.$children[0]
-        const page = inertiaRoot.$children[0]
-
-        expect(page.$page).to.deep.equal(page.$inertia.page)
+        expect(window.initialPage).to.not.be.null
+        expect(window._plugin_global_props.$page).to.deep.equal(window.initialPage)
       })
     })
 
@@ -16,10 +13,7 @@ describe('Plugin', () => {
       cy.visit('/plugin/without')
 
       cy.window().then((window) => {
-        const inertiaRoot = window.testing.vue.$children[0]
-        const page = inertiaRoot.$children[0]
-
-        expect(page.$page).to.be.undefined
+        expect(window._plugin_global_props.$page).to.be.undefined
       })
     })
   })
@@ -29,10 +23,7 @@ describe('Plugin', () => {
       cy.visit('/')
 
       cy.window().then((window) => {
-        const inertiaRoot = window.testing.vue.$children[0]
-        const page = inertiaRoot.$children[0]
-
-        expect(page.$inertia).to.deep.equal(window.testing.Inertia)
+        expect(window._plugin_global_props.$inertia).to.deep.equal(window.testing.Inertia)
       })
     })
 
@@ -40,10 +31,7 @@ describe('Plugin', () => {
       cy.visit('/plugin/without')
 
       cy.window().then((window) => {
-        const inertiaRoot = window.testing.vue.$children[0]
-        const page = inertiaRoot.$children[0]
-
-        expect(page.$inertia).to.be.undefined
+        expect(window._plugin_global_props.$inertia).to.be.undefined
       })
     })
   })

@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 
-defineProps({
+const props = defineProps({
   foo: {
     type: Number,
     default: 0,
@@ -11,7 +11,7 @@ defineProps({
   headers: Object,
 })
 
-// window._inertia_props = this.$page.props
+window._inertia_props = props
 </script>
 
 <template>

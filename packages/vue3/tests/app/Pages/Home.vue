@@ -1,8 +1,8 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
+import { Link, router, usePage } from '@inertiajs/vue3'
+import { getCurrentInstance } from 'vue'
 
-defineProps({
+const props = defineProps({
   example: String,
 })
 
@@ -22,12 +22,11 @@ const redirectExternal = () => {
   router.post('/redirect-external')
 }
 
-onMounted(() => {
-  setTimeout(() => {
-    // window._inertia_page_key = window.testing.vue._.vnode.key
-    console.log(window.testing.vue._.props)
-  })
-})
+window._inertia_page_key = getCurrentInstance().uid
+window._inertia_props = props
+window._plugin_global_props = getCurrentInstance().appContext.config.globalProperties
+
+const page = usePage()
 </script>
 
 <template>

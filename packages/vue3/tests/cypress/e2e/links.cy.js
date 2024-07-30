@@ -885,7 +885,9 @@ describe('Links', () => {
       })
 
       it('restores all tracked scroll regions when pressing the back button from another website', () => {
-        cy.get('.off-site').click({ force: true })
+        cy.wait(500).then(() => {
+          cy.get('.off-site').click({ force: true })
+        })
 
         cy.wait(30)
           .then(() => {
@@ -1060,121 +1062,68 @@ describe('Links', () => {
     })
   })
 
-  describe.skip('"as" warning', () => {
+  describe('"as" warning', () => {
     it('shows no warning when using GET inertia-links', () => {
-      cy.visit('/links/as-warning/get', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning/get')
 
-      cy.get('@consoleWarn').should('not.be.called')
+      cy.get('a').should('have.length', 1)
+      cy.get('button').should('have.length', 0)
     })
 
     it('shows a warning when using POST inertia-links using the anchor tag', () => {
-      // TODO: Make sure this is a button automatically instead of an anchor
-      cy.visit('/links/as-warning/post', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning/post')
 
-      cy.get('@consoleWarn').should(
-        'be.calledWith',
-        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
-          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<Link href="/example" method="post" as="button">...</Link>',
-      )
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows no warning when using POST inertia-links "as" a non-anchor tag', () => {
-      cy.visit('/links/as-warning-false/post', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning-false/post')
 
-      cy.get('@consoleWarn').should('not.be.called')
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows a warning when using PUT inertia-links using the anchor tag', () => {
-      // TODO: Make sure this is a button automatically instead of an anchor
-      cy.visit('/links/as-warning/put', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning/put')
 
-      cy.get('@consoleWarn').should(
-        'be.calledWith',
-        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
-          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<Link href="/example" method="put" as="button">...</Link>',
-      )
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows no warning when using PUT inertia-links "as" a non-anchor tag', () => {
-      cy.visit('/links/as-warning-false/put', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning-false/put')
 
-      cy.get('@consoleWarn').should('not.be.called')
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows a warning when using PATCH inertia-links using the anchor tag', () => {
-      // TODO: Make sure this is a button automatically instead of an anchor
-      cy.visit('/links/as-warning/patch', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning/patch')
 
-      cy.get('@consoleWarn').should(
-        'be.calledWith',
-        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
-          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<Link href="/example" method="patch" as="button">...</Link>',
-      )
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows no warning when using PATCH inertia-links "as" a non-anchor tag', () => {
-      // TODO: Make sure this is a button automatically instead of an anchor
-      cy.visit('/links/as-warning-false/patch', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning-false/patch')
 
-      cy.get('@consoleWarn').should('not.be.called')
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows a warning when using DELETE inertia-links using the anchor tag', () => {
-      // TODO: Make sure this is a button automatically instead of an anchor
-      cy.visit('/links/as-warning/delete', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning/delete')
 
-      cy.get('@consoleWarn').should(
-        'be.calledWith',
-        'Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\n' +
-          'Please specify a more appropriate element using the "as" attribute. For example:\n\n' +
-          '<Link href="/example" method="delete" as="button">...</Link>',
-      )
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
 
     it('shows no warning when using DELETE inertia-links "as" a non-anchor tag', () => {
-      // TODO: Make sure this is a button automatically instead of an anchor
-      cy.visit('/links/as-warning-false/delete', {
-        onBeforeLoad: (window) => {
-          cy.spy(window.console, 'warn').as('consoleWarn')
-        },
-      })
+      cy.visit('/links/as-warning-false/delete')
 
-      cy.get('@consoleWarn').should('not.be.called')
+      cy.get('button').should('have.length', 1)
+      cy.get('a').should('have.length', 0)
     })
   })
 })

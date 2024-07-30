@@ -4,11 +4,9 @@ describe('Pages', () => {
 
     cy.window().then((window) => {
       cy.log('vue obj', window.testing.vue._)
-      //   const inertiaRoot = window.testing.vue.$children[0]
-      //   const page = inertiaRoot.$children[0]
 
-      expect(window.testing.vue._.props).to.have.property('example')
-      expect(window.testing.vue._.props.example).to.equal('FooBar')
+      expect(window._inertia_props).to.have.property('example')
+      expect(window._inertia_props.example).to.equal('FooBar')
     })
   })
 
@@ -18,9 +16,7 @@ describe('Pages', () => {
         cy.visit('/persistent-layouts/render-function/simple/page-a')
 
         cy.window().then((window) => {
-          const inertiaRoot = window.testing.vue.$children[0]
-          const layoutA = inertiaRoot.$children[0]
-          const layoutAUid = layoutA._uid
+          const layoutAUid = window._inertia_layout_id
           expect(layoutAUid).is.not.null
 
           cy.get('.text').should('have.text', 'Simple Persistent Layout - Page A')
@@ -31,9 +27,9 @@ describe('Pages', () => {
           cy.get('.text')
             .should('have.text', 'Simple Persistent Layout - Page B')
             .then(() => {
-              const layoutB = inertiaRoot.$children[0]
+              const layoutBUid = window._inertia_layout_id
 
-              expect(layoutB._uid).to.eq(layoutAUid)
+              expect(layoutBUid).to.eq(layoutAUid)
             })
         })
       })
@@ -42,12 +38,9 @@ describe('Pages', () => {
         cy.visit('/persistent-layouts/render-function/nested/page-a')
 
         cy.window().then((window) => {
-          const inertiaRoot = window.testing.vue.$children[0]
-          const siteLayoutA = inertiaRoot.$children[0]
-          const siteLayoutAUid = siteLayoutA._uid
+          const siteLayoutAUid = window._inertia_nested_layout_id
           expect(siteLayoutAUid).is.not.null
-          const nestedLayoutA = siteLayoutA.$children[0]
-          const nestedLayoutAUid = nestedLayoutA._uid
+          const nestedLayoutAUid = window._inertia_layout_id
           expect(nestedLayoutAUid).is.not.null
 
           cy.get('.text').should('have.text', 'Nested Persistent Layout - Page A')
@@ -58,11 +51,11 @@ describe('Pages', () => {
           cy.get('.text')
             .should('have.text', 'Nested Persistent Layout - Page B')
             .then(() => {
-              const siteLayoutB = inertiaRoot.$children[0]
-              const nestedLayoutB = siteLayoutB.$children[0]
+              const siteLayoutBUid = window._inertia_nested_layout_id
+              const nestedLayoutBUid = window._inertia_layout_id
 
-              expect(siteLayoutB._uid).to.eq(siteLayoutAUid)
-              expect(nestedLayoutB._uid).to.eq(nestedLayoutAUid)
+              expect(siteLayoutBUid).to.eq(siteLayoutAUid)
+              expect(nestedLayoutBUid).to.eq(nestedLayoutAUid)
             })
         })
       })
@@ -73,9 +66,7 @@ describe('Pages', () => {
         cy.visit('/persistent-layouts/shorthand/simple/page-a')
 
         cy.window().then((window) => {
-          const inertiaRoot = window.testing.vue.$children[0]
-          const layoutA = inertiaRoot.$children[0]
-          const layoutAUid = layoutA._uid
+          const layoutAUid = window._inertia_layout_id
           expect(layoutAUid).is.not.null
 
           cy.get('.text').should('have.text', 'Simple Persistent Layout - Page A')
@@ -86,9 +77,9 @@ describe('Pages', () => {
           cy.get('.text')
             .should('have.text', 'Simple Persistent Layout - Page B')
             .then(() => {
-              const layoutB = inertiaRoot.$children[0]
+              const layoutBUid = window._inertia_layout_id
 
-              expect(layoutB._uid).to.eq(layoutAUid)
+              expect(layoutBUid).to.eq(layoutAUid)
             })
         })
       })
@@ -111,12 +102,9 @@ describe('Pages', () => {
         cy.visit('/persistent-layouts/shorthand/nested/page-a')
 
         cy.window().then((window) => {
-          const inertiaRoot = window.testing.vue.$children[0]
-          const siteLayoutA = inertiaRoot.$children[0]
-          const siteLayoutAUid = siteLayoutA._uid
+          const siteLayoutAUid = window._inertia_nested_layout_id
           expect(siteLayoutAUid).is.not.null
-          const nestedLayoutA = siteLayoutA.$children[0]
-          const nestedLayoutAUid = nestedLayoutA._uid
+          const nestedLayoutAUid = window._inertia_layout_id
           expect(nestedLayoutAUid).is.not.null
 
           cy.get('.text').as('pageLabel').should('have.text', 'Nested Persistent Layout - Page A')
@@ -127,11 +115,11 @@ describe('Pages', () => {
           cy.get('.text')
             .should('have.text', 'Nested Persistent Layout - Page B')
             .then(() => {
-              const siteLayoutB = inertiaRoot.$children[0]
-              const nestedLayoutB = siteLayoutB.$children[0]
+              const siteLayoutBUid = window._inertia_nested_layout_id
+              const nestedLayoutBUid = window._inertia_layout_id
 
-              expect(siteLayoutB._uid).to.eq(siteLayoutAUid)
-              expect(nestedLayoutB._uid).to.eq(nestedLayoutAUid)
+              expect(siteLayoutBUid).to.eq(siteLayoutAUid)
+              expect(nestedLayoutBUid).to.eq(nestedLayoutAUid)
             })
         })
       })

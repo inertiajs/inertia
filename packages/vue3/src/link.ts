@@ -199,6 +199,7 @@ const Link: InertiaLink = defineComponent({
     const visitParams = {
       ...baseParams,
       onCancelToken: props.onCancelToken,
+      onBefore: props.onBefore,
       onStart: (event) => {
         inFlightCount.value++
         props.onStart(event)

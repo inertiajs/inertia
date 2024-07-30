@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
+import { getCurrentInstance, onMounted } from 'vue'
 import WithoutScrollRegion from '../../Layouts/WithoutScrollRegion.vue'
 
 defineOptions({
@@ -27,9 +27,7 @@ const preserveCallbackFalse = (page) => {
 }
 
 onMounted(() => {
-  setTimeout(() => {
-    window._inertia_page_key = window.testing.vue._.vnode.key
-  })
+  window._inertia_page_key = getCurrentInstance().uid
 })
 </script>
 

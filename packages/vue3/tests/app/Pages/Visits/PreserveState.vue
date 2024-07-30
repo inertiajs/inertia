@@ -1,6 +1,6 @@
 <script setup>
 import { router } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
+import { getCurrentInstance, onMounted } from 'vue'
 
 defineProps({
   foo: {
@@ -10,9 +10,7 @@ defineProps({
 })
 
 onMounted(() => {
-  setTimeout(() => {
-    window._inertia_page_key = window.testing.vue._.vnode.key
-  })
+  window._inertia_page_key = getCurrentInstance().uid
 })
 
 const preserve = () => {

@@ -1,13 +1,14 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { usePage } from '@inertiajs/vue3'
+import { getCurrentInstance, onMounted, ref } from 'vue'
 
 const createdAt = ref(null)
 
 onMounted(() => {
+  window._inertia_nested_layout_id = getCurrentInstance().uid
+  window._inertia_nested_layout_props = usePage().props
   createdAt.value = Date.now()
 })
-
-// window._inertia_nested_layout_props = this.$vnode.data.props
 </script>
 
 <template>

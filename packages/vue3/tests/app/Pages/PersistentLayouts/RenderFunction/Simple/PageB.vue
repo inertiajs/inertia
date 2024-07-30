@@ -1,10 +1,13 @@
 <script>
 import Layout from '@/Layouts/SiteLayout.vue'
-import { Link } from '@inertiajs/vue3'
 
 export default {
   layout: (h, page) => h(Layout, [page]),
 }
+</script>
+
+<script setup>
+import { Link } from '@inertiajs/vue3'
 </script>
 
 <template>

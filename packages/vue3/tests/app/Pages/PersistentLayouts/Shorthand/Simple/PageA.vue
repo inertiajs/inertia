@@ -1,14 +1,15 @@
 <script>
 import Layout from '@/Layouts/SiteLayout.vue'
-import { Link } from '@inertiajs/vue3'
-
-//   created() {
-//     window._inertia_page_props = this.$vnode.data.props
-//   },
 
 export default {
   layout: Layout,
 }
+</script>
+
+<script setup>
+import { Link, usePage } from '@inertiajs/vue3'
+
+window._inertia_page_props = usePage().props
 </script>
 
 <template>
