@@ -22,11 +22,9 @@ export class InitialVisit {
   }
 
   protected static handleBackForward(): boolean {
-    if (!(History.hasAnyState() && navigationType.isBackForward())) {
+    if (!navigationType.isBackForward() || !History.hasAnyState()) {
       return false
     }
-
-    History.setState('version', currentPage.get().meta.assetVersion)
 
     currentPage.set(History.getAllState(), { preserveScroll: true, preserveState: true }).then(() => {
       Scroll.restore(currentPage.get())
