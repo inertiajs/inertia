@@ -7,6 +7,7 @@ import {
   Progress,
   router,
   shouldIntercept,
+  StaleAfterOption,
 } from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
@@ -32,7 +33,7 @@ export interface InertiaLinkProps {
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  staleAfter?: number | string
+  staleAfter?: StaleAfterOption | StaleAfterOption[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -93,7 +94,7 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     staleAfter: {
-      type: [Number, String] as PropType<number | string>,
+      type: [Number, String, Array] as PropType<StaleAfterOption | StaleAfterOption[]>,
       default: 0,
     },
     onStart: {
