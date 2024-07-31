@@ -179,6 +179,7 @@ class PrefetchedRequests {
       'onSuccess',
       'onError',
       'onPrefetched',
+      'onCancelToken',
     ])
   }
 }
