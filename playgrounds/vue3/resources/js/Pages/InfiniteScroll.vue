@@ -57,7 +57,7 @@ const setItemType = (type: string) => {
       item_type: type,
       page: 1,
     },
-    fresh: ['items', 'page'],
+    reset: ['items', 'page'],
     preserveUrl: true,
   })
 }
@@ -72,13 +72,13 @@ const setItemType = (type: string) => {
       v-for="type in item_types"
       @click="setItemType(type)"
       :key="type"
-      class="px-4 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
+      class="rounded-lg bg-gray-200 px-4 py-1 hover:bg-gray-300"
     >
       {{ type }}
     </button>
   </div>
 
-  <div class="w-full max-w-2xl mt-6 overflow-hidden border rounded shadow-sm">
+  <div class="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
     <table class="w-full text-left">
       <thead>
         <tr>
@@ -93,7 +93,7 @@ const setItemType = (type: string) => {
         </tr>
       </tbody>
     </table>
-    <div ref="fetchEl" v-show="items" class="p-4 text-center bg-gray-100">Fetching more items...</div>
-    <div v-show="!items" class="p-4 text-center bg-gray-100">Loading items...</div>
+    <div ref="fetchEl" v-show="items" class="bg-gray-100 p-4 text-center">Fetching more items...</div>
+    <div v-show="!items" class="bg-gray-100 p-4 text-center">Loading items...</div>
   </div>
 </template>
