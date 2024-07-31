@@ -1,7 +1,15 @@
 import { Head } from '@inertiajs/react'
+import { Suspense } from 'react'
+import DeferredFood from '../Components/DeferredFood'
+import DeferredOrganizations from '../Components/DeferredOrganizations'
+import DeferredUsers from '../Components/DeferredUsers'
 import Layout from '../Components/Layout'
 
-const Defer = ({ users, foods, organizations}: {
+const Defer = ({
+  users,
+  foods,
+  organizations,
+}: {
   users?: {
     id: number
     name: string
@@ -15,47 +23,35 @@ const Defer = ({ users, foods, organizations}: {
   foods?: {
     id: number
     name: string
-  }[] }) => {
-
+  }[]
+}) => {
   return (
     <>
       <Head title="Form" />
       <h1 className="text-3xl">Defer</h1>
-        <div className="p-4 mt-6 bg-yellow-200 border border-yellow-500 rounded">
-            <p>Page is loaded!</p>
+      <div className="mt-6 rounded border border-yellow-500 bg-yellow-200 p-4">
+        <p>Page is loaded!</p>
+      </div>
+
+      <div className="mt-6 flex space-x-6">
+        <div className="w-1/2 rounded border border-black p-4">
+          <Suspense fallback={<p>Loading Users...</p>}>
+            <DeferredUsers />
+          </Suspense>
         </div>
 
-        <div className="flex mt-6 space-x-6">
-            <div className="w-1/2 p-4 border border-black rounded">
-            {/* <Deferred data={users} fallback={() => <p>Loading Users...</p>}> */}
-            {users ? users.map(user => (
-                <div key={user.id}>
-                <p>#{ user.id }: {user.name } ({ user.email })</p>
-                </div>
-            )) : <p>Loading Users...</p>}
-            {/* </Deferred> */}
-            </div>
-
-            <div className="w-1/2 p-4 border border-black rounded">
-                {/* <Deferred data={foods} fallback={() => <p>Loading Foods...</p>}> */}
-                {foods ?foods.map(food => (
-                <div key={food.id}>
-                    <p>#{ food.id }: {food.name }</p>
-                </div>
-                )) : <p>Loading Foods...</p>}
-                {/* </Deferred> */}
-            </div>
-
-            <div className="w-1/2 p-4 border border-black rounded">
-            {/* <Deferred data={organizations} fallback={() => <p>Loading Organizations...</p>}> */}
-            {organizations ? organizations.map(org => (
-                <div key={org.id}>
-                    <p>#{ org.id }: {org.name } ({ org.url })</p>
-                </div>
-            )) : <p>Loading Organizations...</p>}
-            {/* </Deferred> */}
-            </div>
+        <div className="w-1/2 rounded border border-black p-4">
+          <Suspense fallback={<p>Loading Food...</p>}>
+            <DeferredFood />
+          </Suspense>
         </div>
+
+        <div className="w-1/2 rounded border border-black p-4">
+          <Suspense fallback={<p>Loading Organizations...</p>}>
+            <DeferredOrganizations />
+          </Suspense>
+        </div>
+      </div>
     </>
   )
 }
