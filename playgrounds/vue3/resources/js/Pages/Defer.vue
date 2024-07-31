@@ -1,5 +1,4 @@
 <script lang="ts">
-import Deferred from '../../../../../packages/vue3/src/Deferred.vue'
 import Layout from '../Components/Layout.vue'
 import TestGrid from '../Components/TestGrid.vue'
 import TestGridItem from '../Components/TestGridItem.vue'
@@ -7,7 +6,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Deferred, Head } from '@inertiajs/vue3'
 
 defineProps<{
   users?: {
@@ -35,8 +34,8 @@ defineProps<{
   </div>
   <TestGrid>
     <TestGridItem>
-      <Deferred :data="users">
-        <template #loading>
+      <Deferred data="users">
+        <template #fallback>
           <p>Loading Users...</p>
         </template>
 
@@ -47,8 +46,8 @@ defineProps<{
     </TestGridItem>
 
     <TestGridItem>
-      <Deferred :data="foods">
-        <template #loading>
+      <Deferred data="foods">
+        <template #fallback>
           <p>Loading Foods...</p>
         </template>
 
@@ -59,8 +58,8 @@ defineProps<{
     </TestGridItem>
 
     <TestGridItem>
-      <Deferred :data="organizations">
-        <template #loading>
+      <Deferred data="organizations">
+        <template #fallback>
           <p>Loading Organizations...</p>
         </template>
 
