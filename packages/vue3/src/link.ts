@@ -1,4 +1,5 @@
 import {
+  cacheForOption,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
@@ -7,7 +8,6 @@ import {
   Progress,
   router,
   shouldIntercept,
-  StaleAfterOption,
 } from '@inertiajs/core'
 import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
@@ -33,7 +33,7 @@ export interface InertiaLinkProps {
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  staleAfter?: StaleAfterOption | StaleAfterOption[]
+  cacheFor?: cacheForOption | cacheForOption[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -93,8 +93,8 @@ const Link: InertiaLink = defineComponent({
       type: [Boolean, String, Array] as PropType<boolean | LinkPrefetchOption | LinkPrefetchOption[]>,
       default: false,
     },
-    staleAfter: {
-      type: [Number, String, Array] as PropType<StaleAfterOption | StaleAfterOption[]>,
+    cacheFor: {
+      type: [Number, String, Array] as PropType<cacheForOption | cacheForOption[]>,
       default: 0,
     },
     onStart: {
@@ -150,10 +150,10 @@ const Link: InertiaLink = defineComponent({
       return [props.prefetch]
     })()
 
-    const staleAfterValue = (() => {
-      if (props.staleAfter !== 0) {
+    const cacheForValue = (() => {
+      if (props.cacheFor !== 0) {
         // If they've provided a value, respect it
-        return props.staleAfter
+        return props.cacheFor
       }
 
       if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
@@ -216,7 +216,7 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetch = () => {
-      router.prefetch(href, baseParams, { staleAfter: staleAfterValue })
+      router.prefetch(href, baseParams, { cacheFor: cacheForValue })
     }
 
     const regularEvents = {

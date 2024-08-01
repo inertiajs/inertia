@@ -35,7 +35,7 @@ interface BaseInertiaLinkProps {
   onError?: () => void
   queryStringArrayFormat?: 'indices' | 'brackets'
   async?: boolean
-  staleAfter?: number | string
+  cacheFor?: number | string
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
 }
 
@@ -69,7 +69,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onSuccess = noop,
       onError = noop,
       prefetch = false,
-      staleAfter = 0,
+      cacheFor = 0,
       ...props
     },
     ref,
@@ -108,7 +108,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const doPrefetch = () => {
-      router.prefetch(href, baseParams, { staleAfter: staleAfterValue })
+      router.prefetch(href, baseParams, { cacheFor: cacheForValue })
     }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
@@ -130,10 +130,10 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       Array.isArray(prefetch) ? prefetch : [prefetch],
     )
 
-    const staleAfterValue = useMemo(() => {
-      if (staleAfter !== 0) {
+    const cacheForValue = useMemo(() => {
+      if (cacheFor !== 0) {
         // If they've provided a value, respect it
-        return staleAfter
+        return cacheFor
       }
 
       if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
@@ -144,7 +144,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
 
       // Otherwise, default to 30 seconds
       return 30_000
-    }, [staleAfter, prefetchModes])
+    }, [cacheFor, prefetchModes])
 
     useEffect(() => {
       return () => {

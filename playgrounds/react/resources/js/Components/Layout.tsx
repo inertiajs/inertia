@@ -5,12 +5,12 @@ export default function Layout({ children }) {
 
   return (
     <>
-      <nav className="flex items-center px-10 py-6 space-x-6 text-white bg-slate-800">
-        <div className="px-4 py-1 rounded-lg bg-slate-700">{appName}</div>
+      <nav className="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">
+        <div className="rounded-lg bg-slate-700 px-4 py-1">{appName}</div>
         <Link href="/" className="hover:underline" prefetch>
           Home
         </Link>
-        <Link href="/users" className="hover:underline" prefetch="hover" staleAfter={6000}>
+        <Link href="/users" className="hover:underline" prefetch="hover" cacheFor={6000}>
           Users
         </Link>
         <Link href="/article" className="hover:underline" prefetch="mount" stale-after="10s">
