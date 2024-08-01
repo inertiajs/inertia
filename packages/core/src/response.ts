@@ -32,6 +32,8 @@ export class Response {
       return this.handleNonInertiaResponse()
     }
 
+    History.preserveUrl = this.requestParams.params.preserveUrl
+
     await this.setPage()
 
     const errors = currentPage.get().props.errors || {}
@@ -47,6 +49,8 @@ export class Response {
     fireSuccessEvent(currentPage.get())
 
     await this.requestParams.all().onSuccess(currentPage.get())
+
+    History.preserveUrl = false
   }
 
   public mergeParams(params: ActiveVisit) {
@@ -154,6 +158,19 @@ export class Response {
 
   protected mergeProps(pageResponse: Page): void {
     if (this.requestParams.isPartial() && pageResponse.component === currentPage.get().component) {
+      const propsToMerge = pageResponse.meta.mergeProps || []
+
+      propsToMerge.forEach((prop) => {
+        if (Array.isArray(pageResponse.props[prop])) {
+          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...pageResponse.props[prop]]
+        } else if (typeof pageResponse.props[prop] === 'object') {
+          pageResponse.props[prop] = {
+            ...((currentPage.get().props[prop] || []) as Record<string, any>),
+            ...pageResponse.props[prop],
+          }
+        }
+      })
+
       pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
     }
   }

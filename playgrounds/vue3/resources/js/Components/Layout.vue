@@ -19,6 +19,7 @@ const appName = computed(() => page.props.appName)
     <Link href="/async" class="hover:underline">Async Request</Link>
     <Link href="/defer" class="hover:underline">Defer</Link>
     <Link href="/poll" class="hover:underline">Poll</Link>
+    <Link href="/infinite-scroll" class="hover:underline">To Infinity</Link>
   </nav>
   <main class="px-10 py-8">
     <slot />

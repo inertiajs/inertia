@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -96,6 +97,30 @@ Route::get('/async', function () {
         'jonathan' => Cache::get('jonathan', false),
         'taylor' => Cache::get('taylor', false),
         'joe' => Cache::get('joe', false),
+    ]);
+});
+
+Route::get('/infinite-scroll', function () {
+    $page = request()->integer('page', 1);
+    $perPage = 25;
+    $start = ($page - 1) * $perPage;
+    $end = $start + $perPage;
+    $itemTypes = ['user', 'food', 'animal', 'plant'];
+    $itemType = request()->input('item_type', $itemTypes[0]);
+
+    return inertia('InfiniteScroll', [
+        'items' => Inertia::defer(
+            function () use ($start, $end, $itemType) {
+                sleep(1);
+                return collect(range($start, $end))->map(fn ($i) => [
+                    'id' => $i,
+                    'name' => ucwords($itemType) . ' ' . $i,
+                ])->toArray();
+            }
+        )->merge(),
+        'page' => $page,
+        'item_type' => $itemType,
+        'item_types' => $itemTypes,
     ]);
 });
 
