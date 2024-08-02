@@ -4,10 +4,10 @@ import { timeToMs } from './time'
 import {
   ActivelyPrefetching,
   ActiveVisit,
+  cacheForOption,
   PrefetchedResponse,
   PrefetchOptions,
   PrefetchRemovalTimer,
-  StaleAfterOption,
 } from './types'
 
 class PrefetchedRequests {
@@ -15,7 +15,7 @@ class PrefetchedRequests {
   protected activeRequests: ActivelyPrefetching[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
 
-  public add(params: ActiveVisit, sendFunc: (params: ActiveVisit) => void, { staleAfter }: PrefetchOptions) {
+  public add(params: ActiveVisit, sendFunc: (params: ActiveVisit) => void, { cacheFor }: PrefetchOptions) {
     const inFlight = this.findInFlight(params)
 
     if (inFlight) {
@@ -28,7 +28,7 @@ class PrefetchedRequests {
       return Promise.resolve()
     }
 
-    const [stale, expires] = this.extractStaleValues(staleAfter)
+    const [stale, expires] = this.extractStaleValues(cacheFor)
 
     const promise = new Promise((resolve, reject) => {
       sendFunc({
@@ -83,18 +83,18 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected extractStaleValues(staleAfter: PrefetchOptions['staleAfter']): [StaleAfterOption, StaleAfterOption] {
-    if (!Array.isArray(staleAfter)) {
-      return [staleAfter, staleAfter]
+  protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [cacheForOption, cacheForOption] {
+    if (!Array.isArray(cacheFor)) {
+      return [cacheFor, cacheFor]
     }
 
-    switch (staleAfter.length) {
+    switch (cacheFor.length) {
       case 0:
         return [0, 0]
       case 1:
-        return [staleAfter[0], staleAfter[0]]
+        return [cacheFor[0], cacheFor[0]]
       default:
-        return [staleAfter[0], staleAfter[1]]
+        return [cacheFor[0], cacheFor[1]]
     }
   }
 
@@ -109,7 +109,7 @@ class PrefetchedRequests {
     }
   }
 
-  protected scheduleForRemoval(params: ActiveVisit, expiresIn: StaleAfterOption) {
+  protected scheduleForRemoval(params: ActiveVisit, expiresIn: cacheForOption) {
     this.clearTimer(params)
 
     expiresIn = timeToMs(expiresIn)

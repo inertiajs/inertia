@@ -247,7 +247,7 @@ export class Router {
       reset = [],
       preserveUrl = false,
     }: VisitOptions = {},
-    { staleAfter }: PrefetchOptions,
+    { cacheFor }: PrefetchOptions,
   ) {
     if (method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
@@ -309,7 +309,7 @@ export class Router {
       (params) => {
         requestStream.send(Request.create(params, currentPage.get()))
       },
-      { staleAfter },
+      { cacheFor },
     )
   }
 

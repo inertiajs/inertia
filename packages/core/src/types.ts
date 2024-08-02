@@ -233,10 +233,10 @@ export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
-export type StaleAfterOption = number | string
+export type cacheForOption = number | string
 
 export type PrefetchOptions = {
-  staleAfter: StaleAfterOption | StaleAfterOption[]
+  cacheFor: cacheForOption | cacheForOption[]
 }
 
 export type ActivelyPrefetching = {
