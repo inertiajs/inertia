@@ -200,12 +200,14 @@ export class Response {
       const propsToMerge = pageResponse.meta.mergeProps || []
 
       propsToMerge.forEach((prop) => {
-        if (Array.isArray(pageResponse.props[prop])) {
-          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...pageResponse.props[prop]]
-        } else if (typeof pageResponse.props[prop] === 'object') {
+        const incomingProp = pageResponse.props[prop]
+
+        if (Array.isArray(incomingProp)) {
+          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
+        } else if (typeof incomingProp === 'object') {
           pageResponse.props[prop] = {
             ...((currentPage.get().props[prop] || []) as Record<string, any>),
-            ...pageResponse.props[prop],
+            ...incomingProp,
           }
         }
       })
