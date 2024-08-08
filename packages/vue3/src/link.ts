@@ -38,6 +38,7 @@ export interface InertiaLinkProps {
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
 
+// @ts-ignore
 const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
@@ -97,9 +98,12 @@ const Link: InertiaLink = defineComponent({
       type: [Number, String, Array] as PropType<cacheForOption | cacheForOption[]>,
       default: 0,
     },
+    // @ts-ignore
     onStart: {
+      // @ts-ignore
       type: Function as PropType<(visit: PendingVisit) => void>,
-      default: () => {},
+      // @ts-ignore
+      default: (visit) => {},
     },
     onProgress: {
       type: Function as PropType<(progress: Progress) => void>,
