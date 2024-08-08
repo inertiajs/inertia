@@ -47,7 +47,7 @@ export class RequestParams {
   }
 
   public isPartial() {
-    return this.params.only.length > 0 || this.params.except.length > 0
+    return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
   }
 
   public onCancelToken(cb: VoidFunction) {

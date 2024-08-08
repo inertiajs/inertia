@@ -42,20 +42,22 @@ export class Router {
       swapComponent,
     })
 
-    currentPage.on('firstLoad', () => {
-      this.loadDeferredProps()
-    })
-
-    currentPage.on('newComponent', () => {
-      polls.clear()
-      this.loadDeferredProps()
-    })
+    // currentPage.on('newComponent', () => {
+    //     // TODO: Too magic, use the hook
+    //   polls.clear()
+    // })
 
     InitialVisit.handle()
 
     eventHandler.init()
+
     eventHandler.on('missingHistoryItem', () => {
       this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+    })
+
+    eventHandler.onGlobalEvent('navigate', () => {
+      this.loadDeferredProps()
+      //   polls.clear()
     })
   }
 
@@ -117,7 +119,10 @@ export class Router {
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
-    return polls.add(interval, () => this.reload(requestOptions), { keepAlive: options.keepAlive || false })
+    return polls.add(interval, () => this.reload(requestOptions), {
+      autoStart: options.autoStart ?? true,
+      keepAlive: options.keepAlive ?? false,
+    })
   }
 
   public visit(

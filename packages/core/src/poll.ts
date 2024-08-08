@@ -9,12 +9,12 @@ export class Poll {
   protected cbCount = 0
 
   constructor(interval: number, cb: VoidFunction, options: PollOptions) {
-    this.keepAlive = options.keepAlive || false
+    this.keepAlive = options.keepAlive ?? false
 
     this.cb = cb
     this.interval = interval
 
-    if (options.autoStart || true) {
+    if (options.autoStart ?? true) {
       this.start()
     }
   }

@@ -161,7 +161,7 @@ export class Response {
 
     this.requestParams.setPreserveOptions(pageResponse)
 
-    pageResponse.url = this.pageUrl(pageResponse)
+    pageResponse.url = History.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
@@ -184,7 +184,16 @@ export class Response {
 
     // At this point, if the originating request component is different than the current component,
     // the user has since navigated and we should discard the response
-    return this.originatingPage.component === currentPage.get().component
+    if (this.originatingPage.component !== currentPage.get().component) {
+      return false
+    }
+
+    const originatingUrl = hrefToUrl(this.originatingPage.url)
+    const currentPageUrl = hrefToUrl(currentPage.get().url)
+
+    // We have the same component, let's double-check the URL
+    // If we're no longer on the same path name (e.g. /users/1 -> /users/2), we should not set the page
+    return originatingUrl.origin === currentPageUrl.origin && originatingUrl.pathname === currentPageUrl.pathname
   }
 
   protected pageUrl(pageResponse: Page) {

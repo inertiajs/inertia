@@ -5,7 +5,7 @@ const checkForData = (keys: string[]) => {
   let result
   let data
 
-  const suspender: Promise<void> = new Promise((resolve, reject) => {
+  const suspender: Promise<void> = new Promise((resolve) => {
     const checkIfPresent = () => {
       if (!data?.props || !keys.every((key) => data.props[key] !== undefined)) {
         setTimeout(() => checkIfPresent(), 50)
