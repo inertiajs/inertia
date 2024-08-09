@@ -1,12 +1,13 @@
 <script lang="ts">
 import Layout from '../Components/Layout.vue'
+import Spinner from '../Components/Spinner.vue'
 import TestGrid from '../Components/TestGrid.vue'
 import TestGridItem from '../Components/TestGridItem.vue'
 export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Deferred, Head } from '@inertiajs/vue3'
+import { Deferred, Head, WhenVisible } from '@inertiajs/vue3'
 
 defineProps<{
   users?: {
@@ -23,13 +24,25 @@ defineProps<{
     id: number
     name: string
   }[]
+  surprise?: {
+    id: number
+    name: string
+  }[]
+  dogs?: {
+    id: number
+    name: string
+  }[]
+  lunch?: {
+    id: number
+    name: string
+  }[]
 }>()
 </script>
 
 <template>
   <Head title="Async Request" />
   <h1 class="text-3xl">Deferred Props</h1>
-  <div class="mt-6 rounded border border-yellow-500 bg-yellow-200 p-4">
+  <div class="p-4 mt-6 bg-yellow-200 border border-yellow-500 rounded">
     <p>Page is loaded!</p>
   </div>
   <TestGrid>
@@ -69,4 +82,42 @@ defineProps<{
       </Deferred>
     </TestGridItem>
   </TestGrid>
+
+  <div class="mt-72">
+    <WhenVisible data="surprise">
+      <template #loading>
+        <div class="h-24">
+          <div class="flex items-center"><Spinner /> Loading Surprise...</div>
+        </div>
+      </template>
+
+      <div v-for="sur in surprise">
+        <p>#{{ sur.id }}: {{ sur.name }}</p>
+      </div>
+    </WhenVisible>
+  </div>
+
+  <div class="mt-72">
+    <WhenVisible :data="['dogs', 'lunch']" :buffer="20">
+      <template #loading>
+        <div class="h-20">
+          <div class="flex items-center"><Spinner /> Loading Dogs and Lunch...</div>
+        </div>
+      </template>
+
+      <div class="flex space-x-6">
+        <div>
+          <div v-for="dog in dogs">
+            <p>#{{ dog.id }}: {{ dog.name }}</p>
+          </div>
+        </div>
+
+        <div>
+          <div v-for="item in lunch">
+            <p>#{{ item.id }}: {{ item.name }}</p>
+          </div>
+        </div>
+      </div>
+    </WhenVisible>
+  </div>
 </template>

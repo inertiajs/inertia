@@ -143,7 +143,6 @@ Route::get('/defer', function () {
     info("defer route");
     return inertia('Defer', [
         'users' => Inertia::defer(function () {
-            info("resolving users");
             sleep(1);
 
             return [
@@ -165,7 +164,6 @@ Route::get('/defer', function () {
             ];
         }, 'u'),
         'foods' => Inertia::defer(function () {
-            info("resolving foods");
             sleep(3);
 
             return [
@@ -184,7 +182,6 @@ Route::get('/defer', function () {
             ];
         }, 'f'),
         'organizations' => Inertia::defer(function () {
-            info("resolving organizations");
             sleep(2);
 
             return [
@@ -205,6 +202,64 @@ Route::get('/defer', function () {
                 ],
             ];
         }, 'o'),
+        'surprise' => Inertia::optional(function () {
+            sleep(2);
+
+            return [
+                [
+                    'id' => 1,
+                    'name' => 'Surprise!',
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Aha!',
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Gotcha!',
+                ],
+                [
+                    'id' => 4,
+                    'name' => '👋!',
+                ],
+            ];
+        }),
+        'dogs' => Inertia::optional(function () {
+            sleep(1);
+
+            return [
+                [
+                    'id' => 1,
+                    'name' => '🐕',
+                ],
+                [
+                    'id' => 2,
+                    'name' => '🐩',
+                ],
+                [
+                    'id' => 3,
+                    'name' => '🐶',
+                ],
+            ];
+        }),
+        'lunch' => Inertia::optional(function () {
+            sleep(1);
+
+            return [
+                [
+                    'id' => 1,
+                    'name' => '🍔',
+                ],
+                [
+                    'id' => 2,
+                    'name' => '🍟',
+                ],
+                [
+                    'id' => 3,
+                    'name' => '🥤',
+                ],
+            ];
+        }),
     ]);
 });
 
