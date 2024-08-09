@@ -4,8 +4,8 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3'
-import { onMounted, ref } from 'vue'
+import { Head, router, WhenVisible } from '@inertiajs/vue3'
+import { ref } from 'vue'
 
 const props = defineProps<{
   items?: {
@@ -17,37 +17,7 @@ const props = defineProps<{
   item_type: string
 }>()
 
-const fetchEl = ref<HTMLElement | null>(null)
 const currentItemType = ref(props.item_type)
-const fetching = ref(false)
-
-onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting && !fetching.value) {
-        router.reload({
-          data: {
-            item_type: currentItemType.value,
-            page: props.page + 1,
-          },
-          only: ['items', 'page'],
-          preserveUrl: true,
-          onStart() {
-            fetching.value = true
-          },
-          onFinish() {
-            fetching.value = false
-          },
-        })
-      }
-    },
-    {
-      rootMargin: '200px',
-    },
-  )
-
-  observer.observe(fetchEl.value!)
-})
 
 const setItemType = (type: string) => {
   currentItemType.value = type
@@ -72,13 +42,13 @@ const setItemType = (type: string) => {
       v-for="type in item_types"
       @click="setItemType(type)"
       :key="type"
-      class="rounded-lg bg-gray-200 px-4 py-1 hover:bg-gray-300"
+      class="px-4 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
     >
       {{ type }}
     </button>
   </div>
 
-  <div class="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
+  <div class="w-full max-w-2xl mt-6 overflow-hidden border rounded shadow-sm">
     <table class="w-full text-left">
       <thead>
         <tr>
@@ -93,7 +63,26 @@ const setItemType = (type: string) => {
         </tr>
       </tbody>
     </table>
-    <div ref="fetchEl" v-show="items" class="bg-gray-100 p-4 text-center">Fetching more items...</div>
-    <div v-show="!items" class="bg-gray-100 p-4 text-center">Loading items...</div>
+
+    <div v-if="!items" class="p-4 text-center bg-gray-100">Loading items...</div>
+    <WhenVisible
+      v-else
+      :once="false"
+      :buffer="200"
+      :params="{
+        data: {
+          item_type: currentItemType,
+          page: page + 1,
+        },
+        only: ['items', 'page'],
+        preserveUrl: true,
+      }"
+    >
+      <template #fallback>
+        <div class="p-4 text-center bg-gray-100">Fetching more items...</div>
+      </template>
+
+      <div class="p-4 text-center bg-gray-100">Fetching more items...</div>
+    </WhenVisible>
   </div>
 </template>

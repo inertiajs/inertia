@@ -85,7 +85,7 @@ defineProps<{
 
   <div class="mt-72">
     <WhenVisible data="surprise">
-      <template #loading>
+      <template #fallback>
         <div class="h-24">
           <div class="flex items-center"><Spinner /> Loading Surprise...</div>
         </div>
@@ -98,8 +98,8 @@ defineProps<{
   </div>
 
   <div class="mt-72">
-    <WhenVisible :data="['dogs', 'lunch']" :buffer="20">
-      <template #loading>
+    <WhenVisible :data="['dogs', 'lunch']" :buffer="200">
+      <template #fallback>
         <div class="h-20">
           <div class="flex items-center"><Spinner /> Loading Dogs and Lunch...</div>
         </div>
