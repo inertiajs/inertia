@@ -26,11 +26,9 @@
 
   let prevComponent: ComponentType
   let key: number
-  $: {
-    if (prevComponent !== component) {
-      key = Date.now()
-      prevComponent = component
-    }
+  $: if (prevComponent !== component) {
+    key = Date.now()
+    prevComponent = component
   }
 </script>
 
