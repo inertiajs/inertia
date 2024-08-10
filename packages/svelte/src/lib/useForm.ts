@@ -57,11 +57,12 @@ export default function useForm<TForm extends FormDataType>(
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const inputData = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const data: TForm = typeof inputData === 'function' ? inputData() : inputData as TForm
   const restored = rememberKey
-    ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
+    ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> } | null)
     : null
-  let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
+  let defaults = cloneDeep(data)
   let cancelToken: { cancel: () => void } | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
@@ -75,39 +76,33 @@ export default function useForm<TForm extends FormDataType>(
     wasSuccessful: false,
     recentlySuccessful: false,
     processing: false,
-    setStore(keyOrData, maybeData = undefined) {
+    setStore(keyOrData, maybeValue = undefined) {
       store.update((store) => {
-        return Object.assign(store, typeof keyOrData === 'string' ? { [keyOrData]: maybeData } : keyOrData)
+        return Object.assign(store, typeof keyOrData === 'string' ? { [keyOrData]: maybeValue } : keyOrData)
       })
     },
     data() {
-      return Object.keys((typeof data === 'function' ? data() : data) as FormDataType).reduce((carry, key) => {
+      return Object.keys(data).reduce((carry, key) => {
         carry[key] = this[key]
         return carry
       }, {} as FormDataType) as TForm
     },
     transform(callback) {
       transform = callback
-
       return this
     },
-    defaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
-      if (typeof fieldOrFields === 'undefined') {
-        defaults = Object.assign(defaults, cloneDeep(this.data()))
-
-        return this
-      }
-
-      defaults = Object.assign(
-        cloneDeep(defaults),
-        cloneDeep(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
-      )
+    defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
+      defaults = typeof fieldOrFields === 'undefined'
+        ? cloneDeep(this.data())
+        : Object.assign(
+            cloneDeep(defaults),
+            typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
+          )
 
       return this
     },
     reset(...fields) {
-      const resolvedData: TForm = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data!())
-      const clonedData = cloneDeep(resolvedData) as TForm
+      const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
         this.setStore(clonedData)
       } else {
@@ -126,7 +121,7 @@ export default function useForm<TForm extends FormDataType>(
     setError(fieldOrFields: keyof TForm | Errors, maybeValue?: string) {
       this.setStore('errors', {
         ...this.errors,
-        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as any),
+        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
       })
 
       return this
@@ -140,12 +135,11 @@ export default function useForm<TForm extends FormDataType>(
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
           }),
           {},
-        ),
+        ) as Errors,
       )
-
       return this
     },
-    submit(method, url, options = {}) {
+    submit(method, url, options: Partial<VisitOptions> = {}) {
       const data = transform(this.data()) as RequestPayload
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
@@ -262,5 +256,5 @@ export default function useForm<TForm extends FormDataType>(
     }
   })
 
-  return store as Writable<InertiaForm<TForm>>
+  return store
 }
