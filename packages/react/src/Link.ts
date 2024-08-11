@@ -7,12 +7,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useCallback } from 'react'
+import React, { ElementType, createElement, forwardRef, useCallback } from 'react'
 
 const noop = () => undefined
 
 interface BaseInertiaLinkProps {
-  as?: string
+  as?: string | ElementType
   data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
@@ -115,13 +115,13 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       ],
     )
 
-    as = as.toLowerCase()
+    const isAnchor = as === 'a' || as === 'A'
     method = method.toLowerCase() as Method
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
     data = _data
 
-    if (as === 'a' && method !== 'get') {
+    if (isAnchor && method !== 'get') {
       console.warn(
         `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
       )
@@ -131,7 +131,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       as,
       {
         ...props,
-        ...(as === 'a' ? { href } : {}),
+        ...(isAnchor ? { href } : {}),
         ref,
         onClick: visit,
       },
