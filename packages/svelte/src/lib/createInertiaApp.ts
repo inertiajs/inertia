@@ -86,7 +86,7 @@ export default async function createInertiaApp({
     if (!result && typeof (SSR as SSRComponentType).render !== 'function') {
       throw new Error(`setup(...) must return rendered result when in SSR mode.`)
     } else if (!result) {
-      console.warn('Deprecated: in SSR mode setup(...) must be defined and must return rendered result in SSR mode.')
+      console.warn('Deprecated: setup(...) must be defined and must return rendered result in SSR mode.')
       console.warn('For Svelte 5: `return render(App, { props })` or for Svelte 4: `return App.render(props)`')
       result ||= (SSR as SSRComponentType).render!({ id, initialPage })
     }
