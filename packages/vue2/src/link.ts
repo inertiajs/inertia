@@ -7,10 +7,10 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { FunctionalComponentOptions, PropType } from 'vue'
+import { Component, FunctionalComponentOptions, PropType } from 'vue'
 
 export interface InertiaLinkProps {
-  as?: string
+  as?: string | Component
   data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
@@ -37,7 +37,7 @@ const Link: InertiaLink = {
   functional: true,
   props: {
     as: {
-      type: String,
+      type: [String, Object] as PropType<string | Component>,
       default: 'a',
     },
     data: {
@@ -93,7 +93,7 @@ const Link: InertiaLink = {
       ...(data.on || {}),
     }
 
-    const as = props.as.toLowerCase()
+    const isAnchor = props.as === 'a' || props.as === 'A'
     const method = props.method.toLowerCase() as Method
     const [href, propsData] = mergeDataIntoQueryString(
       method,
@@ -102,7 +102,7 @@ const Link: InertiaLink = {
       props.queryStringArrayFormat,
     )
 
-    if (as === 'a' && method !== 'get') {
+    if (isAnchor && method !== 'get') {
       console.warn(
         `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
       )
@@ -114,7 +114,7 @@ const Link: InertiaLink = {
         ...data,
         attrs: {
           ...data.attrs,
-          ...(as === 'a' ? { href } : {}),
+          ...(isAnchor ? { href } : {}),
         },
         on: {
           ...data.on,
