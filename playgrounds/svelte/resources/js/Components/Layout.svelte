@@ -1,5 +1,18 @@
 <script>
+  import { onMount, onDestroy } from 'svelte'
   import { inertia, page } from '@inertiajs/svelte'
+
+  export let name
+
+  $: console.log(`Navigated to ${name}`, new Date().getTime())
+
+  onMount(() => {
+    console.log(`Mounted <Layout />`)
+  })
+
+  onDestroy(() => {
+    console.log(`Destroyed <Layout />`)
+  })
 </script>
 
 <nav class="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">

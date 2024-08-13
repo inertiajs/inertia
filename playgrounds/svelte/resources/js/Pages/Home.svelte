@@ -14,5 +14,6 @@
 <h1 class="text-3xl">Home</h1>
 
 <p class="mt-6">
-  <a href="/article#far-down" use:inertia class="text-blue-700 underline">Link to bottom of article page</a>
+  <a href="/article#far-down" use:inertia class="text-blue-700 underline">Link to bottom of article page</a><br>
+  <a href="/foo" use:inertia class="text-blue-700 underline">Test page component rendering</a>
 </p>
