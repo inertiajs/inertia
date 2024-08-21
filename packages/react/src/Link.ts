@@ -17,6 +17,7 @@ interface BaseInertiaLinkProps {
   href: string
   method?: Method
   headers?: Record<string, string>
+  external?: boolean  // New prop for external links
   onClick?: (event: React.MouseEvent<Element>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
@@ -46,6 +47,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       data = {},
       href,
       method = 'get',
+      external = false,  // Destructure the external prop
       preserveScroll = false,
       preserveState = null,
       replace = false,
@@ -69,6 +71,11 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const visit = useCallback(
       (event: React.MouseEvent) => {
         onClick(event)
+
+        if (external) {
+          // If external is true, do nothing special
+          return
+        }
 
         if (shouldIntercept(event.nativeEvent)) {
           event.preventDefault()
@@ -97,6 +104,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         data,
         href,
         method,
+        external,
         preserveScroll,
         preserveState,
         replace,
@@ -121,7 +129,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     href = _href
     data = _data
 
-    if (as === 'a' && method !== 'get') {
+    if (as === 'a' && method !== 'get' && !external) {
       console.warn(
         `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
       )
