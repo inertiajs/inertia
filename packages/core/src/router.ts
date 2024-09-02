@@ -70,7 +70,7 @@ export class Router {
 
   protected setNavigationType(): void {
     this.navigationType =
-      window.performance && window.performance.getEntriesByType('navigation').length > 0
+      window.performance && window.performance.getEntriesByType && window.performance.getEntriesByType('navigation').length > 0
         ? (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
         : 'navigate'
   }
