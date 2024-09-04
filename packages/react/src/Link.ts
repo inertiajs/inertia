@@ -11,13 +11,24 @@ import { createElement, forwardRef, useCallback } from 'react'
 
 const noop = () => undefined
 
+// Hook to determine if a link is internal or external
+const useLink = (url: string) => {
+  if (!url) return false
+
+  try {
+    const linkUrl = new URL(url, window.location.origin)
+    return linkUrl.origin === window.location.origin
+  } catch (e) {
+    return false
+  }
+}
+
 interface BaseInertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
   headers?: Record<string, string>
-  external?: boolean  // New prop for external links
   onClick?: (event: React.MouseEvent<Element>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
@@ -47,7 +58,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       data = {},
       href,
       method = 'get',
-      external = false,  // Destructure the external prop
       preserveScroll = false,
       preserveState = null,
       replace = false,
@@ -68,12 +78,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     },
     ref,
   ) => {
+    const isInternalLink = useLink(href)  // Determine if the link is internal
+
     const visit = useCallback(
       (event: React.MouseEvent) => {
         onClick(event)
 
-        if (external) {
-          // If external is true, do nothing special
+        if (!isInternalLink) {
+          // If the link is external, do nothing special
           return
         }
 
@@ -104,7 +116,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         data,
         href,
         method,
-        external,
+        isInternalLink,
         preserveScroll,
         preserveState,
         replace,
@@ -129,7 +141,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     href = _href
     data = _data
 
-    if (as === 'a' && method !== 'get' && !external) {
+    if (as === 'a' && method !== 'get' && isInternalLink) {
       console.warn(
         `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
       )
