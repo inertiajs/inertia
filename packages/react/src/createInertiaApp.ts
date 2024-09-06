@@ -35,8 +35,9 @@ type BaseInertiaAppOptions = {
 type CreateInertiaAppSetupReturnType = ReactInstance | void
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: string
-  page?: Page | string
+  page?: Page
   render?: undefined
+  initialData?: (el: HTMLElement) => Page
   progress?:
     | false
     | {
@@ -51,8 +52,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOpti
 type CreateInertiaAppSSRContent = { head: string[]; body: string }
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: undefined
-  page: Page | string
+  page: Page
   render: typeof renderToString
+  initialData?: undefined
   progress?: undefined
   setup(options: SetupOptions<null, SharedProps>): ReactInstance
 }
@@ -68,6 +70,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   resolve,
   setup,
   title,
+  initialData = (el) => JSON.parse(el.dataset.page),
   progress = {},
   page,
   render,
@@ -76,7 +79,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 > {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el.dataset.page)
+  const initialPage = page || initialData(el)
   // @ts-expect-error
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
@@ -88,6 +91,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       el,
       App,
       props: {
+        // @ts-expect-error
         initialPage,
         initialComponent,
         resolveComponent,

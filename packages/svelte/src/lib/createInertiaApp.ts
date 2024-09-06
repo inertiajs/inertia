@@ -17,6 +17,7 @@ interface CreateInertiaAppProps {
       resolveComponent: ComponentResolver
     }
   }) => void | SvelteApp
+  initialData?: (el: HTMLElement | null) => Page
   progress?:
     | false
     | {
@@ -32,12 +33,13 @@ export default async function createInertiaApp({
   id = 'app',
   resolve,
   setup,
+  initialData = (el) => JSON.parse(el?.dataset.page ?? '{}'),
   progress = {},
   page,
 }: CreateInertiaAppProps): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el?.dataset.page ?? '{}')
+  const initialPage = page || initialData(el)
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
   await resolveComponent(initialPage.component).then((initialComponent) => {

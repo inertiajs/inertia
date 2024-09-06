@@ -7,6 +7,7 @@ interface CreateInertiaAppProps {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
   setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: (title: string) => string
+  initialData?: (el: HTMLElement) => Page
   progress?:
     | false
     | {
@@ -24,13 +25,14 @@ export default async function createInertiaApp({
   resolve,
   setup,
   title,
+  initialData = (el) => JSON.parse(el.dataset.page),
   progress = {},
   page,
   render,
 }: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el.dataset.page)
+  const initialPage = page || initialData(el)
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
