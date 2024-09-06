@@ -39,10 +39,10 @@ const page = usePage()
     <span @click="visitsMethod" class="visits-method">Manual basic visits</span>
     <span @click="visitsReplace" class="visits-replace">Manual 'Replace' visits</span>
 
-    <Link href="/redirect" method="post" class="links-redirect">Redirect Link</Link>
+    <Link href="/redirect" method="post" class="links-redirect">Internal Redirect Link</Link>
     <span @click="redirect" class="visits-redirect">Manual Redirect visit</span>
 
-    <Link href="/redirect-external" method="post" class="links-redirect-external">Redirect Link</Link>
+    <Link href="/redirect-external" method="post" class="links-redirect-external">External Redirect Link</Link>
     <span @click="redirectExternal" class="visits-redirect-external">Manual External Redirect visit</span>
   </div>
 </template>
