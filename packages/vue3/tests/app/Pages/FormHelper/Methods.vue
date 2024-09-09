@@ -33,9 +33,9 @@ const deleteForm = () => {
       <input type="checkbox" id="remember" name="remember" v-model="form.remember" />
     </label>
 
-    <span @click="postForm" class="post">POST form</span>
-    <span @click="putForm" class="put">PUT form</span>
-    <span @click="patchForm" class="patch">PATCH form</span>
-    <span @click="deleteForm" class="delete">DELETE form</span>
+    <button @click="postForm" class="post">POST form</button>
+    <button @click="putForm" class="put">PUT form</button>
+    <button @click="patchForm" class="patch">PATCH form</button>
+    <button @click="deleteForm" class="delete">DELETE form</button>
   </div>
 </template>

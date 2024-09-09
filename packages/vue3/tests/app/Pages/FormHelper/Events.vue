@@ -1,23 +1,29 @@
 <script setup>
 import { useForm, usePage } from '@inertiajs/vue3'
 
+window.messages = []
+
 const form = useForm({
   name: 'foo',
   remember: false,
 })
 
+const pushMessage = (message) => {
+  window.messages.push(message)
+}
+
 const page = usePage()
 
 const callbacks = (overrides = {}) => {
   const defaults = {
-    onBefore: () => alert('onBefore'),
-    onCancelToken: () => alert('onCancelToken'),
-    onStart: () => alert('onStart'),
-    onProgress: () => alert('onProgress'),
-    onFinish: () => alert('onFinish'),
-    onCancel: () => alert('onCancel'),
-    onSuccess: () => alert('onSuccess'),
-    onError: () => alert('onError'),
+    onBefore: () => pushMessage('onBefore'),
+    onCancelToken: () => pushMessage('onCancelToken'),
+    onStart: () => pushMessage('onStart'),
+    onProgress: () => pushMessage('onProgress'),
+    onFinish: () => pushMessage('onFinish'),
+    onCancel: () => pushMessage('onCancel'),
+    onSuccess: () => pushMessage('onSuccess'),
+    onError: () => pushMessage('onError'),
   }
 
   return {
@@ -39,23 +45,23 @@ const successfulRequest = () => {
 const onSuccessResetErrors = () => {
   form.post('/form-helper/events/errors', {
     onBefore: () => {
-      alert('onBefore')
-      alert(form.hasErrors)
+      pushMessage('onBefore')
+      pushMessage(form.hasErrors)
     },
     onError: () => {
-      alert('onError')
-      alert(form.hasErrors)
+      pushMessage('onError')
+      pushMessage(form.hasErrors)
 
       form.post('/form-helper/events', {
         onStart: () => {
-          alert('onStart')
-          alert(form.hasErrors)
-          alert(form.errors)
+          pushMessage('onStart')
+          pushMessage(form.hasErrors)
+          pushMessage(form.errors)
         },
         onSuccess: () => {
-          alert('onSuccess')
-          alert(form.hasErrors)
-          alert(form.errors)
+          pushMessage('onSuccess')
+          pushMessage(form.hasErrors)
+          pushMessage(form.errors)
         },
       })
     },
@@ -66,12 +72,12 @@ const errorsSetOnError = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
       onStart: () => {
-        alert('onStart')
-        alert(form.errors)
+        pushMessage('onStart')
+        pushMessage(form.errors)
       },
       onError: () => {
-        alert('onError')
-        alert(form.errors)
+        pushMessage('onError')
+        pushMessage(form.errors)
       },
     }),
   })
@@ -81,8 +87,8 @@ const onBeforeVisit = () => {
   form.post('/sleep', {
     ...callbacks({
       onBefore: (visit) => {
-        alert('onBefore')
-        alert(visit)
+        pushMessage('onBefore')
+        pushMessage(visit)
       },
     }),
   })
@@ -92,7 +98,7 @@ const onBeforeVisitCancelled = () => {
   form.post('/sleep', {
     ...callbacks({
       onBefore: (visit) => {
-        alert('onBefore')
+        pushMessage('onBefore')
         return false
       },
     }),
@@ -103,8 +109,8 @@ const onStartVisit = () => {
   form.post('/form-helper/events', {
     ...callbacks({
       onStart: (visit) => {
-        alert('onStart')
-        alert(visit)
+        pushMessage('onStart')
+        pushMessage(visit)
       },
     }),
   })
@@ -119,8 +125,8 @@ const onProgressVisit = () => {
     .post('/dump/post', {
       ...callbacks({
         onProgress: (event) => {
-          alert('onProgress')
-          alert(event)
+          pushMessage('onProgress')
+          pushMessage(event)
         },
       }),
     })
@@ -130,10 +136,10 @@ const cancelledVisit = () => {
   form.post('/sleep', {
     ...callbacks({
       onCancelToken: (token) => {
-        alert('onCancelToken')
+        pushMessage('onCancelToken')
 
         setTimeout(() => {
-          alert('CANCELLING!')
+          pushMessage('CANCELLING!')
           token.cancel()
         }, 10)
       },
@@ -145,8 +151,8 @@ const onSuccessVisit = () => {
   form.post('/dump/post', {
     ...callbacks({
       onSuccess: (page) => {
-        alert('onSuccess')
-        alert(page)
+        pushMessage('onSuccess')
+        pushMessage(page)
       },
     }),
   })
@@ -156,9 +162,9 @@ const onSuccessPromiseVisit = () => {
   form.post('/dump/post', {
     ...callbacks({
       onSuccess: (page) => {
-        alert('onSuccess')
+        pushMessage('onSuccess')
 
-        setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
+        setTimeout(() => pushMessage('onFinish should have been fired by now if Promise functionality did not work'), 5)
         return new Promise((resolve) => setTimeout(resolve, 20))
       },
     }),
@@ -169,8 +175,8 @@ const onErrorVisit = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
       onError: (errors) => {
-        alert('onError')
-        alert(errors)
+        pushMessage('onError')
+        pushMessage(errors)
       },
     }),
   })
@@ -180,9 +186,9 @@ const onErrorPromiseVisit = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
       onError: (errors) => {
-        alert('onError')
+        pushMessage('onError')
 
-        setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
+        setTimeout(() => pushMessage('onFinish should have been fired by now if Promise functionality did not work'), 5)
         return new Promise((resolve) => setTimeout(resolve, 20))
       },
     }),
@@ -193,24 +199,24 @@ const onSuccessProcessing = () => {
   form.post(page.url, {
     ...callbacks({
       onBefore: () => {
-        alert('onBefore')
-        alert(form.processing)
+        pushMessage('onBefore')
+        pushMessage(form.processing)
       },
       onCancelToken: () => {
-        alert('onCancelToken')
-        alert(form.processing)
+        pushMessage('onCancelToken')
+        pushMessage(form.processing)
       },
       onStart: () => {
-        alert('onStart')
-        alert(form.processing)
+        pushMessage('onStart')
+        pushMessage(form.processing)
       },
       onSuccess: () => {
-        alert('onSuccess')
-        alert(form.processing)
+        pushMessage('onSuccess')
+        pushMessage(form.processing)
       },
       onFinish: () => {
-        alert('onFinish')
-        alert(form.processing)
+        pushMessage('onFinish')
+        pushMessage(form.processing)
       },
     }),
   })
@@ -220,24 +226,24 @@ const onErrorProcessing = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
       onBefore: () => {
-        alert('onBefore')
-        alert(form.processing)
+        pushMessage('onBefore')
+        pushMessage(form.processing)
       },
       onCancelToken: () => {
-        alert('onCancelToken')
-        alert(form.processing)
+        pushMessage('onCancelToken')
+        pushMessage(form.processing)
       },
       onStart: () => {
-        alert('onStart')
-        alert(form.processing)
+        pushMessage('onStart')
+        pushMessage(form.processing)
       },
       onError: () => {
-        alert('onError')
-        alert(form.processing)
+        pushMessage('onError')
+        pushMessage(form.processing)
       },
       onFinish: () => {
-        alert('onFinish')
-        alert(form.processing)
+        pushMessage('onFinish')
+        pushMessage(form.processing)
       },
     }),
   })
@@ -252,28 +258,28 @@ const onSuccessProgress = () => {
     .post(page.url, {
       ...callbacks({
         onBefore: () => {
-          alert('onBefore')
-          alert(form.progress)
+          pushMessage('onBefore')
+          pushMessage(form.progress)
         },
         onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.progress)
+          pushMessage('onCancelToken')
+          pushMessage(form.progress)
         },
         onStart: () => {
-          alert('onStart')
-          alert(form.progress)
+          pushMessage('onStart')
+          pushMessage(form.progress)
         },
         onProgress: () => {
-          alert('onProgress')
-          alert(form.progress)
+          pushMessage('onProgress')
+          pushMessage(form.progress)
         },
         onSuccess: () => {
-          alert('onSuccess')
-          alert(form.progress)
+          pushMessage('onSuccess')
+          pushMessage(form.progress)
         },
         onFinish: () => {
-          alert('onFinish')
-          alert(form.progress)
+          pushMessage('onFinish')
+          pushMessage(form.progress)
         },
       }),
     })
@@ -288,28 +294,28 @@ const onErrorProgress = () => {
     .post('/form-helper/events/errors', {
       ...callbacks({
         onBefore: () => {
-          alert('onBefore')
-          alert(form.progress)
+          pushMessage('onBefore')
+          pushMessage(form.progress)
         },
         onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.progress)
+          pushMessage('onCancelToken')
+          pushMessage(form.progress)
         },
         onStart: () => {
-          alert('onStart')
-          alert(form.progress)
+          pushMessage('onStart')
+          pushMessage(form.progress)
         },
         onProgress: () => {
-          alert('onProgress')
-          alert(form.progress)
+          pushMessage('onProgress')
+          pushMessage(form.progress)
         },
         onError: () => {
-          alert('onError')
-          alert(form.progress)
+          pushMessage('onError')
+          pushMessage(form.progress)
         },
         onFinish: () => {
-          alert('onFinish')
-          alert(form.progress)
+          pushMessage('onFinish')
+          pushMessage(form.progress)
         },
       }),
     })
@@ -319,28 +325,28 @@ const progressNoFiles = () => {
   form.post(page.url, {
     ...callbacks({
       onBefore: () => {
-        alert('onBefore')
-        alert(form.progress)
+        pushMessage('onBefore')
+        pushMessage(form.progress)
       },
       onCancelToken: () => {
-        alert('onCancelToken')
-        alert(form.progress)
+        pushMessage('onCancelToken')
+        pushMessage(form.progress)
       },
       onStart: () => {
-        alert('onStart')
-        alert(form.progress)
+        pushMessage('onStart')
+        pushMessage(form.progress)
       },
       onProgress: () => {
-        alert('onProgress')
-        alert(form.progress)
+        pushMessage('onProgress')
+        pushMessage(form.progress)
       },
       onSuccess: () => {
-        alert('onSuccess')
-        alert(form.progress)
+        pushMessage('onSuccess')
+        pushMessage(form.progress)
       },
       onFinish: () => {
-        alert('onFinish')
-        alert(form.progress)
+        pushMessage('onFinish')
+        pushMessage(form.progress)
       },
     }),
   })
@@ -349,29 +355,29 @@ const progressNoFiles = () => {
 
 <template>
   <div>
-    <span @click="submit" class="submit">Submit form</span>
+    <button @click="submit" class="submit">Submit form</button>
 
-    <span @click="successfulRequest" class="successful-request">Successful request</span>
-    <span @click="cancelledVisit" class="cancel">Cancellable Visit</span>
+    <button @click="successfulRequest" class="successful-request">Successful request</button>
+    <button @click="cancelledVisit" class="cancel">Cancellable Visit</button>
 
-    <span @click="onBeforeVisit" class="before">onBefore</span>
-    <span @click="onBeforeVisitCancelled" class="before-cancel">onBefore cancellation</span>
-    <span @click="onStartVisit" class="start">onStart</span>
-    <span @click="onProgressVisit" class="progress">onProgress</span>
+    <button @click="onBeforeVisit" class="before">onBefore</button>
+    <button @click="onBeforeVisitCancelled" class="before-cancel">onBefore cancellation</button>
+    <button @click="onStartVisit" class="start">onStart</button>
+    <button @click="onProgressVisit" class="progress">onProgress</button>
 
-    <span @click="onSuccessVisit" class="success">onSuccess</span>
-    <span @click="onSuccessProgress" class="success-progress">onSuccess progress property</span>
-    <span @click="onSuccessProcessing" class="success-processing">onSuccess resets processing</span>
-    <span @click="onSuccessResetErrors" class="success-reset-errors">onSuccess resets errors</span>
-    <span @click="onSuccessPromiseVisit" class="success-promise">onSuccess promise</span>
+    <button @click="onSuccessVisit" class="success">onSuccess</button>
+    <button @click="onSuccessProgress" class="success-progress">onSuccess progress property</button>
+    <button @click="onSuccessProcessing" class="success-processing">onSuccess resets processing</button>
+    <button @click="onSuccessResetErrors" class="success-reset-errors">onSuccess resets errors</button>
+    <button @click="onSuccessPromiseVisit" class="success-promise">onSuccess promise</button>
 
-    <span @click="onErrorVisit" class="error">onError</span>
-    <span @click="onErrorProgress" class="error-progress">onError progress property</span>
-    <span @click="onErrorProcessing" class="error-processing">onError resets processing</span>
-    <span @click="errorsSetOnError" class="errors-set-on-error">Errors set on error</span>
-    <span @click="onErrorPromiseVisit" class="error-promise">onError promise</span>
+    <button @click="onErrorVisit" class="error">onError</button>
+    <button @click="onErrorProgress" class="error-progress">onError progress property</button>
+    <button @click="onErrorProcessing" class="error-processing">onError resets processing</button>
+    <button @click="errorsSetOnError" class="errors-set-on-error">Errors set on error</button>
+    <button @click="onErrorPromiseVisit" class="error-promise">onError promise</button>
 
-    <span @click="progressNoFiles" class="no-progress">progress no files</span>
+    <button @click="progressNoFiles" class="no-progress">progress no files</button>
 
     <span class="success-status">Form was {{ form.wasSuccessful ? '' : 'not ' }}successful</span>
     <span class="recently-status">Form was {{ form.recentlySuccessful ? '' : 'not ' }}recently successful</span>

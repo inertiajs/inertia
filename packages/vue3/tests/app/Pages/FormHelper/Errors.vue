@@ -48,12 +48,12 @@ const setError = () => {
     </label>
     <span class="remember_error" v-if="form.errors.remember">{{ form.errors.remember }}</span>
 
-    <span @click="submit" class="submit">Submit form</span>
+    <button @click="submit" class="submit">Submit form</button>
 
-    <span @click="clearErrors" class="clear">Clear all errors</span>
-    <span @click="clearError" class="clear-one">Clear one error</span>
-    <span @click="setErrors" class="set">Set errors</span>
-    <span @click="setError" class="set-one">Set one error</span>
+    <button @click="clearErrors" class="clear">Clear all errors</button>
+    <button @click="clearError" class="clear-one">Clear one error</button>
+    <button @click="setErrors" class="set">Set errors</button>
+    <button @click="setError" class="set-one">Set one error</button>
 
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>

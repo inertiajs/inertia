@@ -55,14 +55,14 @@ const reassignSingle = () => {
     </label>
     <span class="remember_error" v-if="form.errors.remember">{{ form.errors.remember }}</span>
 
-    <span @click="submit" class="submit">Submit form</span>
+    <button @click="submit" class="submit">Submit form</button>
 
-    <span @click="resetAll" class="reset">Reset all data</span>
-    <span @click="resetOne" class="reset-one">Reset one field</span>
+    <button @click="resetAll" class="reset">Reset all data</button>
+    <button @click="resetOne" class="reset-one">Reset one field</button>
 
-    <span @click="reassign" class="reassign">Reassign current as defaults</span>
-    <span @click="reassignObject" class="reassign-object">Reassign default values</span>
-    <span @click="reassignSingle" class="reassign-single">Reassign single default</span>
+    <button @click="reassign" class="reassign">Reassign current as defaults</button>
+    <button @click="reassignObject" class="reassign-object">Reassign default values</button>
+    <button @click="reassignSingle" class="reassign-single">Reassign single default</button>
 
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>
