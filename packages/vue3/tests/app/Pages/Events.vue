@@ -1,5 +1,5 @@
 <script setup>
-import { router, usePage, Link } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 
 const payloadWithFile = {
   file: new File(['foobar'], 'example.bin'),
@@ -7,8 +7,10 @@ const payloadWithFile = {
 
 const page = usePage()
 
+window.messages = []
+
 const internalAlert = (...args) => {
-  args.forEach((arg) => alert(arg))
+  window.messages.push(...args)
 }
 
 const withoutEventListeners = () => {
@@ -454,12 +456,12 @@ const callbackSuccessErrorPromise = (eventName) => {
 <template>
   <div>
     <!-- Listeners -->
-    <span @click="withoutEventListeners" class="without-listeners">Basic Visit</span>
-    <span @click="removeInertiaListener" class="remove-inertia-listener">Remove Inertia Listener</span>
+    <a href="#" @click="withoutEventListeners" class="without-listeners">Basic Visit</a>
+    <a href="#" @click="removeInertiaListener" class="remove-inertia-listener">Remove Inertia Listener</a>
 
     <!-- Events: Before -->
-    <span @click="beforeVisit" class="before">Before Event</span>
-    <span @click="beforeVisitPreventLocal" class="before-prevent-local">Before Event</span>
+    <a href="#" @click="beforeVisit" class="before">Before Event</a>
+    <a href="#" @click="beforeVisitPreventLocal" class="before-prevent-local">Before Event (Prevent)</a>
     <Link
       :href="$page.url"
       method="post"
@@ -479,17 +481,17 @@ const callbackSuccessErrorPromise = (eventName) => {
       "
       @start="() => internalAlert('This listener should not have been called.')"
       class="link-before-prevent-local"
-      >Before Event Link</Link
+      >Before Event Link (Prevent)</Link
     >
-    <span @click="beforeVisitPreventGlobalInertia" class="before-prevent-global-inertia"
-      >Before Event - Prevent globally using Inertia Event Listener</span
+    <a href="#" @click="beforeVisitPreventGlobalInertia" class="before-prevent-global-inertia"
+      >Before Event - Prevent globally using Inertia Event Listener</a
     >
-    <span @click="beforeVisitPreventGlobalNative" class="before-prevent-global-native"
-      >Before Event - Prevent globally using Native Event Listeners</span
+    <a href="#" @click="beforeVisitPreventGlobalNative" class="before-prevent-global-native"
+      >Before Event - Prevent globally using Native Event Listeners</a
     >
 
     <!-- Events: CancelToken -->
-    <span @click="cancelTokenVisit" class="canceltoken">Cancel Token Event</span>
+    <a href="#" @click="cancelTokenVisit" class="canceltoken">Cancel Token Event</a>
     <Link
       :href="$page.url"
       method="post"
@@ -499,7 +501,7 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Cancel -->
-    <span @click="cancelVisit" class="cancel">Cancel Event</span>
+    <a href="#" @click="cancelVisit" class="cancel">Cancel Event</a>
     <Link
       :href="$page.url"
       method="post"
@@ -510,18 +512,14 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Start -->
-    <span @click="startVisit" class="start">Start Event</span>
-    <Link
-      :href="$page.url"
-      method="post"
-      @start="(event) => internalAlert('linkOnStart', event)"
-      class="link-start"
+    <a href="#" @click="startVisit" class="start">Start Event</a>
+    <Link :href="$page.url" method="post" @start="(event) => internalAlert('linkOnStart', event)" class="link-start"
       >Start Event Link</Link
     >
 
     <!-- Events: Progress -->
-    <span @click="progressVisit" class="progress">Progress Event</span>
-    <span @click="progressNoFilesVisit" class="progress-no-files">Missing Progress Event (no files)</span>
+    <a href="#" @click="progressVisit" class="progress">Progress Event</a>
+    <a href="#" @click="progressNoFilesVisit" class="progress-no-files">Missing Progress Event (no files)</a>
     <Link
       :href="$page.url"
       method="post"
@@ -540,8 +538,8 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Error -->
-    <span @click="errorVisit" class="error">Error Event</span>
-    <span @click="errorPromiseVisit" class="error-promise">Error Event (delaying onFinish w/ Promise)</span>
+    <a href="#" @click="errorVisit" class="error">Error Event</a>
+    <a href="#" @click="errorPromiseVisit" class="error-promise">Error Event (delaying onFinish w/ Promise)</a>
     <Link
       href="/events/errors"
       method="post"
@@ -561,8 +559,8 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Success -->
-    <span @click="successVisit" class="success">Success Event</span>
-    <span @click="successPromiseVisit" class="success-promise">Success Event (delaying onFinish w/ Promise)</span>
+    <a href="#" @click="successVisit" class="success">Success Event</a>
+    <a href="#" @click="successPromiseVisit" class="success-promise">Success Event (delaying onFinish w/ Promise)</a>
     <Link
       :href="$page.url"
       method="post"
@@ -582,30 +580,26 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Invalid -->
-    <span @click="invalidVisit" class="invalid">Finish Event</span>
+    <a href="#" @click="invalidVisit" class="invalid">Invalid Event</a>
 
     <!-- Events: Exception -->
-    <span @click="exceptionVisit" class="exception">Exception Event</span>
+    <a href="#" @click="exceptionVisit" class="exception">Exception Event</a>
 
     <!-- Events: Finish -->
-    <span @click="finishVisit" class="finish">Finish Event</span>
-    <Link
-      :href="$page.url"
-      method="post"
-      @finish="(event) => internalAlert('linkOnFinish', event)"
-      class="link-finish"
+    <a href="#" @click="finishVisit" class="finish">Finish Event</a>
+    <Link :href="$page.url" method="post" @finish="(event) => internalAlert('linkOnFinish', event)" class="link-finish"
       >Finish Event Link</Link
     >
 
     <!-- Events: Navigate -->
-    <span @click="navigateVisit" class="navigate">Navigate Event</span>
+    <a href="#" @click="navigateVisit" class="navigate">Navigate Event</a>
 
     <!-- Lifecycles -->
-    <span @click="lifecycleSuccess" class="lifecycle-success">Lifecycle Success</span>
-    <span @click="lifecycleError" class="lifecycle-error">Lifecycle Error</span>
-    <span @click="lifecycleCancel" class="lifecycle-cancel">Lifecycle Cancel</span>
-    <span @click="lifecycleCancelAfterFinish" class="lifecycle-cancel-after-finish"
-      >Lifecycle Cancel - After Finish</span
+    <a href="#" @click="lifecycleSuccess" class="lifecycle-success">Lifecycle Success</a>
+    <a href="#" @click="lifecycleError" class="lifecycle-error">Lifecycle Error</a>
+    <a href="#" @click="lifecycleCancel" class="lifecycle-cancel">Lifecycle Cancel</a>
+    <a href="#" @click="lifecycleCancelAfterFinish" class="lifecycle-cancel-after-finish"
+      >Lifecycle Cancel - After Finish</a
     >
   </div>
 </template>
