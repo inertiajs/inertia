@@ -6,8 +6,8 @@ const visit = () => {
     '/sleep',
     {},
     {
-      onStart: () => alert('started'),
-      onCancel: () => alert('cancelled'),
+      onStart: () => console.log('started'),
+      onCancel: () => console.log('cancelled'),
     },
   )
 }
@@ -16,6 +16,6 @@ const visit = () => {
 <template>
   <div>
     <span class="text">This is the page that demonstrates that only one visit can be active at a time</span>
-    <span @click="visit" class="visit">Link</span>
+    <a href="#" @click="visit" class="visit">Link</a>
   </div>
 </template>

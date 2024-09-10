@@ -307,15 +307,13 @@ test.describe('preserve state', () => {
       await expect(page.getByText('Foo is now default')).toBeVisible()
       await page.getByLabel('Example Field').fill('Example value')
 
-      // @ts-ignore
-      const componentKey = await page.evaluate(() => window._inertia_page_key)
+      const componentKey = await page.evaluate(() => (window as any)._inertia_page_key)
       await expect(componentKey).not.toBeUndefined()
 
       await page.getByRole('link', { name: label }).click()
       await expect(page).toHaveURL('/links/preserve-state-page-two')
 
-      // @ts-ignore
-      const newComponentKey = await page.evaluate(() => window._inertia_page_key)
+      const newComponentKey = await page.evaluate(() => (window as any)._inertia_page_key)
       await expect(newComponentKey).not.toBeUndefined()
 
       await expect(newComponentKey).toBe(componentKey)

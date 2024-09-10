@@ -49,13 +49,15 @@ const nonExistentFragmentGetVisit = () => {
     <div style="width: 200vw; height: 200vh; margin-top: 50vh">
       <!-- prettier-ignore -->
       <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
-      <span @click="basicVisit" class="basic">Basic visit</span>
-      <span @click="fragmentVisit" class="fragment">Fragment visit</span>
-      <span @click="nonExistentFragmentVisit" class="non-existent-fragment">Non-existent fragment visit</span>
+      <a href="#" @click="basicVisit" class="basic">Basic visit</a>
+      <a href="#" @click="fragmentVisit" class="fragment">Fragment visit</a>
+      <a href="#" @click="nonExistentFragmentVisit" class="non-existent-fragment">Non-existent fragment visit</a>
 
-      <span @click="basicGetVisit" class="basic-get">Basic GET visit</span>
-      <span @click="fragmentGetVisit" class="fragment-get">Fragment GET visit</span>
-      <span @click="nonExistentFragmentGetVisit" class="non-existent-fragment-get">Non-existent fragment visit</span>
+      <a href="#" @click="basicGetVisit" class="basic-get">Basic GET visit</a>
+      <a href="#" @click="fragmentGetVisit" class="fragment-get">Fragment GET visit</a>
+      <a href="#" @click="nonExistentFragmentGetVisit" class="non-existent-fragment-get"
+        >Non-existent fragment GET visit</a
+      >
 
       <div id="target">This is the element with id 'target'</div>
     </div>

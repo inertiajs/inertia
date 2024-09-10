@@ -38,10 +38,10 @@ const deleteMethod = () => {
       >This is the page that demonstrates automatic conversion of plain objects to form-data using manual visits</span
     >
 
-    <span @click="visitMethod" class="visit">Visit Link</span>
-    <span @click="postMethod" class="post">POST Link</span>
-    <span @click="putMethod" class="put">PUT Link</span>
-    <span @click="patchMethod" class="patch">PATCH Link</span>
-    <span @click="deleteMethod" class="delete">DELETE Link</span>
+    <a href="#" @click="visitMethod" class="visit">Visit Link</a>
+    <a href="#" @click="postMethod" class="post">POST Link</a>
+    <a href="#" @click="putMethod" class="put">PUT Link</a>
+    <a href="#" @click="patchMethod" class="patch">PATCH Link</a>
+    <a href="#" @click="deleteMethod" class="delete">DELETE Link</a>
   </div>
 </template>
