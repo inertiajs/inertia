@@ -37,7 +37,7 @@ const submit = () => {
       <input type="text" id="untracked" name="untracked" v-model="untracked" />
     </label>
 
-    <span @click="submit" class="submit">Submit form</span>
+    <button @click="submit" class="submit">Submit form</button>
 
     <Link href="/dump/get" class="link">Navigate away</Link>
   </div>
