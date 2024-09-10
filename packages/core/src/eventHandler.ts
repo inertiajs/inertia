@@ -1,4 +1,5 @@
 import debounce from './debounce'
+import { decrypt } from './encryption'
 import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { page as currentPage } from './page'
@@ -65,9 +66,11 @@ class EventHandler {
     }
 
     if (History.isValidState(state)) {
-      currentPage.setQuietly(state.page, { preserveState: false }).then(() => {
-        Scroll.restore(currentPage.get())
-        fireNavigateEvent(currentPage.get())
+      decrypt(state.page).then((data) => {
+        currentPage.setQuietly(data, { preserveState: false }).then(() => {
+          Scroll.restore(currentPage.get())
+          fireNavigateEvent(currentPage.get())
+        })
       })
 
       return

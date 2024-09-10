@@ -1,3 +1,4 @@
+import { decrypt, encrypt } from './encryption'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
 import { Page } from './types'
@@ -27,14 +28,18 @@ export class History {
 
   public static pushState(page: Page): void {
     if (!History.preserveUrl) {
-      window.history.pushState(
-        {
-          page,
-          timestamp: Date.now(),
-        },
-        '',
-        page.url,
-      )
+      encrypt(page).then((data) => {
+        // console.log('data', data)
+
+        window.history.pushState(
+          {
+            page: data,
+            timestamp: Date.now(),
+          },
+          '',
+          page.url,
+        )
+      })
     }
   }
 
@@ -42,18 +47,21 @@ export class History {
     currentPage.merge(page)
 
     if (!History.preserveUrl) {
-      window.history.replaceState(
-        {
-          page,
-          timestamp: Date.now(),
-        },
-        '',
-        page.url,
-      )
+      encrypt(page).then((data) => {
+        window.history.replaceState(
+          {
+            page: data,
+            timestamp: Date.now(),
+          },
+          '',
+          page.url,
+        )
+      })
     }
   }
 
   public static getState<T>(key: string, defaultValue?: T): T {
+    // console.log('getting state', key)
     return window.history.state?.page?.[key] ?? defaultValue
   }
 
@@ -82,10 +90,21 @@ export class History {
   }
 
   public static getAllState(): any {
-    if (this.isExpired(window.history.state)) {
-      return null
+    // if (this.isExpired(window.history.state)) {
+    //   return null
+    // }
+
+    const pageData = window.history.state?.page
+    //
+    // console.log('pageData', pageData)
+
+    if (pageData) {
+      //   console.log('decrypting', pageData)
+      return decrypt(pageData).then((data) => {
+        // console.log('decrypted', data)
+      })
     }
 
-    return window.history.state?.page
+    return pageData
   }
 }
