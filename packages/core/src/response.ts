@@ -212,7 +212,7 @@ export class Response {
 
   protected mergeProps(pageResponse: Page): void {
     if (this.requestParams.isPartial() && pageResponse.component === currentPage.get().component) {
-      const propsToMerge = pageResponse.meta.mergeProps || []
+      const propsToMerge = pageResponse.mergeProps || []
 
       propsToMerge.forEach((prop) => {
         const incomingProp = pageResponse.props[prop]

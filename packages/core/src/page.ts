@@ -45,7 +45,7 @@ class CurrentPage {
 
     const componentId = this.componentId
 
-    if (page.meta.clearHistory) {
+    if (page.clearHistory) {
       History.clear()
     }
 
