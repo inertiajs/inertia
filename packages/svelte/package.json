@@ -31,21 +31,21 @@
     "!dist/**/*.spec.*"
   ],
   "peerDependencies": {
-    "svelte": "^3.20.0 || ^4.0.0"
+    "svelte": "^3.20.0 || ^4.0.0 || ^5.0.0 || ^5.0.0-next.244"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
-    "@sveltejs/kit": "^2.5.7",
-    "@sveltejs/package": "^2.3.1",
-    "@sveltejs/vite-plugin-svelte": "^3.1.0",
+    "@sveltejs/kit": "^2.5.26",
+    "@sveltejs/package": "^2.3.4",
+    "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/lodash": "^4.17.7",
-    "axios": "^1.6.8",
-    "publint": "^0.1.16",
+    "axios": "^1.7.6",
+    "publint": "^0.2.10",
     "svelte": "^4.2.16",
-    "svelte-check": "^3.7.1",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.11"
+    "svelte-check": "^3.8.6",
+    "tslib": "^2.7.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
   },
   "exports": {
     ".": {
@@ -62,6 +62,7 @@
   "type": "module",
   "dependencies": {
     "@inertiajs/core": "1.2.0",
+    "html-escape": "^2.0.0",
     "lodash": "^4.5.0"
   }
 }

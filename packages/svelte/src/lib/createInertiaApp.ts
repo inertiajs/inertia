@@ -1,11 +1,13 @@
+import { VERSION } from 'svelte/compiler'
 import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
 import type { ComponentType } from 'svelte'
+import escape from 'html-escape'
 import App from './components/App.svelte'
 import SSR, { type SSRProps } from './components/SSR.svelte'
 import store from './store'
 import type { ComponentResolver, ResolvedComponent } from './types'
 
-type SvelteRenderResult = { html: string; head: string; css: { code: string } }
+type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 type SSRComponent = ComponentType<SSR> & { render: (props: SSRProps) => SvelteRenderResult }
 
 interface CreateInertiaAppProps {
@@ -50,12 +52,27 @@ export default async function createInertiaApp({
   })
 
   if (isServer) {
-    const { html, head, css } = (SSR as SSRComponent).render({ id, initialPage })
+    const isSvelte5 = VERSION.startsWith('5')
+    const { html, head, css } = await (async () => {
+      if (isSvelte5) {
+        const svelteServer = await dynamicImport('svelte/server')
+        if (svelteServer && typeof svelteServer.render === 'function') {
+          return svelteServer.render(App)
+        }
+      }
 
-    return {
-      body: html,
-      head: [head, `<style data-vite-css>${css.code}</style>`],
-    }
+      return (SSR as SSRComponent).render({ id, initialPage })
+    })() as SvelteRenderResult
+
+    return css
+      ? {
+          body: html,
+          head: [head, `<style data-vite-css>${css.code}</style>`],
+        }
+      : {
+          body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+          head: [head],
+        }
   }
 
   if (!el) {
@@ -86,4 +103,12 @@ export default async function createInertiaApp({
       resolveComponent,
     },
   })
+}
+
+async function dynamicImport(modulePath: string) {
+  try {
+    return await import(/* @vite-ignore */ modulePath)
+  } catch {
+    return null
+  }
 }
