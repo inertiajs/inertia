@@ -42,11 +42,6 @@ export class Router {
       swapComponent,
     })
 
-    // currentPage.on('newComponent', () => {
-    //     // TODO: Too magic, use the hook
-    //   polls.clear()
-    // })
-
     InitialVisit.handle()
 
     eventHandler.init()
@@ -57,7 +52,6 @@ export class Router {
 
     eventHandler.onGlobalEvent('navigate', () => {
       this.loadDeferredProps()
-      //   polls.clear()
     })
   }
 
