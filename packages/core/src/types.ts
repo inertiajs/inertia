@@ -249,6 +249,7 @@ export type PrefetchedResponse = {
   params: ActiveVisit
   response: Promise<Response>
   staleTimestamp: number
+  singleUse: boolean
 }
 
 export type PrefetchRemovalTimer = {

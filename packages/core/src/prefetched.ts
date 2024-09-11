@@ -55,6 +55,7 @@ class PrefetchedRequests {
         params: { ...params },
         staleTimestamp: Date.now() + timeToMs(stale),
         response: promise,
+        singleUse: cacheFor === 0,
       })
 
       this.scheduleForRemoval(params, expires)
@@ -134,19 +135,19 @@ class PrefetchedRequests {
 
       // If this was a one-time cache (generally a prefetch="click"
       // request with no specified stale timeout), remove it
-      this.removeStaleItemFromCache(params)
+      this.removeSingleUseItems(params)
 
       return response.handle()
     })
   }
 
-  protected removeStaleItemFromCache(params: ActiveVisit) {
+  protected removeSingleUseItems(params: ActiveVisit) {
     this.cached = this.cached.filter((prefetched) => {
       if (!this.paramsAreEqual(prefetched.params, params)) {
         return true
       }
 
-      return prefetched.staleTimestamp > Date.now()
+      return !prefetched.singleUse
     })
   }
 
