@@ -21,7 +21,9 @@ Route::get('/', function () {
 });
 
 Route::get('/users', function () {
+    sleep(2);
     return inertia('Users', [
+        'date' => now()->toDateTimeString(),
         'users' => [
             [
                 'id' => 1,
@@ -112,7 +114,7 @@ Route::get('/infinite-scroll', function () {
         'items' => Inertia::defer(
             function () use ($start, $end, $itemType) {
                 sleep(1);
-                return collect(range($start, $end))->map(fn ($i) => [
+                return collect(range($start, $end))->map(fn($i) => [
                     'id' => $i,
                     'name' => ucwords($itemType) . ' ' . $i,
                 ])->toArray();
