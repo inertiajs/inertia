@@ -53,6 +53,12 @@ export class Response {
     return new Response(params, response, originatingPage)
   }
 
+  public async handlePrefetch() {
+    if (currentPage.get().component === this.response.data.component) {
+      this.handle()
+    }
+  }
+
   public async handle() {
     queue.add(this)
     return queue.process()

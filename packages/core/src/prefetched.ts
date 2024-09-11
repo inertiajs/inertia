@@ -30,7 +30,7 @@ class PrefetchedRequests {
 
     const [stale, expires] = this.extractStaleValues(cacheFor)
 
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<Response>((resolve, reject) => {
       sendFunc({
         ...params,
         onCancel: () => {
@@ -64,7 +64,9 @@ class PrefetchedRequests {
         return !this.paramsAreEqual(prefetching.params, params)
       })
 
-      return response as Response
+      response.handlePrefetch()
+
+      return response
     })
 
     this.activeRequests.push({
