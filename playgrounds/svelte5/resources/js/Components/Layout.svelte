@@ -1,5 +1,7 @@
 <script>
   import { inertia, page } from '@inertiajs/svelte'
+
+  let { children } = $props()
 </script>
 
 <nav class="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">
@@ -12,5 +14,5 @@
 </nav>
 
 <main class="px-10 py-8">
-  <slot />
+  {@render children()}
 </main>

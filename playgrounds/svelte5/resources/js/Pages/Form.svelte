@@ -1,11 +1,11 @@
-<script context="module">
+<script module>
   export { default as layout } from '../Components/Layout.svelte'
 </script>
 
 <script>
   import { useForm } from '@inertiajs/svelte'
 
-  export let appName
+  let { appName } = $props()
 
   let form = useForm('NewUser', {
     name: '',
@@ -13,7 +13,8 @@
     role: '',
   })
 
-  function submit() {
+  function submit(e) {
+    e.preventDefault()
     $form.post('/user')
   }
 </script>
@@ -24,7 +25,7 @@
 
 <h1 class="text-3xl">Form</h1>
 
-<form on:submit|preventDefault={submit} class="mt-6 max-w-md space-y-4">
+<form onsubmit={submit} class="mt-6 max-w-md space-y-4">
   {#if $form.isDirty}
     <div class="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">There are unsaved changes!</div>
   {/if}
@@ -55,7 +56,7 @@
   <div>
     <label class="block" for="role">Role:</label>
     <select bind:value={$form.role} id="role" class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm">
-      <option />
+      <option></option>
       <option>User</option>
       <option>Admin</option>
       <option>Super</option>
@@ -68,6 +69,6 @@
     <button type="submit" disabled={$form.processing} class="rounded bg-slate-800 px-6 py-2 text-white">
       Submit
     </button>
-    <button type="button" on:click={() => $form.reset()}>Reset</button>
+    <button type="button" onclick={() => $form.reset()}>Reset</button>
   </div>
 </form>

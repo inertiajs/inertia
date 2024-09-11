@@ -1,10 +1,9 @@
-<script context="module">
+<script module>
   export { default as layout } from '../Components/Layout.svelte'
 </script>
 
 <script>
-  export let appName
-  export let users
+  let { appName, users } = $props()
 </script>
 
 <svelte:head>
@@ -23,7 +22,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each users as user}
+      {#each users as user (user.id)}
         <tr class="border-t">
           <td class="px-4 py-2">{user.id}</td>
           <td class="px-4 py-2">{user.name}</td>

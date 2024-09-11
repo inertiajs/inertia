@@ -1,9 +1,9 @@
-<script context="module">
+<script module>
   export { default as layout } from '../Components/Layout.svelte'
 </script>
 
 <script>
-  export let appName
+  let { appName } = $props()
 </script>
 
 <svelte:head>
