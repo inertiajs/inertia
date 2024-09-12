@@ -158,9 +158,17 @@ export type GlobalEventsMap = {
     result: boolean | void
   }
   prefetched: {
-    parameters: [Response]
+    parameters: [AxiosResponse, ActiveVisit]
     details: {
-      response: Response
+      response: AxiosResponse
+      fetchedAt: number
+    }
+    result: void
+  }
+  prefetching: {
+    parameters: [ActiveVisit]
+    details: {
+      visit: ActiveVisit
     }
     result: void
   }
@@ -196,6 +204,7 @@ export type VisitCallbacks = {
   onSuccess: GlobalEventCallback<'success'>
   onError: GlobalEventCallback<'error'>
   onPrefetched: GlobalEventCallback<'prefetched'>
+  onPrefetching: GlobalEventCallback<'prefetching'>
 }
 
 export type VisitOptions = Partial<Visit & VisitCallbacks>
@@ -215,14 +224,20 @@ export type RouterInitParams = {
   swapComponent: PageHandler
 }
 
-export type PendingVisit = Visit & {
+export type PendingVisitOptions = {
   url: URL
   completed: boolean
   cancelled: boolean
   interrupted: boolean
 }
 
+export type PendingVisit = Visit & PendingVisitOptions
+
 export type ActiveVisit = PendingVisit & Required<VisitOptions>
+
+export type InternalActiveVisit = ActiveVisit & {
+  onPrefetchResponse?: (response: Response) => void
+}
 
 export type VisitId = unknown
 export type Component = unknown
@@ -231,22 +246,24 @@ export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
-export type cacheForOption = number | string
+export type CacheForOption = number | string
 
 export type PrefetchOptions = {
-  cacheFor: cacheForOption | cacheForOption[]
+  cacheFor: CacheForOption | CacheForOption[]
 }
 
-export type ActivelyPrefetching = {
+type PrefetchObject = {
   params: ActiveVisit
   response: Promise<Response>
+}
+
+export type ActivelyPrefetching = PrefetchObject & {
   staleTimestamp: null
 }
 
-export type PrefetchedResponse = {
-  params: ActiveVisit
-  response: Promise<Response>
+export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
+  timestamp: number
   singleUse: boolean
 }
 

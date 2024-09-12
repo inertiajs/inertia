@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios'
-import { fireErrorEvent, fireInvalidEvent, fireSuccessEvent } from './events'
+import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
 import { History } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
@@ -67,7 +67,9 @@ export class Response {
   public async process() {
     if (this.requestParams.all().prefetch) {
       this.requestParams.all().prefetch = false
-      this.requestParams.all().onPrefetched(this)
+      this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
+      firePrefetchedEvent(this.response, this.requestParams.all())
+      this.requestParams.all().onPrefetchResponse(this)
       return Promise.resolve()
     }
 

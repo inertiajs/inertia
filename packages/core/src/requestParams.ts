@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios'
 import { page as currentPage } from './page'
-import { ActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
+import { ActiveVisit, InternalActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
 
 export class RequestParams {
   protected callbacks: {
@@ -8,9 +8,9 @@ export class RequestParams {
     args: any[]
   }[] = []
 
-  protected params: ActiveVisit
+  protected params: InternalActiveVisit
 
-  constructor(params: ActiveVisit) {
+  constructor(params: InternalActiveVisit) {
     if (!params.prefetch) {
       this.params = params
     } else {
@@ -24,11 +24,13 @@ export class RequestParams {
         onError: this.wrapCallback(params, 'onError'),
         onCancelToken: this.wrapCallback(params, 'onCancelToken'),
         onPrefetched: this.wrapCallback(params, 'onPrefetched'),
+        onPrefetching: this.wrapCallback(params, 'onPrefetching'),
       }
 
       this.params = {
         ...params,
         ...wrappedCallbacks,
+        onPrefetchResponse: params.onPrefetchResponse || (() => {}),
       }
     }
     //
@@ -80,6 +82,10 @@ export class RequestParams {
 
   public onStart() {
     this.params.onStart(this.params)
+  }
+
+  public onPrefetching() {
+    this.params.onPrefetching(this.params)
   }
 
   public all() {

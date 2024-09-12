@@ -24,7 +24,7 @@ Route::get('/users', function () {
     sleep(2);
     return inertia('Users', [
         'date' => now()->toDateTimeString(),
-        'users' => [
+        'users' => collect([
             [
                 'id' => 1,
                 'name' => 'Jonathan Reinink',
@@ -65,7 +65,7 @@ Route::get('/users', function () {
                 'name' => 'Pedro Borges',
                 'email' => 'pedro@example.com',
             ],
-        ],
+        ])->shuffle()->values(),
     ]);
 });
 
