@@ -10,7 +10,7 @@
     "@inertiajs/svelte": "^1.0.0",
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
     "autoprefixer": "^10.4.13",
-    "axios": "^1.6.0",
+    "axios": "^1.7.4",
     "laravel-vite-plugin": "^0.7.2",
     "lodash": "^4.17.19",
     "postcss": "^8.4.31",
