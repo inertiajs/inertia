@@ -5,8 +5,7 @@
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
-    "Pedro Borges <oi@pedroborg.es>",
-    "Dmytro Morozov <puny.flash@gmail.com>"
+    "Pedro Borges <oi@pedroborg.es>"
   ],
   "homepage": "https://inertiajs.com/",
   "repository": {
@@ -36,15 +35,17 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
-    "@sveltejs/kit": "^2.5.5",
-    "@sveltejs/package": "^2.3.0",
-    "@sveltejs/vite-plugin-svelte": "^3.0.2",
-    "publint": "^0.2.7",
-    "svelte": "^4.2.12",
-    "svelte-check": "^3.6.8",
+    "@sveltejs/kit": "^2.5.7",
+    "@sveltejs/package": "^2.3.1",
+    "@sveltejs/vite-plugin-svelte": "^3.1.0",
+    "@types/lodash": "^4.17.7",
+    "axios": "^1.6.8",
+    "publint": "^0.1.16",
+    "svelte": "^4.2.16",
+    "svelte-check": "^3.7.1",
     "tslib": "^2.6.2",
-    "typescript": "^5.4.3",
-    "vite": "^5.2.7"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
   },
   "exports": {
     ".": {
@@ -56,16 +57,9 @@
       "svelte": "./dist/server.js"
     }
   },
-  "import": "./dist/index.js",
+  "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
-  "typesVersions": {
-    ">4.0": {
-      ".": [
-        "./dist/index.d.ts"
-      ]
-    }
-  },
   "dependencies": {
     "@inertiajs/core": "1.2.0",
     "lodash": "^4.5.0"

@@ -1,6 +1,7 @@
 import type {
   ActiveVisit,
   Errors,
+  FormDataConvertible,
   Method,
   Page,
   PendingVisit,
@@ -14,7 +15,9 @@ import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import { writable, type Writable } from 'svelte/store'
 
-interface InertiaFormProps<TForm extends Record<string, unknown>> {
+type FormDataType = Record<string, FormDataConvertible>
+
+interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -22,13 +25,13 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   processing: boolean
-  setStore(data: InertiaFormProps<TForm>): void
-  setStore(key: keyof InertiaFormProps<TForm>, value?: any): void
+  setStore(data: TForm): void
+  setStore(key: keyof TForm, value?: FormDataConvertible): void
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(fields: Record<keyof TForm, string>): this
-  defaults(field?: keyof TForm, value?: string): this
+  defaults(fields: Partial<TForm>): this
+  defaults(field?: keyof TForm, value?: FormDataConvertible): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
@@ -42,30 +45,29 @@ interface InertiaFormProps<TForm extends Record<string, unknown>> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends Record<string, unknown>> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends FormDataType> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends Record<string, unknown>>(
-  data: TForm | (() => TForm),
-): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
+export default function useForm<TForm extends FormDataType>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends FormDataType>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const inputData = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const data: TForm = typeof inputData === 'function' ? inputData() : inputData as TForm
   const restored = rememberKey
-    ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
+    ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> } | null)
     : null
-  let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
+  let defaults = cloneDeep(data)
   let cancelToken: { cancel: () => void } | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
 
-  const store = writable<InertiaFormProps<TForm>>({
+  const store = writable<InertiaForm<TForm>>({
     ...(restored ? restored.data : data),
     isDirty: false,
     errors: restored ? restored.errors : {},
@@ -74,60 +76,43 @@ export default function useForm<TForm extends Record<string, unknown>>(
     wasSuccessful: false,
     recentlySuccessful: false,
     processing: false,
-    setStore(keyOrData: keyof InertiaFormProps<TForm> | InertiaFormProps<TForm>, maybeData?: InertiaFormProps<TForm>) {
+    setStore(keyOrData, maybeValue = undefined) {
       store.update((store) => {
-        return Object.assign(store, typeof keyOrData === 'string' ? { [keyOrData]: maybeData } : keyOrData)
+        return Object.assign(store, typeof keyOrData === 'string' ? { [keyOrData]: maybeValue } : keyOrData)
       })
     },
     data() {
-      return Object.keys((typeof data === 'function' ? data() : data) as Record<string, unknown>).reduce(
-        (carry, key) => {
-          // @ts-ignore
-          carry[key] = this[key]
-          return carry
-        },
-        {} as Record<string, unknown>,
-      ) as TForm
+      return Object.keys(data).reduce((carry, key) => {
+        carry[key] = this[key]
+        return carry
+      }, {} as FormDataType) as TForm
     },
     transform(callback) {
       transform = callback
-
       return this
     },
-    defaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
-      if (typeof fieldOrFields === 'undefined') {
-        // @ts-ignore
-        defaults = Object.assign(defaults, cloneDeep(this.data()))
-
-        return this
-      }
-
-      // @ts-ignore
-      defaults = Object.assign(
-        // @ts-ignore
-        cloneDeep(defaults),
-        cloneDeep(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
-      )
+    defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
+      defaults = typeof fieldOrFields === 'undefined'
+        ? cloneDeep(this.data())
+        : Object.assign(
+            cloneDeep(defaults),
+            typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
+          )
 
       return this
     },
     reset(...fields) {
-      // @ts-ignore
-      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
-      const clonedData = cloneDeep(resolvedData)
+      const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
-        // @ts-ignore
         this.setStore(clonedData)
       } else {
         this.setStore(
-          // @ts-ignore
           Object.keys(clonedData)
             .filter((key) => fields.includes(key))
             .reduce((carry, key) => {
-              // @ts-ignore
               carry[key] = clonedData[key]
               return carry
-            }, {} as InertiaFormProps<TForm>),
+            }, {} as FormDataType) as TForm,
         )
       }
 
@@ -136,7 +121,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
     setError(fieldOrFields: keyof TForm | Errors, maybeValue?: string) {
       this.setStore('errors', {
         ...this.errors,
-        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as any),
+        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
       })
 
       return this
@@ -150,14 +135,13 @@ export default function useForm<TForm extends Record<string, unknown>>(
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
           }),
           {},
-        ),
+        ) as Errors,
       )
-
       return this
     },
-    submit(method, url, options = {}) {
+    submit(method, url, options: Partial<VisitOptions> = {}) {
       const data = transform(this.data()) as RequestPayload
-      const _options = {
+      const _options: Omit<VisitOptions, 'method'> = {
         ...options,
         onCancelToken: (token: { cancel: () => void }) => {
           cancelToken = token
@@ -184,8 +168,8 @@ export default function useForm<TForm extends Record<string, unknown>>(
             return options.onStart(visit)
           }
         },
-        onProgress: (event: AxiosProgressEvent) => {
-          this.setStore('progress', event)
+        onProgress: (event?: AxiosProgressEvent) => {
+          this.setStore('progress', event as any)
 
           if (options.onProgress) {
             return options.onProgress(event)
@@ -232,10 +216,8 @@ export default function useForm<TForm extends Record<string, unknown>>(
       }
 
       if (method === 'delete') {
-        // @ts-ignore
         router.delete(url, { ..._options, data })
       } else {
-        // @ts-ignore
         router[method](url, data, _options)
       }
     },
@@ -257,7 +239,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
     cancel() {
       cancelToken?.cancel()
     },
-  })
+  } as InertiaForm<TForm>)
 
   store.subscribe((form) => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
@@ -274,5 +256,5 @@ export default function useForm<TForm extends Record<string, unknown>>(
     }
   })
 
-  return store as Writable<InertiaForm<TForm>>
+  return store
 }
