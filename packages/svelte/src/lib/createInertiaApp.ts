@@ -3,19 +3,18 @@ import { router, setupProgress, type InertiaAppResponse, type Page } from '@iner
 import type { ComponentType } from 'svelte'
 import escape from 'html-escape'
 import App from './components/App.svelte'
-import SSR, { type SSRProps } from './components/SSR.svelte'
 import store from './store'
 import type { ComponentResolver, ResolvedComponent } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
-type SSRComponent = ComponentType<SSR> & { render: (props: SSRProps) => SvelteRenderResult }
+type AppComponent = ComponentType<App> & { render: () => SvelteRenderResult }
 
 interface CreateInertiaAppProps {
   id?: string
   resolve: ComponentResolver
   setup: (props: {
     el: Element
-    App: ComponentType<App>
+    App: AppComponent
     props: {
       initialPage: Page
       resolveComponent: ComponentResolver
@@ -61,18 +60,13 @@ export default async function createInertiaApp({
         }
       }
 
-      return (SSR as SSRComponent).render({ id, initialPage })
+      return (App as AppComponent).render()
     })() as SvelteRenderResult
 
-    return css
-      ? {
-          body: html,
-          head: [head, `<style data-vite-css>${css.code}</style>`],
-        }
-      : {
-          body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
-          head: [head],
-        }
+    return {
+      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+      head: css ? [head, `<style data-vite-css>${css.code}</style>`] : [head],
+    }
   }
 
   if (!el) {
