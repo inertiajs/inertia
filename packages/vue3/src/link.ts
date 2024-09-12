@@ -140,7 +140,7 @@ const Link: InertiaLink = defineComponent({
 
     const prefetchModes: LinkPrefetchOption[] = (() => {
       if (props.prefetch === true) {
-        return ['click']
+        return ['hover']
       }
 
       if (props.prefetch === false) {

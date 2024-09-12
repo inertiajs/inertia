@@ -92,11 +92,11 @@ const preserveGetFalse = () => {
       <input type="text" name="example-field" class="field" />
     </label>
 
-    <span @click="preserve" class="preserve">[State] Preserve visit: true</span>
-    <span @click="preserveFalse" class="preserve-false">[State] Preserve visit: false</span>
-    <span @click="preserveCallback" class="preserve-callback">[State] Preserve Callback: true</span>
-    <span @click="preserveCallbackFalse" class="preserve-callback-false">[State] Preserve Callback: false</span>
-    <span @click="preserveGet" class="preserve-get">[State] Preserve GET: true</span>
-    <span @click="preserveGetFalse" class="preserve-get-false">[State] Preserve GET: false</span>
+    <a href="#" @click="preserve" class="preserve">[State] Preserve visit: true</a>
+    <a href="#" @click="preserveFalse" class="preserve-false">[State] Preserve visit: false</a>
+    <a href="#" @click="preserveCallback" class="preserve-callback">[State] Preserve Callback: true</a>
+    <a href="#" @click="preserveCallbackFalse" class="preserve-callback-false">[State] Preserve Callback: false</a>
+    <a href="#" @click="preserveGet" class="preserve-get">[State] Preserve GET: true</a>
+    <a href="#" @click="preserveGetFalse" class="preserve-get-false">[State] Preserve GET: false</a>
   </div>
 </template>

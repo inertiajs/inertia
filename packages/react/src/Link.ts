@@ -114,7 +114,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const prefetchModes: LinkPrefetchOption[] = useMemo(
       () => {
         if (prefetch === true) {
-          return ['click']
+          return ['hover']
         }
 
         if (prefetch === false) {

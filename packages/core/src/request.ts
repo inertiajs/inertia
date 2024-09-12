@@ -1,5 +1,5 @@
 import { default as axios, AxiosProgressEvent, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { fireExceptionEvent, fireFinishEvent, fireProgressEvent, fireStartEvent } from './events'
+import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
@@ -29,6 +29,11 @@ export class Request {
 
     fireStartEvent(this.requestParams.all())
     this.requestParams.onStart()
+
+    if (this.requestParams.all().prefetch) {
+      this.requestParams.onPrefetching()
+      firePrefetchingEvent(this.requestParams.all())
+    }
 
     return axios({
       method: this.requestParams.all().method,
@@ -113,8 +118,8 @@ export class Request {
       'X-Inertia': true,
     }
 
-    if (currentPage.get().meta.assetVersion) {
-      headers['X-Inertia-Version'] = currentPage.get().meta.assetVersion
+    if (currentPage.get().version) {
+      headers['X-Inertia-Version'] = currentPage.get().version
     }
 
     return headers

@@ -21,7 +21,58 @@ Route::get('/', function () {
 });
 
 Route::get('/users', function () {
+    sleep(2);
     return inertia('Users', [
+        'date' => now()->toDateTimeString(),
+        'users' => collect([
+            [
+                'id' => 1,
+                'name' => 'Jonathan Reinink',
+                'email' => 'jonathan@example.com',
+            ],
+            [
+                'id' => 2,
+                'name' => 'Adam Wathan',
+                'email' => 'adam@example.com',
+            ],
+            [
+                'id' => 3,
+                'name' => 'Taylor Otwell',
+                'email' => 'taylor@example.com',
+            ],
+            [
+                'id' => 4,
+                'name' => 'Jordan Pittman',
+                'email' => 'jordan@example.com',
+            ],
+            [
+                'id' => 5,
+                'name' => 'Jess Archer',
+                'email' => 'jess@example.com',
+            ],
+            [
+                'id' => 6,
+                'name' => 'Claudio Dekker',
+                'email' => 'claudio@example.com',
+            ],
+            [
+                'id' => 7,
+                'name' => 'Sebastian De Deyne',
+                'email' => 'sebastian@example.com',
+            ],
+            [
+                'id' => 8,
+                'name' => 'Pedro Borges',
+                'email' => 'pedro@example.com',
+            ],
+        ])->shuffle()->values(),
+    ]);
+});
+
+Route::get('/users/2', function () {
+    sleep(2);
+    return inertia('Users', [
+        'date' => now()->toDateTimeString(),
         'users' => [
             [
                 'id' => 1,
@@ -112,7 +163,7 @@ Route::get('/infinite-scroll', function () {
         'items' => Inertia::defer(
             function () use ($start, $end, $itemType) {
                 sleep(1);
-                return collect(range($start, $end))->map(fn ($i) => [
+                return collect(range($start, $end))->map(fn($i) => [
                     'id' => $i,
                     'name' => ucwords($itemType) . ' ' . $i,
                 ])->toArray();

@@ -38,9 +38,9 @@ const replaceGetFalse = () => {
   <div>
     <span class="text">This is the links page that demonstrates manual replace</span>
 
-    <span @click="replace" class="replace">[State] Replace visit: true</span>
-    <span @click="replaceFalse" class="replace-false">[State] Replace visit: false</span>
-    <span @click="replaceGet" class="replace-get">[State] Replace GET: true</span>
-    <span @click="replaceGetFalse" class="replace-get-false">[State] Replace GET: false</span>
+    <a href="#" @click="replace" class="replace">[State] Replace visit: true</a>
+    <a href="#" @click="replaceFalse" class="replace-false">[State] Replace visit: false</a>
+    <a href="#" @click="replaceGet" class="replace-get">[State] Replace GET: true</a>
+    <a href="#" @click="replaceGetFalse" class="replace-get-false">[State] Replace GET: false</a>
   </div>
 </template>

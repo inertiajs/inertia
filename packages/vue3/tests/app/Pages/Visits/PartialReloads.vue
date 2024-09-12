@@ -115,16 +115,16 @@ const partialReloadGetExceptBaz = () => {
     <span class="baz-text">Baz is now {{ baz }}</span>
     <pre class="headers">{{ headers }}</pre>
 
-    <span @click="partialReloadVisit" class="visit">Update All (visit)</span>
-    <span @click="partialReloadVisitFooBar" class="visit-foo-bar">'Only' foo + bar (visit)</span>
-    <span @click="partialReloadVisitBaz" class="visit-baz">'Only' baz (visit)</span>
-    <span @click="partialReloadVisitExceptFooBar" class="visit-except-foo-bar">'Except' foo + bar (visit)</span>
-    <span @click="partialReloadVisitExceptBaz" class="visit-except-baz">'Except' baz (visit)</span>
+    <a href="#" @click="partialReloadVisit" class="visit">Update All (visit)</a>
+    <a href="#" @click="partialReloadVisitFooBar" class="visit-foo-bar">'Only' foo + bar (visit)</a>
+    <a href="#" @click="partialReloadVisitBaz" class="visit-baz">'Only' baz (visit)</a>
+    <a href="#" @click="partialReloadVisitExceptFooBar" class="visit-except-foo-bar">'Except' foo + bar (visit)</a>
+    <a href="#" @click="partialReloadVisitExceptBaz" class="visit-except-baz">'Except' baz (visit)</a>
 
-    <span @click="partialReloadGet" class="get">Update All (GET)</span>
-    <span @click="partialReloadGetFooBar" class="get-foo-bar">'Only' foo + bar (GET)</span>
-    <span @click="partialReloadGetBaz" class="get-baz">'Only' baz (GET)</span>
-    <span @click="partialReloadGetExceptFooBar" class="get-except-foo-bar">'Except' foo + bar (GET)</span>
-    <span @click="partialReloadGetExceptBaz" class="get-except-baz">'Except' baz (GET)</span>
+    <a href="#" @click="partialReloadGet" class="get">Update All (GET)</a>
+    <a href="#" @click="partialReloadGetFooBar" class="get-foo-bar">'Only' foo + bar (GET)</a>
+    <a href="#" @click="partialReloadGetBaz" class="get-baz">'Only' baz (GET)</a>
+    <a href="#" @click="partialReloadGetExceptFooBar" class="get-except-foo-bar">'Except' foo + bar (GET)</a>
+    <a href="#" @click="partialReloadGetExceptBaz" class="get-except-baz">'Except' baz (GET)</a>
   </div>
 </template>

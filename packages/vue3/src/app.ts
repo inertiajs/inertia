@@ -131,12 +131,10 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     props: computed(() => page.value?.props),
     url: computed(() => page.value?.url),
     component: computed(() => page.value?.component),
-    meta: {
-      assetVersion: computed(() => page.value?.meta.assetVersion),
-      clearHistory: computed(() => page.value?.meta.clearHistory),
-      deferredProps: computed(() => page.value?.meta.deferredProps),
-      mergeProps: computed(() => page.value?.meta.mergeProps),
-    },
+    version: computed(() => page.value?.version),
+    clearHistory: computed(() => page.value?.clearHistory),
+    deferredProps: computed(() => page.value?.deferredProps),
+    mergeProps: computed(() => page.value?.mergeProps),
     scrollRegions: computed(() => page.value?.scrollRegions),
     rememberedState: computed(() => page.value?.rememberedState),
   })

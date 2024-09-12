@@ -4,7 +4,8 @@ import { timeToMs } from './time'
 import {
   ActivelyPrefetching,
   ActiveVisit,
-  cacheForOption,
+  CacheForOption,
+  InternalActiveVisit,
   PrefetchedResponse,
   PrefetchOptions,
   PrefetchRemovalTimer,
@@ -15,7 +16,7 @@ class PrefetchedRequests {
   protected activeRequests: ActivelyPrefetching[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
 
-  public add(params: ActiveVisit, sendFunc: (params: ActiveVisit) => void, { cacheFor }: PrefetchOptions) {
+  public add(params: ActiveVisit, sendFunc: (params: InternalActiveVisit) => void, { cacheFor }: PrefetchOptions) {
     const inFlight = this.findInFlight(params)
 
     if (inFlight) {
@@ -30,7 +31,7 @@ class PrefetchedRequests {
 
     const [stale, expires] = this.extractStaleValues(cacheFor)
 
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise<Response>((resolve, reject) => {
       sendFunc({
         ...params,
         onCancel: () => {
@@ -43,8 +44,13 @@ class PrefetchedRequests {
           params.onError(error)
           reject()
         },
-        onPrefetched(response) {
-          params.onPrefetched(response)
+        onPrefetching(visitParams) {
+          params.onPrefetching(visitParams)
+        },
+        onPrefetched(response, visit) {
+          params.onPrefetched(response, visit)
+        },
+        onPrefetchResponse(response) {
           resolve(response)
         },
       })
@@ -55,6 +61,8 @@ class PrefetchedRequests {
         params: { ...params },
         staleTimestamp: Date.now() + timeToMs(stale),
         response: promise,
+        singleUse: cacheFor === 0,
+        timestamp: Date.now(),
       })
 
       this.scheduleForRemoval(params, expires)
@@ -63,7 +71,9 @@ class PrefetchedRequests {
         return !this.paramsAreEqual(prefetching.params, params)
       })
 
-      return response as Response
+      response.handlePrefetch()
+
+      return response
     })
 
     this.activeRequests.push({
@@ -75,6 +85,14 @@ class PrefetchedRequests {
     return promise
   }
 
+  public removeAll(): void {
+    this.cached = []
+    this.removalTimers.forEach((removalTimer) => {
+      clearTimeout(removalTimer.timer)
+    })
+    this.removalTimers = []
+  }
+
   public remove(params: ActiveVisit): void {
     this.cached = this.cached.filter((prefetched) => {
       return !this.paramsAreEqual(prefetched.params, params)
@@ -83,7 +101,7 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [cacheForOption, cacheForOption] {
+  protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [CacheForOption, CacheForOption] {
     if (!Array.isArray(cacheFor)) {
       return [cacheFor, cacheFor]
     }
@@ -109,7 +127,7 @@ class PrefetchedRequests {
     }
   }
 
-  protected scheduleForRemoval(params: ActiveVisit, expiresIn: cacheForOption) {
+  protected scheduleForRemoval(params: ActiveVisit, expiresIn: CacheForOption) {
     this.clearTimer(params)
 
     expiresIn = timeToMs(expiresIn)
@@ -132,25 +150,25 @@ class PrefetchedRequests {
     prefetched.response.then((response) => {
       response.mergeParams({ ...params, onPrefetched: () => {} })
 
-      // If this was a one-time cache (generally a prefetch="click"
-      // request with no specified stale timeout), remove it
-      this.removeStaleItemFromCache(params)
+      // If this was a one-time cache, remove it
+      // (generally a prefetch="click" request with no specified cache value)
+      this.removeSingleUseItems(params)
 
       return response.handle()
     })
   }
 
-  protected removeStaleItemFromCache(params: ActiveVisit) {
+  protected removeSingleUseItems(params: ActiveVisit) {
     this.cached = this.cached.filter((prefetched) => {
       if (!this.paramsAreEqual(prefetched.params, params)) {
         return true
       }
 
-      return prefetched.staleTimestamp > Date.now()
+      return !prefetched.singleUse
     })
   }
 
-  protected findCached(params: ActiveVisit): PrefetchedResponse | null {
+  public findCached(params: ActiveVisit): PrefetchedResponse | null {
     return (
       this.cached.find((prefetched) => {
         return this.paramsAreEqual(prefetched.params, params)
@@ -158,7 +176,7 @@ class PrefetchedRequests {
     )
   }
 
-  protected findInFlight(params: ActiveVisit): ActivelyPrefetching | null {
+  public findInFlight(params: ActiveVisit): ActivelyPrefetching | null {
     return (
       this.activeRequests.find((prefetched) => {
         return this.paramsAreEqual(prefetched.params, params)
@@ -180,6 +198,7 @@ class PrefetchedRequests {
       'onError',
       'onPrefetched',
       'onCancelToken',
+      'onPrefetching',
     ])
   }
 }

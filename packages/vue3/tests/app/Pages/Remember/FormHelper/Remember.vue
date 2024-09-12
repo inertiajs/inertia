@@ -41,8 +41,8 @@ const reset = () => {
       <input type="text" id="untracked" name="untracked" v-model="untracked" />
     </label>
 
-    <span @click="submit" class="submit">Submit form</span>
-    <span @click="reset" class="reset-one">Reset one field & error</span>
+    <button @click="submit" class="submit">Submit form</button>
+    <button @click="reset" class="reset-one">Reset one field & error</button>
 
     <Link href="/dump/get" class="link">Navigate away</Link>
   </div>

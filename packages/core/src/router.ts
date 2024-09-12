@@ -10,15 +10,20 @@ import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
+  ActivelyPrefetching,
+  ActiveVisit,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
   PendingVisit,
+  PendingVisitOptions,
   PollOptions,
+  PrefetchedResponse,
   PrefetchOptions,
   ReloadOptions,
   RequestPayload,
   RouterInitParams,
+  Visit,
   VisitHelperOptions,
   VisitOptions,
 } from './types'
@@ -42,11 +47,6 @@ export class Router {
       swapComponent,
     })
 
-    // currentPage.on('newComponent', () => {
-    //     // TODO: Too magic, use the hook
-    //   polls.clear()
-    // })
-
     InitialVisit.handle()
 
     eventHandler.init()
@@ -57,7 +57,6 @@ export class Router {
 
     eventHandler.onGlobalEvent('navigate', () => {
       this.loadDeferredProps()
-      //   polls.clear()
     })
   }
 
@@ -125,88 +124,31 @@ export class Router {
     })
   }
 
-  public visit(
-    href: string | URL,
-    {
-      method = 'get',
-      data = {},
-      replace = false,
-      preserveScroll = false,
-      preserveState = false,
-      only = [],
-      except = [],
-      headers = {},
-      errorBag = '',
-      forceFormData = false,
-      onCancelToken = () => {},
-      onBefore = () => {},
-      onStart = () => {},
-      onProgress = () => {},
-      onFinish = () => {},
-      onCancel = () => {},
-      onSuccess = () => {},
-      onError = () => {},
-      onPrefetched = () => {},
-      queryStringArrayFormat = 'brackets',
-      async = false,
-      showProgress,
-      fresh = false,
-      reset = [],
-      preserveUrl = false,
-    }: VisitOptions = {},
-  ): void {
-    const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
+  public visit(href: string | URL, options: VisitOptions = {}): void {
+    const visit: PendingVisit = this.getPendingVisit(href, {
+      ...options,
+      showProgress: options.showProgress ?? !options.async,
+    })
 
-    const visit: PendingVisit = {
-      url,
-      method,
-      data: _data,
-      replace,
-      preserveScroll,
-      preserveState,
-      only,
-      except,
-      headers,
-      errorBag,
-      forceFormData,
-      queryStringArrayFormat,
-      cancelled: false,
-      completed: false,
-      interrupted: false,
-      async,
-      showProgress: showProgress ?? !async,
-      prefetch: false,
-      fresh,
-      reset,
-      preserveUrl,
-    }
+    const events = this.getVisitEvents(options)
 
     // If either of these return false, we don't want to continue
-    if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
+    if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
     }
 
-    const requestStream = async ? this.asyncRequestStream : this.syncRequestStream
+    const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
 
     requestStream.interruptInFlight()
 
-    if (!currentPage.isCleared() && !preserveUrl) {
+    if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
       Scroll.save(currentPage.get())
     }
 
     const requestParams = {
       ...visit,
-      onCancelToken,
-      onBefore,
-      onStart,
-      onProgress,
-      onFinish,
-      onCancel,
-      onSuccess,
-      onError,
-      onPrefetched,
-      queryStringArrayFormat,
+      ...events,
     }
 
     const prefetched = prefetchedRequests.get(requestParams)
@@ -224,95 +166,56 @@ export class Router {
     }
   }
 
-  public prefetch(
+  public getCached(href: string | URL, options: VisitOptions = {}): ActivelyPrefetching | PrefetchedResponse | null {
+    return prefetchedRequests.findCached(this.getPrefetchParams(href, options))
+  }
+
+  public flush(href: string | URL, options: VisitOptions = {}): void {
+    prefetchedRequests.remove(this.getPrefetchParams(href, options))
+  }
+
+  public flushAll(): void {
+    prefetchedRequests.removeAll()
+  }
+
+  public getPrefetching(
     href: string | URL,
-    {
-      method = 'get',
-      data = {},
-      replace = false,
-      preserveScroll = false,
-      preserveState = false,
-      only = [],
-      except = [],
-      headers = {},
-      errorBag = '',
-      forceFormData = false,
-      onCancelToken = () => {},
-      onBefore = () => {},
-      onStart = () => {},
-      onProgress = () => {},
-      onFinish = () => {},
-      onCancel = () => {},
-      onSuccess = () => {},
-      onError = () => {},
-      onPrefetched = () => {},
-      queryStringArrayFormat = 'brackets',
-      async = false,
-      fresh = false,
-      reset = [],
-      preserveUrl = false,
-    }: VisitOptions = {},
-    { cacheFor }: PrefetchOptions,
-  ) {
-    if (method !== 'get') {
+    options: VisitOptions = {},
+  ): ActivelyPrefetching | PrefetchedResponse | null {
+    return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
+  }
+
+  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor }: PrefetchOptions) {
+    if (options.method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
     }
 
-    const [url, _data] = transformUrlAndData(href, data, method, forceFormData, queryStringArrayFormat)
-
-    const visit: PendingVisit = {
-      url,
-      method,
-      data: _data,
-      replace,
-      preserveScroll,
-      preserveState,
-      only,
-      except,
-      headers,
-      errorBag,
-      forceFormData,
-      queryStringArrayFormat,
-      cancelled: false,
-      completed: false,
-      interrupted: false,
-      async,
-      showProgress: true,
+    const visit: PendingVisit = this.getPendingVisit(href, {
+      ...options,
+      showProgress: false,
       prefetch: true,
-      fresh,
-      reset,
-      preserveUrl,
-    }
+    })
+
+    const events = this.getVisitEvents(options)
 
     // If either of these return false, we don't want to continue
-    if (onBefore(visit) === false || !fireBeforeEvent(visit)) {
+    if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
     }
 
     hideProgress()
 
-    const requestStream = this.asyncRequestStream
-
-    requestStream.interruptInFlight()
+    this.asyncRequestStream.interruptInFlight()
 
     const requestParams = {
       ...visit,
-      onCancelToken,
-      onBefore,
-      onStart,
-      onProgress,
-      onFinish,
-      onCancel,
-      onSuccess,
-      onError,
-      onPrefetched,
-      queryStringArrayFormat,
+      ...events,
     }
 
     prefetchedRequests.add(
       requestParams,
       (params) => {
-        requestStream.send(Request.create(params, currentPage.get()))
+        this.asyncRequestStream.send(Request.create(params, currentPage.get()))
       },
       { cacheFor },
     )
@@ -322,8 +225,79 @@ export class Router {
     History.clear()
   }
 
+  protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
+    return {
+      ...this.getPendingVisit(href, {
+        ...options,
+        showProgress: false,
+        prefetch: true,
+      }),
+      ...this.getVisitEvents(options),
+    }
+  }
+
+  protected getPendingVisit(
+    href: string | URL,
+    options: VisitOptions,
+    pendingVisitOptions: Partial<PendingVisitOptions> = {},
+  ): PendingVisit {
+    const mergedOptions: Visit = {
+      method: 'get',
+      data: {},
+      replace: false,
+      preserveScroll: false,
+      preserveState: false,
+      only: [],
+      except: [],
+      headers: {},
+      errorBag: '',
+      forceFormData: false,
+      queryStringArrayFormat: 'brackets',
+      async: false,
+      showProgress: true,
+      fresh: false,
+      reset: [],
+      preserveUrl: false,
+      prefetch: false,
+      ...options,
+    }
+
+    const [url, _data] = transformUrlAndData(
+      href,
+      mergedOptions.data,
+      mergedOptions.method,
+      mergedOptions.forceFormData,
+      mergedOptions.queryStringArrayFormat,
+    )
+
+    return {
+      cancelled: false,
+      completed: false,
+      interrupted: false,
+      ...mergedOptions,
+      ...pendingVisitOptions,
+      url,
+      data: _data,
+    }
+  }
+
+  protected getVisitEvents(options: VisitOptions): VisitCallbacks {
+    return {
+      onCancelToken: options.onCancelToken || (() => {}),
+      onBefore: options.onBefore || (() => {}),
+      onStart: options.onStart || (() => {}),
+      onProgress: options.onProgress || (() => {}),
+      onFinish: options.onFinish || (() => {}),
+      onCancel: options.onCancel || (() => {}),
+      onSuccess: options.onSuccess || (() => {}),
+      onError: options.onError || (() => {}),
+      onPrefetched: options.onPrefetched || (() => {}),
+      onPrefetching: options.onPrefetching || (() => {}),
+    }
+  }
+
   protected loadDeferredProps(): void {
-    const deferred = currentPage.get().meta?.deferredProps
+    const deferred = currentPage.get()?.deferredProps
 
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {

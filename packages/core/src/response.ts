@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios'
-import { fireErrorEvent, fireInvalidEvent, fireSuccessEvent } from './events'
+import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
 import { History } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
@@ -53,6 +53,12 @@ export class Response {
     return new Response(params, response, originatingPage)
   }
 
+  public async handlePrefetch() {
+    if (currentPage.get().component === this.response.data.component) {
+      this.handle()
+    }
+  }
+
   public async handle() {
     queue.add(this)
     return queue.process()
@@ -61,7 +67,9 @@ export class Response {
   public async process() {
     if (this.requestParams.all().prefetch) {
       this.requestParams.all().prefetch = false
-      this.requestParams.all().onPrefetched(this)
+      this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
+      firePrefetchedEvent(this.response, this.requestParams.all())
+      this.requestParams.all().onPrefetchResponse(this)
       return Promise.resolve()
     }
 
@@ -206,7 +214,7 @@ export class Response {
 
   protected mergeProps(pageResponse: Page): void {
     if (this.requestParams.isPartial() && pageResponse.component === currentPage.get().component) {
-      const propsToMerge = pageResponse.meta.mergeProps || []
+      const propsToMerge = pageResponse.mergeProps || []
 
       propsToMerge.forEach((prop) => {
         const incomingProp = pageResponse.props[prop]

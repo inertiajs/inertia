@@ -30,7 +30,7 @@ const preserveCallback = () => {
   router.visit('/visits/preserve-scroll-false-page-two', {
     data: { foo: 'baz' },
     preserveScroll: (page) => {
-      alert(page)
+      console.log(JSON.stringify(page))
 
       return true
     },
@@ -41,7 +41,7 @@ const preserveCallbackFalse = () => {
   router.visit('/visits/preserve-scroll-false-page-two', {
     data: { foo: 'foo' },
     preserveScroll: (page) => {
-      alert(page)
+      console.log(JSON.stringify(page))
 
       return false
     },
@@ -73,12 +73,13 @@ const preserveGetFalse = () => {
     >
     <span class="foo">Foo is now {{ foo }}</span>
 
-    <span @click="preserve" class="preserve">Preserve Scroll</span>
-    <span @click="preserveFalse" class="reset">Reset Scroll</span>
-    <span @click="preserveCallback" class="preserve-callback">Preserve Scroll (Callback)</span>
-    <span @click="preserveCallbackFalse" class="reset-callback">Reset Scroll (Callback)</span>
-    <span @click="preserveGet" class="preserve-get">Preserve Scroll (GET)</span>
-    <span @click="preserveGetFalse" class="reset-get">Reset Scroll (GET)</span>
+    <a href="#" @click="preserve" class="preserve">Preserve Scroll</a>
+    <a href="#" @click="preserveFalse" class="reset">Reset Scroll</a>
+    <a href="#" @click="preserveCallback" class="preserve-callback">Preserve Scroll (Callback)</a>
+    <br />
+    <a href="#" @click="preserveCallbackFalse" class="reset-callback">Reset Scroll (Callback)</a>
+    <a href="#" @click="preserveGet" class="preserve-get">Preserve Scroll (GET)</a>
+    <a href="#" @click="preserveGetFalse" class="reset-get">Reset Scroll (GET)</a>
 
     <a href="/non-inertia" class="off-site">Off-site link</a>
   </div>

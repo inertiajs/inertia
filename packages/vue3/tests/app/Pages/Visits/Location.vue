@@ -10,6 +10,6 @@ const locationVisit = () => {
   <div>
     <span class="text">This is the page that demonstrates location visits</span>
 
-    <span @click="locationVisit" class="example">Location visit</span>
+    <a href="#" @click="locationVisit" class="example">Location visit</a>
   </div>
 </template>

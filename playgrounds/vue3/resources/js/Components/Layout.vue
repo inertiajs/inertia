@@ -8,11 +8,11 @@ const appName = computed(() => page.props.appName)
 </script>
 
 <template>
-  <nav class="flex items-center px-10 py-6 space-x-6 text-white bg-slate-800">
-    <div class="px-4 py-1 rounded-lg bg-slate-700">{{ appName }}</div>
+  <nav class="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">
+    <div class="rounded-lg bg-slate-700 px-4 py-1">{{ appName }}</div>
     <Link href="/" class="hover:underline" prefetch>Home</Link>
-    <Link href="/users" class="hover:underline" :prefetch="['mount', 'click']" :cache-for="['5s', '10s']">Users</Link>
-    <Link href="/article" class="hover:underline" prefetch="hover" :cache-for="6000">Article</Link>
+    <Link href="/users" class="hover:underline" prefetch :cache-for="['2s', '1m']">Users</Link>
+    <Link href="/article" class="hover:underline" prefetch="click">Article</Link>
     <Link href="/form" class="hover:underline" :prefetch="['mount', 'click']" cache-for="1m">Form</Link>
     <Link href="/logout" method="post" class="hover:underline">Logout</Link>
     <Link href="/goodbye" class="hover:underline">External</Link>
