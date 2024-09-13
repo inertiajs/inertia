@@ -54,14 +54,14 @@ export default async function createInertiaApp({
     const isSvelte5 = VERSION.startsWith('5')
     const { html, head, css } = await (async () => {
       if (isSvelte5) {
-        const svelteServer = await dynamicImport('svelte/server')
-        if (svelteServer && typeof svelteServer.render === 'function') {
-          return svelteServer.render(App)
+        const { render } = await dynamicImport('svelte/server')
+        if (typeof render === 'function') {
+          return render(App) as SvelteRenderResult
         }
       }
 
       return (App as AppComponent).render()
-    })() as SvelteRenderResult
+    })()
 
     return {
       body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
