@@ -26,9 +26,11 @@ export class InitialVisit {
       return false
     }
 
-    currentPage.set(History.getAllState(), { preserveScroll: true, preserveState: true }).then(() => {
-      Scroll.restore(currentPage.get())
-      fireNavigateEvent(currentPage.get())
+    History.getAllState().then((data) => {
+      currentPage.set(data, { preserveScroll: true, preserveState: true }).then(() => {
+        Scroll.restore(currentPage.get())
+        fireNavigateEvent(currentPage.get())
+      })
     })
 
     return true
@@ -47,21 +49,27 @@ export class InitialVisit {
     SessionStorage.remove(SessionStorage.locationVisitKey)
 
     currentPage.setUrlHash(window.location.hash)
-    currentPage.remember(History.getState<Page['rememberedState']>(History.rememberedState, {}))
-    currentPage.scrollRegions(History.getState<Page['scrollRegions']>(History.scrollRegions, []))
 
-    currentPage
-      .set(currentPage.get(), {
-        preserveScroll: locationVisit.preserveScroll,
-        preserveState: true,
-      })
-      .then(() => {
-        if (locationVisit.preserveScroll) {
-          Scroll.restore(currentPage.get())
-        }
+    Promise.all([
+      History.getState<Page['rememberedState']>(History.rememberedState, {}),
+      History.getState<Page['scrollRegions']>(History.scrollRegions, []),
+    ]).then(([rememberedState, scrollRegions]) => {
+      currentPage.remember(rememberedState)
+      currentPage.scrollRegions(scrollRegions)
 
-        fireNavigateEvent(currentPage.get())
-      })
+      currentPage
+        .set(currentPage.get(), {
+          preserveScroll: locationVisit.preserveScroll,
+          preserveState: true,
+        })
+        .then(() => {
+          if (locationVisit.preserveScroll) {
+            Scroll.restore(currentPage.get())
+          }
+
+          fireNavigateEvent(currentPage.get())
+        })
+    })
 
     return true
   }

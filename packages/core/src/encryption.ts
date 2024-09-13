@@ -1,25 +1,28 @@
-export const encrypt = async (data: any): Promise<any> => {
+import { SessionStorage } from './sessionStorage'
+
+export const encryptHistory = async (data: any): Promise<any> => {
   const iv = getIv()
-  const history = await getHistoryFromDb(iv)
-  const key = await getOrCreateKey(iv, history)
+  const storedKey = await getKeyFromSessionStorage()
+  const key = await getOrCreateKey(storedKey)
   const encrypted = await encryptData(iv, key, data)
 
   return encrypted
 }
 
-export const decrypt = async (data: any): Promise<any> => {
-  const iv = getIv()
-  const history = await getHistoryFromDb(iv)
+export const historySessionStorageKeys = {
+  key: 'historyKey',
+  iv: 'historyIv',
+}
 
-  if (!history) {
-    return null
+export const decryptHistory = async (data: any): Promise<any> => {
+  const iv = getIv()
+  const storedKey = await getKeyFromSessionStorage()
+
+  if (!storedKey) {
+    throw new Error('Unable to decrypt history')
   }
 
-  //   try {
-  return await decryptData(iv, history.key, data)
-  //   } catch (e) {
-  //     return null
-  //   }
+  return await decryptData(iv, storedKey, data)
 }
 
 const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
@@ -47,15 +50,15 @@ const decryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
 }
 
 const getIv = () => {
-  const ivString = window.sessionStorage.getItem('iv')
+  const ivString = SessionStorage.get(historySessionStorageKeys.iv)
 
   if (ivString) {
-    return new Uint8Array(JSON.parse(ivString))
+    return new Uint8Array(ivString)
   }
 
   const iv = window.crypto.getRandomValues(new Uint8Array(12))
 
-  window.sessionStorage.setItem('iv', JSON.stringify(Array.from(iv)))
+  SessionStorage.set(historySessionStorageKeys.iv, Array.from(iv))
 
   return iv
 }
@@ -71,96 +74,41 @@ const createKey = async () => {
   )
 }
 
-const clearAllKeys = async () => {
-  const db = await getDb()
+const saveKey = async (key: CryptoKey) => {
+  const keyData = await window.crypto.subtle.exportKey('raw', key)
 
-  const transaction = db.transaction(['history'], 'readwrite')
-  const objectStore = transaction.objectStore('history')
-
-  objectStore.clear()
+  SessionStorage.set(historySessionStorageKeys.key, Array.from(new Uint8Array(keyData)))
 }
 
-const getDb = async (): Promise<IDBDatabase> => {
-  return new Promise((resolve) => {
-    const dbRequest = indexedDB.open('InertiaDatabase', 1)
-
-    dbRequest.onupgradeneeded = function () {
-      dbRequest.result.createObjectStore('history', { keyPath: 'id' })
-    }
-
-    dbRequest.onsuccess = function () {
-      resolve(dbRequest.result)
-    }
-
-    dbRequest.onerror = function (...args) {
-      console.error('got an error!!', args)
-      //
-    }
-  })
-}
-
-const saveKey = async (iv: Uint8Array, key: CryptoKey) => {
-  const db = await getDb()
-
-  const transaction = db.transaction(['history'], 'readwrite')
-  const objectStore = transaction.objectStore('history')
-
-  objectStore.add({ id: iv.toString(), key })
-}
-
-const getOrCreateKey = async (iv: Uint8Array, history: { key: CryptoKey } | null) => {
-  if (history) {
-    return history.key
+const getOrCreateKey = async (key: CryptoKey | null) => {
+  if (key) {
+    return key
   }
 
-  await clearAllKeys()
+  const newKey = await createKey()
 
-  const key = await createKey()
+  await saveKey(newKey)
 
-  window.crypto.subtle.exportKey('raw', key).then((keyData) => {
-    // window.sessionStorage.setItem('key', JSON.stringify(Array.from(new Uint8Array(keyData))))
-    const storable = JSON.stringify(Array.from(new Uint8Array(keyData)))
-    console.log('keyData', keyData)
-
-    window.crypto.subtle
-      .importKey(
-        'raw',
-        new Uint8Array(JSON.parse(storable)),
-        {
-          name: 'AES-GCM',
-          length: 256,
-        },
-        true,
-        ['encrypt', 'decrypt'],
-      )
-      .then((importedKey) => {
-        console.log('importedKey', importedKey)
-      })
-  })
-
-  await saveKey(iv, key)
-
-  return key
+  return newKey
 }
 
-const getHistoryFromDb = async (
-  iv: Uint8Array,
-): Promise<{
-  key: CryptoKey
-} | null> => {
-  const db = await getDb()
+const getKeyFromSessionStorage = async (): Promise<CryptoKey | null> => {
+  const stringKey = SessionStorage.get(historySessionStorageKeys.key)
 
-  return new Promise((resolve) => {
-    const transaction = db.transaction(['history'], 'readonly')
-    const objectStore = transaction.objectStore('history')
-    const getRequest = objectStore.get(iv.toString())
+  if (!stringKey) {
+    return null
+  }
 
-    getRequest.onsuccess = function () {
-      resolve(getRequest.result)
-    }
+  const key = await window.crypto.subtle.importKey(
+    'raw',
+    new Uint8Array(stringKey),
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt'],
+  )
 
-    getRequest.onerror = function (...args) {
-      console.error('got an error...', args)
-    }
-  })
+  return key
 }

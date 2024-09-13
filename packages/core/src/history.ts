@@ -1,4 +1,4 @@
-import { decrypt, encrypt } from './encryption'
+import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
 import { Page } from './types'
@@ -22,15 +22,13 @@ export class History {
 
   public static restore(key: string): unknown {
     if (!isServer) {
-      return this.getState<{ [key: string]: any }>(this.rememberedState, {})?.[key]
+      return this.getState<{ [key: string]: any }>(this.rememberedState, {}).then((data) => data?.[key])
     }
   }
 
   public static pushState(page: Page): void {
     if (!History.preserveUrl) {
-      encrypt(page).then((data) => {
-        // console.log('data', data)
-
+      encryptHistory(page).then((data) => {
         window.history.pushState(
           {
             page: data,
@@ -47,7 +45,7 @@ export class History {
     currentPage.merge(page)
 
     if (!History.preserveUrl) {
-      encrypt(page).then((data) => {
+      encryptHistory(page).then((data) => {
         window.history.replaceState(
           {
             page: data,
@@ -60,15 +58,19 @@ export class History {
     }
   }
 
-  public static getState<T>(key: string, defaultValue?: T): T {
-    // console.log('getting state', key)
-    return window.history.state?.page?.[key] ?? defaultValue
+  public static getState<T>(key: string, defaultValue?: T): Promise<T> {
+    return this.getAllState().then((data) => {
+      return data?.[key] ?? defaultValue
+    })
   }
 
   public static deleteState(key: string) {
-    if (window.history.state?.page?.[key] !== undefined) {
-      delete window.history.state.page[key]
-    }
+    this.getAllState().then((data) => {
+      if (data?.[key] !== undefined) {
+        delete data[key]
+        this.replaceState(data)
+      }
+    })
   }
 
   public static hasAnyState(): boolean {
@@ -76,35 +78,17 @@ export class History {
   }
 
   public static clear() {
-    SessionStorage.set('historyClearedAt', Date.now())
+    SessionStorage.remove(historySessionStorageKeys.key)
+    SessionStorage.remove(historySessionStorageKeys.iv)
   }
 
   public static isValidState(state: any): boolean {
-    return state.page && !this.isExpired(state)
+    return state.page
   }
 
-  public static isExpired(state: { timestamp?: number }): boolean {
-    const clearedAt = SessionStorage.get('historyClearedAt')
-
-    return clearedAt && state.timestamp && state.timestamp < clearedAt
-  }
-
-  public static getAllState(): any {
-    // if (this.isExpired(window.history.state)) {
-    //   return null
-    // }
-
+  public static getAllState(): Promise<any> {
     const pageData = window.history.state?.page
-    //
-    // console.log('pageData', pageData)
 
-    if (pageData) {
-      //   console.log('decrypting', pageData)
-      return decrypt(pageData).then((data) => {
-        // console.log('decrypted', data)
-      })
-    }
-
-    return pageData
+    return pageData ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 }

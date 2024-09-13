@@ -1,5 +1,5 @@
 import debounce from './debounce'
-import { decrypt } from './encryption'
+import { decryptHistory } from './encryption'
 import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { page as currentPage } from './page'
@@ -66,16 +66,24 @@ class EventHandler {
     }
 
     if (History.isValidState(state)) {
-      decrypt(state.page).then((data) => {
-        currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          Scroll.restore(currentPage.get())
-          fireNavigateEvent(currentPage.get())
+      decryptHistory(state.page)
+        .then((data) => {
+          currentPage.setQuietly(data, { preserveState: false }).then(() => {
+            Scroll.restore(currentPage.get())
+            fireNavigateEvent(currentPage.get())
+          })
         })
-      })
+        .catch(() => {
+          this.missingHistoryItem()
+        })
 
       return
     }
 
+    this.missingHistoryItem()
+  }
+
+  protected missingHistoryItem() {
     // At this point, the user has probably cleared the state
     // Mark the current page as cleared so that we don't try to write anything to it.
     currentPage.clear()
