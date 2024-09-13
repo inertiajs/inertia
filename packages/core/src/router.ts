@@ -24,6 +24,7 @@ import {
   RequestPayload,
   RouterInitParams,
   Visit,
+  VisitCallbacks,
   VisitHelperOptions,
   VisitOptions,
 } from './types'
@@ -146,7 +147,7 @@ export class Router {
       Scroll.save(currentPage.get())
     }
 
-    const requestParams = {
+    const requestParams: PendingVisit & VisitCallbacks = {
       ...visit,
       ...events,
     }
@@ -207,7 +208,7 @@ export class Router {
 
     this.asyncRequestStream.interruptInFlight()
 
-    const requestParams = {
+    const requestParams: PendingVisit & VisitCallbacks = {
       ...visit,
       ...events,
     }
