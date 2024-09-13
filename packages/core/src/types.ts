@@ -261,6 +261,11 @@ export type ActivelyPrefetching = PrefetchObject & {
   staleTimestamp: null
 }
 
+export type PrefetchCancellationToken = {
+  isCancelled: boolean
+  cancel: () => void
+}
+
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number

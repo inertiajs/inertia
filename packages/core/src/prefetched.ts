@@ -6,6 +6,7 @@ import {
   ActiveVisit,
   CacheForOption,
   InternalActiveVisit,
+  PrefetchCancellationToken,
   PrefetchedResponse,
   PrefetchOptions,
   PrefetchRemovalTimer,
@@ -15,6 +16,7 @@ class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
   protected activeRequests: ActivelyPrefetching[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
+  protected currentCancellationToken: PrefetchCancellationToken | null = null
 
   public add(params: ActiveVisit, sendFunc: (params: InternalActiveVisit) => void, { cacheFor }: PrefetchOptions) {
     const inFlight = this.findInFlight(params)
@@ -146,8 +148,23 @@ class PrefetchedRequests {
     return this.findCached(params) || this.findInFlight(params)
   }
 
-  public use(prefetched: PrefetchedResponse | ActivelyPrefetching, params: ActiveVisit) {
-    prefetched.response.then((response) => {
+  public cancelUse() {
+    if (this.currentCancellationToken) {
+      this.currentCancellationToken.cancel()
+    }
+  }
+
+  public use(
+    prefetched: PrefetchedResponse | ActivelyPrefetching,
+    params: ActiveVisit,
+    cancellationToken: PrefetchCancellationToken,
+  ) {
+    this.currentCancellationToken = cancellationToken
+    return prefetched.response.then((response) => {
+      if (cancellationToken.isCancelled) {
+        return
+      }
+
       response.mergeParams({ ...params, onPrefetched: () => {} })
 
       // If this was a one-time cache, remove it
@@ -199,6 +216,7 @@ class PrefetchedRequests {
       'onPrefetched',
       'onCancelToken',
       'onPrefetching',
+      'async',
     ])
   }
 }
