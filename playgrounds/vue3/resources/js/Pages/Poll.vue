@@ -63,14 +63,7 @@ onMounted(() => {
   setTimeout(() => {
     console.log('stopping user polling')
     stopUserPolling()
-  }, 7000)
-
-  router.poll(1500, {
-    only: ['companies'],
-    onFinish() {
-      companyPollCount.value++
-    },
-  })
+  }, 3000)
 })
 </script>
 
