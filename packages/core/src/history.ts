@@ -1,3 +1,4 @@
+import debounce from './debounce'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
@@ -64,18 +65,22 @@ export class History {
 
     if (!History.preserveUrl) {
       History.current = page
-      encryptHistory(page).then((data) => {
-        window.history.replaceState(
-          {
-            page: data,
-            timestamp: Date.now(),
-          },
-          '',
-          page.url,
-        )
-      })
+
     }
   }
+
+  protected static doEncryption = debounce((page: Page) => {
+    encryptHistory(page).then((data) => {
+      window.history.replaceState(
+        {
+          page: data,
+          timestamp: Date.now(),
+        },
+        '',
+        page.url,
+      )
+    })
+  }, 100)
 
   public static getState<T>(key: keyof Page, defaultValue?: T): any {
     return History.current?.[key] ?? defaultValue
