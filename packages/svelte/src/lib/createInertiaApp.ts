@@ -65,7 +65,7 @@ export default async function createInertiaApp({
 
     return {
       body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
-      head: css ? [head, `<style data-vite-css>${css.code}</style>`] : [head],
+      head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
 
