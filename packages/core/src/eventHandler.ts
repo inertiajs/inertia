@@ -41,6 +41,14 @@ class EventHandler {
     }
   }
 
+  public onMissingHistoryItem() {
+    // At this point, the user has probably cleared the state
+    // Mark the current page as cleared so that we don't try to write anything to it.
+    currentPage.clear()
+    // Fire an event so that that any listeners can handle this situation
+    this.fireInternalEvent('missingHistoryItem')
+  }
+
   protected fireInternalEvent(event: InternalEvent): void {
     this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
   }
@@ -65,19 +73,21 @@ class EventHandler {
     }
 
     if (History.isValidState(state)) {
-      currentPage.setQuietly(state.page, { preserveState: false }).then(() => {
-        Scroll.restore(currentPage.get())
-        fireNavigateEvent(currentPage.get())
-      })
+      History.decrypt(state.page)
+        .then((data) => {
+          currentPage.setQuietly(data, { preserveState: false }).then(() => {
+            Scroll.restore(currentPage.get())
+            fireNavigateEvent(currentPage.get())
+          })
+        })
+        .catch(() => {
+          this.onMissingHistoryItem()
+        })
 
       return
     }
 
-    // At this point, the user has probably cleared the state
-    // Mark the current page as cleared so that we don't try to write anything to it.
-    currentPage.clear()
-    // Fire an event so that that any listeners can handle this situation
-    this.fireInternalEvent('missingHistoryItem')
+    this.onMissingHistoryItem()
   }
 }
 

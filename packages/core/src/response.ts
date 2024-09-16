@@ -157,7 +157,7 @@ export class Response {
     }
   }
 
-  protected setPage(): Promise<void> {
+  protected async setPage(): Promise<void> {
     const pageResponse: Page = this.response.data
 
     if (!this.shouldSetPage(pageResponse)) {
@@ -165,7 +165,7 @@ export class Response {
     }
 
     this.mergeProps(pageResponse)
-    this.setRememberedState(pageResponse)
+    await this.setRememberedState(pageResponse)
 
     this.requestParams.setPreserveOptions(pageResponse)
 
@@ -233,13 +233,15 @@ export class Response {
     }
   }
 
-  protected setRememberedState(pageResponse: Page): void {
+  protected async setRememberedState(pageResponse: Page): Promise<void> {
+    const rememberedState = await History.getState<Page['rememberedState']>(History.rememberedState, {})
+
     if (
       this.requestParams.all().preserveState &&
-      History.getState(History.rememberedState) &&
+      rememberedState &&
       pageResponse.component === currentPage.get().component
     ) {
-      pageResponse.rememberedState = History.getState(History.rememberedState)
+      pageResponse.rememberedState = rememberedState
     }
   }
 
