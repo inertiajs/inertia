@@ -23,20 +23,17 @@
   export let component: ComponentType
   export let props: PageProps = {}
   export let children: RenderProps[] = []
-
-  let prevComponent: ComponentType
-  let key: number
-  $: if (prevComponent !== component) {
-    key = Date.now()
-    prevComponent = component
-  }
 </script>
 
 {#if $store.component}
-  {#key key}
+  <!--
+  Add the `key` only to the last (page) component in the tree.
+  This ensures that the page component re-renders when `preserveState` is disabled,
+  while the layout components are persisted across page changes. -->
+  {#key children?.length === 0 ? $store.key : null}
     {#if children.length > 0}
       <svelte:component this={component} {...props}>
-        {#each children as child, index (component && component.length === index ? $store.key : null)}
+        {#each children as child}
           <svelte:self {...child} />
         {/each}
       </svelte:component>
