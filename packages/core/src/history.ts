@@ -6,12 +6,13 @@ import { Page } from './types'
 const isServer = typeof window === 'undefined'
 
 export class History {
-  public static rememberedState = 'rememberedState'
-  public static scrollRegions = 'scrollRegions'
+  public static rememberedState = 'rememberedState' as const
+  public static scrollRegions = 'scrollRegions' as const
   public static preserveUrl = false
+  protected static current: Partial<Page> = {}
 
   public static remember(data: unknown, key: string): void {
-    this.replaceState({
+    History.replaceState({
       ...currentPage.get(),
       rememberedState: {
         ...(currentPage.get()?.rememberedState ?? {}),
@@ -22,12 +23,13 @@ export class History {
 
   public static restore(key: string): unknown {
     if (!isServer) {
-      return this.getState<{ [key: string]: any }>(this.rememberedState, {}).then((data) => data?.[key])
+      return History.getState<{ [key: string]: any }>(History.rememberedState, {})?.[key]
     }
   }
 
   public static pushState(page: Page): void {
     if (!History.preserveUrl) {
+      History.current = page
       encryptHistory(page).then((data) => {
         window.history.pushState(
           {
@@ -41,10 +43,27 @@ export class History {
     }
   }
 
+  public static decrypt(page: Page | null = null): Promise<Page> {
+    const pageData = page ?? window.history.state?.page
+
+    const promise = pageData ? decryptHistory(pageData) : Promise.resolve(pageData)
+
+    return promise.then((data) => {
+      if (!data) {
+        throw new Error('Unable to decrypt history')
+      }
+
+      History.current = data ?? {}
+
+      return data
+    })
+  }
+
   public static replaceState(page: Page): void {
     currentPage.merge(page)
 
     if (!History.preserveUrl) {
+      History.current = page
       encryptHistory(page).then((data) => {
         window.history.replaceState(
           {
@@ -58,19 +77,15 @@ export class History {
     }
   }
 
-  public static getState<T>(key: string, defaultValue?: T): Promise<T> {
-    return this.getAllState().then((data) => {
-      return data?.[key] ?? defaultValue
-    })
+  public static getState<T>(key: keyof Page, defaultValue?: T): any {
+    return History.current?.[key] ?? defaultValue
   }
 
-  public static deleteState(key: string) {
-    this.getAllState().then((data) => {
-      if (data?.[key] !== undefined) {
-        delete data[key]
-        this.replaceState(data)
-      }
-    })
+  public static deleteState(key: keyof Page) {
+    if (History.current[key] !== undefined) {
+      delete History.current[key]
+      History.replaceState(History.current as Page)
+    }
   }
 
   public static hasAnyState(): boolean {
@@ -83,12 +98,10 @@ export class History {
   }
 
   public static isValidState(state: any): boolean {
-    return state.page
+    return !!state.page
   }
 
-  public static getAllState(): Promise<any> {
-    const pageData = window.history.state?.page
-
-    return pageData ? decryptHistory(pageData) : Promise.resolve(pageData)
+  public static getAllState(): Page {
+    return History.current as Page
   }
 }

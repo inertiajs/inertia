@@ -1,5 +1,4 @@
 import debounce from './debounce'
-import { decryptHistory } from './encryption'
 import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { page as currentPage } from './page'
@@ -42,6 +41,14 @@ class EventHandler {
     }
   }
 
+  public onMissingHistoryItem() {
+    // At this point, the user has probably cleared the state
+    // Mark the current page as cleared so that we don't try to write anything to it.
+    currentPage.clear()
+    // Fire an event so that that any listeners can handle this situation
+    this.fireInternalEvent('missingHistoryItem')
+  }
+
   protected fireInternalEvent(event: InternalEvent): void {
     this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
   }
@@ -66,7 +73,7 @@ class EventHandler {
     }
 
     if (History.isValidState(state)) {
-      decryptHistory(state.page)
+      History.decrypt(state.page)
         .then((data) => {
           currentPage.setQuietly(data, { preserveState: false }).then(() => {
             Scroll.restore(currentPage.get())
@@ -74,21 +81,13 @@ class EventHandler {
           })
         })
         .catch(() => {
-          this.missingHistoryItem()
+          this.onMissingHistoryItem()
         })
 
       return
     }
 
-    this.missingHistoryItem()
-  }
-
-  protected missingHistoryItem() {
-    // At this point, the user has probably cleared the state
-    // Mark the current page as cleared so that we don't try to write anything to it.
-    currentPage.clear()
-    // Fire an event so that that any listeners can handle this situation
-    this.fireInternalEvent('missingHistoryItem')
+    this.onMissingHistoryItem()
   }
 }
 

@@ -1,3 +1,4 @@
+import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { History } from './history'
 import { navigationType } from './navigationType'
@@ -26,12 +27,16 @@ export class InitialVisit {
       return false
     }
 
-    History.getAllState().then((data) => {
-      currentPage.set(data, { preserveScroll: true, preserveState: true }).then(() => {
-        Scroll.restore(currentPage.get())
-        fireNavigateEvent(currentPage.get())
+    History.decrypt()
+      .then((data) => {
+        currentPage.set(data, { preserveScroll: true, preserveState: true }).then(() => {
+          Scroll.restore(currentPage.get())
+          fireNavigateEvent(currentPage.get())
+        })
       })
-    })
+      .catch(() => {
+        eventHandler.onMissingHistoryItem()
+      })
 
     return true
   }
@@ -50,26 +55,29 @@ export class InitialVisit {
 
     currentPage.setUrlHash(window.location.hash)
 
-    Promise.all([
-      History.getState<Page['rememberedState']>(History.rememberedState, {}),
-      History.getState<Page['scrollRegions']>(History.scrollRegions, []),
-    ]).then(([rememberedState, scrollRegions]) => {
-      currentPage.remember(rememberedState)
-      currentPage.scrollRegions(scrollRegions)
+    History.decrypt()
+      .then(() => {
+        const rememberedState = History.getState<Page['rememberedState']>(History.rememberedState, {})
+        const scrollRegions = History.getState<Page['scrollRegions']>(History.scrollRegions, [])
+        currentPage.remember(rememberedState)
+        currentPage.scrollRegions(scrollRegions)
 
-      currentPage
-        .set(currentPage.get(), {
-          preserveScroll: locationVisit.preserveScroll,
-          preserveState: true,
-        })
-        .then(() => {
-          if (locationVisit.preserveScroll) {
-            Scroll.restore(currentPage.get())
-          }
+        currentPage
+          .set(currentPage.get(), {
+            preserveScroll: locationVisit.preserveScroll,
+            preserveState: true,
+          })
+          .then(() => {
+            if (locationVisit.preserveScroll) {
+              Scroll.restore(currentPage.get())
+            }
 
-          fireNavigateEvent(currentPage.get())
-        })
-    })
+            fireNavigateEvent(currentPage.get())
+          })
+      })
+      .catch(() => {
+        eventHandler.onMissingHistoryItem()
+      })
 
     return true
   }

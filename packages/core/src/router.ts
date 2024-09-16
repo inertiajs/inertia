@@ -98,7 +98,7 @@ export class Router {
   }
 
   public restore(key = 'default'): unknown {
-    return (async () => await History.restore(key))()
+    return History.restore(key)
   }
 
   public on<TEventName extends GlobalEventNames>(
