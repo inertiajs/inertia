@@ -34,10 +34,14 @@
 
 {#if $store.component}
   {#key key}
-    <svelte:component this={component} {...props}>
-      {#each children as child, index (component && component.length === index ? $store.key : null)}
-        <svelte:self {...child} />
-      {/each}
-    </svelte:component>
+    {#if children.length > 0}
+      <svelte:component this={component} {...props}>
+        {#each children as child, index (component && component.length === index ? $store.key : null)}
+          <svelte:self {...child} />
+        {/each}
+      </svelte:component>
+    {:else}
+      <svelte:component this={component} {...props} />
+    {/if}
   {/key}
 {/if}
