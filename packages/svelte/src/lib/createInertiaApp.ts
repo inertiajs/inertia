@@ -99,9 +99,14 @@ export default async function createInertiaApp({
   })
 }
 
-async function dynamicImport(modulePath: string) {
+/**
+ * Loads the module dynamically during execution instead of at build time.
+ * 
+ * The @vite-ignore directive prevents Vite from analyzing or pre-bundling this import.
+ **/
+async function dynamicImport(module: string) {
   try {
-    return await import(/* @vite-ignore */ modulePath)
+    return await import(/* @vite-ignore */ module)
   } catch {
     return null
   }
