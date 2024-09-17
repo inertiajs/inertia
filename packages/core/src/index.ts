@@ -1,6 +1,8 @@
 import { Router } from './router'
 
-export { default as createHeadManager } from './head'
+export { getActiveHead } from 'unhead'
+export { renderSSRHead } from '@unhead/ssr'
+export type { SSRHeadPayload } from '@unhead/ssr'
 export { default as setupProgress } from './progress'
 export { default as shouldIntercept } from './shouldIntercept'
 export * from './types'

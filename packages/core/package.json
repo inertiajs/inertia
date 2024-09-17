@@ -50,10 +50,12 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@unhead/ssr": "^1.9.16",
     "axios": "^1.6.0",
     "deepmerge": "^4.0.0",
     "nprogress": "^0.2.0",
-    "qs": "^6.9.0"
+    "qs": "^6.9.0",
+    "unhead": "^1.9.16"
   },
   "devDependencies": {
     "@types/deepmerge": "^2.2.0",
