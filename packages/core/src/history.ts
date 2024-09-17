@@ -11,6 +11,7 @@ export class History {
   public static scrollRegions = 'scrollRegions' as const
   public static preserveUrl = false
   protected static current: Partial<Page> = {}
+  protected static queue: (() => Promise<void>)[] = []
 
   public static remember(data: unknown, key: string): void {
     History.replaceState({
@@ -31,8 +32,63 @@ export class History {
   public static pushState(page: Page): void {
     if (!History.preserveUrl) {
       History.current = page
-      encryptHistory(page).then((data) => {
-        window.history.pushState(
+
+      this.addToQueue(() => {
+        return this.getPageData(page).then((data) => {
+          window.history.pushState(
+            {
+              page: data,
+              timestamp: Date.now(),
+            },
+            '',
+            page.url,
+          )
+        })
+      })
+    }
+  }
+
+  protected static getPageData(page: Page): Promise<Page | ArrayBuffer> {
+    return new Promise((resolve) => {
+      return page.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
+    })
+  }
+
+  public static processQueue(): Promise<void> {
+    const next = History.queue.shift()
+
+    if (next) {
+      return next().then(() => History.processQueue())
+    }
+
+    return Promise.resolve()
+  }
+
+  public static decrypt(page: Page | null = null): Promise<Page> {
+    const pageData = page ?? window.history.state?.page
+
+    return this.decryptPageData(pageData).then((data) => {
+      if (!data) {
+        throw new Error('Unable to decrypt history')
+      }
+
+      History.current = data ?? {}
+
+      return data
+    })
+  }
+
+  protected static decryptPageData(pageData: ArrayBuffer | Page | null): Promise<Page | null> {
+    return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
+  }
+
+  public static replaceState(page: Page): void {
+    currentPage.merge(page)
+
+    if (!History.preserveUrl) {
+      History.current = page
+      this.doReplace(page, (data) => {
+        window.history.replaceState(
           {
             page: data,
             timestamp: Date.now(),
@@ -44,43 +100,14 @@ export class History {
     }
   }
 
-  public static decrypt(page: Page | null = null): Promise<Page> {
-    const pageData = page ?? window.history.state?.page
-
-    const promise = pageData ? decryptHistory(pageData) : Promise.resolve(pageData)
-
-    return promise.then((data) => {
-      if (!data) {
-        throw new Error('Unable to decrypt history')
-      }
-
-      History.current = data ?? {}
-
-      return data
-    })
+  protected static addToQueue(fn: () => Promise<void>): void {
+    History.queue.push(fn)
+    History.processQueue()
   }
 
-  public static replaceState(page: Page): void {
-    currentPage.merge(page)
-
-    if (!History.preserveUrl) {
-      History.current = page
-
-    }
-  }
-
-  protected static doEncryption = debounce((page: Page) => {
-    encryptHistory(page).then((data) => {
-      window.history.replaceState(
-        {
-          page: data,
-          timestamp: Date.now(),
-        },
-        '',
-        page.url,
-      )
-    })
-  }, 100)
+  protected static doReplace = debounce((page: Page, cb: (data: ArrayBuffer | Page) => void) => {
+    this.addToQueue(() => this.getPageData(page).then(cb))
+  }, 50)
 
   public static getState<T>(key: keyof Page, defaultValue?: T): any {
     return History.current?.[key] ?? defaultValue

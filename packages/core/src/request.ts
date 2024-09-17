@@ -43,6 +43,9 @@ export class Request {
       signal: this.cancelToken.signal,
       headers: this.getHeaders(),
       onUploadProgress: this.onProgress.bind(this),
+      // Why text? This allows us to delay JSON.parse until we're ready to use the response,
+      // helps with performance particularly on large responses + history encryption
+      responseType: 'text',
     })
       .then((response) => {
         return Response.create(this.requestParams, response, this.page).handle()

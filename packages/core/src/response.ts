@@ -79,6 +79,8 @@ export class Response {
       return this.handleNonInertiaResponse()
     }
 
+    await History.processQueue()
+
     History.preserveUrl = this.requestParams.all().preserveUrl
 
     await this.setPage()
@@ -158,7 +160,7 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse: Page = this.response.data
+    const pageResponse = this.getPageFromResponse(this.response.data)
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
@@ -176,6 +178,14 @@ export class Response {
       preserveScroll: this.requestParams.all().preserveScroll,
       preserveState: this.requestParams.all().preserveState,
     })
+  }
+
+  protected getPageFromResponse(response: any): Page {
+    if (typeof response === 'string') {
+      return JSON.parse(response)
+    }
+
+    return response
   }
 
   protected shouldSetPage(pageResponse: Page): boolean {

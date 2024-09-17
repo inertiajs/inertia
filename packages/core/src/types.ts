@@ -39,6 +39,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   url: string
   version: string | null
   clearHistory: boolean
+  encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps: string[]
 

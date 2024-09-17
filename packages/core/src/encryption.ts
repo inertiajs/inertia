@@ -1,6 +1,6 @@
 import { SessionStorage } from './sessionStorage'
 
-export const encryptHistory = async (data: any): Promise<any> => {
+export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
   const iv = getIv()
   const storedKey = await getKeyFromSessionStorage()
   const key = await getOrCreateKey(storedKey)
@@ -26,13 +26,19 @@ export const decryptHistory = async (data: any): Promise<any> => {
 }
 
 const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
+  const textEncoder = new TextEncoder()
+  const str = JSON.stringify(data)
+  const encoded = new Uint8Array(str.length)
+
+  textEncoder.encodeInto(str, encoded)
+
   return window.crypto.subtle.encrypt(
     {
       name: 'AES-GCM',
       iv,
     },
     key,
-    new TextEncoder().encode(JSON.stringify(data)),
+    encoded,
   )
 }
 
