@@ -1,5 +1,5 @@
 {
-  "name": "@inertiajs/svelte-playground",
+  "name": "@inertiajs/svelte4-playground",
   "private": true,
   "type": "module",
   "scripts": {
