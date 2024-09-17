@@ -1,5 +1,5 @@
 import { fireNavigateEvent } from './events'
-import { History } from './history'
+import { history } from './history'
 import { Scroll } from './scroll'
 import {
   Component,
@@ -46,7 +46,7 @@ class CurrentPage {
     const componentId = this.componentId
 
     if (page.clearHistory) {
-      History.clear()
+      history.clear()
     }
 
     return this.resolve(page.component).then((component) => {
@@ -59,7 +59,7 @@ class CurrentPage {
       page.rememberedState ??= {}
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), window.location)
 
-      replace ? History.replaceState(page) : History.pushState(page)
+      replace ? history.replaceState(page) : history.pushState(page)
 
       const isNewComponent = !this.isTheSame(page)
 

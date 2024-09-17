@@ -1,6 +1,6 @@
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
-import { History } from './history'
+import { history } from './history'
 import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
@@ -18,16 +18,17 @@ export class InitialVisit {
 
   protected static clearRememberedStateOnReload(): void {
     if (navigationType.isReload()) {
-      History.deleteState(History.rememberedState)
+      history.deleteState(history.rememberedState)
     }
   }
 
   protected static handleBackForward(): boolean {
-    if (!navigationType.isBackForward() || !History.hasAnyState()) {
+    if (!navigationType.isBackForward() || !history.hasAnyState()) {
       return false
     }
 
-    History.decrypt()
+    history
+      .decrypt()
       .then((data) => {
         currentPage.set(data, { preserveScroll: true, preserveState: true }).then(() => {
           Scroll.restore(currentPage.get())
@@ -55,10 +56,11 @@ export class InitialVisit {
 
     currentPage.setUrlHash(window.location.hash)
 
-    History.decrypt()
+    history
+      .decrypt()
       .then(() => {
-        const rememberedState = History.getState<Page['rememberedState']>(History.rememberedState, {})
-        const scrollRegions = History.getState<Page['scrollRegions']>(History.scrollRegions, [])
+        const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
+        const scrollRegions = history.getState<Page['scrollRegions']>(history.scrollRegions, [])
         currentPage.remember(rememberedState)
         currentPage.scrollRegions(scrollRegions)
 

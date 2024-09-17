@@ -1,6 +1,6 @@
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
-import { History } from './history'
+import { history } from './history'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { GlobalEvent, GlobalEventNames, GlobalEventResult } from './types'
@@ -66,14 +66,15 @@ class EventHandler {
       const url = hrefToUrl(currentPage.get().url)
       url.hash = window.location.hash
 
-      History.replaceState({ ...currentPage.get(), url: url.href })
+      history.replaceState({ ...currentPage.get(), url: url.href })
       Scroll.reset(currentPage.get())
 
       return
     }
 
-    if (History.isValidState(state)) {
-      History.decrypt(state.page)
+    if (history.isValidState(state)) {
+      history
+        .decrypt(state.page)
         .then((data) => {
           currentPage.setQuietly(data, { preserveState: false }).then(() => {
             Scroll.restore(currentPage.get())

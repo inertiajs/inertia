@@ -1,7 +1,7 @@
 import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
-import { History } from './history'
+import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
@@ -95,11 +95,11 @@ export class Router {
   }
 
   public remember(data: unknown, key = 'default'): void {
-    History.remember(data, key)
+    history.remember(data, key)
   }
 
   public restore(key = 'default'): unknown {
-    return History.restore(key)
+    return history.restore(key)
   }
 
   public on<TEventName extends GlobalEventNames>(
@@ -235,7 +235,7 @@ export class Router {
   }
 
   public clearHistory(): void {
-    History.clear()
+    history.clear()
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {

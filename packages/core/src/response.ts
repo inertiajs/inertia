@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
-import { History } from './history'
+import { history } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
@@ -79,9 +79,9 @@ export class Response {
       return this.handleNonInertiaResponse()
     }
 
-    await History.processQueue()
+    await history.processQueue()
 
-    History.preserveUrl = this.requestParams.all().preserveUrl
+    history.preserveUrl = this.requestParams.all().preserveUrl
 
     await this.setPage()
 
@@ -99,7 +99,7 @@ export class Response {
 
     await this.requestParams.all().onSuccess(currentPage.get())
 
-    History.preserveUrl = false
+    history.preserveUrl = false
   }
 
   public mergeParams(params: ActiveVisit) {
@@ -171,7 +171,7 @@ export class Response {
 
     this.requestParams.setPreserveOptions(pageResponse)
 
-    pageResponse.url = History.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
+    pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
@@ -244,7 +244,7 @@ export class Response {
   }
 
   protected async setRememberedState(pageResponse: Page): Promise<void> {
-    const rememberedState = await History.getState<Page['rememberedState']>(History.rememberedState, {})
+    const rememberedState = await history.getState<Page['rememberedState']>(history.rememberedState, {})
 
     if (
       this.requestParams.all().preserveState &&

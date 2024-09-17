@@ -6,15 +6,15 @@ import { Page } from './types'
 
 const isServer = typeof window === 'undefined'
 
-export class History {
-  public static rememberedState = 'rememberedState' as const
-  public static scrollRegions = 'scrollRegions' as const
-  public static preserveUrl = false
-  protected static current: Partial<Page> = {}
-  protected static queue: (() => Promise<void>)[] = []
+class History {
+  public rememberedState = 'rememberedState' as const
+  public scrollRegions = 'scrollRegions' as const
+  public preserveUrl = false
+  protected current: Partial<Page> = {}
+  protected queue: (() => Promise<void>)[] = []
 
-  public static remember(data: unknown, key: string): void {
-    History.replaceState({
+  public remember(data: unknown, key: string): void {
+    this.replaceState({
       ...currentPage.get(),
       rememberedState: {
         ...(currentPage.get()?.rememberedState ?? {}),
@@ -23,15 +23,15 @@ export class History {
     })
   }
 
-  public static restore(key: string): unknown {
+  public restore(key: string): unknown {
     if (!isServer) {
-      return History.getState<{ [key: string]: any }>(History.rememberedState, {})?.[key]
+      return this.getState<{ [key: string]: any }>(this.rememberedState, {})?.[key]
     }
   }
 
-  public static pushState(page: Page): void {
-    if (!History.preserveUrl) {
-      History.current = page
+  public pushState(page: Page): void {
+    if (!this.preserveUrl) {
+      this.current = page
 
       this.addToQueue(() => {
         return this.getPageData(page).then((data) => {
@@ -48,23 +48,23 @@ export class History {
     }
   }
 
-  protected static getPageData(page: Page): Promise<Page | ArrayBuffer> {
+  protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
     return new Promise((resolve) => {
       return page.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
     })
   }
 
-  public static processQueue(): Promise<void> {
-    const next = History.queue.shift()
+  public processQueue(): Promise<void> {
+    const next = this.queue.shift()
 
     if (next) {
-      return next().then(() => History.processQueue())
+      return next().then(() => this.processQueue())
     }
 
     return Promise.resolve()
   }
 
-  public static decrypt(page: Page | null = null): Promise<Page> {
+  public decrypt(page: Page | null = null): Promise<Page> {
     const pageData = page ?? window.history.state?.page
 
     return this.decryptPageData(pageData).then((data) => {
@@ -72,21 +72,21 @@ export class History {
         throw new Error('Unable to decrypt history')
       }
 
-      History.current = data ?? {}
+      this.current = data ?? {}
 
       return data
     })
   }
 
-  protected static decryptPageData(pageData: ArrayBuffer | Page | null): Promise<Page | null> {
+  protected decryptPageData(pageData: ArrayBuffer | Page | null): Promise<Page | null> {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 
-  public static replaceState(page: Page): void {
+  public replaceState(page: Page): void {
     currentPage.merge(page)
 
-    if (!History.preserveUrl) {
-      History.current = page
+    if (!this.preserveUrl) {
+      this.current = page
       this.doReplace(page, (data) => {
         window.history.replaceState(
           {
@@ -100,40 +100,42 @@ export class History {
     }
   }
 
-  protected static addToQueue(fn: () => Promise<void>): void {
-    History.queue.push(fn)
-    History.processQueue()
+  protected addToQueue(fn: () => Promise<void>): void {
+    this.queue.push(fn)
+    this.processQueue()
   }
 
-  protected static doReplace = debounce((page: Page, cb: (data: ArrayBuffer | Page) => void) => {
+  protected doReplace = debounce((page: Page, cb: (data: ArrayBuffer | Page) => void) => {
     this.addToQueue(() => this.getPageData(page).then(cb))
   }, 50)
 
-  public static getState<T>(key: keyof Page, defaultValue?: T): any {
-    return History.current?.[key] ?? defaultValue
+  public getState<T>(key: keyof Page, defaultValue?: T): any {
+    return this.current?.[key] ?? defaultValue
   }
 
-  public static deleteState(key: keyof Page) {
-    if (History.current[key] !== undefined) {
-      delete History.current[key]
-      History.replaceState(History.current as Page)
+  public deleteState(key: keyof Page) {
+    if (this.current[key] !== undefined) {
+      delete this.current[key]
+      this.replaceState(this.current as Page)
     }
   }
 
-  public static hasAnyState(): boolean {
-    return !!History.getAllState()
+  public hasAnyState(): boolean {
+    return !!this.getAllState()
   }
 
-  public static clear() {
+  public clear() {
     SessionStorage.remove(historySessionStorageKeys.key)
     SessionStorage.remove(historySessionStorageKeys.iv)
   }
 
-  public static isValidState(state: any): boolean {
+  public isValidState(state: any): boolean {
     return !!state.page
   }
 
-  public static getAllState(): Page {
-    return History.current as Page
+  public getAllState(): Page {
+    return this.current as Page
   }
 }
+
+export const history = new History()

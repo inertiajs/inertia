@@ -1,10 +1,10 @@
-import { History } from './history'
+import { history } from './history'
 import { page as currentPage } from './page'
 import { Page } from './types'
 
 export class Scroll {
   public static save(page: Page): void {
-    History.replaceState({
+    history.replaceState({
       ...page,
       scrollRegions: Array.from(this.regions()).map((region) => ({
         top: region.scrollTop,
