@@ -36,4 +36,9 @@ jobs:
 
       - name: Build Playground
         run: |
-          cd playgrounds/${{ matrix.adapter }} && npm run build
+          if [ "${{ matrix.adapter }}" = "svelte" ]; then
+            cd playgrounds/svelte4 && npm run build
+            cd ../svelte5 && npm run build
+          else
+            cd playgrounds/${{ matrix.adapter }} && npm run build
+          fi
