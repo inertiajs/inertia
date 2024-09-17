@@ -1,19 +1,20 @@
+import { VERSION } from 'svelte/compiler'
 import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
 import type { ComponentType } from 'svelte'
+import escape from 'html-escape'
 import App from './components/App.svelte'
-import SSR, { type SSRProps } from './components/SSR.svelte'
 import store from './store'
 import type { ComponentResolver, ResolvedComponent } from './types'
 
-type SvelteRenderResult = { html: string; head: string; css: { code: string } }
-type SSRComponent = ComponentType<SSR> & { render: (props: SSRProps) => SvelteRenderResult }
+type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
+type AppComponent = ComponentType<App> & { render: () => SvelteRenderResult }
 
 interface CreateInertiaAppProps {
   id?: string
   resolve: ComponentResolver
   setup: (props: {
     el: Element
-    App: ComponentType<App>
+    App: AppComponent
     props: {
       initialPage: Page
       resolveComponent: ComponentResolver
@@ -50,11 +51,21 @@ export default async function createInertiaApp({
   })
 
   if (isServer) {
-    const { html, head, css } = (SSR as SSRComponent).render({ id, initialPage })
+    const isSvelte5 = VERSION.startsWith('5')
+    const { html, head, css } = await (async () => {
+      if (isSvelte5) {
+        const { render } = await dynamicImport('svelte/server')
+        if (typeof render === 'function') {
+          return render(App) as SvelteRenderResult
+        }
+      }
+
+      return (App as AppComponent).render()
+    })()
 
     return {
-      body: html,
-      head: [head, `<style data-vite-css>${css.code}</style>`],
+      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+      head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
 
@@ -86,4 +97,17 @@ export default async function createInertiaApp({
       resolveComponent,
     },
   })
+}
+
+/**
+ * Loads the module dynamically during execution instead of at build time.
+ * 
+ * The @vite-ignore directive prevents Vite from analyzing or pre-bundling this import.
+ **/
+async function dynamicImport(module: string) {
+  try {
+    return await import(/* @vite-ignore */ module)
+  } catch {
+    return null
+  }
 }
