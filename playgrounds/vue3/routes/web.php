@@ -119,6 +119,8 @@ Route::get('/users/2', function () {
 });
 
 Route::get('/article', function () {
+    Inertia::encryptHistory();
+
     return inertia('Article');
 });
 
