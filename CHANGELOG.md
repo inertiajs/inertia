@@ -11,6 +11,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 - [Svelte] Add Svelte 5 support ([#1970](https://github.com/inertiajs/inertia/pull/1970))
 - [Svelte] Add Svelte TypeScript support ([#1866](https://github.com/inertiajs/inertia/pull/1866))
+- Fix `DataCloneError: <Object> could not be cloned` ([#1967](https://github.com/inertiajs/inertia/pull/1967))
 - Fix form helper `transform` return type in React adapter ([#1896](https://github.com/inertiajs/inertia/pull/1896))
 - Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
 - Skip intercepting non-left button clicks on links ([#1908](https://github.com/inertiajs/inertia/pull/1908), [#1910](https://github.com/inertiajs/inertia/pull/1910))
