@@ -1,33 +1,33 @@
 import { default as Axios, AxiosResponse } from 'axios'
 import debounce from './debounce'
 import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
+    fireBeforeEvent,
+    fireErrorEvent,
+    fireExceptionEvent,
+    fireFinishEvent,
+    fireInvalidEvent,
+    fireNavigateEvent,
+    fireProgressEvent,
+    fireStartEvent,
+    fireSuccessEvent,
 } from './events'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import modal from './modal'
 import {
-  ActiveVisit,
-  GlobalEvent,
-  GlobalEventNames,
-  GlobalEventResult,
-  LocationVisit,
-  Page,
-  PageHandler,
-  PageResolver,
-  PendingVisit,
-  PreserveStateOption,
-  RequestPayload,
-  VisitId,
-  VisitOptions,
+    ActiveVisit,
+    GlobalEvent,
+    GlobalEventNames,
+    GlobalEventResult,
+    LocationVisit,
+    Page,
+    PageHandler,
+    PageResolver,
+    PendingVisit,
+    PreserveStateOption,
+    RequestPayload,
+    VisitId,
+    VisitOptions,
 } from './types'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
@@ -82,7 +82,10 @@ export class Router {
   }
 
   protected handleInitialPageVisit(page: Page): void {
-    this.page.url += window.location.hash
+    const hash = window.location.hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
     this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
