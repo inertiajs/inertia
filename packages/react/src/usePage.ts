@@ -1,8 +1,8 @@
-import { Page } from '@inertiajs/core'
+import { Page, PageProps } from '@inertiajs/core'
 import { useContext } from 'react'
 import PageContext from './PageContext'
 
-export default function usePage<TPage extends Page = Page>(): TPage {
+export default function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageProps> {
   const page = useContext(PageContext)
 
   if (!page) {

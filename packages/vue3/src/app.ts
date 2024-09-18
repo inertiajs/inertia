@@ -1,5 +1,16 @@
 import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
-import { DefineComponent, defineComponent, h, markRaw, Plugin, PropType, ref, shallowRef } from 'vue'
+import {
+  computed,
+  DefineComponent,
+  defineComponent,
+  h,
+  markRaw,
+  Plugin,
+  PropType,
+  reactive,
+  ref,
+  shallowRef,
+} from 'vue'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
@@ -116,5 +127,12 @@ export const plugin: Plugin = {
 }
 
 export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
-  return page.value
+  return reactive({
+    props: computed(() => page.value?.props),
+    url: computed(() => page.value?.url),
+    component: computed(() => page.value?.component),
+    version: computed(() => page.value?.version),
+    scrollRegions: computed(() => page.value?.scrollRegions),
+    rememberedState: computed(() => page.value?.rememberedState),
+  })
 }

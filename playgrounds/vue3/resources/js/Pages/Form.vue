@@ -6,7 +6,7 @@ export default { layout: Layout }
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3'
 
-const form = useForm({
+const form = useForm('NewUser', {
   name: '',
   company: '',
   role: '',
@@ -17,6 +17,9 @@ const form = useForm({
   <Head title="Form" />
   <h1 class="text-3xl">Form</h1>
   <form @submit.prevent="form.post('/user')" class="mt-6 max-w-md space-y-4">
+    <div v-if="form.isDirty" class="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">
+      There are unsaved changes!
+    </div>
     <div>
       <label class="block" for="name">Name:</label>
       <input
@@ -47,10 +50,11 @@ const form = useForm({
       </select>
       <div v-if="form.errors.role" class="mt-2 text-sm text-red-600">{{ form.errors.role }}</div>
     </div>
-    <div>
+    <div class="flex gap-4">
       <button type="submit" :disabled="form.processing" class="rounded bg-slate-800 px-6 py-2 text-white">
         Submit
       </button>
+      <button type="button" @click="form.reset()">Reset</button>
     </div>
   </form>
 </template>
