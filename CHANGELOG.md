@@ -13,7 +13,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
 - Skip intercepting non-left button clicks on links ([#1908](https://github.com/inertiajs/inertia/pull/1908), [#1910](https://github.com/inertiajs/inertia/pull/1910))
 - Add Svelte 5 support ([#1970](https://github.com/inertiajs/inertia/pull/1970))
-- Add TypeScript support in Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866))
+- Add TypeScript support to Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866))
 - Fix props reactivity in Svelte adapter ([#1969](https://github.com/inertiajs/inertia/pull/1969))
 - Fix `<Render />` component to respect `preserveState` option in Svelte adapter ([#1943](https://github.com/inertiajs/inertia/pull/1943))
 - Fix 'received an unexpected slot "default"' warning in Svelte adapter ([#1941](https://github.com/inertiajs/inertia/pull/1941))
