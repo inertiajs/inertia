@@ -32,6 +32,7 @@ import {
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
+const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 export class Router {
   protected page!: Page
@@ -482,12 +483,12 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(cloneSerializable(page), '', page.url)
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(cloneSerializable(page), '', page.url)
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
