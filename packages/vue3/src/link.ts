@@ -1,5 +1,5 @@
 import { mergeDataIntoQueryString, Method, PageProps, Progress, router, shouldIntercept } from '@inertiajs/core'
-import { Component, defineComponent, DefineComponent, h, PropType } from 'vue'
+import { Component, defineComponent, DefineComponent, h, onMounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string | Component
@@ -74,8 +74,23 @@ const Link: InertiaLink = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
+    const internalRef = ref(null)
+
+    onMounted(() => {
+      if (!internalRef.value) {
+        return
+      }
+
+      const element = internalRef.value.$el
+
+      if (element.tagName !== 'A') {
+        element.removeAttribute('href')
+      }
+    })
+
     return () => {
       const isAnchor = props.as === 'a' || props.as === 'A'
+      const isCustomComponent = typeof props.as !== 'string'
       const method = props.method.toLowerCase() as Method
       const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
 
@@ -89,7 +104,8 @@ const Link: InertiaLink = defineComponent({
         props.as,
         {
           ...attrs,
-          ...(isAnchor ? { href } : {}),
+          ...(isAnchor || isCustomComponent ? { href } : {}),
+          ...(isCustomComponent ? { ref: internalRef } : {}),
           onClick: (event) => {
             if (shouldIntercept(event)) {
               event.preventDefault()
