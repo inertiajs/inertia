@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "1.0.0-beta.2",
+  "version": "1.2.0",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -21,24 +21,36 @@
     "dist",
     "types"
   ],
-  "source": "src/index.ts",
+  "type": "module",
   "main": "dist/index.js",
-  "unpkg": "dist/index.umd.js",
   "types": "types/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./server": "./dist/server.js"
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./types/server.d.ts",
+      "import": "./dist/server.esm.js",
+      "require": "./dist/server.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "server": [
+        "types/server.d.ts"
+      ]
+    }
   },
   "scripts": {
-    "build": "npm run clean && npm run build:browser && npm run build:server",
-    "build:browser": "microbundle --format es,cjs",
-    "build:server": "microbundle --format es,cjs --target node --output ./dist/server.js ./src/server.ts",
+    "dev": "./build.js --watch",
+    "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly",
     "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "npm run build",
-    "watch": "microbundle watch --format es,cjs"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "axios": "^0.27.0",
+    "axios": "^1.6.0",
     "deepmerge": "^4.0.0",
     "nprogress": "^0.2.0",
     "qs": "^6.9.0"
@@ -48,7 +60,8 @@
     "@types/node": "^14.0",
     "@types/nprogress": "^0.2.0",
     "@types/qs": "^6.9.0",
-    "microbundle": "^0.12.0",
-    "typescript": "^4.2.4"
+    "esbuild": "^0.16.13",
+    "esbuild-node-externals": "^1.6.0",
+    "typescript": "^4.9.4"
   }
 }

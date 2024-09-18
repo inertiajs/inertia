@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "1.0.0-beta.2",
+  "version": "1.2.0",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -15,30 +15,48 @@
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
   },
-  "source": "src/index.js",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "type": "module",
   "main": "dist/index.js",
-  "typings": "index.d.ts",
+  "types": "types/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./server": "./dist/server.js"
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./types/server.d.ts",
+      "import": "./dist/server.esm.js",
+      "require": "./dist/server.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "server": [
+        "types/server.d.ts"
+      ]
+    }
   },
   "scripts": {
-    "build": "npm run clean && npm run build:browser && npm run build:server",
-    "build:browser": "microbundle --format es,cjs",
-    "build:server": "microbundle --format es,cjs --target node --output ./dist/server.js ./src/server.js",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build",
-    "watch": "microbundle watch --format es,cjs"
+    "dev": "./build.js --watch",
+    "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly",
+    "clean": "rm -rf types && rm -rf dist",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "microbundle": "^0.12.0",
+    "esbuild": "^0.16.13",
+    "typescript": "^4.9.4",
     "vue": "^3.0.0"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@inertiajs/core": "1.0.0-beta.2",
+    "@inertiajs/core": "1.2.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0"
   }

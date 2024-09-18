@@ -5,8 +5,8 @@
   </div>
 </template>
 <script>
-import SiteLayout from '@/Layouts/SiteLayout'
-import NestedLayout from '@/Layouts/NestedLayout'
+import NestedLayout from '@/Layouts/NestedLayout.vue'
+import SiteLayout from '@/Layouts/SiteLayout.vue'
 
 export default {
   layout: (h, page) => {

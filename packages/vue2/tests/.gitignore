@@ -1,5 +1,4 @@
 cypress/videos
 cypress/screenshots
-tmp/
+app/dist
 node_modules
-yarn-error.log

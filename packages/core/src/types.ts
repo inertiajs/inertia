@@ -1,10 +1,17 @@
-import { AxiosResponse, CancelTokenSource } from 'axios'
+import { AxiosProgressEvent, AxiosResponse } from 'axios'
+
+declare module 'axios' {
+  export interface AxiosProgressEvent {
+    percentage: number | undefined
+  }
+}
 
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
 export type FormDataConvertible =
   | Array<FormDataConvertible>
+  | { [key: string]: FormDataConvertible }
   | Blob
   | FormDataEntryValue
   | Date
@@ -13,13 +20,7 @@ export type FormDataConvertible =
   | null
   | undefined
 
-export enum Method {
-  GET = 'get',
-  POST = 'post',
-  PUT = 'put',
-  PATCH = 'patch',
-  DELETE = 'delete',
-}
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
@@ -27,7 +28,7 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page<SharedProps = PageProps> {
+export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
     SharedProps & {
@@ -36,10 +37,10 @@ export interface Page<SharedProps = PageProps> {
   url: string
   version: string | null
 
-  // Refactor away
+  /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
+  /** @internal */
   rememberedState: Record<string, unknown>
-  resolvedErrors: Errors
 }
 
 export type PageResolver = (name: string) => Component
@@ -54,9 +55,9 @@ export type PageHandler = ({
   preserveState: PreserveStateOption
 }) => Promise<unknown>
 
-export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
+export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
-export type Progress = ProgressEvent & { percentage: number }
+export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
@@ -69,6 +70,7 @@ export type Visit = {
   preserveScroll: PreserveStateOption
   preserveState: PreserveStateOption
   only: Array<string>
+  except: Array<string>
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
@@ -186,7 +188,7 @@ export type PendingVisit = Visit & {
 
 export type ActiveVisit = PendingVisit &
   Required<VisitOptions> & {
-    cancelToken: CancelTokenSource
+    cancelToken: AbortController
   }
 
 export type VisitId = unknown

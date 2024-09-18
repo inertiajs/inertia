@@ -8,7 +8,10 @@ window.testing.Inertia = router
 
 createInertiaApp({
   page: window.initialPage,
-  resolve: (name) => import(`./Pages/${name}`),
+  resolve: (name) => {
+    const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
+    return pages[`./Pages/${name}.vue`]
+  },
   setup({ el, App, props, plugin }) {
     if (!window.location.pathname.startsWith('/plugin/without')) {
       Vue.use(plugin)

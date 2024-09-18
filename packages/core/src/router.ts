@@ -1,34 +1,33 @@
-import { AxiosResponse, default as Axios } from 'axios'
+import { default as Axios, AxiosResponse } from 'axios'
 import debounce from './debounce'
 import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
+    fireBeforeEvent,
+    fireErrorEvent,
+    fireExceptionEvent,
+    fireFinishEvent,
+    fireInvalidEvent,
+    fireNavigateEvent,
+    fireProgressEvent,
+    fireStartEvent,
+    fireSuccessEvent,
 } from './events'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import modal from './modal'
 import {
-  ActiveVisit,
-  GlobalEvent,
-  GlobalEventNames,
-  GlobalEventResult,
-  LocationVisit,
-  Method,
-  Page,
-  PageHandler,
-  PageResolver,
-  PendingVisit,
-  PreserveStateOption,
-  RequestPayload,
-  VisitId,
-  VisitOptions,
+    ActiveVisit,
+    GlobalEvent,
+    GlobalEventNames,
+    GlobalEventResult,
+    LocationVisit,
+    Page,
+    PageHandler,
+    PageResolver,
+    PendingVisit,
+    PreserveStateOption,
+    RequestPayload,
+    VisitId,
+    VisitOptions,
 } from './types'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
@@ -83,7 +82,10 @@ export class Router {
   }
 
   protected handleInitialPageVisit(page: Page): void {
-    this.page.url += window.location.hash
+    const hash = window.location.hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
     this.setPage(page, { preserveScroll: true ,preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
@@ -129,7 +131,9 @@ export class Router {
     })
     this.saveScrollPositions()
     if (window.location.hash) {
-      document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
+      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
+      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
+      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
     }
   }
 
@@ -214,7 +218,7 @@ export class Router {
     { cancelled = false, interrupted = false }: { cancelled?: boolean; interrupted?: boolean },
   ): void {
     if (activeVisit && !activeVisit.completed && !activeVisit.cancelled && !activeVisit.interrupted) {
-      activeVisit.cancelToken.cancel()
+      activeVisit.cancelToken.abort()
       activeVisit.onCancel()
       activeVisit.completed = false
       activeVisit.cancelled = cancelled
@@ -234,7 +238,7 @@ export class Router {
     }
   }
 
-  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean | string {
+  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
     if (typeof value === 'function') {
       return value(page)
     } else if (value === 'errors') {
@@ -244,15 +248,22 @@ export class Router {
     }
   }
 
+  public cancel(): void {
+    if (this.activeVisit) {
+      this.cancelVisit(this.activeVisit, { cancelled: true })
+    }
+  }
+
   public visit(
     href: string | URL,
     {
-      method = Method.GET,
+      method = 'get',
       data = {},
       replace = false,
       preserveScroll = false,
       preserveState = false,
       only = [],
+      except = [],
       headers = {},
       errorBag = '',
       forceFormData = false,
@@ -287,6 +298,7 @@ export class Router {
       preserveScroll,
       preserveState,
       only,
+      except,
       headers,
       errorBag,
       forceFormData,
@@ -318,7 +330,7 @@ export class Router {
       onSuccess,
       onError,
       queryStringArrayFormat,
-      cancelToken: Axios.CancelToken.source(),
+      cancelToken: new AbortController(),
     }
 
     onCancelToken({
@@ -332,21 +344,32 @@ export class Router {
     fireStartEvent(visit)
     onStart(visit)
 
+    const isPartial = !!(only.length || except.length)
+
     Axios({
       method,
       url: urlWithoutHash(url).href,
-      data: method === Method.GET ? {} : data,
-      params: method === Method.GET ? data : {},
-      cancelToken: this.activeVisit.cancelToken.token,
+      data: method === 'get' ? {} : data,
+      params: method === 'get' ? data : {},
+      signal: this.activeVisit.cancelToken.signal,
       headers: {
         ...headers,
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...(only.length
+        ...(isPartial
           ? {
               'X-Inertia-Partial-Component': this.page.component,
+            }
+          : {}),
+        ...(only.length
+          ? {
               'X-Inertia-Partial-Data': only.join(','),
+            }
+          : {}),
+        ...(except.length
+          ? {
+              'X-Inertia-Partial-Except': except.join(','),
             }
           : {}),
         ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
@@ -354,7 +377,7 @@ export class Router {
       },
       onUploadProgress: (progress) => {
         if (data instanceof FormData) {
-          progress.percentage = Math.round((progress.loaded / progress.total) * 100)
+          progress.percentage = progress.progress ? Math.round(progress.progress * 100) : 0
           fireProgressEvent(progress)
           onProgress(progress)
         }
@@ -366,7 +389,7 @@ export class Router {
         }
 
         const pageResponse: Page = response.data
-        if (only.length && pageResponse.component === this.page.component) {
+        if (isPartial && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
@@ -490,19 +513,15 @@ export class Router {
     }
   }
 
-  public get(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
-  ): void {
-    return this.visit(url, { ...options, method: Method.GET, data })
+  public get(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
+    return this.visit(url, { ...options, method: 'get', data })
   }
 
-  public reload(options: Exclude<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
+  public reload(options: Omit<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL | string, options: Exclude<VisitOptions, 'replace'> = {}): void {
+  public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
     console.warn(
       `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
         options.method ?? 'get'
@@ -511,32 +530,24 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
-  ): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.POST, data })
+  public post(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
 
-  public put(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
-  ): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.PUT, data })
+  public put(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
 
   public patch(
     url: URL | string,
     data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions, 'method' | 'data'> = {},
   ): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.PATCH, data })
+    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  public delete(url: URL | string, options: Exclude<VisitOptions, 'method'> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: Method.DELETE })
+  public delete(url: URL | string, options: Omit<VisitOptions, 'method'> = {}): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
   public remember(data: unknown, key = 'default'): void {

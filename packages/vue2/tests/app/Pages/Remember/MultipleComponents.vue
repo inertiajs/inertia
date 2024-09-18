@@ -21,8 +21,8 @@
   </div>
 </template>
 <script>
-import ComponentA from '@/Pages/Remember/Components/ComponentA'
-import ComponentB from '@/Pages/Remember/Components/ComponentB'
+import ComponentA from '@/Pages/Remember/Components/ComponentA.vue'
+import ComponentB from '@/Pages/Remember/Components/ComponentB.vue'
 
 export default {
   components: {

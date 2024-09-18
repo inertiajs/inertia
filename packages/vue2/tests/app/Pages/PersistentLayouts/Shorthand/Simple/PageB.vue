@@ -5,7 +5,7 @@
   </div>
 </template>
 <script>
-import Layout from '@/Layouts/SiteLayout'
+import Layout from '@/Layouts/SiteLayout.vue'
 
 export default {
   layout: Layout,

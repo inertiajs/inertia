@@ -19,15 +19,14 @@ module.exports = {
     }
 
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''
+    const partialExceptHeader = req.headers['x-inertia-partial-except'] || ''
     const partialComponentHeader = req.headers['x-inertia-partial-component'] || ''
+
+    const isPartial = partialComponentHeader && partialComponentHeader === data.component
+
     data.props = Object.keys(data.props)
-      .filter(
-        (key) =>
-          !partialComponentHeader ||
-          partialComponentHeader !== data.component ||
-          !partialDataHeader ||
-          partialDataHeader.split(',').indexOf(key) > -1,
-      )
+      .filter((key) => !isPartial || !partialDataHeader || partialDataHeader.split(',').indexOf(key) > -1)
+      .filter((key) => !isPartial || !partialExceptHeader || partialExceptHeader.split(',').indexOf(key) == -1)
       .reduce((carry, key) => {
         carry[key] = typeof data.props[key] === 'function' ? data.props[key](data.props) : data.props[key]
 
@@ -42,7 +41,7 @@ module.exports = {
 
     return res.send(
       fs
-        .readFileSync(path.resolve(__dirname, 'inertia.html'))
+        .readFileSync(path.resolve(__dirname, './dist/index.html'))
         .toString()
         .replace("'{{ placeholder }}'", JSON.stringify(data)),
     )
