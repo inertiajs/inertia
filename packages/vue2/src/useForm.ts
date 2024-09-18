@@ -89,6 +89,7 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
       const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
+        this.wasSuccessful = false
         defaults = clonedData
         Object.assign(this, resolvedData)
       } else {
@@ -235,7 +236,7 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
   watch(
     form,
     (newValue) => {
-      form.isDirty = !isEqual(form.data(), defaults)
+      form.isDirty = !form.wasSuccessful && !isEqual(form.data(), defaults)
       if (rememberKey) {
         router.remember(cloneDeep(newValue.__remember()), rememberKey)
       }
