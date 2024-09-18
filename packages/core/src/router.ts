@@ -86,7 +86,7 @@ export class Router {
     if (!this.page.url.includes(hash)) {
       this.page.url += hash
     }
-    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+    this.setPage(page, { preserveScroll: true ,preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -472,9 +472,8 @@ export class Router {
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
+          
           if (!replace) {
             fireNavigateEvent(page)
           }
