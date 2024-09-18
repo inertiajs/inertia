@@ -7,7 +7,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import React, { ElementType, createElement, forwardRef, useCallback } from 'react'
+import React, { ElementType, createElement, forwardRef, useCallback, useEffect, useRef } from 'react'
 
 const noop = () => undefined
 
@@ -115,7 +115,32 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       ],
     )
 
+    const internalRef = useRef<HTMLElement | null>(null)
+
+    const combinedRef = (element: HTMLElement | null) => {
+      internalRef.current = element
+
+      if (!ref) {
+        return
+      }
+
+      if (typeof ref === 'function') {
+        ref(element)
+      } else {
+        ref.current = element
+      }
+    }
+
+    useEffect(() => {
+      const element = internalRef.current
+
+      if (element && element.tagName !== 'A') {
+        element.removeAttribute('href')
+      }
+    }, [])
+
     const isAnchor = as === 'a' || as === 'A'
+    const isCustomComponent = typeof as !== 'string'
     method = method.toLowerCase() as Method
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
@@ -131,8 +156,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       as,
       {
         ...props,
-        ...(isAnchor ? { href } : {}),
-        ref,
+        ...(isAnchor || isCustomComponent ? { href } : {}),
+        ref: combinedRef,
         onClick: visit,
       },
       children,
