@@ -89,3 +89,15 @@ Route::get('/login', function () {
 Route::post('/logout', function () {
     return redirect('/login');
 });
+
+Route::get('/foo', function () {
+    return inertia('FooBar', [ 'name' => 'Foo' ]);
+});
+
+Route::get('/bar', function () {
+    return inertia('FooBar', [ 'name' => 'Bar' ]);
+});
+
+Route::get('/baz', function () {
+    return inertia('Baz', [ 'name' => 'Baz' ]);
+});
