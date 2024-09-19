@@ -497,7 +497,7 @@ test.describe('Preserve scroll', () => {
       await page.getByRole('link', { exact: true, name: 'Reset Scroll (GET)' }).click()
 
       await expect(page).toHaveURL('/visits/preserve-scroll-false-page-two')
-      await expect(page.getByText('Foo is now bar')).toBeVisible()
+      await expect(page.getByText('Foo is now baz')).toBeVisible()
 
       // @ts-ignore
       await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
