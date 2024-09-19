@@ -1,37 +1,38 @@
 import { default as Axios, AxiosResponse } from 'axios'
 import debounce from './debounce'
 import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
+    fireBeforeEvent,
+    fireErrorEvent,
+    fireExceptionEvent,
+    fireFinishEvent,
+    fireInvalidEvent,
+    fireNavigateEvent,
+    fireProgressEvent,
+    fireStartEvent,
+    fireSuccessEvent,
 } from './events'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import modal from './modal'
 import {
-  ActiveVisit,
-  GlobalEvent,
-  GlobalEventNames,
-  GlobalEventResult,
-  LocationVisit,
-  Page,
-  PageHandler,
-  PageResolver,
-  PendingVisit,
-  PreserveStateOption,
-  RequestPayload,
-  VisitId,
-  VisitOptions,
+    ActiveVisit,
+    GlobalEvent,
+    GlobalEventNames,
+    GlobalEventResult,
+    LocationVisit,
+    Page,
+    PageHandler,
+    PageResolver,
+    PendingVisit,
+    PreserveStateOption,
+    RequestPayload,
+    VisitId,
+    VisitOptions,
 } from './types'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
+const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 export class Router {
   protected page!: Page
@@ -82,8 +83,11 @@ export class Router {
   }
 
   protected handleInitialPageVisit(page: Page): void {
-    this.page.url += window.location.hash
-    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+    const hash = window.location.hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
+    this.setPage(page, { preserveScroll: true ,preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -464,14 +468,13 @@ export class Router {
   ): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
-        page.scrollRegions = page.scrollRegions || []
+        page.scrollRegions = this.page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
+
           if (!replace) {
             fireNavigateEvent(page)
           }
@@ -482,12 +485,12 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(cloneSerializable(page), '', page.url)
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(cloneSerializable(page), '', page.url)
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
