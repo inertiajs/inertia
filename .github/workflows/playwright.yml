@@ -1,0 +1,44 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ "async-requests" ]
+  pull_request:
+    branches: [ "async-requests" ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        adapter: ['vue3']
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+
+    - name: Build Inertia
+      run: |
+        npm install
+        cd packages/core && npm run build
+        cd ../${{ matrix.adapter }} && npm run build
+
+    - name: Local-link @inertiajs/core
+      run: cd packages/core && npm link
+
+    - name: Local-link @inertiajs/${{ matrix.adapter }}
+      run: cd packages/${{ matrix.adapter }} && npm link
+
+    - name: Install Playwright Browsers
+      run:  packages/${{ matrix.adapter }} && npx playwright install --with-deps
+
+    - name: Run Playwright tests
+      run:  packages/${{ matrix.adapter }} && npx playwright test
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: packages/${{ matrix.adapter }}/playwright-report/
+        retention-days: 30

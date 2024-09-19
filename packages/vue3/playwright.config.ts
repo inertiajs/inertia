@@ -73,7 +73,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'node tests/app/server.js',
+    command: 'cd tests && npm run server:run',
     url: 'http://localhost:13715',
     reuseExistingServer: !process.env.CI,
   },

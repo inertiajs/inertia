@@ -2,7 +2,8 @@ name: End-to-end tests
 on: [push, pull_request]
 jobs:
   tests:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    # if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    if: false
     timeout-minutes: 15
     runs-on: ubuntu-20.04
 
