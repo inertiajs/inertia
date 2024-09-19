@@ -115,8 +115,13 @@ export class Response {
       return this.locationVisit(locationUrl)
     }
 
-    if (fireInvalidEvent(this.response)) {
-      return modal.show(this.response.data)
+    const response = {
+      ...this.response,
+      data: this.getDataFromResponse(this.response.data),
+    }
+
+    if (fireInvalidEvent(response)) {
+      return modal.show(response.data)
     }
   }
 
@@ -160,7 +165,7 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse = this.getPageFromResponse(this.response.data)
+    const pageResponse = this.getDataFromResponse(this.response.data)
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
@@ -180,12 +185,16 @@ export class Response {
     })
   }
 
-  protected getPageFromResponse(response: any): Page {
-    if (typeof response === 'string') {
-      return JSON.parse(response)
+  protected getDataFromResponse(response: any): any {
+    if (typeof response !== 'string') {
+      return response
     }
 
-    return response
+    try {
+      return JSON.parse(response)
+    } catch (error) {
+      return response
+    }
   }
 
   protected shouldSetPage(pageResponse: Page): boolean {
