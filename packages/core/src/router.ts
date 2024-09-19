@@ -144,7 +144,9 @@ export class Router {
   }
 
   protected restoreScrollPositions(): void {
-    if (this.page.scrollRegions) {
+    nextFrame(() => {
+      if (!this.page.scrollRegions) return
+
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
         if (!scrollPosition) {
@@ -156,7 +158,7 @@ export class Router {
           region.scrollLeft = scrollPosition.left
         }
       })
-    }
+    })
   }
 
   protected isBackForwardVisit(): boolean {
