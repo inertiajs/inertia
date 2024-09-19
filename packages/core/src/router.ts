@@ -92,7 +92,7 @@ export class Router {
     if (!this.page.url.includes(hash)) {
       this.page.url += hash
     }
-    this.setPage(page, { preserveScroll: true ,preserveState: true }).then(() => fireNavigateEvent(page))
+    this.setPage(page, { preserveScroll: true, preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
