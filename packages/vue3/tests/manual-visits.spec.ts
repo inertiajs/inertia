@@ -686,6 +686,9 @@ test.describe('Preserve scroll', () => {
       await page.goBack()
 
       await expect(page).toHaveURL('/visits/preserve-scroll')
+
+      await page.waitForTimeout(50)
+
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
     })
