@@ -666,6 +666,8 @@ test.describe('Lifecycles', () => {
     test('cancels a visit before it completes', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Lifecycle Cancel' }).click()
 
+      await page.waitForTimeout(50)
+
       const messages = await page.evaluate(() => (window as any).messages)
 
       await expect(messages).toHaveLength(12)
