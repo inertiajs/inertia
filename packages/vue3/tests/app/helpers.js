@@ -14,9 +14,7 @@ module.exports = {
         .join(''),
       props: {},
       url: req.path,
-      meta: {
-        assetVersion: null,
-      },
+      version: null,
       ...data,
     }
 

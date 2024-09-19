@@ -67,7 +67,7 @@ app.get('/links/as-warning-false/:method', (req, res) =>
   inertia.render(req, res, { component: 'Links/AsWarningFalse', props: { method: req.params.method } }),
 )
 app.get('/links/headers/version', (req, res) =>
-  inertia.render(req, res, { component: 'Links/Headers', meta: { assetVersion: 'example-version-header' } }),
+  inertia.render(req, res, { component: 'Links/Headers', version: 'example-version-header' }),
 )
 
 app.get('/visits/partial-reloads', (req, res) =>
@@ -94,7 +94,7 @@ app.post('/visits/events-errors', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Events', props: { errors: { foo: 'bar' } } }),
 )
 app.get('/visits/headers/version', (req, res) =>
-  inertia.render(req, res, { component: 'Visits/Headers', meta: { assetVersion: 'example-version-header' } }),
+  inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
 
 app.post('/remember/form-helper/default', (req, res) =>
