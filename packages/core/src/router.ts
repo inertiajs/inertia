@@ -33,6 +33,11 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
 const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
+const nextFrame = (callback: () => void) => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(callback)
+  })
+}
 
 export class Router {
   protected page!: Page
@@ -87,7 +92,7 @@ export class Router {
     if (!this.page.url.includes(hash)) {
       this.page.url += hash
     }
-    this.setPage(page, { preserveScroll: true ,preserveState: true }).then(() => fireNavigateEvent(page))
+    this.setPage(page, { preserveScroll: true, preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -121,25 +126,27 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    window.scrollTo(0, 0)
-    this.scrollRegions().forEach((region) => {
-      if (typeof region.scrollTo === 'function') {
-        region.scrollTo(0, 0)
-      } else {
-        region.scrollTop = 0
-        region.scrollLeft = 0
+    nextFrame(() => {
+      window.scrollTo(0, 0)
+      this.scrollRegions().forEach((region) => {
+        if (typeof region.scrollTo === 'function') {
+          region.scrollTo(0, 0)
+        } else {
+          region.scrollTop = 0
+          region.scrollLeft = 0
+        }
+      })
+      this.saveScrollPositions()
+      if (window.location.hash) {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
       }
     })
-    this.saveScrollPositions()
-    if (window.location.hash) {
-      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
-      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
-    }
   }
 
   protected restoreScrollPositions(): void {
-    if (this.page.scrollRegions) {
+    nextFrame(() => {
+      if (!this.page.scrollRegions) return
+
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
         if (!scrollPosition) {
@@ -151,7 +158,7 @@ export class Router {
           region.scrollLeft = scrollPosition.left
         }
       })
-    }
+    })
   }
 
   protected isBackForwardVisit(): boolean {
