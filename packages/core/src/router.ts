@@ -126,21 +126,21 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    nextFrame(() => window.scrollTo(0, 0))
-    this.scrollRegions().forEach((region) => {
-      if (typeof region.scrollTo === 'function') {
-        region.scrollTo(0, 0)
-      } else {
-        region.scrollTop = 0
-        region.scrollLeft = 0
+    nextFrame(() => {
+      window.scrollTo(0, 0)
+      this.scrollRegions().forEach((region) => {
+        if (typeof region.scrollTo === 'function') {
+          region.scrollTo(0, 0)
+        } else {
+          region.scrollTop = 0
+          region.scrollLeft = 0
+        }
+      })
+      this.saveScrollPositions()
+      if (window.location.hash) {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
       }
     })
-    this.saveScrollPositions()
-    if (window.location.hash) {
-      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
-      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
-    }
   }
 
   protected restoreScrollPositions(): void {
