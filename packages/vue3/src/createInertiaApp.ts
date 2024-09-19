@@ -1,5 +1,5 @@
 import { Page, setupProgress } from '@inertiajs/core'
-import { App as VueApp, createSSRApp, DefineComponent, h, Plugin } from 'vue'
+import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
 interface CreateInertiaAppProps {

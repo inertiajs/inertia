@@ -17,11 +17,12 @@ interface BaseInertiaLinkProps {
   href: string
   method?: Method
   headers?: Record<string, string>
-  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  onClick?: (event: React.MouseEvent<Element>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   replace?: boolean
   only?: string[]
+  except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
@@ -49,6 +50,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       preserveState = null,
       replace = false,
       only = [],
+      except = [],
       headers = {},
       queryStringArrayFormat = 'brackets',
       onClick = noop,
@@ -65,10 +67,10 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     ref,
   ) => {
     const visit = useCallback(
-      (event) => {
+      (event: React.MouseEvent) => {
         onClick(event)
 
-        if (shouldIntercept(event)) {
+        if (shouldIntercept(event.nativeEvent)) {
           event.preventDefault()
 
           router.visit(href, {
@@ -78,6 +80,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
             preserveState: preserveState ?? method !== 'get',
             replace,
             only,
+            except,
             headers,
             onCancelToken,
             onBefore,
@@ -98,6 +101,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         preserveState,
         replace,
         only,
+        except,
         headers,
         onClick,
         onCancelToken,

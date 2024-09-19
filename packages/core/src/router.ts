@@ -1,37 +1,38 @@
-import { AxiosResponse, default as Axios } from 'axios'
+import { default as Axios, AxiosResponse } from 'axios'
 import debounce from './debounce'
 import {
-  fireBeforeEvent,
-  fireErrorEvent,
-  fireExceptionEvent,
-  fireFinishEvent,
-  fireInvalidEvent,
-  fireNavigateEvent,
-  fireProgressEvent,
-  fireStartEvent,
-  fireSuccessEvent,
+    fireBeforeEvent,
+    fireErrorEvent,
+    fireExceptionEvent,
+    fireFinishEvent,
+    fireInvalidEvent,
+    fireNavigateEvent,
+    fireProgressEvent,
+    fireStartEvent,
+    fireSuccessEvent,
 } from './events'
 import { hasFiles } from './files'
 import { objectToFormData } from './formData'
 import modal from './modal'
 import {
-  ActiveVisit,
-  GlobalEvent,
-  GlobalEventNames,
-  GlobalEventResult,
-  LocationVisit,
-  Page,
-  PageHandler,
-  PageResolver,
-  PendingVisit,
-  PreserveStateOption,
-  RequestPayload,
-  VisitId,
-  VisitOptions,
+    ActiveVisit,
+    GlobalEvent,
+    GlobalEventNames,
+    GlobalEventResult,
+    LocationVisit,
+    Page,
+    PageHandler,
+    PageResolver,
+    PendingVisit,
+    PreserveStateOption,
+    RequestPayload,
+    VisitId,
+    VisitOptions,
 } from './types'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
+const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 export class Router {
   protected page!: Page
@@ -82,8 +83,11 @@ export class Router {
   }
 
   protected handleInitialPageVisit(page: Page): void {
-    this.page.url += window.location.hash
-    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+    const hash = window.location.hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
+    this.setPage(page, { preserveScroll: true ,preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -235,7 +239,7 @@ export class Router {
     }
   }
 
-  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean | string {
+  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
     if (typeof value === 'function') {
       return value(page)
     } else if (value === 'errors') {
@@ -260,6 +264,7 @@ export class Router {
       preserveScroll = false,
       preserveState = false,
       only = [],
+      except = [],
       headers = {},
       errorBag = '',
       forceFormData = false,
@@ -294,6 +299,7 @@ export class Router {
       preserveScroll,
       preserveState,
       only,
+      except,
       headers,
       errorBag,
       forceFormData,
@@ -339,6 +345,8 @@ export class Router {
     fireStartEvent(visit)
     onStart(visit)
 
+    const isPartial = !!(only.length || except.length)
+
     Axios({
       method,
       url: urlWithoutHash(url).href,
@@ -350,10 +358,19 @@ export class Router {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...(only.length
+        ...(isPartial
           ? {
               'X-Inertia-Partial-Component': this.page.component,
+            }
+          : {}),
+        ...(only.length
+          ? {
               'X-Inertia-Partial-Data': only.join(','),
+            }
+          : {}),
+        ...(except.length
+          ? {
+              'X-Inertia-Partial-Except': except.join(','),
             }
           : {}),
         ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
@@ -373,7 +390,7 @@ export class Router {
         }
 
         const pageResponse: Page = response.data
-        if (only.length && pageResponse.component === this.page.component) {
+        if (isPartial && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
@@ -456,11 +473,7 @@ export class Router {
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          } else {
-            this.restoreScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
           if (!replace) {
             fireNavigateEvent(page)
           }
@@ -471,12 +484,12 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    window.history.pushState(cloneSerializable(page), '', page.url)
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    window.history.replaceState(cloneSerializable(page), '', page.url)
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
@@ -500,19 +513,15 @@ export class Router {
     }
   }
 
-  public get(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
-  ): void {
+  public get(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
     return this.visit(url, { ...options, method: 'get', data })
   }
 
-  public reload(options: Exclude<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
+  public reload(options: Omit<VisitOptions, 'preserveScroll' | 'preserveState'> = {}): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace(url: URL | string, options: Exclude<VisitOptions, 'replace'> = {}): void {
+  public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
     console.warn(
       `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
         options.method ?? 'get'
@@ -521,31 +530,23 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, replace: true })
   }
 
-  public post(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
-  ): void {
+  public post(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
 
-  public put(
-    url: URL | string,
-    data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
-  ): void {
+  public put(url: URL | string, data: RequestPayload = {}, options: Omit<VisitOptions, 'method' | 'data'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
 
   public patch(
     url: URL | string,
     data: RequestPayload = {},
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  public delete(url: URL | string, options: Exclude<VisitOptions, 'method'> = {}): void {
+  public delete(url: URL | string, options: Omit<VisitOptions, 'method'> = {}): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 

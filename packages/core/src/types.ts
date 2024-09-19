@@ -55,7 +55,7 @@ export type PageHandler = ({
   preserveState: PreserveStateOption
 }) => Promise<unknown>
 
-export type PreserveStateOption = boolean | string | ((page: Page) => boolean)
+export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
 export type Progress = AxiosProgressEvent
 
@@ -70,6 +70,7 @@ export type Visit = {
   preserveScroll: PreserveStateOption
   preserveState: PreserveStateOption
   only: Array<string>
+  except: Array<string>
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
