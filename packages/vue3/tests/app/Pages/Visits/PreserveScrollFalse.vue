@@ -73,13 +73,13 @@ const preserveGetFalse = () => {
     >
     <span class="foo">Foo is now {{ foo }}</span>
 
-    <a href="#" @click="preserve" class="preserve">Preserve Scroll</a>
-    <a href="#" @click="preserveFalse" class="reset">Reset Scroll</a>
-    <a href="#" @click="preserveCallback" class="preserve-callback">Preserve Scroll (Callback)</a>
+    <a href="#" @click.prevent="preserve" class="preserve">Preserve Scroll</a>
+    <a href="#" @click.prevent="preserveFalse" class="reset">Reset Scroll</a>
+    <a href="#" @click.prevent="preserveCallback" class="preserve-callback">Preserve Scroll (Callback)</a>
     <br />
-    <a href="#" @click="preserveCallbackFalse" class="reset-callback">Reset Scroll (Callback)</a>
-    <a href="#" @click="preserveGet" class="preserve-get">Preserve Scroll (GET)</a>
-    <a href="#" @click="preserveGetFalse" class="reset-get">Reset Scroll (GET)</a>
+    <a href="#" @click.prevent="preserveCallbackFalse" class="reset-callback">Reset Scroll (Callback)</a>
+    <a href="#" @click.prevent="preserveGet" class="preserve-get">Preserve Scroll (GET)</a>
+    <a href="#" @click.prevent="preserveGetFalse" class="reset-get">Reset Scroll (GET)</a>
 
     <a href="/non-inertia" class="off-site">Off-site link</a>
   </div>
