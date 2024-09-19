@@ -472,8 +472,7 @@ test.describe('Preserve scroll', () => {
       await expect(message.component).not.toBeUndefined()
       await expect(message.props).not.toBeUndefined()
       await expect(message.url).not.toBeUndefined()
-      await expect(message.meta).not.toBeUndefined()
-      await expect(message.meta.assetVersion).not.toBeUndefined()
+      await expect(message.version).not.toBeUndefined()
     })
 
     test('does not restore untracked scroll regions when pressing the back button (visit method)', async ({ page }) => {
@@ -531,8 +530,7 @@ test.describe('Preserve scroll', () => {
       await expect(message.component).not.toBeUndefined()
       await expect(message.props).not.toBeUndefined()
       await expect(message.url).not.toBeUndefined()
-      await expect(message.meta).not.toBeUndefined()
-      await expect(message.meta.assetVersion).not.toBeUndefined()
+      await expect(message.version).not.toBeUndefined()
 
       await page.goBack()
 
@@ -604,8 +602,7 @@ test.describe('Preserve scroll', () => {
       await expect(message.component).not.toBeUndefined()
       await expect(message.props).not.toBeUndefined()
       await expect(message.url).not.toBeUndefined()
-      await expect(message.meta).not.toBeUndefined()
-      await expect(message.meta.assetVersion).not.toBeUndefined()
+      await expect(message.version).not.toBeUndefined()
     })
 
     test('preserves scroll regions when using the "preserve-scroll" feature (visit method)', async ({ page }) => {
@@ -642,8 +639,7 @@ test.describe('Preserve scroll', () => {
       await expect(message.component).not.toBeUndefined()
       await expect(message.props).not.toBeUndefined()
       await expect(message.url).not.toBeUndefined()
-      await expect(message.meta).not.toBeUndefined()
-      await expect(message.meta.assetVersion).not.toBeUndefined()
+      await expect(message.version).not.toBeUndefined()
     })
 
     test('restores all tracked scroll regions when pressing the back button (visit method)', async ({ page }) => {

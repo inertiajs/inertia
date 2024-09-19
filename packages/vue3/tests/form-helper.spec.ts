@@ -563,8 +563,7 @@ test.describe('Form Helper', () => {
         await expect(pageData).toHaveProperty('component')
         await expect(pageData).toHaveProperty('props')
         await expect(pageData).toHaveProperty('url')
-        await expect(pageData).toHaveProperty('meta')
-        await expect(pageData.meta).toHaveProperty('assetVersion')
+        await expect(pageData).toHaveProperty('version')
       })
 
       test('marks the form as no longer processing', async ({ page }) => {

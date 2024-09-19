@@ -36,8 +36,7 @@ const assertPageObject = async (page) => {
   await expect(page.component).toBeDefined()
   await expect(page.props).toBeDefined()
   await expect(page.url).toBeDefined()
-  await expect(page.meta).toBeDefined()
-  await expect(page.meta.assetVersion).toBeDefined()
+  await expect(page.version).toBeDefined()
 }
 
 const assertProgressObject = async (progress) => {

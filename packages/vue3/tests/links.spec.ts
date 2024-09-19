@@ -397,8 +397,7 @@ test.describe('preserve scroll', () => {
     await expect(message.component).not.toBeUndefined()
     await expect(message.props).not.toBeUndefined()
     await expect(message.url).not.toBeUndefined()
-    await expect(message.meta).not.toBeUndefined()
-    await expect(message.meta.assetVersion).not.toBeUndefined()
+    await expect(message.version).not.toBeUndefined()
   })
 
   test('does not restore untracked scroll regions when pressing the back button', async ({ page }) => {
@@ -438,8 +437,7 @@ test.describe('preserve scroll', () => {
     await expect(message.component).not.toBeUndefined()
     await expect(message.props).not.toBeUndefined()
     await expect(message.url).not.toBeUndefined()
-    await expect(message.meta).not.toBeUndefined()
-    await expect(message.meta.assetVersion).not.toBeUndefined()
+    await expect(message.version).not.toBeUndefined()
 
     await page.goBack()
 
@@ -501,8 +499,7 @@ test.describe('enabled', () => {
     await expect(message.component).not.toBeUndefined()
     await expect(message.props).not.toBeUndefined()
     await expect(message.url).not.toBeUndefined()
-    await expect(message.meta).not.toBeUndefined()
-    await expect(message.meta.assetVersion).not.toBeUndefined()
+    await expect(message.version).not.toBeUndefined()
   })
 
   test('preserves scroll regions when using the "preserve-scroll" feature', async ({ page }) => {
@@ -528,8 +525,7 @@ test.describe('enabled', () => {
     await expect(message.component).not.toBeUndefined()
     await expect(message.props).not.toBeUndefined()
     await expect(message.url).not.toBeUndefined()
-    await expect(message.meta).not.toBeUndefined()
-    await expect(message.meta.assetVersion).not.toBeUndefined()
+    await expect(message.version).not.toBeUndefined()
   })
 
   test('restores all tracked scroll regions when pressing the back button', async ({ page }) => {
@@ -537,8 +533,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
 
-    // @ts-ignore
-    await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+    await page.evaluate(() => (document as any).querySelector('#slot').scrollTo(0, 0))
 
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
