@@ -1,4 +1,3 @@
-import debounce from './debounce'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
@@ -87,15 +86,17 @@ class History {
 
     if (!this.preserveUrl) {
       this.current = page
-      this.doReplace(page, (data) => {
-        window.history.replaceState(
-          {
-            page: data,
-            timestamp: Date.now(),
-          },
-          '',
-          page.url,
-        )
+      this.addToQueue(() => {
+        return this.getPageData(page).then((data) => {
+          window.history.replaceState(
+            {
+              page: data,
+              timestamp: Date.now(),
+            },
+            '',
+            page.url,
+          )
+        })
       })
     }
   }
@@ -104,10 +105,6 @@ class History {
     this.queue.push(fn)
     this.processQueue()
   }
-
-  protected doReplace = debounce((page: Page, cb: (data: ArrayBuffer | Page) => void) => {
-    this.addToQueue(() => this.getPageData(page).then(cb))
-  }, 50)
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
     return this.current?.[key] ?? defaultValue
