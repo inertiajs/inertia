@@ -33,6 +33,11 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
 const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
+const nextFrame = (callback: () => void) => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(callback)
+  })
+}
 
 export class Router {
   protected page!: Page
