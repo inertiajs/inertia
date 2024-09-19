@@ -474,6 +474,7 @@ export class Router {
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
           preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
+
           if (!replace) {
             fireNavigateEvent(page)
           }
