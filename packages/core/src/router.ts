@@ -126,7 +126,7 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    window.scrollTo(0, 0)
+    nextFrame(() => window.scrollTo(0, 0))
     this.scrollRegions().forEach((region) => {
       if (typeof region.scrollTo === 'function') {
         region.scrollTo(0, 0)
