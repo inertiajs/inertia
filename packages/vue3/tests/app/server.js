@@ -175,6 +175,15 @@ app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 
+app.get('/prefetch/:pageNumber', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Page',
+    props: {
+      pageNumber: req.params.pageNumber,
+    },
+  })
+})
+
 app.get('/merge-props', (req, res) => {
   inertia.render(req, res, {
     component: 'MergeProps',
