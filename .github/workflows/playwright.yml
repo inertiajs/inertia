@@ -18,17 +18,13 @@ jobs:
       with:
         node-version: lts/*
 
-    # - name: Build Inertia
-    #   run: |
-    #     npm install
-    #     cd packages/core && npm run build
-    #     cd ../${{ matrix.adapter }} && npm run build
-
     - name: Build Inertia
       run: |
+        rm package-lock.json
         npm install
-        cd packages/core && npm run clean && ./build.js
-        cd ../${{ matrix.adapter }} && npm run clean && ./build.js
+        cd packages/core && npm run build
+        cd ../${{ matrix.adapter }} && npm run build
+        cd tests && npm install
 
     - name: Local-link @inertiajs/core
       run: cd packages/core && npm link
@@ -37,10 +33,10 @@ jobs:
       run: cd packages/${{ matrix.adapter }} && npm link
 
     - name: Install Playwright Browsers
-      run:  packages/${{ matrix.adapter }} && npx playwright install --with-deps
+      run:  cd packages/${{ matrix.adapter }} && npx playwright install --with-deps
 
-    - name: Run Playwright tests
-      run:  packages/${{ matrix.adapter }} && npx playwright test
+    - name: Run Playwright Tests
+      run:  cd packages/${{ matrix.adapter }} && npx playwright test
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
