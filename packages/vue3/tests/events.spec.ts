@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { pageLoads } from './support'
+import { clickAndWaitForResponse, pageLoads } from './support'
 
 const listenForGlobalMessages = async (page: Page, event, stringifyDetail = false) => {
   await page.evaluate(
@@ -300,7 +300,7 @@ test.describe('Events', () => {
       test('fires when the request has files and upload progression occurs', async ({ page }) => {
         await listenForGlobalMessages(page, 'inertia:progress')
 
-        await page.getByRole('link', { exact: true, name: 'Progress Event' }).click()
+        await clickAndWaitForResponse(page, 'Progress Event')
 
         const messages = await page.evaluate(() => (window as any).messages)
         const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:progress'])
@@ -323,7 +323,7 @@ test.describe('Events', () => {
       })
 
       test('fires when the request has files and upload progression occurs (link)', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'Progress Event Link' }).click()
+        await clickAndWaitForResponse(page, 'Progress Event Link', null, 'button')
 
         const messages = await page.evaluate(() => (window as any).messages)
 
@@ -354,7 +354,7 @@ test.describe('Events', () => {
       test('fires when the request finishes with validation errors', async ({ page }) => {
         await listenForGlobalMessages(page, 'inertia:error')
 
-        await page.getByRole('link', { exact: true, name: 'Error Event' }).click()
+        await clickAndWaitForResponse(page, 'Error Event', 'events/errors')
 
         const messages = await page.evaluate(() => (window as any).messages)
         const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:error'])
@@ -378,7 +378,7 @@ test.describe('Events', () => {
       test('fires when the request finishes with validation errors (link)', async ({ page }) => {
         await listenForGlobalMessages(page, 'inertia:error')
 
-        await page.getByRole('button', { exact: true, name: 'Error Event Link' }).click()
+        const response = await clickAndWaitForResponse(page, 'Error Event Link', 'events/errors', 'button')
 
         const messages = await page.evaluate(() => (window as any).messages)
         const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:error'])
@@ -395,7 +395,7 @@ test.describe('Events', () => {
 
     test.describe('Local Event Callbacks', () => {
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
-        await page.getByRole('link', { exact: true, name: 'Error Event (delaying onFinish w/ Promise)' }).click()
+        await clickAndWaitForResponse(page, 'Error Event (delaying onFinish w/ Promise)', 'events/errors')
 
         await page.waitForTimeout(25)
 
@@ -426,7 +426,7 @@ test.describe('Events', () => {
     test('fires when the request finished without validation errors', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:success')
 
-      await page.getByRole('link', { exact: true, name: 'Success Event' }).click()
+      await clickAndWaitForResponse(page, 'Success Event')
 
       const messages = await page.evaluate(() => (window as any).messages)
       const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:success'])
@@ -450,7 +450,7 @@ test.describe('Events', () => {
     test('fires when the request finished without validation errors (link)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:success')
 
-      await page.getByRole('button', { exact: true, name: 'Success Event Link' }).click()
+      await clickAndWaitForResponse(page, 'Success Event Link', null, 'button')
 
       const messages = await page.evaluate(() => (window as any).messages)
       const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:success'])
@@ -522,6 +522,7 @@ test.describe('Events', () => {
     test('gets fired when an unexpected situation occurs (e.g. network disconnect)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:exception', true)
       await page.getByRole('link', { exact: true, name: 'Exception Event' }).click()
+      await page.waitForTimeout(100)
 
       const messages = await page.evaluate(() => (window as any).messages)
       const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:exception'])
@@ -544,7 +545,7 @@ test.describe('Events', () => {
     test('fires when the request completes', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:finish')
 
-      await page.getByRole('link', { exact: true, name: 'Finish Event' }).click()
+      await clickAndWaitForResponse(page, 'Finish Event')
 
       const messages = await page.evaluate(() => (window as any).messages)
       const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:finish'])
@@ -567,7 +568,8 @@ test.describe('Events', () => {
 
     test('fires when the request completes (link)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:finish')
-      await page.getByRole('button', { exact: true, name: 'Finish Event Link' }).click()
+
+      await clickAndWaitForResponse(page, 'Finish Event Link', null, 'button')
 
       const messages = await page.evaluate(() => (window as any).messages)
       const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:finish'])
@@ -635,7 +637,7 @@ test.describe('Lifecycles', () => {
   })
 
   test('fires all expected events in the correct order on an error request', async ({ page }) => {
-    await page.getByRole('link', { exact: true, name: 'Lifecycle Error' }).click()
+    await clickAndWaitForResponse(page, 'Lifecycle Error', 'events/errors')
 
     const messages = await page.evaluate(() => (window as any).messages)
 

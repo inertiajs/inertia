@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { pageLoads, shouldBeDumpPage } from './support'
+import { clickAndWaitForResponse, pageLoads, shouldBeDumpPage } from './support'
 
 test.describe('Form Helper', () => {
   test.describe('Methods', () => {
@@ -485,6 +485,8 @@ test.describe('Form Helper', () => {
       test('fires when the form has files (and upload progression occurs)', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onProgress' }).click()
 
+        await page.waitForTimeout(100)
+
         const messages = await page.evaluate(() => (window as any).messages)
 
         await expect(messages[3]).toBe('onProgress')
@@ -498,7 +500,7 @@ test.describe('Form Helper', () => {
       })
 
       test('does not fire when the form has no files', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'progress no files' }).click()
+        await clickAndWaitForResponse(page, 'progress no files', null, 'button')
 
         const messages = await page.evaluate(() => (window as any).messages)
 
@@ -518,6 +520,8 @@ test.describe('Form Helper', () => {
 
       test('updates the progress property of the form', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onSuccess progress property' }).click()
+
+        await page.waitForTimeout(100)
 
         const messages = await page.evaluate(() => (window as any).messages)
 
@@ -597,7 +601,7 @@ test.describe('Form Helper', () => {
       })
 
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onSuccess promise' }).click()
+        await clickAndWaitForResponse(page, 'onSuccess promise', '/dump/post', 'button')
 
         await page.waitForTimeout(50)
 
@@ -612,7 +616,7 @@ test.describe('Form Helper', () => {
       })
 
       test('clears all existing errors and resets the hasErrors prop', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onSuccess resets errors' }).click()
+        await clickAndWaitForResponse(page, 'onSuccess resets errors', null, 'button')
 
         const messages = await page.evaluate(() => (window as any).messages)
 
@@ -640,7 +644,7 @@ test.describe('Form Helper', () => {
 
       test('will mark the form as being submitted successfully', async ({ page }) => {
         await expect(page.locator('.success-status')).toHaveText('Form was not successful')
-        await page.getByRole('button', { exact: true, name: 'Submit form' }).click()
+        await clickAndWaitForResponse(page, 'Submit form', null, 'button')
         await expect(page.locator('.success-status')).toHaveText('Form was successful')
       })
 
@@ -648,7 +652,7 @@ test.describe('Form Helper', () => {
         await expect(page.locator('.success-status')).toHaveText('Form was not successful')
         await expect(page.locator('.recently-status')).toHaveText('Form was not recently successful')
 
-        await page.getByRole('button', { exact: true, name: 'Submit form' }).click()
+        await clickAndWaitForResponse(page, 'Submit form', null, 'button')
 
         await expect(page.locator('.success-status')).toHaveText('Form was successful')
         await expect(page.locator('.recently-status')).toHaveText('Form was recently successful')
@@ -689,7 +693,7 @@ test.describe('Form Helper', () => {
       })
 
       test('resets the progress property back to null', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onError progress property' }).click()
+        await clickAndWaitForResponse(page, 'onError progress property', 'form-helper/events/errors', 'button')
 
         const messages = await page.evaluate(() => (window as any).messages)
 
@@ -723,7 +727,7 @@ test.describe('Form Helper', () => {
       })
 
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onError promise' }).click()
+        await clickAndWaitForResponse(page, 'onError promise', 'form-helper/events/errors', 'button')
 
         await page.waitForTimeout(50)
 

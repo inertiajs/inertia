@@ -1,5 +1,16 @@
 import { expect, Page, Request } from '@playwright/test'
 
+export const clickAndWaitForResponse = async (
+  page: Page,
+  buttonText: string,
+  url: string | null = null,
+  element: 'link' | 'button' = 'link',
+) => {
+  const responsePromise = page.waitForResponse(url ?? page.url())
+  await page.getByRole(element, { exact: true, name: buttonText }).click()
+  return await responsePromise
+}
+
 export const pageLoads = {
   count: 0,
 

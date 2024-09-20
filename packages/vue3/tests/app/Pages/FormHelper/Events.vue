@@ -355,29 +355,29 @@ const progressNoFiles = () => {
 
 <template>
   <div>
-    <button @click="submit" class="submit">Submit form</button>
+    <button @click.prevent="submit" class="submit">Submit form</button>
 
-    <button @click="successfulRequest" class="successful-request">Successful request</button>
-    <button @click="cancelledVisit" class="cancel">Cancellable Visit</button>
+    <button @click.prevent="successfulRequest" class="successful-request">Successful request</button>
+    <button @click.prevent="cancelledVisit" class="cancel">Cancellable Visit</button>
 
-    <button @click="onBeforeVisit" class="before">onBefore</button>
-    <button @click="onBeforeVisitCancelled" class="before-cancel">onBefore cancellation</button>
-    <button @click="onStartVisit" class="start">onStart</button>
-    <button @click="onProgressVisit" class="progress">onProgress</button>
+    <button @click.prevent="onBeforeVisit" class="before">onBefore</button>
+    <button @click.prevent="onBeforeVisitCancelled" class="before-cancel">onBefore cancellation</button>
+    <button @click.prevent="onStartVisit" class="start">onStart</button>
+    <button @click.prevent="onProgressVisit" class="progress">onProgress</button>
 
-    <button @click="onSuccessVisit" class="success">onSuccess</button>
-    <button @click="onSuccessProgress" class="success-progress">onSuccess progress property</button>
-    <button @click="onSuccessProcessing" class="success-processing">onSuccess resets processing</button>
-    <button @click="onSuccessResetErrors" class="success-reset-errors">onSuccess resets errors</button>
-    <button @click="onSuccessPromiseVisit" class="success-promise">onSuccess promise</button>
+    <button @click.prevent="onSuccessVisit" class="success">onSuccess</button>
+    <button @click.prevent="onSuccessProgress" class="success-progress">onSuccess progress property</button>
+    <button @click.prevent="onSuccessProcessing" class="success-processing">onSuccess resets processing</button>
+    <button @click.prevent="onSuccessResetErrors" class="success-reset-errors">onSuccess resets errors</button>
+    <button @click.prevent="onSuccessPromiseVisit" class="success-promise">onSuccess promise</button>
 
-    <button @click="onErrorVisit" class="error">onError</button>
-    <button @click="onErrorProgress" class="error-progress">onError progress property</button>
-    <button @click="onErrorProcessing" class="error-processing">onError resets processing</button>
-    <button @click="errorsSetOnError" class="errors-set-on-error">Errors set on error</button>
-    <button @click="onErrorPromiseVisit" class="error-promise">onError promise</button>
+    <button @click.prevent="onErrorVisit" class="error">onError</button>
+    <button @click.prevent="onErrorProgress" class="error-progress">onError progress property</button>
+    <button @click.prevent="onErrorProcessing" class="error-processing">onError resets processing</button>
+    <button @click.prevent="errorsSetOnError" class="errors-set-on-error">Errors set on error</button>
+    <button @click.prevent="onErrorPromiseVisit" class="error-promise">onError promise</button>
 
-    <button @click="progressNoFiles" class="no-progress">progress no files</button>
+    <button @click.prevent="progressNoFiles" class="no-progress">progress no files</button>
 
     <span class="success-status">Form was {{ form.wasSuccessful ? '' : 'not ' }}successful</span>
     <span class="recently-status">Form was {{ form.recentlySuccessful ? '' : 'not ' }}recently successful</span>

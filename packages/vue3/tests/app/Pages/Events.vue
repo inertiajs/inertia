@@ -456,12 +456,12 @@ const callbackSuccessErrorPromise = (eventName) => {
 <template>
   <div>
     <!-- Listeners -->
-    <a href="#" @click="withoutEventListeners" class="without-listeners">Basic Visit</a>
-    <a href="#" @click="removeInertiaListener" class="remove-inertia-listener">Remove Inertia Listener</a>
+    <a href="#" @click.prevent="withoutEventListeners" class="without-listeners">Basic Visit</a>
+    <a href="#" @click.prevent="removeInertiaListener" class="remove-inertia-listener">Remove Inertia Listener</a>
 
     <!-- Events: Before -->
-    <a href="#" @click="beforeVisit" class="before">Before Event</a>
-    <a href="#" @click="beforeVisitPreventLocal" class="before-prevent-local">Before Event (Prevent)</a>
+    <a href="#" @click.prevent="beforeVisit" class="before">Before Event</a>
+    <a href="#" @click.prevent="beforeVisitPreventLocal" class="before-prevent-local">Before Event (Prevent)</a>
     <Link
       :href="$page.url"
       method="post"
@@ -483,15 +483,15 @@ const callbackSuccessErrorPromise = (eventName) => {
       class="link-before-prevent-local"
       >Before Event Link (Prevent)</Link
     >
-    <a href="#" @click="beforeVisitPreventGlobalInertia" class="before-prevent-global-inertia"
+    <a href="#" @click.prevent="beforeVisitPreventGlobalInertia" class="before-prevent-global-inertia"
       >Before Event - Prevent globally using Inertia Event Listener</a
     >
-    <a href="#" @click="beforeVisitPreventGlobalNative" class="before-prevent-global-native"
+    <a href="#" @click.prevent="beforeVisitPreventGlobalNative" class="before-prevent-global-native"
       >Before Event - Prevent globally using Native Event Listeners</a
     >
 
     <!-- Events: CancelToken -->
-    <a href="#" @click="cancelTokenVisit" class="canceltoken">Cancel Token Event</a>
+    <a href="#" @click.prevent="cancelTokenVisit" class="canceltoken">Cancel Token Event</a>
     <Link
       :href="$page.url"
       method="post"
@@ -501,7 +501,7 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Cancel -->
-    <a href="#" @click="cancelVisit" class="cancel">Cancel Event</a>
+    <a href="#" @click.prevent="cancelVisit" class="cancel">Cancel Event</a>
     <Link
       :href="$page.url"
       method="post"
@@ -512,14 +512,14 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Start -->
-    <a href="#" @click="startVisit" class="start">Start Event</a>
+    <a href="#" @click.prevent="startVisit" class="start">Start Event</a>
     <Link :href="$page.url" method="post" @start="(event) => internalAlert('linkOnStart', event)" class="link-start"
       >Start Event Link</Link
     >
 
     <!-- Events: Progress -->
-    <a href="#" @click="progressVisit" class="progress">Progress Event</a>
-    <a href="#" @click="progressNoFilesVisit" class="progress-no-files">Missing Progress Event (no files)</a>
+    <a href="#" @click.prevent="progressVisit" class="progress">Progress Event</a>
+    <a href="#" @click.prevent="progressNoFilesVisit" class="progress-no-files">Missing Progress Event (no files)</a>
     <Link
       :href="$page.url"
       method="post"
@@ -538,8 +538,8 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Error -->
-    <a href="#" @click="errorVisit" class="error">Error Event</a>
-    <a href="#" @click="errorPromiseVisit" class="error-promise">Error Event (delaying onFinish w/ Promise)</a>
+    <a href="#" @click.prevent="errorVisit" class="error">Error Event</a>
+    <a href="#" @click.prevent="errorPromiseVisit" class="error-promise">Error Event (delaying onFinish w/ Promise)</a>
     <Link
       href="/events/errors"
       method="post"
@@ -559,8 +559,10 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Success -->
-    <a href="#" @click="successVisit" class="success">Success Event</a>
-    <a href="#" @click="successPromiseVisit" class="success-promise">Success Event (delaying onFinish w/ Promise)</a>
+    <a href="#" @click.prevent="successVisit" class="success">Success Event</a>
+    <a href="#" @click.prevent="successPromiseVisit" class="success-promise"
+      >Success Event (delaying onFinish w/ Promise)</a
+    >
     <Link
       :href="$page.url"
       method="post"
@@ -580,25 +582,25 @@ const callbackSuccessErrorPromise = (eventName) => {
     >
 
     <!-- Events: Invalid -->
-    <a href="#" @click="invalidVisit" class="invalid">Invalid Event</a>
+    <a href="#" @click.prevent="invalidVisit" class="invalid">Invalid Event</a>
 
     <!-- Events: Exception -->
-    <a href="#" @click="exceptionVisit" class="exception">Exception Event</a>
+    <a href="#" @click.prevent="exceptionVisit" class="exception">Exception Event</a>
 
     <!-- Events: Finish -->
-    <a href="#" @click="finishVisit" class="finish">Finish Event</a>
+    <a href="#" @click.prevent="finishVisit" class="finish">Finish Event</a>
     <Link :href="$page.url" method="post" @finish="(event) => internalAlert('linkOnFinish', event)" class="link-finish"
       >Finish Event Link</Link
     >
 
     <!-- Events: Navigate -->
-    <a href="#" @click="navigateVisit" class="navigate">Navigate Event</a>
+    <a href="#" @click.prevent="navigateVisit" class="navigate">Navigate Event</a>
 
     <!-- Lifecycles -->
-    <a href="#" @click="lifecycleSuccess" class="lifecycle-success">Lifecycle Success</a>
-    <a href="#" @click="lifecycleError" class="lifecycle-error">Lifecycle Error</a>
-    <a href="#" @click="lifecycleCancel" class="lifecycle-cancel">Lifecycle Cancel</a>
-    <a href="#" @click="lifecycleCancelAfterFinish" class="lifecycle-cancel-after-finish"
+    <a href="#" @click.prevent="lifecycleSuccess" class="lifecycle-success">Lifecycle Success</a>
+    <a href="#" @click.prevent="lifecycleError" class="lifecycle-error">Lifecycle Error</a>
+    <a href="#" @click.prevent="lifecycleCancel" class="lifecycle-cancel">Lifecycle Cancel</a>
+    <a href="#" @click.prevent="lifecycleCancelAfterFinish" class="lifecycle-cancel-after-finish"
       >Lifecycle Cancel - After Finish</a
     >
   </div>
