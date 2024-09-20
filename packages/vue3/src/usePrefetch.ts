@@ -14,7 +14,7 @@ export default function usePrefetch(options: VisitOptions = {}): {
   const cached = router.getCached(window.location.pathname, options)
   const inFlight = router.getPrefetching(window.location.pathname, options)
 
-  lastUpdatedAt.value = cached?.timestamp || null
+  lastUpdatedAt.value = cached.staleTimestamp || null
 
   isPrefetching.value = inFlight !== null
   isPrefetched.value = cached !== null
@@ -30,7 +30,7 @@ export default function usePrefetch(options: VisitOptions = {}): {
     })
 
     onPrefetchedListener = router.on('prefetched', (e) => {
-      if (e.detail.response.url === window.location.pathname) {
+      if (e.detail.visit.url.pathname === window.location.pathname) {
         isPrefetching.value = false
         isPrefetched.value = true
       }

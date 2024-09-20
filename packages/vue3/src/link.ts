@@ -1,5 +1,5 @@
 import {
-  cacheForOption,
+  CacheForOption,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
@@ -33,7 +33,7 @@ export interface InertiaLinkProps {
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: cacheForOption | cacheForOption[]
+  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -95,7 +95,7 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     cacheFor: {
-      type: [Number, String, Array] as PropType<cacheForOption | cacheForOption[]>,
+      type: [Number, String, Array] as PropType<CacheForOption | CacheForOption[]>,
       default: 0,
     },
     // @ts-ignore

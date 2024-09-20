@@ -163,6 +163,7 @@ export type GlobalEventsMap = {
     details: {
       response: AxiosResponse
       fetchedAt: number
+      visit: ActiveVisit
     }
     result: void
   }

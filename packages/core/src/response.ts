@@ -69,7 +69,7 @@ export class Response {
       this.requestParams.all().prefetch = false
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
       firePrefetchedEvent(this.response, this.requestParams.all())
-      this.requestParams.all().onPrefetchResponse(this)
+      this.requestParams.onPrefetchResponse(this)
       return Promise.resolve()
     }
 

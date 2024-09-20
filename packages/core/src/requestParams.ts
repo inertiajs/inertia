@@ -1,5 +1,6 @@
 import { AxiosRequestConfig } from 'axios'
 import { page as currentPage } from './page'
+import { Response } from './response'
 import { ActiveVisit, InternalActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
 
 export class RequestParams {
@@ -86,6 +87,12 @@ export class RequestParams {
 
   public onPrefetching() {
     this.params.onPrefetching(this.params)
+  }
+
+  public onPrefetchResponse(response: Response) {
+    if (this.params.onPrefetchResponse) {
+      this.params.onPrefetchResponse(response)
+    }
   }
 
   public all() {
