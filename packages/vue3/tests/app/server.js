@@ -175,6 +175,69 @@ app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 
+app.get('/deferred-props/page-1', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/Page1',
+      deferredProps: {
+        default: ['foo', 'bar'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/Page1',
+        props: {
+          foo: req.headers['x-inertia-partial-data']?.includes('foo') ? 'foo value' : undefined,
+          bar: req.headers['x-inertia-partial-data']?.includes('bar') ? 'bar value' : undefined,
+        },
+      }),
+    500,
+  )
+})
+
+app.get('/deferred-props/page-2', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/Page2',
+      deferredProps: {
+        default: ['baz'],
+        other: ['qux'],
+      },
+      props: {},
+    })
+  }
+
+  if (req.headers['x-inertia-partial-data']?.includes('baz')) {
+    setTimeout(
+      () =>
+        inertia.render(req, res, {
+          component: 'DeferredProps/Page2',
+          props: {
+            baz: 'baz value',
+          },
+        }),
+      500,
+    )
+  }
+
+  if (req.headers['x-inertia-partial-data']?.includes('qux')) {
+    setTimeout(
+      () =>
+        inertia.render(req, res, {
+          component: 'DeferredProps/Page2',
+          props: {
+            qux: 'qux value',
+          },
+        }),
+      750,
+    )
+  }
+})
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
