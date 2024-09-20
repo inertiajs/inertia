@@ -175,6 +175,17 @@ app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 
+app.get('/merge-props', (req, res) => {
+  inertia.render(req, res, {
+    component: 'MergeProps',
+    props: {
+      bar: new Array(5).fill(1),
+      foo: new Array(5).fill(1),
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { mergeProps: ['foo'] }),
+  })
+})
+
 app.get('/deferred-props/page-1', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
