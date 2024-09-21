@@ -492,7 +492,7 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(cloneSerializable(page), '', page.url)
+    setTimeout(() => window.history.pushState(cloneSerializable(page), '', page.url))
   }
 
   protected replaceState(page: Page): void {
