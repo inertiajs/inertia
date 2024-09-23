@@ -14,7 +14,7 @@ interface CreateInertiaAppProps {
   resolve: ComponentResolver
   setup: (props: {
     el: Element
-    App: AppComponent
+    App: ComponentType<App>
     props: {
       initialPage: Page
       resolveComponent: ComponentResolver
@@ -47,6 +47,7 @@ export default async function createInertiaApp({
     store.set({
       component: initialComponent,
       page: initialPage,
+      key: null,
     })
   })
 
