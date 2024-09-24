@@ -214,6 +214,20 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/when-visible', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisible',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(page, 500)
+  } else {
+    page()
+  }
+})
+
 app.get('/merge-props', (req, res) => {
   inertia.render(req, res, {
     component: 'MergeProps',
