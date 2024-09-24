@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const package = process.env.PACKAGE_NAME || 'vue3'
+const package = process.env.PACKAGE || 'vue3'
 
 module.exports = {
   package,

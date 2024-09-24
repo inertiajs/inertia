@@ -73,7 +73,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `cd ../packages/${process.env.PACKAGE_NAME}/test-app && vite build && cd ../../../ && node tests/app/server.js`,
+    command: `cd ../packages/${process.env.PACKAGE}/test-app && vite build && cd ../../../ && node tests/app/server.js`,
     url: 'http://localhost:13715',
     reuseExistingServer: !process.env.CI,
   },
