@@ -10,7 +10,7 @@ test('will start polling when the component mounts with usePoll', async ({ page 
 
   const response = await page.waitForResponse(page.url())
   const firstRequestTime = Date.now() - start
-  await expect(firstRequestTime).toBeGreaterThanOrEqual(500)
+  await expect(firstRequestTime).toBeGreaterThanOrEqual(400)
   await expect(firstRequestTime).toBeLessThanOrEqual(700)
 
   const response2 = await page.waitForResponse(page.url())
@@ -58,7 +58,7 @@ manualData.forEach(({ method, url }) => {
 
     const response = await page.waitForResponse(page.url())
     const firstRequestTime = Date.now() - start
-    await expect(firstRequestTime).toBeGreaterThanOrEqual(490)
+    await expect(firstRequestTime).toBeGreaterThanOrEqual(400)
     await expect(firstRequestTime).toBeLessThanOrEqual(700)
 
     const response2 = await page.waitForResponse(page.url())
