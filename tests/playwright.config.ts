@@ -11,7 +11,7 @@ import { defineConfig, devices } from '@playwright/test'
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: './',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -73,7 +73,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd tests && npm run server:run',
+    command: `cd ../packages/${process.env.PACKAGE_NAME}/test-app && vite build && cd ../../../ && node tests/app/server.js`,
     url: 'http://localhost:13715',
     reuseExistingServer: !process.env.CI,
   },

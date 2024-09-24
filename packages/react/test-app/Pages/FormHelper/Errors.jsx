@@ -1,0 +1,85 @@
+import { useForm } from '@inertiajs/react'
+
+export default (props) => {
+  const form = useForm({ name: 'foo', handle: 'example', remember: false })
+
+  const submit = () => {
+    form.post('/form-helper/errors')
+  }
+
+  const clearErrors = () => {
+    form.clearErrors()
+  }
+
+  const clearError = () => {
+    form.clearErrors('handle')
+  }
+
+  const setErrors = () => {
+    form.setError({
+      name: 'Manually set Name error',
+      handle: 'Manually set Handle error',
+    })
+  }
+
+  const setError = () => {
+    form.setError('handle', 'Manually set Handle error')
+  }
+
+  return (
+    <div>
+      <label>
+        Full Name
+        <input
+          type="text"
+          id="name"
+          name="name"
+          onChange={(e) => form.setData('name', e.target.value)}
+          value={form.data.name}
+        />
+      </label>
+      {form.errors.name && <span className="name_error">{form.errors.name}</span>}
+      <label>
+        Handle
+        <input
+          type="text"
+          id="handle"
+          name="handle"
+          onChange={(e) => form.setData('handle', e.target.value)}
+          value={form.data.handle}
+        />
+      </label>
+      {form.errors.handle && <span className="handle_error">{form.errors.handle}</span>}
+      <label>
+        Remember Me
+        <input
+          type="checkbox"
+          id="remember"
+          name="remember"
+          onChange={(e) => form.setData('remember', e.target.checked)}
+          checked={form.data.remember}
+        />
+      </label>
+      {form.errors.remember && <span className="remember_error">{form.errors.remember}</span>}
+
+      <span onClick={submit} className="submit">
+        Submit form
+      </span>
+
+      <span onClick={clearErrors} className="clear">
+        Clear all errors
+      </span>
+      <span onClick={clearError} className="clear-one">
+        Clear one error
+      </span>
+      <span onClick={setErrors} className="set">
+        Set errors
+      </span>
+      <span onClick={setError} className="set-one">
+        Set one error
+      </span>
+
+      <span className="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
+    </div>
+  )
+}
