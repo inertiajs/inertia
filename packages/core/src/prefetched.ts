@@ -61,7 +61,7 @@ class PrefetchedRequests {
 
       this.cached.push({
         params: { ...params },
-        staleTimestamp: Date.now() + timeToMs(stale),
+        staleTimestamp: Date.now() + stale,
         response: promise,
         singleUse: cacheFor === 0,
         timestamp: Date.now(),
@@ -103,7 +103,13 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [CacheForOption, CacheForOption] {
+  protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [number, number] {
+    const [stale, expires] = this.cacheForToStaleAndExpires(cacheFor)
+
+    return [timeToMs(stale), timeToMs(expires)]
+  }
+
+  protected cacheForToStaleAndExpires(cacheFor: PrefetchOptions['cacheFor']): [CacheForOption, CacheForOption] {
     if (!Array.isArray(cacheFor)) {
       return [cacheFor, cacheFor]
     }
@@ -129,10 +135,8 @@ class PrefetchedRequests {
     }
   }
 
-  protected scheduleForRemoval(params: ActiveVisit, expiresIn: CacheForOption) {
+  protected scheduleForRemoval(params: ActiveVisit, expiresIn: number) {
     this.clearTimer(params)
-
-    expiresIn = timeToMs(expiresIn)
 
     if (expiresIn > 0) {
       const timer = window.setTimeout(() => this.remove(params), expiresIn)
