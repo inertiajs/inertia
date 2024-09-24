@@ -8,14 +8,6 @@
         "css-loader": "^5.0.1",
         "eslint": "^7.17.0",
         "express": "^4.17.1",
-        "multer": "^1.4.2",
-        "start-server-and-test": "^2.0.4",
-        "@vitejs/plugin-vue": "^5.0.5",
-        "vite": "^5.3.4",
-        "vue": "^3.4.33"
-    },
-    "dependencies": {
-        "@inertiajs/core": "file:../../core",
-        "@inertiajs/vue3": "file:.."
+        "multer": "^1.4.2"
     }
 }

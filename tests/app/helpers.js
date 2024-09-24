@@ -1,7 +1,10 @@
 const path = require('path')
 const fs = require('fs')
 
+const package = process.env.PACKAGE_NAME || 'vue3'
+
 module.exports = {
+  package,
   render: (req, res, data) => {
     data = {
       component: req.path
@@ -41,7 +44,7 @@ module.exports = {
 
     return res.send(
       fs
-        .readFileSync(path.resolve(__dirname, './dist/index.html'))
+        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
         .toString()
         .replace("'{{ placeholder }}'", JSON.stringify(data)),
     )
