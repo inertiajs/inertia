@@ -1,5 +1,5 @@
 <script lang="ts">
-import Layout from '@/Layouts/Prefetch.vue'
+import Layout from '@/Layouts/SWR.vue'
 
 export default {
   layout: (h, page) => h(Layout, [page]),
