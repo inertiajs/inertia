@@ -574,7 +574,7 @@ export class Router {
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
     if (isServer) {
-      return () => {};
+      return () => {}
     }
 
     const listener = ((event: GlobalEvent<TEventName>) => {
