@@ -180,7 +180,37 @@ app.get('/prefetch/:pageNumber', (req, res) => {
     component: 'Prefetch/Page',
     props: {
       pageNumber: req.params.pageNumber,
+      lastLoaded: Date.now(),
     },
+  })
+})
+
+app.get('/prefetch/swr/:pageNumber', (req, res) => {
+  const page = () => {
+    inertia.render(req, res, {
+      component: 'Prefetch/SWR',
+      props: {
+        pageNumber: req.params.pageNumber,
+        lastLoaded: Date.now(),
+      },
+    })
+  }
+
+  if (req.params.pageNumber === '4' || req.params.pageNumber === '5') {
+    setTimeout(page, 1500)
+  } else {
+    page()
+  }
+})
+
+app.get('/history/:pageNumber', (req, res) => {
+  inertia.render(req, res, {
+    component: 'History/Page',
+    props: {
+      pageNumber: req.params.pageNumber,
+    },
+    encryptHistory: req.params.pageNumber === '3',
+    clearHistory: req.params.pageNumber === '4',
   })
 })
 

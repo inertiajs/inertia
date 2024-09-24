@@ -39,10 +39,16 @@ export const consoleMessages = {
 
 export const requests = {
   requests: [] as Request[],
+  finished: [] as Request[],
 
   listen(page: Page) {
     this.requests = []
     page.on('request', (request) => this.requests.push(request))
+  },
+
+  listenForFinished(page: Page) {
+    this.finished = []
+    page.on('requestfinished', (request) => this.finished.push(request))
   },
 }
 
