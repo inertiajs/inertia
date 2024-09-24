@@ -1,5 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react'
 
+window.messages = []
+
 export default () => {
   const payloadWithFile = {
     file: new File(['foobar'], 'example.bin'),
@@ -8,14 +10,16 @@ export default () => {
   const page = usePage()
 
   const internalAlert = (...args) => {
-    args.forEach((arg) => alert(arg))
+    args.forEach((arg) => window.messages.push(arg))
   }
 
-  const withoutEventListeners = () => {
+  const withoutEventListeners = (e) => {
+    e.preventDefault()
     router.post(page.url, {})
   }
 
-  const removeInertiaListener = () => {
+  const removeInertiaListener = (e) => {
+    e.preventDefault()
     const removeEventListener = router.on('before', () => internalAlert('Inertia.on(before)'))
 
     internalAlert('Removing Inertia.on Listener')
@@ -31,7 +35,8 @@ export default () => {
     )
   }
 
-  const beforeVisit = () => {
+  const beforeVisit = (e) => {
+    e.preventDefault()
     router.on('before', (event) => {
       internalAlert('Inertia.on(before)')
       internalAlert(event)
@@ -55,7 +60,8 @@ export default () => {
     )
   }
 
-  const beforeVisitPreventLocal = () => {
+  const beforeVisitPreventLocal = (e) => {
+    e.preventDefault()
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
     router.on('before', () => internalAlert('Inertia.on(before)'))
 
@@ -453,20 +459,20 @@ export default () => {
   return (
     <div>
       {/* Listeners */}
-      <span onClick={withoutEventListeners} className="without-listeners">
+      <a href="#" onClick={withoutEventListeners} className="without-listeners">
         Basic Visit
-      </span>
-      <span onClick={removeInertiaListener} className="remove-inertia-listener">
+      </a>
+      <a href="#" onClick={removeInertiaListener} className="remove-inertia-listener">
         Remove Inertia Listener
-      </span>
+      </a>
 
       {/* Events: Before */}
-      <span onClick={beforeVisit} className="before">
+      <a href="#" onClick={beforeVisit} className="before">
         Before Event
-      </span>
-      <span onClick={beforeVisitPreventLocal} className="before-prevent-local">
-        Before Event
-      </span>
+      </a>
+      <a href="#" onClick={beforeVisitPreventLocal} className="before-prevent-local">
+        Before Event (Prevent)
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -486,7 +492,7 @@ export default () => {
         onStart={() => internalAlert('This listener should not have been called.')}
         className="link-before-prevent-local"
       >
-        Before Event Link
+        Before Event Link (Prevent)
       </Link>
       <span onClick={beforeVisitPreventGlobalInertia} className="before-prevent-global-inertia">
         Before Event - Prevent globally using Inertia Event Listener
