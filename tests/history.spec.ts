@@ -32,7 +32,7 @@ test('it will not encrypt history by default', async ({ page }) => {
   await expect(requests.requests).toHaveLength(0)
 })
 
-test('it will can encrypt history', async ({ page }) => {
+test('it can encrypt history', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 3', '/history/3')
   const historyState3 = await page.evaluate(() => window.history.state)
   // When history is encrypted, the page is an ArrayBuffer,
