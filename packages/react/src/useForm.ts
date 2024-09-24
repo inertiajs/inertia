@@ -1,4 +1,4 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
@@ -6,8 +6,9 @@ import useRemember from './useRemember'
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
+type FormDataType = object
 
-export interface InertiaFormProps<TForm extends Record<string, unknown>> {
+export interface InertiaFormProps<TForm extends FormDataType> {
   data: TForm
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
@@ -17,10 +18,10 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
-  transform: (callback: (data: TForm) => TForm) => void
+  transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
-  setDefaults(field: keyof TForm, value: string): void
-  setDefaults(fields: Record<keyof TForm, string>): void
+  setDefaults(field: keyof TForm, value: FormDataConvertible): void
+  setDefaults(fields: Partial<TForm>): void
   reset: (...fields: (keyof TForm)[]) => void
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
@@ -33,12 +34,12 @@ export interface InertiaFormProps<TForm extends Record<string, unknown>> {
   delete: (url: string, options?: VisitOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends Record<string, unknown>>(initialValues?: TForm): InertiaFormProps<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType>(
   rememberKey: string,
   initialValues?: TForm,
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends Record<string, unknown>>(
+export default function useForm<TForm extends FormDataType>(
   rememberKeyOrInitialValues?: string | TForm,
   maybeInitialValues?: TForm,
 ): InertiaFormProps<TForm> {
@@ -58,7 +59,7 @@ export default function useForm<TForm extends Record<string, unknown>>(
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  let transform = (data) => data
+  const transform = useRef((data) => data)
 
   useEffect(() => {
     isMounted.current = true
@@ -157,36 +158,29 @@ export default function useForm<TForm extends Record<string, unknown>>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform(data) })
+        router.delete(url, { ..._options, data: transform.current(data) })
       } else {
-        router[method](url, transform(data), _options)
+        router[method](url, transform.current(data), _options)
       }
     },
     [data, setErrors],
   )
 
-  return {
-    data,
-    setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
+  const setDataFunction = useCallback(
+    (keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) => {
       if (typeof keyOrData === 'string') {
-        setData({ ...data, [keyOrData]: maybeValue })
+        setData((data) => ({ ...data, [keyOrData]: maybeValue }))
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
         setData(keyOrData as TForm)
       }
     },
-    isDirty: !isEqual(data, defaults),
-    errors,
-    hasErrors,
-    processing,
-    progress,
-    wasSuccessful,
-    recentlySuccessful,
-    transform(callback) {
-      transform = callback
-    },
-    setDefaults(fieldOrFields?: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    [setData],
+  )
+
+  const setDefaultsFunction = useCallback(
+    (fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) => {
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(() => data)
       } else {
@@ -196,11 +190,15 @@ export default function useForm<TForm extends Record<string, unknown>>(
         }))
       }
     },
-    reset(...fields) {
+    [data, setDefaults],
+  )
+
+  const reset = useCallback(
+    (...fields) => {
       if (fields.length === 0) {
         setData(defaults)
       } else {
-        setData(
+        setData((data) =>
           (Object.keys(defaults) as Array<keyof TForm>)
             .filter((key) => fields.includes(key))
             .reduce(
@@ -213,7 +211,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
         )
       }
     },
-    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    [setData, defaults],
+  )
+
+  const setError = useCallback(
+    (fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
@@ -225,7 +227,11 @@ export default function useForm<TForm extends Record<string, unknown>>(
         return newErrors
       })
     },
-    clearErrors(...fields) {
+    [setErrors, setHasErrors],
+  )
+
+  const clearErrors = useCallback(
+    (...fields) => {
       setErrors((errors) => {
         const newErrors = (Object.keys(errors) as Array<keyof TForm>).reduce(
           (carry, field) => ({
@@ -238,26 +244,49 @@ export default function useForm<TForm extends Record<string, unknown>>(
         return newErrors
       })
     },
+    [setErrors, setHasErrors],
+  )
+
+  const createSubmitMethod = (method) => (url, options) => {
+    submit(method, url, options)
+  }
+  const get = useCallback(createSubmitMethod('get'), [submit])
+  const post = useCallback(createSubmitMethod('post'), [submit])
+  const put = useCallback(createSubmitMethod('put'), [submit])
+  const patch = useCallback(createSubmitMethod('patch'), [submit])
+  const deleteMethod = useCallback(createSubmitMethod('delete'), [submit])
+
+  const cancel = useCallback(() => {
+    if (cancelToken.current) {
+      cancelToken.current.cancel()
+    }
+  }, [])
+
+  const transformFunction = useCallback((callback) => {
+    transform.current = callback
+  }, [])
+
+  return {
+    data,
+    setData: setDataFunction,
+    isDirty: !isEqual(data, defaults),
+    errors,
+    hasErrors,
+    processing,
+    progress,
+    wasSuccessful,
+    recentlySuccessful,
+    transform: transformFunction,
+    setDefaults: setDefaultsFunction,
+    reset,
+    setError,
+    clearErrors,
     submit,
-    get(url, options) {
-      submit('get', url, options)
-    },
-    post(url, options) {
-      submit('post', url, options)
-    },
-    put(url, options) {
-      submit('put', url, options)
-    },
-    patch(url, options) {
-      submit('patch', url, options)
-    },
-    delete(url, options) {
-      submit('delete', url, options)
-    },
-    cancel() {
-      if (cancelToken.current) {
-        cancelToken.current.cancel()
-      }
-    },
+    get,
+    post,
+    put,
+    patch,
+    delete: deleteMethod,
+    cancel,
   }
 }

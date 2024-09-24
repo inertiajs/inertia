@@ -1002,6 +1002,20 @@ describe('Links', () => {
       cy.get('.bar-text').should('have.text', 'Bar is now 4')
       cy.get('.baz-text').should('have.text', 'Baz is now 5')
     })
+
+    it('it only updates props that are not passed through "except"', () => {
+      cy.get('.except-foo-bar').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/partial-reloads')
+      cy.get('.foo-text').should('have.text', 'Foo is now 1')
+      cy.get('.bar-text').should('have.text', 'Bar is now 2')
+      cy.get('.baz-text').should('have.text', 'Baz is now 4')
+
+      cy.get('.except-baz').click()
+      cy.url().should('eq', Cypress.config().baseUrl + '/links/partial-reloads')
+      cy.get('.foo-text').should('have.text', 'Foo is now 2')
+      cy.get('.bar-text').should('have.text', 'Bar is now 3')
+      cy.get('.baz-text').should('have.text', 'Baz is now 4')
+    })
   })
 
   describe('Redirects', () => {

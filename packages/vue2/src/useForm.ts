@@ -1,9 +1,11 @@
-import { Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-interface InertiaFormProps<TForm> {
+type FormDataType = object
+
+interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
@@ -14,8 +16,8 @@ interface InertiaFormProps<TForm> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: keyof TForm, value: string): this
-  defaults(fields: Record<keyof TForm, string>): this
+  defaults(field: keyof TForm, value: FormDataConvertible): this
+  defaults(fields: Partial<TForm>): this
   reset(...fields: (keyof TForm)[]): this
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
@@ -29,16 +31,19 @@ interface InertiaFormProps<TForm> {
   cancel(): void
 }
 
-export type InertiaForm<TForm> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends FormDataType> = TForm & InertiaFormProps<TForm>
 
 export interface InertiaFormTrait {
-  form<TForm>(data: TForm): InertiaForm<TForm>
-  form<TForm>(rememberKey: string, data: TForm): InertiaForm<TForm>
+  form<TForm extends FormDataType>(data: TForm): InertiaForm<TForm>
+  form<TForm extends FormDataType>(rememberKey: string, data: TForm): InertiaForm<TForm>
 }
 
-export default function useForm<TForm>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm>(rememberKey: string, data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm>(...args): InertiaForm<TForm> {
+export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType>(
+  rememberKey: string,
+  data: TForm | (() => TForm),
+): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType>(...args): InertiaForm<TForm> {
   const rememberKey = typeof args[0] === 'string' ? args[0] : null
   const data = (typeof args[0] === 'string' ? args[1] : args[0]) || {}
   const restored = rememberKey ? (router.restore(rememberKey) as { data: any; errors: any }) : null
@@ -84,6 +89,7 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
       const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
+        this.wasSuccessful = false
         defaults = clonedData
         Object.assign(this, resolvedData)
       } else {
@@ -160,7 +166,6 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = cloneDeep(this.data())
           this.isDirty = false
           return onSuccess
         },
@@ -231,7 +236,7 @@ export default function useForm<TForm>(...args): InertiaForm<TForm> {
   watch(
     form,
     (newValue) => {
-      form.isDirty = !isEqual(form.data(), defaults)
+      form.isDirty = !form.wasSuccessful && !isEqual(form.data(), defaults)
       if (rememberKey) {
         router.remember(cloneDeep(newValue.__remember()), rememberKey)
       }

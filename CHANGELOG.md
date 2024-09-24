@@ -7,9 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.0.8...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.2.0...HEAD)
 
-- Nothing!
+- Fix scroll reset on page navigation ([#1980](https://github.com/inertiajs/inertia/pull/1980))
+- Fix scroll position restoration for `[scroll-region]` elements ([#1782](https://github.com/inertiajs/inertia/pull/1782) and [#1980](https://github.com/inertiajs/inertia/pull/1980))
+- Changed `preserveScroll` to be `true` on initial page visit ([#1360](https://github.com/inertiajs/inertia/pull/1360))
+- Fix `useForm` re-renders by memoizing functions in React adapter ([#1607](https://github.com/inertiajs/inertia/pull/1607))
+- Fix doubling hash when using `<React.StrictMode>` ([#1728](https://github.com/inertiajs/inertia/pull/1728))
+- Fix type augmentation in Vue 3 adapter ([#1958](https://github.com/inertiajs/inertia/pull/1958))
+- Fix `default` values being overwritten after form submission in Vue adapters ([#1935](https://github.com/inertiajs/inertia/pull/1935))
+- Fix `DataCloneError: <Object> could not be cloned` ([#1967](https://github.com/inertiajs/inertia/pull/1967))
+- Fix form helper `transform` return type in React adapter ([#1896](https://github.com/inertiajs/inertia/pull/1896))
+- Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
+- Skip intercepting non-left button clicks on links ([#1908](https://github.com/inertiajs/inertia/pull/1908), [#1910](https://github.com/inertiajs/inertia/pull/1910))
+- Add Svelte 5 support ([#1970](https://github.com/inertiajs/inertia/pull/1970))
+- Add TypeScript support to Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866))
+- Fix props reactivity in Svelte adapter ([#1969](https://github.com/inertiajs/inertia/pull/1969))
+- Fix `<Render />` component to respect `preserveState` option in Svelte adapter ([#1943](https://github.com/inertiajs/inertia/pull/1943))
+- Fix 'received an unexpected slot "default"' warning in Svelte adapter ([#1941](https://github.com/inertiajs/inertia/pull/1941))
+
+## [v1.2.0](https://github.com/inertiajs/inertia/compare/v1.1.0...v1.2.0)
+
+- Fix `preserveScroll` and `preserveState` types ([#1882](https://github.com/inertiajs/inertia/pull/1882))
+- Revert "merge props from partial reloads" ([#1895](https://github.com/inertiajs/inertia/pull/1895))
+
+## [v1.1.0](https://github.com/inertiajs/inertia/compare/v1.0.16...v1.1.0)
+
+- Add new `except` visit option to exclude props from partial reloads ([#1876](https://github.com/inertiajs/inertia/pull/1876))
+- Deep merge props from partial reloads ([#1877](https://github.com/inertiajs/inertia/pull/1877))
+
+## [v1.0.16](https://github.com/inertiajs/inertia/compare/v1.0.15...v1.0.16)
+
+- Fix Svelte 4 slot rendering issues ([#1763](https://github.com/inertiajs/inertia/pull/1763))
+- Fix accessibility warning in Svelte `Link` component ([#1858](https://github.com/inertiajs/inertia/pull/1858))
+- Use `Omit` instead of `Exclude` in router types ([#1857](https://github.com/inertiajs/inertia/pull/1857))
+
+## [v1.0.15](https://github.com/inertiajs/inertia/compare/v1.0.14...v1.0.15)
+
+- Bump axios from `v1.4.0` to `v1.6.0` ([#1723](https://github.com/inertiajs/inertia/pull/1723))
+
+## [v1.0.14](https://github.com/inertiajs/inertia/compare/v1.0.13...v1.0.14)
+
+- Revert "Clear errors on form reset (#1568)" ([#1716](https://github.com/inertiajs/inertia/pull/1716))
+
+## [v1.0.13](https://github.com/inertiajs/inertia/compare/v1.0.12...v1.0.13)
+
+- Clear errors on form reset ([#1568](https://github.com/inertiajs/inertia/pull/1568))
+- Fix `Link` type in React ([#1659](https://github.com/inertiajs/inertia/pull/1659))
+
+## [v1.0.12](https://github.com/inertiajs/inertia/compare/v1.0.11...v1.0.12)
+
+- Fix type of `onClick` for `Link` component in React and Vue ([#1699](https://github.com/inertiajs/inertia/pull/1699), [#1701](https://github.com/inertiajs/inertia/pull/1701))
+
+## [v1.0.11](https://github.com/inertiajs/inertia/compare/v1.0.10...v1.0.11)
+
+- Fix form helper types for `setDefaults()` method (React) and `defaults()` method (Vue) ([#1504](https://github.com/inertiajs/inertia/pull/1504))
+- Fix interface issue with `useForm()` in React and Vue adapters ([#1649](https://github.com/inertiajs/inertia/pull/1649))
+
+## [v1.0.10](https://github.com/inertiajs/inertia/compare/v1.0.9...v1.0.10)
+
+- Fix Svelte's `useForm` helper ([#1610](https://github.com/inertiajs/inertia/pull/1610))
+
+## [v1.0.9](https://github.com/inertiajs/inertia/compare/v1.0.8...v1.0.9)
+
+- Fix `<Head>` vNode handling in Vue 3 adapter ([#1590](https://github.com/inertiajs/inertia/pull/1590))
+- Add Svelte 4 support ([60699c7](https://github.com/inertiajs/inertia/commit/60699c7c5978eebd393e0333b567d8e465f4b58f))
 
 ## [v1.0.8](https://github.com/inertiajs/inertia/compare/v1.0.7...v1.0.8)
 
