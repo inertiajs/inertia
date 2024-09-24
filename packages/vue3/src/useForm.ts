@@ -79,6 +79,7 @@ export default function useForm<TForm extends FormDataType>(
 
       if (typeof fieldOrFields === 'undefined') {
         defaults = this.data()
+        this.isDirty = false
       } else {
         defaults = Object.assign(
           {},

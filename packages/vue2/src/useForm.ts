@@ -79,6 +79,7 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
 
       if (typeof key === 'undefined') {
         defaults = this.data()
+        this.isDirty = false
       } else {
         defaults = Object.assign({}, cloneDeep(defaults), value ? { [key]: value } : key)
       }
