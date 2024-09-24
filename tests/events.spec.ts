@@ -499,7 +499,7 @@ test.describe('Events', () => {
     test('gets fired when a non-Inertia response is received', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:invalid')
 
-      await page.getByRole('link', { exact: true, name: 'Invalid Event' }).click()
+      await clickAndWaitForResponse(page, 'Invalid Event', 'non-inertia')
 
       const messages = await page.evaluate(() => (window as any).messages)
       const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:invalid'])
