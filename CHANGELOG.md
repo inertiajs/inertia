@@ -9,6 +9,11 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.2.0...HEAD)
 
+- Fix history navigation issue on Chrome iOS ([#1984](https://github.com/inertiajs/inertia/pull/1984))
+- Fix `setNavigationType` for Safari 10 ([#1957](https://github.com/inertiajs/inertia/pull/1957))
+- Export `InertiaFormProps` from React adapter ([#1596](https://github.com/inertiajs/inertia/pull/1596))
+- Return early when using `router.on()` during SSR ([#1715](https://github.com/inertiajs/inertia/pull/1715))
+- Fix `isDirty` after `form.defaults()` call in Vue 3 ([#1985](https://github.com/inertiajs/inertia/pull/1985))
 - Fix scroll reset on page navigation ([#1980](https://github.com/inertiajs/inertia/pull/1980))
 - Fix scroll position restoration for `[scroll-region]` elements ([#1782](https://github.com/inertiajs/inertia/pull/1782) and [#1980](https://github.com/inertiajs/inertia/pull/1980))
 - Changed `preserveScroll` to be `true` on initial page visit ([#1360](https://github.com/inertiajs/inertia/pull/1360))
