@@ -492,7 +492,9 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(cloneSerializable(page), '', page.url)
+    // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+    // Ensure any previous history.replaceState completes before pushState is executed.
+    setTimeout(() => window.history.pushState(cloneSerializable(page), '', page.url))
   }
 
   protected replaceState(page: Page): void {
