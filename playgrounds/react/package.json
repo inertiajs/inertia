@@ -1,6 +1,7 @@
 {
   "name": "@inertiajs/react-playground",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && vite build --ssr"
