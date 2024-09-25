@@ -1,6 +1,7 @@
 {
   "name": "@inertiajs/vue2-playground",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build && vite build --ssr"
