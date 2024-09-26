@@ -17,7 +17,7 @@ import { writable, type Writable } from 'svelte/store'
 
 type FormDataType = Record<string, FormDataConvertible>
 
-interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
