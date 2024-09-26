@@ -1,14 +1,11 @@
 import { usePage } from '@inertiajs/react'
-import { useEffect, useState } from 'react'
-import { getCurrentInstance } from 'vue'
+import { useId, useState } from 'react'
 
 export default ({ children }) => {
   const [createdAt, setCreatedAt] = useState(Date.now())
 
-  useEffect(() => {
-    window._inertia_layout_id = getCurrentInstance().uid
-    window._inertia_site_layout_props = usePage().props
-  })
+  window._inertia_layout_id = useId()
+  window._inertia_site_layout_props = usePage().props
 
   return (
     <div>

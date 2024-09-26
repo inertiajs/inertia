@@ -42,7 +42,7 @@ export default (props) => {
           id="remember"
           name="remember"
           onChange={(e) => form.setData('remember', e.target.checked)}
-          value={form.remember}
+          checked={form.remember}
         />
       </label>
 

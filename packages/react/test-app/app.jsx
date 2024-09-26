@@ -1,8 +1,5 @@
-import { createInertiaApp, router } from '@inertiajs/react'
+import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
-
-window.testing = {}
-window.testing.Inertia = router
 
 createInertiaApp({
   page: window.initialPage,

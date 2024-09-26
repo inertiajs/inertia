@@ -1,8 +1,5 @@
-import { createInertiaApp, router } from '@inertiajs/vue3'
+import { createInertiaApp } from '@inertiajs/vue3'
 import { createApp, h } from 'vue'
-
-window.testing = {}
-window.testing.Inertia = router
 
 createInertiaApp({
   page: window.initialPage,
@@ -17,6 +14,6 @@ createInertiaApp({
       inst.use(plugin)
     }
 
-    window.testing.vue = inst.mount(el)
+    inst.mount(el)
   },
 })

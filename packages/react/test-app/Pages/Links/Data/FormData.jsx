@@ -1,13 +1,10 @@
 import { Link } from '@inertiajs/react'
-import { onMounted, ref } from 'vue'
+
+const linkData = new FormData()
+
+linkData.append('foo', 'bar')
 
 export default (props) => {
-  const linkData = ref(new FormData())
-
-  onMounted(() => {
-    linkData.value.append('bar', 'baz')
-  })
-
   return (
     <div>
       <span className="text">This is the links page that demonstrates passing data through FormData objects</span>
