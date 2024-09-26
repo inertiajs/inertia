@@ -413,10 +413,12 @@ test.describe('Form Helper', () => {
       test('fires when a request is about to be made', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onBefore' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
         await expect(messages[0]).toBe('onBefore')
-        const visit = messages[1]
+
+        const visit = data.find((d) => d.event === 'onBefore' && d.type === 'visit').data
 
         await expect(visit).toHaveProperty('url')
         await expect(visit).toHaveProperty('method')
@@ -428,7 +430,7 @@ test.describe('Form Helper', () => {
       test('can prevent the visit from starting by returning false', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onBefore cancellation' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
         await expect(messages).toHaveLength(1)
         await expect(messages[0]).toBe('onBefore')
@@ -456,11 +458,12 @@ test.describe('Form Helper', () => {
       test('fires when the request has started', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onStart' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
         await expect(messages[2]).toBe('onStart')
 
-        const visit = messages[3]
+        const visit = data.find((d) => d.event === 'onStart' && d.type === 'visit').data
 
         await expect(visit).toHaveProperty('url')
         await expect(visit).toHaveProperty('method')
@@ -470,14 +473,15 @@ test.describe('Form Helper', () => {
       })
 
       test('marks the form as processing', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onSuccess resets processing' }).click()
+        await clickAndWaitForResponse(page, 'onSuccess resets processing', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[2]).toBe('onCancelToken')
-        await expect(messages[3]).toBe(false)
-        await expect(messages[4]).toBe('onStart')
-        await expect(messages[5]).toBe(true)
+        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
+
+        await expect(processing).toBe(true)
+        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
       })
     })
 
@@ -487,10 +491,12 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(100)
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
+
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progressEvent').data
 
         await expect(messages[3]).toBe('onProgress')
-        const event = messages[4]
 
         await expect(event).toHaveProperty('percentage')
         await expect(event).toHaveProperty('total')
@@ -502,31 +508,18 @@ test.describe('Form Helper', () => {
       test('does not fire when the form has no files', async ({ page }) => {
         await clickAndWaitForResponse(page, 'progress no files', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
-        await expect(messages).toHaveLength(10)
-
-        await expect(messages[0]).toBe('onBefore')
-        await expect(messages[1]).toBe(null)
-        await expect(messages[2]).toBe('onCancelToken')
-        await expect(messages[3]).toBe(null)
-        await expect(messages[4]).toBe('onStart')
-        await expect(messages[5]).toBe(null)
-        await expect(messages[6]).toBe('onSuccess')
-        await expect(messages[7]).toBe(null)
-        await expect(messages[8]).toBe('onFinish')
-        await expect(messages[9]).toBe(null)
+        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
       })
 
-      test('updates the progress property of the form', async ({ page }) => {
+      test('updates the progress property of the form', async ({ page, context }) => {
+        await clickAndWaitForResponse(page, 'onSuccess progress property', null, 'button')
         await page.getByRole('button', { exact: true, name: 'onSuccess progress property' }).click()
 
-        await page.waitForTimeout(100)
-
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
         await expect(messages[4]).toBe('onStart')
-        await expect(messages[5]).toBeNull()
         await expect(messages[6]).toBe('onProgress')
 
         const event = messages[7]
@@ -545,8 +538,9 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(20)
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
+        await expect(messages[3]).toBe('CANCELLING!')
         await expect(messages[4]).toBe('onCancel')
       })
     })
@@ -555,14 +549,15 @@ test.describe('Form Helper', () => {
       test('fires the request succeeds without validation errors', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onSuccess' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
         await expect(messages[0]).toBe('onBefore')
         await expect(messages[1]).toBe('onCancelToken')
         await expect(messages[2]).toBe('onStart')
         await expect(messages[3]).toBe('onSuccess')
 
-        const pageData = messages[4]
+        const pageData = data.find((d) => d.event === 'onSuccess' && d.type === 'page').data
 
         await expect(pageData).toHaveProperty('component')
         await expect(pageData).toHaveProperty('props')
@@ -573,22 +568,22 @@ test.describe('Form Helper', () => {
       test('marks the form as no longer processing', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onSuccess resets processing' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[4]).toBe('onStart')
-        await expect(messages[5]).toBe(true)
-        await expect(messages[6]).toBe('onSuccess')
-        await expect(messages[7]).toBe(false)
+        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
+        const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
+
+        await expect(processing).toBe(true)
+        await expect(notProcessing).toBe(false)
       })
 
       test('resets the progress property back to null', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onSuccess progress property' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages[6]).toBe('onProgress')
-
-        const event = messages[7]
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progressEvent').data
+        const endEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
 
         await expect(event).toHaveProperty('percentage')
         await expect(event).toHaveProperty('total')
@@ -596,8 +591,8 @@ test.describe('Form Helper', () => {
         await expect(event.percentage).toBeGreaterThanOrEqual(0)
         await expect(event.percentage).toBeLessThanOrEqual(100)
 
-        await expect(messages[8]).toBe('onSuccess')
-        await expect(messages[9]).toBeNull()
+        await expect(messages[7]).toBe('onSuccess')
+        await expect(messages[8]).toBeNull()
       })
 
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
@@ -605,41 +600,33 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(50)
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
-        await expect(messages[0]).toBe('onBefore')
-        await expect(messages[1]).toBe('onCancelToken')
-        await expect(messages[2]).toBe('onStart')
-        await expect(messages[3]).toBe('onSuccess')
-        await expect(messages[4]).toBe('onFinish should have been fired by now if Promise functionality did not work')
-        await expect(messages[5]).toBe('onFinish')
+        await expect(messages).toEqual([
+          'onBefore',
+          'onCancelToken',
+          'onStart',
+          'onSuccess',
+          'onFinish should have been fired by now if Promise functionality did not work',
+          'onFinish',
+        ])
       })
 
       test('clears all existing errors and resets the hasErrors prop', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onSuccess resets errors', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages).toHaveLength(10)
+        await expect(messages).toEqual(['onError', 'onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
 
-        await expect(messages[0]).toBe('onBefore')
-        await expect(messages[1]).toBe(false)
-        await expect(messages[2]).toBe('onError')
-        await expect(messages[3]).toBe(true)
-        await expect(messages[4]).toBe('onStart')
-        await expect(messages[5]).toBe(true)
-
-        const errors = messages[6]
+        const errors = data.find((d) => d.event === 'onStart' && d.type === 'errors').data
+        const endingErrors = data.find((d) => d.event === 'onFinish' && d.type === 'errors').data
 
         await expect(errors).toHaveProperty('name')
         await expect(errors.name).toBe('Some name error')
 
-        await expect(messages[7]).toBe('onSuccess')
-        await expect(messages[8]).toBe(false)
-
-        const successErrors = messages[9]
-
-        await expect(successErrors).toEqual({})
+        await expect(endingErrors).toEqual({})
       })
 
       test('will mark the form as being submitted successfully', async ({ page }) => {
@@ -668,14 +655,12 @@ test.describe('Form Helper', () => {
       test('fires when the request finishes with validation errors', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onError' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[0]).toBe('onBefore')
-        await expect(messages[1]).toBe('onCancelToken')
-        await expect(messages[2]).toBe('onStart')
-        await expect(messages[3]).toBe('onError')
+        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
 
-        const errors = messages[4]
+        const errors = data.find((d) => d.event === 'onError' && d.type === 'errors').data
 
         await expect(errors).toHaveProperty('name')
         await expect(errors.name).toBe('Some name error')
@@ -684,18 +669,22 @@ test.describe('Form Helper', () => {
       test('marks the form as no longer processing', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onError resets processing' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[4]).toBe('onStart')
-        await expect(messages[5]).toBe(true)
-        await expect(messages[6]).toBe('onError')
-        await expect(messages[7]).toBe(false)
+        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
+
+        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
+        const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
+
+        await expect(processing).toBe(true)
+        await expect(notProcessing).toBe(false)
       })
 
       test('resets the progress property back to null', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onError progress property', 'form-helper/events/errors', 'button')
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
         await expect(messages[6]).toBe('onProgress')
 
@@ -714,13 +703,15 @@ test.describe('Form Helper', () => {
       test('sets form errors', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Errors set on error' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[2]).toBe('onStart')
-        await expect(messages[3]).toEqual({})
-        await expect(messages[4]).toBe('onError')
+        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
 
-        const errors = messages[5]
+        const startErrors = data.find((d) => d.event === null && d.type === 'errors').data
+        const errors = data.find((d) => d.event === 'onFinish' && d.type === 'errors').data
+
+        await expect(startErrors).toEqual({})
 
         await expect(errors).toHaveProperty('name')
         await expect(errors.name).toBe('Some name error')
@@ -731,14 +722,16 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(50)
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
-        await expect(messages[0]).toBe('onBefore')
-        await expect(messages[1]).toBe('onCancelToken')
-        await expect(messages[2]).toBe('onStart')
-        await expect(messages[3]).toBe('onError')
-        await expect(messages[4]).toBe('onFinish should have been fired by now if Promise functionality did not work')
-        await expect(messages[5]).toBe('onFinish')
+        await expect(messages).toEqual([
+          'onBefore',
+          'onCancelToken',
+          'onStart',
+          'onError',
+          'onFinish should have been fired by now if Promise functionality did not work',
+          'onFinish',
+        ])
       })
     })
 
@@ -746,9 +739,9 @@ test.describe('Form Helper', () => {
       test('fires when the request is completed', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Successful request' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await page.evaluate(() => (window as any).events)
 
-        await expect(messages[4]).toBe('onFinish')
+        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
       })
     })
   })

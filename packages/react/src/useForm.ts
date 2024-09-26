@@ -163,7 +163,7 @@ export default function useForm<TForm extends FormDataType>(
         router[method](url, transform(data), _options)
       }
     },
-    [data, setErrors],
+    [data, setErrors, transform],
   )
 
   return {

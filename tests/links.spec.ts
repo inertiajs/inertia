@@ -372,7 +372,7 @@ test.describe('preserve scroll', () => {
   })
 
   test('does not reset untracked scroll regions in persistent layouts', async ({ page }) => {
-    await page.getByTestId('reset').click()
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
@@ -384,7 +384,7 @@ test.describe('preserve scroll', () => {
   }) => {
     consoleMessages.listen(page)
 
-    await page.getByTestId('reset-callback').click({ position: { x: 0, y: 0 } })
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click({ position: { x: 0, y: 0 } })
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
@@ -401,7 +401,7 @@ test.describe('preserve scroll', () => {
   })
 
   test('does not restore untracked scroll regions when pressing the back button', async ({ page }) => {
-    await page.getByTestId('reset').click()
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
 
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
@@ -422,8 +422,9 @@ test.describe('preserve scroll', () => {
     page,
   }) => {
     consoleMessages.listen(page)
-
-    await page.getByTestId('preserve-callback').click({ position: { x: 0, y: 0 } })
+    await page
+      .getByRole('link', { exact: true, name: 'Preserve Scroll (Callback)' })
+      .click({ position: { x: 0, y: 0 } })
 
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
@@ -477,7 +478,7 @@ test.describe('enabled', () => {
   })
 
   test('resets scroll regions to the top when doing a regular visit', async ({ page }) => {
-    await page.getByTestId('reset').click()
+    await page.getByText('Reset Scroll', { exact: true }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
@@ -486,7 +487,7 @@ test.describe('enabled', () => {
 
   test('resets scroll regions to the top when returning false from a preserveScroll callback', async ({ page }) => {
     consoleMessages.listen(page)
-    await page.getByTestId('reset-callback').click({ position: { x: 0, y: 0 } })
+    await page.getByText('Reset Scroll (Callback)', { exact: true }).click({ position: { x: 0, y: 0 } })
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
@@ -503,7 +504,7 @@ test.describe('enabled', () => {
   })
 
   test('preserves scroll regions when using the "preserve-scroll" feature', async ({ page }) => {
-    await page.getByTestId('preserve').click()
+    await page.getByText('Preserve Scroll', { exact: true }).click()
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
@@ -513,7 +514,7 @@ test.describe('enabled', () => {
 
   test('preserves scroll regions when using the "preserve-scroll" feature from a callback', async ({ page }) => {
     consoleMessages.listen(page)
-    await page.getByTestId('preserve-callback').click({ position: { x: 0, y: 0 } })
+    await page.getByText('Preserve Scroll (Callback)', { exact: true }).click({ position: { x: 0, y: 0 } })
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()

@@ -14,16 +14,16 @@ export default ({ foo = 0, bar, baz, headers }) => {
         Update All
       </Link>
       <Link href="/links/partial-reloads" only={['headers', 'foo', 'bar']} data={{ foo }} className="foo-bar">
-        'Only' foo + bar
+        Only foo + bar
       </Link>
       <Link href="/links/partial-reloads" only={['headers', 'baz']} data={{ foo }} className="baz">
-        'Only' baz
+        Only baz
       </Link>
       <Link href="/links/partial-reloads" except={['foo', 'bar']} data={{ foo }} className="except-foo-bar">
-        'Except' foo + bar
+        Except foo + bar
       </Link>
       <Link href="/links/partial-reloads" except={['baz']} data={{ foo }} className="except-baz">
-        'Except' baz
+        Except baz
       </Link>
     </div>
   )

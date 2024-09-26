@@ -3,11 +3,11 @@ import { Link } from '@inertiajs/react'
 
 const PreserveScroll = ({ foo = 'default' }) => {
   const preserveCallback = (page) => {
-    alert(page)
+    console.log(JSON.stringify(page))
     return true
   }
   const preserveCallbackFalse = (page) => {
-    alert(page)
+    console.log(JSON.stringify(page))
     return false
   }
 
@@ -19,7 +19,7 @@ const PreserveScroll = ({ foo = 'default' }) => {
       <Link href="/links/preserve-scroll-page-two" preserve-scroll data={{ foo: 'baz' }} className="preserve">
         Preserve Scroll
       </Link>
-      <Link href="/links/preserve-scroll-page-two" data={{ foo: 'bar' }} className="reset">
+      <Link href="/links/preserve-scroll-page-two" data={{ foo: 'bar' }} data-testid="reset" className="reset">
         Reset Scroll
       </Link>
 

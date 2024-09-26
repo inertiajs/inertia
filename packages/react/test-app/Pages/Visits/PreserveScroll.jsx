@@ -54,7 +54,7 @@ const PreserveScroll = ({ foo = 'default' }) => {
       <span onClick={preserve} className="preserve">
         Preserve Scroll
       </span>
-      <span onClick={preserveFalse} className="reset">
+      <span onClick={preserveFalse} data-testid="reset" className="reset">
         Reset Scroll
       </span>
       <span onClick={preserveCallback} className="preserve-callback">

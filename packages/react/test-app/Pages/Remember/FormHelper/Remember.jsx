@@ -35,12 +35,12 @@ export default (props) => {
         <input type="text" id="untracked" name="untracked" v-model="untracked" />
       </label>
 
-      <span onClick={submit} className="submit">
+      <button onClick={submit} className="submit">
         Submit form
-      </span>
-      <span onClick={reset} className="reset-one">
+      </button>
+      <button onClick={reset} className="reset-one">
         Reset one field & error
-      </span>
+      </button>
 
       <Link href="/dump/get" className="link">
         Navigate away

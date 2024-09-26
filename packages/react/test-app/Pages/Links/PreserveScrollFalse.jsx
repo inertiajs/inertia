@@ -3,12 +3,12 @@ import { Link } from '@inertiajs/react'
 
 const PreserveScrollFalse = ({ foo = 'default' }) => {
   const preserveCallback = (page) => {
-    alert(page)
+    console.log(JSON.stringify(page))
     return true
   }
 
   const preserveCallbackFalse = (page) => {
-    alert(page)
+    console.log(JSON.stringify(page))
     return false
   }
 

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import path from 'path'
 
 /**
  * Read environment variables from file.
@@ -73,7 +74,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `cd ../packages/${process.env.PACKAGE}/test-app && vite build && cd ../../../ && node tests/app/server.js`,
+    command: `cd ${path.resolve(__dirname, '../packages/', process.env.PACKAGE || 'vue3', 'test-app')} && vite build && cd ${__dirname} && node app/server.js`,
     url: 'http://localhost:13715',
     reuseExistingServer: !process.env.CI,
   },

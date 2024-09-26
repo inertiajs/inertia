@@ -78,7 +78,8 @@ export default () => {
     )
   }
 
-  const beforeVisitPreventGlobalInertia = () => {
+  const beforeVisitPreventGlobalInertia = (e) => {
+    e.preventDefault()
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
     router.on('before', (visit) => {
       internalAlert('Inertia.on(before)')
@@ -494,17 +495,17 @@ export default () => {
       >
         Before Event Link (Prevent)
       </Link>
-      <span onClick={beforeVisitPreventGlobalInertia} className="before-prevent-global-inertia">
+      <a href="#" onClick={beforeVisitPreventGlobalInertia} className="before-prevent-global-inertia">
         Before Event - Prevent globally using Inertia Event Listener
-      </span>
-      <span onClick={beforeVisitPreventGlobalNative} className="before-prevent-global-native">
+      </a>
+      <a href="#" onClick={beforeVisitPreventGlobalNative} className="before-prevent-global-native">
         Before Event - Prevent globally using Native Event Listeners
-      </span>
+      </a>
 
       {/* Events: CancelToken */}
-      <span onClick={cancelTokenVisit} className="canceltoken">
+      <a href="#" onClick={cancelTokenVisit} className="canceltoken">
         Cancel Token Event
-      </span>
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -515,9 +516,9 @@ export default () => {
       </Link>
 
       {/* Events: Cancel */}
-      <span onClick={cancelVisit} className="cancel">
+      <a href="#" onClick={cancelVisit} className="cancel">
         Cancel Event
-      </span>
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -529,9 +530,9 @@ export default () => {
       </Link>
 
       {/* Events: Start */}
-      <span onClick={startVisit} className="start">
+      <a href="#" onClick={startVisit} className="start">
         Start Event
-      </span>
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -542,12 +543,12 @@ export default () => {
       </Link>
 
       {/* Events: Progress */}
-      <span onClick={progressVisit} className="progress">
+      <a href="#" onClick={progressVisit} className="progress">
         Progress Event
-      </span>
-      <span onClick={progressNoFilesVisit} className="progress-no-files">
+      </a>
+      <a href="#" onClick={progressNoFilesVisit} className="progress-no-files">
         Missing Progress Event (no files)
-      </span>
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -568,12 +569,12 @@ export default () => {
       </Link>
 
       {/* Events: Error */}
-      <span onClick={errorVisit} className="error">
+      <a href="#" onClick={errorVisit} className="error">
         Error Event
-      </span>
-      <span onClick={errorPromiseVisit} className="error-promise">
+      </a>
+      <a href="#" onClick={errorPromiseVisit} className="error-promise">
         Error Event (delaying onFinish w/ Promise)
-      </span>
+      </a>
       <Link
         href="/events/errors"
         method="post"
@@ -595,12 +596,12 @@ export default () => {
       </Link>
 
       {/* Events: Success */}
-      <span onClick={successVisit} className="success">
+      <a href="#" onClick={successVisit} className="success">
         Success Event
-      </span>
-      <span onClick={successPromiseVisit} className="success-promise">
+      </a>
+      <a href="#" onClick={successPromiseVisit} className="success-promise">
         Success Event (delaying onFinish w/ Promise)
-      </span>
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -622,19 +623,19 @@ export default () => {
       </Link>
 
       {/* Events: Invalid */}
-      <span onClick={invalidVisit} className="invalid">
-        Finish Event
-      </span>
+      <a href="#" onClick={invalidVisit} className="invalid">
+        Invalid Event
+      </a>
 
       {/* Events: Exception */}
-      <span onClick={exceptionVisit} className="exception">
+      <a href="#" onClick={exceptionVisit} className="exception">
         Exception Event
-      </span>
+      </a>
 
       {/* Events: Finish */}
-      <span onClick={finishVisit} className="finish">
+      <a href="#" onClick={finishVisit} className="finish">
         Finish Event
-      </span>
+      </a>
       <Link
         href={page.url}
         method="post"
@@ -645,23 +646,23 @@ export default () => {
       </Link>
 
       {/* Events: Navigate */}
-      <span onClick={navigateVisit} className="navigate">
+      <a href="#" onClick={navigateVisit} className="navigate">
         Navigate Event
-      </span>
+      </a>
 
       {/* Lifecycles */}
-      <span onClick={lifecycleSuccess} className="lifecycle-success">
+      <a href="#" onClick={lifecycleSuccess} className="lifecycle-success">
         Lifecycle Success
-      </span>
-      <span onClick={lifecycleError} className="lifecycle-error">
+      </a>
+      <a href="#" onClick={lifecycleError} className="lifecycle-error">
         Lifecycle Error
-      </span>
-      <span onClick={lifecycleCancel} className="lifecycle-cancel">
+      </a>
+      <a href="#" onClick={lifecycleCancel} className="lifecycle-cancel">
         Lifecycle Cancel
-      </span>
-      <span onClick={lifecycleCancelAfterFinish} className="lifecycle-cancel-after-finish">
+      </a>
+      <a href="#" onClick={lifecycleCancelAfterFinish} className="lifecycle-cancel-after-finish">
         Lifecycle Cancel - After Finish
-      </span>
+      </a>
     </div>
   )
 }

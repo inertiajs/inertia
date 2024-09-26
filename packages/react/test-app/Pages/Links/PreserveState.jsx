@@ -1,7 +1,6 @@
 import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion.jsx'
 import { Link } from '@inertiajs/react'
-import { useEffect } from 'react'
-import { getCurrentInstance } from 'vue'
+import { useId } from 'react'
 
 const PreserveState = ({ foo = 'default' }) => {
   const preserveCallback = (page) => {
@@ -14,9 +13,7 @@ const PreserveState = ({ foo = 'default' }) => {
     return false
   }
 
-  useEffect(() => {
-    window._inertia_page_key = getCurrentInstance().uid
-  })
+  window._inertia_page_key = useId()
 
   return (
     <div>

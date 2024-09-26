@@ -69,26 +69,26 @@ export default (props) => {
       </label>
       {form.errors.remember && <span className="remember_error">{form.errors.remember}</span>}
 
-      <span onClick={submit} className="submit">
+      <button onClick={submit} className="submit">
         Submit form
-      </span>
+      </button>
 
-      <span onClick={resetAll} className="reset">
+      <button onClick={resetAll} className="reset">
         Reset all data
-      </span>
-      <span onClick={resetOne} className="reset-one">
+      </button>
+      <button onClick={resetOne} className="reset-one">
         Reset one field
-      </span>
+      </button>
 
-      <span onClick={reassign} className="reassign">
+      <button onClick={reassign} className="reassign">
         Reassign current as defaults
-      </span>
-      <span onClick={reassignObject} className="reassign-object">
+      </button>
+      <button onClick={reassignObject} className="reassign-object">
         Reassign default values
-      </span>
-      <span onClick={reassignSingle} className="reassign-single">
+      </button>
+      <button onClick={reassignSingle} className="reassign-single">
         Reassign single default
-      </span>
+      </button>
 
       <span className="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
     </div>

@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,6 +21,7 @@ Route::get('/', function () {
 
 Route::get('/users', function () {
     sleep(2);
+
     return inertia('Users', [
         'date' => now()->toDateTimeString(),
         'users' => collect([
@@ -71,6 +71,7 @@ Route::get('/users', function () {
 
 Route::get('/users/2', function () {
     sleep(2);
+
     return inertia('Users', [
         'date' => now()->toDateTimeString(),
         'users' => [
@@ -134,7 +135,7 @@ Route::post('/user', function () {
             'name' => ['required'],
             'company' => ['required'],
             'role' => ['required', 'in:User,Admin,Super'],
-        ])
+        ]),
     ]);
 });
 
@@ -165,9 +166,10 @@ Route::get('/infinite-scroll', function () {
         'items' => Inertia::defer(
             function () use ($start, $end, $itemType) {
                 sleep(1);
-                return collect(range($start, $end))->map(fn($i) => [
+
+                return collect(range($start, $end))->map(fn ($i) => [
                     'id' => $i,
-                    'name' => ucwords($itemType) . ' ' . $i,
+                    'name' => ucwords($itemType).' '.$i,
                 ])->toArray();
             }
         )->merge(),
@@ -185,7 +187,7 @@ Route::post('/async/checkbox', function () {
     Cache::put('taylor', request('taylor'), 10);
     Cache::put('joe', request('joe'), 10);
 
-    if (!$previousJoe && request()->boolean('joe')) {
+    if (! $previousJoe && request()->boolean('joe')) {
         return redirect('article');
     }
 
@@ -193,7 +195,8 @@ Route::post('/async/checkbox', function () {
 });
 
 Route::get('/defer', function () {
-    info("defer route");
+    info('defer route');
+
     return inertia('Defer', [
         'users' => Inertia::defer(function () {
             sleep(1);
@@ -213,7 +216,7 @@ Route::get('/defer', function () {
                     'id' => 3,
                     'name' => 'Joe Tannenbaum',
                     'email' => 'yo@tannenbaum.edu',
-                ]
+                ],
             ];
         }, 'u'),
         'foods' => Inertia::defer(function () {
@@ -320,7 +323,6 @@ Route::get('/goodbye', function () {
     return Inertia::location('https://inertiajs.com/redirects');
 });
 
-
 Route::get('/poll', function () {
     return inertia('Poll', [
         'users' => collect([
@@ -350,11 +352,13 @@ Route::get('/elsewhere', function () {
 
 Route::get('/sleepy/{duration}', function ($duration) {
     sleep($duration);
+
     return inertia('Users');
 });
 
 Route::post('/sleepy/{duration}', function ($duration) {
     sleep($duration);
+
     return inertia('Article');
 });
 

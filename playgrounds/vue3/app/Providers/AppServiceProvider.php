@@ -103,7 +103,7 @@ class AppServiceProvider extends ServiceProvider
                     ->unique('href')
                     ->values()
                     ->pipe(fn ($assets) => with(Js::from($assets), fn ($assets) => match ($this->prefetchStrategy) {
-                        'waterfall' => new HtmlString($base . <<<HTML
+                        'waterfall' => new HtmlString($base.<<<HTML
 
                             <script>
                                  window.addEventListener('load', () => window.setTimeout(() => {
@@ -141,7 +141,7 @@ class AppServiceProvider extends ServiceProvider
                                 }))
                             </script>
                             HTML),
-                        'aggressive' => new HtmlString($base . <<<HTML
+                        'aggressive' => new HtmlString($base.<<<HTML
 
                             <script>
                                  window.addEventListener('load', () => window.setTimeout(() => {

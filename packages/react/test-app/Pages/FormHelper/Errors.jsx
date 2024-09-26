@@ -62,22 +62,22 @@ export default (props) => {
       </label>
       {form.errors.remember && <span className="remember_error">{form.errors.remember}</span>}
 
-      <span onClick={submit} className="submit">
+      <button onClick={submit} className="submit">
         Submit form
-      </span>
+      </button>
 
-      <span onClick={clearErrors} className="clear">
+      <button onClick={clearErrors} className="clear">
         Clear all errors
-      </span>
-      <span onClick={clearError} className="clear-one">
+      </button>
+      <button onClick={clearError} className="clear-one">
         Clear one error
-      </span>
-      <span onClick={setErrors} className="set">
+      </button>
+      <button onClick={setErrors} className="set">
         Set errors
-      </span>
-      <span onClick={setError} className="set-one">
+      </button>
+      <button onClick={setError} className="set-one">
         Set one error
-      </span>
+      </button>
 
       <span className="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
     </div>

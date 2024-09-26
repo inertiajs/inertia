@@ -1,19 +1,23 @@
 import { Link, router } from '@inertiajs/react'
 
 export default (props) => {
-  const visitsMethod = () => {
+  const visitsMethod = (e) => {
+    e.preventDefault()
     router.visit('/visits/method')
   }
 
-  const visitsReplace = () => {
+  const visitsReplace = (e) => {
+    e.preventDefault()
     router.get('/visits/replace')
   }
 
-  const redirect = () => {
+  const redirect = (e) => {
+    e.preventDefault()
     router.post('/redirect')
   }
 
-  const redirectExternal = () => {
+  const redirectExternal = (e) => {
+    e.preventDefault()
     router.post('/redirect-external')
   }
 
@@ -33,28 +37,28 @@ export default (props) => {
         'Replace' Links
       </Link>
 
-      <span onClick={visitsMethod} className="visits-method">
+      <a href="#" onClick={visitsMethod} className="visits-method">
         Manual basic visits
-      </span>
+      </a>
 
-      <span onClick={visitsReplace} className="visits-replace">
+      <a href="#" onClick={visitsReplace} className="visits-replace">
         Manual 'Replace' visits
-      </span>
+      </a>
 
       <Link href="/redirect" method="post" className="links-redirect">
-        Redirect Link
+        Internal Redirect Link
       </Link>
-      <span onClick={redirect} className="visits-redirect">
+      <a href="#" onClick={redirect} className="visits-redirect">
         Manual Redirect visit
-      </span>
+      </a>
 
       <Link href="/redirect-external" method="post" className="links-redirect-external">
-        Redirect Link
+        External Redirect Link
       </Link>
 
-      <span onClick={redirectExternal} className="visits-redirect-external">
+      <a href="#" onClick={redirectExternal} className="visits-redirect-external">
         Manual External Redirect visit
-      </span>
+      </a>
     </div>
   )
 }

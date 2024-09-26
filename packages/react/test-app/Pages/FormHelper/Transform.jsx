@@ -46,18 +46,18 @@ export default (props) => {
         />
       </label>
 
-      <span onClick={postForm} className="post">
+      <button onClick={postForm} className="post">
         POST form
-      </span>
-      <span onClick={putForm} className="put">
+      </button>
+      <button onClick={putForm} className="put">
         PUT form
-      </span>
-      <span onClick={patchForm} className="patch">
+      </button>
+      <button onClick={patchForm} className="patch">
         PATCH form
-      </span>
-      <span onClick={deleteForm} className="delete">
+      </button>
+      <button onClick={deleteForm} className="delete">
         DELETE form
-      </span>
+      </button>
     </div>
   )
 }

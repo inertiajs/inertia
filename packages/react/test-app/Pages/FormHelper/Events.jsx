@@ -1,21 +1,55 @@
 import { useForm, usePage } from '@inertiajs/react'
+import { useEffect } from 'react'
+
+window.events = []
+window.data = []
+
+const pushEvent = (message) => {
+  window.events.push(message)
+}
+
+const pushData = (type, data) => {
+  const currentEvent = window.events[window.events.length - 1] ?? null
+
+  window.data.push({
+    type,
+    data,
+    event: currentEvent,
+  })
+}
+
+const callbacks = (overrides = {}) => ({
+  onBefore: () => pushEvent('onBefore'),
+  onCancelToken: () => pushEvent('onCancelToken'),
+  onStart: () => pushEvent('onStart'),
+  onProgress: () => pushEvent('onProgress'),
+  onFinish: () => pushEvent('onFinish'),
+  onCancel: () => pushEvent('onCancel'),
+  onSuccess: () => pushEvent('onSuccess'),
+  onError: () => pushEvent('onError'),
+  ...overrides,
+})
 
 export default (props) => {
   const form = useForm({ name: 'foo', remember: false })
 
   const page = usePage()
 
-  const callbacks = (overrides = {}) => ({
-    onBefore: () => alert('onBefore'),
-    onCancelToken: () => alert('onCancelToken'),
-    onStart: () => alert('onStart'),
-    onProgress: () => alert('onProgress'),
-    onFinish: () => alert('onFinish'),
-    onCancel: () => alert('onCancel'),
-    onSuccess: () => alert('onSuccess'),
-    onError: () => alert('onError'),
-    ...overrides,
-  })
+  useEffect(() => {
+    pushData('processing', form.processing)
+  }, [form.processing])
+
+  useEffect(() => {
+    pushData('progress', form.progress)
+  }, [form.progress])
+
+  useEffect(() => {
+    pushData('errors', form.errors)
+  }, [form.errors])
+
+  useEffect(() => {
+    pushData('hasErrors', form.hasErrors)
+  }, [form.hasErrors])
 
   const submit = () => {
     form.post(page.url)
@@ -27,50 +61,23 @@ export default (props) => {
 
   const onSuccessResetErrors = () => {
     form.post('/form-helper/events/errors', {
-      onBefore: () => {
-        alert('onBefore')
-        alert(form.hasErrors)
-      },
       onError: () => {
-        alert('onError')
-        alert(form.hasErrors)
-        form.post('/form-helper/events', {
-          onStart: () => {
-            alert('onStart')
-            alert(form.hasErrors)
-            alert(form.errors)
-          },
-          onSuccess: () => {
-            alert('onSuccess')
-            alert(form.hasErrors)
-            alert(form.errors)
-          },
-        })
+        pushEvent('onError')
+        form.post('/form-helper/events', callbacks())
       },
     })
   }
 
   const errorsSetOnError = () => {
-    form.post('/form-helper/events/errors', {
-      ...callbacks({
-        onStart: () => {
-          alert('onStart')
-          alert(form.errors)
-        },
-        onError: () => {
-          alert('onError')
-          alert(form.errors)
-        },
-      }),
-    })
+    form.post('/form-helper/events/errors', callbacks())
   }
 
   const onBeforeVisit = () => {
     form.post('/sleep', {
       ...callbacks({
         onBefore: (visit) => {
-          alert('onBefore')
-          alert(visit)
+          pushEvent('onBefore')
+          pushData('visit', visit)
         },
       }),
     })
@@ -80,7 +87,7 @@ export default (props) => {
     form.post('/sleep', {
       ...callbacks({
         onBefore: (visit) => {
-          alert('onBefore')
+          pushEvent('onBefore')
           return false
         },
       }),
@@ -91,8 +98,8 @@ export default (props) => {
     form.post('/form-helper/events', {
       ...callbacks({
         onStart: (visit) => {
-          alert('onStart')
-          alert(visit)
+          pushEvent('onStart')
+          pushData('visit', visit)
         },
       }),
     })
@@ -100,14 +107,14 @@ export default (props) => {
 
   const onProgressVisit = () => {
     form.transform((data) => {
-      console.log('transforming data', data)
       return { ...data, file: new File(['foobar'], 'example.bin') }
     })
+
     form.post('/dump/post', {
       ...callbacks({
         onProgress: (event) => {
-          alert('onProgress')
-          alert(event)
+          pushEvent('onProgress')
+          pushData('progressEvent', event)
         },
       }),
     })
@@ -117,9 +124,9 @@ export default (props) => {
     form.post('/sleep', {
       ...callbacks({
         onCancelToken: (token) => {
-          alert('onCancelToken')
+          pushEvent('onCancelToken')
           setTimeout(() => {
-            alert('CANCELLING!')
+            pushEvent('CANCELLING!')
             token.cancel()
           }, 10)
         },
@@ -131,8 +138,8 @@ export default (props) => {
     form.post('/dump/post', {
       ...callbacks({
         onSuccess: (page) => {
-          alert('onSuccess')
-          alert(page)
+          pushEvent('onSuccess')
+          pushData('page', page)
         },
       }),
     })
@@ -142,8 +149,8 @@ export default (props) => {
     form.post('/dump/post', {
       ...callbacks({
         onSuccess: (page) => {
-          alert('onSuccess')
-          setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
+          pushEvent('onSuccess')
+          setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
           return new Promise((resolve) => setTimeout(resolve, 20))
         },
       }),
@@ -154,8 +161,8 @@ export default (props) => {
     form.post('/form-helper/events/errors', {
       ...callbacks({
         onError: (errors) => {
-          alert('onError')
-          alert(errors)
+          pushEvent('onError')
+          pushData('errors', errors)
         },
       }),
     })
@@ -165,8 +172,8 @@ export default (props) => {
     form.post('/form-helper/events/errors', {
       ...callbacks({
         onError: (errors) => {
-          alert('onError')
-          setTimeout(() => alert('onFinish should have been fired by now if Promise functionality did not work'), 5)
+          pushEvent('onError')
+          setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
           return new Promise((resolve) => setTimeout(resolve, 20))
         },
       }),
@@ -174,89 +181,17 @@ export default (props) => {
   }
 
   const onSuccessProcessing = () => {
-    form.post(page.url, {
-      ...callbacks({
-        onBefore: () => {
-          alert('onBefore')
-          alert(form.processing)
-        },
-        onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.processing)
-        },
-        onStart: () => {
-          alert('onStart')
-          alert(form.processing)
-        },
-        onSuccess: () => {
-          alert('onSuccess')
-          alert(form.processing)
-        },
-        onFinish: () => {
-          alert('onFinish')
-          alert(form.processing)
-        },
-      }),
-    })
+    form.post(page.url, callbacks())
   }
 
   const onErrorProcessing = () => {
-    form.post('/form-helper/events/errors', {
-      ...callbacks({
-        onBefore: () => {
-          alert('onBefore')
-          alert(form.processing)
-        },
-        onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.processing)
-        },
-        onStart: () => {
-          alert('onStart')
-          alert(form.processing)
-        },
-        onError: () => {
-          alert('onError')
-          alert(form.processing)
-        },
-        onFinish: () => {
-          alert('onFinish')
-          alert(form.processing)
-        },
-      }),
-    })
+    form.post('/form-helper/events/errors', callbacks())
   }
 
-  const onSuccessProgress = () => {
-    form.transform((data) => ({ ...data, file: new File(['foobar'], 'example.bin') }))
-    form.post(page.url, {
-      ...callbacks({
-        onBefore: () => {
-          alert('onBefore')
-          alert(form.progress)
-        },
-        onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.progress)
-        },
-        onStart: () => {
-          alert('onStart')
-          alert(form.progress)
-        },
-        onProgress: () => {
-          alert('onProgress')
-          alert(form.progress)
-        },
-        onSuccess: () => {
-          alert('onSuccess')
-          alert(form.progress)
-        },
-        onFinish: () => {
-          alert('onFinish')
-          alert(form.progress)
-        },
-      }),
-    })
+  const onSuccessProgress = (e) => {
+    e.preventDefault()
+    form.transform((data) => ({ ...data, file: new File(['foo'], 'example.bin') }))
+    form.post(page.url, callbacks())
   }
 
   const onErrorProgress = () => {
@@ -264,128 +199,74 @@ export default (props) => {
       ...data,
       file: new File(['foobar'], 'example.bin'),
     }))
-    form.post('/form-helper/events/errors', {
-      ...callbacks({
-        onBefore: () => {
-          alert('onBefore')
-          alert(form.progress)
-        },
-        onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.progress)
-        },
-        onStart: () => {
-          alert('onStart')
-          alert(form.progress)
-        },
-        onProgress: () => {
-          alert('onProgress')
-          alert(form.progress)
-        },
-        onError: () => {
-          alert('onError')
-          alert(form.progress)
-        },
-        onFinish: () => {
-          alert('onFinish')
-          alert(form.progress)
-        },
-      }),
-    })
+    form.post('/form-helper/events/errors', callbacks())
   }
 
   const progressNoFiles = () => {
-    form.post(page.url, {
-      ...callbacks({
-        onBefore: () => {
-          alert('onBefore')
-          alert(form.progress)
-        },
-        onCancelToken: () => {
-          alert('onCancelToken')
-          alert(form.progress)
-        },
-        onStart: () => {
-          alert('onStart')
-          alert(form.progress)
-        },
-        onProgress: () => {
-          alert('onProgress')
-          alert(form.progress)
-        },
-        onSuccess: () => {
-          alert('onSuccess')
-          alert(form.progress)
-        },
-        onFinish: () => {
-          alert('onFinish')
-          alert(form.progress)
-        },
-      }),
-    })
+    form.post(page.url, callbacks())
   }
 
   return (
     <div>
-      <span onClick={submit} className="submit">
+      <button onClick={submit} className="submit">
         Submit form
-      </span>
+      </button>
 
-      <span onClick={successfulRequest} className="successful-request">
+      <button onClick={successfulRequest} className="successful-request">
         Successful request
-      </span>
-      <span onClick={cancelledVisit} className="cancel">
+      </button>
+      <button onClick={cancelledVisit} className="cancel">
         Cancellable Visit
-      </span>
+      </button>
 
-      <span onClick={onBeforeVisit} className="before">
+      <button onClick={onBeforeVisit} className="before">
         onBefore
-      </span>
-      <span onClick={onBeforeVisitCancelled} className="before-cancel">
+      </button>
+      <button onClick={onBeforeVisitCancelled} className="before-cancel">
         onBefore cancellation
-      </span>
-      <span onClick={onStartVisit} className="start">
+      </button>
+      <button onClick={onStartVisit} className="start">
         onStart
-      </span>
-      <span onClick={onProgressVisit} className="progress">
+      </button>
+      <button onClick={onProgressVisit} className="progress">
         onProgress
-      </span>
+      </button>
 
-      <span onClick={onSuccessVisit} className="success">
+      <button onClick={onSuccessVisit} className="success">
         onSuccess
-      </span>
-      <span onClick={onSuccessProgress} className="success-progress">
+      </button>
+      <button onClick={onSuccessProgress} className="success-progress">
         onSuccess progress property
-      </span>
-      <span onClick={onSuccessProcessing} className="success-processing">
+      </button>
+      <button onClick={onSuccessProcessing} className="success-processing">
         onSuccess resets processing
-      </span>
-      <span onClick={onSuccessResetErrors} className="success-reset-errors">
+      </button>
+      <button onClick={onSuccessResetErrors} className="success-reset-errors">
         onSuccess resets errors
-      </span>
-      <span onClick={onSuccessPromiseVisit} className="success-promise">
+      </button>
+      <button onClick={onSuccessPromiseVisit} className="success-promise">
         onSuccess promise
-      </span>
+      </button>
 
-      <span onClick={onErrorVisit} className="error">
+      <button onClick={onErrorVisit} className="error">
         onError
-      </span>
-      <span onClick={onErrorProgress} className="error-progress">
+      </button>
+      <button onClick={onErrorProgress} className="error-progress">
         onError progress property
-      </span>
-      <span onClick={onErrorProcessing} className="error-processing">
+      </button>
+      <button onClick={onErrorProcessing} className="error-processing">
         onError resets processing
-      </span>
-      <span onClick={errorsSetOnError} className="errors-set-on-error">
+      </button>
+      <button onClick={errorsSetOnError} className="errors-set-on-error">
         Errors set on error
-      </span>
-      <span onClick={onErrorPromiseVisit} className="error-promise">
+      </button>
+      <button onClick={onErrorPromiseVisit} className="error-promise">
         onError promise
-      </span>
+      </button>
 
-      <span onClick={progressNoFiles} className="no-progress">
+      <button onClick={progressNoFiles} className="no-progress">
         progress no files
-      </span>
+      </button>
 
       <span className="success-status">Form was {form.wasSuccessful ? '' : 'not '}successful</span>
       <span className="recently-status">Form was {form.recentlySuccessful ? '' : 'not '}recently successful</span>
