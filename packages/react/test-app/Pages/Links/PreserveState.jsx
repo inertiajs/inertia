@@ -24,7 +24,7 @@ const PreserveState = ({ foo = 'default' }) => {
         <input type="text" name="example-field" className="field" />
       </label>
 
-      <Link href="/links/preserve-state-page-two" preserve-state data={{ foo: 'bar' }} className="preserve">
+      <Link href="/links/preserve-state-page-two" preserveState data={{ foo: 'bar' }} className="preserve">
         [State] Preserve: true
       </Link>
       <Link
