@@ -18,7 +18,7 @@ export default function usePoll(
   })
 
   onMounted(() => {
-    if (options.autoStart) {
+    if (options.autoStart ?? true) {
       start()
     }
   })

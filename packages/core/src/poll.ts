@@ -20,7 +20,9 @@ export class Poll {
   }
 
   public stop() {
+    // console.log('stopping...', this.id)
     if (this.id) {
+      //   console.log('clearing interval...')
       clearInterval(this.id)
     }
   }
