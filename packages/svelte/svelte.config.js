@@ -7,6 +7,9 @@ const config = {
   kit: {
     adapter: adapter(),
   },
+  files: {
+    lib: 'src',
+  },
 }
 
 export default config
