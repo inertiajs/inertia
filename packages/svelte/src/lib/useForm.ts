@@ -58,7 +58,7 @@ export default function useForm<TForm extends FormDataType>(
 ): Writable<InertiaForm<TForm>> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const inputData = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
-  const data: TForm = typeof inputData === 'function' ? inputData() : inputData as TForm
+  const data: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> } | null)
     : null
@@ -92,12 +92,13 @@ export default function useForm<TForm extends FormDataType>(
       return this
     },
     defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
-      defaults = typeof fieldOrFields === 'undefined'
-        ? cloneDeep(this.data())
-        : Object.assign(
-            cloneDeep(defaults),
-            typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
-          )
+      defaults =
+        typeof fieldOrFields === 'undefined'
+          ? cloneDeep(this.data())
+          : Object.assign(
+              cloneDeep(defaults),
+              typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
+            )
 
       return this
     },

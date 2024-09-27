@@ -42,7 +42,7 @@
     layout: ComponentType,
     child: RenderProps,
     pageProps: PageProps,
-    key: number | null
+    key: number | null,
   ): RenderProps {
     if (Array.isArray(layout)) {
       return layout
@@ -58,4 +58,3 @@
 {#if props}
   <Render {...props} />
 {/if}
- 
