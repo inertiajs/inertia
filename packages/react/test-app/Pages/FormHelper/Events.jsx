@@ -188,10 +188,9 @@ export default (props) => {
     form.post('/form-helper/events/errors', callbacks())
   }
 
-  const onSuccessProgress = (e) => {
-    e.preventDefault()
+  const onSuccessProgress = () => {
     form.transform((data) => ({ ...data, file: new File(['foo'], 'example.bin') }))
-    form.post(page.url, callbacks())
+    form.post('/sleep', callbacks())
   }
 
   const onErrorProgress = () => {

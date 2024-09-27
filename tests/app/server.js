@@ -124,12 +124,15 @@ app.post('/form-helper/errors', (req, res) =>
     props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
   }),
 )
-app.post('/form-helper/events/errors', (req, res) =>
-  inertia.render(req, res, {
-    component: 'FormHelper/Events',
-    props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
-  }),
-)
+
+app.post('/form-helper/events/errors', (req, res) => {
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'FormHelper/Events',
+      props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
+    })
+  }, 250)
+})
 
 app.get('/dump/get', upload.any(), (req, res) =>
   inertia.render(req, res, {

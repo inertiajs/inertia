@@ -514,15 +514,15 @@ test.describe('Form Helper', () => {
       })
 
       test('updates the progress property of the form', async ({ page, context }) => {
-        await clickAndWaitForResponse(page, 'onSuccess progress property', null, 'button')
-        await page.getByRole('button', { exact: true, name: 'onSuccess progress property' }).click()
+        await clickAndWaitForResponse(page, 'onSuccess progress property', 'sleep', 'button')
 
         const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[4]).toBe('onStart')
-        await expect(messages[6]).toBe('onProgress')
+        await expect(messages[2]).toBe('onStart')
+        await expect(messages[3]).toBe('onProgress')
 
-        const event = messages[7]
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
 
         await expect(event).toHaveProperty('percentage')
         await expect(event).toHaveProperty('total')
@@ -536,7 +536,7 @@ test.describe('Form Helper', () => {
       test('fires when the request was cancelled', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Cancellable Visit' }).click()
 
-        await page.waitForTimeout(20)
+        await page.waitForTimeout(2)
 
         const messages = await page.evaluate(() => (window as any).events)
 
@@ -578,11 +578,11 @@ test.describe('Form Helper', () => {
       })
 
       test('resets the progress property back to null', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onSuccess progress property' }).click()
+        await clickAndWaitForResponse(page, 'onSuccess progress property', 'sleep', 'button')
 
         const messages = await page.evaluate(() => (window as any).events)
         const data = await page.evaluate(() => (window as any).data)
-        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progressEvent').data
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
         const endEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
 
         await expect(event).toHaveProperty('percentage')
@@ -591,8 +591,8 @@ test.describe('Form Helper', () => {
         await expect(event.percentage).toBeGreaterThanOrEqual(0)
         await expect(event.percentage).toBeLessThanOrEqual(100)
 
-        await expect(messages[7]).toBe('onSuccess')
-        await expect(messages[8]).toBeNull()
+        await expect(messages[4]).toBe('onFinish')
+        await expect(endEvent).toBeNull()
       })
 
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
@@ -653,7 +653,7 @@ test.describe('Form Helper', () => {
 
     test.describe('onError', () => {
       test('fires when the request finishes with validation errors', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onError' }).click()
+        await clickAndWaitForResponse(page, 'onError', 'form-helper/events/errors', 'button')
 
         const messages = await page.evaluate(() => (window as any).events)
         const data = await page.evaluate(() => (window as any).data)
@@ -667,7 +667,7 @@ test.describe('Form Helper', () => {
       })
 
       test('marks the form as no longer processing', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onError resets processing' }).click()
+        await clickAndWaitForResponse(page, 'onError resets processing', 'form-helper/events/errors', 'button')
 
         const messages = await page.evaluate(() => (window as any).events)
         const data = await page.evaluate(() => (window as any).data)
@@ -685,10 +685,12 @@ test.describe('Form Helper', () => {
         await clickAndWaitForResponse(page, 'onError progress property', 'form-helper/events/errors', 'button')
 
         const messages = await page.evaluate(() => (window as any).events)
+        const data = await page.evaluate(() => (window as any).data)
 
-        await expect(messages[6]).toBe('onProgress')
+        await expect(messages[3]).toBe('onProgress')
 
-        const event = messages[7]
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
+        const finishEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
 
         await expect(event).toHaveProperty('percentage')
         await expect(event).toHaveProperty('total')
@@ -696,12 +698,12 @@ test.describe('Form Helper', () => {
         await expect(event.percentage).toBeGreaterThanOrEqual(0)
         await expect(event.percentage).toBeLessThanOrEqual(100)
 
-        await expect(messages[8]).toBe('onError')
-        await expect(messages[9]).toBeNull()
+        await expect(messages[4]).toBe('onError')
+        await expect(finishEvent).toBeNull()
       })
 
       test('sets form errors', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'Errors set on error' }).click()
+        await clickAndWaitForResponse(page, 'Errors set on error', 'form-helper/events/errors', 'button')
 
         const messages = await page.evaluate(() => (window as any).events)
         const data = await page.evaluate(() => (window as any).data)
