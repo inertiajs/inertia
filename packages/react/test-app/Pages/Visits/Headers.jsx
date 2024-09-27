@@ -1,67 +1,75 @@
 import { router } from '@inertiajs/react'
 
 export default (props) => {
-  const defaultHeadersMethod = () => {
+  const defaultHeadersMethod = (e) => {
+    e.preventDefault()
     router.visit('/dump/get')
   }
 
-  const visitWithCustomHeaders = () => {
+  const visitWithCustomHeaders = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', { headers: { foo: 'bar' } })
   }
 
-  const getMethod = () => {
+  const getMethod = (e) => {
+    e.preventDefault()
     router.get('/dump/get', {}, { headers: { bar: 'baz' } })
   }
 
-  const postMethod = () => {
+  const postMethod = (e) => {
+    e.preventDefault()
     router.post('/dump/post', {}, { headers: { baz: 'foo' } })
   }
 
-  const putMethod = () => {
+  const putMethod = (e) => {
+    e.preventDefault()
     router.put('/dump/put', {}, { headers: { foo: 'bar' } })
   }
 
-  const patchMethod = () => {
+  const patchMethod = (e) => {
+    e.preventDefault()
     router.patch('/dump/patch', {}, { headers: { bar: 'baz' } })
   }
 
-  const deleteMethod = () => {
+  const deleteMethod = (e) => {
+    e.preventDefault()
     router.delete('/dump/delete', { headers: { baz: 'foo' } })
   }
 
-  const overridden = () => {
+  const overridden = (e) => {
+    e.preventDefault()
     router.post('/dump/post', {}, { headers: { bar: 'baz', 'X-Requested-With': 'custom' } })
   }
   return (
     <div>
       <span className="text">This is the page that demonstrates passing custom headers through manual visits</span>
 
-      <span onClick={defaultHeadersMethod} className="default">
+      <a href="#" onClick={defaultHeadersMethod} className="default">
         Standard visit Link
-      </span>
+      </a>
 
-      <span onClick={visitWithCustomHeaders} className="visit">
+      <a href="#" onClick={visitWithCustomHeaders} className="visit">
         Specific visit Link
-      </span>
-      <span onClick={getMethod} className="get">
+      </a>
+      <a href="#" onClick={getMethod} className="get">
         GET Link
-      </span>
-      <span onClick={postMethod} className="post">
+      </a>
+      <a href="#" onClick={postMethod} className="post">
         POST Link
-      </span>
-      <span onClick={putMethod} className="put">
+      </a>
+      <a href="#" onClick={putMethod} className="put">
         PUT Link
-      </span>
-      <span onClick={patchMethod} className="patch">
+      </a>
+      <a href="#" onClick={patchMethod} className="patch">
         PATCH Link
-      </span>
-      <span onClick={deleteMethod} className="delete">
+      </a>
+      <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
-      </span>
+      </a>
 
-      <span onClick={overridden} className="overridden">
-        DELETE Link
-      </span>
+      <a href="#" onClick={overridden} className="overridden">
+        Overriden Link
+      </a>
     </div>
   )
 }

@@ -1,50 +1,54 @@
 import { router } from '@inertiajs/react'
-import { useEffect } from 'react'
+import { useId } from 'react'
 
 export default ({ foo = 'default' }) => {
-  useEffect(() => {
-    window._inertia_page_key = null
-  })
+  window._inertia_page_key = useId()
 
-  const preserve = () => {
+  const preserve = (e) => {
+    e.preventDefault()
     router.visit('/visits/preserve-state-page-two', { data: { foo: 'bar' }, preserveState: true })
   }
 
-  const preserveFalse = () => {
+  const preserveFalse = (e) => {
+    e.preventDefault()
     router.visit('/visits/preserve-state-page-two', { data: { foo: 'baz' }, preserveState: false })
   }
 
-  const preserveCallback = () => {
+  const preserveCallback = (e) => {
+    e.preventDefault()
     router.get(
       '/visits/preserve-state-page-two',
       { foo: 'callback-bar' },
       {
         preserveState: (page) => {
-          alert(page)
+          console.log(JSON.stringify(page))
           return true
         },
       },
     )
   }
 
-  const preserveCallbackFalse = () => {
+  const preserveCallbackFalse = (e) => {
+    e.preventDefault()
     router.get(
       '/visits/preserve-state-page-two',
       { foo: 'callback-baz' },
       {
         preserveState: (page) => {
-          alert(page)
+          console.log(JSON.stringify(page))
           return false
         },
       },
     )
   }
 
-  const preserveGet = () => {
+  const preserveGet = (e) => {
+    e.preventDefault()
     router.get('/visits/preserve-state-page-two', { foo: 'get-bar' }, { preserveState: true })
   }
 
-  const preserveGetFalse = () => {
+  const preserveGetFalse = (e) => {
+    e.preventDefault()
     router.get('/visits/preserve-state-page-two', { foo: 'get-baz' }, { preserveState: false })
   }
 
@@ -57,24 +61,24 @@ export default ({ foo = 'default' }) => {
         <input type="text" name="example-field" className="field" />
       </label>
 
-      <span onClick={preserve} className="preserve">
+      <a href="#" onClick={preserve} className="preserve">
         [State] Preserve visit: true
-      </span>
-      <span onClick={preserveFalse} className="preserve-false">
+      </a>
+      <a href="#" onClick={preserveFalse} className="preserve-false">
         [State] Preserve visit: false
-      </span>
-      <span onClick={preserveCallback} className="preserve-callback">
+      </a>
+      <a href="#" onClick={preserveCallback} className="preserve-callback">
         [State] Preserve Callback: true
-      </span>
-      <span onClick={preserveCallbackFalse} className="preserve-callback-false">
+      </a>
+      <a href="#" onClick={preserveCallbackFalse} className="preserve-callback-false">
         [State] Preserve Callback: false
-      </span>
-      <span onClick={preserveGet} className="preserve-get">
+      </a>
+      <a href="#" onClick={preserveGet} className="preserve-get">
         [State] Preserve GET: true
-      </span>
-      <span onClick={preserveGetFalse} className="preserve-get-false">
+      </a>
+      <a href="#" onClick={preserveGetFalse} className="preserve-get-false">
         [State] Preserve GET: false
-      </span>
+      </a>
     </div>
   )
 }

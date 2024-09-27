@@ -1,13 +1,14 @@
 import { router } from '@inertiajs/react'
 
 export default (props) => {
-  const visit = () => {
+  const visit = (e) => {
+    e.preventDefault()
     router.get(
       '/sleep',
       {},
       {
-        onStart: () => alert('started'),
-        onCancel: () => alert('cancelled'),
+        onStart: () => console.log('started'),
+        onCancel: () => console.log('cancelled'),
       },
     )
   }
@@ -15,9 +16,9 @@ export default (props) => {
   return (
     <div>
       <span className="text">This is the page that demonstrates that only one visit can be active at a time</span>
-      <span onClick={visit} className="visit">
+      <a href="#" onClick={visit} className="visit">
         Link
-      </span>
+      </a>
     </div>
   )
 }

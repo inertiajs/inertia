@@ -1,31 +1,38 @@
 import { router } from '@inertiajs/react'
 
 export default (props) => {
-  const standardVisitMethod = () => {
+  const standardVisitMethod = (e) => {
+    e.preventDefault()
     router.visit('/dump/get')
   }
 
-  const specificVisitMethod = () => {
+  const specificVisitMethod = (e) => {
+    e.preventDefault()
     router.visit('/dump/patch', { method: 'patch' })
   }
 
-  const getMethod = () => {
+  const getMethod = (e) => {
+    e.preventDefault()
     router.get('/dump/get')
   }
 
-  const postMethod = () => {
+  const postMethod = (e) => {
+    e.preventDefault()
     router.post('/dump/post')
   }
 
-  const putMethod = () => {
+  const putMethod = (e) => {
+    e.preventDefault()
     router.put('/dump/put')
   }
 
-  const patchMethod = () => {
+  const patchMethod = (e) => {
+    e.preventDefault()
     router.patch('/dump/patch')
   }
 
-  const deleteMethod = () => {
+  const deleteMethod = (e) => {
+    e.preventDefault()
     router.delete('/dump/delete')
   }
 
@@ -33,27 +40,27 @@ export default (props) => {
     <div>
       <span className="text">This is the page that demonstrates manual visit methods</span>
 
-      <span onClick={standardVisitMethod} className="visit-get">
+      <a href="#" onClick={standardVisitMethod} className="visit-get">
         Standard visit Link
-      </span>
-      <span onClick={specificVisitMethod} className="visit-specific">
+      </a>
+      <a href="#" onClick={specificVisitMethod} className="visit-specific">
         Specific visit Link
-      </span>
-      <span onClick={getMethod} className="get">
+      </a>
+      <a href="#" onClick={getMethod} className="get">
         GET Link
-      </span>
-      <span onClick={postMethod} className="post">
+      </a>
+      <a href="#" onClick={postMethod} className="post">
         POST Link
-      </span>
-      <span onClick={putMethod} className="put">
+      </a>
+      <a href="#" onClick={putMethod} className="put">
         PUT Link
-      </span>
-      <span onClick={patchMethod} className="patch">
+      </a>
+      <a href="#" onClick={patchMethod} className="patch">
         PATCH Link
-      </span>
-      <span onClick={deleteMethod} className="delete">
+      </a>
+      <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
-      </span>
+      </a>
     </div>
   )
 }

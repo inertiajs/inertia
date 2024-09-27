@@ -1,7 +1,8 @@
 import { router } from '@inertiajs/react'
 
 export default (props) => {
-  const locationVisit = () => {
+  const locationVisit = (e) => {
+    e.preventDefault()
     router.visit('/location')
   }
 
@@ -9,9 +10,9 @@ export default (props) => {
     <div>
       <span className="text">This is the page that demonstrates location visits</span>
 
-      <span onClick={locationVisit} className="example">
+      <a href="#" onClick={locationVisit} className="example">
         Location visit
-      </span>
+      </a>
     </div>
   )
 }

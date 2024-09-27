@@ -18,27 +18,33 @@ export default (props) => {
     }
   })
 
-  const basicVisit = () => {
+  const basicVisit = (e) => {
+    e.preventDefault()
     router.visit('/visits/url-fragments#target')
   }
 
-  const fragmentVisit = () => {
+  const fragmentVisit = (e) => {
+    e.preventDefault()
     router.visit('#target')
   }
 
-  const nonExistentFragmentVisit = () => {
+  const nonExistentFragmentVisit = (e) => {
+    e.preventDefault()
     router.visit('/visits/url-fragments#non-existent-fragment')
   }
 
-  const basicGetVisit = () => {
+  const basicGetVisit = (e) => {
+    e.preventDefault()
     router.get('/visits/url-fragments#target')
   }
 
-  const fragmentGetVisit = () => {
+  const fragmentGetVisit = (e) => {
+    e.preventDefault()
     router.get('#target')
   }
 
-  const nonExistentFragmentGetVisit = () => {
+  const nonExistentFragmentGetVisit = (e) => {
+    e.preventDefault()
     router.get('/visits/url-fragments#non-existent-fragment')
   }
 
@@ -54,25 +60,25 @@ export default (props) => {
       >
         {/* prettier-ignore */}
         <div className="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
-        <span onClick={basicVisit} className="basic">
+        <a href="#" onClick={basicVisit} className="basic">
           Basic visit
-        </span>
-        <span onClick={fragmentVisit} className="fragment">
+        </a>
+        <a href="#" onClick={fragmentVisit} className="fragment">
           Fragment visit
-        </span>
-        <span onClick={nonExistentFragmentVisit} className="non-existent-fragment">
+        </a>
+        <a href="#" onClick={nonExistentFragmentVisit} className="non-existent-fragment">
           Non-existent fragment visit
-        </span>
+        </a>
 
-        <span onClick={basicGetVisit} className="basic-get">
+        <a href="#" onClick={basicGetVisit} className="basic-get">
           Basic GET visit
-        </span>
-        <span onClick={fragmentGetVisit} className="fragment-get">
+        </a>
+        <a href="#" onClick={fragmentGetVisit} className="fragment-get">
           Fragment GET visit
-        </span>
-        <span onClick={nonExistentFragmentGetVisit} className="non-existent-fragment-get">
-          Non-existent fragment visit
-        </span>
+        </a>
+        <a href="#" onClick={nonExistentFragmentGetVisit} className="non-existent-fragment-get">
+          Non-existent fragment GET visit
+        </a>
 
         <div id="target">This is the element with id 'target'</div>
       </div>

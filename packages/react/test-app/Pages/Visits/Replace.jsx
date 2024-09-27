@@ -1,19 +1,23 @@
 import { router } from '@inertiajs/react'
 
 export default (props) => {
-  const replace = () => {
+  const replace = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', { replace: true })
   }
 
-  const replaceFalse = () => {
+  const replaceFalse = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', { replace: false })
   }
 
-  const replaceGet = () => {
+  const replaceGet = (e) => {
+    e.preventDefault()
     router.get('/dump/get', {}, { replace: true })
   }
 
-  const replaceGetFalse = () => {
+  const replaceGetFalse = (e) => {
+    e.preventDefault()
     router.get('/dump/get', {}, { replace: false })
   }
 
@@ -21,18 +25,18 @@ export default (props) => {
     <div>
       <span className="text">This is the links page that demonstrates manual replace</span>
 
-      <span onClick={replace} className="replace">
+      <a href="#" onClick={replace} className="replace">
         [State] Replace visit: true
-      </span>
-      <span onClick={replaceFalse} className="replace-false">
+      </a>
+      <a href="#" onClick={replaceFalse} className="replace-false">
         [State] Replace visit: false
-      </span>
-      <span onClick={replaceGet} className="replace-get">
+      </a>
+      <a href="#" onClick={replaceGet} className="replace-get">
         [State] Replace GET: true
-      </span>
-      <span onClick={replaceGetFalse} className="replace-get-false">
+      </a>
+      <a href="#" onClick={replaceGetFalse} className="replace-get-false">
         [State] Replace GET: false
-      </span>
+      </a>
     </div>
   )
 }

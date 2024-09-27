@@ -3,23 +3,28 @@ import { router } from '@inertiajs/react'
 export default (props) => {
   const formData = { file: new File([], 'example.jpg'), foo: 'bar' }
 
-  const visitMethod = () => {
+  const visitMethod = (e) => {
+    e.preventDefault()
     router.visit('/dump/post', { method: 'post', data: formData })
   }
 
-  const postMethod = () => {
+  const postMethod = (e) => {
+    e.preventDefault()
     router.post('/dump/post', formData)
   }
 
-  const putMethod = () => {
+  const putMethod = (e) => {
+    e.preventDefault()
     router.put('/dump/put', formData)
   }
 
-  const patchMethod = () => {
+  const patchMethod = (e) => {
+    e.preventDefault()
     router.patch('/dump/patch', formData)
   }
 
-  const deleteMethod = () => {
+  const deleteMethod = (e) => {
+    e.preventDefault()
     router.delete('/dump/delete', { data: formData })
   }
 
@@ -29,21 +34,21 @@ export default (props) => {
         This is the page that demonstrates automatic conversion of plain objects to form-data using manual visits
       </span>
 
-      <span onClick={visitMethod} className="visit">
+      <a href="#" onClick={visitMethod} className="visit">
         Visit Link
-      </span>
-      <span onClick={postMethod} className="post">
+      </a>
+      <a href="#" onClick={postMethod} className="post">
         POST Link
-      </span>
-      <span onClick={putMethod} className="put">
+      </a>
+      <a href="#" onClick={putMethod} className="put">
         PUT Link
-      </span>
-      <span onClick={patchMethod} className="patch">
+      </a>
+      <a href="#" onClick={patchMethod} className="patch">
         PATCH Link
-      </span>
-      <span onClick={deleteMethod} className="delete">
+      </a>
+      <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
-      </span>
+      </a>
     </div>
   )
 }

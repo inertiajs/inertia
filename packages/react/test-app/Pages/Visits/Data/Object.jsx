@@ -1,39 +1,48 @@
 import { router } from '@inertiajs/react'
 
 export default (props) => {
-  const visitMethod = () => {
+  const visitMethod = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', { data: { foo: 'visit' } })
   }
 
-  const getMethod = () => {
+  const getMethod = (e) => {
+    e.preventDefault()
     router.get('/dump/get', { bar: 'get' })
   }
 
-  const postMethod = () => {
+  const postMethod = (e) => {
+    e.preventDefault()
     router.post('/dump/post', { baz: 'post' })
   }
 
-  const putMethod = () => {
+  const putMethod = (e) => {
+    e.preventDefault()
     router.put('/dump/put', { foo: 'put' })
   }
 
-  const patchMethod = () => {
+  const patchMethod = (e) => {
+    e.preventDefault()
     router.patch('/dump/patch', { bar: 'patch' })
   }
 
-  const deleteMethod = () => {
+  const deleteMethod = (e) => {
+    e.preventDefault()
     router.delete('/dump/delete', { data: { baz: 'delete' } })
   }
 
-  const qsafDefault = () => {
+  const qsafDefault = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', { data: { a: ['b', 'c'] } })
   }
 
-  const qsafIndices = () => {
+  const qsafIndices = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', { data: { a: ['b', 'c'] }, queryStringArrayFormat: 'indices' })
   }
 
-  const qsafBrackets = () => {
+  const qsafBrackets = (e) => {
+    e.preventDefault()
     router.visit('/dump/get', {
       data: { a: ['b', 'c'] },
       queryStringArrayFormat: 'brackets',
@@ -44,34 +53,34 @@ export default (props) => {
     <div>
       <span className="text">This is the page that demonstrates manual visit data passing through plain objects</span>
 
-      <span onClick={visitMethod} className="visit">
+      <a href="#" onClick={visitMethod} className="visit">
         Visit Link
-      </span>
-      <span onClick={getMethod} className="get">
+      </a>
+      <a href="#" onClick={getMethod} className="get">
         GET Link
-      </span>
-      <span onClick={postMethod} className="post">
+      </a>
+      <a href="#" onClick={postMethod} className="post">
         POST Link
-      </span>
-      <span onClick={putMethod} className="put">
+      </a>
+      <a href="#" onClick={putMethod} className="put">
         PUT Link
-      </span>
-      <span onClick={patchMethod} className="patch">
+      </a>
+      <a href="#" onClick={patchMethod} className="patch">
         PATCH Link
-      </span>
-      <span onClick={deleteMethod} className="delete">
+      </a>
+      <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
-      </span>
+      </a>
 
-      <span onClick={qsafDefault} className="qsaf-default">
+      <a href="#" onClick={qsafDefault} className="qsaf-default">
         QSAF Defaults
-      </span>
-      <span onClick={qsafIndices} className="qsaf-indices">
+      </a>
+      <a href="#" onClick={qsafIndices} className="qsaf-indices">
         QSAF Indices
-      </span>
-      <span onClick={qsafBrackets} className="qsaf-brackets">
+      </a>
+      <a href="#" onClick={qsafBrackets} className="qsaf-brackets">
         QSAF Brackets
-      </span>
+      </a>
     </div>
   )
 }
