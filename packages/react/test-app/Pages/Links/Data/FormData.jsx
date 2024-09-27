@@ -2,7 +2,7 @@ import { Link } from '@inertiajs/react'
 
 const linkData = new FormData()
 
-linkData.append('foo', 'bar')
+linkData.append('bar', 'baz')
 
 export default (props) => {
   return (

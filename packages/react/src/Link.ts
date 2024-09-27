@@ -77,6 +77,12 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>()
 
+    as = as.toLowerCase()
+    method = method.toLowerCase() as Method
+    const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
+    href = _href
+    data = _data
+
     const baseParams = {
       data,
       method,
@@ -200,12 +206,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         }
       },
     }
-
-    as = as.toLowerCase()
-    method = method.toLowerCase() as Method
-    const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
-    href = _href
-    data = _data
 
     if (method !== 'get') {
       as = 'button'

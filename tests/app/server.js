@@ -118,6 +118,7 @@ app.post('/form-helper/data', (req, res) =>
     props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
   }),
 )
+
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Errors',
