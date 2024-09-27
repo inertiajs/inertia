@@ -1,5 +1,5 @@
-import { hydrate, mount } from 'svelte'
 import { createInertiaApp } from '@inertiajs/svelte'
+import { hydrate, mount } from 'svelte'
 
 createInertiaApp({
   resolve: (name) => {
@@ -8,9 +8,9 @@ createInertiaApp({
   },
   setup({ el, App }) {
     if (el.dataset.serverRendered === 'true') {
-        hydrate(App, { target: el })
+      hydrate(App, { target: el })
     } else {
-        mount(App, { target: el })
+      mount(App, { target: el })
     }
   },
 })
