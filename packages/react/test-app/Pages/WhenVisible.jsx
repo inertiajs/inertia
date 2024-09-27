@@ -1,29 +1,27 @@
-import { Suspense } from 'react'
+import { WhenVisible } from '@inertiajs/react'
 
-const Foo = ({ label, once }) => {
-  const { foo } = useWhenVisible('foo')
-
+const Foo = ({ label }) => {
   return <div>{label}</div>
 }
 
 export default () => (
   <>
-    <div style="margin-top: 5000px">
-      <Suspense fallback={<div>Loading first one...</div>}>
+    <div style={{ marginTop: '5000px' }}>
+      <WhenVisible data="foo" fallback={<div>Loading first one...</div>}>
         <Foo label="First one is visible!" />
-      </Suspense>
+      </WhenVisible>
     </div>
 
-    <div style="margin-top: 5000px">
-      <Suspense fallback={<div>Loading second one...</div>}>
+    <div style={{ marginTop: '5000px' }}>
+      <WhenVisible buffer={1000} data="foo" fallback={<div>Loading second one...</div>}>
         <Foo label="Second one is visible!" />
-      </Suspense>
+      </WhenVisible>
     </div>
 
-    <div style="margin-top: 5000px">
-      <Suspense fallback={<div>Loading third one...</div>}>
+    <div style={{ marginTop: '5000px' }}>
+      <WhenVisible data="foo" once={false} fallback={<div>Loading third one...</div>}>
         <Foo label="Third one is visible!" once={false} />
-      </Suspense>
+      </WhenVisible>
     </div>
   </>
 )
