@@ -16,7 +16,13 @@ const PreserveScroll = ({ foo = 'default' }) => {
       <span className="text">This is the links page that demonstrates scroll preservation with scroll regions</span>
       <span className="foo">Foo is now {foo}</span>
 
-      <Link href="/links/preserve-scroll-page-two" preserve-scroll data={{ foo: 'baz' }} className="preserve">
+      <Link
+        href="/links/preserve-scroll-page-two"
+        preserveScroll
+        data={{ foo: 'baz' }}
+        data-testid="preserve"
+        className="preserve"
+      >
         Preserve Scroll
       </Link>
       <Link href="/links/preserve-scroll-page-two" data={{ foo: 'bar' }} data-testid="reset" className="reset">

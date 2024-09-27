@@ -32,7 +32,7 @@ export default ({ children }) => {
           Slot scroll position is {slotScrollLeft} & {slotScrollTop}
         </span>
         <div
-          scroll-region
+          scroll-region=""
           id="slot"
           style={{ height: '100px', width: '500px', overflow: 'scroll' }}
           onScroll={handleScrollEvent}
