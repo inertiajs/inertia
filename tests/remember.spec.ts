@@ -95,7 +95,7 @@ test.describe('Remember (local state caching)', () => {
 
     await page.goBack()
 
-    await expect(page).toHaveURL('remember/multiple-components')
+    await page.waitForURL('remember/multiple-components')
 
     await expect(page.locator('#name')).toHaveValue('D')
     await expect(page.locator('#remember')).toBeChecked()
