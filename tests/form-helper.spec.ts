@@ -536,7 +536,7 @@ test.describe('Form Helper', () => {
       test('fires when the request was cancelled', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Cancellable Visit' }).click()
 
-        await page.waitForTimeout(2)
+        await page.waitForTimeout(200)
 
         const messages = await page.evaluate(() => (window as any).events)
 
