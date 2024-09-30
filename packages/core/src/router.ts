@@ -31,8 +31,8 @@ import {
 } from './types'
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
-const isChromeIOS = /CriOS/.test(navigator.userAgent)
 const isServer = typeof window === 'undefined'
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 const nextFrame = (callback: () => void) => {
   requestAnimationFrame(() => {
