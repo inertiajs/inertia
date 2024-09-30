@@ -17,11 +17,3 @@ export default function useRemember<State>(
 
   return [state, setState]
 }
-
-/** @deprecated use `useRemember` instead */
-export function useRememberedState<State>(initialState: State, key?: string): [State, Dispatch<SetStateAction<State>>] {
-  console.warn(
-    'The "useRememberedState" hook has been deprecated and will be removed in a future release. Use "useRemember" instead.',
-  )
-  return useRemember(initialState, key)
-}
