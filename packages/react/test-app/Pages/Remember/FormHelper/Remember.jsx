@@ -10,7 +10,8 @@ export default (props) => {
   }
 
   const reset = () => {
-    form.reset('handle').clearErrors('name')
+    form.reset('handle')
+    form.clearErrors('name')
   }
 
   return (
