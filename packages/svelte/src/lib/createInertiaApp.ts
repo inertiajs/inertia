@@ -40,12 +40,14 @@ export default async function createInertiaApp({
   const initialPage = page || JSON.parse(el?.dataset.page ?? '{}')
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
-  await resolveComponent(initialPage.component).then((initialComponent) => {
-    store.set({
-      component: initialComponent as unknown as InertiaComponentType,
-      page: initialPage,
-    })
-  })
+  await Promise.all([resolveComponent(initialPage.component), router.decryptHistory().catch(() => {})]).then(
+    ([initialComponent]) => {
+      store.set({
+        component: initialComponent as unknown as InertiaComponentType,
+        page: initialPage,
+      })
+    },
+  )
 
   if (!isServer) {
     if (!el) {

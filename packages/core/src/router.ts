@@ -15,6 +15,7 @@ import {
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
+  Page,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -236,6 +237,10 @@ export class Router {
 
   public clearHistory(): void {
     history.clear()
+  }
+
+  public decryptHistory(): Promise<Page> {
+    return history.decrypt()
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {

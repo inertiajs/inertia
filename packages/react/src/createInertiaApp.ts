@@ -1,4 +1,4 @@
-import { Page, PageProps, PageResolver, setupProgress } from '@inertiajs/core'
+import { Page, PageProps, PageResolver, router, setupProgress } from '@inertiajs/core'
 import { ComponentType, FunctionComponent, Key, ReactElement, ReactNode, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App'
@@ -82,7 +82,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   let head = []
 
-  const reactApp = await resolveComponent(initialPage.component).then((initialComponent) => {
+  const reactApp = await Promise.all([
+    resolveComponent(initialPage.component),
+    router.decryptHistory().catch(() => {}),
+  ]).then(([initialComponent]) => {
     return setup({
       // @ts-expect-error
       el,

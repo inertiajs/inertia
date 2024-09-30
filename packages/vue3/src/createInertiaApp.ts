@@ -1,4 +1,4 @@
-import { Page, setupProgress } from '@inertiajs/core'
+import { Page, router, setupProgress } from '@inertiajs/core'
 import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
@@ -35,7 +35,10 @@ export default async function createInertiaApp({
 
   let head = []
 
-  const vueApp = await resolveComponent(initialPage.component).then((initialComponent) => {
+  const vueApp = await Promise.all([
+    resolveComponent(initialPage.component),
+    router.decryptHistory().catch(() => {}),
+  ]).then(([initialComponent]) => {
     return setup({
       el,
       App,
