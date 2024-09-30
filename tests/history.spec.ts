@@ -65,6 +65,8 @@ test('it can encrypt history', async ({ page }) => {
 test('history can be cleared via router', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 3', '/history/3')
 
+  await page.waitForTimeout(200)
+
   await page.goBack()
   await page.waitForURL('/history/1')
 
