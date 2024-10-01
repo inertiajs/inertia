@@ -32,6 +32,7 @@ import {
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 const nextFrame = (callback: () => void) => {
   requestAnimationFrame(() => {
@@ -494,14 +495,24 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    // Defer history.pushState to the next event loop tick to prevent timing conflicts.
-    // Ensure any previous history.replaceState completes before pushState is executed.
-    setTimeout(() => window.history.pushState(cloneSerializable(page), '', page.url))
+    if (isChromeIOS) {
+      // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.replaceState completes before pushState is executed.
+      setTimeout(() => window.history.pushState(cloneSerializable(page), '', page.url))
+    } else {
+      window.history.pushState(cloneSerializable(page), '', page.url)
+    }
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(cloneSerializable(page), '', page.url)
+    if (isChromeIOS) {
+      // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.pushState completes before replaceState is executed.
+      setTimeout(() => window.history.replaceState(cloneSerializable(page), '', page.url))
+    } else {
+      window.history.replaceState(cloneSerializable(page), '', page.url)
+    }
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
