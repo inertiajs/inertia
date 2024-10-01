@@ -20,7 +20,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
 
 ### Fixed
-- Fix history navigation issue on Chrome iOS ([#1984](https://github.com/inertiajs/inertia/pull/1984))
+- Fix history navigation issue on Chrome iOS ([#1984](https://github.com/inertiajs/inertia/pull/1984), [#1992](https://github.com/inertiajs/inertia/pull/1992))
 - Fix `setNavigationType` for Safari 10 ([#1957](https://github.com/inertiajs/inertia/pull/1957))
 - Export `InertiaFormProps` in all adapters ([#1596](https://github.com/inertiajs/inertia/pull/1596), [#1734](https://github.com/inertiajs/inertia/pull/1734))
 - Fix `isDirty` after `form.defaults()` call in Vue 3 ([#1985](https://github.com/inertiajs/inertia/pull/1985))
