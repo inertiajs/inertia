@@ -1,17 +1,17 @@
 <script lang="ts">
   import type {
     CacheForOption,
+    FormDataConvertible,
     LinkPrefetchOption,
     Method,
     PreserveStateOption,
-    RequestPayload
   } from '@inertiajs/core'
   import { beforeUpdate } from 'svelte'
   import { inertia } from '../index'
 
   export let href: string
   export let as: keyof HTMLElementTagNameMap = 'a'
-  export let data: RequestPayload = {}
+  export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
   export let replace: boolean = false
   export let preserveScroll: PreserveStateOption = false
@@ -20,9 +20,9 @@
   export let except: string[] = []
   export let headers: Record<string, string> = {}
   export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
-  export let async: boolean
-  export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  export let cacheFor: CacheForOption | CacheForOption[]
+  export let async: boolean = false
+  export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
+  export let cacheFor: CacheForOption | CacheForOption[] = 0
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
