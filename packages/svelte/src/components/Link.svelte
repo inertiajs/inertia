@@ -1,5 +1,11 @@
 <script lang="ts">
-  import type { Method, PreserveStateOption, RequestPayload } from '@inertiajs/core'
+  import type {
+    CacheForOption,
+    LinkPrefetchOption,
+    Method,
+    PreserveStateOption,
+    RequestPayload
+  } from '@inertiajs/core'
   import { beforeUpdate } from 'svelte'
   import { inertia } from '../index'
 
@@ -14,6 +20,9 @@
   export let except: string[] = []
   export let headers: Record<string, string> = {}
   export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
+  export let async: boolean
+  export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+  export let cacheFor: CacheForOption | CacheForOption[]
 
   beforeUpdate(() => {
     if (as === 'a' && method.toLowerCase() !== 'get') {
@@ -38,6 +47,9 @@
     except,
     headers,
     queryStringArrayFormat,
+    async,
+    prefetch,
+    cacheFor,
   }}
   {...as === 'a' ? { href } : {}}
   {...$$restProps}
