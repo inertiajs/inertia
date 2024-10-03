@@ -729,3 +729,28 @@ test.describe('"as" attribute', () => {
     })
   })
 })
+
+test.describe('data-loading attribute', () => {
+  test('adds data-loading attribute to link component', async ({ page }) => {
+    await page.goto('/links/data-loading')
+    const link = await page.getByRole('link', { name: 'First' })
+    await link.click()
+    await expect(link).toHaveAttribute('data-loading', '')
+    await page.waitForResponse('sleep')
+    await expect(link).not.toHaveAttribute('data-loading')
+  })
+
+  test('handles data-loading attribute for cancelled requests', async ({ page }) => {
+    await page.goto('/links/data-loading')
+    const link1 = await page.getByRole('link', { name: 'First' })
+    const link2 = await page.getByRole('link', { name: 'Second' })
+    await link1.click()
+    await expect(link1).toHaveAttribute('data-loading', '')
+    await expect(link2).not.toHaveAttribute('data-loading', '')
+    await link2.click()
+    await expect(link1).not.toHaveAttribute('data-loading', '')
+    await expect(link2).toHaveAttribute('data-loading', '')
+    await page.waitForResponse('sleep')
+    await expect(link2).not.toHaveAttribute('data-loading')
+  })
+})

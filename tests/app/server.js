@@ -71,6 +71,7 @@ app.get('/links/as-warning-false/:method', (req, res) =>
 app.get('/links/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Links/Headers', version: 'example-version-header' }),
 )
+app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
 
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
