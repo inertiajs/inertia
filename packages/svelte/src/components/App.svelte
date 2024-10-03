@@ -11,8 +11,6 @@
    * Resolves the render props for the current page component, including layouts.
    */
   function resolveProps({ component, page, key = null }: InertiaStore): RenderProps {
-    if (!component?.default || !page) return null
-
     const child = h(component.default, page.props, [], key)
     const layout = component.layout
 
