@@ -7,13 +7,13 @@ interface WhenVisibleProps {
   data: string | string[]
   params?: ReloadOptions
   buffer?: number
-  elementTag?: string
+  as?: string
   once?: boolean
 }
 
-const WhenVisible = ({ children, data, params, buffer, elementTag, once, fallback }: WhenVisibleProps) => {
+const WhenVisible = ({ children, data, params, buffer, as, once, fallback }: WhenVisibleProps) => {
   once = once ?? true
-  elementTag = elementTag ?? 'div'
+  as = as ?? 'div'
   fallback = fallback ?? null
 
   const [loaded, setLoaded] = useState(false)
@@ -85,7 +85,7 @@ const WhenVisible = ({ children, data, params, buffer, elementTag, once, fallbac
 
   if (!once || !loaded) {
     return createElement(
-      elementTag,
+      as,
       {
         props: null,
         ref,

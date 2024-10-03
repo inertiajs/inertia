@@ -14,7 +14,7 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
-    elementTag: {
+    as: {
       type: String,
       default: 'div',
     },
@@ -91,7 +91,7 @@ export default defineComponent({
     const els = []
 
     if (!this.$props.once || !this.loaded) {
-      els.push(h(this.$props.elementTag))
+      els.push(h(this.$props.as))
     }
 
     if (this.loaded) {
