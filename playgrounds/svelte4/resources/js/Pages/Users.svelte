@@ -2,9 +2,13 @@
   export { default as layout } from '../Components/Layout.svelte'
 </script>
 
-<script>
+<script lang="ts">
+  import { usePrefetch } from '@inertiajs/svelte'
+
   export let appName
-  export let users
+  export let users = []
+
+  const prefetch = usePrefetch()
 </script>
 
 <svelte:head>
@@ -12,6 +16,21 @@
 </svelte:head>
 
 <h1 class="text-3xl">Users</h1>
+
+<div class="my-6">
+  Data last refreshed at:
+  {#if $prefetch.lastUpdatedAt}
+    <span>{new Date($prefetch.lastUpdatedAt)}</span>
+  {:else}
+    <span>N/A</span>
+  {/if}
+  {#if $prefetch.isPrefetched}
+    <span> (Page is prefetched!)</span>
+  {/if}
+  {#if $prefetch.isPrefetching}
+    <span class="text-red-500">refreshing...</span>
+  {/if}
+</div>
 
 <div class="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
   <table class="w-full text-left">
@@ -23,7 +42,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each users as user}
+      {#each users as user (user.id)}
         <tr class="border-t">
           <td class="px-4 py-2">{user.id}</td>
           <td class="px-4 py-2">{user.name}</td>
