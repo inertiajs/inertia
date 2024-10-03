@@ -7,7 +7,7 @@
 
   export let appName
 
-  let form = useForm('NewUser', {
+  const form = useForm('NewUser', {
     name: '',
     company: '',
     role: '',

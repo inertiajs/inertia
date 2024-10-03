@@ -158,7 +158,7 @@ Route::get('/infinite-scroll', function () {
     $page = request()->integer('page', 1);
     $perPage = 25;
     $start = ($page - 1) * $perPage;
-    $end = $start + $perPage;
+    $end = $start + $perPage - 1;
     $itemTypes = ['user', 'food', 'animal', 'plant'];
     $itemType = request()->input('item_type', $itemTypes[0]);
 
