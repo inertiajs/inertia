@@ -6,7 +6,6 @@
     Method,
     PreserveStateOption,
   } from '@inertiajs/core'
-  import { beforeUpdate } from 'svelte'
   import { inertia } from '../index'
 
   export let href: string
@@ -23,14 +22,6 @@
   export let async: boolean = false
   export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
   export let cacheFor: CacheForOption | CacheForOption[] = 0
-
-  beforeUpdate(() => {
-    if (as === 'a' && method.toLowerCase() !== 'get') {
-      console.warn(
-        `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
-      )
-    }
-  })
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -51,8 +42,9 @@
     prefetch,
     cacheFor,
   }}
-  {...as === 'a' ? { href } : {}}
   {...$$restProps}
+  {...as === 'a' ? { href } : {}}
+  {...as === 'button' ? { type: 'button' } : {}}
   on:focus
   on:blur
   on:click
