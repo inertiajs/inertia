@@ -2,50 +2,44 @@ import {
   mergeDataIntoQueryString,
   router,
   shouldIntercept,
-  type ActiveVisit,
   type CacheForOption,
-  type Errors,
   type FormDataConvertible,
+  type GlobalEventsMap,
   type LinkPrefetchOption,
   type Method,
-  type Page,
-  type PendingVisit,
-  type Progress,
   type VisitOptions,
 } from '@inertiajs/core'
+import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
+
+type ActionEventHandlers = {
+  [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
+}
 
 interface ActionElement extends HTMLElement {
   href?: string
 }
 
-type ActionParameters = VisitOptions & {
+type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
   href?: string,
   data?: Record<string, FormDataConvertible>,
-  cacheFor?: CacheForOption | CacheForOption[],
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[],
+  cacheFor?: CacheForOption | CacheForOption[],
 }
 
-interface ActionAttributes {
-  'on:start'?: CustomEvent<{ visit: PendingVisit }>
-  'on:progress'?: CustomEvent<{ progress: Progress | undefined }>
-  'on:finish'?: CustomEvent<{ visit: ActiveVisit }>
-  'on:before'?: CustomEvent<{ visit: PendingVisit }>
-  'on:cancel'?: CustomEvent
-  'on:success'?: CustomEvent<{ page: Page }>
-  'on:error'?: CustomEvent<{ errors: Errors }>
-  'on:cancel-token'?: CustomEvent
-}
-
-type ActionEventHandlers = {
-  [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
+type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
+type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
+type ActionAttributes = {
+  [K in keyof SelectedGlobalEventsMap as `on:${K}`]?: CustomEvent<SelectedGlobalEventsMap[K]['details']>
+} & {
+  'on:cancel-token'?: CustomEvent<CancelTokenSource>
 }
 
 function link(node: ActionElement, initialParams: ActionParameters = {}): ActionReturn<ActionParameters, ActionAttributes> {
   let inFlightCount = 0
   let hoverTimeout: NodeJS.Timeout
 
-  // Variables initialized and updated by the "update" function
+  // Variables initialized and controlled by the "update" function
   let prefetchModes: LinkPrefetchOption[] = []
   let cacheForValue: CacheForOption | CacheForOption[]
   let method: Method
@@ -98,11 +92,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
         return []
       }
 
-      if (Array.isArray(prefetch)) {
-        return prefetch
-      }
-
-      return [prefetch]
+      return Array.isArray(prefetch) ? prefetch : [prefetch]
     })()
 
     cacheForValue = (() => {
@@ -129,8 +119,8 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
     }
 
     baseParams = {
-      data: data,
-      method: method,
+      data,
+      method,
       replace: newParams.replace || false,
       preserveScroll: newParams.preserveScroll || false,
       preserveState: newParams.preserveState ?? method !== 'get',
@@ -226,6 +216,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
 
   update(initialParams)
 
+  // TODO: Confirm is this needs to rerun when "prefetchModes" changes
   if (prefetchModes.includes('mount')) {
     prefetch()
   }
