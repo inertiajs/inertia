@@ -11,10 +11,10 @@ export default function usePrefetch(options: VisitOptions = {}): {
   const lastUpdatedAt = ref<number | null>(null)
   const isPrefetched = ref(false)
 
-  const cached = router.getCached(window.location.pathname, options)
-  const inFlight = router.getPrefetching(window.location.pathname, options)
+  const cached = typeof window === 'undefined' ? null : router.getCached(window.location.pathname, options)
+  const inFlight = typeof window === 'undefined' ? null : router.getPrefetching(window.location.pathname, options)
 
-  lastUpdatedAt.value = cached.staleTimestamp || null
+  lastUpdatedAt.value = cached?.staleTimestamp || null
 
   isPrefetching.value = inFlight !== null
   isPrefetched.value = cached !== null

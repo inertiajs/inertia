@@ -136,6 +136,10 @@ class PrefetchedRequests {
   }
 
   protected scheduleForRemoval(params: ActiveVisit, expiresIn: number) {
+    if (typeof window === 'undefined') {
+      return
+    }
+
     this.clearTimer(params)
 
     if (expiresIn > 0) {

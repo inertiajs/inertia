@@ -66,6 +66,10 @@ class History {
   }
 
   public decrypt(page: Page | null = null): Promise<Page> {
+    if (isServer) {
+      return Promise.resolve(page ?? currentPage.get())
+    }
+
     const pageData = page ?? window.history.state?.page
 
     return this.decryptPageData(pageData).then((data) => {

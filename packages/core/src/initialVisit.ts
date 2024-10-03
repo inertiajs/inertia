@@ -54,7 +54,9 @@ export class InitialVisit {
 
     SessionStorage.remove(SessionStorage.locationVisitKey)
 
-    currentPage.setUrlHash(window.location.hash)
+    if (typeof window !== 'undefined') {
+      currentPage.setUrlHash(window.location.hash)
+    }
 
     history
       .decrypt()
@@ -85,7 +87,10 @@ export class InitialVisit {
   }
 
   protected static handleDefault(): void {
-    currentPage.setUrlHash(window.location.hash)
+    if (typeof window !== 'undefined') {
+      currentPage.setUrlHash(window.location.hash)
+    }
+
     currentPage.set(currentPage.get(), { preserveState: true }).then(() => {
       fireNavigateEvent(currentPage.get())
     })

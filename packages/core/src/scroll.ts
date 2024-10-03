@@ -18,7 +18,9 @@ export class Scroll {
   }
 
   public static reset(page: Page): void {
-    window.scrollTo(0, 0)
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0)
+    }
 
     this.regions().forEach((region) => {
       if (typeof region.scrollTo === 'function') {

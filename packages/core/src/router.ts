@@ -54,7 +54,9 @@ export class Router {
     eventHandler.init()
 
     eventHandler.on('missingHistoryItem', () => {
-      this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+      if (typeof window !== 'undefined') {
+        this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+      }
     })
 
     eventHandler.onGlobalEvent('navigate', () => {
@@ -83,6 +85,10 @@ export class Router {
   }
 
   public reload(options: ReloadOptions = {}): void {
+    if (typeof window === 'undefined') {
+      return
+    }
+
     return this.visit(window.location.href, {
       ...options,
       preserveScroll: true,

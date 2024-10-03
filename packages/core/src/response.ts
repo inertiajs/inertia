@@ -154,6 +154,10 @@ export class Response {
         preserveScroll: this.requestParams.all().preserveScroll === true,
       })
 
+      if (typeof window === 'undefined') {
+        return
+      }
+
       if (isSameUrlWithoutHash(window.location, url)) {
         window.location.reload()
       } else {

@@ -2,11 +2,15 @@ export class SessionStorage {
   public static locationVisitKey = 'inertiaLocationVisit'
 
   public static set(key: string, value: any): void {
-    window.sessionStorage.setItem(key, JSON.stringify(value))
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(key, JSON.stringify(value))
+    }
   }
 
   public static get(key: string): any {
-    return JSON.parse(window.sessionStorage.getItem(key) || 'null')
+    if (typeof window !== 'undefined') {
+      return JSON.parse(window.sessionStorage.getItem(key) || 'null')
+    }
   }
 
   public static merge(key: string, value: any): void {
@@ -20,7 +24,9 @@ export class SessionStorage {
   }
 
   public static remove(key: string): void {
-    window.sessionStorage.removeItem(key)
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(key)
+    }
   }
 
   public static removeNested(key: string, nestedKey: string): void {
@@ -42,6 +48,8 @@ export class SessionStorage {
   }
 
   public static clear(): void {
-    window.sessionStorage.clear()
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.clear()
+    }
   }
 }
