@@ -1,13 +1,22 @@
 import NProgress from 'nprogress'
 import { GlobalEvent } from './types'
 
-const hideProgressStyleEl = document.createElement('style')
-hideProgressStyleEl.innerHTML = '#nprogress { display: none; }'
+const hideProgressStyleEl = (() => {
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  const el = document.createElement('style')
+
+  el.innerHTML = '#nprogress { display: none; }'
+
+  return el
+})()
 
 let hideCount = 0
 
 const removeStyle = () => {
-  if (!document.querySelector('#nprogress')) {
+  if (hideProgressStyleEl && !document.querySelector('#nprogress')) {
     return document.head.removeChild(hideProgressStyleEl)
   }
 
@@ -25,7 +34,7 @@ export const reveal = (force = false) => {
 export const hide = () => {
   hideCount++
 
-  if (!document.head.contains(hideProgressStyleEl)) {
+  if (hideProgressStyleEl && !document.head.contains(hideProgressStyleEl)) {
     document.head.appendChild(hideProgressStyleEl)
   }
 }

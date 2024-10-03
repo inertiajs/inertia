@@ -28,6 +28,10 @@ export class Poll {
   }
 
   public start() {
+    if (typeof window === 'undefined') {
+      return
+    }
+
     this.stop()
 
     this.id = window.setInterval(() => {

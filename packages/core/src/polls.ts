@@ -33,6 +33,10 @@ class Polls {
   }
 
   protected setupVisibilityListener() {
+    if (typeof document === 'undefined') {
+      return
+    }
+
     document.addEventListener(
       'visibilitychange',
       () => {
