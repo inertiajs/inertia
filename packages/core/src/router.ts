@@ -85,9 +85,10 @@ export class Router {
   }
 
   protected clearRememberedStateOnReload(): void {
-    if (this.navigationType === 'reload' && this.getHistoryState()?.rememberedState) {
-      const { rememberedState, ...newHistoryState} = this.getHistoryState() ?? {};
-      rememberedState && this.replaceState(newHistoryState);
+    const historyState = this.getHistoryState() as Omit<Page, 'rememberedState'> & { rememberedState ?: Record<string, unknown> };
+    if (this.navigationType === 'reload' && historyState?.rememberedState) {
+        delete historyState.rememberedState;
+        this.replaceState(historyState as Page);
     }
   }
 
@@ -166,17 +167,18 @@ export class Router {
   }
 
   protected isBackForwardVisit(): boolean {
-    return this.getHistoryState() && this.navigationType === 'back_forward'
+    return this.getHistoryState() !== null && this.navigationType === 'back_forward'
   }
 
   protected handleBackForwardVisit(page: Page): void {
-    this.setPage({ ...this.getHistoryState(), version: page.version }, { preserveScroll: true, preserveState: true }).then(() => {
+    const historyState = this.getHistoryState();
+    historyState && this.setPage({ ...historyState, version: page.version }, { preserveScroll: true, preserveState: true }).then(() => {
       this.restoreScrollPositions()
       fireNavigateEvent(page)
     })
   }
 
-  protected getHistoryState(stateId: string = null): Page|null {
+  protected getHistoryState(stateId: string|null = null): Page | null {
     const currentId: string|undefined = stateId ?? window.history.state?._id;
     if (currentId) {
       const currentState = window.sessionStorage.getItem(currentId);
@@ -416,8 +418,9 @@ export class Router {
         }
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
-        if (preserveState && this.getHistoryState()?.rememberedState && pageResponse.component === this.page.component) {
-          pageResponse.rememberedState = this.getHistoryState().rememberedState
+        const historyState = this.getHistoryState();
+        if (preserveState && historyState?.rememberedState && pageResponse.component === this.page.component) {
+          pageResponse.rememberedState = historyState.rememberedState;
         }
         const requestUrl = url
         const responseUrl = hrefToUrl(pageResponse.url)
@@ -510,7 +513,7 @@ export class Router {
     window.history.pushState({_id: uniqueId}, '', page.url);
   }
 
-  protected getAllStates() {
+  protected getAllStates(): string[] {
     return JSON.parse(window.sessionStorage.getItem(allStateIdsSessionStorageKey) ?? '[]');
   }
 
