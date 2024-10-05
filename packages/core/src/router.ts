@@ -518,7 +518,7 @@ export class Router {
   }
 
   private getStateId() {
-    const newId = `inertia_${crypto.randomUUID()}`;
+    const newId = `inertia_${Date.now() + Math.floor(Math.random() * 1000)}`;
     window.sessionStorage.setItem(allStateIdsSessionStorageKey, JSON.stringify([...this.getAllStates(), newId]));
     return newId;
   }
