@@ -544,9 +544,7 @@ export class Router {
   private _replaceState(page: Page): void {
     const currentId = window.history.state?._id ?? this.getStateId();
     window.sessionStorage.setItem(currentId, JSON.stringify(page));
-    if (!window.history.state?._id) {
-      window.history.replaceState({_id: currentId}, '', page.url);
-    }
+    window.history.replaceState({_id: currentId}, '', page.url);
   }
 
   protected replaceState(page: Page): void {
