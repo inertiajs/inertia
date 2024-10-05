@@ -33,7 +33,7 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
 const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
-const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
+const allStateIdsSessionStorageKey = 'inertia_state_ids';
 const nextFrame = (callback: () => void) => {
   requestAnimationFrame(() => {
     requestAnimationFrame(callback)
@@ -85,8 +85,9 @@ export class Router {
   }
 
   protected clearRememberedStateOnReload(): void {
-    if (this.navigationType === 'reload' && window.history.state?.rememberedState) {
-      delete window.history.state.rememberedState
+    if (this.navigationType === 'reload' && this.getHistoryState()?.rememberedState) {
+      const { rememberedState, ...newHistoryState} = this.getHistoryState() ?? {};
+      rememberedState && this.replaceState(newHistoryState);
     }
   }
 
@@ -165,15 +166,25 @@ export class Router {
   }
 
   protected isBackForwardVisit(): boolean {
-    return window.history.state && this.navigationType === 'back_forward'
+    return this.getHistoryState() && this.navigationType === 'back_forward'
   }
 
   protected handleBackForwardVisit(page: Page): void {
-    window.history.state.version = page.version
-    this.setPage(window.history.state, { preserveScroll: true, preserveState: true }).then(() => {
+    this.setPage({ ...this.getHistoryState(), version: page.version }, { preserveScroll: true, preserveState: true }).then(() => {
       this.restoreScrollPositions()
       fireNavigateEvent(page)
     })
+  }
+
+  protected getHistoryState(stateId: string = null): Page|null {
+    const currentId: string|undefined = stateId ?? window.history.state?._id;
+    if (currentId) {
+      const currentState = window.sessionStorage.getItem(currentId);
+      if (currentState) {
+        return JSON.parse(currentState);
+      }
+    }
+    return null;
   }
 
   protected locationVisit(url: URL, preserveScroll: LocationVisit['preserveScroll']): boolean | void {
@@ -201,8 +212,8 @@ export class Router {
     const locationVisit: LocationVisit = JSON.parse(window.sessionStorage.getItem('inertiaLocationVisit') || '')
     window.sessionStorage.removeItem('inertiaLocationVisit')
     page.url += window.location.hash
-    page.rememberedState = window.history.state?.rememberedState ?? {}
-    page.scrollRegions = window.history.state?.scrollRegions ?? []
+    page.rememberedState = this.getHistoryState()?.rememberedState ?? {}
+    page.scrollRegions = this.getHistoryState()?.scrollRegions ?? []
     this.setPage(page, { preserveScroll: locationVisit.preserveScroll, preserveState: true }).then(() => {
       if (locationVisit.preserveScroll) {
         this.restoreScrollPositions()
@@ -405,8 +416,8 @@ export class Router {
         }
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
         preserveState = this.resolvePreserveOption(preserveState, pageResponse)
-        if (preserveState && window.history.state?.rememberedState && pageResponse.component === this.page.component) {
-          pageResponse.rememberedState = window.history.state.rememberedState
+        if (preserveState && this.getHistoryState()?.rememberedState && pageResponse.component === this.page.component) {
+          pageResponse.rememberedState = this.getHistoryState().rememberedState
         }
         const requestUrl = url
         const responseUrl = hrefToUrl(pageResponse.url)
@@ -493,14 +504,45 @@ export class Router {
     })
   }
 
+  private _pushState(page: Page): void {
+    const uniqueId = this.getStateId();
+    window.sessionStorage.setItem(uniqueId, JSON.stringify(page));
+    window.history.pushState({_id: uniqueId}, '', page.url);
+  }
+
+  protected getAllStates() {
+    return JSON.parse(window.sessionStorage.getItem(allStateIdsSessionStorageKey) ?? '[]');
+  }
+
+  private getStateId() {
+    const newId = `inertia_${crypto.randomUUID()}`;
+    window.sessionStorage.setItem(allStateIdsSessionStorageKey, JSON.stringify([...this.getAllStates(), newId]));
+    return newId;
+  }
+
+  public clearHistory(): void {
+    this.getAllStates().forEach((id) => {
+      window.sessionStorage.removeItem(id);
+    });
+    window.sessionStorage.removeItem(allStateIdsSessionStorageKey);
+  }
+
   protected pushState(page: Page): void {
     this.page = page
     if (isChromeIOS) {
       // Defer history.pushState to the next event loop tick to prevent timing conflicts.
       // Ensure any previous history.replaceState completes before pushState is executed.
-      setTimeout(() => window.history.pushState(cloneSerializable(page), '', page.url))
+      setTimeout(() => this._pushState(page));
     } else {
-      window.history.pushState(cloneSerializable(page), '', page.url)
+      this._pushState(page);
+    }
+  }
+
+  private _replaceState(page: Page): void {
+    const currentId = window.history.state?._id ?? this.getStateId();
+    window.sessionStorage.setItem(currentId, JSON.stringify(page));
+    if (!window.history.state?._id) {
+      window.history.replaceState({_id: currentId}, '', page.url);
     }
   }
 
@@ -509,25 +551,29 @@ export class Router {
     if (isChromeIOS) {
       // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
       // Ensure any previous history.pushState completes before replaceState is executed.
-      setTimeout(() => window.history.replaceState(cloneSerializable(page), '', page.url))
+      setTimeout(() => this._replaceState(page))
     } else {
-      window.history.replaceState(cloneSerializable(page), '', page.url)
+      this._replaceState(page)
     }
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
     if (event.state !== null) {
-      const page = event.state
-      const visitId = this.createVisitId()
-      Promise.resolve(this.resolveComponent(page.component)).then((component) => {
-        if (visitId === this.visitId) {
-          this.page = page
-          this.swapComponent({ component, page, preserveState: false }).then(() => {
-            this.restoreScrollPositions()
-            fireNavigateEvent(page)
-          })
-        }
-      })
+      const page = this.getHistoryState(event.state?._id);
+      if (page !== null) {
+        const visitId = this.createVisitId()
+        Promise.resolve(this.resolveComponent(page.component)).then((component) => {
+          if (visitId === this.visitId) {
+            this.page = page
+            this.swapComponent({ component, page, preserveState: false }).then(() => {
+              this.restoreScrollPositions()
+              fireNavigateEvent(page)
+            })
+          }
+        })
+      } else {
+        this.reload();
+      }
     } else {
       const url = hrefToUrl(this.page.url)
       url.hash = window.location.hash
@@ -592,7 +638,7 @@ export class Router {
       return
     }
 
-    return window.history.state?.rememberedState?.[key]
+    return this.getHistoryState()?.rememberedState?.[key]
   }
 
   public on<TEventName extends GlobalEventNames>(
