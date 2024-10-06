@@ -34,6 +34,7 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 const isServer = typeof window === 'undefined'
 const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 const allStateIdsSessionStorageKey = 'inertia_state_ids';
+const sessionUsageKey = 'inertia_session_usage';
 const nextFrame = (callback: () => void) => {
   requestAnimationFrame(() => {
     requestAnimationFrame(callback)
@@ -509,25 +510,54 @@ export class Router {
 
   private _pushState(page: Page): void {
     const uniqueId = this.getStateId();
-    window.sessionStorage.setItem(uniqueId, JSON.stringify(page));
+    this.dropOldestStateItemToPreventQuotaExceeded();
+    const serializedPage = JSON.stringify(page);
+    window.sessionStorage.setItem(uniqueId, serializedPage);
     window.history.pushState({_id: uniqueId}, '', page.url);
+    this.setSessionUsage(this.getSessionUsage() + (new Blob([serializedPage])).size);
   }
 
-  protected getAllStates(): string[] {
+  protected getAllStateIds(): string[] {
     return JSON.parse(window.sessionStorage.getItem(allStateIdsSessionStorageKey) ?? '[]');
+  }
+
+  protected getSessionUsage(): number
+  {
+    return parseInt(window.sessionStorage.getItem(sessionUsageKey) ?? '0');
+  }
+
+  protected setSessionUsage(usage: number): void
+  {
+    window.sessionStorage.setItem(sessionUsageKey, usage.toString())
+  }
+
+  protected dropOldestStateItemToPreventQuotaExceeded() {
+    // Ensures inertia uses at most ~1M (+/- size of 1 Page) of session storage for history state
+    const sessionUsage = this.getSessionUsage();
+    if (sessionUsage > 1000000) {
+      const allStateIds = this.getAllStateIds();
+      const oldestStateId = allStateIds.shift();
+      if (oldestStateId) {
+        const sizeOfStateItem = new Blob([window.sessionStorage.getItem(oldestStateId) ?? '']).size;
+        window.sessionStorage.removeItem(oldestStateId);
+        window.sessionStorage.setItem(allStateIdsSessionStorageKey, JSON.stringify(allStateIds));
+        this.setSessionUsage(sessionUsage - sizeOfStateItem);
+      }
+    }
   }
 
   private getStateId() {
     const newId = `inertia_${Date.now() + Math.floor(Math.random() * 1000)}`;
-    window.sessionStorage.setItem(allStateIdsSessionStorageKey, JSON.stringify([...this.getAllStates(), newId]));
+    window.sessionStorage.setItem(allStateIdsSessionStorageKey, JSON.stringify([...this.getAllStateIds(), newId]));
     return newId;
   }
 
   public clearHistory(): void {
-    this.getAllStates().forEach((id) => {
+    this.getAllStateIds().forEach((id) => {
       window.sessionStorage.removeItem(id);
     });
     window.sessionStorage.removeItem(allStateIdsSessionStorageKey);
+    this.setSessionUsage(0);
   }
 
   protected pushState(page: Page): void {
@@ -543,8 +573,11 @@ export class Router {
 
   private _replaceState(page: Page): void {
     const currentId = window.history.state?._id ?? this.getStateId();
-    window.sessionStorage.setItem(currentId, JSON.stringify(page));
+    const serializedPage = JSON.stringify(page);
+    this.setSessionUsage(this.getSessionUsage() - (new Blob([window.sessionStorage.getItem(currentId) ?? ''])).size);
+    window.sessionStorage.setItem(currentId, serializedPage);
     window.history.replaceState({_id: currentId}, '', page.url);
+    this.setSessionUsage(this.getSessionUsage() + (new Blob([serializedPage])).size);
   }
 
   protected replaceState(page: Page): void {
