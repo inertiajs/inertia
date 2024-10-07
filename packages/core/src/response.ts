@@ -67,9 +67,10 @@ export class Response {
   public async process() {
     if (this.requestParams.all().prefetch) {
       this.requestParams.all().prefetch = false
+
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
       firePrefetchedEvent(this.response, this.requestParams.all())
-      this.requestParams.onPrefetchResponse(this)
+
       return Promise.resolve()
     }
 

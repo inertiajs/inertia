@@ -1,4 +1,4 @@
-import { default as axios, AxiosProgressEvent, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { default as axios, AxiosProgressEvent, AxiosRequestConfig } from 'axios'
 import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
@@ -7,7 +7,7 @@ import { ActiveVisit, Page } from './types'
 import { urlWithoutHash } from './url'
 
 export class Request {
-  protected response!: AxiosResponse
+  protected response!: Response
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
   protected requestHasFinished = false
@@ -35,6 +35,11 @@ export class Request {
       firePrefetchingEvent(this.requestParams.all())
     }
 
+    // We capture this up here because the response
+    // will clear the prefetch flag so it can use it
+    // as a regular response once the prefetch is done
+    const originallyPrefetch = this.requestParams.all().prefetch
+
     return axios({
       method: this.requestParams.all().method,
       url: urlWithoutHash(this.requestParams.all().url).href,
@@ -48,11 +53,15 @@ export class Request {
       responseType: 'text',
     })
       .then((response) => {
-        return Response.create(this.requestParams, response, this.page).handle()
+        this.response = Response.create(this.requestParams, response, this.page)
+
+        return this.response.handle()
       })
       .catch((error) => {
         if (error?.response) {
-          return Response.create(this.requestParams, error.response, this.page).handle()
+          this.response = Response.create(this.requestParams, error.response, this.page)
+
+          return this.response.handle()
         }
 
         return Promise.reject(error)
@@ -68,6 +77,10 @@ export class Request {
       })
       .finally(() => {
         this.finish()
+
+        if (originallyPrefetch && this.response) {
+          this.requestParams.onPrefetchResponse(this.response)
+        }
       })
   }
 
