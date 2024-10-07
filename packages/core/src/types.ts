@@ -41,7 +41,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   clearHistory: boolean
   encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
-  mergeProps: string[]
+  mergeProps?: string[]
 
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
