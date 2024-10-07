@@ -16,17 +16,15 @@ const hideProgressStyleEl = (() => {
 let hideCount = 0
 
 const removeStyle = () => {
-  if (hideProgressStyleEl && !document.querySelector('#nprogress')) {
+  if (hideProgressStyleEl && document.head.contains(hideProgressStyleEl)) {
     return document.head.removeChild(hideProgressStyleEl)
   }
-
-  setTimeout(() => removeStyle(), 100)
 }
 
 export const reveal = (force = false) => {
   hideCount = Math.max(0, hideCount - 1)
 
-  if ((force || hideCount === 0) && document.head.contains(hideProgressStyleEl)) {
+  if (force || hideCount === 0) {
     removeStyle()
   }
 }
@@ -45,10 +43,12 @@ function addEventListeners(delay: number): void {
 }
 
 function start(event: GlobalEvent<'start'>, delay: number): void {
-  if (event.detail.visit.showProgress) {
-    const timeout = setTimeout(() => NProgress.start(), delay)
-    document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
+  if (!event.detail.visit.showProgress) {
+    hide()
   }
+
+  const timeout = setTimeout(() => NProgress.start(), delay)
+  document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
 }
 
 function progress(event: GlobalEvent<'progress'>): void {
