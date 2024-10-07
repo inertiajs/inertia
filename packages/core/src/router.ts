@@ -159,23 +159,11 @@ export class Router {
       ...events,
     }
 
-    // If a prefetch is in flight, cancel any existing `use` calls
-    // as we're about to potentially use a different one
-    // e.g. if a user clicks a link before a
-    // prefetch is complete then clicks another link
-    prefetchedRequests.cancelUse()
-
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
       revealProgress(prefetched.inFlight)
-
-      prefetchedRequests.use(prefetched, requestParams, {
-        isCancelled: false,
-        cancel() {
-          this.isCancelled = true
-        },
-      })
+      prefetchedRequests.use(prefetched, requestParams)
     } else {
       revealProgress(true)
       requestStream.send(Request.create(requestParams, currentPage.get()))

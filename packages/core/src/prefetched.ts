@@ -6,7 +6,6 @@ import {
   CacheForOption,
   InFlightPrefetch,
   InternalActiveVisit,
-  PrefetchCancellationToken,
   PrefetchedResponse,
   PrefetchOptions,
   PrefetchRemovalTimer,
@@ -16,7 +15,7 @@ class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
   protected inFlightRequests: InFlightPrefetch[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
-  protected currentCancellationToken: PrefetchCancellationToken | null = null
+  protected currentUseId: string | null = null
 
   public add(params: ActiveVisit, sendFunc: (params: InternalActiveVisit) => void, { cacheFor }: PrefetchOptions) {
     const inFlight = this.findInFlight(params)
@@ -158,21 +157,15 @@ class PrefetchedRequests {
     return this.findCached(params) || this.findInFlight(params)
   }
 
-  public cancelUse() {
-    if (this.currentCancellationToken) {
-      this.currentCancellationToken.cancel()
-    }
-  }
+  public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
+    const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
-  public use(
-    prefetched: PrefetchedResponse | InFlightPrefetch,
-    params: ActiveVisit,
-    cancellationToken: PrefetchCancellationToken,
-  ) {
-    this.currentCancellationToken = cancellationToken
+    this.currentUseId = id
 
     return prefetched.response.then((response) => {
-      if (cancellationToken.isCancelled) {
+      if (this.currentUseId !== id) {
+        // They've since gone on to `use` a different request,
+        // so we should ignore this one
         return
       }
 
