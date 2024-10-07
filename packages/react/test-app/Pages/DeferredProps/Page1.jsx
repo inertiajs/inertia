@@ -1,14 +1,13 @@
-import { Link, useDeferred } from '@inertiajs/react'
-import { Suspense } from 'react'
+import { Deferred, Link, usePage } from '@inertiajs/react'
 
 const Foo = () => {
-  const { foo } = useDeferred('foo')
+  const { foo } = usePage().props
 
   return foo
 }
 
 const Bar = () => {
-  const { bar } = useDeferred('bar')
+  const { bar } = usePage().props
 
   return bar
 }
@@ -16,13 +15,13 @@ const Bar = () => {
 export default () => {
   return (
     <>
-      <Suspense fallback={<div>Loading foo...</div>}>
+      <Deferred data="foo" fallback={<div>Loading foo...</div>}>
         <Foo />
-      </Suspense>
+      </Deferred>
 
-      <Suspense fallback={<div>Loading bar...</div>}>
+      <Deferred data="bar" fallback={<div>Loading bar...</div>}>
         <Bar />
-      </Suspense>
+      </Deferred>
 
       <Link href="/deferred-props/page-2">Page 2</Link>
     </>
