@@ -10,11 +10,11 @@ import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
-  ActivelyPrefetching,
   ActiveVisit,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
+  InFlightPrefetch,
   Page,
   PendingVisit,
   PendingVisitOptions,
@@ -168,10 +168,7 @@ export class Router {
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
-      if (!prefetched.staleTimestamp) {
-        // This prefetch is still in flight, show the progress bar
-        revealProgress(true)
-      }
+      revealProgress(prefetched.inFlight)
 
       prefetchedRequests.use(prefetched, requestParams, {
         isCancelled: false,
@@ -185,7 +182,7 @@ export class Router {
     }
   }
 
-  public getCached(href: string | URL, options: VisitOptions = {}): ActivelyPrefetching | PrefetchedResponse | null {
+  public getCached(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findCached(this.getPrefetchParams(href, options))
   }
 
@@ -197,10 +194,7 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
-  public getPrefetching(
-    href: string | URL,
-    options: VisitOptions = {},
-  ): ActivelyPrefetching | PrefetchedResponse | null {
+  public getPrefetching(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 

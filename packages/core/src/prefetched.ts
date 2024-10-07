@@ -2,9 +2,9 @@ import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'
 import {
-  ActivelyPrefetching,
   ActiveVisit,
   CacheForOption,
+  InFlightPrefetch,
   InternalActiveVisit,
   PrefetchCancellationToken,
   PrefetchedResponse,
@@ -14,7 +14,7 @@ import {
 
 class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
-  protected activeRequests: ActivelyPrefetching[] = []
+  protected inFlightRequests: InFlightPrefetch[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
   protected currentCancellationToken: PrefetchCancellationToken | null = null
 
@@ -65,11 +65,12 @@ class PrefetchedRequests {
         response: promise,
         singleUse: cacheFor === 0,
         timestamp: Date.now(),
+        inFlight: false,
       })
 
       this.scheduleForRemoval(params, expires)
 
-      this.activeRequests = this.activeRequests.filter((prefetching) => {
+      this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
         return !this.paramsAreEqual(prefetching.params, params)
       })
 
@@ -78,10 +79,11 @@ class PrefetchedRequests {
       return response
     })
 
-    this.activeRequests.push({
+    this.inFlightRequests.push({
       params: { ...params },
       response: promise,
       staleTimestamp: null,
+      inFlight: true,
     })
 
     return promise
@@ -152,7 +154,7 @@ class PrefetchedRequests {
     }
   }
 
-  public get(params: ActiveVisit): ActivelyPrefetching | PrefetchedResponse | null {
+  public get(params: ActiveVisit): InFlightPrefetch | PrefetchedResponse | null {
     return this.findCached(params) || this.findInFlight(params)
   }
 
@@ -163,11 +165,12 @@ class PrefetchedRequests {
   }
 
   public use(
-    prefetched: PrefetchedResponse | ActivelyPrefetching,
+    prefetched: PrefetchedResponse | InFlightPrefetch,
     params: ActiveVisit,
     cancellationToken: PrefetchCancellationToken,
   ) {
     this.currentCancellationToken = cancellationToken
+
     return prefetched.response.then((response) => {
       if (cancellationToken.isCancelled) {
         return
@@ -201,9 +204,9 @@ class PrefetchedRequests {
     )
   }
 
-  public findInFlight(params: ActiveVisit): ActivelyPrefetching | null {
+  public findInFlight(params: ActiveVisit): InFlightPrefetch | null {
     return (
-      this.activeRequests.find((prefetched) => {
+      this.inFlightRequests.find((prefetched) => {
         return this.paramsAreEqual(prefetched.params, params)
       }) || null
     )
