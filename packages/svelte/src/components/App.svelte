@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ComponentType } from 'svelte'
+  import type { LayoutType, LayoutResolver } from '../types'
   import type { PageProps } from '@inertiajs/core'
   import type { RenderProps } from './Render.svelte'
   import Render, { h } from './Render.svelte'
@@ -37,19 +37,30 @@
    *    }
    */
   function resolveLayout(
-    layout: ComponentType,
+    layout: LayoutType,
     child: RenderProps,
     pageProps: PageProps,
     key: number | null,
   ): RenderProps {
+    if (isLayoutFunction(layout)) {
+      return layout(h, child)
+    }
+
     if (Array.isArray(layout)) {
       return layout
-        .concat(child)
+        .slice()
         .reverse()
-        .reduce((child, layout) => h(layout, pageProps, [child], key))
+        .reduce((renderedChild, layoutComponent) => h(layoutComponent, pageProps, [renderedChild], key), child)
     }
 
     return h(layout, pageProps, child ? [child] : [], key)
+  }
+
+  /**
+   * Type guard to check if layout is a LayoutResolver
+   */
+  function isLayoutFunction(layout: LayoutType): layout is LayoutResolver {
+    return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined'
   }
 </script>
 
