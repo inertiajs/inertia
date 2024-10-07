@@ -61,6 +61,9 @@ const Head: InertiaHead = {
       return node.children.reduce((html, child) => html + this.renderTag(child), '')
     },
     renderTag(node) {
+      if (typeof node === "string") {
+        return node
+      }
       if (!node.tag) {
         return node.text
       }

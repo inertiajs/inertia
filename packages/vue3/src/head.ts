@@ -77,6 +77,9 @@ const Head: InertiaHead = defineComponent({
       return /(text|txt)/i.test(node.type.toString())
     },
     renderTag(node) {
+      if (typeof node === "string") {
+        return node
+      }
       if (this.isTextNode(node)) {
         return node.children
       } else if (this.isFragmentNode(node)) {
