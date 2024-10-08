@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "scripts": {
+    "server:run": "vite build .",
+    "watch": "vite build . --watch"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "svelte": "^4.2.14",
+    "vite": "^5.4.2"
+  },
+  "dependencies": {
+    "@inertiajs/core": "file:../../core",
+    "@inertiajs/svelte": "file:.."
+  }
+}
