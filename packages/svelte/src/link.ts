@@ -82,7 +82,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, ...newParams }: ActionParameters) {
+  function update({ cacheFor = 0, prefetch = false, ...params }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -111,8 +111,8 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
       return 30_000
     })()
 
-    method = (newParams.method?.toLowerCase() || 'get') as Method
-    [href, data] = hrefAndData(method, newParams)
+    method = (params.method?.toLowerCase() || 'get') as Method
+    [href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
       node.href = href
@@ -121,13 +121,13 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
     baseParams = {
       data,
       method,
-      replace: newParams.replace || false,
-      preserveScroll: newParams.preserveScroll || false,
-      preserveState: newParams.preserveState ?? method !== 'get',
-      only: newParams.only || [],
-      except: newParams.except || [],
-      headers: newParams.headers || {},
-      async: newParams.async || false,
+      replace: params.replace || false,
+      preserveScroll: params.preserveScroll || false,
+      preserveState: params.preserveState ?? method !== 'get',
+      only: params.only || [],
+      except: params.except || [],
+      headers: params.headers || {},
+      async: params.async || false,
     }
     
     visitParams = {
