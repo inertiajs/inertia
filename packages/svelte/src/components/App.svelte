@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ComponentType } from 'svelte'
+  import type { LayoutType } from '../types'
   import type { PageProps } from '@inertiajs/core'
   import type { RenderProps } from './Render.svelte'
   import Render, { h } from './Render.svelte'
@@ -11,8 +11,6 @@
    * Resolves the render props for the current page component, including layouts.
    */
   function resolveProps({ component, page, key = null }: InertiaStore): RenderProps {
-    if (!component?.default || !page) return null
-
     const child = h(component.default, page.props, [], key)
     const layout = component.layout
 
@@ -39,16 +37,16 @@
    *    }
    */
   function resolveLayout(
-    layout: ComponentType,
+    layout: LayoutType,
     child: RenderProps,
     pageProps: PageProps,
     key: number | null,
   ): RenderProps {
     if (Array.isArray(layout)) {
       return layout
-        .concat(child)
+        .slice()
         .reverse()
-        .reduce((child, layout) => h(layout, pageProps, [child], key))
+        .reduce((currentRender, layoutComponent) => h(layoutComponent, pageProps, [currentRender], key), child)
     }
 
     return h(layout, pageProps, child ? [child] : [], key)

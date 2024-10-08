@@ -1,13 +1,32 @@
-import { mergeDataIntoQueryString, router, shouldIntercept, type VisitOptions } from '@inertiajs/core'
-import type { Action } from 'svelte/action'
+import {
+  mergeDataIntoQueryString,
+  router,
+  shouldIntercept,
+  type FormDataConvertible,
+  type GlobalEventsMap,
+  type VisitOptions,
+} from '@inertiajs/core'
+import type { CancelTokenSource } from 'axios'
+import type { ActionReturn } from 'svelte/action'
 
 interface ActionElement extends HTMLElement {
   href?: string
 }
 
-type ActionParameters = VisitOptions & { href?: string }
+type ActionParameters = Omit<VisitOptions, 'data'> & {
+  href?: string
+  data?: Record<string, FormDataConvertible>
+}
 
-const link: Action<ActionElement, ActionParameters> = (node, options = {}) => {
+type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
+type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
+type ActionAttributes = {
+  [K in keyof SelectedGlobalEventsMap as `on:${K}`]?: CustomEvent<SelectedGlobalEventsMap[K]['details']>
+} & {
+  'on:cancel-token'?: CustomEvent<CancelTokenSource>
+}
+
+function link(node: ActionElement, options: ActionParameters = {}): ActionReturn<ActionParameters, ActionAttributes> {
   const [href, data] = hrefAndData(options)
   node.href = href
   options.data = data
@@ -34,8 +53,8 @@ const link: Action<ActionElement, ActionParameters> = (node, options = {}) => {
       event.preventDefault()
 
       router.visit(node.href, {
-        onCancelToken: () => fireEvent('cancel-token'),
-        onBefore: (visit) => fireEvent('before', { detail: { visit } }),
+        onCancelToken: (token) => fireEvent('cancel-token', { detail: { token } }),
+        onBefore: (visit) => fireEvent('before', { cancelable: true, detail: { visit } }),
         onStart: (visit) => fireEvent('start', { detail: { visit } }),
         onProgress: (progress) => fireEvent('progress', { detail: { progress } }),
         onFinish: (visit) => fireEvent('finish', { detail: { visit } }),

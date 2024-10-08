@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { Method, PreserveStateOption, RequestPayload } from '@inertiajs/core'
-  import { beforeUpdate } from 'svelte'
+  import type { FormDataConvertible, Method, PreserveStateOption } from '@inertiajs/core'
   import { inertia } from '../index'
 
   export let href: string
   export let as: keyof HTMLElementTagNameMap = 'a'
-  export let data: RequestPayload = {}
+  export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
   export let replace: boolean = false
   export let preserveScroll: PreserveStateOption = false
@@ -15,13 +14,12 @@
   export let headers: Record<string, string> = {}
   export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
 
-  beforeUpdate(() => {
-    if (as === 'a' && method.toLowerCase() !== 'get') {
-      console.warn(
-        `Creating POST/PUT/PATCH/DELETE <a> links is discouraged as it causes "Open Link in New Tab/Window" accessibility issues.\n\nPlease specify a more appropriate element using the "as" attribute. For example:\n\n<Link href="${href}" method="${method}" as="button">...</Link>`,
-      )
-    }
-  })
+  $: asProp = method !== 'get' ? 'button' : as.toLowerCase()
+  $: elProps =
+    {
+      a: { href },
+      button: { type: 'button' },
+    }[asProp] || {}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -39,8 +37,8 @@
     headers,
     queryStringArrayFormat,
   }}
-  {...as === 'a' ? { href } : {}}
   {...$$restProps}
+  {...elProps}
   on:focus
   on:blur
   on:click

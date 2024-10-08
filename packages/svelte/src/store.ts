@@ -3,14 +3,14 @@ import { writable } from 'svelte/store'
 import type { ResolvedComponent } from './types'
 
 export interface InertiaStore {
-  component: ResolvedComponent | null
-  page: Page | null
+  component: ResolvedComponent
+  page: Page
   key: number | null
 }
 
 const store = writable<InertiaStore>({
-  component: null,
-  page: null,
+  component: null as unknown as ResolvedComponent,
+  page: null as unknown as Page,
   key: null,
 })
 
