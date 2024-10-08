@@ -32,7 +32,6 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - Fix `useForm` re-renders by memoizing functions in React adapter ([#1607](https://github.com/inertiajs/inertia/pull/1607))
 - Fix doubling hash when using `<React.StrictMode>` ([#1728](https://github.com/inertiajs/inertia/pull/1728))
 - Fix type augmentation in Vue 3 adapter ([#1958](https://github.com/inertiajs/inertia/pull/1958))
-- Fix `DataCloneError: <Object> could not be cloned` ([#1967](https://github.com/inertiajs/inertia/pull/1967))
 - Fix form helper `transform` return type in React adapter ([#1896](https://github.com/inertiajs/inertia/pull/1896))
 - Fix props reactivity in Svelte adapter ([#1969](https://github.com/inertiajs/inertia/pull/1969))
 - Fix `<Render />` component to respect `preserveState` option in Svelte adapter ([#1943](https://github.com/inertiajs/inertia/pull/1943))

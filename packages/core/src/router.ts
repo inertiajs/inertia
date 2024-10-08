@@ -33,7 +33,6 @@ import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
 const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
-const cloneSerializable = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 const nextFrame = (callback: () => void) => {
   requestAnimationFrame(() => {
     requestAnimationFrame(callback)
@@ -498,9 +497,9 @@ export class Router {
     if (isChromeIOS) {
       // Defer history.pushState to the next event loop tick to prevent timing conflicts.
       // Ensure any previous history.replaceState completes before pushState is executed.
-      setTimeout(() => window.history.pushState(cloneSerializable(page), '', page.url))
+      setTimeout(() => window.history.pushState(page, '', page.url))
     } else {
-      window.history.pushState(cloneSerializable(page), '', page.url)
+      window.history.pushState(page, '', page.url)
     }
   }
 
@@ -509,9 +508,9 @@ export class Router {
     if (isChromeIOS) {
       // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
       // Ensure any previous history.pushState completes before replaceState is executed.
-      setTimeout(() => window.history.replaceState(cloneSerializable(page), '', page.url))
+      setTimeout(() => window.history.replaceState(page, '', page.url))
     } else {
-      window.history.replaceState(cloneSerializable(page), '', page.url)
+      window.history.replaceState(page, '', page.url)
     }
   }
 

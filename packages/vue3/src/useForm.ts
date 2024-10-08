@@ -243,7 +243,7 @@ export default function useForm<TForm extends FormDataType>(
     (newValue) => {
       form.isDirty = !isEqual(form.data(), defaults)
       if (rememberKey) {
-        router.remember(newValue.__remember(), rememberKey)
+        router.remember(cloneDeep(newValue.__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },
