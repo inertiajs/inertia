@@ -1,6 +1,6 @@
+import { router, type VisitOptions } from '@inertiajs/core'
 import { onDestroy, onMount } from 'svelte'
 import { writable, type Readable } from 'svelte/store'
-import { router, type VisitOptions } from '@inertiajs/core'
 
 interface InertiaPrefetch {
   isPrefetched: boolean
@@ -16,7 +16,7 @@ export default function usePrefetch(options: VisitOptions = {}): Readable<Inerti
     lastUpdatedAt: null,
     flush() {
       router.flush(window.location.pathname, options)
-    }
+    },
   })
 
   const cached = router.getCached(window.location.pathname, options)

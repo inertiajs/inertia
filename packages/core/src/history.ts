@@ -29,22 +29,24 @@ class History {
   }
 
   public pushState(page: Page): void {
-    if (!this.preserveUrl) {
-      this.current = page
-
-      this.addToQueue(() => {
-        return this.getPageData(page).then((data) => {
-          window.history.pushState(
-            {
-              page: data,
-              timestamp: Date.now(),
-            },
-            '',
-            page.url,
-          )
-        })
-      })
+    if (isServer || this.preserveUrl) {
+      return
     }
+
+    this.current = page
+
+    this.addToQueue(() => {
+      return this.getPageData(page).then((data) => {
+        window.history.pushState(
+          {
+            page: data,
+            timestamp: Date.now(),
+          },
+          '',
+          page.url,
+        )
+      })
+    })
   }
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
@@ -64,6 +66,10 @@ class History {
   }
 
   public decrypt(page: Page | null = null): Promise<Page> {
+    if (isServer) {
+      return Promise.resolve(page ?? currentPage.get())
+    }
+
     const pageData = page ?? window.history.state?.page
 
     return this.decryptPageData(pageData).then((data) => {
@@ -84,21 +90,24 @@ class History {
   public replaceState(page: Page): void {
     currentPage.merge(page)
 
-    if (!this.preserveUrl) {
-      this.current = page
-      this.addToQueue(() => {
-        return this.getPageData(page).then((data) => {
-          window.history.replaceState(
-            {
-              page: data,
-              timestamp: Date.now(),
-            },
-            '',
-            page.url,
-          )
-        })
-      })
+    if (isServer || this.preserveUrl) {
+      return
     }
+
+    this.current = page
+
+    this.addToQueue(() => {
+      return this.getPageData(page).then((data) => {
+        window.history.replaceState(
+          {
+            page: data,
+            timestamp: Date.now(),
+          },
+          '',
+          page.url,
+        )
+      })
+    })
   }
 
   protected addToQueue(fn: () => Promise<void>): void {

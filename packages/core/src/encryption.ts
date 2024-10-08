@@ -1,6 +1,10 @@
 import { SessionStorage } from './sessionStorage'
 
 export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
+  if (typeof window === 'undefined') {
+    throw new Error('Unable to encrypt history')
+  }
+
   const iv = getIv()
   const storedKey = await getKeyFromSessionStorage()
   const key = await getOrCreateKey(storedKey)
@@ -26,6 +30,10 @@ export const decryptHistory = async (data: any): Promise<any> => {
 }
 
 const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
+  if (typeof window === 'undefined') {
+    throw new Error('Unable to encrypt history')
+  }
+
   const textEncoder = new TextEncoder()
   const str = JSON.stringify(data)
   const encoded = new Uint8Array(str.length)

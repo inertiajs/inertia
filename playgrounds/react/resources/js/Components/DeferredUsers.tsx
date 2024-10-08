@@ -1,7 +1,7 @@
-import { useDeferred } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
 
 export default () => {
-  const { users } = useDeferred('users')
+  const users = usePage().props.users
 
   return users.map((user) => (
     <div key={user.id}>

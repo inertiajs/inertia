@@ -41,7 +41,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   clearHistory: boolean
   encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
-  mergeProps: string[]
+  mergeProps?: string[]
 
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
@@ -259,8 +259,9 @@ type PrefetchObject = {
   response: Promise<Response>
 }
 
-export type ActivelyPrefetching = PrefetchObject & {
+export type InFlightPrefetch = PrefetchObject & {
   staleTimestamp: null
+  inFlight: true
 }
 
 export type PrefetchCancellationToken = {
@@ -272,6 +273,7 @@ export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
   singleUse: boolean
+  inFlight: false
 }
 
 export type PrefetchRemovalTimer = {

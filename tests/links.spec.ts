@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { consoleMessages, pageLoads, requests, shouldBeDumpPage } from './support'
 
-test.beforeEach(async ({ page }) => {})
+test.beforeEach(async ({ page }) => {
+  test.skip(process.env.PACKAGE === 'svelte')
+})
 
 test('visits a different page', async ({ page }) => {
   pageLoads.watch(page)

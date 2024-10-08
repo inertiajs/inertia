@@ -1,7 +1,4 @@
-import { Head } from '@inertiajs/react'
-import { Suspense } from 'react'
-import DeferredFood from '../Components/DeferredFood'
-import DeferredOrganizations from '../Components/DeferredOrganizations'
+import { Deferred, Head } from '@inertiajs/react'
 import DeferredUsers from '../Components/DeferredUsers'
 import Layout from '../Components/Layout'
 
@@ -35,21 +32,21 @@ const Defer = ({
 
       <div className="mt-6 flex space-x-6">
         <div className="w-1/2 rounded border border-black p-4">
-          <Suspense fallback={<p>Loading Users...</p>}>
+          <Deferred data="users" fallback={<p>Loading Users...</p>}>
             <DeferredUsers />
-          </Suspense>
+          </Deferred>
         </div>
 
         <div className="w-1/2 rounded border border-black p-4">
-          <Suspense fallback={<p>Loading Food...</p>}>
+          {/* <Suspense fallback={<p>Loading Food...</p>}>
             <DeferredFood />
-          </Suspense>
+          </Suspense> */}
         </div>
 
         <div className="w-1/2 rounded border border-black p-4">
-          <Suspense fallback={<p>Loading Organizations...</p>}>
+          {/* <Suspense fallback={<p>Loading Organizations...</p>}>
             <DeferredOrganizations />
-          </Suspense>
+          </Suspense> */}
         </div>
       </div>
     </>

@@ -10,11 +10,11 @@ import { Request } from './request'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
-  ActivelyPrefetching,
   ActiveVisit,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
+  InFlightPrefetch,
   Page,
   PendingVisit,
   PendingVisitOptions,
@@ -54,7 +54,9 @@ export class Router {
     eventHandler.init()
 
     eventHandler.on('missingHistoryItem', () => {
-      this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+      if (typeof window !== 'undefined') {
+        this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+      }
     })
 
     eventHandler.onGlobalEvent('navigate', () => {
@@ -83,6 +85,10 @@ export class Router {
   }
 
   public reload(options: ReloadOptions = {}): void {
+    if (typeof window === 'undefined') {
+      return
+    }
+
     return this.visit(window.location.href, {
       ...options,
       preserveScroll: true,
@@ -153,33 +159,18 @@ export class Router {
       ...events,
     }
 
-    // If a prefetch is in flight, cancel any existing `use` calls
-    // as we're about to potentially use a different one
-    // e.g. if a user clicks a link before a
-    // prefetch is complete then clicks another link
-    prefetchedRequests.cancelUse()
-
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
-      if (!prefetched.staleTimestamp) {
-        // This prefetch is still in flight, show the progress bar
-        revealProgress(true)
-      }
-
-      prefetchedRequests.use(prefetched, requestParams, {
-        isCancelled: false,
-        cancel() {
-          this.isCancelled = true
-        },
-      })
+      revealProgress(prefetched.inFlight)
+      prefetchedRequests.use(prefetched, requestParams)
     } else {
       revealProgress(true)
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
 
-  public getCached(href: string | URL, options: VisitOptions = {}): ActivelyPrefetching | PrefetchedResponse | null {
+  public getCached(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findCached(this.getPrefetchParams(href, options))
   }
 
@@ -191,10 +182,7 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
-  public getPrefetching(
-    href: string | URL,
-    options: VisitOptions = {},
-  ): ActivelyPrefetching | PrefetchedResponse | null {
+  public getPrefetching(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 

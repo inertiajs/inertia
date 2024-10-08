@@ -5,7 +5,7 @@ import { isFormData, objectToFormData } from './formData'
 import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
-  return new URL(href.toString(), window.location.toString())
+  return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
 }
 
 export const transformUrlAndData = (

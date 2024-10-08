@@ -2,11 +2,10 @@ import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'
 import {
-  ActivelyPrefetching,
   ActiveVisit,
   CacheForOption,
+  InFlightPrefetch,
   InternalActiveVisit,
-  PrefetchCancellationToken,
   PrefetchedResponse,
   PrefetchOptions,
   PrefetchRemovalTimer,
@@ -14,9 +13,9 @@ import {
 
 class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
-  protected activeRequests: ActivelyPrefetching[] = []
+  protected inFlightRequests: InFlightPrefetch[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
-  protected currentCancellationToken: PrefetchCancellationToken | null = null
+  protected currentUseId: string | null = null
 
   public add(params: ActiveVisit, sendFunc: (params: InternalActiveVisit) => void, { cacheFor }: PrefetchOptions) {
     const inFlight = this.findInFlight(params)
@@ -65,11 +64,12 @@ class PrefetchedRequests {
         response: promise,
         singleUse: cacheFor === 0,
         timestamp: Date.now(),
+        inFlight: false,
       })
 
       this.scheduleForRemoval(params, expires)
 
-      this.activeRequests = this.activeRequests.filter((prefetching) => {
+      this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
         return !this.paramsAreEqual(prefetching.params, params)
       })
 
@@ -78,10 +78,11 @@ class PrefetchedRequests {
       return response
     })
 
-    this.activeRequests.push({
+    this.inFlightRequests.push({
       params: { ...params },
       response: promise,
       staleTimestamp: null,
+      inFlight: true,
     })
 
     return promise
@@ -136,6 +137,10 @@ class PrefetchedRequests {
   }
 
   protected scheduleForRemoval(params: ActiveVisit, expiresIn: number) {
+    if (typeof window === 'undefined') {
+      return
+    }
+
     this.clearTimer(params)
 
     if (expiresIn > 0) {
@@ -148,24 +153,19 @@ class PrefetchedRequests {
     }
   }
 
-  public get(params: ActiveVisit): ActivelyPrefetching | PrefetchedResponse | null {
+  public get(params: ActiveVisit): InFlightPrefetch | PrefetchedResponse | null {
     return this.findCached(params) || this.findInFlight(params)
   }
 
-  public cancelUse() {
-    if (this.currentCancellationToken) {
-      this.currentCancellationToken.cancel()
-    }
-  }
+  public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
+    const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
-  public use(
-    prefetched: PrefetchedResponse | ActivelyPrefetching,
-    params: ActiveVisit,
-    cancellationToken: PrefetchCancellationToken,
-  ) {
-    this.currentCancellationToken = cancellationToken
+    this.currentUseId = id
+
     return prefetched.response.then((response) => {
-      if (cancellationToken.isCancelled) {
+      if (this.currentUseId !== id) {
+        // They've since gone on to `use` a different request,
+        // so we should ignore this one
         return
       }
 
@@ -197,9 +197,9 @@ class PrefetchedRequests {
     )
   }
 
-  public findInFlight(params: ActiveVisit): ActivelyPrefetching | null {
+  public findInFlight(params: ActiveVisit): InFlightPrefetch | null {
     return (
-      this.activeRequests.find((prefetched) => {
+      this.inFlightRequests.find((prefetched) => {
         return this.paramsAreEqual(prefetched.params, params)
       }) || null
     )
