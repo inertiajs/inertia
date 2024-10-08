@@ -135,19 +135,19 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
       onStart: (visit) => {
         inFlightCount++
         updateNodeAttributes()
-        dispatchEvent('start', { detail: { visit } })
+        return dispatchEvent('start', { detail: { visit } })
       },
       onProgress: (progress) => dispatchEvent('progress', { detail: { progress } }),
       onFinish: (visit) => {
         inFlightCount--
         updateNodeAttributes()
-        dispatchEvent('finish', { detail: { visit } })
+        return dispatchEvent('finish', { detail: { visit } })
       },
-      onBefore: (visit) => dispatchEvent('before', { detail: { visit } }),
+      onBefore: (visit) => dispatchEvent('before', { cancelable: true, detail: { visit } }),
       onCancel: () => dispatchEvent('cancel'),
       onSuccess: (page) => dispatchEvent('success', { detail: { page } }),
       onError: (errors) => dispatchEvent('error', { detail: { errors } }),
-      onCancelToken: () => dispatchEvent('cancel-token'),
+      onCancelToken: (token) => dispatchEvent('cancel-token', { detail: { token } }),
     }
 
     updateEventListeners()
