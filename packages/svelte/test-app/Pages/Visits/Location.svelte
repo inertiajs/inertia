@@ -1,7 +1,8 @@
 <script>
   import { router } from '@inertiajs/svelte'
 
-  const locationVisit = () => {
+  const locationVisit = (e) => {
+    e.preventDefault()
     router.visit('/location')
   }
 </script>

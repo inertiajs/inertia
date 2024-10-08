@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { consoleMessages, pageLoads, requests, shouldBeDumpPage } from './support'
+import { clickAndWaitForResponse, consoleMessages, pageLoads, requests, shouldBeDumpPage } from './support'
 
 test('visits a different page', async ({ page }) => {
   pageLoads.watch(page)
@@ -12,9 +12,8 @@ test('visits a different page', async ({ page }) => {
 test('can make a location visit', async ({ page }) => {
   pageLoads.watch(page, 2)
   await page.goto('/visits/location')
-  await page.getByRole('link', { name: 'Location visit' }).click()
-
-  await page.waitForTimeout(50)
+  await clickAndWaitForResponse(page, 'Location visit', 'dump/get')
+  await page.waitForLoadState('networkidle')
   await expect(pageLoads.count).toBe(2)
 
   const dump = await shouldBeDumpPage(page, 'get')
