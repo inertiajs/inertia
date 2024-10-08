@@ -16,13 +16,13 @@ defineProps({ users: Array, date: String })
   <h1 class="text-3xl">Users</h1>
   <div class="my-6">
     Data last refreshed at:
-    <span v-if="lastUpdatedAt">{{ new Date(lastUpdatedAt) }}</span>
+    <span v-if="lastUpdatedAt"> <br />Client: {{ new Date(lastUpdatedAt) }} <br />Server: {{ date }}</span>
     <span v-else>N/A</span>
-    <span v-if="isPrefetched"> (Page is prefetched!)</span>
+    <div v-if="isPrefetched">(Page is prefetched!)</div>
     <span v-if="isPrefetching" class="text-red-500"> refreshing...</span>
   </div>
 
-  <div class="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
+  <div class="w-full max-w-2xl mt-6 overflow-hidden border rounded shadow-sm">
     <table class="w-full text-left">
       <thead>
         <tr>

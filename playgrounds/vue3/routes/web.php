@@ -167,9 +167,9 @@ Route::get('/infinite-scroll', function () {
             function () use ($start, $end, $itemType) {
                 sleep(1);
 
-                return collect(range($start, $end))->map(fn ($i) => [
+                return collect(range($start, $end))->map(fn($i) => [
                     'id' => $i,
-                    'name' => ucwords($itemType).' '.$i,
+                    'name' => ucwords($itemType) . ' ' . $i,
                 ])->toArray();
             }
         )->merge(),
