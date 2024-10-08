@@ -94,7 +94,6 @@ export default function useForm<TForm extends FormDataType>(
       const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
-        this.wasSuccessful = false
         defaults = clonedData
         Object.assign(this, resolvedData)
       } else {
@@ -171,6 +170,7 @@ export default function useForm<TForm extends FormDataType>(
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          defaults = cloneDeep(this.data())
           this.isDirty = false
           return onSuccess
         },
@@ -241,7 +241,7 @@ export default function useForm<TForm extends FormDataType>(
   watch(
     form,
     (newValue) => {
-      form.isDirty = !form.wasSuccessful && !isEqual(form.data(), defaults)
+      form.isDirty = !isEqual(form.data(), defaults)
       if (rememberKey) {
         router.remember(newValue.__remember(), rememberKey)
       }
