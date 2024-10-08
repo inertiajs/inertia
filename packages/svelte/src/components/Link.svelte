@@ -8,8 +8,9 @@
   } from '@inertiajs/core'
   import { inertia } from '../index'
 
+  let propAs: keyof HTMLElementTagNameMap = 'a'
+  export { as as propAs }
   export let href: string
-  export let as: keyof HTMLElementTagNameMap = 'a'
   export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
   export let replace: boolean = false
@@ -22,6 +23,12 @@
   export let async: boolean = false
   export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
   export let cacheFor: CacheForOption | CacheForOption[] = 0
+
+  $: as = method !== 'get' ? 'button' : propAs.toLowerCase()
+  $: elProps = {
+    a: { href },
+    button: { type: 'button' },
+  }[as]
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -43,8 +50,7 @@
     cacheFor,
   }}
   {...$$restProps}
-  {...as === 'a' ? { href } : {}}
-  {...as === 'button' ? { type: 'button' } : {}}
+  {...elProps}
   on:focus
   on:blur
   on:click

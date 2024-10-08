@@ -34,11 +34,11 @@
   <a href="#" on:click={visitsMethod} class="visits-method">Manual basic visits</a>
   <a href="#" on:click={visitsReplace} class="visits-replace">Manual 'Replace' visits</a>
 
-  <a href="/redirect" use:inertia={{ method: 'post' }} class="links-redirect">Internal Redirect Link</a>
+  <button use:inertia={{ href: '/redirect', method: 'post' }} class="links-redirect">Internal Redirect Link</button>
   <a href="#" on:click={redirect} class="visits-redirect">Manual Redirect visit</a>
 
-  <a href="/redirect-external" use:inertia={{ method: 'post' }} class="links-redirect-external"
-    >External Redirect Link</a
+  <button use:inertia={{ href: '/redirect-external', method: 'post' }} class="links-redirect-external"
+    >External Redirect Link</button
   >
   <a href="#" on:click={redirectExternal} class="visits-redirect-external">Manual External Redirect visit</a>
 </div>
