@@ -21,10 +21,10 @@ interface ActionElement extends HTMLElement {
 }
 
 type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
-  href?: string,
-  data?: Record<string, FormDataConvertible>,
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[],
-  cacheFor?: CacheForOption | CacheForOption[],
+  href?: string
+  data?: Record<string, FormDataConvertible>
+  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
@@ -35,7 +35,10 @@ type ActionAttributes = {
   'on:cancel-token'?: CustomEvent<CancelTokenSource>
 }
 
-function link(node: ActionElement, initialParams: ActionParameters = {}): ActionReturn<ActionParameters, ActionAttributes> {
+function link(
+  node: ActionElement,
+  initialParams: ActionParameters = {},
+): ActionReturn<ActionParameters, ActionAttributes> {
   let inFlightCount = 0
   let hoverTimeout: NodeJS.Timeout
 
@@ -58,7 +61,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
   }
 
   const prefetchHoverEvents: ActionEventHandlers = {
-    mouseenter: () => hoverTimeout = setTimeout(() => prefetch(), 75),
+    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), 75)),
     mouseleave: () => clearTimeout(hoverTimeout),
     click: regularEvents.click,
   }
@@ -112,7 +115,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
     })()
 
     method = (params.method?.toLowerCase() || 'get') as Method
-    [href, data] = hrefAndData(method, params)
+    ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
       node.href = href
@@ -129,7 +132,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
       headers: params.headers || {},
       async: params.async || false,
     }
-    
+
     visitParams = {
       ...baseParams,
       onStart: (visit) => {
@@ -186,7 +189,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
       addEventListeners(prefetchHoverEvents)
       return
     }
-    
+
     if (prefetchModes.includes('click')) {
       addEventListeners(prefetchClickEvents)
       return
@@ -202,7 +205,7 @@ function link(node: ActionElement, initialParams: ActionParameters = {}): Action
   }
 
   function removeEventListeners() {
-    [prefetchHoverEvents, prefetchClickEvents, regularEvents].forEach((eventHandlers) => {
+    ;[prefetchHoverEvents, prefetchClickEvents, regularEvents].forEach((eventHandlers) => {
       Object.entries(eventHandlers).forEach(([event, handler]) => {
         node.removeEventListener(event as keyof HTMLElementEventMap, handler as EventListener)
       })

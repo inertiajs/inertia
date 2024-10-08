@@ -10,17 +10,8 @@
   } | null
 
   export type RenderFunction = {
-    (
-      component: ComponentType,
-      props?: PageProps,
-      children?: RenderProps[],
-      key?: number | null,
-    ): RenderProps
-    (
-      component: ComponentType,
-      children?: RenderProps[],
-      key?: number | null,
-    ): RenderProps
+    (component: ComponentType, props?: PageProps, children?: RenderProps[], key?: number | null): RenderProps
+    (component: ComponentType, children?: RenderProps[], key?: number | null): RenderProps
   }
 
   export const h: RenderFunction = (component, propsOrChildren, childrenOrKey, key: number | null = null) => {
@@ -28,11 +19,19 @@
 
     return {
       component,
-      key: hasProps ? key : (typeof childrenOrKey === 'number' ? childrenOrKey : null),
+      key: hasProps ? key : typeof childrenOrKey === 'number' ? childrenOrKey : null,
       props: hasProps ? propsOrChildren : {},
       children: hasProps
-        ? (Array.isArray(childrenOrKey) ? childrenOrKey : childrenOrKey !== null ? [childrenOrKey] : []) as RenderProps[]
-        : (Array.isArray(propsOrChildren) ? propsOrChildren : propsOrChildren !== null ? [propsOrChildren] : []) as RenderProps[],
+        ? ((Array.isArray(childrenOrKey)
+            ? childrenOrKey
+            : childrenOrKey !== null
+              ? [childrenOrKey]
+              : []) as RenderProps[])
+        : ((Array.isArray(propsOrChildren)
+            ? propsOrChildren
+            : propsOrChildren !== null
+              ? [propsOrChildren]
+              : []) as RenderProps[]),
     }
   }
 </script>

@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    router,
-    type ReloadOptions,
-  } from '@inertiajs/core'
+  import { router, type ReloadOptions } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
 
   export let data: string | string[] = ''
@@ -80,11 +77,11 @@
 </script>
 
 {#if !once || !loaded}
-  <svelte:element bind:this={el} this={elementTag} />
+  <svelte:element this={elementTag} bind:this={el} />
 {/if}
 
 {#if loaded}
   <slot />
-{:else if ($$slots.fallback)}
+{:else if $$slots.fallback}
   <slot name="fallback" />
 {/if}
