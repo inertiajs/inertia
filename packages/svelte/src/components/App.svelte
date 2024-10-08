@@ -50,7 +50,7 @@
       return layout
         .slice()
         .reverse()
-        .reduce((renderedChild, layoutComponent) => h(layoutComponent, pageProps, [renderedChild], key), child)
+        .reduce((currentRender, layoutComponent) => h(layoutComponent, pageProps, [currentRender], key), child)
     }
 
     return h(layout, pageProps, child ? [child] : [], key)
