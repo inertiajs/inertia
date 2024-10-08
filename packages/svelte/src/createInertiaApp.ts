@@ -46,7 +46,7 @@ export default async function createInertiaApp({
   await Promise.all([resolveComponent(initialPage.component), router.decryptHistory().catch(() => {})]).then(
     ([initialComponent]) => {
       store.set({
-        component: initialComponent as ResolvedComponent,
+        component: initialComponent,
         page: initialPage,
         key: null,
       })
