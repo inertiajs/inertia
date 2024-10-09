@@ -1,13 +1,10 @@
 name: Playwright Tests
-on:
-  push:
-    branches: [ "async-requests" ]
-  pull_request:
-    branches: [ "async-requests" ]
+on: [push, pull_request]
 jobs:
   test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    timeout-minutes: 15
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         adapter: ['vue3']
@@ -16,15 +13,24 @@ jobs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: lts/*
+        node-version: 21.7.3
 
     - name: Build Inertia
       run: |
         rm package-lock.json
         npm install
-        cd packages/core && npm run build
-        cd ../${{ matrix.adapter }} && npm run build
-        cd tests && npm install
+        cd packages/core
+        npm run build
+
+    - name: Build Adapter
+      run: |
+        cd packages/${{ matrix.adapter }}
+        npm run build
+
+    - name: Install Test Dependencies
+      run: |
+        cd packages/${{ matrix.adapter }}/test-app
+        npm install
 
     - name: Local-link @inertiajs/core
       run: cd packages/core && npm link
@@ -35,8 +41,11 @@ jobs:
     - name: Install Playwright Browsers
       run:  cd packages/${{ matrix.adapter }} && npx playwright install --with-deps
 
+    - name: Install Playwright Test Dependencies
+      run:  cd tests/app && npm install
+
     - name: Run Playwright Tests
-      run:  cd packages/${{ matrix.adapter }} && npx playwright test
+      run:  cd tests && PACKAGE=${{ matrix.adapter }} npx playwright test
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
