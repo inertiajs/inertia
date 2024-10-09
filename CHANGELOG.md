@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.3.0-beta.1...HEAD)
 
-- Nothing yet!
+- Fix Svelte version import ([#2002](https://github.com/inertiajs/inertia/pull/2002))
 
 ## [v1.3.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v1.3.0-beta.1)
 
