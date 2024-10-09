@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { requests } from './support'
+import { clickAndWaitForResponse, requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -9,6 +9,13 @@ const isPrefetchPage = async (page: Page, id: number) => {
 const isPrefetchSwrPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/swr/${id}`)
   await expect(page.getByText(`This is page ${id}`)).toBeVisible()
+}
+
+const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
+  await page.getByRole('link', { name: buttonText, exact: true }).hover()
+  await page.waitForTimeout(75)
+  await clickAndWaitForResponse(page, buttonText, `prefetch/swr/${id}`)
+  await isPrefetchSwrPage(page, id)
 }
 
 test('can prefetch using link props', async ({ page }) => {
@@ -69,29 +76,22 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
-test.skip('can cache links with single cache value', async ({ page }) => {
-  // These two prefetch requests should be made on mount
-  const prefetch2 = page.waitForResponse('prefetch/swr/2')
-  const prefetch3 = page.waitForResponse('prefetch/swr/3')
-
+test('can cache links with single cache value', async ({ page }) => {
   await page.goto('prefetch/swr/1')
-
-  // These two prefetch requests should be made on mount
-  await prefetch2
-  await prefetch3
 
   requests.listen(page)
 
   // Click back and forth a couple of times to ensure no requests go out
-  await page.getByRole('link', { exact: true, name: '1s Expired (Number)' }).click()
-  await isPrefetchSwrPage(page, 3)
-  await expect(requests.requests.length).toBe(0)
+  await hoverAndClick(page, '1s Expired (Number)', 3)
+  await expect(requests.requests.length).toBe(1)
   const lastLoaded1 = await page.locator('#last-loaded').textContent()
 
-  await page.getByRole('link', { exact: true, name: '1s Expired' }).click()
+  await hoverAndClick(page, '1s Expired', 2)
   await isPrefetchSwrPage(page, 2)
-  await expect(requests.requests.length).toBe(0)
+  await expect(requests.requests.length).toBe(2)
   const lastLoaded2 = await page.locator('#last-loaded').textContent()
+
+  requests.listen(page)
 
   await page.getByRole('link', { exact: true, name: '1s Expired (Number)' }).click()
   await isPrefetchSwrPage(page, 3)
@@ -110,45 +110,33 @@ test.skip('can cache links with single cache value', async ({ page }) => {
 
   requests.listenForFinished(page)
 
-  await page.getByRole('link', { exact: true, name: '1s Expired (Number)' }).click()
-  await isPrefetchSwrPage(page, 3)
-  await page.waitForTimeout(100)
+  await hoverAndClick(page, '1s Expired (Number)', 3)
   await expect(requests.finished.length).toBe(1)
   const lastLoaded1Fresh = await page.locator('#last-loaded').textContent()
   await expect(lastLoaded1).not.toBe(lastLoaded1Fresh)
 
-  await page.getByRole('link', { exact: true, name: '1s Expired' }).click()
-  await isPrefetchSwrPage(page, 2)
-  await page.waitForTimeout(100)
+  await hoverAndClick(page, '1s Expired', 2)
   await expect(requests.finished.length).toBe(2)
   const lastLoaded2Fresh = await page.locator('#last-loaded').textContent()
   await expect(lastLoaded2).not.toBe(lastLoaded2Fresh)
 })
 
 test.skip('can do SWR when the link cacheFor prop has two values', async ({ page }) => {
-  // These two prefetch requests should be made on mount
-  const prefetch2 = page.waitForResponse('prefetch/swr/4')
-  const prefetch3 = page.waitForResponse('prefetch/swr/5')
-
   await page.goto('prefetch/swr/1')
 
-  // These two prefetch requests should be made on mount
-  await prefetch2
-  await prefetch3
+  requests.listen(page)
+
+  await hoverAndClick(page, '1s Stale, 2s Expired (Number)', 5)
+  await expect(requests.requests.length).toBe(1)
+  const lastLoaded1 = await page.locator('#last-loaded').textContent()
+
+  await hoverAndClick(page, '1s Stale, 2s Expired', 4)
+  await expect(requests.requests.length).toBe(2)
+  const lastLoaded2 = await page.locator('#last-loaded').textContent()
 
   requests.listen(page)
 
   // Click back and forth a couple of times to ensure no requests go out
-  await page.getByRole('link', { exact: true, name: '1s Stale, 2s Expired (Number)' }).click()
-  await isPrefetchSwrPage(page, 5)
-  await expect(requests.requests.length).toBe(0)
-  const lastLoaded1 = await page.locator('#last-loaded').textContent()
-
-  await page.getByRole('link', { exact: true, name: '1s Stale, 2s Expired' }).click()
-  await isPrefetchSwrPage(page, 4)
-  await expect(requests.requests.length).toBe(0)
-  const lastLoaded2 = await page.locator('#last-loaded').textContent()
-
   await page.getByRole('link', { exact: true, name: '1s Stale, 2s Expired (Number)' }).click()
   await isPrefetchSwrPage(page, 5)
   await expect(requests.requests.length).toBe(0)
@@ -166,13 +154,15 @@ test.skip('can do SWR when the link cacheFor prop has two values', async ({ page
 
   requests.listenForFinished(page)
 
+  const promiseFor5 = page.waitForResponse('prefetch/swr/5')
+  await page.getByRole('link', { exact: true, name: '1s Stale, 2s Expired (Number)' }).hover()
+  await page.waitForTimeout(75)
   await page.getByRole('link', { exact: true, name: '1s Stale, 2s Expired (Number)' }).click()
   await isPrefetchSwrPage(page, 5)
-  const promiseFor5 = page.waitForResponse('prefetch/swr/5')
   const lastLoaded1Stale = await page.locator('#last-loaded').textContent()
   await expect(lastLoaded1).toBe(lastLoaded1Stale)
-
   await promiseFor5
+
   //   await expect(requests.finished.length).toBe(1)
   await page.waitForTimeout(600)
   const lastLoaded1Fresh = await page.locator('#last-loaded').textContent()

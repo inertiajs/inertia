@@ -54,7 +54,7 @@ export class Response {
   }
 
   public async handlePrefetch() {
-    if (currentPage.get().component === this.response.data.component) {
+    if (isSameUrlWithoutHash(this.requestParams.all().url, window.location)) {
       this.handle()
     }
   }
