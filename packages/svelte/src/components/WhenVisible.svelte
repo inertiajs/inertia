@@ -6,7 +6,7 @@
   export let params: ReloadOptions = {}
   export let buffer: number = 0
   export let elementTag: keyof HTMLElementTagNameMap = 'div'
-  export let once: boolean = true
+  export let always: boolean = false
 
   let loaded = false
   let fetching = false
@@ -24,7 +24,7 @@
           return
         }
 
-        if (once) {
+        if (!always) {
           observer?.disconnect()
         }
 
@@ -76,7 +76,7 @@
   }
 </script>
 
-{#if !once || !loaded}
+{#if always || !loaded}
   <svelte:element this={elementTag} bind:this={el} />
 {/if}
 

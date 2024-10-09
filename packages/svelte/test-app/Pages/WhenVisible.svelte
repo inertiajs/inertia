@@ -23,7 +23,7 @@
 </div>
 
 <div style="margin-top: 5000px">
-  <WhenVisible data="foo" once={false}>
+  <WhenVisible data="foo" always>
     <svelte:fragment slot="fallback">
       <div>Loading third one...</div>
     </svelte:fragment>
