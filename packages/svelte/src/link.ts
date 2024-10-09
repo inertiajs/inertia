@@ -30,9 +30,12 @@ type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
 type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
 type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
 type ActionAttributes = {
-  [K in keyof SelectedGlobalEventsMap as `on:${K}`]?: CustomEvent<SelectedGlobalEventsMap[K]['details']>
+  [K in keyof SelectedGlobalEventsMap as `on:${K}` | `on${K}`]?: (
+    event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
+  ) => void
 } & {
-  'on:cancel-token'?: CustomEvent<CancelTokenSource>
+  'on:cancel-token'?: (event: CustomEvent<CancelTokenSource>) => void
+  oncanceltoken?: (event: CustomEvent<CancelTokenSource>) => void
 }
 
 function link(
