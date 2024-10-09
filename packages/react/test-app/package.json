@@ -4,7 +4,7 @@
         "watch": "vite build . --watch"
     },
     "devDependencies": {
-        "vite": "^5.3.4"
+        "vite": "^5.4.8"
     },
     "dependencies": {
         "@inertiajs/core": "file:../../core",
