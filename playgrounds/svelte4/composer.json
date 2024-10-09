@@ -66,7 +66,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "./../../../inertia-laravel-v2/",
+            "url": "./../../../inertia-laravel/",
             "options": {
                 "symlink": true
             }

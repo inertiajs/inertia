@@ -8,7 +8,7 @@
   export let appName
   export let users = []
 
-  const prefetch = usePrefetch()
+  const { lastUpdatedAt, isPrefetched, isPrefetching } = usePrefetch()
 </script>
 
 <svelte:head>
@@ -19,15 +19,15 @@
 
 <div class="my-6">
   Data last refreshed at:
-  {#if $prefetch.lastUpdatedAt}
-    <span>{new Date($prefetch.lastUpdatedAt)}</span>
+  {#if $lastUpdatedAt}
+    <span>{new Date($lastUpdatedAt)}</span>
   {:else}
     <span>N/A</span>
   {/if}
-  {#if $prefetch.isPrefetched}
+  {#if $isPrefetched}
     <span> (Page is prefetched!)</span>
   {/if}
-  {#if $prefetch.isPrefetching}
+  {#if $isPrefetching}
     <span class="text-red-500">refreshing...</span>
   {/if}
 </div>
