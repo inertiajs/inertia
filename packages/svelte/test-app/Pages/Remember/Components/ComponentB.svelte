@@ -1,9 +1,9 @@
 <script>
-  import { remember } from '@inertiajs/svelte'
+  import { useRemember } from '@inertiajs/svelte'
 
   let untracked = ''
 
-  const data = remember(
+  const data = useRemember(
     {
       name: '',
       remember: false,
