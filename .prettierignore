@@ -1,1 +1,8 @@
 .github/
+**/.svelte-kit
+**/bootstrap/ssr
+**/composer.json
+**/composer.lock
+**/dist
+**/public/build
+**/vendor
