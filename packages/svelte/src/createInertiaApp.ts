@@ -1,7 +1,7 @@
 import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
 import escape from 'html-escape'
 import type { ComponentType } from 'svelte'
-import { VERSION } from 'svelte/compiler'
+import { version as SVELTE_VERSION } from 'svelte/package.json'
 import App from './components/App.svelte'
 import store from './store'
 import type { ComponentResolver, ResolvedComponent } from './types'
@@ -54,7 +54,7 @@ export default async function createInertiaApp({
   )
 
   if (isServer) {
-    const isSvelte5 = VERSION.startsWith('5')
+    const isSvelte5 = SVELTE_VERSION.startsWith('5')
     const { html, head, css } = await (async () => {
       if (isSvelte5) {
         const { render } = await dynamicImport('svelte/server')
