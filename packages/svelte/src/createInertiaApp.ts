@@ -12,7 +12,7 @@ type AppComponent = ComponentType<App> & { render: () => SvelteRenderResult }
 interface CreateInertiaAppProps {
   id?: string
   resolve: ComponentResolver
-  setup: (props: {
+  setup?: (props: {
     el: Element
     App: ComponentType<App>
     props: {
