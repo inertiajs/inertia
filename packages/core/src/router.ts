@@ -585,9 +585,9 @@ export class Router {
     if (isChromeIOS) {
       // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
       // Ensure any previous history.pushState completes before replaceState is executed.
-      setTimeout(() => this._replaceState(page))
+      setTimeout(() => this._replaceState(page));
     } else {
-      this._replaceState(page)
+      this._replaceState(page);
     }
   }
 
