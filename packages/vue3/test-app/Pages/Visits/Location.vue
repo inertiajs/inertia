@@ -1,7 +1,8 @@
 <script setup>
 import { router } from '@inertiajs/vue3'
 
-const locationVisit = () => {
+const locationVisit = (e) => {
+  e.preventDefault()
   router.visit('/location')
 }
 </script>
