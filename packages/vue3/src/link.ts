@@ -1,10 +1,11 @@
 import {
   CacheForOption,
+  FormDataConvertible,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
-  PageProps,
   PendingVisit,
+  PreserveStateOption,
   Progress,
   router,
   shouldIntercept,
@@ -13,23 +14,24 @@ import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, 
 
 export interface InertiaLinkProps {
   as?: string
-  data?: object
+  data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
-  headers?: object
+  headers?: Record<string, string>
   onClick?: (event: MouseEvent) => void
-  preserveScroll?: boolean | ((props: PageProps) => boolean)
-  preserveState?: boolean | ((props: PageProps) => boolean) | null
+  preserveScroll?: PreserveStateOption
+  preserveState?: PreserveStateOption
   replace?: boolean
   only?: string[]
   except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
-  onStart?: () => void
+  onStart?: (visit: PendingVisit) => void
   onProgress?: (progress: Progress) => void
-  onFinish?: () => void
+  onFinish?: (visit: PendingVisit) => void
   onCancel?: () => void
   onSuccess?: () => void
+  onError?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
   async?: boolean
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
@@ -98,12 +100,9 @@ const Link: InertiaLink = defineComponent({
       type: [Number, String, Array] as PropType<CacheForOption | CacheForOption[]>,
       default: 0,
     },
-    // @ts-ignore
     onStart: {
-      // @ts-ignore
       type: Function as PropType<(visit: PendingVisit) => void>,
-      // @ts-ignore
-      default: (visit) => {},
+      default: (_visit: PendingVisit) => {},
     },
     onProgress: {
       type: Function as PropType<(progress: Progress) => void>,
