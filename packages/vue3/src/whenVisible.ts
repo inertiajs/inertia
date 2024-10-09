@@ -18,9 +18,9 @@ export default defineComponent({
       type: String,
       default: 'div',
     },
-    once: {
+    always: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   data() {
@@ -40,7 +40,7 @@ export default defineComponent({
           return
         }
 
-        if (this.$props.once) {
+        if (!this.$props.always) {
           this.observer.disconnect()
         }
 
@@ -90,7 +90,7 @@ export default defineComponent({
   render() {
     const els = []
 
-    if (!this.$props.once || !this.loaded) {
+    if (this.$props.always || !this.loaded) {
       els.push(h(this.$props.as))
     }
 

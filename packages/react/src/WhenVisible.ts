@@ -8,11 +8,11 @@ interface WhenVisibleProps {
   params?: ReloadOptions
   buffer?: number
   as?: string
-  once?: boolean
+  always?: boolean
 }
 
-const WhenVisible = ({ children, data, params, buffer, as, once, fallback }: WhenVisibleProps) => {
-  once = once ?? true
+const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: WhenVisibleProps) => {
+  always = always ?? false
   as = as ?? 'div'
   fallback = fallback ?? null
 
@@ -46,7 +46,7 @@ const WhenVisible = ({ children, data, params, buffer, as, once, fallback }: Whe
           return
         }
 
-        if (once) {
+        if (!always) {
           observer.current?.disconnect()
         }
 
@@ -83,7 +83,7 @@ const WhenVisible = ({ children, data, params, buffer, as, once, fallback }: Whe
     }
   }, [ref])
 
-  if (!once || !loaded) {
+  if (always || !loaded) {
     return createElement(
       as,
       {
