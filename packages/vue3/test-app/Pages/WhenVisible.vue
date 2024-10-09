@@ -24,7 +24,7 @@ import { WhenVisible } from '@inertiajs/vue3'
   </div>
 
   <div style="margin-top: 5000px">
-    <WhenVisible data="foo" :once="false">
+    <WhenVisible data="foo" always>
       <template #fallback>
         <div>Loading third one...</div>
       </template>

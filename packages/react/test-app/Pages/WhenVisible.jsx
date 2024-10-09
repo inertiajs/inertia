@@ -19,8 +19,8 @@ export default () => (
     </div>
 
     <div style={{ marginTop: '5000px' }}>
-      <WhenVisible data="foo" once={false} fallback={<div>Loading third one...</div>}>
-        <Foo label="Third one is visible!" once={false} />
+      <WhenVisible data="foo" fallback={<div>Loading third one...</div>} always>
+        <Foo label="Third one is visible!" />
       </WhenVisible>
     </div>
   </>
