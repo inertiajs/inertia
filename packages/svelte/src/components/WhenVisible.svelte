@@ -5,7 +5,7 @@
   export let data: string | string[] = ''
   export let params: ReloadOptions = {}
   export let buffer: number = 0
-  export let elementTag: keyof HTMLElementTagNameMap = 'div'
+  export let as: keyof HTMLElementTagNameMap = 'div'
   export let always: boolean = false
 
   let loaded = false
@@ -77,7 +77,7 @@
 </script>
 
 {#if always || !loaded}
-  <svelte:element this={elementTag} bind:this={el} />
+  <svelte:element this={as} bind:this={el} />
 {/if}
 
 {#if loaded}
