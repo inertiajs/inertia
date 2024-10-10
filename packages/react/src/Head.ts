@@ -62,6 +62,9 @@ const Head: InertiaHead = function ({ children, title }) {
   }
 
   function renderTag(node) {
+    if (typeof node === "string") {
+      return node
+    }
     let html = renderTagStart(node)
     if (node.props.children) {
       html += renderTagChildren(node)
