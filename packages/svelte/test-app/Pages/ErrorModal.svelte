@@ -1,5 +1,5 @@
 <script>
-  import { router } from '@inertiajs/vue3'
+  import { router } from '@inertiajs/svelte'
 
   const invalidVisit = () => {
     router.post('/non-inertia')
