@@ -32,6 +32,12 @@ import {
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
+const nextFrame = (callback: () => void) => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(callback)
+  })
+}
 
 export class Router {
   protected page!: Page
@@ -70,7 +76,9 @@ export class Router {
 
   protected setNavigationType(): void {
     this.navigationType =
-      window.performance && window.performance.getEntriesByType('navigation').length > 0
+      window.performance &&
+      window.performance.getEntriesByType &&
+      window.performance.getEntriesByType('navigation').length > 0
         ? (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
         : 'navigate'
   }
@@ -82,8 +90,11 @@ export class Router {
   }
 
   protected handleInitialPageVisit(page: Page): void {
-    this.page.url += window.location.hash
-    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+    const hash = window.location.hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
+    this.setPage(page, { preserveScroll: true, preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -117,25 +128,27 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    window.scrollTo(0, 0)
-    this.scrollRegions().forEach((region) => {
-      if (typeof region.scrollTo === 'function') {
-        region.scrollTo(0, 0)
-      } else {
-        region.scrollTop = 0
-        region.scrollLeft = 0
+    nextFrame(() => {
+      window.scrollTo(0, 0)
+      this.scrollRegions().forEach((region) => {
+        if (typeof region.scrollTo === 'function') {
+          region.scrollTo(0, 0)
+        } else {
+          region.scrollTop = 0
+          region.scrollLeft = 0
+        }
+      })
+      this.saveScrollPositions()
+      if (window.location.hash) {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
       }
     })
-    this.saveScrollPositions()
-    if (window.location.hash) {
-      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
-      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
-    }
   }
 
   protected restoreScrollPositions(): void {
-    if (this.page.scrollRegions) {
+    nextFrame(() => {
+      if (!this.page.scrollRegions) return
+
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
         if (!scrollPosition) {
@@ -147,7 +160,7 @@ export class Router {
           region.scrollLeft = scrollPosition.left
         }
       })
-    }
+    })
   }
 
   protected isBackForwardVisit(): boolean {
@@ -235,7 +248,7 @@ export class Router {
     }
   }
 
-  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean | string {
+  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
     if (typeof value === 'function') {
       return value(page)
     } else if (value === 'errors') {
@@ -260,6 +273,7 @@ export class Router {
       preserveScroll = false,
       preserveState = false,
       only = [],
+      except = [],
       headers = {},
       errorBag = '',
       forceFormData = false,
@@ -275,7 +289,7 @@ export class Router {
     }: VisitOptions<TData> = {},
   ): void {
     let url = typeof href === 'string' ? hrefToUrl(href) : href
-    let data: RequestPayload = visitData;
+    let data: RequestPayload = visitData
 
     if ((hasFiles(data) || forceFormData) && !(data instanceof FormData)) {
       data = objectToFormData(data)
@@ -295,6 +309,7 @@ export class Router {
       preserveScroll,
       preserveState,
       only,
+      except,
       headers,
       errorBag,
       forceFormData,
@@ -340,6 +355,8 @@ export class Router {
     fireStartEvent(visit)
     onStart(visit)
 
+    const isPartial = !!(only.length || except.length)
+
     Axios({
       method,
       url: urlWithoutHash(url).href,
@@ -351,10 +368,19 @@ export class Router {
         Accept: 'text/html, application/xhtml+xml',
         'X-Requested-With': 'XMLHttpRequest',
         'X-Inertia': true,
-        ...(only.length
+        ...(isPartial
           ? {
               'X-Inertia-Partial-Component': this.page.component,
+            }
+          : {}),
+        ...(only.length
+          ? {
               'X-Inertia-Partial-Data': only.join(','),
+            }
+          : {}),
+        ...(except.length
+          ? {
+              'X-Inertia-Partial-Except': except.join(','),
             }
           : {}),
         ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
@@ -374,7 +400,7 @@ export class Router {
         }
 
         const pageResponse: Page = response.data
-        if (only.length && pageResponse.component === this.page.component) {
+        if (isPartial && pageResponse.component === this.page.component) {
           pageResponse.props = { ...this.page.props, ...pageResponse.props }
         }
         preserveScroll = this.resolvePreserveOption(preserveScroll, pageResponse) as boolean
@@ -452,14 +478,13 @@ export class Router {
   ): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
-        page.scrollRegions = page.scrollRegions || []
+        page.scrollRegions = this.page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
+
           if (!replace) {
             fireNavigateEvent(page)
           }
@@ -470,12 +495,24 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    if (isChromeIOS) {
+      // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.replaceState completes before pushState is executed.
+      setTimeout(() => window.history.pushState(page, '', page.url))
+    } else {
+      window.history.pushState(page, '', page.url)
+    }
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    if (isChromeIOS) {
+      // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.pushState completes before replaceState is executed.
+      setTimeout(() => window.history.replaceState(page, '', page.url))
+    } else {
+      window.history.replaceState(page, '', page.url)
+    }
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
@@ -502,16 +539,21 @@ export class Router {
   public get<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
     data: TData = {} as TData,
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions<TData>, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { ...options, method: 'get', data })
   }
 
-  public reload<TData extends RequestPayload = RequestPayload>(options: Exclude<VisitOptions<TData>, 'preserveScroll' | 'preserveState'> = {}): void {
+  public reload<TData extends RequestPayload = RequestPayload>(
+    options: Omit<VisitOptions<TData>, 'preserveScroll' | 'preserveState'> = {},
+  ): void {
     return this.visit(window.location.href, { ...options, preserveScroll: true, preserveState: true })
   }
 
-  public replace<TData extends RequestPayload = RequestPayload>(url: URL | string, options: Exclude<VisitOptions<TData>, 'replace'> = {}): void {
+  public replace<TData extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    options: Omit<VisitOptions<TData>, 'replace'> = {},
+  ): void {
     console.warn(
       `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
         options.method ?? 'get'
@@ -523,7 +565,7 @@ export class Router {
   public post<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
     data: TData = {} as TData,
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions<TData>, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
@@ -531,7 +573,7 @@ export class Router {
   public put<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
     data: TData = {} as TData,
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions<TData>, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
@@ -539,12 +581,15 @@ export class Router {
   public patch<TData extends RequestPayload = RequestPayload>(
     url: URL | string,
     data: TData = {} as TData,
-    options: Exclude<VisitOptions, 'method' | 'data'> = {},
+    options: Omit<VisitOptions<TData>, 'method' | 'data'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  public delete<TData extends RequestPayload = RequestPayload>(url: URL | string, options: Exclude<VisitOptions<TData>, 'method'> = {}): void {
+  public delete<TData extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    options: Omit<VisitOptions<TData>, 'method'> = {},
+  ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
@@ -574,6 +619,10 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
+    if (isServer) {
+      return () => {}
+    }
+
     const listener = ((event: GlobalEvent<TEventName>) => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {

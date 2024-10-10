@@ -5,8 +5,6 @@
     "jsx": "preserve",
     "strict": true,
     "isolatedModules": true,
-    "preserveValueImports": true,
-    "importsNotUsedAsValues": "error",
     "target": "ESNext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

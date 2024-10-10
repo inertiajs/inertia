@@ -64,7 +64,7 @@ npm run ssr:serve
 This section is really for the benefit of the core maintainers.
 
 1. Increment the version numbers in the `package.json` file for each package, making sure to also update the adapter dependencies on `@inertiajs/core`.
-2. Run `npm install` to update the top-laravel `package-lock.json` file.
+2. Run `npm install` to update the top-level `package-lock.json` file.
 3. Update `CHANGELOG.md`.
-4. Run `npm publish` for each package. This will automatically run the necessary build step.
+4. Run `npm publish` for each package. This will automatically run the necessary build step. When publishing beta releases, make sure to run `npm publish --tag=beta`.
 5. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).

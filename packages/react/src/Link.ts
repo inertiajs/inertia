@@ -17,11 +17,12 @@ interface BaseInertiaLinkProps {
   href: string
   method?: Method
   headers?: Record<string, string>
-  onClick?: (event: React.MouseEvent<HTMLAnchorElement> | React.KeyboardEvent<HTMLAnchorElement>) => void
+  onClick?: (event: React.MouseEvent<Element>) => void
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   replace?: boolean
   only?: string[]
+  except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: () => void
@@ -37,9 +38,7 @@ export type InertiaLinkProps = BaseInertiaLinkProps &
   Omit<React.HTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps> &
   Omit<React.AllHTMLAttributes<HTMLElement>, keyof BaseInertiaLinkProps>
 
-type InertiaLink = React.FunctionComponent<InertiaLinkProps>
-
-const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
+const Link = forwardRef<unknown, InertiaLinkProps>(
   (
     {
       children,
@@ -51,6 +50,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
       preserveState = null,
       replace = false,
       only = [],
+      except = [],
       headers = {},
       queryStringArrayFormat = 'brackets',
       onClick = noop,
@@ -67,10 +67,10 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
     ref,
   ) => {
     const visit = useCallback(
-      (event) => {
+      (event: React.MouseEvent) => {
         onClick(event)
 
-        if (shouldIntercept(event)) {
+        if (shouldIntercept(event.nativeEvent)) {
           event.preventDefault()
 
           router.visit(href, {
@@ -80,6 +80,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
             preserveState: preserveState ?? method !== 'get',
             replace,
             only,
+            except,
             headers,
             onCancelToken,
             onBefore,
@@ -100,6 +101,7 @@ const Link: InertiaLink = forwardRef<unknown, InertiaLinkProps>(
         preserveState,
         replace,
         only,
+        except,
         headers,
         onClick,
         onCancelToken,
