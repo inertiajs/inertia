@@ -1,33 +1,18 @@
 import { router, type VisitOptions } from '@inertiajs/core'
 import { onDestroy, onMount } from 'svelte'
-import { writable, type Readable } from 'svelte/store'
+import { readonly, writable } from 'svelte/store'
 
-interface InertiaPrefetch {
-  isPrefetched: boolean
-  isPrefetching: boolean
-  lastUpdatedAt: number | null
-  flush: () => void
-}
-
-export default function usePrefetch(options: VisitOptions = {}): Readable<InertiaPrefetch> {
-  const { subscribe, update } = writable<InertiaPrefetch>({
-    isPrefetched: false,
-    isPrefetching: false,
-    lastUpdatedAt: null,
-    flush() {
-      router.flush(window.location.pathname, options)
-    },
-  })
+export default function usePrefetch(options: VisitOptions = {}) {
+  const isPrefetched = writable(false)
+  const isPrefetching = writable(false)
+  const lastUpdatedAt = writable<number | null>(null)
 
   const cached = router.getCached(window.location.pathname, options)
   const inFlight = router.getPrefetching(window.location.pathname, options)
 
-  update((state) => ({
-    ...state,
-    isPrefetched: cached !== null,
-    isPrefetching: inFlight !== null,
-    lastUpdatedAt: cached?.staleTimestamp || null,
-  }))
+  isPrefetched.set(cached !== null)
+  isPrefetching.set(inFlight !== null)
+  lastUpdatedAt.set(cached?.staleTimestamp || null)
 
   let removePrefetchedListener: () => void
   let removePrefetchingListener: () => void
@@ -35,13 +20,14 @@ export default function usePrefetch(options: VisitOptions = {}): Readable<Inerti
   onMount(() => {
     removePrefetchingListener = router.on('prefetching', ({ detail }) => {
       if (detail.visit.url.pathname === window.location.pathname) {
-        update((state) => ({ ...state, isPrefetching: true }))
+        isPrefetching.set(true)
       }
     })
 
     removePrefetchedListener = router.on('prefetched', ({ detail }) => {
       if (detail.visit.url.pathname === window.location.pathname) {
-        update((state) => ({ ...state, isPrefetched: true, isPrefetching: false }))
+        isPrefetched.set(true)
+        isPrefetching.set(false)
       }
     })
   })
@@ -51,5 +37,12 @@ export default function usePrefetch(options: VisitOptions = {}): Readable<Inerti
     removePrefetchingListener()
   })
 
-  return { subscribe }
+  return {
+    isPrefetched: readonly(isPrefetched),
+    isPrefetching: readonly(isPrefetching),
+    lastUpdatedAt: readonly(lastUpdatedAt),
+    flush() {
+      router.flush(window.location.pathname, options)
+    },
+  }
 }

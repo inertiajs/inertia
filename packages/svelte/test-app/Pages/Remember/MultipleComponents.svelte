@@ -1,11 +1,11 @@
 <script>
   import ComponentA from '@/Pages/Remember/Components/ComponentA.svelte'
   import ComponentB from '@/Pages/Remember/Components/ComponentB.svelte'
-  import { inertia, remember } from '@inertiajs/svelte'
+  import { inertia, useRemember } from '@inertiajs/svelte'
 
   let untracked = ''
 
-  const form = remember({
+  const form = useRemember({
     name: '',
     remember: false,
   })

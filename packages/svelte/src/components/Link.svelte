@@ -24,10 +24,11 @@
   export let cacheFor: CacheForOption | CacheForOption[] = 0
 
   $: asProp = method !== 'get' ? 'button' : as.toLowerCase()
-  $: elProps = {
-    a: { href },
-    button: { type: 'button' },
-  }[asProp] || {}
+  $: elProps =
+    {
+      a: { href },
+      button: { type: 'button' },
+    }[asProp] || {}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
