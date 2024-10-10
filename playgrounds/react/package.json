@@ -1,24 +1,25 @@
 {
-  "name": "@inertiajs/react-playground",
-  "private": true,
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build && vite build --ssr"
-  },
-  "devDependencies": {
-    "@inertiajs/react": "^1.0.0",
-    "@types/react": "^16.14.35",
-    "@types/react-dom": "^16.9.18",
-    "@vitejs/plugin-react": "^4.3.2",
-    "autoprefixer": "^10.4.13",
-    "axios": "^1.6.0",
-    "laravel-vite-plugin": "^1.0.5",
-    "lodash": "^4.17.19",
-    "postcss": "^8.4.31",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "tailwindcss": "^3.2.4",
-    "typescript": "^4.9.5",
-    "vite": "^5.4.8"
-  }
+    "name": "@inertiajs/react-playground",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": " vite build && vite build --ssr"
+    },
+    "type": "module",
+    "devDependencies": {
+        "@inertiajs/react": "^1.0.0",
+        "@types/react": "^16.14.35",
+        "@types/react-dom": "^16.9.18",
+        "@vitejs/plugin-react": "^4.3.2",
+        "autoprefixer": "^10.4.13",
+        "axios": "^1.6.0",
+        "laravel-vite-plugin": "^1.0.5",
+        "lodash": "^4.17.19",
+        "postcss": "^8.4.31",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.2.4",
+        "typescript": "^4.9.5",
+        "vite": "^5.4.8"
+    }
 }
