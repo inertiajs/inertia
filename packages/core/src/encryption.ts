@@ -8,6 +8,11 @@ export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
   const iv = getIv()
   const storedKey = await getKeyFromSessionStorage()
   const key = await getOrCreateKey(storedKey)
+
+  if (!key) {
+    throw new Error('Unable to encrypt history')
+  }
+
   const encrypted = await encryptData(iv, key, data)
 
   return encrypted
@@ -124,6 +129,10 @@ const getOrCreateKey = async (key: CryptoKey | null) => {
   }
 
   const newKey = await createKey()
+
+  if (!newKey) {
+    return null
+  }
 
   await saveKey(newKey)
 
