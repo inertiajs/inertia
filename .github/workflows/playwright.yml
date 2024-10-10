@@ -7,7 +7,9 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        adapter: ['vue3']
+        adapter: ['vue3', 'react', 'svelte']
+    env:
+        PACKAGE: ${{ matrix.adapter }}
     steps:
     - uses: actions/checkout@v4
 
@@ -45,7 +47,7 @@ jobs:
       run:  cd tests/app && npm install
 
     - name: Run Playwright Tests
-      run:  cd tests && PACKAGE=${{ matrix.adapter }} npx playwright test
+      run:  cd tests && npx playwright test
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
