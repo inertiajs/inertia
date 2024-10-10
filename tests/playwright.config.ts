@@ -81,7 +81,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: `cd ${path.resolve(__dirname, '../packages/', process.env.PACKAGE || 'vue3', 'test-app')} && npm run server:run && cd ${__dirname} && node app/server.js`,
-    url: 'http://localhost:13715',
+    url: `http://localhost:${adapterPorts[process.env.PACKAGE || 'vue3']}`,
     reuseExistingServer: !process.env.CI,
   },
 })
