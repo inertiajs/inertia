@@ -13,7 +13,7 @@ interface CreateInertiaAppProps {
   id?: string
   resolve: ComponentResolver
   setup?: (props: {
-    el: Element
+    el: HTMLElement
     App: ComponentType<App>
     props: {
       initialPage: Page
