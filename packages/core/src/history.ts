@@ -11,6 +11,8 @@ class History {
   public preserveUrl = false
   protected current: Partial<Page> = {}
   protected queue: (() => Promise<void>)[] = []
+  // We need initialState for `restore`
+  protected initialState: Partial<Page> | null = null
 
   public remember(data: unknown, key: string): void {
     this.replaceState({
@@ -24,7 +26,7 @@ class History {
 
   public restore(key: string): unknown {
     if (!isServer) {
-      return this.getState<{ [key: string]: any }>(this.rememberedState, {})?.[key]
+      return this.initialState?.[this.rememberedState]?.[key]
     }
   }
 
@@ -77,7 +79,11 @@ class History {
         throw new Error('Unable to decrypt history')
       }
 
-      this.current = data ?? {}
+      if (this.initialState === null) {
+        this.initialState = data ?? undefined
+      } else {
+        this.current = data ?? {}
+      }
 
       return data
     })
