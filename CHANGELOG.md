@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v1.2.0...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.1...HEAD)
 
-- v2.0 🫣
+- Nothing!
+
+## [v2.0.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0-beta.1)
+
+- First beta release for the upcoming Inertia.js v2.0. View documentation and upgrade guide at https://v2.inertiajs.com.
 
 ## [v1.3.0-beta.2](https://github.com/inertiajs/inertia/compare/v1.3.0-beta.1...v1.3.0-beta.2)
 

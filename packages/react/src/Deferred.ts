@@ -17,7 +17,7 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   const keys = Array.isArray(data) ? data : [data]
 
   useEffect(() => {
-    setLoaded(loaded || keys.every((key) => pageProps[key] !== undefined))
+    setLoaded(keys.every((key) => pageProps[key] !== undefined))
   }, [pageProps, keys])
 
   return loaded ? children : fallback

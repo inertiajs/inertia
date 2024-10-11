@@ -3,10 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && vite build --ssr"
+    "build": " vite build && vite build --ssr"
   },
+  "type": "module",
   "devDependencies": {
-    "@inertiajs/react": "^1.0.0",
+    "@inertiajs/react": "2.0.0-beta.1",
     "@types/react": "^16.14.35",
     "@types/react-dom": "^16.9.18",
     "@vitejs/plugin-react": "^4.3.2",
