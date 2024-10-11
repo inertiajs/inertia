@@ -9,7 +9,10 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.1...HEAD)
 
-- Nothing!
+- [2.x] Fix issue where initial page data is coming from history state ([#2023](https://github.com/inertiajs/inertia/pull/2023))
+- [2.x] Fix onClick in React adapter ([#2019](https://github.com/inertiajs/inertia/pull/2019))
+- [2.x] Export usePrefetch for react ([#2016](https://github.com/inertiajs/inertia/pull/2016))
+- [2.x] Rename WhenVisible "elementTag" prop to "as" ([#2009](https://github.com/inertiajs/inertia/pull/2009))
 
 ## [v2.0.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0-beta.1)
 
