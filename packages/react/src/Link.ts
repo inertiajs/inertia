@@ -166,6 +166,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
 
     const regularEvents = {
       onClick: (event) => {
+        onClick(event)
+
         if (shouldIntercept(event)) {
           event.preventDefault()
 
