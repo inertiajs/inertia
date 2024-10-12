@@ -29,11 +29,9 @@ The `<Link>` component and the `use:inertia` action have been removed. Instead, 
 
 ### `<Frame>`
 
-The Frame component is the heart and soul of this version of Inertia. It allows you to embed an Inertia page within another Inertia page. This way you can easily create interactive modals, wizrards, dialogs, sidebars, etc.
+The Frame component is the heart and soul of this version of Inertia. It allows you to embed an Inertia page within another Inertia page. This way you can easily create interactive modals, wizards, dialogs, sidebars, etc.
 
-All navigation (including form submissions) is encapsulated within the Frame component.
-
-### Usage
+#### Usage
 
 ```html
 <Frame src="/dashboard">
@@ -41,7 +39,13 @@ All navigation (including form submissions) is encapsulated within the Frame com
 </Frame>
 ```
 
-### Props
+#### Things to note
+
+* All navigation (including form submissions) is encapsulated within the Frame component.
+* Props on the `<Frame>` component are being passed on to the Inertia page component.
+* When making a request from within a Frame, the `X-Inertia-Referer` header contains the URL of the frame. Use this instead of calling `redirect_back`, if you want to redirect the user back.
+
+#### Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -50,7 +54,3 @@ All navigation (including form submissions) is encapsulated within the Frame com
 | `component` | string | The name of the Inertia page component to load. `src` is ignored if this is set. |
 | `renderLayout` | boolean | Whether to render the layout. Defaults to `true` if `name` == `_top`. `false` otherwise. |
 
-#### Things to note
-
-* Props on the `<Frame>` component are being passed on to the Inertia page component.
-* When making a request from within a Frame, the `X-Inertia-Referer` header contains the URL of the frame. Use this instead of calling `redirect_back`, if you want to redirect the user back.
