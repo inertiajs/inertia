@@ -5,7 +5,7 @@ import modal from './modal'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, Page, Frame } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 class ResponseQueue {
@@ -84,9 +84,10 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
-    await this.setPage()
-
-    const errors = currentPage.get().props.errors || {}
+    await this.setFrame()
+    const frame = this.requestParams.all().frame
+    
+    const errors = currentPage.frame(frame).props.errors || {}
 
     if (Object.keys(errors).length > 0) {
       const scopedErrors = this.getScopedErrors(errors)
@@ -169,10 +170,10 @@ export class Response {
     }
   }
 
-  protected async setPage(): Promise<void> {
+  protected async setFrame(): Promise<void> {
     const pageResponse = this.getDataFromResponse(this.response.data)
 
-    if (!this.shouldSetPage(pageResponse)) {
+    if (!this.shouldSetFrame(pageResponse)) {
       return Promise.resolve()
     }
 
@@ -181,9 +182,11 @@ export class Response {
 
     this.requestParams.setPreserveOptions(pageResponse)
 
-    pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
+    pageResponse.url = history.preserveUrl ? currentPage.frame("_top").url : this.pageUrl(pageResponse)
 
-    return currentPage.set(pageResponse, {
+    return currentPage.setFrame(
+      this.requestParams.all().frame, 
+      pageResponse, {
       replace: this.requestParams.all().replace,
       preserveScroll: this.requestParams.all().preserveScroll,
       preserveState: this.requestParams.all().preserveState,
@@ -202,13 +205,14 @@ export class Response {
     }
   }
 
-  protected shouldSetPage(pageResponse: Page): boolean {
+  protected shouldSetFrame(pageResponse: Frame): boolean {
+    const frame = this.requestParams.all().frame
     if (!this.requestParams.all().async) {
       // If the request is sync, we should always set the page
       return true
     }
 
-    if (this.originatingPage.component !== pageResponse.component) {
+    if (this.originatingPage.frames[frame].component !== pageResponse.component) {
       // We originated from a component but the response re-directed us,
       // we should respect the redirection and set the page
       return true
@@ -216,19 +220,19 @@ export class Response {
 
     // At this point, if the originating request component is different than the current component,
     // the user has since navigated and we should discard the response
-    if (this.originatingPage.component !== currentPage.get().component) {
+    if (this.originatingPage.frames[frame].component !== currentPage.frame(frame).component) {
       return false
     }
 
-    const originatingUrl = hrefToUrl(this.originatingPage.url)
-    const currentPageUrl = hrefToUrl(currentPage.get().url)
+    const originatingUrl = hrefToUrl(this.originatingPage.frames['_top'].url)
+    const currentPageUrl = hrefToUrl(currentPage.frame("_top").url)
 
     // We have the same component, let's double-check the URL
     // If we're no longer on the same path name (e.g. /users/1 -> /users/2), we should not set the page
     return originatingUrl.origin === currentPageUrl.origin && originatingUrl.pathname === currentPageUrl.pathname
   }
 
-  protected pageUrl(pageResponse: Page) {
+  protected pageUrl(pageResponse: Frame) {
     const responseUrl = hrefToUrl(pageResponse.url)
 
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
@@ -236,34 +240,36 @@ export class Response {
     return responseUrl.href
   }
 
-  protected mergeProps(pageResponse: Page): void {
-    if (this.requestParams.isPartial() && pageResponse.component === currentPage.get().component) {
+  protected mergeProps(pageResponse: Frame): void {
+    const frame = this.requestParams.all().frame
+    if (this.requestParams.isPartial() && pageResponse.component === currentPage.frame(frame).component) {
       const propsToMerge = pageResponse.mergeProps || []
 
       propsToMerge.forEach((prop) => {
         const incomingProp = pageResponse.props[prop]
 
         if (Array.isArray(incomingProp)) {
-          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
+          pageResponse.props[prop] = [...((currentPage.frame(frame).props[prop] || []) as any[]), ...incomingProp]
         } else if (typeof incomingProp === 'object') {
           pageResponse.props[prop] = {
-            ...((currentPage.get().props[prop] || []) as Record<string, any>),
+            ...((currentPage.frame(frame).props[prop] || []) as Record<string, any>),
             ...incomingProp,
           }
         }
       })
 
-      pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
+      pageResponse.props = { ...currentPage.frame(frame).props, ...pageResponse.props }
     }
   }
 
-  protected async setRememberedState(pageResponse: Page): Promise<void> {
-    const rememberedState = await history.getState<Page['rememberedState']>(history.rememberedState, {})
-
+  protected async setRememberedState(pageResponse: Frame): Promise<void> {
+    const rememberedFrames = await history.getState<Page['frames']>('frames', {})
+    const frame = this.requestParams.all().frame
+    const rememberedState = rememberedFrames[frame]?.rememberedState || {}
     if (
       this.requestParams.all().preserveState &&
       rememberedState &&
-      pageResponse.component === currentPage.get().component
+      pageResponse.component === currentPage.frame(frame).component
     ) {
       pageResponse.rememberedState = rememberedState
     }

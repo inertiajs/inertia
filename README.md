@@ -1,19 +1,31 @@
-[![Inertia.js](https://raw.githubusercontent.com/inertiajs/inertia/master/.github/LOGO.png)](https://inertiajs.com/)
+# Inertia X Æ A-Xii
 
-Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps using classic server-side routing and controllers. Find full documentation at [inertiajs.com](https://inertiajs.com/).
+Inertia X Æ A-Xii is an adaptation and (almost) drop-in replacement for the [Inertiajs](https://inertiajs.com) client side adapter for Svelte 5.
 
-## Contributing
+Forked from Inertia 2.0, it contains the following changes:
 
-If you're interested in contributing to Inertia.js, please read our [contributing guide](https://github.com/inertiajs/inertia/blob/master/.github/CONTRIBUTING.md).
+* It adds support for the `<Frame>` component with multiple routers in the same app
+* It drops the global page store. Instead, each `<Frame>` has its own store.
+* It removes the `<App>` component and replaces it with a top-level `<Frame>`.
+* It changes the structure of the history state: The `Page` object does not contain props anymore. Instead, it now contains several `Frame` objects that contain the props for each frame.
 
-## Sponsors
+Unfortunately, this is only for Svelte 5 at the moment. However, the changes to the internal API are minimal. It shouldn't be too hard to add support for your favourite framework.
 
-A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help push Inertia.js development forward! In particular, we'd like to say a special thank you to our partners:
+## Breaking Changes
 
-<p>
-  <a href="https://forge.laravel.com">
-    <img src="./.github/sponsors/forge.svg" width="150" alt="Laravel Forge">
-  </a>
-</p>
+### Context instead of imports
 
-If you'd like to become a sponsor, please [see here](https://github.com/sponsors/reinink) for more information. 💜
+Many functions and objects are now "frames-aware". This means that they are now not globally exported anymore, but have to be fetched from the Svelte context:
+
+```diff
+-import { router, page, inertia, useForm } from '@inertiajs/svelte'
++const { router, page, inertia, useForm } = getContext('frame')
+```
+
+To get the router or page of a parent frame, use `getContext('router:[frameName]))`
+
+### Global click handler
+
+By default, Inertia X Æ A-Xii uses a global click handler to intercept all `<a>` tags for the Inertia router. If you don't want this, add a `data-inertia-ignore` attribute to the `<a>` tag or one of its parents. To opt-out globally, set the `data-inertia-ignore` attribute on the `<body>`.
+
+## New Features

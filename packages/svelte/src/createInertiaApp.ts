@@ -1,35 +1,6 @@
-import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
-import escape from 'html-escape'
-import type { ComponentType } from 'svelte'
-import { version as SVELTE_VERSION } from 'svelte/package.json'
-import App from './components/App.svelte'
-import store from './store'
-import type { ComponentResolver, ResolvedComponent } from './types'
-
-type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
-type AppComponent = ComponentType<App> & { render: () => SvelteRenderResult }
-
-interface CreateInertiaAppProps {
-  id?: string
-  resolve: ComponentResolver
-  setup?: (props: {
-    el: HTMLElement
-    App: ComponentType<App>
-    props: {
-      initialPage: Page
-      resolveComponent: ComponentResolver
-    }
-  }) => void | App
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
-  page?: Page
-}
+import { setupProgress } from 'inertiax-core';
+import escape from 'html-escape';
+import Frame from './components/Frame.svelte';
 
 export default async function createInertiaApp({
   id = 'app',
@@ -37,78 +8,51 @@ export default async function createInertiaApp({
   setup,
   progress = {},
   page,
-}: CreateInertiaAppProps): InertiaAppResponse {
-  const isServer = typeof window === 'undefined'
-  const el = isServer ? null : document.getElementById(id)
-  const initialPage: Page = page || JSON.parse(el?.dataset?.page || '{}')
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name))
-
-  await Promise.all([resolveComponent(initialPage.component), router.decryptHistory().catch(() => {})]).then(
-    ([initialComponent]) => {
-      store.set({
-        component: initialComponent,
-        page: initialPage,
-        key: null,
-      })
-    },
-  )
-
+}) {
+  const isServer = typeof window === 'undefined';
+  const el = isServer ? null : document.getElementById(id);
+  const initialFrame = page || JSON.parse(el?.dataset?.page || '{}');
+  const resolveComponent = (name) => Promise.resolve(resolve(name));
+  
   if (isServer) {
-    const isSvelte5 = SVELTE_VERSION.startsWith('5')
+    const { render } = await dynamicImport('svelte/server');
     const { html, head, css } = await (async () => {
-      if (isSvelte5) {
-        const { render } = await dynamicImport('svelte/server')
-        if (typeof render === 'function') {
-          return render(App) as SvelteRenderResult
-        }
+      if (typeof render === 'function') {
+        return render(Frame, {
+          props: { initialFrame, resolveComponent },
+        });
       }
-
-      return (App as AppComponent).render()
-    })()
+    })();
 
     return {
-      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialFrame))}">${html}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
-    }
+    };
   }
 
   if (!el) {
-    throw new Error(`Element with ID "${id}" not found.`)
+    throw new Error(`Element with ID "${id}" not found.`);
   }
 
-  router.init({
-    initialPage,
-    resolveComponent,
-    swapComponent: async ({ component, page, preserveState }) => {
-      store.update((current) => ({
-        component: component as ResolvedComponent,
-        page,
-        key: preserveState ? current.key : Date.now(),
-      }))
-    },
-  })
-
   if (progress) {
-    setupProgress(progress)
+    setupProgress(progress);
   }
 
   setup({
     el,
-    App,
+    App: Frame,
     props: {
-      initialPage,
+      initialFrame,
       resolveComponent,
     },
-  })
+  });
 }
 
-// Loads the module dynamically during execution instead of at
-// build time. The `@vite-ignore` flag prevents Vite from
-// analyzing or pre-bundling this import.
-async function dynamicImport(module: string) {
+async function dynamicImport(module) {
   try {
-    return await import(/* @vite-ignore */ module)
+    return await import(/* @vite-ignore */ module);
   } catch {
-    return null
+    return null;
   }
 }
+

@@ -32,6 +32,8 @@ import {
 import { transformUrlAndData } from './url'
 
 export class Router {
+  protected frame
+  
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
     interruptible: true,
@@ -41,10 +43,13 @@ export class Router {
     maxConcurrent: Infinity,
     interruptible: false,
   })
-
-  public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
+  
+  constructor({ frame, initialFrame, resolveComponent, swapComponent }: RouterInitParams) {
+    this.frame = frame
+    
     currentPage.init({
-      initialPage,
+      frame,
+      initialFrame,
       resolveComponent,
       swapComponent,
     })
@@ -102,11 +107,11 @@ export class Router {
   }
 
   public remember(data: unknown, key = 'default'): void {
-    history.remember(data, key)
+    history.remember(this.frame, data, key)
   }
 
   public restore(key = 'default'): unknown {
-    return history.restore(key)
+    return history.restore(this.frame, key)
   }
 
   public on<TEventName extends GlobalEventNames>(
@@ -266,6 +271,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
+      frame: "_top",
       ...options,
     }
 
@@ -304,7 +310,7 @@ export class Router {
   }
 
   protected loadDeferredProps(): void {
-    const deferred = currentPage.get()?.deferredProps
+    const deferred = currentPage.frame(this.frame)?.deferredProps
 
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {

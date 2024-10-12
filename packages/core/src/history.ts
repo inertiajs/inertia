@@ -14,19 +14,26 @@ class History {
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
 
-  public remember(data: unknown, key: string): void {
+  public remember(frame: string, data: unknown, key: string): void {
+    // LOL
     this.replaceState({
       ...currentPage.get(),
-      rememberedState: {
-        ...(currentPage.get()?.rememberedState ?? {}),
-        [key]: data,
-      },
+      frames: {
+        ...currentPage.get().frames,
+        [frame]: {
+          ...currentPage.get().frames[frame],
+          rememberedState: {
+            ...(currentPage.get().frames[frame]?.rememberedState ?? {}),
+            [key]: data,
+          },
+        }
+      }
     })
   }
 
-  public restore(key: string): unknown {
+  public restore(frame: string, key: string): unknown {
     if (!isServer) {
-      return this.initialState?.[this.rememberedState]?.[key]
+      return this.initialState?.frames?.[frame]?.rememberedState?.[key]
     }
   }
 
@@ -45,7 +52,7 @@ class History {
             timestamp: Date.now(),
           },
           '',
-          page.url,
+          page.frames["_top"].url,
         )
       })
     })
@@ -110,7 +117,7 @@ class History {
             timestamp: Date.now(),
           },
           '',
-          page.url,
+          page.frames["_top"].url,
         )
       })
     })
@@ -125,11 +132,11 @@ class History {
     return this.current?.[key] ?? defaultValue
   }
 
-  public deleteState(key: keyof Page) {
-    if (this.current[key] !== undefined) {
-      delete this.current[key]
-      this.replaceState(this.current as Page)
-    }
+  public deleteRememberedState() {
+    Object.values((this.current as Page).frames).forEach((frame) => {
+      delete frame.rememberedState
+    })
+    this.replaceState(this.current as Page)
   }
 
   public hasAnyState(): boolean {

@@ -2,10 +2,11 @@ import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
 import {
+  Frame,
   Component,
   Page,
   PageEvent,
-  PageHandler,
+  FrameHandler,
   PageResolver,
   PreserveStateOption,
   RouterInitParams,
@@ -15,8 +16,12 @@ import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
   protected page!: Page
-  protected swapComponent!: PageHandler
-  protected resolveComponent!: PageResolver
+  protected resolvers!: {
+    [frame: string]: PageResolver,
+  }
+  protected swappers!: {
+    [frame: string]: FrameHandler,
+  }
   protected componentId = {}
   protected listeners: {
     event: PageEvent
@@ -25,15 +30,15 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
 
-  public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
-    this.page = initialPage
-    this.swapComponent = swapComponent
-    this.resolveComponent = resolveComponent
-
+  public init({ frame, initialFrame, swapComponent, resolveComponent }: RouterInitParams) {
+    this.page.frames[frame] = initialFrame
+    this.swappers[frame] = swapComponent
+    this.resolvers[frame] = resolveComponent
+  
     return this
   }
 
-  public set(
+  public async set(
     page: Page,
     {
       replace = false,
@@ -49,27 +54,31 @@ class CurrentPage {
       history.clear()
     }
 
-    return this.resolve(page.component).then((component) => {
+    return this.resolve(page.frames).then((components) => {
       if (componentId !== this.componentId) {
         // Component has changed since we started resolving this component, bail
         return
       }
 
       page.scrollRegions ??= []
-      page.rememberedState ??= {}
-      const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
-      replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
+      //page.rememberedState ??= {}
+      
+      // If we changed the _top frame, update the URL
+      if (page.frames['_top']?.url === undefined) {
+        const location = typeof window !== 'undefined' ? window.location : new URL(page.frames['_top'].url)
+        replace = replace || isSameUrlWithoutHash(hrefToUrl(page.frames['_top']?.url), location)
+      }
 
       replace ? history.replaceState(page) : history.pushState(page)
 
-      const isNewComponent = !this.isTheSame(page)
+      // const isNewComponent = !this.isTheSame(page)
 
       this.page = page
       this.cleared = false
 
-      if (isNewComponent) {
-        this.fireEventsFor('newComponent')
-      }
+      // if (isNewComponent) {
+        // this.fireEventsFor('newComponent')
+      // }
 
       if (this.isFirstPageLoad) {
         this.fireEventsFor('firstLoad')
@@ -77,7 +86,7 @@ class CurrentPage {
 
       this.isFirstPageLoad = false
 
-      return this.swap({ component, page, preserveState }).then(() => {
+      return this.swap({ components, page, preserveState }).then(() => {
         if (!preserveScroll) {
           Scroll.reset(page)
         }
@@ -89,7 +98,7 @@ class CurrentPage {
     })
   }
 
-  public setQuietly(
+  public async setQuietly(
     page: Page,
     {
       preserveState = false,
@@ -97,13 +106,28 @@ class CurrentPage {
       preserveState?: PreserveStateOption
     } = {},
   ) {
-    return this.resolve(page.component).then((component) => {
+    return this.resolve(page.frames).then((components) => {
       this.page = page
       this.cleared = false
-      return this.swap({ component, page, preserveState })
+      return this.swap({ components, page, preserveState })
     })
   }
 
+  public async setFrame(
+    name: string,
+    frame: Frame,
+    options: Partial<VisitOptions> = {}
+  ): Promise<void> {
+    return this.set({
+      ...this.page,
+      frames: {
+        ...this.page.frames,
+        [name]: frame,
+      }
+    }, options)
+  }
+    
+  
   public clear(): void {
     this.cleared = true
   }
@@ -111,21 +135,32 @@ class CurrentPage {
   public isCleared(): boolean {
     return this.cleared
   }
-
+  
+  public frame(name: string): Frame {
+    return this.page.frames[name]
+  }
+  
   public get(): Page {
     return this.page
   }
 
   public merge(data: Partial<Page>): void {
-    this.page = { ...this.page, ...data }
+    this.page = { 
+      ...this.page,
+      ...data,
+      frames: {
+        ...this.page.frames,
+        ...data.frames,
+      },
+    }
   }
 
   public setUrlHash(hash: string): void {
-    this.page.url += hash
+    this.page.frames["_top"].url += hash
   }
 
-  public remember(data: Page['rememberedState']): void {
-    this.page.rememberedState = data
+  public remember(frame: string, data: Frame['rememberedState']): void {
+    this.page.frames[frame].rememberedState = data
   }
 
   public scrollRegions(regions: Page['scrollRegions']): void {
@@ -133,23 +168,30 @@ class CurrentPage {
   }
 
   public swap({
-    component,
+    components,
     page,
     preserveState,
   }: {
-    component: Component
-    page: Page
+    components: { [name: string]: Component }
+    page: Page,
     preserveState: PreserveStateOption
   }): Promise<unknown> {
-    return this.swapComponent({ component, page, preserveState })
+    return Promise.all(Object.entries(components).map(([name, component]) => {
+      return this.swappers[name]({ component, frame: page.frames[name], preserveState })
+    }))
   }
 
-  public resolve(component: string): Promise<Component> {
-    return Promise.resolve(this.resolveComponent(component))
+  public async resolve(frames: { [name: string]: Frame }): Promise<{ [name: string]: Component }> {
+    const result: { [name: string]: Component } = {}
+    await Promise.all(Object.keys(frames).map(async (name) => {
+      const frame = frames[name]
+      result[name] = await this.resolvers[name](frame.component)
+    }))
+    return result
   }
 
-  public isTheSame(page: Page): boolean {
-    return this.page.component === page.component
+  public isTheSame(name: string, frame: Frame): boolean {
+    return this.page.frames[name].component === frame.component
   }
 
   public on(event: PageEvent, callback: VoidFunction): VoidFunction {

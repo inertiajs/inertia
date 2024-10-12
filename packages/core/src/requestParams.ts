@@ -105,7 +105,7 @@ export class RequestParams {
     }
 
     if (this.isPartial()) {
-      headers['X-Inertia-Partial-Component'] = currentPage.get().component
+      headers['X-Inertia-Partial-Component'] = currentPage.frame(this.params.frame).component
     }
 
     const only = this.params.only.concat(this.params.reset)
@@ -167,7 +167,7 @@ export class RequestParams {
     }
 
     if (value === 'errors') {
-      return Object.keys(page.props.errors || {}).length > 0
+      return Object.keys(page.frames[this.params.frame].props.errors || {}).length > 0
     }
 
     return value

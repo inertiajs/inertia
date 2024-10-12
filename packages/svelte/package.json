@@ -1,20 +1,21 @@
 {
-  "name": "@inertiajs/svelte",
-  "version": "2.0.0-beta.1",
+  "name": "inertiax-svelte",
+  "version": "5.0.0",
   "license": "MIT",
-  "description": "The Svelte adapter for Inertia.js",
+  "description": "The Svelte adapter for Inertia X",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
-    "Pedro Borges <oi@pedroborg.es>"
+    "Pedro Borges <oi@pedroborg.es>",
+    "Stefan Buhrmester <buhrmi@shitcoinsociety.com>"
   ],
-  "homepage": "https://inertiajs.com/",
+  "homepage": "https://github.com/buhrmi/inertiax",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inertiajs/inertia.git",
+    "url": "https://github.com/buhrmi/inertiax.git",
     "directory": "packages/svelte"
   },
   "bugs": {
-    "url": "https://github.com/inertiajs/inertia/issues"
+    "url": "https://github.com/buhrmi/inertiax/issues"
   },
   "scripts": {
     "dev": "npm run package -- --watch",
@@ -40,10 +41,10 @@
     "!dist/**/*.spec.*"
   ],
   "peerDependencies": {
-    "svelte": "^4.0.0 || ^5.0.0 || ^5.0.0-next.244"
+    "svelte": "^5.0.0 || ^5.0.0-next.244"
   },
   "dependencies": {
-    "@inertiajs/core": "2.0.0-beta.1",
+    "inertiax-core": "^5.0.0",
     "html-escape": "^2.0.0",
     "lodash": "^4.5.0"
   },

@@ -29,7 +29,7 @@ export interface PageProps {
   [key: string]: unknown
 }
 
-export interface Page<SharedProps extends PageProps = PageProps> {
+export interface Frame<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
     SharedProps & {
@@ -37,27 +37,34 @@ export interface Page<SharedProps extends PageProps = PageProps> {
       deferred?: Record<string, VisitOptions['only']>
     }
   url: string
+  deferredProps?: Record<string, VisitOptions['only']>
+  mergeProps?: string[]
+  
+  /** @internal */
+  rememberedState?: Record<string, unknown>
+}
+
+export interface Page {
+  frames: {
+    [name: string]: Frame
+  }
   version: string | null
   clearHistory: boolean
   encryptHistory: boolean
-  deferredProps?: Record<string, VisitOptions['only']>
-  mergeProps?: string[]
 
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
-  /** @internal */
-  rememberedState: Record<string, unknown>
 }
 
 export type PageResolver = (name: string) => Component
 
-export type PageHandler = ({
+export type FrameHandler = ({
   component,
-  page,
+  frame,
   preserveState,
 }: {
   component: Component
-  page: Page
+  frame: Frame
   preserveState: PreserveStateOption
 }) => Promise<unknown>
 
@@ -87,6 +94,7 @@ export type Visit = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  frame: string
 }
 
 export type GlobalEventsMap = {
@@ -221,9 +229,10 @@ export type PollOptions = {
 export type VisitHelperOptions = Omit<VisitOptions, 'method' | 'data'>
 
 export type RouterInitParams = {
-  initialPage: Page
+  frame: string,
+  initialFrame: Frame
   resolveComponent: PageResolver
-  swapComponent: PageHandler
+  swapComponent: FrameHandler
 }
 
 export type PendingVisitOptions = {

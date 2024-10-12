@@ -1,6 +1,8 @@
-import { router } from '@inertiajs/core'
-import { onDestroy } from 'svelte'
+import { Router } from 'inertiax-core'
+import { getContext, onDestroy } from 'svelte'
 import { writable } from 'svelte/store'
+
+const { router } = getContext<{router: Router}>('frame')
 
 export default function useRemember<State>(initialState: State, key?: string) {
   const restored = router.restore(key) as State | undefined

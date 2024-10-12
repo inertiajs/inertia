@@ -1,21 +1,22 @@
 {
-  "name": "@inertiajs/core",
-  "version": "2.0.0-beta.1",
+  "name": "inertiax-core",
+  "version": "5.0.0",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
     "Jonathan Reinink <jonathan@reinink.ca>",
     "Claudio Dekker <claudio@ubient.net>",
-    "Sebastian De Deyne <sebastiandedeyne@gmail.com>"
+    "Sebastian De Deyne <sebastiandedeyne@gmail.com>",
+    "Stefan Buhrmester <buhrmi@shitcoinsociety.com>"
   ],
-  "homepage": "https://inertiajs.com/",
+  "homepage": "https://github.com/buhrmi/inertiax",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inertiajs/inertia.git",
+    "url": "https://github.com/buhrmi/inertiax.git",
     "directory": "packages/inertia"
   },
   "bugs": {
-    "url": "https://github.com/inertiajs/inertia/issues"
+    "url": "https://github.com/buhrmi/inertiax/issues"
   },
   "files": [
     "dist",

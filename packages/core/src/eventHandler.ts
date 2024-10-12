@@ -68,12 +68,21 @@ class EventHandler {
     const state = event.state || null
 
     if (state === null) {
-      const url = hrefToUrl(currentPage.get().url)
+      const url = hrefToUrl(currentPage.frame("_top").url)
       url.hash = window.location.hash
-
-      history.replaceState({ ...currentPage.get(), url: url.href })
+      
+      // LOL
+      history.replaceState({
+        ...currentPage.get(),
+        frames: {
+          ...currentPage.get().frames,
+          "_top": {
+            ...currentPage.frame("_top"),
+            url: url.href,
+          }
+        }
+      })
       Scroll.reset(currentPage.get())
-
       return
     }
 

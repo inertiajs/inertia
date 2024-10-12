@@ -5,7 +5,7 @@ import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { SessionStorage } from './sessionStorage'
-import { LocationVisit, Page } from './types'
+import { LocationVisit, Page, Frame } from './types'
 
 export class InitialVisit {
   public static handle(): void {
@@ -18,7 +18,7 @@ export class InitialVisit {
 
   protected static clearRememberedStateOnReload(): void {
     if (navigationType.isReload()) {
-      history.deleteState(history.rememberedState)
+      history.deleteRememberedState()
     }
   }
 
@@ -61,9 +61,11 @@ export class InitialVisit {
     history
       .decrypt()
       .then(() => {
-        const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
+        const rememberedFrames: Record<string, Frame> = history.getState<Page['frames']>("frames", {})
         const scrollRegions = history.getState<Page['scrollRegions']>(history.scrollRegions, [])
-        currentPage.remember(rememberedState)
+        Object.entries(rememberedFrames).forEach(([name, frame]) => {
+          currentPage.remember(name, frame.rememberedState)
+        })
         currentPage.scrollRegions(scrollRegions)
 
         currentPage
