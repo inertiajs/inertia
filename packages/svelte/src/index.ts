@@ -1,3 +1,4 @@
+export { default as Frame } from './components/Frame.svelte'
 export { default as Deferred } from './components/Deferred.svelte'
 export { default as WhenVisible } from './components/WhenVisible.svelte'
 export { default as createInertiaApp } from './createInertiaApp'

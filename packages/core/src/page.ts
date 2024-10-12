@@ -1,13 +1,13 @@
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
+import { Router } from './router'
 import {
   Frame,
   Component,
   Page,
   PageEvent,
   FrameHandler,
-  PageResolver,
   PreserveStateOption,
   RouterInitParams,
   VisitOptions,
@@ -20,9 +20,7 @@ class CurrentPage {
     version: null,
     scrollRegions: []
   }
-  protected resolvers: {
-    [frame: string]: PageResolver,
-  } = {}
+  
   protected swappers: {
     [frame: string]: FrameHandler,
   } = {}
@@ -34,14 +32,13 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
 
-  public init({ frame, initialFrame, swapComponent, resolveComponent }: RouterInitParams) {  
-    this.page.version = initialFrame.version
+  public init({ frame, initialFrame, swapComponent }: RouterInitParams) {  
+    this.page.version ||= initialFrame?.version
     this.page.frames = {
       ...this.page?.frames,
-      [frame]: initialFrame
+      [frame]: initialFrame || {}
     }
     this.swappers[frame] = swapComponent
-    this.resolvers[frame] = resolveComponent
   
     return this
   }
@@ -70,7 +67,6 @@ class CurrentPage {
 
       page.scrollRegions ??= []
       //page.rememberedState ??= {}
-      
       // If we changed the _top frame, update the URL
       if (page.frames['_top']?.url === undefined) {
         const location = typeof window !== 'undefined' ? window.location : new URL(page.frames['_top'].url)
@@ -126,6 +122,7 @@ class CurrentPage {
     frame: Frame,
     options: Partial<VisitOptions> = {}
   ): Promise<void> {
+    console.log('setting frame', name, frame)
     return this.set({
       ...this.page,
       frames: {
@@ -193,7 +190,7 @@ class CurrentPage {
     const result: { [name: string]: Component } = {}
     await Promise.all(Object.keys(frames).map(async (name) => {
       const frame = frames[name]
-      result[name] = await this.resolvers[name](frame.component)
+      result[name] = await Router.resolveComponent(frame.component)
     }))
     return result
   }

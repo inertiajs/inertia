@@ -231,7 +231,6 @@ export type VisitHelperOptions = Omit<VisitOptions, 'method' | 'data'>
 export type RouterInitParams = {
   frame: string,
   initialFrame: Frame & { version: string | null }
-  resolveComponent: PageResolver
   swapComponent: FrameHandler
 }
 

@@ -23,6 +23,7 @@ import {
   PrefetchOptions,
   ReloadOptions,
   RequestPayload,
+  PageResolver,
   RouterInitParams,
   Visit,
   VisitCallbacks,
@@ -32,6 +33,8 @@ import {
 import { transformUrlAndData } from './url'
 
 export class Router {
+  static resolveComponent: PageResolver
+  
   protected frame
   
   protected syncRequestStream = new RequestStream({
@@ -44,16 +47,14 @@ export class Router {
     interruptible: false,
   })
   
-  constructor({ frame, initialFrame, resolveComponent, swapComponent }: RouterInitParams) {
+  constructor({ frame, initialFrame, swapComponent }: RouterInitParams) {
     this.frame = frame
     
     currentPage.init({
       frame,
       initialFrame,
-      resolveComponent,
       swapComponent,
     })
-
     
     InitialVisit.handle()
     
@@ -272,7 +273,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
-      frame: "_top",
+      frame: this.frame,
       ...options,
     }
 

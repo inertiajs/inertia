@@ -6,35 +6,42 @@
   import Render, { h } from './Render.svelte';
   
   let {
-    name = "_top", 
+    name = Math.random(),
+    src,
     initialFrame,
-    component,
-    resolveComponent,
+    renderLayout = name == '_top'
   } = $props()
   
+  
+  console.log('new frame:', name, src, initialFrame)
   // const store = writable({ component: null, frame: null, key: null })
   
+  let resolvedComponent = $state(null)
   let frame = $state(initialFrame)
   let key = $state(null)
   
   export const router = new Router({
     frame: name,
     initialFrame,
-    resolveComponent,
     swapComponent: async (opts) => {
-      ({ component, frame } = opts);
+      ({ component: resolvedComponent, frame } = opts);
       if (!opts.preserveState) key = Date.now();
     },
   })
-
+    
+  if (src) {
+    router.visit(src)
+  }
   
-  // Promise.all([resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
-  //   ([initialComponent]) => {
-  //     component = initialComponent
-  //     frame = initialFrame
-  //     key = null
-  //   },
-  // );
+  if (initialFrame?.component) {
+    Promise.all([Router.resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
+      ([initialComponent]) => {
+        resolvedComponent = initialComponent
+        frame = initialFrame
+        key = null
+      },
+    )
+  }
   
   const page = toStore(() => frame)
   
@@ -42,17 +49,19 @@
   setContext('frame', context)
   setContext(`router:${name}`, context)
   
-  const frameProps = $derived(resolveProps())
+  const resolvedProps = $derived(resolveProps())
   
   
   function resolveProps() {
-    const child = h(component.default, frame.props, [], key);
-    const layout = component.layout;
+    if (!resolvedComponent) return
+    
+    const child = h(resolvedComponent.default, frame.props, [], key);
+    const layout = renderLayout && resolvedComponent.layout;
   
     return layout ? resolveLayout(layout, child, frame.props, key) : child;
   }
   
-  function resolveLayout(layout, child, frameProps, key) {
+  function resolveLayout(layout, child, resolvedProps, key) {
     if (isLayoutFunction(layout)) {
       return layout(h, child);
     }
@@ -64,7 +73,7 @@
         .reduce((currentRender, layoutComponent) => h(layoutComponent, pageProps, [currentRender], key), child);
     }
   
-    return h(layout, frameProps, child ? [child] : [], key);
+    return h(layout, resolvedProps, child ? [child] : [], key);
   }
   
   function isLayoutFunction(layout) {
@@ -77,7 +86,9 @@
     
     event.preventDefault();
     
-    const href = event.currentTarget.getAttribute('href');
+    const href = event.target.closest('[href]')?.getAttribute('href')
+    if (!href) return
+    
     router.visit(href);
   }
 </script>
@@ -85,8 +96,8 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="frame" {onclick}>
-  {#if frameProps}
-    <Render {...frameProps} />
+  {#if resolvedProps}
+    <Render {...resolvedProps} />
   {/if}
 </div>
 

@@ -1,4 +1,4 @@
-import { setupProgress } from 'inertiax-core';
+import { setupProgress, Router } from 'inertiax-core';
 import escape from 'html-escape';
 import Frame from './components/Frame.svelte';
 
@@ -12,23 +12,22 @@ export default async function createInertiaApp({
   const isServer = typeof window === 'undefined';
   const el = isServer ? null : document.getElementById(id);
   const initialFrame = page || JSON.parse(el?.dataset?.page || '{}');
-  const resolveComponent = (name) => Promise.resolve(resolve(name));
-  
-  const component = await(resolveComponent(initialFrame.component))
-  
+  Router.resolveComponent = (name) => Promise.resolve(resolve(name));
+    
   if (isServer) {
     const { render } = await dynamicImport('svelte/server');
-    const { html, head, css } = await (async () => {
-      if (typeof render === 'function') {
-        return render(Frame, {
-          props: { initialFrame, resolveComponent, component },
-        });
-      }
+    const { html, head } = await (async () => {
+      return render(Frame, {
+        props: { 
+          name: "_top",
+          initialFrame
+        },
+      });
     })();
 
     return {
       body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialFrame))}">${html}</div>`,
-      head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
+      head: [head],
     };
   }
 
@@ -44,9 +43,8 @@ export default async function createInertiaApp({
     el,
     App: Frame,
     props: {
-      component,
+      name: "_top",
       initialFrame,
-      resolveComponent,
     },
   });
 }

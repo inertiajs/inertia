@@ -101,6 +101,8 @@ class History {
   }
 
   public replaceState(page: Page): void {
+    console.log('replaceState called with', page)
+    
     currentPage.merge(page)
 
     if (isServer || this.preserveUrl) {

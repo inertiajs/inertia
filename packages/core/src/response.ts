@@ -172,6 +172,7 @@ export class Response {
 
   protected async setFrame(): Promise<void> {
     const pageResponse = this.getDataFromResponse(this.response.data)
+    console.log('response.setFrame', this.requestParams.all().frame, pageResponse)
 
     if (!this.shouldSetFrame(pageResponse)) {
       return Promise.resolve()
@@ -183,7 +184,8 @@ export class Response {
     this.requestParams.setPreserveOptions(pageResponse)
 
     pageResponse.url = history.preserveUrl ? currentPage.frame("_top").url : this.pageUrl(pageResponse)
-
+    delete pageResponse.version
+    
     return currentPage.setFrame(
       this.requestParams.all().frame, 
       pageResponse, {

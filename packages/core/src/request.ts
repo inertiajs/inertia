@@ -4,7 +4,7 @@ import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
 import { ActiveVisit, Page } from './types'
-import { urlWithoutHash } from './url'
+import { urlWithoutHash, hrefToUrl } from './url'
 
 export class Request {
   protected response!: Response
@@ -135,7 +135,10 @@ export class Request {
     }
     
     const frame = this.requestParams.all().frame
-    headers['X-Inertia-Referer'] = urlWithoutHash(new URL(currentPage.frame(frame).url)).href
+    const referer = currentPage.frame(frame).url
+    if (referer) {
+      headers['X-Inertia-Referer'] = urlWithoutHash(hrefToUrl(referer)).href
+    }
 
     if (currentPage.get().version) {
       headers['X-Inertia-Version'] = currentPage.get().version
