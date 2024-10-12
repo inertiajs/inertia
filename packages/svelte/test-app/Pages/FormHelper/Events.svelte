@@ -1,5 +1,5 @@
 <script>
-  import { page, useForm } from '@inertiajs/svelte'
+  import { page, useForm } from 'inertiax-svelte'
 
   window.events = []
   window.data = []

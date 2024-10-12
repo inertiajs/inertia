@@ -1,5 +1,5 @@
 <script>
-  import { router } from '@inertiajs/svelte'
+  import { router } from 'inertiax-svelte'
 
   export let foo = []
   export let bar = []

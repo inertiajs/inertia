@@ -1,5 +1,5 @@
 <script>
-  import { router } from '@inertiajs/svelte'
+  import { router } from 'inertiax-svelte'
 
   const defaultVisit = () => {
     router.post('/dump/post')

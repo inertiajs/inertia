@@ -5,7 +5,7 @@
 </script>
 
 <script>
-  import { inertia, page } from '@inertiajs/svelte'
+  import { inertia, page } from 'inertiax-svelte'
 
   window._inertia_page_props = $page.props
 </script>

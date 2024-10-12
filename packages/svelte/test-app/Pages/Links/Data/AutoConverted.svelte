@@ -1,5 +1,5 @@
 <script>
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from 'inertiax-svelte'
 
   const linkData = {
     file: new File([], 'example.jpg'),

@@ -1,7 +1,7 @@
 {
   "version": "4",
   "specifiers": {
-    "npm:@inertiajs/svelte@2.0.0-beta.1": "2.0.0-beta.1_svelte@4.2.19",
+    "npm:inertiax-svelte@2.0.0-beta.1": "2.0.0-beta.1_svelte@4.2.19",
     "npm:@sveltejs/adapter-auto@^3.2.0": "3.2.5_@sveltejs+kit@2.7.0__@sveltejs+vite-plugin-svelte@3.1.2___svelte@4.2.19___vite@5.4.8__svelte@4.2.19__vite@5.4.8_@sveltejs+vite-plugin-svelte@3.1.2__svelte@4.2.19__vite@5.4.8_svelte@4.2.19_vite@5.4.8",
     "npm:@sveltejs/kit@^2.5.26": "2.7.0_@sveltejs+vite-plugin-svelte@3.1.2__svelte@4.2.19__vite@5.4.8_svelte@4.2.19_vite@5.4.8",
     "npm:@sveltejs/package@^2.3.4": "2.3.5_svelte@4.2.19_typescript@4.9.5",
@@ -199,7 +199,7 @@
         "qs"
       ]
     },
-    "@inertiajs/svelte@2.0.0-beta.1_svelte@4.2.19": {
+    "inertiax-svelte@2.0.0-beta.1_svelte@4.2.19": {
       "integrity": "sha512-2/hgdv8v1wTOWsOBFP69pwVQNkUJEODJoQsSLohT8iDn99ebUVOaSylmTkOS8cCSMjoefo0vvXvpYpf+eF/wug==",
       "dependencies": [
         "@inertiajs/core",
@@ -1954,7 +1954,7 @@
       "playgrounds/svelte5": {
         "packageJson": {
           "dependencies": [
-            "npm:@inertiajs/svelte@2.0.0-beta.1",
+            "npm:inertiax-svelte@2.0.0-beta.1",
             "npm:@sveltejs/vite-plugin-svelte@^4.0.0-next.6",
             "npm:@tsconfig/svelte@^5.0.4",
             "npm:autoprefixer@^10.4.13",

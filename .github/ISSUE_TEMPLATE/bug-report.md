@@ -13,7 +13,7 @@ assignees: ''
 - `@inertiajs/vue2` version: #.#.#
 - `@inertiajs/vue3` version: #.#.#
 - `@inertiajs/react` version: #.#.#
-- `@inertiajs/svelte` version: #.#.#
+- `inertiax-svelte` version: #.#.#
 
 ### Describe the problem:
 

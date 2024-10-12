@@ -1,5 +1,5 @@
 <script>
-  import { Deferred } from '@inertiajs/svelte'
+  import { Deferred } from 'inertiax-svelte'
 
   export let baz
   export let qux

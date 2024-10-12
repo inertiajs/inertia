@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import type { PageProps } from '@inertiajs/core'
+  import type { PageProps } from 'inertiax-core'
   import type { ComponentType } from 'svelte'
 
   export type RenderProps = {

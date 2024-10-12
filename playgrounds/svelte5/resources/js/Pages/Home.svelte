@@ -3,7 +3,7 @@
 </script>
 
 <script>
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from 'inertiax-svelte'
 
   let { appName } = $props()
 </script>

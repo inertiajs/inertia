@@ -11,7 +11,7 @@
   "homepage": "https://github.com/buhrmi/inertiax",
   "repository": {
     "type": "git",
-    "url": "https://github.com/buhrmi/inertiax.git",
+    "url": "git+https://github.com/buhrmi/inertiax.git",
     "directory": "packages/svelte"
   },
   "bugs": {

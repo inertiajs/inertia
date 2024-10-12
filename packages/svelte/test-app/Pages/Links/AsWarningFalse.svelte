@@ -1,5 +1,5 @@
 <script>
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from 'inertiax-svelte'
 
   export let method
 </script>

@@ -1,6 +1,6 @@
-import { createInertiaApp } from '@inertiajs/svelte'
-import createServer from '@inertiajs/svelte/server'
-import { ResolvedComponent } from '@inertiajs/svelte'
+import { createInertiaApp } from 'inertiax-svelte'
+import createServer from 'inertiax-svelte/server'
+import { ResolvedComponent } from 'inertiax-svelte'
 
 createServer((page) =>
   createInertiaApp({

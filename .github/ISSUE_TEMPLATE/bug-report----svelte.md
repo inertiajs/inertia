@@ -9,7 +9,7 @@ assignees: pedroborges
 
 ### Version:
 
-- `@inertiajs/svelte` version: #.#.#
+- `inertiax-svelte` version: #.#.#
 
 ### Describe the problem:
 

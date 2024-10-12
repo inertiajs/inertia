@@ -1,5 +1,5 @@
 <script>
-  import { router } from '@inertiajs/svelte'
+  import { router } from 'inertiax-svelte'
 
   let documentScrollTop = 0
   let documentScrollLeft = 0

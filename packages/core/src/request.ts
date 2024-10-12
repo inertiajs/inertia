@@ -133,6 +133,9 @@ export class Request {
       'X-Requested-With': 'XMLHttpRequest',
       'X-Inertia': true,
     }
+    
+    const frame = this.requestParams.all().frame
+    headers['X-Inertia-Referer'] = urlWithoutHash(new URL(currentPage.frame(frame).url)).href
 
     if (currentPage.get().version) {
       headers['X-Inertia-Version'] = currentPage.get().version

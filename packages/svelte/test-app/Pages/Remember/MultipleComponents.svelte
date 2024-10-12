@@ -1,7 +1,7 @@
 <script>
   import ComponentA from '@/Pages/Remember/Components/ComponentA.svelte'
   import ComponentB from '@/Pages/Remember/Components/ComponentB.svelte'
-  import { inertia, useRemember } from '@inertiajs/svelte'
+  import { inertia, useRemember } from 'inertiax-svelte'
 
   let untracked = ''
 

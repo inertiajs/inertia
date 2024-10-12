@@ -1,5 +1,5 @@
 <script>
-  import { Link } from '@inertiajs/svelte'
+  import { Link } from 'inertiax-svelte'
 
   export let method
 </script>

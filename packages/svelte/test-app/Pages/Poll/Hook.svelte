@@ -1,5 +1,5 @@
 <script>
-  import { inertia, usePoll } from '@inertiajs/svelte'
+  import { inertia, usePoll } from 'inertiax-svelte'
 
   usePoll(500, {
     only: ['custom_prop'],

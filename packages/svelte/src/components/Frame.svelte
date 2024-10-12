@@ -1,6 +1,5 @@
 <script>
   import { setContext } from 'svelte'
-  import { writable } from 'svelte/store';}
   import { Router } from 'inertiax-core';
   
   import Render, { h } from './Render.svelte';
@@ -11,39 +10,39 @@
     resolveComponent
   } = $props()
   
-  const store = writable({ component: null, frame: null, key: null })
+  // const store = writable({ component: null, frame: null, key: null })
+  
+  let component = $state(null)
+  let frame = $state(null)
+  let key = $state(null)
   
   export const router = new Router({
     frame: name,
     initialFrame,
     resolveComponent,
-    swapComponent: async ({ component, frame, preserveState }) => {
-      store.update((current) => ({
-        component: component,
-        frame,
-        key: preserveState ? current.key : Date.now(),
-      }));
+    swapComponent: async (opts) => {
+      ({ component, frame } = opts);
+      if (!opts.preserveState) key = Date.now();
     },
   })
 
   
-  await Promise.all([resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
+  Promise.all([resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
     ([initialComponent]) => {
-      store.set({
-        component: initialComponent,
-        frame: initialFrame,
-        key: null,
-      });
+      component = initialComponent
+      frame = initialFrame
+      key = null
     },
   );
   
-  const context = {router}
+  
+  const context = {router, page}
   setContext('frame', context)
   setContext(`router:${name}`, context)
   
-  const props = $derived(resolveProps($store));
+  const props = $derived(resolveProps())
   
-  function resolveProps({ component, frame, key = null }) {
+  function resolveProps() {
     const child = h(component.default, frame.props, [], key);
     const layout = component.layout;
   
@@ -69,8 +68,27 @@
     return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined';
   }
 
+  function onclick(event: MouseEvent) {
+    if (event.defaultPrevented) return
+    if (event.target.closest('[data-inertia-ignore]')) return;
+    
+    event.preventDefault();
+    
+    const href = event.currentTarget.getAttribute('href');
+    router.visit(href);
+  }
 </script>
 
-{#if props}
-  <Render {...props} />
-{/if}
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="frame" {onclick}>
+  {#if props}
+    <Render {...props} />
+  {/if}
+</div>
+
+<style>
+  .frame {
+    display: contents;
+  }
+</style>

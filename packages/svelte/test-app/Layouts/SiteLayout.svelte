@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { page } from '@inertiajs/svelte'
+  import { page } from 'inertiax-svelte'
 
   let createdAt = null
 

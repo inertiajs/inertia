@@ -15,6 +15,6 @@
   },
   "dependencies": {
     "@inertiajs/core": "file:../../core",
-    "@inertiajs/svelte": "file:.."
+    "inertiax-svelte": "file:.."
   }
 }
