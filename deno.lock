@@ -190,7 +190,7 @@
     "@esbuild/win32-x64@0.21.5": {
       "integrity": "sha512-tQd/1efJuzPC6rCFwEvLtci/xNFcTZknmXs98FYDfGE4wP9ClFV98nyKrzJKVPMhdDnjzLhdUyMX4PsQAPjwIw=="
     },
-    "@inertiajs/core@2.0.0-beta.1": {
+    "inertiax-core@2.0.0-beta.1": {
       "integrity": "sha512-T36SqIxtcdiMbGPNeP3rpD7lF3IxKkGBLspX3+Or/7GRUgX4F1Q3ymZMSzTri1torfz4/T76GJPWqFQ/A8ro8g==",
       "dependencies": [
         "axios",
@@ -202,7 +202,7 @@
     "inertiax-svelte@2.0.0-beta.1_svelte@4.2.19": {
       "integrity": "sha512-2/hgdv8v1wTOWsOBFP69pwVQNkUJEODJoQsSLohT8iDn99ebUVOaSylmTkOS8cCSMjoefo0vvXvpYpf+eF/wug==",
       "dependencies": [
-        "@inertiajs/core",
+        "inertiax-core",
         "html-escape",
         "lodash",
         "svelte@4.2.19"

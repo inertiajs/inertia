@@ -8,12 +8,13 @@ import type {
   Progress,
   RequestPayload,
   VisitOptions,
-} from '@inertiajs/core'
-import { router } from '@inertiajs/core'
+} from 'inertiax-core'
+
 import type { AxiosProgressEvent } from 'axios'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import { writable, type Writable } from 'svelte/store'
+import { getContext } from 'svelte'
 
 type FormDataType = Record<string, FormDataConvertible>
 
@@ -56,6 +57,7 @@ export default function useForm<TForm extends FormDataType>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
+  const { router } = getContext('frame')
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const inputData = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
   const data: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)

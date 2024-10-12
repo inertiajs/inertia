@@ -14,12 +14,14 @@ export default async function createInertiaApp({
   const initialFrame = page || JSON.parse(el?.dataset?.page || '{}');
   const resolveComponent = (name) => Promise.resolve(resolve(name));
   
+  const component = await(resolveComponent(initialFrame.component))
+  
   if (isServer) {
     const { render } = await dynamicImport('svelte/server');
     const { html, head, css } = await (async () => {
       if (typeof render === 'function') {
         return render(Frame, {
-          props: { initialFrame, resolveComponent },
+          props: { initialFrame, resolveComponent, component },
         });
       }
     })();
@@ -42,6 +44,7 @@ export default async function createInertiaApp({
     el,
     App: Frame,
     props: {
+      component,
       initialFrame,
       resolveComponent,
     },

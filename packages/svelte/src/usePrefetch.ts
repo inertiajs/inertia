@@ -1,8 +1,10 @@
-import { router, type VisitOptions } from '@inertiajs/core'
-import { onDestroy, onMount } from 'svelte'
+import { type VisitOptions } from 'inertiax-core'
+import { getContext, onDestroy, onMount } from 'svelte'
 import { readonly, writable } from 'svelte/store'
 
 export default function usePrefetch(options: VisitOptions = {}) {
+  const { router } = getContext('frame')
+  
   const isPrefetched = writable(false)
   const isPrefetching = writable(false)
   const lastUpdatedAt = writable<number | null>(null)

@@ -9,7 +9,7 @@ assignees: ''
 
 ### Versions:
 
-- `@inertiajs/core` version: #.#.#
+- `inertiax-core` version: #.#.#
 - `@inertiajs/vue2` version: #.#.#
 - `@inertiajs/vue3` version: #.#.#
 - `@inertiajs/react` version: #.#.#

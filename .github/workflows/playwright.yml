@@ -34,7 +34,7 @@ jobs:
         cd packages/${{ matrix.adapter }}/test-app
         npm install
 
-    - name: Local-link @inertiajs/core
+    - name: Local-link inertiax-core
       run: cd packages/core && npm link
 
     - name: Local-link @inertiajs/${{ matrix.adapter }}

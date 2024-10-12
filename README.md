@@ -5,8 +5,8 @@ Inertia X Æ A-Xii is an adaptation and (almost) drop-in replacement for the [In
 Forked from Inertia 2.0, it contains the following changes:
 
 * A new `<Frame>` component with support for multiple routers in the same app.
-* The global page store has been removed. All state is now encapsulated within Frame components, and leverage Svelte 5's fine-grained reactivity.
-* The `<App>` component has replaced by a top-level `<Frame>` component.
+* All state is now encapsulated within Frame components, leveraging Svelte 5's fine-grained reactivity. The global page store has been removed. 
+* A top-level `<Frame>` component is taking the place of the `<App>` component. The `<App>` component has been removed.
 * The structre of the history state has been altered: The `Page` object does not contain props anymore. Instead, it now contains several `Frame` objects that contain the props for each frame.
 
 ## Breaking Changes
@@ -24,7 +24,7 @@ To get the router or page of a parent frame, use `getContext('router:[frameName]
 
 ### Global click handler
 
-By default, Inertia X Æ A-Xii uses a global click handler to intercept all `<a>` tags for the Inertia router. If you don't want this, add a `data-inertia-ignore` attribute to the `<a>` tag or one of its parents. To opt-out globally, set the `data-inertia-ignore` attribute on the `<body>`.
+The `<Link>` component and the `use:inertia` action do no longer exist. Instead, we use a global click handler to intercept all `<a>` tags for the Inertia router. If you don't want this, add a `data-inertia-ignore` attribute to the `<a>` tag or one of its parents. To opt-out globally, set the `data-inertia-ignore` attribute on the `<body>`.
 
 ## New Features
 

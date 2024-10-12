@@ -9,8 +9,9 @@ import { LocationVisit, Page, Frame } from './types'
 
 export class InitialVisit {
   public static handle(): void {
+    
     this.clearRememberedStateOnReload()
-
+    
     const scenarios = [this.handleBackForward, this.handleLocation, this.handleDefault]
 
     scenarios.find((handler) => handler.bind(this)())

@@ -49,8 +49,8 @@ export interface Page {
     [name: string]: Frame
   }
   version: string | null
-  clearHistory: boolean
-  encryptHistory: boolean
+  clearHistory?: boolean
+  encryptHistory?: boolean
 
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>
@@ -230,7 +230,7 @@ export type VisitHelperOptions = Omit<VisitOptions, 'method' | 'data'>
 
 export type RouterInitParams = {
   frame: string,
-  initialFrame: Frame
+  initialFrame: Frame & { version: string | null }
   resolveComponent: PageResolver
   swapComponent: FrameHandler
 }

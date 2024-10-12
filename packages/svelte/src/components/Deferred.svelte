@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { page } from '../index'
+  import { getContext } from 'svelte'
+  
+  const { page } = getContext('frame')
 
   export let data: string | string[]
 

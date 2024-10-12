@@ -1,4 +1,4 @@
-import type { Page } from '@inertiajs/core'
+import type { Page } from 'inertiax-core'
 import { writable } from 'svelte/store'
 import type { ResolvedComponent } from './types'
 

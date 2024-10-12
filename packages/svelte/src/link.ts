@@ -1,6 +1,5 @@
 import {
   mergeDataIntoQueryString,
-  router,
   shouldIntercept,
   type CacheForOption,
   type FormDataConvertible,
@@ -8,9 +7,10 @@ import {
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
-} from '@inertiajs/core'
+} from 'inertiax-core'
 import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
+import { getContext } from 'svelte'
 
 type ActionEventHandlers = {
   [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
@@ -42,6 +42,8 @@ function link(
   node: ActionElement,
   initialParams: ActionParameters = {},
 ): ActionReturn<ActionParameters, ActionAttributes> {
+  const { router } = getContext('frame')
+  
   let inFlightCount = 0
   let hoverTimeout: NodeJS.Timeout
 

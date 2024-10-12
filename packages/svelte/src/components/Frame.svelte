@@ -1,19 +1,20 @@
 <script>
   import { setContext } from 'svelte'
+  import { toStore } from 'svelte/store';
   import { Router } from 'inertiax-core';
   
   import Render, { h } from './Render.svelte';
   
-  const {
+  let {
     name = "_top", 
     initialFrame,
-    resolveComponent
+    component,
+    resolveComponent,
   } = $props()
   
   // const store = writable({ component: null, frame: null, key: null })
   
-  let component = $state(null)
-  let frame = $state(null)
+  let frame = $state(initialFrame)
   let key = $state(null)
   
   export const router = new Router({
@@ -27,20 +28,22 @@
   })
 
   
-  Promise.all([resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
-    ([initialComponent]) => {
-      component = initialComponent
-      frame = initialFrame
-      key = null
-    },
-  );
+  // Promise.all([resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
+  //   ([initialComponent]) => {
+  //     component = initialComponent
+  //     frame = initialFrame
+  //     key = null
+  //   },
+  // );
   
+  const page = toStore(() => frame)
   
   const context = {router, page}
   setContext('frame', context)
   setContext(`router:${name}`, context)
   
-  const props = $derived(resolveProps())
+  const frameProps = $derived(resolveProps())
+  
   
   function resolveProps() {
     const child = h(component.default, frame.props, [], key);
@@ -68,7 +71,7 @@
     return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined';
   }
 
-  function onclick(event: MouseEvent) {
+  function onclick(event) {
     if (event.defaultPrevented) return
     if (event.target.closest('[data-inertia-ignore]')) return;
     
@@ -82,8 +85,8 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="frame" {onclick}>
-  {#if props}
-    <Render {...props} />
+  {#if frameProps}
+    <Render {...frameProps} />
   {/if}
 </div>
 

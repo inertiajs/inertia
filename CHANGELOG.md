@@ -179,7 +179,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ### Changed
 
-- Renamed `@inertiajs/inertia` library to `@inertiajs/core` ([#1282](https://github.com/inertiajs/inertia/pull/1282))
+- Renamed `@inertiajs/inertia` library to `inertiax-core` ([#1282](https://github.com/inertiajs/inertia/pull/1282))
 - Renamed `@inertiajs/inertia-react` library to `@inertiajs/react` ([#1282](https://github.com/inertiajs/inertia/pull/1282))
 - Renamed `@inertiajs/inertia-svelte` library to `inertiax-svelte` ([#1282](https://github.com/inertiajs/inertia/pull/1282))
 - Renamed `@inertiajs/inertia-vue` library to `@inertiajs/vue2` ([#1282](https://github.com/inertiajs/inertia/pull/1282))

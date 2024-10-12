@@ -133,6 +133,7 @@ class History {
   }
 
   public deleteRememberedState() {
+    if (!this.current.frames) return
     Object.values((this.current as Page).frames).forEach((frame) => {
       delete frame.rememberedState
     })

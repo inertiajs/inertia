@@ -54,8 +54,9 @@ export class Router {
       swapComponent,
     })
 
+    
     InitialVisit.handle()
-
+    
     eventHandler.init()
 
     eventHandler.on('missingHistoryItem', () => {

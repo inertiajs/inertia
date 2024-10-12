@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy, onMount } from 'svelte'
+  import { type ReloadOptions } from 'inertiax-core'
+  import { getContext, onDestroy, onMount } from 'svelte'
 
   export let data: string | string[] = ''
   export let params: ReloadOptions = {}
@@ -8,6 +8,8 @@
   export let as: keyof HTMLElementTagNameMap = 'div'
   export let always: boolean = false
 
+  const { router } = getContext('frame')
+  
   let loaded = false
   let fetching = false
   let el: HTMLElement

@@ -15,13 +15,17 @@ import {
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
-  protected page!: Page
-  protected resolvers!: {
+  protected page: Page = {
+    frames: {},
+    version: null,
+    scrollRegions: []
+  }
+  protected resolvers: {
     [frame: string]: PageResolver,
-  }
-  protected swappers!: {
+  } = {}
+  protected swappers: {
     [frame: string]: FrameHandler,
-  }
+  } = {}
   protected componentId = {}
   protected listeners: {
     event: PageEvent
@@ -30,8 +34,12 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
 
-  public init({ frame, initialFrame, swapComponent, resolveComponent }: RouterInitParams) {
-    this.page.frames[frame] = initialFrame
+  public init({ frame, initialFrame, swapComponent, resolveComponent }: RouterInitParams) {  
+    this.page.version = initialFrame.version
+    this.page.frames = {
+      ...this.page?.frames,
+      [frame]: initialFrame
+    }
     this.swappers[frame] = swapComponent
     this.resolvers[frame] = resolveComponent
   
