@@ -27,6 +27,11 @@ export class InitialVisit {
     if (!navigationType.isBackForward() || !history.hasAnyState()) {
       return false
     }
+    
+    if (!window.history.state?.page) {
+      // We have no power here
+      return false
+    }
 
     history
       .decrypt()

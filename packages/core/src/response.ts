@@ -172,7 +172,6 @@ export class Response {
 
   protected async setFrame(): Promise<void> {
     const pageResponse = this.getDataFromResponse(this.response.data)
-    console.log('response.setFrame', this.requestParams.all().frame, pageResponse)
 
     if (!this.shouldSetFrame(pageResponse)) {
       return Promise.resolve()

@@ -12,14 +12,14 @@ Forked from Inertia 2.0, it contains the following changes:
 
 ### Context instead of imports
 
-Many functions and objects are now "frames-aware". This means that they are not globally exported anymore, but have to be fetched from the Svelte context:
+There now exists a router and a page store at the Frame level. That means, that they are not globally exported anymore. Instead, they are saved in the Svelte context of each Frame:
 
 ```diff
--import { router, page, inertia, useForm } from 'inertiax-svelte'
-+const { router, page, inertia, useForm } = getContext('frame')
+-import { router, page } from '@inertiajs/svelte'
++const { router, page } = getContext('inertia')
 ```
 
-To get the router or page of a parent frame, use `getContext('router:[frameName]))`
+To get the context of a parent Frame, use `getContext('inertia:[frame name]))`. For example, to get the top-level router (which exists within the Frame with the name `_top`), use `const { router } = getContext('inertia:_top')`.
 
 ### Global click handler
 
@@ -34,7 +34,7 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
 #### Usage
 
 ```html
-<Frame src="/dashboard">
+<Frame url="/dashboard">
   Loading...
 </Frame>
 ```
@@ -42,15 +42,15 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
 #### Things to note
 
 * All navigation (including form submissions) is encapsulated within the Frame component.
-* Props on the `<Frame>` component are being passed on to the Inertia page component.
 * When making a request from within a Frame, the `X-Inertia-Referer` header contains the URL of the frame. Use this instead of calling `redirect_back`, if you want to redirect the user back.
 
 #### Props
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `src` | string | The URL of the page to load |
-| `name` | string | The name of the frame. This is used to identify the frame in the history state |
-| `component` | string | The name of the Inertia page component to load. `src` is ignored if this is set. |
-| `renderLayout` | boolean | Whether to render the layout. Defaults to `true` if `name` == `_top`. `false` otherwise. |
+| `url` | string | (required if `component` is not given) The URL of the page to load |
+| `component` | string | (required if `url` is not given) The name of the Inertia page component to load. |
+| `props` | object | (optional) The initial props to pass to the Inertia page component. They will be replaced once `url` has been loaded. |
+| `renderLayout` | boolean | (optional) Whether to render the layout. Defaults to `true` if `name` == `_top`. `false` otherwise. |
+| `name` | string | (optional) The name of the frame. This is used to identify the frame in the history state |
 

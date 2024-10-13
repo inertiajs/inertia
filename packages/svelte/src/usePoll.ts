@@ -9,7 +9,7 @@ export default function usePoll(
     autoStart: true,
   },
 ) {
-  const { router } = getContext('frame')
+  const { router } = getContext('inertia')
   const { stop, start } = router.poll(interval, requestOptions, {
     ...options,
     autoStart: false,

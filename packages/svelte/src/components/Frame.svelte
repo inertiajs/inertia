@@ -2,63 +2,66 @@
   import { setContext } from 'svelte'
   import { toStore } from 'svelte/store';
   import { Router } from 'inertiax-core';
-  
+
   import Render, { h } from './Render.svelte';
   
   let {
     name = Math.random(),
-    src,
-    initialFrame,
-    renderLayout = name == '_top'
+    renderLayout = name == '_top',
+    component,
+    props,
+    url,
+    version
   } = $props()
   
-  
-  console.log('new frame:', name, src, initialFrame)
+
   // const store = writable({ component: null, frame: null, key: null })
   
   let resolvedComponent = $state(null)
-  let frame = $state(initialFrame)
   let key = $state(null)
   
   export const router = new Router({
     frame: name,
-    initialFrame,
+    initialState: {component, props, url, version},
     swapComponent: async (opts) => {
-      ({ component: resolvedComponent, frame } = opts);
+      ({ component: resolvedComponent, frame: {component, props, url} } = opts);
       if (!opts.preserveState) key = Date.now();
     },
   })
     
-  if (src) {
-    router.visit(src)
+  if (url) {
+    router.visit(url, {
+      preserveState: true,
+      preserveScroll: true
+    })
   }
   
-  if (initialFrame?.component) {
-    Promise.all([Router.resolveComponent(initialFrame.component), router.decryptHistory().catch(() => {})]).then(
-      ([initialComponent]) => {
-        resolvedComponent = initialComponent
-        frame = initialFrame
-        key = null
-      },
-    )
-  }
+  // if (initialState?.component) {
+
+  //   Promise.all([Router.resolveComponent(initialState.component), router.decryptHistory().catch(() => {})]).then(
+  //     ([initialComponent]) => {
+  //       resolvedComponent = initialComponent
+  //       frame = initialState
+  //       key = null
+  //     },
+  //   )
+  // }
   
-  const page = toStore(() => frame)
+  const page = toStore(() => {component, props, url, version})
   
   const context = {router, page}
-  setContext('frame', context)
-  setContext(`router:${name}`, context)
+  setContext('inertia', context)
+  setContext(`inertia:${name}`, context)
   
   const resolvedProps = $derived(resolveProps())
   
-  
   function resolveProps() {
     if (!resolvedComponent) return
-    
-    const child = h(resolvedComponent.default, frame.props, [], key);
+    const child = h(resolvedComponent.default, props, [], key);
+  
     const layout = renderLayout && resolvedComponent.layout;
   
-    return layout ? resolveLayout(layout, child, frame.props, key) : child;
+    return layout ? resolveLayout(layout, child, props, key) : child;
   }
   
   function resolveLayout(layout, child, resolvedProps, key) {
@@ -84,10 +87,11 @@
     if (event.defaultPrevented) return
     if (event.target.closest('[data-inertia-ignore]')) return;
     
-    event.preventDefault();
     
     const href = event.target.closest('[href]')?.getAttribute('href')
     if (!href) return
+    
+    event.preventDefault();
     
     router.visit(href);
   }

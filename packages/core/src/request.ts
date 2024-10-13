@@ -39,7 +39,6 @@ export class Request {
     // will clear the prefetch flag so it can use it
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
-
     return axios({
       method: this.requestParams.all().method,
       url: urlWithoutHash(this.requestParams.all().url).href,

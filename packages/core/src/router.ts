@@ -47,14 +47,16 @@ export class Router {
     interruptible: false,
   })
   
-  constructor({ frame, initialFrame, swapComponent }: RouterInitParams) {
+  constructor({ frame, initialState, swapComponent }: RouterInitParams) {
     this.frame = frame
     
     currentPage.init({
       frame,
-      initialFrame,
+      initialState,
       swapComponent,
     })
+    
+    if (frame !== '_top') return;
     
     InitialVisit.handle()
     

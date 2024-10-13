@@ -8,7 +8,7 @@
   export let as: keyof HTMLElementTagNameMap = 'div'
   export let always: boolean = false
 
-  const { router } = getContext('frame')
+  const { router } = getContext('inertia')
   
   let loaded = false
   let fetching = false

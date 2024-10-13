@@ -32,11 +32,14 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
 
-  public init({ frame, initialFrame, swapComponent }: RouterInitParams) {  
-    this.page.version ||= initialFrame?.version
-    this.page.frames = {
-      ...this.page?.frames,
-      [frame]: initialFrame || {}
+  public init({ frame, initialState, swapComponent }: RouterInitParams) {  
+    this.page.version ||= initialState?.version
+    if (initialState?.component) {
+      this.merge({
+        frames: {
+          [frame]: initialState
+        }
+      })
     }
     this.swappers[frame] = swapComponent
   
@@ -122,7 +125,6 @@ class CurrentPage {
     frame: Frame,
     options: Partial<VisitOptions> = {}
   ): Promise<void> {
-    console.log('setting frame', name, frame)
     return this.set({
       ...this.page,
       frames: {
@@ -142,7 +144,7 @@ class CurrentPage {
   }
   
   public frame(name: string): Frame {
-    return this.page.frames[name]
+    return this.page.frames[name] || {}
   }
   
   public get(): Page {

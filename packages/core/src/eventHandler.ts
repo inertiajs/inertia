@@ -85,7 +85,7 @@ class EventHandler {
       Scroll.reset(currentPage.get())
       return
     }
-
+    
     if (history.isValidState(state)) {
       history
         .decrypt(state.page)

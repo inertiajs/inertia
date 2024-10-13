@@ -3,7 +3,7 @@ import { getContext, onDestroy, onMount } from 'svelte'
 import { readonly, writable } from 'svelte/store'
 
 export default function usePrefetch(options: VisitOptions = {}) {
-  const { router } = getContext('frame')
+  const { router } = getContext('inertia')
   
   const isPrefetched = writable(false)
   const isPrefetching = writable(false)

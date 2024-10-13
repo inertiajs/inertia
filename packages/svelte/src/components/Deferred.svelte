@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte'
   
-  const { page } = getContext('frame')
+  const { page } = getContext('inertia')
 
   export let data: string | string[]
 

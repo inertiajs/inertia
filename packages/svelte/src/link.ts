@@ -42,7 +42,7 @@ function link(
   node: ActionElement,
   initialParams: ActionParameters = {},
 ): ActionReturn<ActionParameters, ActionAttributes> {
-  const { router } = getContext('frame')
+  const { router } = getContext('inertia')
   
   let inFlightCount = 0
   let hoverTimeout: NodeJS.Timeout

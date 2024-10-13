@@ -57,7 +57,7 @@ export default function useForm<TForm extends FormDataType>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
-  const { router } = getContext('frame')
+  const { router } = getContext('inertia')
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const inputData = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
   const data: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)

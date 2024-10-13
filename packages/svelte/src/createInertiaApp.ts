@@ -11,7 +11,7 @@ export default async function createInertiaApp({
 }) {
   const isServer = typeof window === 'undefined';
   const el = isServer ? null : document.getElementById(id);
-  const initialFrame = page || JSON.parse(el?.dataset?.page || '{}');
+  const initialState = page || JSON.parse(el?.dataset?.page || '{}');
   Router.resolveComponent = (name) => Promise.resolve(resolve(name));
     
   if (isServer) {
@@ -20,13 +20,13 @@ export default async function createInertiaApp({
       return render(Frame, {
         props: { 
           name: "_top",
-          initialFrame
+          ...initialState,
         },
       });
     })();
 
     return {
-      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialFrame))}">${html}</div>`,
+      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialState))}">${html}</div>`,
       head: [head],
     };
   }
@@ -44,7 +44,7 @@ export default async function createInertiaApp({
     App: Frame,
     props: {
       name: "_top",
-      initialFrame,
+      ...initialState,
     },
   });
 }
