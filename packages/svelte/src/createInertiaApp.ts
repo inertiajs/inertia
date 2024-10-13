@@ -9,12 +9,12 @@ export default async function createInertiaApp({
   progress = {},
   page,
 }) {
-  const isServer = typeof window === 'undefined';
-  const el = isServer ? null : document.getElementById(id);
+  const el = import.meta.env.SSR ? null : document.getElementById(id);
   const initialState = page || JSON.parse(el?.dataset?.page || '{}');
+  // Router.setVersion(initialState.version);
   Router.resolveComponent = (name) => Promise.resolve(resolve(name));
     
-  if (isServer) {
+  if (import.meta.env.SSR) {
     const { render } = await dynamicImport('svelte/server');
     const { html, head } = await (async () => {
       return render(Frame, {

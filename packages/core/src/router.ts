@@ -48,6 +48,8 @@ export class Router {
   })
   
   constructor({ frame, initialState, swapComponent }: RouterInitParams) {
+    if (import.meta.env.SSR) return;
+    
     this.frame = frame
     
     currentPage.init({
@@ -142,6 +144,8 @@ export class Router {
   }
 
   public visit(href: string | URL, options: VisitOptions = {}): void {
+    if (import.meta.env.SSR) return;
+    
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,

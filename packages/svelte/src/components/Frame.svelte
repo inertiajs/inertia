@@ -36,16 +36,14 @@
     })
   }
   
-  // if (initialState?.component) {
-
-  //   Promise.all([Router.resolveComponent(initialState.component), router.decryptHistory().catch(() => {})]).then(
-  //     ([initialComponent]) => {
-  //       resolvedComponent = initialComponent
-  //       frame = initialState
-  //       key = null
-  //     },
-  //   )
-  // }
+  if (component) {
+    Promise.all([Router.resolveComponent(component), router.decryptHistory().catch(() => {})]).then(
+      ([initialComponent]) => {
+        resolvedComponent = initialComponent
+        key = null
+      },
+    )
+  }
   
   const page = toStore(() => {component, props, url, version})
   

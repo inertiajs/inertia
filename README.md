@@ -10,6 +10,10 @@ Forked from Inertia 2.0, it contains the following changes:
 
 ## Breaking Changes
 
+### Vite required
+
+Vite is now **required** to build the adapter. This is because we're now using `import.meta.env.SSR` instead of `typeof window === 'undefined'`. This allows Vite to statically analyze and optimize the code at transpile time, and won't result in SSR-related code to be shipped to the browser.
+
 ### Context instead of imports
 
 There now exists a router and a page store at the Frame level. That means, that they are not globally exported anymore. Instead, they are saved in the Svelte context of each Frame:
@@ -41,7 +45,7 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
 
 #### Things to note
 
-* All navigation (including form submissions) is encapsulated within the Frame component.
+* All navigation (including form submissions) is encapsulated within the Frame component. To "break out" of a Frame, make the request on a different router. Frame components export their router via `frame.router`.
 * When making a request from within a Frame, the `X-Inertia-Referer` header contains the URL of the frame. Use this instead of calling `redirect_back`, if you want to redirect the user back.
 
 #### Props
@@ -54,3 +58,13 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
 | `renderLayout` | boolean | (optional) Whether to render the layout. Defaults to `true` if `name` == `_top`. `false` otherwise. |
 | `name` | string | (optional) The name of the frame. This is used to identify the frame in the history state |
 
+## Installation
+
+```bash
+npm install inertiax-svelte inertiax-core
+```
+
+```diff
+-import { createInertiaApp } from '@inertiajs/svelte'
++import { createInertiaApp } from 'inertiax-svelte'
+```
