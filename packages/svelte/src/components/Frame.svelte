@@ -45,7 +45,7 @@
     )
   }
   
-  const page = toStore(() => {component, props, url, version})
+  const page = toStore(() => ({component, props, url, version}))
   
   const context = {router, page}
   setContext('inertia', context)
