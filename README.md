@@ -1,4 +1,4 @@
-# Inertia X Æ A-Xii
+# Inertia X Æ A-Xii for Svelte
 
 Inertia X Æ A-Xii is an adaptation and (almost) drop-in replacement for the [Inertiajs](https://inertiajs.com) client side adapter for Svelte 5.
 
