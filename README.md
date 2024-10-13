@@ -15,7 +15,7 @@ It contains the following changes:
 
 ### Vite required
 
-Vite is now **required** to build the adapter. This is because we're now using `import.meta.env.SSR` instead of `typeof window === 'undefined'`. This allows Vite to statically analyze and optimize the code at transpile time, and won't result in SSR-related code to be shipped to the browser.
+Vite is now **required** to build the adapter. This is because we're now using `import.meta.env.SSR` instead of `typeof window === 'undefined'`. This allows Vite to statically analyze and optimize the code at transpile time, and won't result in SSR-related code being shipped to the browser.
 
 ### Context instead of imports
 
