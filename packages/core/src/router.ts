@@ -35,7 +35,7 @@ import { transformUrlAndData } from './url'
 export class Router {
   static resolveComponent: PageResolver
   
-  protected frame
+  protected frame: string
   
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
@@ -48,10 +48,10 @@ export class Router {
   })
   
   constructor({ frame, initialState, swapComponent }: RouterInitParams) {
-    if (import.meta.env.SSR) return;
-    
     this.frame = frame
     
+    if (import.meta.env.SSR) return;
+
     currentPage.init({
       frame,
       initialState,

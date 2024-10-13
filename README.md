@@ -2,11 +2,14 @@
 
 Inertia X Æ A-Xii is an adaptation and (almost) drop-in replacement for the [Inertiajs](https://inertiajs.com) client side adapter for Svelte 5.
 
-Forked from Inertia 2.0, it contains the following changes:
+This is complete rewrite of Inertia X based on the Inertia 2.0 beta. Inertia X started as a proof-of-concept for the Frame component, but now I'm developing it as a real project (because I'm also dogfeeding it at my job).
+
+It contains the following changes:
 
 * All state is now saved within `<Frame>` components, leveraging Svelte 5's fine-grained reactivity. The global page store has been removed. 
 * A top-level `<Frame>` component is taking the place of the `<App>` component. The `<App>` component has been removed.
 * The structre of the history state has been altered: The `Page` object does not contain props anymore. Instead, it now contains several `Frame` objects that contain the props for each frame.
+* A global click handler
 
 ## Breaking Changes
 
@@ -61,7 +64,7 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
 ## Installation
 
 ```bash
-npm install inertiax-svelte inertiax-core
+npm install -D inertiax-svelte inertiax-core
 ```
 
 ```diff
