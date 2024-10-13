@@ -19,7 +19,7 @@ Vite is now **required** to build the adapter. This is because we're now using `
 
 ### Context instead of imports
 
-There now exists a router and a page store at the Frame level. That means, that they are not globally exported anymore. Instead, they are saved in the Svelte context of each Frame:
+Routers and page stores now exist at the Frame level (yes, an Inertia X app has multiple routers, one for each frame). That means, that they are not globally exported anymore. Instead, they are saved in the Svelte context of each Frame:
 
 ```diff
 -import { router, page } from '@inertiajs/svelte'
