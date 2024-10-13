@@ -1,8 +1,8 @@
-# Inertia X Æ A-Xii for Svelte
+# Inertia X Æ A-Xii
 
 Inertia X Æ A-Xii is an adaptation and (almost) drop-in replacement for the [Inertiajs](https://inertiajs.com) client side adapter for Svelte 5.
 
-This is complete rewrite of Inertia X based on the Inertia 2.0 beta. Inertia X started as a proof-of-concept for the Frame component, but now I'm developing it as a real project (because I'm also dogfeeding it at my job).
+This is complete rewrite of Inertia X based on the Inertia 2.0 beta. Inertia X started as a proof-of-concept for the Frame component, but now I'm developing it as a real project (because I'm also dogfeeding it at my [company](https://www.shitcoinsociety.com).
 
 It contains the following changes:
 
