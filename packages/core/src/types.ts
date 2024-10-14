@@ -50,7 +50,7 @@ export interface Page {
   }
   version: string | null
   clearHistory?: boolean
-  encryptHistory?: boolean
+  // encryptHistory?: boolean
 
   /** @internal */
   scrollRegions: Array<{ top: number; left: number }>

@@ -6,10 +6,12 @@ import { Page } from './types'
 
 const isServer = typeof window === 'undefined'
 
-class History {
+export class History {
   public rememberedState = 'rememberedState' as const
   public scrollRegions = 'scrollRegions' as const
   public preserveUrl = false
+  public static encryptHistory = false
+  
   protected current: Partial<Page> = {}
   protected queue: (() => Promise<void>)[] = []
 
@@ -54,7 +56,7 @@ class History {
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
     return new Promise((resolve) => {
-      return page.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
+      return History.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
     })
   }
 

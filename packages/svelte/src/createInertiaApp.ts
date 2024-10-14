@@ -1,4 +1,4 @@
-import { setupProgress, Router } from 'inertiax-core';
+import { setupProgress, Router, History } from 'inertiax-core';
 import escape from 'html-escape';
 import Frame from './components/Frame.svelte';
 
@@ -13,7 +13,6 @@ export default async function createInertiaApp({
   const initialState = page || JSON.parse(el?.dataset?.page || '{}');
   // Router.setVersion(initialState.version);
   Router.resolveComponent = (name) => Promise.resolve(resolve(name));
-    
   if (import.meta.env.SSR) {
     const { render } = await dynamicImport('svelte/server');
     const { html, head } = await (async () => {
@@ -31,6 +30,8 @@ export default async function createInertiaApp({
     };
   }
 
+  History.encryptHistory = initialState.encryptHistory;
+  
   if (!el) {
     throw new Error(`Element with ID "${id}" not found.`);
   }

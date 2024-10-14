@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
-import { history } from './history'
+import { history, History } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
@@ -184,6 +184,11 @@ export class Response {
 
     pageResponse.url = history.preserveUrl ? currentPage.frame("_top").url : this.pageUrl(pageResponse)
     delete pageResponse.version
+    
+    History.encryptHistory = pageResponse.encryptHistory
+    if (pageResponse.clearHistory) {
+      history.clear()
+    }
     
     return currentPage.setFrame(
       this.requestParams.all().frame, 

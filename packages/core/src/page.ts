@@ -60,9 +60,6 @@ class CurrentPage {
 
     const componentId = this.componentId
 
-    if (page.clearHistory) {
-      history.clear()
-    }
 
     return this.resolve(page.frames).then((components) => {
       if (componentId !== this.componentId) {
