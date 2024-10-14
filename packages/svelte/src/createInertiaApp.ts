@@ -18,7 +18,7 @@ export default async function createInertiaApp({
     const { render } = await dynamicImport('svelte/server');
     const { html, head } = await (async () => {
       return render(Frame, {
-        props: { 
+        props: {
           name: "_top",
           ...initialState,
         },
@@ -44,6 +44,7 @@ export default async function createInertiaApp({
     App: Frame,
     props: {
       name: "_top",
+      makeRequest: false,
       ...initialState,
     },
   });
