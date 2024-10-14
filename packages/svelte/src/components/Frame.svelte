@@ -6,7 +6,7 @@
   import Render, { h } from './Render.svelte';
   
   let {
-    name = Math.random(),
+    name = Math.random().toString(),
     renderLayout = name == '_top',
     component,
     props,
@@ -26,7 +26,6 @@
     frame: name,
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
-      console.log('swap called for frame', name);
       ({ component: resolvedComponent, frame: {component, props, url} } = opts);
       if (!opts.preserveState) key = Date.now();
     },

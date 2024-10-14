@@ -52,7 +52,8 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
+      frame
+    }: Partial<VisitOptions> = {},
   ): Promise<void> {
     this.componentId = {}
 
@@ -84,7 +85,7 @@ class CurrentPage {
       this.cleared = false
 
       // if (isNewComponent) {
-        // this.fireEventsFor('newComponent')
+      //   this.fireEventsFor('newComponent')
       // }
 
       if (this.isFirstPageLoad) {
@@ -93,7 +94,7 @@ class CurrentPage {
 
       this.isFirstPageLoad = false
 
-      return this.swap({ components, page, preserveState }).then(() => {
+      return this.swap({ components, page, preserveState, frame }).then(() => {
         if (!preserveScroll) {
           Scroll.reset(page)
         }
@@ -131,7 +132,7 @@ class CurrentPage {
         ...this.page.frames,
         [name]: frame,
       }
-    }, options)
+    }, { frame: name, ...options })
   }
     
   
@@ -178,12 +179,16 @@ class CurrentPage {
     components,
     page,
     preserveState,
+    frame
   }: {
     components: { [name: string]: Component }
     page: Page,
-    preserveState: PreserveStateOption
+    preserveState: PreserveStateOption,
+    frame?: string
   }): Promise<unknown> {
+
     return Promise.all(Object.entries(components).map(([name, component]) => {
+      if (frame && frame !== name) return Promise.resolve()
       return this.swappers[name]({ component, frame: page.frames[name], preserveState })
     }))
   }
