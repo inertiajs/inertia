@@ -44,12 +44,10 @@ const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
 
     return Promise.resolve(data)
   }
-
   const textEncoder = new TextEncoder()
   const str = JSON.stringify(data)
-  const encoded = new Uint8Array(str.length)
-
-  textEncoder.encodeInto(str, encoded)
+  
+  const encoded = textEncoder.encode(str)
 
   return window.crypto.subtle.encrypt(
     {
@@ -76,8 +74,10 @@ const decryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
     key,
     data,
   )
+  
+  let decoded = new TextDecoder().decode(decrypted)
 
-  return JSON.parse(new TextDecoder().decode(decrypted))
+  return JSON.parse(decoded)
 }
 
 const getIv = () => {

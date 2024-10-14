@@ -81,7 +81,6 @@ export class History {
       if (!data) {
         throw new Error('Unable to decrypt history')
       }
-
   
       this.current = data ?? {}
       
