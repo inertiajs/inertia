@@ -11,6 +11,8 @@
     component,
     props,
     url,
+    makeRequest = true,
+    
     version
   } = $props()
   
@@ -29,7 +31,7 @@
     },
   })
     
-  if (url) {
+  if (url && makeRequest) {
     router.visit(url, {
       preserveState: true,
       preserveScroll: true
@@ -100,6 +102,8 @@
 <div class="frame" {onclick}>
   {#if resolvedProps}
     <Render {...resolvedProps} />
+  {:else}
+    <slot />
   {/if}
 </div>
 
