@@ -16,7 +16,7 @@
     version
   } = $props()
   
-
+  let frame
   // const store = writable({ component: null, frame: null, key: null })
   
   let resolvedComponent = $state(null)
@@ -27,7 +27,6 @@
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
       ({ component: resolvedComponent, frame: {component, props, url} } = opts);
-      console.log('Swapping frame', name, 'with', component, url);
       if (!opts.preserveState) key = Date.now();
     },
   })
@@ -102,8 +101,6 @@
     const preserveScroll = el.hasAttribute('data-preserve-scroll')
     const preserveState = el.hasAttribute('data-preserve-state')
     
-    
-    console.log('handling router click from from ', name)
     router.visit(href, {method, preserveScroll, preserveState})
   }
   
