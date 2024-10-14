@@ -262,8 +262,8 @@ app.get('/deferred-props/page-1', (req, res) => {
       inertia.render(req, res, {
         component: 'DeferredProps/Page1',
         props: {
-          foo: req.headers['x-inertia-partial-data']?.includes('foo') ? 'foo value' : undefined,
-          bar: req.headers['x-inertia-partial-data']?.includes('bar') ? 'bar value' : undefined,
+          foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
+          bar: req.headers['x-inertia-partial-data']?.includes('bar') ? { text: 'bar value' } : undefined,
         },
       }),
     500,
