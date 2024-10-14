@@ -1,5 +1,5 @@
 <script>
-  import { setContext } from 'svelte'
+  import { onDestroy, onMount, setContext } from 'svelte'
   import { toStore } from 'svelte/store';
   import { Router } from 'inertiax-core';
 
@@ -22,13 +22,12 @@
   let resolvedComponent = $state(null)
   let key = $state(null)
   
-  let frame
-  
   export const router = new Router({
     frame: name,
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
       ({ component: resolvedComponent, frame: {component, props, url} } = opts);
+      console.log('Swapping frame', name, 'with', component, url);
       if (!opts.preserveState) key = Date.now();
     },
   })
@@ -51,7 +50,7 @@
   
   const page = toStore(() => ({component, props, url, version}))
   
-  const context = {router, page, getFrame() { return frame }}
+  const context = {router, page}
   setContext('inertia', context)
   setContext(`inertia:${name}`, context)
   
@@ -85,12 +84,16 @@
     return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined';
   }
 
-  function onclick(event) {
+  const clickhandler = function(event) {
     if (event.defaultPrevented) return
     if (event.target.closest('[data-inertia-ignore]')) return;
     
+    
     const el = event.target.closest('[href]')
+    
     if (!el) return
+    
+    if (!frame.contains(el)) return;
     
     event.preventDefault();
     
@@ -100,13 +103,23 @@
     const preserveState = el.hasAttribute('data-preserve-state')
     
     
+    console.log('handling router click from from ', name)
     router.visit(href, {method, preserveScroll, preserveState})
   }
+  
+  onMount(function() {
+    document.addEventListener('click', clickhandler)
+  })
+  
+  onDestroy(function() {
+    if (import.meta.env.SSR) return
+    document.removeEventListener('click', clickhandler)
+  })
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="frame" {onclick} bind:this={frame}>
+<div class="frame" bind:this={frame}>
   {#if resolvedProps}
     <Render {...resolvedProps} />
   {:else}
