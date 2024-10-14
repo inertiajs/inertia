@@ -309,6 +309,10 @@ app.get('/deferred-props/page-2', (req, res) => {
   }
 })
 
+app.get('/svelte/props-and-page-store', (req, res) =>
+  inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' }}),
+)
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))

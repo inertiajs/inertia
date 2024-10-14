@@ -2,12 +2,11 @@ import { router, setupProgress, type InertiaAppResponse, type Page } from '@iner
 import escape from 'html-escape'
 import type { ComponentType } from 'svelte'
 import { version as SVELTE_VERSION } from 'svelte/package.json'
-import App from './components/App.svelte'
-import store from './store'
-import type { ComponentResolver, ResolvedComponent } from './types'
+import App, { type InertiaAppProps } from './components/App.svelte'
+import type { ComponentResolver } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
-type AppComponent = ComponentType<App> & { render: () => SvelteRenderResult }
+type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
 
 interface CreateInertiaAppProps {
   id?: string
@@ -15,10 +14,7 @@ interface CreateInertiaAppProps {
   setup?: (props: {
     el: HTMLElement
     App: ComponentType<App>
-    props: {
-      initialPage: Page
-      resolveComponent: ComponentResolver
-    }
+    props: InertiaAppProps
   }) => void | App
   progress?:
     | false
@@ -43,15 +39,20 @@ export default async function createInertiaApp({
   const initialPage: Page = page || JSON.parse(el?.dataset?.page || '{}')
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
-  await Promise.all([resolveComponent(initialPage.component), router.decryptHistory().catch(() => {})]).then(
-    ([initialComponent]) => {
-      store.set({
-        component: initialComponent,
-        page: initialPage,
-        key: null,
-      })
-    },
-  )
+  const [initialComponent] = await Promise.all([
+    resolveComponent(initialPage.component),
+    router.decryptHistory().catch(() => {}),
+  ])
+
+  const props: InertiaAppProps = { initialPage, initialComponent, resolveComponent }
+
+  if (setup) {
+    if (!el) {
+      throw new Error(`Element with ID "${id}" not found.`)
+    }
+
+    setup({ el, App, props })
+  }
 
   if (isServer) {
     const isSvelte5 = SVELTE_VERSION.startsWith('5')
@@ -59,11 +60,11 @@ export default async function createInertiaApp({
       if (isSvelte5) {
         const { render } = await dynamicImport('svelte/server')
         if (typeof render === 'function') {
-          return render(App) as SvelteRenderResult
+          return render(App, { props }) as SvelteRenderResult
         }
       }
 
-      return (App as AppComponent).render()
+      return (App as AppComponent).render(props)
     })()
 
     return {
@@ -72,34 +73,9 @@ export default async function createInertiaApp({
     }
   }
 
-  if (!el) {
-    throw new Error(`Element with ID "${id}" not found.`)
-  }
-
-  router.init({
-    initialPage,
-    resolveComponent,
-    swapComponent: async ({ component, page, preserveState }) => {
-      store.update((current) => ({
-        component: component as ResolvedComponent,
-        page,
-        key: preserveState ? current.key : Date.now(),
-      }))
-    },
-  })
-
   if (progress) {
     setupProgress(progress)
   }
-
-  setup({
-    el,
-    App,
-    props: {
-      initialPage,
-      resolveComponent,
-    },
-  })
 }
 
 // Loads the module dynamically during execution instead of at
