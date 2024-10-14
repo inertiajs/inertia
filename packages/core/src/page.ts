@@ -13,6 +13,7 @@ import {
   VisitOptions,
 } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
+import deepmerge from 'deepmerge'
 
 class CurrentPage {
   protected page: Page = {
@@ -103,6 +104,7 @@ class CurrentPage {
           fireNavigateEvent(page)
         }
       })
+        
     })
   }
 
@@ -126,13 +128,12 @@ class CurrentPage {
     frame: Frame,
     options: Partial<VisitOptions> = {}
   ): Promise<void> {
-    return this.set({
-      ...this.page,
+    return this.set(deepmerge(this.page, {
       frames: {
-        ...this.page.frames,
         [name]: frame,
       }
-    }, { frame: name, ...options })
+    }, { arrayMerge: (_, s) => s }) as Page,
+    { frame: name, ...options })
   }
     
   
@@ -153,14 +154,7 @@ class CurrentPage {
   }
 
   public merge(data: Partial<Page>): void {
-    this.page = { 
-      ...this.page,
-      ...data,
-      frames: {
-        ...this.page.frames,
-        ...data.frames,
-      },
-    }
+    this.page = deepmerge(this.page, data, {arrayMerge: (_, source) => source})
   }
 
   public setUrlHash(hash: string): void {

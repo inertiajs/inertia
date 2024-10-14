@@ -62,9 +62,9 @@ export class Scroll {
   }
 
   public static onScroll(event: Event): void {
-    const target = event.target as Element
+    let target = event.target as Element
 
-    if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
+    if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region') || target as unknown == document) {
       this.save(currentPage.get())
     }
   }

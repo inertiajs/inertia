@@ -1,3 +1,4 @@
+import deepmerge from 'deepmerge'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
@@ -11,29 +12,21 @@ class History {
   public preserveUrl = false
   protected current: Partial<Page> = {}
   protected queue: (() => Promise<void>)[] = []
-  // We need initialState for `restore`
-  protected initialState: Partial<Page> | null = null
+
 
   public remember(frame: string, data: unknown, key: string): void {
-    // LOL
-    this.replaceState({
-      ...currentPage.get(),
-      frames: {
-        ...currentPage.get().frames,
-        [frame]: {
-          ...currentPage.get().frames[frame],
-          rememberedState: {
-            ...(currentPage.get().frames[frame]?.rememberedState ?? {}),
-            [key]: data,
-          },
-        }
-      }
-    })
+    const old = currentPage.get()
+    const newState = deepmerge(old, {
+      frames: {[frame]: {rememberedState: {[key]: data}}}
+    }, {arrayMerge: (_,s) => s})
+    
+    this.replaceState(newState)
   }
 
   public restore(frame: string, key: string): unknown {
     if (!isServer) {
-      return this.initialState?.frames?.[frame]?.rememberedState?.[key]
+      const frameState = this.current?.frames?.[frame]
+      return frameState?.rememberedState?.[key]
     }
   }
 
@@ -87,11 +80,9 @@ class History {
         throw new Error('Unable to decrypt history')
       }
 
-      if (this.initialState === null) {
-        this.initialState = data ?? undefined
-      } else {
-        this.current = data ?? {}
-      }
+  
+      this.current = data ?? {}
+      
 
       return data
     })

@@ -1,3 +1,4 @@
+import deepmerge from 'deepmerge'
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
@@ -71,17 +72,13 @@ class EventHandler {
       const url = hrefToUrl(currentPage.frame("_top").url)
       url.hash = window.location.hash
       
-      // LOL
-      history.replaceState({
-        ...currentPage.get(),
-        frames: {
-          ...currentPage.get().frames,
-          "_top": {
-            ...currentPage.frame("_top"),
-            url: url.href,
-          }
-        }
-      })
+      history.replaceState(
+        deepmerge(currentPage.get(), {
+          frames: { _top: { url: url.href } }
+        },
+          { arrayMerge: (_, s) => s })
+      );
+        
       Scroll.reset(currentPage.get())
       return
     }

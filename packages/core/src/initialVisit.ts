@@ -36,7 +36,7 @@ export class InitialVisit {
     history
       .decrypt()
       .then((data) => {
-        currentPage.set(data, { preserveScroll: true, preserveState: true }).then(() => {
+        currentPage.set(data, { preserveScroll: true, preserveState: true, replace: true }).then(() => {
           Scroll.restore(currentPage.get())
           fireNavigateEvent(currentPage.get())
         })
@@ -99,7 +99,7 @@ export class InitialVisit {
       currentPage.setUrlHash(window.location.hash)
     }
 
-    currentPage.set(currentPage.get(), { preserveState: true }).then(() => {
+    currentPage.set(currentPage.get(), { preserveState: true, replace: true }).then(() => {
       fireNavigateEvent(currentPage.get())
     })
   }
