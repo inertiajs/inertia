@@ -96,7 +96,8 @@ class CurrentPage {
       this.isFirstPageLoad = false
 
       return this.swap({ components, page, preserveState, frame }).then(() => {
-        if (!preserveScroll) {
+        // TODO: save scroll positions within frames.
+        if (!preserveScroll && frame == '_top') {
           Scroll.reset(page)
         }
 
@@ -183,6 +184,11 @@ class CurrentPage {
 
     return Promise.all(Object.entries(components).map(([name, component]) => {
       if (frame && frame !== name) return Promise.resolve()
+      
+      // a swapper can be undefined if we refresh the page, and have history in frames
+      // that we havent initialized in the new page
+      if (!this.swappers[name]) return;
+      
       return this.swappers[name]({ component, frame: page.frames[name], preserveState })
     }))
   }

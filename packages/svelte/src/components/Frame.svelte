@@ -22,6 +22,8 @@
   let resolvedComponent = $state(null)
   let key = $state(null)
   
+  let frame
+  
   export const router = new Router({
     frame: name,
     initialState: {component, props, url, version},
@@ -49,7 +51,7 @@
   
   const page = toStore(() => ({component, props, url, version}))
   
-  const context = {router, page}
+  const context = {router, page, getFrame() { return frame }}
   setContext('inertia', context)
   setContext(`inertia:${name}`, context)
   
@@ -90,12 +92,13 @@
     const el = event.target.closest('[href]')
     if (!el) return
     
+    event.preventDefault();
+    
     const href = el.getAttribute('href')
     const method = el.getAttribute('data-method') || 'get'
     const preserveScroll = el.hasAttribute('data-preserve-scroll')
     const preserveState = el.hasAttribute('data-preserve-state')
     
-    event.preventDefault();
     
     router.visit(href, {method, preserveScroll, preserveState})
   }
@@ -103,7 +106,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="frame" {onclick}>
+<div class="frame" {onclick} bind:this={frame}>
   {#if resolvedProps}
     <Render {...resolvedProps} />
   {:else}

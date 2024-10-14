@@ -45,6 +45,7 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
   Loading...
 </Frame>
 ```
+You can get the frame's encapsulating HTML element from the context: `const { getFrame() } = getContext('inertia')`. This can be useful when you want to add click handlers to the frame.
 
 #### Things to note
 
