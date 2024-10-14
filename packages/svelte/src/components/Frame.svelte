@@ -26,6 +26,7 @@
     frame: name,
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
+      console.log('swap called for frame', name);
       ({ component: resolvedComponent, frame: {component, props, url} } = opts);
       if (!opts.preserveState) key = Date.now();
     },
@@ -87,13 +88,17 @@
     if (event.defaultPrevented) return
     if (event.target.closest('[data-inertia-ignore]')) return;
     
+    const el = event.target.closest('[href]')
+    if (!el) return
     
-    const href = event.target.closest('[href]')?.getAttribute('href')
-    if (!href) return
+    const href = el.getAttribute('href')
+    const method = el.getAttribute('data-method') || 'get'
+    const preserveScroll = el.hasAttribute('data-preserve-scroll')
+    const preserveState = el.hasAttribute('data-preserve-state')
     
     event.preventDefault();
     
-    router.visit(href);
+    router.visit(href, {method, preserveScroll, preserveState})
   }
 </script>
 
