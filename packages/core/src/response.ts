@@ -233,7 +233,7 @@ export class Response {
 
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
-    return responseUrl.href
+    return responseUrl.href.split(responseUrl.host).pop()
   }
 
   protected mergeProps(pageResponse: Page): void {
