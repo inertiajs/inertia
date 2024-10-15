@@ -1,6 +1,7 @@
 import { setupProgress, Router, History } from 'inertiax-core';
 import escape from 'html-escape';
 import Frame from './components/Frame.svelte';
+import { BROWSER } from 'esm-env'
 
 export default async function createInertiaApp({
   id = 'app',
@@ -9,11 +10,12 @@ export default async function createInertiaApp({
   progress = {},
   page,
 }) {
-  const el = import.meta.env.SSR ? null : document.getElementById(id);
+  const el = BROWSER && document.getElementById(id);
   const initialState = page || JSON.parse(el?.dataset?.page || '{}');
   // Router.setVersion(initialState.version);
   Router.resolveComponent = (name) => Promise.resolve(resolve(name));
-  if (import.meta.env.SSR) {
+  
+  if (!BROWSER) {
     const { render } = await dynamicImport('svelte/server');
     const { html, head } = await (async () => {
       return render(Frame, {

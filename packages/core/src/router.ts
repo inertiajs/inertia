@@ -1,3 +1,4 @@
+import { BROWSER } from 'esm-env';
 import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -50,7 +51,7 @@ export class Router {
   constructor({ frame, initialState, swapComponent }: RouterInitParams) {
     this.frame = frame
     
-    if (import.meta.env.SSR) return;
+    if (!BROWSER) return;
 
     currentPage.init({
       frame,
@@ -144,7 +145,7 @@ export class Router {
   }
 
   public visit(href: string | URL, options: VisitOptions = {}): void {
-    if (import.meta.env.SSR) return;
+    if (!BROWSER) return;
     
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,

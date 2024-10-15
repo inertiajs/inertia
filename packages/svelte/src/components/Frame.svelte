@@ -1,4 +1,5 @@
 <script>
+  import { BROWSER } from 'esm-env';
   import { onDestroy, onMount, setContext } from 'svelte'
   import { toStore } from 'svelte/store';
   import { Router } from 'inertiax-core';
@@ -108,8 +109,7 @@
     document.addEventListener('click', clickhandler)
   })
   
-  onDestroy(function() {
-    if (import.meta.env.SSR) return
+  if (BROWSER) onDestroy(function() {
     document.removeEventListener('click', clickhandler)
   })
 </script>
