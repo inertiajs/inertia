@@ -47,15 +47,17 @@ const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
   const textEncoder = new TextEncoder()
   const str = JSON.stringify(data)
   
-  const encoded = textEncoder.encode(str)
-
-  return window.crypto.subtle.encrypt(
-    {
-      name: 'AES-GCM',
-      iv,
-    },
-    key,
-    encoded,
+  const encoded = new Uint8Array(str.length * 3)
+ 
+   const result = textEncoder.encodeInto(str, encoded)
+ 
+   return window.crypto.subtle.encrypt(
+     {
+       name: 'AES-GCM',
+       iv,
+     },
+     key,
+     encoded.subarray(0, result.written),
   )
 }
 
