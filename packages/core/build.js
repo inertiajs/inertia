@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 

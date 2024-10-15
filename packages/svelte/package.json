@@ -1,6 +1,6 @@
 {
   "name": "inertiax-svelte",
-  "version": "5.0.13",
+  "version": "5.0.14",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia X",
   "contributors": [
@@ -18,10 +18,10 @@
     "url": "https://github.com/buhrmi/inertiax/issues"
   },
   "scripts": {
-    "dev": "npm run package -- --watch",
-    "build": "npm run package && publint",
-    "package": "svelte-kit sync && svelte-package --input src",
-    "prepublishOnly": "npm run build",
+    "dev": "bun run package -- --watch",
+    "build": "bun run package && bunx publint",
+    "package": "bunx svelte-kit sync && bunx svelte-package --input src",
+    "prepublishOnly": "bun run build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
@@ -52,7 +52,7 @@
     "@sveltejs/adapter-auto": "^3.2.0",
     "@sveltejs/kit": "^2.5.26",
     "@sveltejs/package": "^2.3.5",
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
     "@types/html-escape": "^2.0.2",
     "@types/lodash": "^4.17.7",
     "axios": "^1.7.6",

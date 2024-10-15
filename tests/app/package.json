@@ -1,7 +1,7 @@
 {
     "scripts": {
-        "server:run": "vite build app && node app/server.js",
-        "watch": "vite build app --watch"
+        "server:run": "bunx vite build app && bun app/server.js",
+        "watch": "bunx vite build app --watch"
     },
     "devDependencies": {
         "body-parser": "^1.19.0",
