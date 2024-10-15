@@ -108,6 +108,11 @@ class CurrentPage {
         
     })
   }
+  
+  public destroy(frame: string) {
+    delete this.page.frames[frame]
+    history.replaceState(this.page)
+  }
 
   public async setQuietly(
     page: Page,

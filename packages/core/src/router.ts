@@ -75,6 +75,10 @@ export class Router {
       this.loadDeferredProps()
     })
   }
+  
+  public destroy() {
+    currentPage.destroy(this.frame)
+  }
 
   public get(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
     return this.visit(url, { ...options, method: 'get', data })

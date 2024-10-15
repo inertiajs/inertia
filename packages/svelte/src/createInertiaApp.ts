@@ -41,7 +41,7 @@ export default async function createInertiaApp({
   if (progress) {
     setupProgress(progress);
   }
-
+  
   setup({
     el,
     App: Frame,

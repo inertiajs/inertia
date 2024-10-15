@@ -36,7 +36,8 @@
   if (url && makeRequest) {
     router.visit(url, {
       preserveState: true,
-      preserveScroll: true
+      preserveScroll: true,
+      replace: true
     })
   }
   
@@ -112,6 +113,7 @@
   
   if (BROWSER) onDestroy(function() {
     document.removeEventListener('click', clickhandler)
+    router.destroy()
   })
 </script>
 
