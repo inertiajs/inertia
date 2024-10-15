@@ -3,13 +3,13 @@ import { Deferred, Link, usePage } from '@inertiajs/react'
 const Foo = () => {
   const { foo } = usePage().props
 
-  return foo
+  return foo.text
 }
 
 const Bar = () => {
   const { bar } = usePage().props
 
-  return bar
+  return bar.text
 }
 
 export default () => {
