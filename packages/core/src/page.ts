@@ -1,3 +1,4 @@
+import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
@@ -97,6 +98,8 @@ class CurrentPage {
         if (!preserveScroll && frame == '_top') {
           Scroll.reset(page)
         }
+        
+        eventHandler.fireInternalEvent('loadDeferredProps')
 
         if (!replace) {
           fireNavigateEvent(page)

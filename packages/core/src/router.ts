@@ -70,7 +70,7 @@ export class Router {
       }
     })
 
-    eventHandler.onGlobalEvent('navigate', () => {
+  eventHandler.on('loadDeferredProps', () => {
       this.loadDeferredProps()
     })
   }
