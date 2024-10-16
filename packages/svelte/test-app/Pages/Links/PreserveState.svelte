@@ -33,26 +33,26 @@
     <input type="text" name="example-field" class="field" />
   </label>
 
-  <a href="/links/preserve-state-page-two" use:inertia={{ preserveState: true, data: { foo: 'bar' } }} class="preserve">
+  <a href="/links/preserve-state-page-two" use:inertia={{ forgetState: false, data: { foo: 'bar' } }} class="preserve">
     [State] Preserve: true
   </a>
   <a
     href="/links/preserve-state-page-two"
-    use:inertia={{ preserveState: false, data: { foo: 'baz' } }}
+    use:inertia={{ forgetState: true, data: { foo: 'baz' } }}
     class="preserve-false"
   >
     [State] Preserve: false
   </a>
   <a
     href="/links/preserve-state-page-two"
-    use:inertia={{ preserveState: preserveCallback, data: { foo: 'callback-bar' } }}
+    use:inertia={{ forgetState: preserveCallback, data: { foo: 'callback-bar' } }}
     class="preserve-callback"
   >
     [State] Preserve Callback: true
   </a>
   <a
     href="/links/preserve-state-page-two"
-    use:inertia={{ preserveState: preserveCallbackFalse, data: { foo: 'callback-baz' } }}
+    use:inertia={{ forgetState: preserveCallbackFalse, data: { foo: 'callback-baz' } }}
     class="preserve-callback-false"
   >
     [State] Preserve Callback: false

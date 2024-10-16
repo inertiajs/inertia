@@ -153,7 +153,7 @@ export class Response {
   protected locationVisit(url: URL): boolean | void {
     try {
       SessionStorage.set(SessionStorage.locationVisitKey, {
-        preserveScroll: this.requestParams.all().preserveScroll === true,
+        forgetScroll: this.requestParams.all().forgetScroll === true,
       })
 
       if (typeof window === 'undefined') {
@@ -193,10 +193,10 @@ export class Response {
     return currentPage.setFrame(
       this.requestParams.all().frame, 
       pageResponse, {
-      useHistory: this.requestParams.all().useHistory,
+      skipHistory: this.requestParams.all().skipHistory,
       replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll,
-      preserveState: this.requestParams.all().preserveState,
+      forgetScroll: this.requestParams.all().forgetScroll,
+      forgetState: this.requestParams.all().forgetState,
     })
   }
 
@@ -274,7 +274,7 @@ export class Response {
     const frame = this.requestParams.all().frame
     const rememberedState = rememberedFrames[frame]?.rememberedState || {}
     if (
-      this.requestParams.all().preserveState &&
+      this.requestParams.all().forgetState &&
       rememberedState &&
       pageResponse.component === currentPage.frame(frame).component
     ) {

@@ -54,13 +54,13 @@ app.get('/links/partial-reloads', (req, res) =>
   }),
 )
 app.all('/links/preserve-state-page-two', (req, res) =>
-  inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
+  inertia.render(req, res, { component: 'Links/forgetStat', props: { foo: req.query.foo } }),
 )
 app.all('/links/preserve-scroll-page-two', (req, res) =>
-  inertia.render(req, res, { component: 'Links/PreserveScroll', props: { foo: req.query.foo } }),
+  inertia.render(req, res, { component: 'Links/forgetScroll', props: { foo: req.query.foo } }),
 )
 app.all('/links/preserve-scroll-false-page-two', (req, res) =>
-  inertia.render(req, res, { component: 'Links/PreserveScrollFalse', props: { foo: req.query.foo } }),
+  inertia.render(req, res, { component: 'Links/forgetScrollFalse', props: { foo: req.query.foo } }),
 )
 app.get('/links/as-warning/:method', (req, res) =>
   inertia.render(req, res, { component: 'Links/AsWarning', props: { method: req.params.method } }),
@@ -85,13 +85,13 @@ app.get('/visits/partial-reloads', (req, res) =>
   }),
 )
 app.all('/visits/preserve-state-page-two', (req, res) =>
-  inertia.render(req, res, { component: 'Visits/PreserveState', props: { foo: req.query.foo } }),
+  inertia.render(req, res, { component: 'Visits/forgetState', props: { foo: req.query.foo } }),
 )
 app.all('/visits/preserve-scroll-page-two', (req, res) =>
-  inertia.render(req, res, { component: 'Visits/PreserveScroll', props: { foo: req.query.foo } }),
+  inertia.render(req, res, { component: 'Visits/forgetScroll', props: { foo: req.query.foo } }),
 )
 app.all('/visits/preserve-scroll-false-page-two', (req, res) =>
-  inertia.render(req, res, { component: 'Visits/PreserveScrollFalse', props: { foo: req.query.foo } }),
+  inertia.render(req, res, { component: 'Visits/forgetScrollFalse', props: { foo: req.query.foo } }),
 )
 app.post('/visits/events-errors', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Events', props: { errors: { foo: 'bar' } } }),

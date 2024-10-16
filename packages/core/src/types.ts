@@ -61,27 +61,27 @@ export type PageResolver = (name: string) => Component
 export type FrameHandler = ({
   component,
   frame,
-  preserveState,
+  forgetState,
 }: {
   component: Component
   frame: Frame
-  preserveState: PreserveStateOption
+  forgetState: ForgetStateOption
 }) => Promise<unknown>
 
-export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
+export type ForgetStateOption = boolean | string | ((page: Page) => boolean)
 
 export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
-  preserveScroll: boolean
+  forgetScroll: boolean
 }
 
 export type Visit = {
   method: Method
   data: RequestPayload
   replace: boolean
-  preserveScroll: PreserveStateOption
-  preserveState: PreserveStateOption
+  forgetScroll: ForgetStateOption
+  forgetState: ForgetStateOption
   only: Array<string>
   except: Array<string>
   headers: Record<string, string>
@@ -95,7 +95,7 @@ export type Visit = {
   reset: string[]
   preserveUrl: boolean
   frame: string
-  useHistory: boolean
+  skipHistory: boolean
 }
 
 export type GlobalEventsMap = {
@@ -222,7 +222,7 @@ export type VisitCallbacks = {
 
 export type VisitOptions = Partial<Visit & VisitCallbacks>
 
-export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'preserveState'>
+export type ReloadOptions = Omit<VisitOptions, 'forgetScroll' | 'forgetState'>
 
 export type PollOptions = {
   keepAlive?: boolean

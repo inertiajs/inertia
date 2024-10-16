@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from 'axios'
 import { page as currentPage } from './page'
 import { Response } from './response'
-import { ActiveVisit, InternalActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
+import { ActiveVisit, InternalActiveVisit, Page, ForgetStateOption, VisitCallbacks } from './types'
 
 export class RequestParams {
   protected callbacks: {
@@ -130,8 +130,8 @@ export class RequestParams {
   }
 
   public setPreserveOptions(page: Page) {
-    this.params.preserveScroll = this.resolvePreserveOption(this.params.preserveScroll, page)
-    this.params.preserveState = this.resolvePreserveOption(this.params.preserveState, page)
+    this.params.forgetScroll = this.resolvePreserveOption(this.params.forgetScroll, page)
+    this.params.forgetState = this.resolvePreserveOption(this.params.forgetState, page)
   }
 
   public runCallbacks() {
@@ -161,7 +161,7 @@ export class RequestParams {
     this.callbacks.push({ name, args })
   }
 
-  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
+  protected resolvePreserveOption(value: ForgetStateOption, page: Page): boolean | string{
     if (typeof value === 'function') {
       return value(page)
     }

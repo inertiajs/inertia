@@ -10,7 +10,7 @@
   const preserve = () => {
     router.visit('/visits/preserve-scroll-page-two', {
       data: { foo: 'foo' },
-      preserveScroll: true,
+      forgetScroll: false,
     })
   }
 
@@ -23,7 +23,7 @@
   const preserveCallback = () => {
     router.visit('/visits/preserve-scroll-page-two', {
       data: { foo: 'baz' },
-      preserveScroll: (page) => {
+      forgetScroll: (page) => {
         console.log(JSON.stringify(page))
 
         return true
@@ -34,7 +34,7 @@
   const preserveCallbackFalse = () => {
     router.visit('/visits/preserve-scroll-page-two', {
       data: { foo: 'foo' },
-      preserveScroll: (page) => {
+      forgetScroll: (page) => {
         console.log(JSON.stringify(page))
 
         return false
@@ -49,7 +49,7 @@
         foo: 'bar',
       },
       {
-        preserveScroll: true,
+        forgetScroll: false,
       },
     )
   }

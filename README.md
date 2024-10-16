@@ -24,6 +24,11 @@ Routers and page stores now exist at the Frame level (yes, an Inertia X app has 
 
 To get the context of a parent Frame, use `getContext('inertia:[frame name]))`. For example, to get the top-level router (which exists within the Frame with the name `_top`), use `const { router } = getContext('inertia:_top')`.
 
+### `forget` instead of `preserve`
+
+The Visit options `preserveState` and `preserveScroll` have been renamed to `forgetState` and `forgetScroll` and now defaults to `true`.
+If you pass them a string, only the state or scroll positions of that frame will be forgotten.
+
 ### Global click handler
 
 The `<Link>` component and the `use:inertia` action have been removed. Instead, we use a global click handler to intercept clicks and pass them to the Inertia router. You can opt out of this by adding a `data-inertia-ignore` attribute to the link. To opt-out globally, set the `data-inertia-ignore` attribute on the `<body>`.

@@ -37,7 +37,7 @@ export class Router {
   static resolveComponent: PageResolver
   
   protected frame: string = '_top'
-  protected useHistory: boolean = true
+  protected skipHistory: boolean = false
   
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
@@ -49,9 +49,9 @@ export class Router {
     interruptible: false,
   })
   
-  public init(useHistory: boolean, { frame, initialState, swapComponent }: RouterInitParams) {
+  public init(skipHistory: boolean, { frame, initialState, swapComponent }: RouterInitParams) {
     this.frame = frame
-    this.useHistory = useHistory
+    this.skipHistory = skipHistory
     
     if (!BROWSER) return;
 
@@ -69,7 +69,7 @@ export class Router {
 
     eventHandler.on('missingHistoryItem', () => {
       if (typeof window !== 'undefined') {
-        this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+        this.visit(window.location.href, { forgetState: false, forgetScroll: false, replace: true })
       }
     })
 
@@ -88,19 +88,19 @@ export class Router {
   }
 
   public post(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'post', data })
+    return this.visit(url, { forgetState: false, ...options, method: 'post', data })
   }
 
   public put(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'put', data })
+    return this.visit(url, { forgetState: false, ...options, method: 'put', data })
   }
 
   public patch(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
+    return this.visit(url, { forgetState: false, ...options, method: 'patch', data })
   }
 
   public delete(url: URL | string, options: Omit<VisitOptions, 'method'> = {}): void {
-    return this.visit(url, { preserveState: true, ...options, method: 'delete' })
+    return this.visit(url, { forgetState: false, ...options, method: 'delete' })
   }
 
   public reload(options: ReloadOptions = {}): void {
@@ -110,8 +110,8 @@ export class Router {
 
     return this.visit(window.location.href, {
       ...options,
-      preserveScroll: true,
-      preserveState: true,
+      forgetScroll: false,
+      forgetState: false,
       async: true,
       headers: {
         ...(options.headers || {}),
@@ -156,6 +156,7 @@ export class Router {
     
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
+      forgetState: options.forgetState ?? true,
       showProgress: options.showProgress ?? !options.async,
     })
 
@@ -273,8 +274,8 @@ export class Router {
       method: 'get',
       data: {},
       replace: false, 
-      preserveScroll: false,
-      preserveState: false,
+      forgetScroll: true,
+      forgetState: false,
       only: [],
       except: [],
       headers: {},
@@ -288,7 +289,7 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       frame: this.frame,
-      useHistory: this.useHistory,
+      skipHistory: this.skipHistory,
       ...options,
     }
 

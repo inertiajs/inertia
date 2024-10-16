@@ -9,7 +9,7 @@ import {
   Page,
   PageEvent,
   FrameHandler,
-  PreserveStateOption,
+  ForgetStateOption,
   RouterInitParams,
   VisitOptions,
 } from './types'
@@ -56,9 +56,9 @@ class CurrentPage {
     page: Page,
     {
       replace,
-      useHistory,
-      preserveScroll = false,
-      preserveState = false,
+      skipHistory,
+      forgetScroll = true,
+      forgetState = false,
       frame
     }: Partial<VisitOptions> = {},
   ): Promise<void> {
@@ -74,15 +74,15 @@ class CurrentPage {
       }
 
       page.scrollRegions ??= []
-      //page.rememberedState ??= {}
+      
       // If we changed the _top frame, update the URL
       if (page.frames['_top']?.url === undefined) {
         const location = typeof window !== 'undefined' ? window.location : new URL(page.frames['_top'].url)
         replace = replace || isSameUrlWithoutHash(hrefToUrl(page.frames['_top']?.url), location)
       }
       
-      if (useHistory) {
-        replace ? history.replaceState(page) : history.pushState(page)
+      if (skipHistory) {
+        replace ? history.replaceState(page) : history.pushState(page, frame)
       }
 
       // const isNewComponent = !this.isTheSame(page)
@@ -100,9 +100,8 @@ class CurrentPage {
 
       this.isFirstPageLoad = false
 
-      return this.swap({ components, page, preserveState, frame }).then(() => {
-        // TODO: save scroll positions within frames.
-        if (!preserveScroll && frame == '_top') {
+      return this.swap({ components, page, forgetState, frame }).then(() => {
+        if (forgetScroll === true || forgetScroll == frame) {
           Scroll.reset(page)
         }
         
@@ -124,15 +123,15 @@ class CurrentPage {
   public async setQuietly(
     page: Page,
     {
-      preserveState = false,
+      forgetState = false,
     }: {
-      preserveState?: PreserveStateOption
+      forgetState?: ForgetStateOption
     } = {},
   ) {
     return this.resolve(page.frames).then((components) => {
       this.page = page
       this.cleared = false
-      return this.swap({ components, page, preserveState })
+      return this.swap({ components, page, forgetState })
     })
   }
 
@@ -185,12 +184,12 @@ class CurrentPage {
   public swap({
     components,
     page,
-    preserveState,
+    forgetState,
     frame
   }: {
     components: { [name: string]: Component }
     page: Page,
-    preserveState: PreserveStateOption,
+    forgetState: ForgetStateOption,
     frame?: string
   }): Promise<unknown> {
 
@@ -201,7 +200,7 @@ class CurrentPage {
       // that we havent initialized in the new page
       if (!this.swappers[name]) return;
       
-      return this.swappers[name]({ component, frame: page.frames[name], preserveState })
+      return this.swappers[name]({ component, frame: page.frames[name], forgetState })
     }))
   }
 

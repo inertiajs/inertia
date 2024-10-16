@@ -12,6 +12,8 @@ export class History {
   public preserveUrl = false
   public static encryptHistory = false
   
+  public lastUpdatedFrame?: string
+  
   protected current: Partial<Page> = {}
   protected queue: (() => Promise<void>)[] = []
 
@@ -32,13 +34,14 @@ export class History {
     }
   }
 
-  public pushState(page: Page): void {
+  public pushState(page: Page, updatedFrame?: string): void {
     if (isServer || this.preserveUrl) {
       return
     }
 
     this.current = page
-
+    this.lastUpdatedFrame = updatedFrame
+    
     this.addToQueue(() => {
       return this.getPageData(page).then((data) => {
 
@@ -46,6 +49,7 @@ export class History {
           {
             page: data,
             timestamp: Date.now(),
+            updatedFrame
           },
           '',
           page.frames["_top"].url,

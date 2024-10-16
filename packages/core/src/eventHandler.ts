@@ -85,14 +85,12 @@ class EventHandler {
     if (history.isValidState(state)) {
       history
         .decrypt(state.page)
-        .then((data) => {
-          // XXX: 
-          // we must only preserve state of frames that did not change
-          // set preserveState to false on the last updated frame
-          currentPage.setQuietly(data, { preserveState: true }).then(() => {
+        .then((data) => {   
+          currentPage.setQuietly(data, { forgetState: history.lastUpdatedFrame }).then(() => {
             Scroll.restore(currentPage.get())
             fireNavigateEvent(currentPage.get())
           })
+          history.lastUpdatedFrame = window.history.state?.updatedFrame
         })
         .catch(() => {
           this.onMissingHistoryItem()

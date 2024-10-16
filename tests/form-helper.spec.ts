@@ -424,7 +424,7 @@ test.describe('Form Helper', () => {
         await expect(visit).toHaveProperty('method')
         await expect(visit).toHaveProperty('data')
         await expect(visit).toHaveProperty('headers')
-        await expect(visit).toHaveProperty('preserveState')
+        await expect(visit).toHaveProperty('forgetState')
       })
 
       test('can prevent the visit from starting by returning false', async ({ page }) => {
@@ -469,7 +469,7 @@ test.describe('Form Helper', () => {
         await expect(visit).toHaveProperty('method')
         await expect(visit).toHaveProperty('data')
         await expect(visit).toHaveProperty('headers')
-        await expect(visit).toHaveProperty('preserveState')
+        await expect(visit).toHaveProperty('forgetState')
       })
 
       test('marks the form as processing', async ({ page }) => {

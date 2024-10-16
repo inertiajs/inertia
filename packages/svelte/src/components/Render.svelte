@@ -49,7 +49,7 @@
 {#if Component}
   <!--
   Add the `key` only to the last (page) component in the tree.
-  This ensures that the page component re-renders when `preserveState` is disabled,
+  This ensures that the page component re-renders when `forgetState` is disabled,
   while the layout components are persisted across page changes. -->
   {#key children?.length === 0 ? key : null}
     {#if children.length > 0}

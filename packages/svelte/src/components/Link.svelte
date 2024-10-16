@@ -4,7 +4,7 @@
     FormDataConvertible,
     LinkPrefetchOption,
     Method,
-    PreserveStateOption,
+    ForgetStateOption,
   } from 'inertiax-core'
   import { inertia } from '../index'
 
@@ -13,8 +13,8 @@
   export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
   export let replace: boolean = false
-  export let preserveScroll: PreserveStateOption = false
-  export let preserveState: PreserveStateOption | null = null
+  export let forgetScroll: ForgetStateOption = false
+  export let forgetState: ForgetStateOption | null = null
   export let only: string[] = []
   export let except: string[] = []
   export let headers: Record<string, string> = {}
@@ -39,8 +39,8 @@
     data,
     method,
     replace,
-    preserveScroll,
-    preserveState: preserveState ?? method !== 'get',
+    forgetScroll,
+    forgetState: forgetState ?? method !== 'get',
     only,
     except,
     headers,

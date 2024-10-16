@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from 'vitest'
-import { ActiveVisit, Page, PreserveStateOption } from '../src'
+import { ActiveVisit, Page, ForgetStateOption } from '../src'
 import * as events from '../src/events'
 import { History } from '../src/history'
 import modal from '../src/modal'
@@ -75,8 +75,8 @@ test('props are merged for partial request responses', async () => {
       url: 'http://localhost:3000/',
     },
     {
-      preserveState: false,
-      preserveScroll: false,
+      forgetState: true,
+      forgetScroll: true,
       replace: false,
     },
   )
@@ -102,13 +102,13 @@ test.each([
     responseProps: {},
   },
   {
-    value: 'errors' as PreserveStateOption,
+    value: 'errors' as ForgetStateOption,
     expected: false,
     label: 'errors but none',
     responseProps: {},
   },
   {
-    value: 'errors' as PreserveStateOption,
+    value: 'errors' as ForgetStateOption,
     expected: true,
     label: 'errors but present',
     // @ts-ignore
@@ -128,7 +128,7 @@ test.each([
 
   const response = Response.create(
     requestParams({
-      preserveScroll: value,
+      forgetScroll: value,
     }),
     axiosResponse({
       headers: {
@@ -149,8 +149,8 @@ test.each([
       url: 'http://localhost:3000/',
     },
     {
-      preserveState: false,
-      preserveScroll: expected,
+      forgetState: true,
+      forgetScroll: expected,
       replace: false,
     },
   )
@@ -179,14 +179,14 @@ test.each([
     historyStateCount: 1,
   },
   {
-    value: 'errors' as PreserveStateOption,
+    value: 'errors' as ForgetStateOption,
     expected: false,
     label: 'errors but none',
     responseProps: {},
     historyStateCount: 1,
   },
   {
-    value: 'errors' as PreserveStateOption,
+    value: 'errors' as ForgetStateOption,
     expected: true,
     label: 'errors but present',
     historyStateCount: 1,
@@ -211,7 +211,7 @@ test.each([
 
     const response = Response.create(
       requestParams({
-        preserveState: value,
+        forgetState: value,
       }),
       axiosResponse({
         headers: {
@@ -232,8 +232,8 @@ test.each([
         url: 'http://localhost:3000/',
       },
       {
-        preserveState: expected,
-        preserveScroll: false,
+        forgetState: expected,
+        forgetScroll: true,
         replace: false,
       },
     )
@@ -253,7 +253,7 @@ test('remembered state is set after response', async () => {
 
   const response = Response.create(
     requestParams({
-      preserveState: true,
+      forgetState: false,
     }),
     axiosResponse({
       headers: {
@@ -276,8 +276,8 @@ test('remembered state is set after response', async () => {
       url: 'http://localhost:3000/',
     },
     {
-      preserveState: true,
-      preserveScroll: false,
+      forgetState: false,
+      forgetScroll: true,
       replace: false,
     },
   )
@@ -297,7 +297,7 @@ test('remembered state is not set if preserve state is false', async () => {
 
   const response = Response.create(
     requestParams({
-      preserveState: false,
+      forgetState: true,
     }),
     axiosResponse({
       headers: {
@@ -317,8 +317,8 @@ test('remembered state is not set if preserve state is false', async () => {
       url: 'http://localhost:3000/',
     },
     {
-      preserveState: false,
-      preserveScroll: false,
+      forgetState: true,
+      forgetScroll: true,
       replace: false,
     },
   )
@@ -337,7 +337,7 @@ test('remembered state is not set if the response component is different', async
 
   const response = Response.create(
     requestParams({
-      preserveState: true,
+      forgetState: false,
     }),
     axiosResponse({
       headers: {
@@ -360,8 +360,8 @@ test('remembered state is not set if the response component is different', async
       url: 'http://localhost:3000/',
     },
     {
-      preserveState: true,
-      preserveScroll: false,
+      forgetState: false,
+      forgetScroll: true,
       replace: false,
     },
   )
@@ -399,8 +399,8 @@ test('preserve url hash if response url is the same', async () => {
       url: 'http://localhost:3000/#test',
     },
     {
-      preserveState: false,
-      preserveScroll: false,
+      forgetState: true,
+      forgetScroll: true,
       replace: false,
     },
   )
@@ -522,7 +522,7 @@ test('handles location responses', async () => {
   await response.handle()
 
   expect(sessionStorageSpies.setItem).toHaveBeenCalledOnce()
-  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ preserveScroll: false })
+  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ forgetScroll: true })
 
   expect(window.location.href).toBe('http://localhost:3000/new-location')
   expect(windowReloadSpy).not.toHaveBeenCalled()
@@ -566,7 +566,7 @@ test.each([
   await response.handle()
 
   expect(sessionStorageSpies.setItem).toHaveBeenCalledOnce()
-  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ preserveScroll: false })
+  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ forgetScroll: true })
 
   expect(window.location.href).toBe(expected)
   expect(windowReloadSpy).toHaveBeenCalledOnce()

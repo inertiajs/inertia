@@ -29,7 +29,7 @@ const assertVisitObject = async (visit) => {
   await expect(visit.method).toBeDefined()
   await expect(visit.data).toBeDefined()
   await expect(visit.headers).toBeDefined()
-  await expect(visit.preserveState).toBeDefined()
+  await expect(visit.forgetState).toBeDefined()
 }
 
 const assertPageObject = async (page) => {

@@ -36,8 +36,9 @@
     frame: name,
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
+      console.log('swapComponent', name, url, opts.forgetState);
       ({ component: resolvedComponent, frame: {component, props, url} } = opts);
-      if (!opts.preserveState) key = Date.now();
+      if (opts.forgetState === true || opts.forgetState === name) key = Date.now();
     },
   })
   
@@ -48,7 +49,7 @@
   
   if (url && makeRequest) {
     router.visit(url, {
-      preserveState: true,
+      forgetState: false,
       preserveScroll: true,
       replace: history || undefined
     })

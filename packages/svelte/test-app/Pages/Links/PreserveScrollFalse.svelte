@@ -26,7 +26,7 @@
 
   <a
     href="/links/preserve-scroll-false-page-two"
-    use:inertia={{ preserveScroll: true, data: { foo: 'baz' } }}
+    use:inertia={{ forgetScroll: false, data: { foo: 'baz' } }}
     class="preserve"
     data-testid="preserve">Preserve Scroll</a
   >
@@ -39,13 +39,13 @@
 
   <a
     href="/links/preserve-scroll-false-page-two"
-    use:inertia={{ preserveScroll: preserveCallback, data: { foo: 'baz' } }}
+    use:inertia={{ forgetScroll: preserveCallback, data: { foo: 'baz' } }}
     class="preserve-callback"
     data-testid="preserve-callback">Preserve Scroll (Callback)</a
   >
   <a
     href="/links/preserve-scroll-false-page-two"
-    use:inertia={{ preserveScroll: preserveCallbackFalse, data: { foo: 'foo' } }}
+    use:inertia={{ forgetScroll: preserveCallbackFalse, data: { foo: 'foo' } }}
     class="reset-callback"
     data-testid="reset-callback">Reset Scroll (Callback)</a
   >

@@ -11,14 +11,14 @@
   const preserve = () => {
     router.visit('/visits/preserve-state-page-two', {
       data: { foo: 'bar' },
-      preserveState: true,
+      forgetState: false,
     })
   }
 
   const preserveFalse = () => {
     router.visit('/visits/preserve-state-page-two', {
       data: { foo: 'baz' },
-      preserveState: false,
+      forgetState: true,
     })
   }
 
@@ -29,7 +29,7 @@
         foo: 'callback-bar',
       },
       {
-        preserveState: (page) => {
+        forgetState: (page) => {
           alert(page)
 
           return true
@@ -45,7 +45,7 @@
         foo: 'callback-baz',
       },
       {
-        preserveState: (page) => {
+        forgetState: (page) => {
           alert(page)
 
           return false
@@ -61,7 +61,7 @@
         foo: 'get-bar',
       },
       {
-        preserveState: true,
+        forgetState: false,
       },
     )
   }
@@ -73,7 +73,7 @@
         foo: 'get-baz',
       },
       {
-        preserveState: false,
+        forgetState: true,
       },
     )
   }
