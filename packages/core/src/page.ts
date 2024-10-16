@@ -119,7 +119,11 @@ class CurrentPage {
   
   public destroy(frame: string) {
     delete this.page.frames[frame]
-    history.replaceState(this.page)
+    delete this.swappers[frame]
+    if (!this.ignoredFrames.includes(frame)) {
+      history.replaceState(this.page)
+    }
+    this.ignoredFrames = this.ignoredFrames.filter(f => f !== frame)
   }
 
   public async setQuietly(

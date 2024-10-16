@@ -112,10 +112,8 @@
     
     if (new URL(href, window.location.href).host !== window.location.host) return
     
-    const preserveScroll = el.hasAttribute('data-preserve-scroll')
-
     event.preventDefault();
-    router.visit(href, {...el.dataset, preserveScroll})
+    router.visit(href, {...el.dataset})
   }
   
   if (BROWSER) onDestroy(function() {
