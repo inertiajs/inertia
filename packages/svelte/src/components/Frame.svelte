@@ -122,16 +122,10 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="frame" onclick={bothOnclick} bind:this={frame}>
+<div style="display: contents" class="frame" onclick={bothOnclick} bind:this={frame}>
   {#if resolvedProps}
     <Render {...resolvedProps} />
   {:else}
     {@render children?.()}
   {/if}
 </div>
-
-<style>
-  .frame {
-    display: contents;
-  }
-</style>
