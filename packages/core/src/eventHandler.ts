@@ -78,7 +78,7 @@ class EventHandler {
           { arrayMerge: (_, s) => s })
       );
         
-      Scroll.reset(currentPage.get())
+      Scroll.reset()
       return
     }
 

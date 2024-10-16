@@ -95,7 +95,6 @@ export type Visit = {
   reset: string[]
   preserveUrl: boolean
   frame: string
-  skipHistory: boolean
 }
 
 export type GlobalEventsMap = {

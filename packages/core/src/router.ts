@@ -37,7 +37,6 @@ export class Router {
   static resolveComponent: PageResolver
   
   protected frame: string = '_top'
-  protected skipHistory: boolean = false
   
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
@@ -49,13 +48,12 @@ export class Router {
     interruptible: false,
   })
   
-  public init(skipHistory: boolean, { frame, initialState, swapComponent }: RouterInitParams) {
+  public init(history: boolean, { frame, initialState, swapComponent }: RouterInitParams) {
     this.frame = frame
-    this.skipHistory = skipHistory
     
     if (!BROWSER) return;
 
-    const historyFrame = currentPage.initFrame({
+    const historyFrame = currentPage.initFrame(history, {
       frame,
       initialState,
       swapComponent,
@@ -153,7 +151,7 @@ export class Router {
 
   public visit(href: string | URL, options: VisitOptions = {}): void {
     if (!BROWSER) return;
-    
+
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       forgetState: options.forgetState ?? true,
@@ -173,7 +171,7 @@ export class Router {
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
+      Scroll.save()
     }
 
     const requestParams: PendingVisit & VisitCallbacks = {
@@ -289,7 +287,6 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       frame: this.frame,
-      skipHistory: this.skipHistory,
       ...options,
     }
 

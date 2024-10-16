@@ -23,6 +23,8 @@ class CurrentPage {
     scrollRegions: []
   }
   
+  public ignoredFrames: Array<string> = []
+  
   protected swappers: {
     [frame: string]: FrameHandler,
   } = {}
@@ -34,11 +36,11 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
 
-  public initFrame({ frame, initialState, swapComponent }: RouterInitParams) {  
+  public initFrame(useHistory: boolean, { frame, initialState, swapComponent }: RouterInitParams) {  
     this.page.version ||= initialState?.version
     const historyFrame = this.page.frames?.[frame]
     
-    if (initialState?.component) {
+    if (initialState?.component && useHistory) {
       this.merge({
         frames: {
           [frame]: initialState,
@@ -48,7 +50,7 @@ class CurrentPage {
     }
     
     this.swappers[frame] = swapComponent
-  
+    if (!useHistory) this.ignoredFrames.push(frame)
     return historyFrame
   }
 
@@ -56,7 +58,6 @@ class CurrentPage {
     page: Page,
     {
       replace,
-      skipHistory,
       forgetScroll = true,
       forgetState = false,
       frame
@@ -81,9 +82,10 @@ class CurrentPage {
         replace = replace || isSameUrlWithoutHash(hrefToUrl(page.frames['_top']?.url), location)
       }
       
-      if (!skipHistory) {
+      if (frame && !this.ignoredFrames.includes(frame)) {
         replace ? history.replaceState(page) : history.pushState(page, frame)
       }
+      
 
       // const isNewComponent = !this.isTheSame(page)
 
@@ -102,7 +104,7 @@ class CurrentPage {
 
       return this.swap({ components, page, forgetState, frame }).then(() => {
         if (forgetScroll === true || forgetScroll == frame) {
-          Scroll.reset(page)
+          Scroll.reset()
         }
         
         eventHandler.fireInternalEvent('loadDeferredProps')

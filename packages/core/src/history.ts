@@ -89,12 +89,25 @@ export class History {
       this.current = data ?? {}
       
 
-      return data
+      return {
+        ...data,
+        scrollRegions: window.history.state?.scrollRegions ?? []
+      }
     })
   }
 
   protected decryptPageData(pageData: ArrayBuffer | Page | null): Promise<Page | null> {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
+  }
+  
+  public saveScrollRegions(scrollRegions: Array<{ top: number; left: number }>): void {
+    window.history.replaceState(
+      {
+        ...window.history.state,
+        scrollRegions
+      },
+      ''
+    )
   }
 
   public replaceState(page: Page): void {

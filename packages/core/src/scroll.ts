@@ -1,23 +1,22 @@
 import { history } from './history'
-import { page as currentPage } from './page'
+
 import { Page } from './types'
 
 export class Scroll {
-  public static save(page: Page): void {
-    history.replaceState({
-      ...page,
-      scrollRegions: Array.from(this.regions()).map((region) => ({
+  public static save(): void {
+    history.saveScrollRegions(
+      Array.from(this.regions()).map((region) => ({
         top: region.scrollTop,
         left: region.scrollLeft,
       })),
-    })
+    )
   }
 
   protected static regions(): NodeListOf<Element> {
     return document.querySelectorAll('[scroll-region]')
   }
 
-  public static reset(page: Page): void {
+  public static reset(): void {
     if (typeof window !== 'undefined') {
       window.scrollTo(0, 0)
     }
@@ -31,7 +30,7 @@ export class Scroll {
       }
     })
 
-    this.save(page)
+    this.save()
 
     if (window.location.hash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
@@ -64,7 +63,7 @@ export class Scroll {
   public static onScroll(event: Event): void {
     let target = event.target as Element
     if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region') || target as unknown == document) {
-      this.save(currentPage.get())
+      this.save()
     }
   }
 }

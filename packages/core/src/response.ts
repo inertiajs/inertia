@@ -96,7 +96,7 @@ export class Response {
 
       return this.requestParams.all().onError(scopedErrors)
     }
-
+    
     fireSuccessEvent(currentPage.get())
 
     await this.requestParams.all().onSuccess(currentPage.get())
@@ -181,7 +181,7 @@ export class Response {
     await this.setRememberedState(pageResponse)
 
     this.requestParams.setPreserveOptions(pageResponse)
-
+    
     pageResponse.url = history.preserveUrl ? currentPage.frame("_top").url : this.pageUrl(pageResponse)
     delete pageResponse.version
     
@@ -189,11 +189,9 @@ export class Response {
     if (pageResponse.clearHistory) {
       history.clear()
     }
-    
     return currentPage.setFrame(
       this.requestParams.all().frame, 
       pageResponse, {
-      skipHistory: this.requestParams.all().skipHistory,
       replace: this.requestParams.all().replace,
       forgetScroll: this.requestParams.all().forgetScroll,
       forgetState: this.requestParams.all().forgetState,
