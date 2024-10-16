@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45a9e748df5cc8af0c2f5ab8453946d6",
+    "content-hash": "bdfcad99e41dfb5ea6825fc3ec074ed5",
     "packages": [
         {
             "name": "brick/math",
@@ -1057,16 +1057,10 @@
         {
             "name": "inertiajs/inertia-laravel",
             "version": "2.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/inertiajs/inertia-laravel.git",
-                "reference": "141256b2ed1833158852c9d239d00abec8ff4942"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/141256b2ed1833158852c9d239d00abec8ff4942",
-                "reference": "141256b2ed1833158852c9d239d00abec8ff4942",
-                "shasum": ""
+                "type": "path",
+                "url": "./../../../inertia-laravel",
+                "reference": "6fa3696aad5e20495264a8b5a2ee6d4c0be92b40"
             },
             "require": {
                 "ext-json": "*",
@@ -1096,14 +1090,18 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "./helpers.php"
-                ],
                 "psr-4": {
                     "Inertia\\": "src"
+                },
+                "files": [
+                    "./helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Inertia\\Tests\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1119,17 +1117,10 @@
                 "inertia",
                 "laravel"
             ],
-            "support": {
-                "issues": "https://github.com/inertiajs/inertia-laravel/issues",
-                "source": "https://github.com/inertiajs/inertia-laravel/tree/2.x"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/reinink",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-10-10T13:16:21+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "laravel/framework",

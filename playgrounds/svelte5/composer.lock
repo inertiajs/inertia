@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "764d9aef4bf3cc9e043aed896c9ff744",
+    "content-hash": "bdfcad99e41dfb5ea6825fc3ec074ed5",
     "packages": [
         {
             "name": "brick/math",
@@ -1055,8 +1055,8 @@
             "version": "2.x-dev",
             "dist": {
                 "type": "path",
-                "url": "./../../../inertia-laravel-v2",
-                "reference": "f6ad746994d2e0b64693af56c4fdfbed7b53ea0f"
+                "url": "./../../../inertia-laravel",
+                "reference": "6fa3696aad5e20495264a8b5a2ee6d4c0be92b40"
             },
             "require": {
                 "ext-json": "*",
