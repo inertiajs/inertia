@@ -55,6 +55,7 @@ The Frame component is the heart and soul of this version of Inertia. It allows 
 | `component` | string | (required if `url` is not given) The name of the Inertia page component to load. |
 | `props` | object | (optional) The initial props to pass to the Inertia page component. They will be replaced once `url` has been loaded. |
 | `renderLayout` | boolean | (optional) Whether to render the layout. Defaults to `true` if `name` == `_top`. `false` otherwise. |
+| `history` | boolean | (optional) Whether this frame should save its state in the history. Setting this to false effectively makes this frame invisible to browser navigation. |
 | `name` | string | (optional) The name of the frame. This is used to identify the frame in the history state |
 
 ## Installation

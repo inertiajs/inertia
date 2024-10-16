@@ -36,7 +36,8 @@ import { transformUrlAndData } from './url'
 export class Router {
   static resolveComponent: PageResolver
   
-  protected frame: string
+  protected frame: string = '_top'
+  protected useHistory: boolean = true
   
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
@@ -48,18 +49,19 @@ export class Router {
     interruptible: false,
   })
   
-  constructor({ frame, initialState, swapComponent }: RouterInitParams) {
+  public init(useHistory: boolean, { frame, initialState, swapComponent }: RouterInitParams) {
     this.frame = frame
+    this.useHistory = useHistory
     
     if (!BROWSER) return;
 
-    currentPage.init({
+    const historyFrame = currentPage.initFrame({
       frame,
       initialState,
       swapComponent,
     })
     
-    if (frame !== '_top') return;
+    if (frame !== '_top') return historyFrame;
     
     InitialVisit.handle()
     
@@ -74,6 +76,7 @@ export class Router {
   eventHandler.on('loadDeferredProps', () => {
       this.loadDeferredProps()
     })
+    return historyFrame
   }
   
   public destroy() {
@@ -269,7 +272,7 @@ export class Router {
     const mergedOptions: Visit = {
       method: 'get',
       data: {},
-      replace: false,
+      replace: false, 
       preserveScroll: false,
       preserveState: false,
       only: [],
@@ -285,6 +288,7 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       frame: this.frame,
+      useHistory: this.useHistory,
       ...options,
     }
 

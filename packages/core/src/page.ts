@@ -34,24 +34,28 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
 
-  public init({ frame, initialState, swapComponent }: RouterInitParams) {  
+  public initFrame({ frame, initialState, swapComponent }: RouterInitParams) {  
     this.page.version ||= initialState?.version
-    if (initialState?.component) {
+    const historyFrame = this.page.frames?.[frame]
+    // if (initialState?.component) {
       this.merge({
         frames: {
-          [frame]: initialState
+          [frame]: initialState,
+          ...this.page.frames
         }
       })
-    }
+    // }
+    
     this.swappers[frame] = swapComponent
   
-    return this
+    return historyFrame
   }
 
   public async set(
     page: Page,
     {
-      replace = false,
+      replace,
+      useHistory,
       preserveScroll = false,
       preserveState = false,
       frame
@@ -75,8 +79,10 @@ class CurrentPage {
         const location = typeof window !== 'undefined' ? window.location : new URL(page.frames['_top'].url)
         replace = replace || isSameUrlWithoutHash(hrefToUrl(page.frames['_top']?.url), location)
       }
-
-      replace ? history.replaceState(page) : history.pushState(page)
+      
+      if (useHistory) {
+        replace ? history.replaceState(page) : history.pushState(page)
+      }
 
       // const isNewComponent = !this.isTheSame(page)
 

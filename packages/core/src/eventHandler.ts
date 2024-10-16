@@ -86,7 +86,10 @@ class EventHandler {
       history
         .decrypt(state.page)
         .then((data) => {
-          currentPage.setQuietly(data, { preserveState: false }).then(() => {
+          // XXX: 
+          // we must only preserve state of frames that did not change
+          // set preserveState to false on the last updated frame
+          currentPage.setQuietly(data, { preserveState: true }).then(() => {
             Scroll.restore(currentPage.get())
             fireNavigateEvent(currentPage.get())
           })

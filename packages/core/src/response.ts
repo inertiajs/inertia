@@ -193,6 +193,7 @@ export class Response {
     return currentPage.setFrame(
       this.requestParams.all().frame, 
       pageResponse, {
+      useHistory: this.requestParams.all().useHistory,
       replace: this.requestParams.all().replace,
       preserveScroll: this.requestParams.all().preserveScroll,
       preserveState: this.requestParams.all().preserveState,

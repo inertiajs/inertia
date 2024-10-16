@@ -12,6 +12,7 @@
     component,
     props,
     url,
+    history = true,
     makeRequest = true,
     
     children,
@@ -24,7 +25,9 @@
   let resolvedComponent = $state(null)
   let key = $state(null)
   
-  export const router = new Router({
+  export const router = new Router();
+  
+  const historyFrame = router.init(history, {
     frame: name,
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
@@ -32,12 +35,17 @@
       if (!opts.preserveState) key = Date.now();
     },
   })
-    
+  
+  if (historyFrame) {
+    makeRequest = false;
+    ({ component, props, url } = historyFrame);
+  }
+  
   if (url && makeRequest) {
     router.visit(url, {
       preserveState: true,
       preserveScroll: true,
-      replace: true
+      replace: history || undefined
     })
   }
   
@@ -86,40 +94,30 @@
     return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined';
   }
 
-  const clickhandler = function(event) {
+  const onclick = function(event) {
     if (event.defaultPrevented) return
     if (event.target.closest('[data-inertia-ignore]')) return;
-    
     
     const el = event.target.closest('[href]')
     
     if (!el) return
     
-    if (!frame.contains(el)) return;
+    const href = el.getAttribute('href')
+    
+    if (new URL(href, window.location.href).host !== window.location.host) return
     
     event.preventDefault();
-    
-    const href = el.getAttribute('href')
-    const method = el.getAttribute('data-method') || 'get'
-    const preserveScroll = el.hasAttribute('data-preserve-scroll')
-    const preserveState = el.hasAttribute('data-preserve-state')
-    
-    router.visit(href, {method, preserveScroll, preserveState})
+    router.visit(href, {...el.dataset})
   }
   
-  onMount(function() {
-    document.addEventListener('click', clickhandler)
-  })
-  
   if (BROWSER) onDestroy(function() {
-    document.removeEventListener('click', clickhandler)
     router.destroy()
   })
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="frame" bind:this={frame}>
+<div class="frame" {onclick} bind:this={frame}>
   {#if resolvedProps}
     <Render {...resolvedProps} />
   {:else}
