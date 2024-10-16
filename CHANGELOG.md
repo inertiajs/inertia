@@ -13,6 +13,9 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - [2.x] Fix onClick in React adapter ([#2019](https://github.com/inertiajs/inertia/pull/2019))
 - [2.x] Export usePrefetch for react ([#2016](https://github.com/inertiajs/inertia/pull/2016))
 - [2.x] Rename WhenVisible "elementTag" prop to "as" ([#2009](https://github.com/inertiajs/inertia/pull/2009))
+- [2.x] $page url should not include the host ([#2032](https://github.com/inertiajs/inertia/pull/2032))
+- [2.x] Suppress Svelte accessibility warnings from Playwright logs ([#2033](https://github.com/inertiajs/inertia/pull/2033))
+- [2.x] Change TypeScript module resolution in the Svelte adapter ([#2035](https://github.com/inertiajs/inertia/pull/2035))
 
 ## [v2.0.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0-beta.1)
 
