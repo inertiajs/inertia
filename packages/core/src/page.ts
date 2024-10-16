@@ -81,7 +81,7 @@ class CurrentPage {
         replace = replace || isSameUrlWithoutHash(hrefToUrl(page.frames['_top']?.url), location)
       }
       
-      if (skipHistory) {
+      if (!skipHistory) {
         replace ? history.replaceState(page) : history.pushState(page, frame)
       }
 
