@@ -3,10 +3,9 @@ import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
-import { GlobalEvent, GlobalEventNames, GlobalEventResult } from './types'
+import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
 import { hrefToUrl } from './url'
 
-type InternalEvent = 'missingHistoryItem'
 class EventHandler {
   protected internalListeners: {
     event: InternalEvent
@@ -54,7 +53,7 @@ class EventHandler {
     this.fireInternalEvent('missingHistoryItem')
   }
 
-  protected fireInternalEvent(event: InternalEvent): void {
+  public fireInternalEvent(event: InternalEvent): void {
     this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
   }
 
