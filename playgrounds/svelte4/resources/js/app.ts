@@ -1,5 +1,4 @@
-import { createInertiaApp } from '@inertiajs/svelte'
-import type { ResolvedComponent } from '@inertiajs/svelte'
+import { createInertiaApp, type ResolvedComponent } from '@inertiajs/svelte'
 
 createInertiaApp({
   resolve: (name) => {
