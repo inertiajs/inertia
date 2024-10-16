@@ -76,7 +76,7 @@ test('props are merged for partial request responses', async () => {
     },
     {
       forgetState: true,
-      forgetScroll: true,
+      preserveScroll: false,
       replace: false,
     },
   )
@@ -128,7 +128,7 @@ test.each([
 
   const response = Response.create(
     requestParams({
-      forgetScroll: value,
+      preserveScroll: value,
     }),
     axiosResponse({
       headers: {
@@ -150,7 +150,7 @@ test.each([
     },
     {
       forgetState: true,
-      forgetScroll: expected,
+      preserveScroll: expected,
       replace: false,
     },
   )
@@ -233,7 +233,7 @@ test.each([
       },
       {
         forgetState: expected,
-        forgetScroll: true,
+        preserveScroll: false,
         replace: false,
       },
     )
@@ -277,7 +277,7 @@ test('remembered state is set after response', async () => {
     },
     {
       forgetState: false,
-      forgetScroll: true,
+      preserveScroll: false,
       replace: false,
     },
   )
@@ -318,7 +318,7 @@ test('remembered state is not set if preserve state is false', async () => {
     },
     {
       forgetState: true,
-      forgetScroll: true,
+      preserveScroll: false,
       replace: false,
     },
   )
@@ -361,7 +361,7 @@ test('remembered state is not set if the response component is different', async
     },
     {
       forgetState: false,
-      forgetScroll: true,
+      preserveScroll: false,
       replace: false,
     },
   )
@@ -400,7 +400,7 @@ test('preserve url hash if response url is the same', async () => {
     },
     {
       forgetState: true,
-      forgetScroll: true,
+      preserveScroll: false,
       replace: false,
     },
   )
@@ -522,7 +522,7 @@ test('handles location responses', async () => {
   await response.handle()
 
   expect(sessionStorageSpies.setItem).toHaveBeenCalledOnce()
-  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ forgetScroll: true })
+  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ preserveScroll: false })
 
   expect(window.location.href).toBe('http://localhost:3000/new-location')
   expect(windowReloadSpy).not.toHaveBeenCalled()
@@ -566,7 +566,7 @@ test.each([
   await response.handle()
 
   expect(sessionStorageSpies.setItem).toHaveBeenCalledOnce()
-  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ forgetScroll: true })
+  expect(sessionStorageSpies.setItem).toHaveBeenCalledWith({ preserveScroll: false })
 
   expect(window.location.href).toBe(expected)
   expect(windowReloadSpy).toHaveBeenCalledOnce()

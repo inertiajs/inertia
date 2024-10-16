@@ -73,14 +73,14 @@ export type ForgetStateOption = boolean | string | ((page: Page) => boolean)
 export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
-  forgetScroll: boolean
+  preserveScroll: boolean
 }
 
 export type Visit = {
   method: Method
   data: RequestPayload
   replace: boolean
-  forgetScroll: ForgetStateOption
+  preserveScroll: ForgetStateOption
   forgetState: ForgetStateOption
   only: Array<string>
   except: Array<string>
@@ -221,7 +221,7 @@ export type VisitCallbacks = {
 
 export type VisitOptions = Partial<Visit & VisitCallbacks>
 
-export type ReloadOptions = Omit<VisitOptions, 'forgetScroll' | 'forgetState'>
+export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'forgetState'>
 
 export type PollOptions = {
   keepAlive?: boolean

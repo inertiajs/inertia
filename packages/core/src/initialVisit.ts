@@ -36,7 +36,7 @@ export class InitialVisit {
     history
       .decrypt()
       .then((data) => {
-        currentPage.set(data, { forgetScroll: false, forgetState: false, replace: true }).then(() => {
+        currentPage.set(data, { preserveScroll: true, forgetState: false, replace: true }).then(() => {
           Scroll.restore(currentPage.get())
           fireNavigateEvent(currentPage.get())
         })
@@ -76,11 +76,11 @@ export class InitialVisit {
 
         currentPage
           .set(currentPage.get(), {
-            forgetScroll: locationVisit.forgetScroll,
+            preserveScroll: locationVisit.preserveScroll,
             forgetState: false,
           })
           .then(() => {
-            if (locationVisit.forgetScroll) {
+            if (!locationVisit.preserveScroll) {
               Scroll.restore(currentPage.get())
             }
 

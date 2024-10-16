@@ -153,7 +153,7 @@ export class Response {
   protected locationVisit(url: URL): boolean | void {
     try {
       SessionStorage.set(SessionStorage.locationVisitKey, {
-        forgetScroll: this.requestParams.all().forgetScroll === true,
+        preserveScroll: this.requestParams.all().preserveScroll === true,
       })
 
       if (typeof window === 'undefined') {
@@ -193,7 +193,7 @@ export class Response {
       this.requestParams.all().frame, 
       pageResponse, {
       replace: this.requestParams.all().replace,
-      forgetScroll: this.requestParams.all().forgetScroll,
+      preserveScroll: this.requestParams.all().preserveScroll,
       forgetState: this.requestParams.all().forgetState,
     })
   }

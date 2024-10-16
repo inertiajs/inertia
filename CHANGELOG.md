@@ -33,7 +33,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ### Changed
 
 - Skip intercepting non-left button clicks on links ([#1908](https://github.com/inertiajs/inertia/pull/1908), [#1910](https://github.com/inertiajs/inertia/pull/1910))
-- Changed `forgetScroll` to be `true` on initial page visit ([#1360](https://github.com/inertiajs/inertia/pull/1360))
+- Changed `preserveScroll` to be `true` on initial page visit ([#1360](https://github.com/inertiajs/inertia/pull/1360))
 - Return early when using `router.on()` during SSR ([#1715](https://github.com/inertiajs/inertia/pull/1715))
 - Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
 
@@ -55,7 +55,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [v1.2.0](https://github.com/inertiajs/inertia/compare/v1.1.0...v1.2.0)
 
-- Fix `forgetScroll` and `forgetState` types ([#1882](https://github.com/inertiajs/inertia/pull/1882))
+- Fix `preserveScroll` and `forgetState` types ([#1882](https://github.com/inertiajs/inertia/pull/1882))
 - Revert "merge props from partial reloads" ([#1895](https://github.com/inertiajs/inertia/pull/1895))
 
 ## [v1.1.0](https://github.com/inertiajs/inertia/compare/v1.0.16...v1.1.0)

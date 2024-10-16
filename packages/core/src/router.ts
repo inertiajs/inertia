@@ -67,7 +67,7 @@ export class Router {
 
     eventHandler.on('missingHistoryItem', () => {
       if (typeof window !== 'undefined') {
-        this.visit(window.location.href, { forgetState: false, forgetScroll: false, replace: true })
+        this.visit(window.location.href, { forgetState: false, preserveScroll: true, replace: true })
       }
     })
 
@@ -108,8 +108,8 @@ export class Router {
 
     return this.visit(window.location.href, {
       ...options,
-      forgetScroll: false,
-      forgetState: false,
+      preserveScroll: true,
+      forgetState: this.frame,
       async: true,
       headers: {
         ...(options.headers || {}),
@@ -154,7 +154,8 @@ export class Router {
 
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
-      forgetState: options.forgetState ?? true,
+      preserveScroll: options.preserveScroll ?? this.frame !== '_top',
+      forgetState: options.forgetState ?? this.frame,
       showProgress: options.showProgress ?? !options.async,
     })
 
@@ -272,7 +273,7 @@ export class Router {
       method: 'get',
       data: {},
       replace: false, 
-      forgetScroll: true,
+      preserveScroll: false,
       forgetState: false,
       only: [],
       except: [],

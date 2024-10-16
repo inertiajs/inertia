@@ -13,7 +13,7 @@
   export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
   export let replace: boolean = false
-  export let forgetScroll: ForgetStateOption = false
+  export let preserveScroll: ForgetStateOption = false
   export let forgetState: ForgetStateOption | null = null
   export let only: string[] = []
   export let except: string[] = []
@@ -39,7 +39,7 @@
     data,
     method,
     replace,
-    forgetScroll,
+    preserveScroll,
     forgetState: forgetState ?? method !== 'get',
     only,
     except,

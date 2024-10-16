@@ -58,7 +58,7 @@ class CurrentPage {
     page: Page,
     {
       replace,
-      forgetScroll = true,
+      preserveScroll = false,
       forgetState = false,
       frame
     }: Partial<VisitOptions> = {},
@@ -103,7 +103,7 @@ class CurrentPage {
       this.isFirstPageLoad = false
 
       return this.swap({ components, page, forgetState, frame }).then(() => {
-        if (forgetScroll === true || forgetScroll == frame) {
+        if (!preserveScroll) {
           Scroll.reset()
         }
         

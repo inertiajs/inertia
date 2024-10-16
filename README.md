@@ -24,10 +24,11 @@ Routers and page stores now exist at the Frame level (yes, an Inertia X app has 
 
 To get the context of a parent Frame, use `getContext('inertia:[frame name]))`. For example, to get the top-level router (which exists within the Frame with the name `_top`), use `const { router } = getContext('inertia:_top')`.
 
-### `forget` instead of `preserve`
+### `preserveState` and `preserveScroll`
 
-The Visit options `preserveState` and `preserveScroll` have been renamed to `forgetState` and `forgetScroll` and now defaults to `true`.
-If you pass them a string, only the state or scroll positions of that frame will be forgotten.
+The `preserveState` router option has been replaced by `forgetState`. It can be `true`, `false`, or the name of a frame. If true, the state of all frames will be forgotten upon navigation. If set to a frame name, only the state of that frame will be forgotten. It defaults to the name of the frame that made the request.
+
+The `preserveScroll` option is true by default within non-top frames.
 
 ### Global click handler
 

@@ -130,7 +130,7 @@ export class RequestParams {
   }
 
   public setPreserveOptions(page: Page) {
-    this.params.forgetScroll = this.resolvePreserveOption(this.params.forgetScroll, page)
+    this.params.preserveScroll = this.resolvePreserveOption(this.params.preserveScroll, page)
     this.params.forgetState = this.resolvePreserveOption(this.params.forgetState, page)
   }
 

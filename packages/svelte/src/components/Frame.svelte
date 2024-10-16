@@ -36,8 +36,8 @@
     frame: name,
     initialState: {component, props, url, version},
     swapComponent: async (opts) => {
-      // console.log('swapComponent', name, url, opts.forgetState);
       ({ component: resolvedComponent, frame: {component, props, url} } = opts);
+      // console.log('swapComponent', name, url, opts.forgetState);
       if (opts.forgetState === true || opts.forgetState === name) key = Date.now();
     },
   })
@@ -50,7 +50,7 @@
   if (url && makeRequest) {
     router.visit(url, {
       forgetState: false,
-      forgetScroll: false,
+      preserveScroll: true,
       replace: history || undefined
     })
   }
@@ -112,8 +112,10 @@
     
     if (new URL(href, window.location.href).host !== window.location.host) return
     
+    const preserveScroll = el.hasAttribute('data-preserve-scroll')
+
     event.preventDefault();
-    router.visit(href, {...el.dataset})
+    router.visit(href, {...el.dataset, preserveScroll})
   }
   
   if (BROWSER) onDestroy(function() {

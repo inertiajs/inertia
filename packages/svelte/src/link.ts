@@ -130,7 +130,7 @@ function link(
       data,
       method,
       replace: params.replace || false,
-      forgetScroll: params.forgetScroll || false,
+      preserveScroll: params.preserveScroll || false,
       forgetState: params.forgetState ?? method !== 'get',
       only: params.only || [],
       except: params.except || [],

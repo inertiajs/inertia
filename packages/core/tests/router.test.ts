@@ -106,7 +106,7 @@ suite('init', () => {
     expect(historySpies.getAllState).toHaveBeenCalledOnce()
 
     expect(pageSpy).toHaveBeenCalledOnce()
-    expect(pageSpy).toHaveBeenCalledWith({ myState: 'is here' }, { forgetScroll: false, forgetState: false })
+    expect(pageSpy).toHaveBeenCalledWith({ myState: 'is here' }, { preserveScroll: true, forgetState: false })
 
     expect(scrollRestoreSpy).toHaveBeenCalledOnce()
     expect(scrollRestoreSpy).toHaveBeenCalledWith(homePage)
@@ -116,16 +116,16 @@ suite('init', () => {
   })
 
   test.each([
-    { forgetScroll: false, shouldBeCalled: 1 },
-    { forgetScroll: true, shouldBeCalled: 0 },
+    { preserveScroll: true, shouldBeCalled: 1 },
+    { preserveScroll: false, shouldBeCalled: 0 },
   ])(
-    'handle location visit with preserve scroll equal to $forgetScroll',
-    async ({ forgetScroll, shouldBeCalled }) => {
+    'handle location visit with preserve scroll equal to $preserveScroll',
+    async ({ preserveScroll, shouldBeCalled }) => {
       const sessionStorageSpies = {
         exists: vi.spyOn(SessionStorage, 'exists').mockReturnValue(true),
         get: vi.spyOn(SessionStorage, 'get').mockReturnValue(
           JSON.stringify({
-            forgetScroll,
+            preserveScroll,
           }),
         ),
         remove: vi.spyOn(SessionStorage, 'remove').mockReturnValue(),
@@ -164,7 +164,7 @@ suite('init', () => {
       expect(pageSpies.remember).toHaveBeenCalledOnce()
       expect(pageSpies.scrollRegions).toHaveBeenCalledOnce()
       expect(pageSpies.set).toHaveBeenCalledOnce()
-      expect(pageSpies.set).toHaveBeenCalledWith(homePage, { forgetScroll, forgetState: false })
+      expect(pageSpies.set).toHaveBeenCalledWith(homePage, { preserveScroll, forgetState: false })
 
       expect(fireNavigateEventSpy).toHaveBeenCalledOnce()
 
@@ -573,7 +573,7 @@ suite('visit', () => {
       ...options,
       async: true,
       forgetState: false,
-      forgetScroll: false,
+      preserveScroll: true,
     })
   })
 

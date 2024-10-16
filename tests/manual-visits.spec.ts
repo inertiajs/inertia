@@ -453,7 +453,7 @@ test.describe('Preserve scroll', () => {
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
     })
 
-    test('does not reset untracked scroll regions in persistent layouts when returning false from a forgetScroll callback', async ({
+    test('does not reset untracked scroll regions in persistent layouts when returning false from a preserveScroll callback', async ({
       page,
     }) => {
       consoleMessages.listen(page)
@@ -512,7 +512,7 @@ test.describe('Preserve scroll', () => {
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
     })
 
-    test('does not restore untracked scroll regions when returning true from a forgetScroll callback', async ({
+    test('does not restore untracked scroll regions when returning true from a preserveScroll callback', async ({
       page,
     }) => {
       consoleMessages.listen(page)
@@ -586,7 +586,7 @@ test.describe('Preserve scroll', () => {
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
     })
 
-    test('resets scroll regions to the top when returning false from a forgetScroll callback', async ({ page }) => {
+    test('resets scroll regions to the top when returning false from a preserveScroll callback', async ({ page }) => {
       consoleMessages.listen(page)
       await page
         .getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' })

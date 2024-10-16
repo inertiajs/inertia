@@ -22,7 +22,7 @@ export const getRequestParams = (overrides: Partial<ActiveVisit> = {}): ActiveVi
   replace: false,
   only: [],
   except: [],
-  forgetScroll: true,
+  preserveScroll: false,
   forgetState: true,
   errorBag: '',
   async: false,
