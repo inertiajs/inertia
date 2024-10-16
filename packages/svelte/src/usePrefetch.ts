@@ -33,13 +33,8 @@ export default function usePrefetch(options: VisitOptions = {}) {
   })
 
   onDestroy(() => {
-    if (removePrefetchedListener) {
-      removePrefetchedListener()
-    }
-
-    if (removePrefetchingListener) {
-      removePrefetchingListener()
-    }
+    removePrefetchedListener?.()
+    removePrefetchingListener?.()
   })
 
   return {
