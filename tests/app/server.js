@@ -215,8 +215,9 @@ app.get('/history/:pageNumber', (req, res) => {
     component: 'History/Page',
     props: {
       pageNumber: req.params.pageNumber,
+      multiByte: req.params.pageNumber === '5' ? '😃' : 'n/a',
     },
-    encryptHistory: req.params.pageNumber === '3',
+    encryptHistory: req.params.pageNumber === '3' || req.params.pageNumber === '5',
     clearHistory: req.params.pageNumber === '4',
   })
 })
