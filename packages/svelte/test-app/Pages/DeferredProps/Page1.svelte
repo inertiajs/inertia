@@ -9,14 +9,14 @@
   <svelte:fragment slot="fallback">
     <div>Loading foo...</div>
   </svelte:fragment>
-  {foo}
+  {foo.text}
 </Deferred>
 
 <Deferred data="bar">
   <svelte:fragment slot="fallback">
     <div>Loading bar...</div>
   </svelte:fragment>
-  {bar}
+  {bar.text}
 </Deferred>
 
 <a href="/deferred-props/page-2" use:inertia>Page 2</a>
