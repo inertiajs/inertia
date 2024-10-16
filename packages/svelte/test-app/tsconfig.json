@@ -9,8 +9,8 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "module": "ESNext",
+    "moduleResolution": "node"
   },
   "include": ["*.d.ts", "*.ts", "*.js", "**/*.d.ts", "**/*.ts", "**/*.js", "**/*.svelte", "*.config.js", "*.config.cjs"]
 }
