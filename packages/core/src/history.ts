@@ -106,6 +106,7 @@ export class History {
       return this.getPageData(page).then((data) => {
         window.history.replaceState(
           {
+            ...window.history.state,
             page: data,
             timestamp: Date.now(),
           },
