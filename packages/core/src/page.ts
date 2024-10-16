@@ -37,14 +37,15 @@ class CurrentPage {
   public initFrame({ frame, initialState, swapComponent }: RouterInitParams) {  
     this.page.version ||= initialState?.version
     const historyFrame = this.page.frames?.[frame]
-    // if (initialState?.component) {
+    
+    if (initialState?.component) {
       this.merge({
         frames: {
           [frame]: initialState,
           ...this.page.frames
         }
       })
-    // }
+    }
     
     this.swappers[frame] = swapComponent
   

@@ -1,6 +1,6 @@
 <script>
   import { BROWSER } from 'esm-env';
-  import { onDestroy, onMount, setContext } from 'svelte'
+  import { onDestroy, setContext } from 'svelte'
   import { toStore } from 'svelte/store';
   import { Router } from 'inertiax-core';
 
@@ -14,6 +14,7 @@
     url,
     history = true,
     makeRequest = true,
+    onclick = () => {},
     
     children,
     version
@@ -21,6 +22,10 @@
   
   let frame
   // const store = writable({ component: null, frame: null, key: null })
+  const bothOnclick = function(event) {
+    onclick(event)
+    defaultOnclick(event)
+  }
   
   let resolvedComponent = $state(null)
   let key = $state(null)
@@ -48,7 +53,7 @@
       replace: history || undefined
     })
   }
-  
+
   if (component) {
     Promise.all([Router.resolveComponent(component), router.decryptHistory().catch(() => {})]).then(
       ([initialComponent]) => {
@@ -58,9 +63,9 @@
     )
   }
   
-  const page = toStore(() => ({component, props, url, version}))
+  const page = toStore(() => ({component, props, url}))
   
-  const context = {router, page}
+  const context = {router, page, frame}
   setContext('inertia', context)
   setContext(`inertia:${name}`, context)
   
@@ -94,7 +99,7 @@
     return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined';
   }
 
-  const onclick = function(event) {
+  function defaultOnclick(event) {
     if (event.defaultPrevented) return
     if (event.target.closest('[data-inertia-ignore]')) return;
     
@@ -117,7 +122,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="frame" {onclick} bind:this={frame}>
+<div class="frame" onclick={bothOnclick} bind:this={frame}>
   {#if resolvedProps}
     <Render {...resolvedProps} />
   {:else}
