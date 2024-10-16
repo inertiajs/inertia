@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\LogItem;
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,7 +19,10 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return inertia('Home');
+    return inertia('Home', [
+        'date' => now()->toDateTimeString(),
+        'other_date' => Inertia::optional(fn() => now()->toDateTimeString()),
+    ]);
 });
 
 Route::get('/users', function () {
@@ -151,6 +157,93 @@ Route::get('/async', function () {
         'jonathan' => Cache::get('jonathan', false),
         'taylor' => Cache::get('taylor', false),
         'joe' => Cache::get('joe', false),
+    ]);
+});
+
+Route::get('/users-scroll', function () {
+    $users = User::paginate(15);
+
+    return inertia('UserScroll', [
+        'users' => Inertia::merge($users->items()),
+        'page' => $users->currentPage(),
+        'is_last_page' => $users->nextPageUrl() === null,
+    ]);
+});
+
+Route::get('/users-scroll/default', function () {
+    $query = User::query();
+
+    if (request()->input('query')) {
+        $query->where('name', 'like', '%' . request()->input('query') . '%');
+    }
+
+    $users = $query->paginate(15);
+
+    return inertia('UserScrollDemo', [
+        'users' => Inertia::infinite($users),
+        'query' => request()->input('query'),
+    ]);
+});
+
+Route::get('/users-scroll/simple', function () {
+    $query = User::query();
+
+    if (request()->input('query')) {
+        $query->where('name', 'like', '%' . request()->input('query') . '%');
+    }
+
+    $users = $query->simplePaginate(15);
+
+    return inertia('UserScrollDemo', [
+        'users' => Inertia::infinite($users),
+        'query' => request()->input('query'),
+    ]);
+});
+
+Route::get('/users-scroll/cursor', function () {
+    $query = User::query();
+
+    if (request()->input('query')) {
+        $query->where('name', 'like', '%' . request()->input('query') . '%');
+    }
+
+    $users = $query->cursorPaginate(15);
+
+    return inertia('UserScrollDemo', [
+        'users' => Inertia::infinite($users),
+        'query' => request()->input('query'),
+    ]);
+});
+
+Route::get('/chat', function () {
+    $messages = Message::orderByDesc('created_at')->cursorPaginate(25);
+
+    return inertia('ChatScroll', [
+        'messages' => Inertia::infinite($messages),
+    ]);
+});
+
+Route::get('/multi-scroll', function () {
+    $items = LogItem::orderBy('created_at')->simplePaginate(perPage: 25, pageName: 'log_page');
+    $users = User::orderBy('id')->simplePaginate(perPage: 25, pageName: 'user_page');
+
+    return inertia('MultiScroll', [
+        'items' => Inertia::infinite($items),
+        'users' => Inertia::infinite($users),
+    ]);
+});
+
+Route::get('/logs', function () {
+    $total = LogItem::count();
+    $perPage = 25;
+
+    $items = LogItem::orderBy('created_at')->simplePaginate(
+        perPage: $perPage,
+        page: request()->input('page', floor($total / $perPage) / 2),
+    );
+
+    return inertia('LogScroll', [
+        'items' => Inertia::infinite($items),
     ]);
 });
 

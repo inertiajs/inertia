@@ -15,8 +15,8 @@ export default defineComponent({
       default: 0,
     },
     as: {
-      type: String,
-      default: 'div',
+      type: [String, Boolean] as PropType<string | false>,
+      default: undefined,
     },
     always: {
       type: Boolean,
@@ -69,8 +69,13 @@ export default defineComponent({
         rootMargin: `${this.$props.buffer}px`,
       },
     )
+    const elToObserve = this.$el.nextElementSibling
 
-    this.observer.observe(this.$el.nextSibling)
+    if (!elToObserve) {
+      throw new Error('No element found to observe. Please provide a `fallback` slot.')
+    }
+
+    this.observer.observe(elToObserve)
   },
   methods: {
     getReloadParams(): Partial<ReloadOptions> {
@@ -86,12 +91,17 @@ export default defineComponent({
 
       return this.$props.params
     },
+    getAs() {
+      // If they haven't specified, try to gracefully fallback to a div if there's no fallback slot
+      return this.$props.as ?? (this.$slots.fallback ? false : 'div')
+    },
   },
   render() {
     const els = []
+    const as = this.getAs()
 
-    if (this.$props.always || !this.loaded) {
-      els.push(h(this.$props.as))
+    if ((this.$props.always || !this.loaded) && as) {
+      els.push(h(as))
     }
 
     if (this.loaded) {

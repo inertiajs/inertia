@@ -281,6 +281,19 @@ export type PrefetchRemovalTimer = {
   timer: number
 }
 
+export type InfiniteScrollProp<T> = {
+  current_page: number | null
+  data: T[]
+  has_next: boolean
+  has_previous: boolean
+  total_pages: number | null
+  total: number | null
+  per_page: number
+  next_page: string | number | null
+  previous_page: string | number | null
+  page_name: string
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>

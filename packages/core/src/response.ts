@@ -176,7 +176,12 @@ export class Response {
       return Promise.resolve()
     }
 
+    if (this.requestParams.isPartial() && currentPage.isTheSame(pageResponse)) {
+      pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
+    }
+
     this.mergeProps(pageResponse)
+
     await this.setRememberedState(pageResponse)
 
     this.requestParams.setPreserveOptions(pageResponse)
@@ -241,19 +246,16 @@ export class Response {
       const propsToMerge = pageResponse.mergeProps || []
 
       propsToMerge.forEach((prop) => {
-        const incomingProp = pageResponse.props[prop]
+        const keys = prop.split('.')
+        const currentPagePropValue = keys.reduce<any>((acc, key) => acc && acc[key], currentPage.get().props)
+        const incomingPropValue = keys.reduce<any>((acc, key) => acc && acc[key], pageResponse.props)
 
-        if (Array.isArray(incomingProp)) {
-          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
-        } else if (typeof incomingProp === 'object') {
-          pageResponse.props[prop] = {
-            ...((currentPage.get().props[prop] || []) as Record<string, any>),
-            ...incomingProp,
-          }
+        if (Array.isArray(currentPagePropValue)) {
+          ;(incomingPropValue as typeof currentPagePropValue).unshift(...currentPagePropValue)
+        } else if (typeof currentPagePropValue === 'object' && currentPagePropValue !== null) {
+          Object.assign(currentPagePropValue, incomingPropValue)
         }
       })
-
-      pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
     }
   }
 
