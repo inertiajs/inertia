@@ -8,7 +8,7 @@
   let loaded = false
 
   const unsubscribe = page.subscribe(({ props }) => {
-    // Ensures the deferred slot isn't loaded before page props update
+    // Ensures the slot isn't loaded before the deferred props are available
     window.queueMicrotask(() => {
       loaded = keys.every((key) => typeof props[key] !== 'undefined')
     })
