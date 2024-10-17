@@ -271,9 +271,9 @@ export class Router {
     {
       method = 'get',
       data = {},
-      replace = false,
+      replace = true,
       preserveScroll = false,
-      preserveState = false,
+      preserveState = true,
       only = [],
       except = [],
       headers = {},
