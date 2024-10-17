@@ -2,8 +2,8 @@
 import { Deferred, Link } from '@inertiajs/vue3'
 
 defineProps<{
-  foo?: string
-  bar?: string
+  foo?: {text: string }
+  bar?: {text: string }
 }>()
 </script>
 
@@ -12,14 +12,14 @@ defineProps<{
     <template #fallback>
       <div>Loading foo...</div>
     </template>
-    {{ foo }}
+    {{ foo?.text }}
   </Deferred>
 
   <Deferred data="bar">
     <template #fallback>
       <div>Loading bar...</div>
     </template>
-    {{ bar }}
+    {{ bar?.text }}
   </Deferred>
 
   <Link href="/deferred-props/page-2">Page 2</Link>
