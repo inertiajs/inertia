@@ -12,7 +12,7 @@ interface CreateInertiaAppProps {
   resolve: ComponentResolver
   setup: (props: {
     el: HTMLElement | null
-    App: ComponentType<App>
+    App: AppComponent
     props: InertiaAppProps
   }) => void | App | SvelteRenderResult
   progress?:
@@ -45,7 +45,11 @@ export default async function createInertiaApp({
 
   const props: InertiaAppProps = { initialPage, initialComponent, resolveComponent }
 
-  const svelteApp = setup({ el, App, props })
+  const svelteApp = setup({
+    el,
+    App: App as unknown as AppComponent,
+    props
+  })
 
   if (isServer) {
     const { html, head, css } = svelteApp as SvelteRenderResult
