@@ -1,6 +1,8 @@
-import { derived } from 'svelte/store'
-import store from './store'
+import { type Page } from '@inertiajs/core'
+import { writable } from 'svelte/store'
 
-const page = derived(store, ($store) => $store.page)
+const { set, subscribe } = writable<Page>()
 
-export default page
+export const setPage = set
+
+export default { subscribe }

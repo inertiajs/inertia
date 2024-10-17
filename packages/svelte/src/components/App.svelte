@@ -1,16 +1,52 @@
+<script context="module" lang="ts">
+  import type { ComponentResolver, ResolvedComponent } from '../types'
+  import { type Page } from '@inertiajs/core'
+
+  export interface InertiaAppProps {
+    initialComponent: ResolvedComponent
+    initialPage: Page
+    resolveComponent: ComponentResolver
+  }
+</script>
+
 <script lang="ts">
   import type { LayoutType, LayoutResolver } from '../types'
-  import type { PageProps } from '@inertiajs/core'
-  import type { RenderProps } from './Render.svelte'
-  import Render, { h } from './Render.svelte'
-  import store, { type InertiaStore } from '../store'
+  import { router, type PageProps } from '@inertiajs/core'
+  import Render, { h, type RenderProps } from './Render.svelte'
+  import { setPage } from '../page'
 
-  $: props = resolveProps($store)
+  export let initialComponent: InertiaAppProps['initialComponent']
+  export let initialPage: InertiaAppProps['initialPage']
+  export let resolveComponent: InertiaAppProps['resolveComponent']
+
+  let component = initialComponent
+  let key: number | null = null
+  let page = initialPage
+  let renderProps = resolveRenderProps(component, page, key)
+
+  setPage(page)
+
+  const isServer = typeof window === 'undefined'
+
+  if (!isServer) {
+    router.init({
+      initialPage,
+      resolveComponent,
+      swapComponent: async (args) => {
+        component = args.component as ResolvedComponent
+        page = args.page
+        key = args.preserveState ? key : Date.now()
+
+        renderProps = resolveRenderProps(component, page, key)
+        setPage(page)
+      },
+    })
+  }
 
   /**
    * Resolves the render props for the current page component, including layouts.
    */
-  function resolveProps({ component, page, key = null }: InertiaStore): RenderProps {
+  function resolveRenderProps(component: ResolvedComponent, page: Page, key: number | null = null): RenderProps {
     const child = h(component.default, page.props, [], key)
     const layout = component.layout
 
@@ -64,6 +100,4 @@
   }
 </script>
 
-{#if props}
-  <Render {...props} />
-{/if}
+<Render {...renderProps} />

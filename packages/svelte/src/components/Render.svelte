@@ -7,7 +7,7 @@
     props?: PageProps
     children?: RenderProps[]
     key?: number | null
-  } | null
+  }
 
   export type RenderFunction = {
     (component: ComponentType, props?: PageProps, children?: RenderProps[], key?: number | null): RenderProps
