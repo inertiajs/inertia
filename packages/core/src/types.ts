@@ -283,6 +283,22 @@ export type PrefetchRemovalTimer = {
   timer: number
 }
 
+export type ProgressSettings = {
+  minimum: number
+  easing: string
+  positionUsing: 'translate3d' | 'translate' | 'margin'
+  speed: number
+  trickle: boolean
+  trickleSpeed: number
+  showSpinner: boolean
+  barSelector: string
+  spinnerSelector: string
+  parent: string
+  template: string
+  includeCSS: boolean
+  color: string
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
