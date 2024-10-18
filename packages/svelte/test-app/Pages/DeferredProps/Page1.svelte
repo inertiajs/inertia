@@ -19,4 +19,5 @@
   {bar.text}
 </Deferred>
 
+<a href="/deferred-props/page-1" use:inertia>Page 1</a>
 <a href="/deferred-props/page-2" use:inertia>Page 2</a>
