@@ -196,6 +196,8 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames> = (
   ...params: GlobalEventParameters<TEventName>
 ) => GlobalEventResult<TEventName>
 
+export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
+
 export type VisitCallbacks = {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
   onBefore: GlobalEventCallback<'before'>
