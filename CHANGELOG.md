@@ -16,6 +16,11 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - [2.x] $page url should not include the host ([#2032](https://github.com/inertiajs/inertia/pull/2032))
 - [2.x] Suppress Svelte accessibility warnings from Playwright logs ([#2033](https://github.com/inertiajs/inertia/pull/2033))
 - [2.x] Change TypeScript module resolution in the Svelte adapter ([#2035](https://github.com/inertiajs/inertia/pull/2035))
+- [2.x] Fix multi byte strings in history encryption ([#2030](https://github.com/inertiajs/inertia/pull/2030))
+- [2.x] Load deferred props on every page swap ([#2024](https://github.com/inertiajs/inertia/pull/2024))
+- [2.x] Refactor createInertiaApp in Svelte adapter ([#2036](https://github.com/inertiajs/inertia/pull/2036))
+- [2.x] Fix `<Deferred />` in Svelte adapter ([#2037](https://github.com/inertiajs/inertia/pull/2037))
+- [2.x] Fix `usePrefetch` in SSR mode in Svelte adapter ([#2034](https://github.com/inertiajs/inertia/pull/2034))
 
 ## [v2.0.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0-beta.1)
 
