@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.1...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.2...HEAD)
+
+- Nothing yet!
+
+## [v2.0.0-beta.2](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.1...v2.0.0-beta.2)
 
 - [2.x] Fix issue where initial page data is coming from history state ([#2023](https://github.com/inertiajs/inertia/pull/2023))
 - [2.x] Fix onClick in React adapter ([#2019](https://github.com/inertiajs/inertia/pull/2019))
