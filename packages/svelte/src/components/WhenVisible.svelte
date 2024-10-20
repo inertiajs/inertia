@@ -62,17 +62,14 @@
   })
 
   function getReloadParams(): Partial<ReloadOptions> {
-    if (data !== '') {
-      return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
-      }
-    }
-
-    if (!params.data) {
+    if (!params && !data) {
       throw new Error('You must provide either a `data` or `params` prop.')
     }
 
-    return params
+    return {
+      ...params,
+      ...(data && { only: Array.isArray(data) ? data : [data] }),
+    }
   }
 </script>
 
