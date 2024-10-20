@@ -74,14 +74,19 @@ export default defineComponent({
   },
   methods: {
     getReloadParams(): Partial<ReloadOptions> {
-      if (!this.$props.params && !this.$props.data) {
+      const { params, data } = this.$props;
+
+      if (!params && !data) {
         throw new Error('You must provide either a `data` or `params` prop.')
       }
 
-      return {
-        ...this.$props.params,
-        ...(this.$props.data && { only: Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data] }),
+      const reloadParams: Partial<ReloadOptions> = params || {} ;
+
+      if (data) {
+        reloadParams.only = (Array.isArray(data) ? data : [data]) as string[];
       }
+
+      return reloadParams;
     },
   },
   render() {

@@ -66,10 +66,13 @@
       throw new Error('You must provide either a `data` or `params` prop.')
     }
 
-    return {
-      ...params,
-      ...(data && { only: Array.isArray(data) ? data : [data] }),
+    const reloadParams: Partial<ReloadOptions> = params || {} ;
+
+    if (data) {
+      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[];
     }
+
+    return reloadParams;
   }
 </script>
 
