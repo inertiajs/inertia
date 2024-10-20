@@ -2,9 +2,9 @@ import { ReloadOptions, router } from '@inertiajs/core'
 import { createElement, ReactChild, useEffect, useRef, useState } from 'react'
 
 interface WhenVisibleProps {
-  children: ReactChild
   fallback: ReactChild
   data: string | string[]
+  children?: ReactChild
   params?: ReloadOptions
   buffer?: number
   as?: string
@@ -22,17 +22,17 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   const ref = useRef<HTMLDivElement>(null)
 
   const getReloadParams = (): Partial<ReloadOptions> => {
-    if (data) {
-      return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
-      }
-    }
-
-    if (!params) {
+    if (!params && !data) {
       throw new Error('You must provide either a `data` or `params` prop.')
     }
 
-    return params
+    const reloadParams: Partial<ReloadOptions> = params || {} ;
+
+    if (data) {
+      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[];
+    }
+
+    return reloadParams;
   }
 
   useEffect(() => {
