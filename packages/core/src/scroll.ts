@@ -39,6 +39,8 @@ export class Scroll {
   }
 
   public static restore(scrollRegions: ScrollRegion[]): void {
+    this.restoreDocument()
+
     this.regions().forEach((region: Element, index: number) => {
       const scrollPosition = scrollRegions[index]
 
@@ -55,10 +57,23 @@ export class Scroll {
     })
   }
 
-  public static onScroll(event: Event): void {
-    const target = event.target as Element
+  public static restoreDocument(): void {
+    const scrollPosition = history.getDocumentScrollPosition()
 
-    if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(scrollPosition.left, scrollPosition.top)
+    }
+  }
+
+  public static onScroll(event: Event): void {
+    const target = event.target as Element | Document
+
+    if (target instanceof Document) {
+      history.saveDocumentScrollPosition({
+        top: target.documentElement.scrollTop,
+        left: target.documentElement.scrollLeft,
+      })
+    } else if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
       this.save()
     }
   }

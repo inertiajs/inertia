@@ -108,13 +108,27 @@ class History {
   public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
     this.addToQueue(() => {
       return Promise.resolve().then(() => {
-        window.history.replaceState(
+        this.doReplaceState(
           {
             page: window.history.state.page,
             scrollRegions,
           },
-          '',
-          this.current.url,
+          this.current.url!,
+        )
+      })
+    })
+  }
+
+  public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
+    console.log('saveDocumentScrollPosition', scrollRegion)
+    this.addToQueue(() => {
+      return Promise.resolve().then(() => {
+        this.doReplaceState(
+          {
+            page: window.history.state.page,
+            documentScrollPosition: scrollRegion,
+          },
+          this.current.url!,
         )
       })
     })
@@ -122,6 +136,10 @@ class History {
 
   public getScrollRegions(): ScrollRegion[] {
     return window.history.state.scrollRegions || []
+  }
+
+  public getDocumentScrollPosition(): ScrollRegion {
+    return window.history.state.documentScrollPosition || { top: 0, left: 0 }
   }
 
   public replaceState(page: Page): void {
@@ -135,15 +153,42 @@ class History {
 
     this.addToQueue(() => {
       return this.getPageData(page).then((data) => {
-        window.history.replaceState(
+        this.doReplaceState(
           {
             page: data,
           },
-          '',
           page.url,
         )
       })
     })
+  }
+
+  protected doReplaceState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url: string,
+  ): void {
+    console.log(
+      'doReplaceState',
+      {
+        ...data,
+        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+      },
+      url,
+    )
+    window.history.replaceState(
+      {
+        ...data,
+        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+      },
+      '',
+      url,
+    )
   }
 
   protected addToQueue(fn: () => Promise<void>): void {
@@ -178,6 +223,10 @@ class History {
   public getAllState(): Page {
     return this.current as Page
   }
+}
+
+if (window.history.scrollRestoration) {
+  window.history.scrollRestoration = 'manual'
 }
 
 export const history = new History()
