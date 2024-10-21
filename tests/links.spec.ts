@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { consoleMessages, pageLoads, requests, shouldBeDumpPage } from './support'
+import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.beforeEach(async ({ page }) => {})
 
@@ -363,9 +363,14 @@ test.describe('preserve scroll', () => {
     await page.goto('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
 
-    await page.evaluate(() => window.scrollTo(5, 7))
-    // @ts-ignore
-    await page.evaluate(() => document.querySelector('#slot').scrollTo(10, 15))
+    await scrollElementTo(
+      page,
+      page.evaluate(() => window.scrollTo(5, 7)),
+    )
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
+    )
 
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
@@ -406,8 +411,10 @@ test.describe('preserve scroll', () => {
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
 
-    // @ts-ignore
-    await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+    )
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
     await page.goBack()
@@ -429,8 +436,10 @@ test.describe('preserve scroll', () => {
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
 
-    // @ts-ignore
-    await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+    )
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
     const message = JSON.parse(consoleMessages.messages[0])
@@ -469,10 +478,14 @@ test.describe('enabled', () => {
     await page.goto('/links/preserve-scroll')
     await expect(page.getByText('Foo is now default')).toBeVisible()
 
-    await page.evaluate(() => window.scrollTo(5, 7))
-    // @ts-ignore
-    await page.evaluate(() => document.querySelector('#slot').scrollTo(10, 15))
-
+    await scrollElementTo(
+      page,
+      page.evaluate(() => window.scrollTo(5, 7)),
+    )
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
+    )
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -534,7 +547,10 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
 
-    await page.evaluate(() => (document as any).querySelector('#slot').scrollTo(0, 0))
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+    )
 
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
