@@ -27,11 +27,13 @@ export class InitialVisit {
       return false
     }
 
+    const scrollRegions = history.getScrollRegions()
+
     history
       .decrypt()
       .then((data) => {
         currentPage.set(data, { preserveScroll: true, preserveState: true }).then(() => {
-          Scroll.restore(currentPage.get())
+          Scroll.restore(scrollRegions)
           fireNavigateEvent(currentPage.get())
         })
       })
@@ -62,7 +64,7 @@ export class InitialVisit {
       .decrypt()
       .then(() => {
         const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
-        const scrollRegions = history.getState<Page['scrollRegions']>(history.scrollRegions, [])
+        const scrollRegions = history.getScrollRegions()
         currentPage.remember(rememberedState)
         currentPage.scrollRegions(scrollRegions)
 
@@ -73,7 +75,7 @@ export class InitialVisit {
           })
           .then(() => {
             if (locationVisit.preserveScroll) {
-              Scroll.restore(currentPage.get())
+              Scroll.restore(scrollRegions)
             }
 
             fireNavigateEvent(currentPage.get())

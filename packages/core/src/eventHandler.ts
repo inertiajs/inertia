@@ -81,7 +81,7 @@ class EventHandler {
         .decrypt(state.page)
         .then((data) => {
           currentPage.setQuietly(data, { preserveState: false }).then(() => {
-            Scroll.restore(currentPage.get())
+            Scroll.restore(history.getScrollRegions())
             fireNavigateEvent(currentPage.get())
           })
         })

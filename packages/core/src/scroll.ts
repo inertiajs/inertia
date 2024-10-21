@@ -1,16 +1,14 @@
 import { history } from './history'
-import { page as currentPage } from './page'
-import { Page } from './types'
+import { Page, ScrollRegion } from './types'
 
 export class Scroll {
-  public static save(page: Page): void {
-    history.replaceState({
-      ...page,
-      scrollRegions: Array.from(this.regions()).map((region) => ({
+  public static save(): void {
+    history.saveScrollPositions(
+      Array.from(this.regions()).map((region) => ({
         top: region.scrollTop,
         left: region.scrollLeft,
       })),
-    })
+    )
   }
 
   protected static regions(): NodeListOf<Element> {
@@ -31,7 +29,7 @@ export class Scroll {
       }
     })
 
-    this.save(page)
+    this.save()
 
     if (window.location.hash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
@@ -40,13 +38,9 @@ export class Scroll {
     }
   }
 
-  public static restore(page: Page): void {
-    if (!page.scrollRegions) {
-      return
-    }
-
+  public static restore(scrollRegions: ScrollRegion[]): void {
     this.regions().forEach((region: Element, index: number) => {
-      const scrollPosition = page.scrollRegions[index]
+      const scrollPosition = scrollRegions[index]
 
       if (!scrollPosition) {
         return
@@ -65,7 +59,7 @@ export class Scroll {
     const target = event.target as Element
 
     if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
-      this.save(currentPage.get())
+      this.save()
     }
   }
 }

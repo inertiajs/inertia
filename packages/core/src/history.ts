@@ -1,7 +1,7 @@
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import { SessionStorage } from './sessionStorage'
-import { Page } from './types'
+import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
 
@@ -13,6 +13,7 @@ class History {
   protected queue: (() => Promise<void>)[] = []
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
+  protected processingQueue = false
 
   public remember(data: unknown, key: string): void {
     this.replaceState({
@@ -56,11 +57,23 @@ class History {
     })
   }
 
-  public processQueue(): Promise<void> {
+  public processQueue(): void {
+    if (this.processingQueue) {
+      return
+    }
+
+    this.processingQueue = true
+
+    this.processNext().then(() => {
+      this.processingQueue = false
+    })
+  }
+
+  protected processNext(): Promise<void> {
     const next = this.queue.shift()
 
     if (next) {
-      return next().then(() => this.processQueue())
+      return next().then(() => this.processNext())
     }
 
     return Promise.resolve()
@@ -90,6 +103,25 @@ class History {
 
   protected decryptPageData(pageData: ArrayBuffer | Page | null): Promise<Page | null> {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
+  }
+
+  public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
+    this.addToQueue(() => {
+      return Promise.resolve().then(() => {
+        window.history.replaceState(
+          {
+            page: window.history.state.page,
+            scrollRegions,
+          },
+          '',
+          this.current.url,
+        )
+      })
+    })
+  }
+
+  public getScrollRegions(): ScrollRegion[] {
+    return window.history.state.scrollRegions || []
   }
 
   public replaceState(page: Page): void {
