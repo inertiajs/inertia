@@ -120,7 +120,6 @@ class History {
   }
 
   public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
-    console.log('saveDocumentScrollPosition', scrollRegion)
     this.addToQueue(() => {
       return Promise.resolve().then(() => {
         this.doReplaceState(
@@ -171,15 +170,6 @@ class History {
     },
     url: string,
   ): void {
-    console.log(
-      'doReplaceState',
-      {
-        ...data,
-        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-      },
-      url,
-    )
     window.history.replaceState(
       {
         ...data,
