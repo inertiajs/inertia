@@ -1,22 +1,18 @@
 export default class Queue<T> {
   protected items: (() => T)[] = []
-  protected processing = false
+  protected processingPromise: Promise<void> | null = null
 
   public add(item: () => T) {
     this.items.push(item)
-    this.process()
+    return this.process()
   }
 
-  protected process() {
-    if (this.processing) {
-      return
-    }
-
-    this.processing = true
-
-    this.processNext().then(() => {
-      this.processing = false
+  public process() {
+    this.processingPromise ??= this.processNext().then(() => {
+      this.processingPromise = null
     })
+
+    return this.processingPromise
   }
 
   protected processNext(): Promise<void> {
