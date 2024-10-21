@@ -151,7 +151,7 @@ export class Router {
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
+      Scroll.save()
     }
 
     const requestParams: PendingVisit & VisitCallbacks = {

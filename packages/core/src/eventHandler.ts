@@ -15,6 +15,7 @@ class EventHandler {
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
+      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
     }
 
     if (typeof document !== 'undefined') {
@@ -71,7 +72,7 @@ class EventHandler {
       url.hash = window.location.hash
 
       history.replaceState({ ...currentPage.get(), url: url.href })
-      Scroll.reset(currentPage.get())
+      Scroll.reset()
 
       return
     }
@@ -81,7 +82,8 @@ class EventHandler {
         .decrypt(state.page)
         .then((data) => {
           currentPage.setQuietly(data, { preserveState: false }).then(() => {
-            Scroll.restore(currentPage.get())
+            Scroll.restore(history.getScrollRegions())
+            Scroll.restoreDocument()
             fireNavigateEvent(currentPage.get())
           })
         })
