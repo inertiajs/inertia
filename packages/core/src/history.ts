@@ -1,19 +1,20 @@
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
+import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
 import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
+
+const queue = new Queue<Promise<void>>()
 
 class History {
   public rememberedState = 'rememberedState' as const
   public scrollRegions = 'scrollRegions' as const
   public preserveUrl = false
   protected current: Partial<Page> = {}
-  protected queue: (() => Promise<void>)[] = []
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
-  protected processingQueue = false
 
   public remember(data: unknown, key: string): void {
     this.replaceState({
@@ -38,7 +39,7 @@ class History {
 
     this.current = page
 
-    this.addToQueue(() => {
+    queue.add(() => {
       return this.getPageData(page).then((data) => {
         window.history.pushState(
           {
@@ -57,26 +58,8 @@ class History {
     })
   }
 
-  public processQueue(): void {
-    if (this.processingQueue) {
-      return
-    }
-
-    this.processingQueue = true
-
-    this.processNext().then(() => {
-      this.processingQueue = false
-    })
-  }
-
-  protected processNext(): Promise<void> {
-    const next = this.queue.shift()
-
-    if (next) {
-      return next().then(() => this.processNext())
-    }
-
-    return Promise.resolve()
+  public processQueue(): Promise<void> {
+    return queue.process()
   }
 
   public decrypt(page: Page | null = null): Promise<Page> {
@@ -106,7 +89,7 @@ class History {
   }
 
   public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
-    this.addToQueue(() => {
+    queue.add(() => {
       return Promise.resolve().then(() => {
         this.doReplaceState(
           {
@@ -120,7 +103,7 @@ class History {
   }
 
   public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
-    this.addToQueue(() => {
+    queue.add(() => {
       return Promise.resolve().then(() => {
         this.doReplaceState(
           {
@@ -150,7 +133,7 @@ class History {
 
     this.current = page
 
-    this.addToQueue(() => {
+    queue.add(() => {
       return this.getPageData(page).then((data) => {
         this.doReplaceState(
           {
@@ -179,11 +162,6 @@ class History {
       '',
       url,
     )
-  }
-
-  protected addToQueue(fn: () => Promise<void>): void {
-    this.queue.push(fn)
-    this.processQueue()
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
