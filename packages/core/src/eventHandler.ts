@@ -72,7 +72,7 @@ class EventHandler {
       url.hash = window.location.hash
 
       history.replaceState({ ...currentPage.get(), url: url.href })
-      Scroll.reset(currentPage.get())
+      Scroll.reset()
 
       return
     }

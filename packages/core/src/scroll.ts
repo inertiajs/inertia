@@ -1,5 +1,5 @@
 import { history } from './history'
-import { Page, ScrollRegion } from './types'
+import { ScrollRegion } from './types'
 
 export class Scroll {
   public static save(): void {
@@ -15,7 +15,7 @@ export class Scroll {
     return document.querySelectorAll('[scroll-region]')
   }
 
-  public static reset(page: Page): void {
+  public static reset(): void {
     if (typeof window !== 'undefined') {
       window.scrollTo(0, 0)
     }
