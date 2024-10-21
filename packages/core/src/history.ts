@@ -42,7 +42,6 @@ class History {
         window.history.pushState(
           {
             page: data,
-            timestamp: Date.now(),
           },
           '',
           page.url,
@@ -107,7 +106,6 @@ class History {
         window.history.replaceState(
           {
             page: data,
-            timestamp: Date.now(),
           },
           '',
           page.url,

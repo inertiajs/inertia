@@ -9,7 +9,6 @@ test('it will not encrypt history by default', async ({ page }) => {
   const historyState1 = await page.evaluate(() => window.history.state)
   await expect(historyState1.page.component).toBe('History/Page')
   await expect(historyState1.page.props.pageNumber).toBe('1')
-  await expect(historyState1.timestamp).toBeGreaterThan(0)
   await expect(page.getByText('This is page 1')).toBeVisible()
 
   await clickAndWaitForResponse(page, 'Page 2', '/history/2')
@@ -17,7 +16,6 @@ test('it will not encrypt history by default', async ({ page }) => {
   await expect(historyState2.page.component).toBe('History/Page')
   await expect(historyState2.page.props.pageNumber).toBe('2')
   await expect(page.getByText('This is page 2')).toBeVisible()
-  await expect(historyState2.timestamp).toBeGreaterThan(0)
 
   requests.listen(page)
 
@@ -39,7 +37,6 @@ test('it can encrypt history', async ({ page }) => {
   // but Playwright doesn't transfer it as such over the wire (page.evaluate),
   // so if the object is "empty" and the page check below works, it's working.
   await expect(historyState3.page).toEqual({})
-  await expect(historyState3.timestamp).toBeGreaterThan(0)
 
   requests.listen(page)
 
@@ -52,7 +49,6 @@ test('it can encrypt history', async ({ page }) => {
   const historyState1 = await page.evaluate(() => window.history.state)
   await expect(historyState1.page.component).toBe('History/Page')
   await expect(historyState1.page.props.pageNumber).toBe('1')
-  await expect(historyState1.timestamp).toBeGreaterThan(0)
 
   await page.goForward()
   await page.waitForURL('/history/3')
@@ -117,7 +113,6 @@ test('multi byte strings can be encrypyed', async ({ page }) => {
   // but Playwright doesn't transfer it as such over the wire (page.evaluate),
   // so if the object is "empty" and the page check below works, it's working.
   await expect(historyState5.page).toEqual({})
-  await expect(historyState5.timestamp).toBeGreaterThan(0)
   await expect(page.getByText('Multi byte character: 😃')).toBeVisible()
 
   await clickAndWaitForResponse(page, 'Page 1', '/history/1')
