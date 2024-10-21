@@ -66,7 +66,6 @@ export class InitialVisit {
         const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
         const scrollRegions = history.getScrollRegions()
         currentPage.remember(rememberedState)
-        currentPage.scrollRegions(scrollRegions)
 
         currentPage
           .set(currentPage.get(), {

@@ -135,7 +135,6 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     clearHistory: computed(() => page.value?.clearHistory),
     deferredProps: computed(() => page.value?.deferredProps),
     mergeProps: computed(() => page.value?.mergeProps),
-    scrollRegions: computed(() => page.value?.scrollRegions),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
   })
