@@ -66,15 +66,17 @@ export class Scroll {
   }
 
   public static onScroll(event: Event): void {
-    const target = event.target as Element | Document
+    const target = event.target as Element
 
-    if (target instanceof Document) {
-      history.saveDocumentScrollPosition({
-        top: target.documentElement.scrollTop,
-        left: target.documentElement.scrollLeft,
-      })
-    } else if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
+    if (typeof target.hasAttribute === 'function' && target.hasAttribute('scroll-region')) {
       this.save()
     }
+  }
+
+  public static onWindowScroll(): void {
+    history.saveDocumentScrollPosition({
+      top: window.scrollY,
+      left: window.scrollX,
+    })
   }
 }
