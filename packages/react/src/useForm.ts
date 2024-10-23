@@ -7,6 +7,7 @@ type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
 type FormDataType = object
+type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType> {
   data: TForm
@@ -26,12 +27,12 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
   setError(errors: Record<keyof TForm, string>): void
-  submit: (method: Method, url: string, options?: Omit<VisitOptions, 'data'>) => void
-  get: (url: string, options?: Omit<VisitOptions, 'data'>) => void
-  patch: (url: string, options?: Omit<VisitOptions, 'data'>) => void
-  post: (url: string, options?: Omit<VisitOptions, 'data'>) => void
-  put: (url: string, options?: Omit<VisitOptions, 'data'>) => void
-  delete: (url: string, options?: Omit<VisitOptions, 'data'>) => void
+  submit: (method: Method, url: string, options?: FormOptions) => void
+  get: (url: string, options?: FormOptions) => void
+  patch: (url: string, options?: FormOptions) => void
+  post: (url: string, options?: FormOptions) => void
+  put: (url: string, options?: FormOptions) => void
+  delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
 export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
