@@ -22,12 +22,12 @@ interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
-  submit(method: Method, url: string, options?: Partial<VisitOptions>): void
-  get(url: string, options?: Partial<VisitOptions>): void
-  post(url: string, options?: Partial<VisitOptions>): void
-  put(url: string, options?: Partial<VisitOptions>): void
-  patch(url: string, options?: Partial<VisitOptions>): void
-  delete(url: string, options?: Partial<VisitOptions>): void
+  submit(method: Method, url: string, options?: Omit<VisitOptions, 'data'>): void
+  get(url: string, options?: Omit<VisitOptions, 'data'>): void
+  post(url: string, options?: Omit<VisitOptions, 'data'>): void
+  put(url: string, options?: Omit<VisitOptions, 'data'>): void
+  patch(url: string, options?: Omit<VisitOptions, 'data'>): void
+  delete(url: string, options?: Omit<VisitOptions, 'data'>): void
   cancel(): void
 }
 

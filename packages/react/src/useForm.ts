@@ -26,12 +26,12 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors: (...fields: (keyof TForm)[]) => void
   setError(field: keyof TForm, value: string): void
   setError(errors: Record<keyof TForm, string>): void
-  submit: (method: Method, url: string, options?: VisitOptions) => void
-  get: (url: string, options?: VisitOptions) => void
-  patch: (url: string, options?: VisitOptions) => void
-  post: (url: string, options?: VisitOptions) => void
-  put: (url: string, options?: VisitOptions) => void
-  delete: (url: string, options?: VisitOptions) => void
+  submit: (method: Method, url: string, options?: Omit<VisitOptions, 'data'>) => void
+  get: (url: string, options?: Omit<VisitOptions, 'data'>) => void
+  patch: (url: string, options?: Omit<VisitOptions, 'data'>) => void
+  post: (url: string, options?: Omit<VisitOptions, 'data'>) => void
+  put: (url: string, options?: Omit<VisitOptions, 'data'>) => void
+  delete: (url: string, options?: Omit<VisitOptions, 'data'>) => void
   cancel: () => void
 }
 export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
