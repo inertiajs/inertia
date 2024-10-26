@@ -274,7 +274,7 @@ export class Response {
           return source;
         };
 
-        // Assign the deeply merged result back to props
+        // Assign the deeply merged result back to props.
         pageResponse.props[prop] = deepMerge(currentProp, incomingProp);
       });
 
