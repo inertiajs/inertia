@@ -249,7 +249,7 @@ app.get('/merge-props', (req, res) => {
 
 app.get('/deep-merge-props', (req, res) => {
     inertia.render(req, res, {
-        component: 'DeepMergeProps',
+        component: 'MergeProps',
         props: {
             bar: new Array(5).fill(1),
             foo: new Array(5).fill(1),
