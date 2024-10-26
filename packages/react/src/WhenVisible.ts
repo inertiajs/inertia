@@ -25,6 +25,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     if (data) {
       return {
         only: (Array.isArray(data) ? data : [data]) as string[],
+        ...params
       }
     }
 
