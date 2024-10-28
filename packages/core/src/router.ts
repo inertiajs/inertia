@@ -29,7 +29,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { transformUrlAndData } from './url'
+import { hrefToUrl, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -229,6 +229,29 @@ export class Router {
 
   public decryptHistory(): Promise<Page> {
     return history.decrypt()
+  }
+
+  // TODO: Not replace, something else
+  public replace(params = {}) {
+    const page = currentPage
+
+    page.merge({
+      props: {
+        ...page.get().props,
+        ...params,
+      },
+    })
+
+    const currentUrl = page.get().url
+
+    // update query params to reflect the new state
+    const newUrl = hrefToUrl(currentUrl)
+
+    newUrl.search = new URLSearchParams(params).toString()
+
+    page.get().url = newUrl.toString()
+
+    return history.replaceState(page.get())
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {

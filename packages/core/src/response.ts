@@ -248,14 +248,19 @@ export class Response {
       propsToMerge.forEach((prop) => {
         const keys = prop.split('.')
         const currentPagePropValue = keys.reduce<any>((acc, key) => acc && acc[key], currentPage.get().props)
-        const incomingPropValue = keys.reduce<any>((acc, key) => acc && acc[key], pageResponse.props)
+        const incomingPropValue = keys.reduce<any>(
+          (acc, key) => acc && acc[key],
+          pageResponse.props,
+        ) as typeof currentPagePropValue
 
         if (Array.isArray(currentPagePropValue)) {
-          ;(incomingPropValue as typeof currentPagePropValue).unshift(...currentPagePropValue)
+          incomingPropValue.unshift(...currentPagePropValue)
         } else if (typeof currentPagePropValue === 'object' && currentPagePropValue !== null) {
           Object.assign(currentPagePropValue, incomingPropValue)
         }
       })
+
+      pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
     }
   }
 
