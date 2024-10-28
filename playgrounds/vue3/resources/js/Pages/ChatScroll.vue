@@ -4,8 +4,8 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, InfiniteScroll, InfiniteScrollProp, usePage } from '@inertiajs/vue3'
-import { computed, onMounted } from 'vue'
+import { Head, InfiniteScroll, InfiniteScrollProp } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps<{
   messages: InfiniteScrollProp<{
@@ -22,20 +22,13 @@ const sortedMessages = computed(() => {
     return a.created_at.localeCompare(b.created_at)
   })
 })
-
-const pageProps = computed(() => usePage().props)
-
-onMounted(() => {
-  setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 10)
-})
 </script>
 
 <template>
   <Head title="Chat" />
   <h1 class="text-3xl">Chat</h1>
-  <div class="fixed bottom-4 right-4">{{ pageProps.messages.data.length }}</div>
   <div class="mt-6 w-full max-w-2xl space-y-4 overflow-hidden rounded shadow-sm">
-    <InfiniteScroll prop="messages" trigger="start">
+    <InfiniteScroll prop="messages" trigger="start" auto-scroll>
       <div v-for="message in sortedMessages" :key="message.id" class="relative rounded-lg bg-teal-100 p-2">
         <div class="absolute right-4 top-4 mb-2 whitespace-nowrap text-xs text-gray-400">
           {{ message.created_at.split('.').shift() }}

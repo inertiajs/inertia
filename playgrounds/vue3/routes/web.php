@@ -2,6 +2,7 @@
 
 use App\Models\LogItem;
 use App\Models\Message;
+use App\Models\Photo;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -18,11 +19,22 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
-    return inertia('Home', [
-        'date' => now()->toDateTimeString(),
-        'other_date' => Inertia::optional(fn() => now()->toDateTimeString()),
+Route::get('/infinite-scroll/photos', function () {
+    $category = request()->input('category', 'space');
+    $photos = Photo::orderBy('id')->where('category', $category)->cursorPaginate(15);
+
+    return inertia('InfiniteScroll/Photos', [
+        'photos' => Inertia::infinite($photos),
+        'category' => $category,
+        'categories' => [
+            'space' => 'Space',
+            'flower' => 'Flower',
+        ],
     ]);
+});
+
+Route::get('/', function () {
+    return inertia('Home');
 });
 
 Route::get('/users', function () {
