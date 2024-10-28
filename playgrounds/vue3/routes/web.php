@@ -21,7 +21,7 @@ use Inertia\Inertia;
 
 Route::get('/infinite-scroll/photos', function () {
     $category = request()->input('category', 'space');
-    $photos = Photo::orderBy('id')->where('category', $category)->cursorPaginate(15);
+    $photos = Photo::orderBy('id')->where('category', $category)->paginate(15);
 
     return inertia('InfiniteScroll/Photos', [
         'photos' => Inertia::infinite($photos),

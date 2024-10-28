@@ -30,8 +30,8 @@ const sortedPhotos = computed(() => {
   <h1 class="text-3xl">Browse Photos</h1>
   <div class="flex">
     <div>
-      <div class="sticky left-4 top-4 w-36 p-4 pl-0 pt-6">
-        <h3 class="mb-2 border-b border-gray-300 pb-1 text-sm font-bold uppercase">Categories</h3>
+      <div class="sticky p-4 pt-6 pl-0 left-4 top-4 w-36">
+        <h3 class="pb-1 mb-2 text-sm font-bold uppercase border-b border-gray-300">Categories</h3>
         <ul>
           <li v-for="(name, value) in categories" :key="value">
             <Link
@@ -46,14 +46,14 @@ const sortedPhotos = computed(() => {
       </div>
     </div>
     <div>
-      <div class="mt-6 grid grid-cols-3 gap-4">
-        <InfiniteScroll trigger="both" prop="photos" :buffer="200" update-url>
+      <div class="grid grid-cols-3 gap-4 mt-6">
+        <InfiniteScroll trigger="both" prop="photos" :buffer="200">
           <div v-for="photo in sortedPhotos" :key="photo.id" class="overflow-hidden rounded-lg shadow-lg">
-            <div class="h-48 w-full">
-              <img :src="photo.url" :alt="photo.description" class="h-full w-full object-cover" />
+            <div class="w-full h-48">
+              <img :src="photo.url" :alt="photo.description" class="object-cover w-full h-full" />
             </div>
             <div class="p-4">
-              <div class="truncate text-gray-500">{{ photo.description }}</div>
+              <div class="text-gray-500 truncate">{{ photo.description }}</div>
             </div>
           </div>
 
@@ -62,9 +62,9 @@ const sortedPhotos = computed(() => {
               <button
                 @click="fetch"
                 :disabled="fetching"
-                class="rounded bg-sky-700 px-4 py-2 text-white hover:bg-sky-800"
+                class="px-4 py-2 text-white rounded bg-sky-700 hover:bg-sky-800"
               >
-                {{ fetching ? 'Loading...' : 'Load more' }}
+                {{ fetching ? 'Loading...' : 'Load ' + (position === 'start' ? 'Previous' : 'More') }}
               </button>
             </div>
           </template>
