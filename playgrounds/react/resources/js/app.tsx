@@ -1,5 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react'
-import { hydrateRoot } from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 
 createInertiaApp({
   title: (title) => `${title} - React Playground`,
@@ -8,7 +8,7 @@ createInertiaApp({
     return pages[`./Pages/${name}.tsx`]
   },
   setup({ el, App, props }) {
-    hydrateRoot(el, <App {...props} />)
-    // createRoot(el).render(<App {...props} />)
+    // hydrateRoot(el, <App {...props} />)
+    createRoot(el).render(<App {...props} />)
   },
 })

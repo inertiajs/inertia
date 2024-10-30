@@ -3,12 +3,11 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Lottery;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Message>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\LogItem>
  */
-class MessageFactory extends Factory
+class LogItemFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,8 +17,8 @@ class MessageFactory extends Factory
     public function definition(): array
     {
         return [
-            'from' => Lottery::odds(1, 2)->choose() ? 'Jonathan' : 'Joe',
-            'body' => $this->faker->sentence(),
+            'level' => $this->faker->randomElement(['info', 'warning', 'error']),
+            'message' => $this->faker->sentence(),
             'created_at' => $this->faker->dateTime(),
         ];
     }

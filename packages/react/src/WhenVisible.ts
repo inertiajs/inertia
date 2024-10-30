@@ -4,18 +4,22 @@ import { createElement, ReactChild, useEffect, useRef, useState } from 'react'
 interface WhenVisibleProps {
   children: ReactChild
   fallback: ReactChild
-  data: string | string[]
+  data?: string | string[]
   params?: ReloadOptions
   buffer?: number
   as?: string
   always?: boolean
 }
 
-const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: WhenVisibleProps) => {
-  always = always ?? false
-  as = as ?? 'div'
-  fallback = fallback ?? null
-
+const WhenVisible = ({
+  children,
+  data,
+  params,
+  buffer,
+  as = 'div',
+  always = false,
+  fallback = null,
+}: WhenVisibleProps) => {
   const [loaded, setLoaded] = useState(false)
   const [fetching, setFetching] = useState(false)
   const observer = useRef<IntersectionObserver | null>(null)

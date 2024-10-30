@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\LogItem;
+use App\Models\Message;
+use App\Models\Photo;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,6 +18,38 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/infinite-scroll/chat', function () {
+    $messages = Message::orderByDesc('created_at')->cursorPaginate(25);
+
+    return inertia('InfiniteScroll/Chat', [
+        'messages' => Inertia::infinite($messages),
+    ]);
+});
+
+Route::get('/infinite-scroll/dashboard', function () {
+    $items = LogItem::orderBy('created_at')->simplePaginate(perPage: 25, pageName: 'log_page');
+    $users = User::orderBy('id')->simplePaginate(perPage: 25, pageName: 'user_page');
+
+    return inertia('InfiniteScroll/Dashboard', [
+        'items' => Inertia::infinite($items),
+        'users' => Inertia::infinite($users),
+    ]);
+});
+
+Route::get('/infinite-scroll/photos', function () {
+    $category = request()->input('category', 'space');
+    $photos = Photo::orderBy('id')->where('category', $category)->paginate(15);
+
+    return inertia('InfiniteScroll/Photos', [
+        'photos' => Inertia::infinite($photos),
+        'category' => $category,
+        'categories' => [
+            'space' => 'Space',
+            'flower' => 'Flower',
+        ],
+    ]);
+});
 
 Route::get('/', function () {
     return inertia('Home');

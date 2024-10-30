@@ -19,6 +19,24 @@ use Inertia\Inertia;
 |
 */
 
+Route::get('/infinite-scroll/chat', function () {
+    $messages = Message::orderByDesc('created_at')->cursorPaginate(25);
+
+    return inertia('InfiniteScroll/Chat', [
+        'messages' => Inertia::infinite($messages),
+    ]);
+});
+
+Route::get('/infinite-scroll/dashboard', function () {
+    $items = LogItem::orderBy('created_at')->simplePaginate(perPage: 25, pageName: 'log_page');
+    $users = User::orderBy('id')->simplePaginate(perPage: 25, pageName: 'user_page');
+
+    return inertia('InfiniteScroll/Dashboard', [
+        'items' => Inertia::infinite($items),
+        'users' => Inertia::infinite($users),
+    ]);
+});
+
 Route::get('/infinite-scroll/photos', function () {
     $category = request()->input('category', 'space');
     $photos = Photo::orderBy('id')->where('category', $category)->paginate(15);
@@ -224,24 +242,6 @@ Route::get('/users-scroll/cursor', function () {
     return inertia('UserScrollDemo', [
         'users' => Inertia::infinite($users),
         'query' => request()->input('query'),
-    ]);
-});
-
-Route::get('/chat', function () {
-    $messages = Message::orderByDesc('created_at')->cursorPaginate(25);
-
-    return inertia('ChatScroll', [
-        'messages' => Inertia::infinite($messages),
-    ]);
-});
-
-Route::get('/multi-scroll', function () {
-    $items = LogItem::orderBy('created_at')->simplePaginate(perPage: 25, pageName: 'log_page');
-    $users = User::orderBy('id')->simplePaginate(perPage: 25, pageName: 'user_page');
-
-    return inertia('MultiScroll', [
-        'items' => Inertia::infinite($items),
-        'users' => Inertia::infinite($users),
     ]);
 });
 
