@@ -10,7 +10,7 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref, toRefs, watch } from 'vue'
+import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string
