@@ -34,16 +34,24 @@ const InfiniteScroll = ({
   manual,
 }: InfiniteScrollProps) => {
   const [showTrigger, setShowTrigger] = useState(false)
-  const [lastStartData, setLastStartData] = useState(null)
-  const [lastEndData, setLastEndData] = useState(null)
-  const loadedData: InfiniteScrollProp<any> = usePage().props[prop]
-  const [requestCount, setRequestCount] = useState(0)
-  const firstEl = useRef<HTMLElement>(null)
   const [isFetching, setIsFetching] = useState(false)
   const [showStartTrigger, setShowStartTrigger] = useState(false)
   const [showEndTrigger, setShowEndTrigger] = useState(false)
+
+  const [lastStartData, setLastStartData] = useState(null)
+  const [lastEndData, setLastEndData] = useState(null)
+
+  const loadedData: InfiniteScrollProp<any> = usePage().props[prop]
+  const latestData = useRef<InfiniteScrollProp<any> | null>(null)
+
+  const [requestCount, setRequestCount] = useState(0)
+
+  const firstEl = useRef<HTMLElement>(null)
   const scrollableParent = useRef<Element | null>(null)
+
   const pageNumberObserver = useRef<IntersectionObserver | null>(null)
+
+  latestData.current = loadedData
 
   useEffect(() => {
     setShowStartTrigger(trigger !== 'end' && showTrigger)
@@ -102,6 +110,8 @@ const InfiniteScroll = ({
   const getWhenVisibleComponent = useCallback(
     (params: ReloadOptions, position: 'start' | 'end') => {
       const manualMode = manualAfter > 0 && requestCount >= manualAfter
+
+      console.log({ ...params })
 
       if (!manualMode) {
         return (
@@ -237,43 +247,27 @@ const InfiniteScroll = ({
     [preserveUrl],
   )
 
-  //   useEffect(() => {
-  //     console.log('changed', loadedData.next_page, loadedData.data.length)
-  //   }, [loadedData])
-
   const getStartWhenVisibleComponent = useCallback(() => {
-    console.log(loadedData.next_page)
+    const lastData: InfiniteScrollProp<any> = lastStartData ?? latestData.current
 
-    // setTimeout(() => {
-    //   console.log('timeout tho', loadedData.next_page)
-    // })
-
-    console.log(lastStartData, loadedData)
-    const lastData: InfiniteScrollProp<any> = lastStartData ?? loadedData
-
-    let currentTopElement: number | null = null
+    let currentTopOffset: number | null = null
 
     const events = {
       onStart: () => {
-        currentTopElement = scrollableParent.current
-          ? scrollableParent.current.scrollHeight
-          : document.body.scrollHeight
+        currentTopOffset = scrollableParent.current ? scrollableParent.current.scrollHeight : document.body.scrollHeight
       },
       onFinish: () => {
-        setTimeout(() => {
-          console.log('finished', loadedData)
-        }, 1000)
-        setLastStartData(loadedData)
+        setLastStartData(latestData.current)
         tagFirstElementWithPageNumber(lastData.previous_page)
 
-        if (currentTopElement === null) {
+        if (currentTopOffset === null) {
           return
         }
 
         const newScrollHeight = scrollableParent.current
           ? scrollableParent.current.scrollHeight
           : document.body.scrollHeight
-        const diff = newScrollHeight - currentTopElement
+        const diff = newScrollHeight - currentTopOffset
 
         if (scrollableParent.current) {
           scrollableParent.current.scrollTop += diff
@@ -314,7 +308,7 @@ const InfiniteScroll = ({
       },
       'start',
     )
-  }, [trigger, showTrigger, loadedData, lastStartData])
+  }, [trigger, showTrigger, lastStartData, latestData])
 
   const getEndWhenVisibleComponent = useCallback(() => {
     const lastData: InfiniteScrollProp<any> = lastEndData ?? loadedData
@@ -362,15 +356,12 @@ const InfiniteScroll = ({
   }, [autoScroll])
 
   const newChildren = React.Children.map(children, (child, index) => {
-    // console.log(child.key)
     if (index === 0) {
       return React.cloneElement(child, { ref: firstEl })
     }
 
     return child
   })
-
-  //   console.log('rendering')
 
   const startEl = showStartTrigger ? getStartWhenVisibleComponent() : null
   const endEl = showEndTrigger ? getEndWhenVisibleComponent() : null
