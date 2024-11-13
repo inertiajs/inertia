@@ -20,7 +20,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/infinite-scroll/chat', function () {
-    $messages = Message::orderByDesc('created_at')->cursorPaginate(25);
+    $messages = Message::orderByDesc('created_at')->paginate(25);
 
     return inertia('InfiniteScroll/Chat', [
         'messages' => Inertia::infinite($messages),
