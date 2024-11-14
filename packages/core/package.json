@@ -34,6 +34,10 @@
       "types": "./types/server.d.ts",
       "import": "./dist/server.esm.js",
       "require": "./dist/server.js"
+    },
+    "./vite": {
+      "types": "./types/vite.d.ts",
+      "default": "./dist/vite.js"
     }
   },
   "typesVersions": {
@@ -54,6 +58,14 @@
     "es-toolkit": "^1.34.1",
     "qs": "^6.9.0"
   },
+  "peerDependencies": {
+    "vite": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/deepmerge": "^2.2.0",
     "@types/node": "^18.4",
@@ -61,6 +73,7 @@
     "@types/qs": "^6.9.0",
     "esbuild": "^0.25.0",
     "esbuild-node-externals": "^1.6.0",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "vite": "^5.4.8"
   }
 }

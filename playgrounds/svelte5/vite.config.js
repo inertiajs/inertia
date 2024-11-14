@@ -1,3 +1,4 @@
+import inertia from '@inertiajs/core/vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
 import laravel from 'laravel-vite-plugin'
@@ -13,6 +14,7 @@ export default defineConfig({
       ssr: 'resources/js/ssr.ts',
       refresh: true,
     }),
+    inertia('resources/js/viteSsr.ts'),
     svelte(),
     tailwindcss(),
   ],
