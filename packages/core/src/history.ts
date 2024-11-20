@@ -30,7 +30,7 @@ class History {
     }
   }
 
-  public pushState(page: Page): void {
+  public pushState(page: Page, cb: (() => void) | null = null): void {
     if (isServer || this.preserveUrl) {
       return
     }
@@ -47,6 +47,8 @@ class History {
           '',
           page.url,
         )
+
+        cb && cb()
       })
     })
   }
@@ -93,7 +95,7 @@ class History {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 
-  public replaceState(page: Page): void {
+  public replaceState(page: Page, cb: (() => void) | null = null): void {
     currentPage.merge(page)
 
     if (isServer || this.preserveUrl) {
@@ -112,6 +114,8 @@ class History {
           '',
           page.url,
         )
+
+        cb && cb()
       })
     })
   }
