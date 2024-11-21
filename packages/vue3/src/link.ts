@@ -181,14 +181,16 @@ const Link: InertiaLink = defineComponent({
 
     const method = props.method.toLowerCase() as Method
     const as = method !== 'get' ? 'button' : props.as.toLowerCase()
-    const mergeDataArray = computed(() => mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat))
+    const mergeDataArray = computed(() =>
+      mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat),
+    )
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
 
-    const elProps = computed(() => {
-      a: { href: href.value }
-      button: { type: 'button' }
-    })
+    const elProps = computed(() => ({
+      a: { href: href.value },
+      button: { type: 'button' },
+    }))
 
     const baseParams = {
       data: data.value,
