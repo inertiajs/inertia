@@ -214,13 +214,29 @@ export class Router {
       ...events,
     }
 
-    prefetchedRequests.add(
-      requestParams,
-      (params) => {
-        this.asyncRequestStream.send(Request.create(params, currentPage.get()))
-      },
-      { cacheFor },
-    )
+    const ensureCurrentPageIsSet = (): Promise<void> => {
+      return new Promise((resolve) => {
+        const checkIfPageIsDefined = () => {
+          if (currentPage.get()) {
+            resolve()
+          } else {
+            setTimeout(checkIfPageIsDefined, 50)
+          }
+        }
+
+        checkIfPageIsDefined()
+      })
+    }
+
+    ensureCurrentPageIsSet().then(() => {
+      prefetchedRequests.add(
+        requestParams,
+        (params) => {
+          this.asyncRequestStream.send(Request.create(params, currentPage.get()))
+        },
+        { cacheFor },
+      )
+    })
   }
 
   public clearHistory(): void {
