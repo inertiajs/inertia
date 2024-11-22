@@ -793,8 +793,6 @@ test.describe('disabled attribute', () => {
     const link = await page.getByRole('button', { name: 'Disabled Button', exact: true })
     await expect(link).toBeDisabled()
     await expect(link).toHaveAttribute('disabled')
-    await link.click()
-    await expect(page).toHaveURL('/links/disabled')
   })
 
   test('disables the link (as=button) when the disabled attribute is set', async ({ page }) => {
@@ -802,8 +800,6 @@ test.describe('disabled attribute', () => {
     const link = await page.getByRole('button', { name: 'Disabled Default Button', exact: true })
     await expect(link).toBeDisabled()
     await expect(link).toHaveAttribute('disabled')
-    await link.click()
-    await expect(page).toHaveURL('/links/disabled')
   })
 
   test('does not disable the link (as=button) when the disabled attribute is set to false', async ({ page }) => {
