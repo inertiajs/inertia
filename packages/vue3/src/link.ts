@@ -190,7 +190,7 @@ const Link: InertiaLink = defineComponent({
 
     const elProps = {
       a: { href },
-      button: { type: 'button' },
+      button: { type: 'button', disabled: props.disabled },
     }
 
     const baseParams = {
