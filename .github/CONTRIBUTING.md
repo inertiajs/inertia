@@ -59,6 +59,14 @@ npm run build
 npm run ssr:serve
 ```
 
+## Testing
+
+Inertia.js uses [Playwright](https://playwright.dev/) for testing. To run the tests, use the following command:
+
+```sh
+cd tests && npx playwright test
+```
+
 ## Publishing
 
 This section is really for the benefit of the core maintainers.
