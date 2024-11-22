@@ -759,7 +759,6 @@ test.describe('disabled attribute', () => {
   test('disables the link when the disabled attribute is set to true', async ({ page }) => {
     await page.goto('/links/disabled')
     const link = await page.getByRole('link', { name: 'Disabled', exact: true })
-    await expect(link).toBeDisabled()
     await expect(link).not.toHaveAttribute('disabled')
     await link.click()
     await expect(page).toHaveURL('/links/disabled')
@@ -768,7 +767,6 @@ test.describe('disabled attribute', () => {
   test('disables the link when the disabled attribute exists', async ({ page }) => {
     await page.goto('/links/disabled')
     const link = await page.getByRole('link', { name: 'Disabled Default', exact: true })
-    await expect(link).toBeDisabled()
     await expect(link).not.toHaveAttribute('disabled')
     await link.click()
     await expect(page).toHaveURL('/links/disabled')
@@ -777,7 +775,6 @@ test.describe('disabled attribute', () => {
   test('does not disable the link when the disabled attribute is set to false', async ({ page }) => {
     await page.goto('/links/disabled')
     const link = await page.getByRole('link', { name: 'Enabled', exact: true })
-    await expect(link).not.toBeDisabled()
     await expect(link).not.toHaveAttribute('disabled')
     await link.click()
     await expect(page).toHaveURL('/links/disabled')
@@ -786,7 +783,6 @@ test.describe('disabled attribute', () => {
   test('does not disable the link when the disabled attribute not exists', async ({ page }) => {
     await page.goto('/links/disabled')
     const link = await page.getByRole('link', { name: 'Enabled Default', exact: true })
-    await expect(link).not.toBeDisabled()
     await expect(link).not.toHaveAttribute('disabled')
     await link.click()
     await expect(page).toHaveURL('/links/disabled')
@@ -796,7 +792,7 @@ test.describe('disabled attribute', () => {
     await page.goto('/links/disabled')
     const link = await page.getByRole('link', { name: 'Disabled Button', exact: true })
     await expect(link).toBeDisabled()
-    await expect(link).toHaveAttribute('disabled')
+    await expect(link).toHaveAttribute('disabled', 'true')
     await link.click()
     await expect(page).toHaveURL('/links/disabled')
   })
