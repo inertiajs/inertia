@@ -224,28 +224,29 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetch = () => {
-      router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+      if (!props.disabled) {
+        router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+      }
     }
 
     const regularEvents = {
       onClick: (event) => {
-        if (props.disabled) return;
         if (shouldIntercept(event)) {
           event.preventDefault()
-          router.visit(href, visitParams)
+          if (!props.disabled) {
+            router.visit(href, visitParams)
+          }
         }
       },
     }
 
     const prefetchHoverEvents = {
       onMouseenter: () => {
-        if (props.disabled) return;
         hoverTimeout.value = setTimeout(() => {
           prefetch()
         }, 75)
       },
       onMouseleave: () => {
-        if (props.disabled) return;
         clearTimeout(hoverTimeout.value)
       },
       onClick: regularEvents.onClick,
@@ -253,16 +254,16 @@ const Link: InertiaLink = defineComponent({
 
     const prefetchClickEvents = {
       onMousedown: (event) => {
-        if (props.disabled) return;
         if (shouldIntercept(event)) {
           event.preventDefault()
           prefetch()
         }
       },
       onMouseup: (event) => {
-        if (props.disabled) return;
         event.preventDefault()
-        router.visit(href, visitParams)
+        if (!props.disabled) {
+          router.visit(href, visitParams)
+        }
       },
       onClick: (event) => {
         if (shouldIntercept(event)) {
