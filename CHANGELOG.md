@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.2...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.3...HEAD)
 
 - Nothing yet!
+
+## [v2.0.0-beta.3](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.2...v2.0.0-beta.3)
+
+- [2.x] Ensure current page is set before prefetching ([#2100](https://github.com/inertiajs/inertia/pull/2100))
+- [2.x] Set the history state before swapping component ([#2098](https://github.com/inertiajs/inertia/pull/2098))
+- [2.x] Ensure we have a default slot for WhenVisible before executing it ([#2096](https://github.com/inertiajs/inertia/pull/2096))
+- [2.x] Fix: make Link href prop reactive ([#2089](https://github.com/inertiajs/inertia/pull/2089))
+- [2.x] Don't prefetch the current page ([#2097](https://github.com/inertiajs/inertia/pull/2097))
+- [2.x] Removal of NProgress dependency ([#2045](https://github.com/inertiajs/inertia/pull/2045))
 
 ## [v2.0.0-beta.2](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.1...v2.0.0-beta.2)
 
