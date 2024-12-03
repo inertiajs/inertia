@@ -78,7 +78,7 @@ export default function useForm<TForm extends FormDataType>(
       }
 
       if (typeof fieldOrFields === 'undefined') {
-        defaults = this.data()
+        defaults = cloneDeep(this.data())
       } else {
         defaults = Object.assign(
           {},
