@@ -198,7 +198,10 @@ export class Router {
       prefetch: true,
     })
 
-    if (visit.url.href === window.location.href) {
+    const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
+    const currentUrl = window.location.origin + window.location.pathname + window.location.search
+
+    if (visitUrl === currentUrl) {
       // Don't prefetch the current page, you're already on it
       return
     }
