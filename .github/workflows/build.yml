@@ -20,7 +20,7 @@ jobs:
           node-version: 20.15
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
           path: |
