@@ -19,14 +19,14 @@ jobs:
         with:
           node-version: 20.15
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
-          path: |
-            ~/.cache
-            node_modules
-            packages/${{ matrix.adapter }}/tests/node_modules
+      # - name: Cache node modules
+      #   uses: actions/cache@v2
+      #   with:
+      #     key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
+      #     path: |
+      #       ~/.cache
+      #       node_modules
+      #       packages/${{ matrix.adapter }}/tests/node_modules
 
       - name: Build Inertia
         run: |
