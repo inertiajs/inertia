@@ -11,6 +11,7 @@ import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
   ActiveVisit,
+  ClientSideVisitOptions,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
@@ -253,6 +254,33 @@ export class Router {
 
   public decryptHistory(): Promise<Page> {
     return history.decrypt()
+  }
+
+  public replace(params: ClientSideVisitOptions): void {
+    this.clientVisit(params, { replace: true })
+  }
+
+  public push(params: ClientSideVisitOptions): void {
+    this.clientVisit(params)
+  }
+
+  protected clientVisit(params: ClientSideVisitOptions, { replace = false }: { replace?: boolean } = {}): void {
+    const current = currentPage.get()
+
+    const props = typeof params.props === 'function' ? params.props(current.props) : params.props ?? current.props
+
+    currentPage.set(
+      {
+        ...current,
+        ...params,
+        props,
+      },
+      {
+        replace,
+        preserveScroll: params.preserveScroll,
+        preserveState: params.preserveState,
+      },
+    )
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
