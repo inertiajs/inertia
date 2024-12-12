@@ -70,7 +70,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       (event: React.MouseEvent) => {
         onClick(event)
 
-        if (shouldIntercept(event.nativeEvent)) {
+        if (shouldIntercept(event)) {
           event.preventDefault()
 
           router.visit(href, {
