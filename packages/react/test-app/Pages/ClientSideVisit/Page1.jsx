@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/vue3'
+import { router } from '@inertiajs/react'
 
 export default ({ foo, bar }) => {
   const replace = () => {
