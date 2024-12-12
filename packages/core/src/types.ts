@@ -49,21 +49,14 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   rememberedState: Record<string, unknown>
 }
 
-interface ClientSideVisitOptions {
+export interface ClientSideVisitOptions {
   component?: Page['component']
   url?: Page['url']
+  props?: ((props: Page['props']) => Page['props']) | Page['props']
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
-}
-
-export interface ClientSideReplaceOptions extends ClientSideVisitOptions {
-  props?: (props: Page['props']) => Page['props']
-}
-
-export interface ClientSidePushOptions extends ClientSideVisitOptions {
-  props?: Page['props']
 }
 
 export type PageResolver = (name: string) => Component
