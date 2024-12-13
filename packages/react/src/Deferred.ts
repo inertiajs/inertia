@@ -1,9 +1,9 @@
-import { ReactChild, useEffect, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import usePage from './usePage'
 
 interface DeferredProps {
-  children: ReactChild
-  fallback: ReactChild
+  children: ReactElement | number | string
+  fallback: ReactElement | number | string
   data: string | string[]
 }
 
