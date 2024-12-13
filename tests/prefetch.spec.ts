@@ -104,7 +104,7 @@ test('can prefetch using link props', async ({ page, browser }) => {
   expect(requests.requests.length).toBe(0)
 
   await page2.getByRole('link', { exact: true, name: 'On Hover (Default)' }).focus()
-  await page2.waitForTimeout(80)
+  await page2.waitForTimeout(100)
   expect(requests.requests.length).toBe(1)
   await isPrefetchPage(page2, 2)
   await page2.keyboard.down('Enter')
