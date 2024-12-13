@@ -18,6 +18,11 @@ const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
   await isPrefetchSwrPage(page, id)
 }
 
+test.fixme('prefetch touchstart/focus/blur', async ({ page }) => {
+	// TODO next
+	expect(true).toBe(false);
+});
+
 test('will not prefetch current page', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
