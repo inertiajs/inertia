@@ -36,7 +36,7 @@ test('will not prefetch current page', async ({ page }) => {
   expect(requests.requests.length).toBe(0)
 })
 
-test('can prefetch using link props', async ({ page, browser, context }) => {
+test('can prefetch using link props', async ({ page, browser }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
   const prefetch4 = page.waitForResponse('prefetch/4')
@@ -93,8 +93,9 @@ test('can prefetch using link props', async ({ page, browser, context }) => {
   await isPrefetchPage(page, 4)
   expect(requests.requests.length).toBe(0)
 
-  // Create a new page without the cache populated by previous tests
-  const page2 = await context.newPage()
+  // Create a new context to test the focus/blur behavior without the cache populated by previous tests
+  const context2 = await browser.newContext()
+  const page2 = await context2.newPage()
   await page2.goto('prefetch/2')
   requests.listen(page2)
   // If they just do a quick focus, it shouldn't make the request
@@ -109,12 +110,11 @@ test('can prefetch using link props', async ({ page, browser, context }) => {
   await page2.keyboard.down('Enter')
   await isPrefetchPage(page2, 1)
   expect(requests.requests.length).toBe(1)
-
-  await page2.close()
+  await context2.close()
 
   // Create a new context to simulate touchscreen
-  const context2 = await browser.newContext({ hasTouch: true })
-  const page3 = await context2.newPage()
+  const context3 = await browser.newContext({ hasTouch: true })
+  const page3 = await context3.newPage()
 
   // These two prefetch requests should be made on mount
   const page3Prefetch2 = page3.waitForResponse('prefetch/2')
@@ -135,8 +135,7 @@ test('can prefetch using link props', async ({ page, browser, context }) => {
   await page3.waitForTimeout(75)
   expect(requests.requests.length).toBe(1)
   await isPrefetchPage(page3, 1)
-
-  await context.close()
+  await context3.close()
 })
 
 test('can cache links with single cache value', async ({ page }) => {
