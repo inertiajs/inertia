@@ -10,6 +10,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.3...HEAD)
 
 - [2.x] Add React 19 support ([#2131](https://github.com/inertiajs/inertia/pull/2131))
+- [2.x] Add client side visits ([#2130](https://github.com/inertiajs/inertia/pull/2130))
 
 ## [v1.3.0](https://github.com/inertiajs/inertia/compare/v1.2.0...v1.3.0)
 
