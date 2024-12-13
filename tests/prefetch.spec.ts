@@ -18,11 +18,6 @@ const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
   await isPrefetchSwrPage(page, id)
 }
 
-test.fixme('prefetch touchstart/focus/blur', async ({ page }) => {
-	// TODO next
-	expect(true).toBe(false);
-});
-
 test('will not prefetch current page', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
@@ -41,7 +36,7 @@ test('will not prefetch current page', async ({ page }) => {
   expect(requests.requests.length).toBe(0)
 })
 
-test('can prefetch using link props', async ({ page }) => {
+test('can prefetch using link props', async ({ page, browser, context }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
   const prefetch4 = page.waitForResponse('prefetch/4')
@@ -97,6 +92,51 @@ test('can prefetch using link props', async ({ page }) => {
   await page.getByRole('link', { name: 'On Hover + Mount' }).click()
   await isPrefetchPage(page, 4)
   expect(requests.requests.length).toBe(0)
+
+  // Create a new page without the cache populated by previous tests
+  const page2 = await context.newPage()
+  await page2.goto('prefetch/2')
+  requests.listen(page2)
+  // If they just do a quick focus, it shouldn't make the request
+  await page2.getByRole('link', { exact: true, name: 'On Hover (Default)' }).focus()
+  await page2.getByRole('link', { exact: true, name: 'On Hover (Default)' }).blur()
+  expect(requests.requests.length).toBe(0)
+
+  await page2.getByRole('link', { exact: true, name: 'On Hover (Default)' }).focus()
+  await page2.waitForTimeout(80)
+  expect(requests.requests.length).toBe(1)
+  await isPrefetchPage(page2, 2)
+  await page2.keyboard.down('Enter')
+  await isPrefetchPage(page2, 1)
+  expect(requests.requests.length).toBe(1)
+
+  await page2.close()
+
+  // Create a new context to simulate touchscreen
+  const context2 = await browser.newContext({ hasTouch: true })
+  const page3 = await context2.newPage()
+
+  // These two prefetch requests should be made on mount
+  const page3Prefetch2 = page3.waitForResponse('prefetch/2')
+  const page3Prefetch4 = page3.waitForResponse('prefetch/4')
+
+  await page3.goto('prefetch/2')
+
+  // These two prefetch requests should be made on mount
+  await page3Prefetch2
+  await page3Prefetch4
+
+  requests.listen(page3)
+
+  const link = page3.getByRole('link', { exact: true, name: 'On Hover (Default)' })
+  const box = await link.boundingBox()
+  expect(box).not.toBeNull()
+  page3.touchscreen.tap(box!.x, box!.y)
+  await page3.waitForTimeout(75)
+  expect(requests.requests.length).toBe(1)
+  await isPrefetchPage(page3, 1)
+
+  await context.close()
 })
 
 test('can cache links with single cache value', async ({ page }) => {
