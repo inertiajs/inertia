@@ -95,7 +95,7 @@ const Head: InertiaHead = defineComponent({
     },
     addTitleElement(elements) {
       if (this.title && !elements.find((tag) => tag.startsWith('<title'))) {
-        elements.push(`<title inertia>${this.title}</title>`)
+        elements.unshift(`<title inertia>${this.title}</title>`)
       }
       return elements
     },
