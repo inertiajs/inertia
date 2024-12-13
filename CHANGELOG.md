@@ -11,6 +11,39 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 - [2.x] Add React 19 support ([#2131](https://github.com/inertiajs/inertia/pull/2131))
 
+## [v1.3.0](https://github.com/inertiajs/inertia/compare/v1.2.0...v1.3.0)
+
+### Added
+
+- Add React 19 support ([#2121](https://github.com/inertiajs/inertia/pull/2121))
+- Add Svelte 5 support ([#1970](https://github.com/inertiajs/inertia/pull/1970))
+- Add TypeScript support to Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866), [69292e](https://github.com/inertiajs/inertia/commit/69292ef3592ccca5e0f05f7ce131a53f6c1ba22b), [#2003](https://github.com/inertiajs/inertia/pull/2003), [#2005](https://github.com/inertiajs/inertia/pull/2005))
+
+### Changed
+
+- Skip intercepting non-left button clicks on links ([#1908](https://github.com/inertiajs/inertia/pull/1908), [#1910](https://github.com/inertiajs/inertia/pull/1910))
+- Changed `preserveScroll` to be `true` on initial page visit ([#1360](https://github.com/inertiajs/inertia/pull/1360))
+- Return early when using `router.on()` during SSR ([#1715](https://github.com/inertiajs/inertia/pull/1715))
+- Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
+
+### Fixed
+
+- Fix history navigation issue on Chrome iOS ([#1984](https://github.com/inertiajs/inertia/pull/1984), [#1992](https://github.com/inertiajs/inertia/pull/1992))
+- Fix `setNavigationType` for Safari 10 ([#1957](https://github.com/inertiajs/inertia/pull/1957))
+- Export `InertiaFormProps` in all adapters ([#1596](https://github.com/inertiajs/inertia/pull/1596), [#1734](https://github.com/inertiajs/inertia/pull/1734))
+- Fix `isDirty` after `form.defaults()` call in Vue 3 ([#1985](https://github.com/inertiajs/inertia/pull/1985))
+- Fix scroll reset on page navigation ([#1980](https://github.com/inertiajs/inertia/pull/1980))
+- Fix scroll position restoration for `[scroll-region]` elements ([#1782](https://github.com/inertiajs/inertia/pull/1782), [#1980](https://github.com/inertiajs/inertia/pull/1980))
+- Fix `useForm` re-renders by memoizing functions in React adapter ([#1607](https://github.com/inertiajs/inertia/pull/1607))
+- Fix doubling hash when using `<React.StrictMode>` ([#1728](https://github.com/inertiajs/inertia/pull/1728))
+- Fix type augmentation in Vue 3 adapter ([#1958](https://github.com/inertiajs/inertia/pull/1958))
+- Fix form helper `transform` return type in React adapter ([#1896](https://github.com/inertiajs/inertia/pull/1896))
+- Fix props reactivity in Svelte adapter ([#1969](https://github.com/inertiajs/inertia/pull/1969))
+- Fix `<Render />` component to respect `preserveState` option in Svelte adapter ([#1943](https://github.com/inertiajs/inertia/pull/1943))
+- Fix 'received an unexpected slot "default"' warning in Svelte adapter ([#1941](https://github.com/inertiajs/inertia/pull/1941))
+- Fix command + click behavior on links in React adapter ([#2132](https://github.com/inertiajs/inertia/pull/2132))
+- Fix import in Svelte adapter ([#2002](https://github.com/inertiajs/inertia/pull/2002))
+
 ## [v2.0.0-beta.3](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.2...v2.0.0-beta.3)
 
 - [2.x] Ensure current page is set before prefetching ([#2100](https://github.com/inertiajs/inertia/pull/2100))
@@ -38,41 +71,6 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [v2.0.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0-beta.1)
 
 - First beta release for the upcoming Inertia.js v2.0. View documentation and upgrade guide at https://v2.inertiajs.com.
-
-## [v1.3.0-beta.2](https://github.com/inertiajs/inertia/compare/v1.3.0-beta.1...v1.3.0-beta.2)
-
-- Fix import in Svelte adapter ([#2002](https://github.com/inertiajs/inertia/pull/2002))
-- Improve types in Svelte adapter ([69292e](https://github.com/inertiajs/inertia/commit/69292ef3592ccca5e0f05f7ce131a53f6c1ba22b), [#2003](https://github.com/inertiajs/inertia/pull/2003), [#2005](https://github.com/inertiajs/inertia/pull/2005))
-
-## [v1.3.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v1.3.0-beta.1)
-
-### Added
-
-- Add Svelte 5 support ([#1970](https://github.com/inertiajs/inertia/pull/1970))
-- Add TypeScript support to Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866))
-
-### Changed
-
-- Skip intercepting non-left button clicks on links ([#1908](https://github.com/inertiajs/inertia/pull/1908), [#1910](https://github.com/inertiajs/inertia/pull/1910))
-- Changed `preserveScroll` to be `true` on initial page visit ([#1360](https://github.com/inertiajs/inertia/pull/1360))
-- Return early when using `router.on()` during SSR ([#1715](https://github.com/inertiajs/inertia/pull/1715))
-- Use updater function in `setData` in `useForm` hook in React adapter ([#1859](https://github.com/inertiajs/inertia/pull/1859))
-
-### Fixed
-
-- Fix history navigation issue on Chrome iOS ([#1984](https://github.com/inertiajs/inertia/pull/1984), [#1992](https://github.com/inertiajs/inertia/pull/1992))
-- Fix `setNavigationType` for Safari 10 ([#1957](https://github.com/inertiajs/inertia/pull/1957))
-- Export `InertiaFormProps` in all adapters ([#1596](https://github.com/inertiajs/inertia/pull/1596), [#1734](https://github.com/inertiajs/inertia/pull/1734))
-- Fix `isDirty` after `form.defaults()` call in Vue 3 ([#1985](https://github.com/inertiajs/inertia/pull/1985))
-- Fix scroll reset on page navigation ([#1980](https://github.com/inertiajs/inertia/pull/1980))
-- Fix scroll position restoration for `[scroll-region]` elements ([#1782](https://github.com/inertiajs/inertia/pull/1782), [#1980](https://github.com/inertiajs/inertia/pull/1980))
-- Fix `useForm` re-renders by memoizing functions in React adapter ([#1607](https://github.com/inertiajs/inertia/pull/1607))
-- Fix doubling hash when using `<React.StrictMode>` ([#1728](https://github.com/inertiajs/inertia/pull/1728))
-- Fix type augmentation in Vue 3 adapter ([#1958](https://github.com/inertiajs/inertia/pull/1958))
-- Fix form helper `transform` return type in React adapter ([#1896](https://github.com/inertiajs/inertia/pull/1896))
-- Fix props reactivity in Svelte adapter ([#1969](https://github.com/inertiajs/inertia/pull/1969))
-- Fix `<Render />` component to respect `preserveState` option in Svelte adapter ([#1943](https://github.com/inertiajs/inertia/pull/1943))
-- Fix 'received an unexpected slot "default"' warning in Svelte adapter ([#1941](https://github.com/inertiajs/inertia/pull/1941))
 
 ## [v1.2.0](https://github.com/inertiajs/inertia/compare/v1.1.0...v1.2.0)
 
