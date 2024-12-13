@@ -98,11 +98,12 @@ test('can prefetch link on focus', async ({ page, browser }) => {
   await page.goto('prefetch/2')
   requests.listen(page)
   // If they just do a quick focus, it shouldn't make the request
-  await page.getByRole('link', { exact: true, name: 'On Hover (Default)' }).focus()
-  await page.getByRole('link', { exact: true, name: 'On Hover (Default)' }).blur()
+  const link = page.getByRole('link', { exact: true, name: 'On Hover (Default)' })
+  await link.focus()
+  await link.blur()
   expect(requests.requests.length).toBe(0)
 
-  await page.getByRole('link', { exact: true, name: 'On Hover (Default)' }).focus()
+  await link.focus()
   await page.waitForTimeout(80)
   expect(requests.requests.length).toBe(1)
   await isPrefetchPage(page, 2)
@@ -126,8 +127,7 @@ test('can prefetch link on focus', async ({ page, browser }) => {
 
   requests.listen(page2)
 
-  const link = page2.getByRole('link', { exact: true, name: 'On Hover (Default)' })
-  const box = await link.boundingBox()
+  const box = await page2.getByRole('link', { exact: true, name: 'On Hover (Default)' }).boundingBox()
   expect(box).not.toBeNull()
   page2.touchscreen.tap(box!.x, box!.y)
   await page2.waitForTimeout(75)
