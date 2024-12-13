@@ -96,6 +96,7 @@ test('can prefetch using link props', async ({ page, browser }) => {
 
 test('can prefetch link on focus', async ({ page, browser }) => {
   await page.goto('prefetch/2')
+  await isPrefetchPage(page, 2)
   requests.listen(page)
   // If they just do a quick focus, it shouldn't make the request
   const link = page.getByRole('link', { exact: true, name: 'On Hover (Default)' })
