@@ -36,7 +36,7 @@ test('will not prefetch current page', async ({ page }) => {
   expect(requests.requests.length).toBe(0)
 })
 
-test('can prefetch using link props', async ({ page, browser }) => {
+test('can prefetch using link props', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
   const prefetch4 = page.waitForResponse('prefetch/4')
