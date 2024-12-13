@@ -30,11 +30,6 @@ jobs:
 
       - name: Build Inertia
         run: |
-          rm package-lock.json
           npm install
           cd packages/core && npm run build
           cd ../${{ matrix.adapter }} && npm run build
-
-    #   - name: Build Playground
-    #     run: |
-    #       cd playgrounds/${{ matrix.adapter }} && npm run build
