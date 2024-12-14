@@ -62,7 +62,8 @@ class CurrentPage {
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       return new Promise((resolve) => {
-        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
+        replace ? history.replaceState(page) : history.pushState(page)
+        resolve(null)
       }).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
