@@ -166,9 +166,8 @@ export default function useForm<TForm extends FormDataType>(
     [data, setErrors, transform],
   )
 
-  return {
-    data,
-    setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
+  const setDataExpanded = useCallback(
+    (keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) => {
       if (typeof keyOrData === 'string') {
         setData((data) => ({ ...data, [keyOrData]: maybeValue }))
       } else if (typeof keyOrData === 'function') {
@@ -177,6 +176,12 @@ export default function useForm<TForm extends FormDataType>(
         setData(keyOrData as TForm)
       }
     },
+    [setData],
+  )
+
+  return {
+    data,
+    setData: setDataExpanded,
     isDirty: !isEqual(data, defaults),
     errors,
     hasErrors,
