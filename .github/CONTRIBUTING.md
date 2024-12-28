@@ -56,7 +56,15 @@ To test the SSR mode, first run the build, and then start the SSR server:
 
 ```sh
 npm run build
-npm run ssr:serve
+php artisan inertia:start-ssr
+```
+
+## Testing
+
+Inertia.js uses [Playwright](https://playwright.dev/) for testing. To run the tests, use the following command:
+
+```sh
+cd tests && npx playwright test
 ```
 
 ## Publishing

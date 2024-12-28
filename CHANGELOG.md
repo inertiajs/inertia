@@ -7,49 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.3...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0...HEAD)
 
-- Nothing yet!
+- Nothing
 
-## [v2.0.0-beta.3](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.2...v2.0.0-beta.3)
-
-- [2.x] Ensure current page is set before prefetching ([#2100](https://github.com/inertiajs/inertia/pull/2100))
-- [2.x] Set the history state before swapping component ([#2098](https://github.com/inertiajs/inertia/pull/2098))
-- [2.x] Ensure we have a default slot for WhenVisible before executing it ([#2096](https://github.com/inertiajs/inertia/pull/2096))
-- [2.x] Fix: make Link href prop reactive ([#2089](https://github.com/inertiajs/inertia/pull/2089))
-- [2.x] Don't prefetch the current page ([#2097](https://github.com/inertiajs/inertia/pull/2097))
-- [2.x] Removal of NProgress dependency ([#2045](https://github.com/inertiajs/inertia/pull/2045))
-
-## [v2.0.0-beta.2](https://github.com/inertiajs/inertia/compare/v2.0.0-beta.1...v2.0.0-beta.2)
-
-- [2.x] Fix issue where initial page data is coming from history state ([#2023](https://github.com/inertiajs/inertia/pull/2023))
-- [2.x] Fix onClick in React adapter ([#2019](https://github.com/inertiajs/inertia/pull/2019))
-- [2.x] Export usePrefetch for react ([#2016](https://github.com/inertiajs/inertia/pull/2016))
-- [2.x] Rename WhenVisible "elementTag" prop to "as" ([#2009](https://github.com/inertiajs/inertia/pull/2009))
-- [2.x] $page url should not include the host ([#2032](https://github.com/inertiajs/inertia/pull/2032))
-- [2.x] Suppress Svelte accessibility warnings from Playwright logs ([#2033](https://github.com/inertiajs/inertia/pull/2033))
-- [2.x] Change TypeScript module resolution in the Svelte adapter ([#2035](https://github.com/inertiajs/inertia/pull/2035))
-- [2.x] Fix multi byte strings in history encryption ([#2030](https://github.com/inertiajs/inertia/pull/2030))
-- [2.x] Load deferred props on every page swap ([#2024](https://github.com/inertiajs/inertia/pull/2024))
-- [2.x] Refactor createInertiaApp in Svelte adapter ([#2036](https://github.com/inertiajs/inertia/pull/2036))
-- [2.x] Fix `<Deferred />` in Svelte adapter ([#2037](https://github.com/inertiajs/inertia/pull/2037))
-- [2.x] Fix `usePrefetch` in SSR mode in Svelte adapter ([#2034](https://github.com/inertiajs/inertia/pull/2034))
-
-## [v2.0.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0-beta.1)
-
-- First beta release for the upcoming Inertia.js v2.0. View documentation and upgrade guide at https://v2.inertiajs.com.
-
-## [v1.3.0-beta.2](https://github.com/inertiajs/inertia/compare/v1.3.0-beta.1...v1.3.0-beta.2)
-
-- Fix import in Svelte adapter ([#2002](https://github.com/inertiajs/inertia/pull/2002))
-- Improve types in Svelte adapter ([69292e](https://github.com/inertiajs/inertia/commit/69292ef3592ccca5e0f05f7ce131a53f6c1ba22b), [#2003](https://github.com/inertiajs/inertia/pull/2003), [#2005](https://github.com/inertiajs/inertia/pull/2005))
-
-## [v1.3.0-beta.1](https://github.com/inertiajs/inertia/compare/v1.2.0...v1.3.0-beta.1)
+## [v2.0.0](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0)
 
 ### Added
 
+- Add polling
+- Add link prefetching
+- Add deferred props
+- Add lazy loading of data when scrolling
+- Add history encryption API
+- Add React 19 support ([#2131](https://github.com/inertiajs/inertia/pull/2131))
+- Add client side visits ([#2130](https://github.com/inertiajs/inertia/pull/2130))
+
+### Changed
+
+- Removal of NProgress dependency ([#2045](https://github.com/inertiajs/inertia/pull/2045))
+- Change TypeScript module resolution in the Svelte adapter ([#2035](https://github.com/inertiajs/inertia/pull/2035))
+- Refactor `createInertiaApp` in Svelte adapter ([#2036](https://github.com/inertiajs/inertia/pull/2036))
+
+### Fixed
+
+- Fix: make Link href prop reactive ([#2089](https://github.com/inertiajs/inertia/pull/2089))
+
+## [v1.3.0](https://github.com/inertiajs/inertia/compare/v1.2.0...v1.3.0)
+
+### Added
+
+- Add React 19 support ([#2121](https://github.com/inertiajs/inertia/pull/2121))
 - Add Svelte 5 support ([#1970](https://github.com/inertiajs/inertia/pull/1970))
-- Add TypeScript support to Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866))
+- Add TypeScript support to Svelte adapter ([#1866](https://github.com/inertiajs/inertia/pull/1866), [69292e](https://github.com/inertiajs/inertia/commit/69292ef3592ccca5e0f05f7ce131a53f6c1ba22b), [#2003](https://github.com/inertiajs/inertia/pull/2003), [#2005](https://github.com/inertiajs/inertia/pull/2005))
 
 ### Changed
 
@@ -73,6 +63,8 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - Fix props reactivity in Svelte adapter ([#1969](https://github.com/inertiajs/inertia/pull/1969))
 - Fix `<Render />` component to respect `preserveState` option in Svelte adapter ([#1943](https://github.com/inertiajs/inertia/pull/1943))
 - Fix 'received an unexpected slot "default"' warning in Svelte adapter ([#1941](https://github.com/inertiajs/inertia/pull/1941))
+- Fix command + click behavior on links in React adapter ([#2132](https://github.com/inertiajs/inertia/pull/2132))
+- Fix import in Svelte adapter ([#2002](https://github.com/inertiajs/inertia/pull/2002))
 
 ## [v1.2.0](https://github.com/inertiajs/inertia/compare/v1.1.0...v1.2.0)
 

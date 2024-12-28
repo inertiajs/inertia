@@ -74,6 +74,13 @@ app.get('/links/headers/version', (req, res) =>
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
 app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
 
+app.get('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server' },
+  }),
+)
+
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/PartialReloads',
