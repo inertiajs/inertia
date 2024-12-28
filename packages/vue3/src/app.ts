@@ -88,9 +88,16 @@ const App: InertiaApp = defineComponent({
 
           const urlParams = new URLSearchParams(args.page.url.split('?')[1] || '')
           const id = urlParams.get('KeepAliveId')
-
           const componentName = (args.component as any)?.name || args.page.component
-          key.value = id ? `${componentName}-${id}` : (args.preserveState ? key.value : Date.now())
+          
+          if (id) {
+            key.value = `${componentName}-${id}`
+          } else if (args.preserveState) {
+            key.value = key.value
+          } else {
+            // Use a combination of timestamp and random number to ensure uniqueness
+            key.value = `${Date.now()}-${Math.random()}`
+          }
         },
       })
 
