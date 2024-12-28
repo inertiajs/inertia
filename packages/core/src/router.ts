@@ -11,6 +11,7 @@ import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
   ActiveVisit,
+  ClientSideVisitOptions,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
@@ -198,6 +199,14 @@ export class Router {
       prefetch: true,
     })
 
+    const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
+    const currentUrl = window.location.origin + window.location.pathname + window.location.search
+
+    if (visitUrl === currentUrl) {
+      // Don't prefetch the current page, you're already on it
+      return
+    }
+
     const events = this.getVisitEvents(options)
 
     // If either of these return false, we don't want to continue
@@ -214,13 +223,29 @@ export class Router {
       ...events,
     }
 
-    prefetchedRequests.add(
-      requestParams,
-      (params) => {
-        this.asyncRequestStream.send(Request.create(params, currentPage.get()))
-      },
-      { cacheFor },
-    )
+    const ensureCurrentPageIsSet = (): Promise<void> => {
+      return new Promise((resolve) => {
+        const checkIfPageIsDefined = () => {
+          if (currentPage.get()) {
+            resolve()
+          } else {
+            setTimeout(checkIfPageIsDefined, 50)
+          }
+        }
+
+        checkIfPageIsDefined()
+      })
+    }
+
+    ensureCurrentPageIsSet().then(() => {
+      prefetchedRequests.add(
+        requestParams,
+        (params) => {
+          this.asyncRequestStream.send(Request.create(params, currentPage.get()))
+        },
+        { cacheFor },
+      )
+    })
   }
 
   public clearHistory(): void {
@@ -229,6 +254,33 @@ export class Router {
 
   public decryptHistory(): Promise<Page> {
     return history.decrypt()
+  }
+
+  public replace(params: ClientSideVisitOptions): void {
+    this.clientVisit(params, { replace: true })
+  }
+
+  public push(params: ClientSideVisitOptions): void {
+    this.clientVisit(params)
+  }
+
+  protected clientVisit(params: ClientSideVisitOptions, { replace = false }: { replace?: boolean } = {}): void {
+    const current = currentPage.get()
+
+    const props = typeof params.props === 'function' ? params.props(current.props) : params.props ?? current.props
+
+    currentPage.set(
+      {
+        ...current,
+        ...params,
+        props,
+      },
+      {
+        replace,
+        preserveScroll: params.preserveScroll,
+        preserveState: params.preserveState,
+      },
+    )
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {

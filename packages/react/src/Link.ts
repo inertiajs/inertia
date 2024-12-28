@@ -75,7 +75,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     ref,
   ) => {
     const [inFlightCount, setInFlightCount] = useState(0)
-    const hoverTimeout = useRef<number>()
+    const hoverTimeout = useRef<number>(null)
 
     as = as.toLowerCase()
     method = method.toLowerCase() as Method

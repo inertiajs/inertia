@@ -32,4 +32,12 @@ import { WhenVisible } from '@inertiajs/vue3'
       <div>Third one is visible!</div>
     </WhenVisible>
   </div>
+
+  <div style="margin-top: 5000px">
+    <WhenVisible data="foo">
+      <template #fallback>
+        <div>Loading fourth one...</div>
+      </template>
+    </WhenVisible>
+  </div>
 </template>

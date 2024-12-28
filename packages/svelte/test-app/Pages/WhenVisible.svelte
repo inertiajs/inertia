@@ -31,3 +31,11 @@
     <div>Third one is visible!</div>
   </WhenVisible>
 </div>
+
+<div style="margin-top: 5000px">
+  <WhenVisible data="foo">
+    <svelte:fragment slot="fallback">
+      <div>Loading fourth one...</div>
+    </svelte:fragment>
+  </WhenVisible>
+</div>
