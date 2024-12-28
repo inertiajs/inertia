@@ -17,7 +17,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   fallback = fallback ?? null
 
   const [loaded, setLoaded] = useState(false)
-  const fetchedOnce = useRef<boolean>(false)
+  const fetchedOnceRef = useRef<boolean>(false)
   const fetchingRef = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -46,7 +46,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
           return
         }
 
-        if (!always && fetchedOnce) {
+        if (!always && fetchedOnceRef.current) {
           observer.disconnect()
         }
 
@@ -54,7 +54,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
           return
         }
 
-        fetchedOnce.current = true
+        fetchedOnceRef.current = true
         fetchingRef.current = true
 
         const reloadParams = getReloadParams()
