@@ -31,8 +31,14 @@ class History {
   }
 
   public pushState(page: Page, cb: (() => void) | null = null): void {
-    if (isServer || this.preserveUrl) {
+    if (isServer) {
       return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb();
+
+      return;
     }
 
     this.current = page
@@ -98,8 +104,14 @@ class History {
   public replaceState(page: Page, cb: (() => void) | null = null): void {
     currentPage.merge(page)
 
-    if (isServer || this.preserveUrl) {
+    if (isServer) {
       return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb();
+
+      return;
     }
 
     this.current = page
