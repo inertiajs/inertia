@@ -17,8 +17,8 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   fallback = fallback ?? null
 
   const [loaded, setLoaded] = useState(false)
-  const fetchedOnceRef = useRef<boolean>(false)
-  const fetchingRef = useRef<boolean>(false)
+  const hasFetched = useRef<boolean>(false)
+  const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
@@ -39,35 +39,35 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     if (!ref.current) {
       return
     }
-    let observer: IntersectionObserver
-    observer = new IntersectionObserver(
+
+    const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) {
           return
         }
 
-        if (!always && fetchedOnceRef.current) {
+        if (!always && hasFetched.current) {
           observer.disconnect()
         }
 
-        if (fetchingRef.current) {
+        if (fetching.current) {
           return
         }
 
-        fetchedOnceRef.current = true
-        fetchingRef.current = true
+        hasFetched.current = true
+        fetching.current = true
 
         const reloadParams = getReloadParams()
 
         router.reload({
           ...reloadParams,
           onStart: (e) => {
-            fetchingRef.current = true
+            fetching.current = true
             reloadParams.onStart?.(e)
           },
           onFinish: (e) => {
             setLoaded(true)
-            fetchingRef.current = false
+            fetching.current = false
             reloadParams.onFinish?.(e)
           },
         })
