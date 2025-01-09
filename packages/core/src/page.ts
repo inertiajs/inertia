@@ -61,33 +61,50 @@ class CurrentPage {
       const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
-      replace ? history.replaceState(page) : history.pushState(page)
+      return new Promise((resolve) => {
+        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
+      }).then(() => {
+        const isNewComponent = !this.isTheSame(page)
 
-      const isNewComponent = !this.isTheSame(page)
+        this.page = page
+        this.cleared = false
 
-      this.page = page
-      this.cleared = false
+        this.page = page
+        this.cleared = false
 
-      if (isNewComponent) {
-        this.fireEventsFor('newComponent')
-      }
-
-      if (this.isFirstPageLoad) {
-        this.fireEventsFor('firstLoad')
-      }
-
-      this.isFirstPageLoad = false
-
-      return this.swap({ component, page, preserveState }).then(() => {
-        if (!preserveScroll) {
-          Scroll.reset()
+        if (isNewComponent) {
+          this.fireEventsFor('newComponent')
         }
 
-        eventHandler.fireInternalEvent('loadDeferredProps')
-
-        if (!replace) {
-          fireNavigateEvent(page)
+        if (this.isFirstPageLoad) {
+          this.fireEventsFor('firstLoad')
         }
+
+        this.isFirstPageLoad = false
+
+        return this.swap({ component, page, preserveState }).then(() => {
+          if (!preserveScroll) {
+            Scroll.reset()
+          }
+
+          if (this.isFirstPageLoad) {
+            this.fireEventsFor('firstLoad')
+          }
+
+          this.isFirstPageLoad = false
+
+          return this.swap({ component, page, preserveState }).then(() => {
+            if (!preserveScroll) {
+              Scroll.reset(page)
+            }
+
+            eventHandler.fireInternalEvent('loadDeferredProps')
+
+            if (!replace) {
+              fireNavigateEvent(page)
+            }
+          })
+        })
       })
     })
   }

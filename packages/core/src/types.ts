@@ -52,6 +52,16 @@ export type ScrollRegion = {
   left: number
 }
 
+export interface ClientSideVisitOptions {
+  component?: Page['component']
+  url?: Page['url']
+  props?: ((props: Page['props']) => Page['props']) | Page['props']
+  clearHistory?: Page['clearHistory']
+  encryptHistory?: Page['encryptHistory']
+  preserveScroll?: VisitOptions['preserveScroll']
+  preserveState?: VisitOptions['preserveState']
+}
+
 export type PageResolver = (name: string) => Component
 
 export type PageHandler = ({
@@ -284,6 +294,22 @@ export type PrefetchedResponse = PrefetchObject & {
 export type PrefetchRemovalTimer = {
   params: ActiveVisit
   timer: number
+}
+
+export type ProgressSettings = {
+  minimum: number
+  easing: string
+  positionUsing: 'translate3d' | 'translate' | 'margin'
+  speed: number
+  trickle: boolean
+  trickleSpeed: number
+  showSpinner: boolean
+  barSelector: string
+  spinnerSelector: string
+  parent: string
+  template: string
+  includeCSS: boolean
+  color: string
 }
 
 declare global {

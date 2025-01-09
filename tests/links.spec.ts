@@ -770,3 +770,12 @@ test.describe('data-loading attribute', () => {
     await expect(link2).not.toHaveAttribute('data-loading')
   })
 })
+
+test('will update href if prop is updated', async ({ page }) => {
+  await page.goto('/links/prop-update')
+  const link = await page.getByRole('link', { name: 'The Link' })
+  const button = await page.getByRole('button', { name: 'Change URL' })
+  await expect(link).toHaveAttribute('href', /\/sleep$/)
+  await button.click()
+  await expect(link).toHaveAttribute('href', /\/something-else$/)
+})

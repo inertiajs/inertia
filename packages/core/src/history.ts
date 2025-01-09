@@ -32,8 +32,14 @@ class History {
     }
   }
 
-  public pushState(page: Page): void {
-    if (isServer || this.preserveUrl) {
+  public pushState(page: Page, cb: (() => void) | null = null): void {
+    if (isServer) {
+      return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb()
+
       return
     }
 
@@ -48,6 +54,8 @@ class History {
           '',
           page.url,
         )
+
+        cb && cb()
       })
     })
   }
@@ -124,10 +132,16 @@ class History {
     return window.history.state.documentScrollPosition || { top: 0, left: 0 }
   }
 
-  public replaceState(page: Page): void {
+  public replaceState(page: Page, cb: (() => void) | null = null): void {
     currentPage.merge(page)
 
-    if (isServer || this.preserveUrl) {
+    if (isServer) {
+      return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb()
+
       return
     }
 
@@ -141,6 +155,8 @@ class History {
           },
           page.url,
         )
+
+        cb && cb()
       })
     })
   }
