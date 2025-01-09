@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-type FormDataType = object
+type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
 interface InertiaFormProps<TForm extends FormDataType> {
