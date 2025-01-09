@@ -237,8 +237,8 @@ app.get('/when-visible', (req, res) => {
       props: {},
     })
 
-  if (req.headers['x-inertia-partial-data']) {
-    setTimeout(page, 500)
+  if (req.headers['x-inertia-partial-data'] || req.query.count) {
+    setTimeout(page, 250)
   } else {
     page()
   }
