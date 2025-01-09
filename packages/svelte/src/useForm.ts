@@ -16,6 +16,7 @@ import isEqual from 'lodash/isEqual'
 import { writable, type Writable } from 'svelte/store'
 
 type FormDataType = Record<string, FormDataConvertible>
+type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
@@ -36,12 +37,12 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Errors): this
-  submit(method: Method, url: string, options?: Partial<VisitOptions>): void
-  get(url: string, options?: Partial<VisitOptions>): void
-  post(url: string, options?: Partial<VisitOptions>): void
-  put(url: string, options?: Partial<VisitOptions>): void
-  patch(url: string, options?: Partial<VisitOptions>): void
-  delete(url: string, options?: Partial<VisitOptions>): void
+  submit(method: Method, url: string, options?: FormOptions): void
+  get(url: string, options?: FormOptions): void
+  post(url: string, options?: FormOptions): void
+  put(url: string, options?: FormOptions): void
+  patch(url: string, options?: FormOptions): void
+  delete(url: string, options?: FormOptions): void
   cancel(): void
 }
 
@@ -140,7 +141,7 @@ export default function useForm<TForm extends FormDataType>(
       )
       return this
     },
-    submit(method, url, options: Partial<VisitOptions> = {}) {
+    submit(method, url, options: FormOptions = {}) {
       const data = transform(this.data()) as RequestPayload
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
