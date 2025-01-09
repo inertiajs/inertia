@@ -44,11 +44,11 @@ export default function useForm<TForm extends FormDataType>(
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const data = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null
-  let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
+  let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
@@ -91,7 +91,7 @@ export default function useForm<TForm extends FormDataType>(
       return this
     },
     reset(...fields) {
-      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
+      const resolvedData = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
         defaults = clonedData
