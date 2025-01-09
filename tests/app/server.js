@@ -72,6 +72,14 @@ app.get('/links/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Links/Headers', version: 'example-version-header' }),
 )
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
+app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
+
+app.get('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server' },
+  }),
+)
 
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
@@ -229,8 +237,8 @@ app.get('/when-visible', (req, res) => {
       props: {},
     })
 
-  if (req.headers['x-inertia-partial-data']) {
-    setTimeout(page, 500)
+  if (req.headers['x-inertia-partial-data'] || req.query.count) {
+    setTimeout(page, 250)
   } else {
     page()
   }
@@ -311,7 +319,7 @@ app.get('/deferred-props/page-2', (req, res) => {
 })
 
 app.get('/svelte/props-and-page-store', (req, res) =>
-  inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' }}),
+  inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))

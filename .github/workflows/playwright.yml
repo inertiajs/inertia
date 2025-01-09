@@ -19,7 +19,6 @@ jobs:
 
     - name: Build Inertia
       run: |
-        rm package-lock.json
         npm install
         cd packages/core
         npm run build
