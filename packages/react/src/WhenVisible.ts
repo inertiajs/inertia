@@ -4,7 +4,7 @@ import { createElement, ReactElement, useCallback, useEffect, useRef, useState }
 interface WhenVisibleProps {
   children: ReactElement | number | string
   fallback: ReactElement | number | string
-  data: string | string[]
+  data?: string | string[]
   params?: ReloadOptions
   buffer?: number
   as?: string
