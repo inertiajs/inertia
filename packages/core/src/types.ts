@@ -44,9 +44,12 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   mergeProps?: string[]
 
   /** @internal */
-  scrollRegions: Array<{ top: number; left: number }>
-  /** @internal */
   rememberedState: Record<string, unknown>
+}
+
+export type ScrollRegion = {
+  top: number
+  left: number
 }
 
 export interface ClientSideVisitOptions {
