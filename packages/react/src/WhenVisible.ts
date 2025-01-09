@@ -69,6 +69,10 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
             setLoaded(true)
             fetching.current = false
             reloadParams.onFinish?.(e)
+
+            if (!always) {
+              observer.disconnect()
+            }
           },
         })
       },
