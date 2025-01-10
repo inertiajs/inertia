@@ -3,9 +3,19 @@ import { has, isEqual, set } from 'lodash'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
+type NestedValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
+  ? K extends keyof T
+    ? Rest extends string
+      ? NestedValue<T[K], Rest>
+      : never
+    : never
+  : P extends keyof T
+    ? T[P]
+    : never
+
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type setDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: TForm[K]) => void
+type setDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: NestedValue<TForm, K>) => void
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
