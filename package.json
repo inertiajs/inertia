@@ -5,6 +5,14 @@
     "packages/*",
     "playgrounds/*"
   ],
+  "scripts": {
+    "test:react": "cd tests && PACKAGE=react npx playwright test",
+    "test:react:watch": "cd packages/react/test-app && npm run watch",
+    "test:svelte": "cd tests && PACKAGE=svelte npx playwright test",
+    "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
+    "test:vue": "cd tests && PACKAGE=vue3 npx playwright test",
+    "test:vue:watch": "cd packages/vue3/test-app && npm run watch"
+  },
   "dependencies": {
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.1.0",

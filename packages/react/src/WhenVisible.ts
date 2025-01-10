@@ -1,10 +1,10 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { createElement, ReactElement, useEffect, useRef, useState } from 'react'
+import { createElement, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 interface WhenVisibleProps {
   children: ReactElement | number | string
   fallback: ReactElement | number | string
-  data: string | string[]
+  data?: string | string[]
   params?: ReloadOptions
   buffer?: number
   as?: string
@@ -17,57 +17,62 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   fallback = fallback ?? null
 
   const [loaded, setLoaded] = useState(false)
-  const [fetching, setFetching] = useState(false)
-  const observer = useRef<IntersectionObserver | null>(null)
+  const hasFetched = useRef<boolean>(false)
+  const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const getReloadParams = (): Partial<ReloadOptions> => {
-    if (!params && !data) {
-      throw new Error('You must provide either a `data` or `params` prop.')
-    }
+  const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
+      if (!params && !data) {
+          throw new Error('You must provide either a `data` or `params` prop.')
+      }
 
-    const reloadParams: Partial<ReloadOptions> = params || {} ;
+      const reloadParams: Partial<ReloadOptions> = params || {} ;
 
-    if (data) {
-      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[];
-    }
+      if (data) {
+          reloadParams.only = (Array.isArray(data) ? data : [data]) as string[];
+      }
 
-    return reloadParams;
-  }
+      return reloadParams;
+  }, [params, data])
 
   useEffect(() => {
     if (!ref.current) {
       return
     }
 
-    observer.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) {
           return
         }
 
-        if (!always) {
-          observer.current?.disconnect()
+        if (!always && hasFetched.current) {
+          observer.disconnect()
         }
 
-        if (fetching) {
+        if (fetching.current) {
           return
         }
 
-        setFetching(true)
+        hasFetched.current = true
+        fetching.current = true
 
         const reloadParams = getReloadParams()
 
         router.reload({
           ...reloadParams,
           onStart: (e) => {
-            setFetching(true)
+            fetching.current = true
             reloadParams.onStart?.(e)
           },
           onFinish: (e) => {
             setLoaded(true)
-            setFetching(false)
+            fetching.current = false
             reloadParams.onFinish?.(e)
+
+            if (!always) {
+              observer.disconnect()
+            }
           },
         })
       },
@@ -76,12 +81,12 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
       },
     )
 
-    observer.current.observe(ref.current)
+    observer.observe(ref.current)
 
     return () => {
-      observer.current?.disconnect()
+      observer.disconnect()
     }
-  }, [ref])
+  }, [ref, getReloadParams, buffer])
 
   if (always || !loaded) {
     return createElement(

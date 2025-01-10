@@ -3,7 +3,8 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-type FormDataType = object
+type FormDataType = Record<string, FormDataConvertible>
+type FormOptions = Omit<VisitOptions, 'data'>
 
 interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
@@ -22,12 +23,12 @@ interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
-  submit(method: Method, url: string, options?: Partial<VisitOptions>): void
-  get(url: string, options?: Partial<VisitOptions>): void
-  post(url: string, options?: Partial<VisitOptions>): void
-  put(url: string, options?: Partial<VisitOptions>): void
-  patch(url: string, options?: Partial<VisitOptions>): void
-  delete(url: string, options?: Partial<VisitOptions>): void
+  submit(method: Method, url: string, options?: FormOptions): void
+  get(url: string, options?: FormOptions): void
+  post(url: string, options?: FormOptions): void
+  put(url: string, options?: FormOptions): void
+  patch(url: string, options?: FormOptions): void
+  delete(url: string, options?: FormOptions): void
   cancel(): void
 }
 
@@ -43,11 +44,11 @@ export default function useForm<TForm extends FormDataType>(
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const data = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null
-  let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
+  let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
@@ -90,7 +91,7 @@ export default function useForm<TForm extends FormDataType>(
       return this
     },
     reset(...fields) {
-      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
+      const resolvedData = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(defaults)
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
         defaults = clonedData
@@ -126,7 +127,7 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    submit(method, url, options: VisitOptions = {}) {
+    submit(method, url, options: FormOptions = {}) {
       const data = transform(this.data())
       const _options = {
         ...options,

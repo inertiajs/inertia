@@ -152,7 +152,7 @@ export class Router {
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
+      Scroll.save()
     }
 
     const requestParams: PendingVisit & VisitCallbacks = {
@@ -187,7 +187,7 @@ export class Router {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 
-  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor }: PrefetchOptions) {
+  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor = 30_000 }: PrefetchOptions) {
     if (options.method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
     }

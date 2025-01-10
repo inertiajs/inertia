@@ -56,8 +56,8 @@ class CurrentPage {
         return
       }
 
-      page.scrollRegions ??= []
       page.rememberedState ??= {}
+
       const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
@@ -81,7 +81,7 @@ class CurrentPage {
 
         return this.swap({ component, page, preserveState }).then(() => {
           if (!preserveScroll) {
-            Scroll.reset(page)
+            Scroll.reset()
           }
 
           eventHandler.fireInternalEvent('loadDeferredProps')
@@ -131,10 +131,6 @@ class CurrentPage {
 
   public remember(data: Page['rememberedState']): void {
     this.page.rememberedState = data
-  }
-
-  public scrollRegions(regions: Page['scrollRegions']): void {
-    this.page.scrollRegions = regions
   }
 
   public swap({
