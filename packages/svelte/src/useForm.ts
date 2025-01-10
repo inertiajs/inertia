@@ -2,6 +2,7 @@ import type {
   ActiveVisit,
   Errors,
   FormDataConvertible,
+  FormDataKeys,
   Method,
   Page,
   PendingVisit,
@@ -11,8 +12,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import cloneDeep from 'lodash/cloneDeep'
-import isEqual from 'lodash/isEqual'
+import { cloneDeep, get, has, isEqual, set } from 'lodash'
 import { writable, type Writable } from 'svelte/store'
 
 type FormDataType = Record<string, FormDataConvertible>
@@ -20,22 +20,22 @@ type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
-  errors: Partial<Record<keyof TForm, string>>
+  errors: Partial<Record<FormDataKeys<TForm>, string>>
   hasErrors: boolean
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   processing: boolean
   setStore(data: TForm): void
-  setStore(key: keyof TForm, value?: FormDataConvertible): void
+  setStore(key: FormDataKeys<TForm>, value?: FormDataConvertible): void
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
   defaults(fields: Partial<TForm>): this
-  defaults(field?: keyof TForm, value?: FormDataConvertible): this
-  reset(...fields: (keyof TForm)[]): this
-  clearErrors(...fields: (keyof TForm)[]): this
-  setError(field: keyof TForm, value: string): this
+  defaults(field?: FormDataKeys<TForm>, value?: FormDataConvertible): this
+  reset(...fields: FormDataKeys<TForm>[]): this
+  clearErrors(...fields: FormDataKeys<TForm>[]): this
+  setError(field: FormDataKeys<TForm>, value: string): this
   setError(errors: Errors): this
   submit(method: Method, url: string, options?: FormOptions): void
   get(url: string, options?: FormOptions): void
@@ -61,7 +61,7 @@ export default function useForm<TForm extends FormDataType>(
   const inputData = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
   const data: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)
   const restored = rememberKey
-    ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> } | null)
+    ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
     : null
   let defaults = cloneDeep(data)
   let cancelToken: { cancel: () => void } | null = null
@@ -79,12 +79,12 @@ export default function useForm<TForm extends FormDataType>(
     processing: false,
     setStore(keyOrData, maybeValue = undefined) {
       store.update((store) => {
-        return Object.assign(store, typeof keyOrData === 'string' ? { [keyOrData]: maybeValue } : keyOrData)
+        return typeof keyOrData === 'string' ? set(store, keyOrData, maybeValue) : Object.assign(store, keyOrData)
       })
     },
     data() {
       return Object.keys(data).reduce((carry, key) => {
-        carry[key] = this[key]
+        set(carry, key, get(this, key))
         return carry
       }, {} as FormDataType) as TForm
     },
@@ -92,14 +92,15 @@ export default function useForm<TForm extends FormDataType>(
       transform = callback
       return this
     },
-    defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
-      defaults =
-        typeof fieldOrFields === 'undefined'
-          ? cloneDeep(this.data())
-          : Object.assign(
-              cloneDeep(defaults),
-              typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
-            )
+    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) {
+      if (typeof fieldOrFields === 'undefined') {
+        defaults = cloneDeep(this.data())
+      } else {
+        defaults =
+          typeof fieldOrFields === 'string'
+            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
+            : Object.assign(cloneDeep(defaults), fieldOrFields)
+      }
 
       return this
     },
@@ -109,10 +110,10 @@ export default function useForm<TForm extends FormDataType>(
         this.setStore(clonedData)
       } else {
         this.setStore(
-          Object.keys(clonedData)
-            .filter((key) => fields.includes(key))
+          (fields as Array<FormDataKeys<TForm>>)
+            .filter((key) => has(clonedData, key))
             .reduce((carry, key) => {
-              carry[key] = clonedData[key]
+              set(carry, key, get(clonedData, key))
               return carry
             }, {} as FormDataType) as TForm,
         )
@@ -120,24 +121,22 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    setError(fieldOrFields: keyof TForm | Errors, maybeValue?: string) {
-      this.setStore('errors', {
-        ...this.errors,
-        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
-      })
+    setError(fieldOrFields: FormDataKeys<TForm> | Errors, maybeValue?: string) {
+      this.setStore(
+        'errors',
+        typeof fieldOrFields === 'string'
+          ? set(this.errors, fieldOrFields, maybeValue)
+          : { ...this.errors, ...fieldOrFields },
+      )
 
       return this
     },
     clearErrors(...fields) {
       this.setStore(
         'errors',
-        Object.keys(this.errors).reduce(
-          (carry, field) => ({
-            ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
-          }),
-          {},
-        ) as Errors,
+        (Object.keys(this.errors) as FormDataKeys<TForm>[]).reduce((carry, field) => {
+          return fields.length > 0 && !fields.includes(field) ? set(carry, field, get(this.errors, field)) : carry
+        }, {}) as Errors,
       )
       return this
     },
