@@ -9,7 +9,19 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0...HEAD)
 
-- Nothing
+- Fix playground dependencies ([#2070](https://github.com/inertiajs/inertia/pull/2070))
+- Removed Vitest tests + dependencies ([#2175](https://github.com/inertiajs/inertia/pull/2175))
+- Augment `vue` instead of `@vue/runtime-core` ([#2099](https://github.com/inertiajs/inertia/pull/2099))
+- Fix prefetch missing `cacheFor` default value ([#2136](https://github.com/inertiajs/inertia/pull/2136))
+- Fix `useForm` re-renders by memoizing functions in React [#2146](https://github.com/inertiajs/inertia/pull/2146)
+- WhenVisible useEffect function is not recreated when params change. ([#2153](https://github.com/inertiajs/inertia/pull/2153))
+- Ensure callback execution ([#2163](https://github.com/inertiajs/inertia/pull/2163))
+- More resilient logic for stripping the origin from page URLs ([#2164](https://github.com/inertiajs/inertia/pull/2164))
+- Add helper scripts for running tests ([#2173](https://github.com/inertiajs/inertia/pull/2173))
+- Export `InertiaFormProps` in react ([#2161](https://github.com/inertiajs/inertia/pull/2161))
+- Use default empty object in `useForm` Vue and Svelte ([#2052](https://github.com/inertiajs/inertia/pull/2052))
+- Remove `data` option from `useForm` options type ([#2060](https://github.com/inertiajs/inertia/pull/2060))
+- Take over scroll restoration from browser ([#2051](https://github.com/inertiajs/inertia/pull/2051))
 
 ## [v2.0.0](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0)
 
