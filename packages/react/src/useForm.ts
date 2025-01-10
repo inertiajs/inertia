@@ -178,7 +178,7 @@ export default function useForm<TForm extends FormDataType>(
   )
 
   const setDataFunction = useCallback(
-    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: TForm[FormDataKeys<TForm>]) => {
+    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: NestedValue<TForm, FormDataKeys<TForm>>) => {
       if (typeof keyOrData === 'string') {
         setData((data) => set(data, keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
@@ -196,10 +196,7 @@ export default function useForm<TForm extends FormDataType>(
         setDefaults(() => data)
       } else {
         setDefaults((defaults) => {
-          if (typeof fieldOrFields === 'string') {
-            return set(defaults, fieldOrFields, maybeValue)
-          }
-          return { ...defaults, ...fieldOrFields }
+          return typeof fieldOrFields === 'string' ? set(defaults, fieldOrFields, maybeValue) : { ...defaults, ...fieldOrFields }
         })
       }
     },
