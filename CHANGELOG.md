@@ -18,7 +18,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 - Ensure callback execution ([#2163](https://github.com/inertiajs/inertia/pull/2163))
 - More resilient logic for stripping the origin from page URLs ([#2164](https://github.com/inertiajs/inertia/pull/2164))
 - Add helper scripts for running tests ([#2173](https://github.com/inertiajs/inertia/pull/2173))
-- Export `InertiaFormProps` in react ([#2161](https://github.com/inertiajs/inertia/pull/2161))
+- Export `InertiaFormProps` in React ([#2161](https://github.com/inertiajs/inertia/pull/2161))
 - Use default empty object in `useForm` Vue and Svelte ([#2052](https://github.com/inertiajs/inertia/pull/2052))
 - Remove `data` option from `useForm` options type ([#2060](https://github.com/inertiajs/inertia/pull/2060))
 - Take over scroll restoration from browser ([#2051](https://github.com/inertiajs/inertia/pull/2051))
