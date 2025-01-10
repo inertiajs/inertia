@@ -69,9 +69,6 @@ class CurrentPage {
         this.page = page
         this.cleared = false
 
-        this.page = page
-        this.cleared = false
-
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
         }
@@ -87,23 +84,11 @@ class CurrentPage {
             Scroll.reset()
           }
 
-          if (this.isFirstPageLoad) {
-            this.fireEventsFor('firstLoad')
+          eventHandler.fireInternalEvent('loadDeferredProps')
+
+          if (!replace) {
+            fireNavigateEvent(page)
           }
-
-          this.isFirstPageLoad = false
-
-          return this.swap({ component, page, preserveState }).then(() => {
-            if (!preserveScroll) {
-              Scroll.reset()
-            }
-
-            eventHandler.fireInternalEvent('loadDeferredProps')
-
-            if (!replace) {
-              fireNavigateEvent(page)
-            }
-          })
         })
       })
     })
