@@ -3,19 +3,9 @@ import { has, isEqual, set } from 'lodash'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-type NestedValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
-  ? K extends keyof T
-    ? Rest extends string
-      ? NestedValue<T[K], Rest>
-      : never
-    : never
-  : P extends keyof T
-    ? T[P]
-    : never
-
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type setDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: NestedValue<TForm, K>) => void
+type setDataByKeyValuePair<TForm> = (key: FormDataKeys<TForm>, value: any) => void
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
@@ -178,7 +168,7 @@ export default function useForm<TForm extends FormDataType>(
   )
 
   const setDataFunction = useCallback(
-    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: NestedValue<TForm, FormDataKeys<TForm>>) => {
+    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
         setData((data) => set(data, keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
@@ -196,7 +186,9 @@ export default function useForm<TForm extends FormDataType>(
         setDefaults(() => data)
       } else {
         setDefaults((defaults) => {
-          return typeof fieldOrFields === 'string' ? set(defaults, fieldOrFields, maybeValue) : { ...defaults, ...fieldOrFields }
+          return typeof fieldOrFields === 'string'
+            ? set(defaults, fieldOrFields, maybeValue)
+            : { ...defaults, ...fieldOrFields }
         })
       }
     },
