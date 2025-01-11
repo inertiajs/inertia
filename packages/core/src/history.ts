@@ -1,16 +1,18 @@
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
+import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
-import { Page } from './types'
+import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
+
+const queue = new Queue<Promise<void>>()
 
 class History {
   public rememberedState = 'rememberedState' as const
   public scrollRegions = 'scrollRegions' as const
   public preserveUrl = false
   protected current: Partial<Page> = {}
-  protected queue: (() => Promise<void>)[] = []
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
 
@@ -30,23 +32,30 @@ class History {
     }
   }
 
-  public pushState(page: Page): void {
-    if (isServer || this.preserveUrl) {
+  public pushState(page: Page, cb: (() => void) | null = null): void {
+    if (isServer) {
+      return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb()
+
       return
     }
 
     this.current = page
 
-    this.addToQueue(() => {
+    queue.add(() => {
       return this.getPageData(page).then((data) => {
         window.history.pushState(
           {
             page: data,
-            timestamp: Date.now(),
           },
           '',
           page.url,
         )
+
+        cb && cb()
       })
     })
   }
@@ -58,13 +67,7 @@ class History {
   }
 
   public processQueue(): Promise<void> {
-    const next = this.queue.shift()
-
-    if (next) {
-      return next().then(() => this.processQueue())
-    }
-
-    return Promise.resolve()
+    return queue.process()
   }
 
   public decrypt(page: Page | null = null): Promise<Page> {
@@ -93,32 +96,88 @@ class History {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 
-  public replaceState(page: Page): void {
-    currentPage.merge(page)
-
-    if (isServer || this.preserveUrl) {
-      return
-    }
-
-    this.current = page
-
-    this.addToQueue(() => {
-      return this.getPageData(page).then((data) => {
-        window.history.replaceState(
+  public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
+    queue.add(() => {
+      return Promise.resolve().then(() => {
+        this.doReplaceState(
           {
-            page: data,
-            timestamp: Date.now(),
+            page: window.history.state.page,
+            scrollRegions,
           },
-          '',
-          page.url,
+          this.current.url!,
         )
       })
     })
   }
 
-  protected addToQueue(fn: () => Promise<void>): void {
-    this.queue.push(fn)
-    this.processQueue()
+  public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
+    queue.add(() => {
+      return Promise.resolve().then(() => {
+        this.doReplaceState(
+          {
+            page: window.history.state.page,
+            documentScrollPosition: scrollRegion,
+          },
+          this.current.url!,
+        )
+      })
+    })
+  }
+
+  public getScrollRegions(): ScrollRegion[] {
+    return window.history.state.scrollRegions || []
+  }
+
+  public getDocumentScrollPosition(): ScrollRegion {
+    return window.history.state.documentScrollPosition || { top: 0, left: 0 }
+  }
+
+  public replaceState(page: Page, cb: (() => void) | null = null): void {
+    currentPage.merge(page)
+
+    if (isServer) {
+      return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb()
+
+      return
+    }
+
+    this.current = page
+
+    queue.add(() => {
+      return this.getPageData(page).then((data) => {
+        this.doReplaceState(
+          {
+            page: data,
+          },
+          page.url,
+        )
+
+        cb && cb()
+      })
+    })
+  }
+
+  protected doReplaceState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url: string,
+  ): void {
+    window.history.replaceState(
+      {
+        ...data,
+        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+      },
+      '',
+      url,
+    )
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
@@ -148,6 +207,10 @@ class History {
   public getAllState(): Page {
     return this.current as Page
   }
+}
+
+if (window.history.scrollRestoration) {
+  window.history.scrollRestoration = 'manual'
 }
 
 export const history = new History()
