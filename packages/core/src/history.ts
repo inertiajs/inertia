@@ -5,6 +5,7 @@ import { SessionStorage } from './sessionStorage'
 import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 
 const queue = new Queue<Promise<void>>()
 
@@ -47,13 +48,21 @@ class History {
 
     queue.add(() => {
       return this.getPageData(page).then((data) => {
-        window.history.pushState(
-          {
-            page: data,
-          },
-          '',
-          page.url,
+        const pushAction = () =>  window.history.pushState(
+            {
+              page: data,
+            },
+            '',
+            page.url,
         )
+
+        if (isChromeIOS) {
+          // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+          // Ensure any previous history.replaceState completes before pushState is executed.
+          setTimeout(pushAction)
+        } else {
+          pushAction()
+        }
 
         cb && cb()
       })
@@ -169,7 +178,7 @@ class History {
     },
     url: string,
   ): void {
-    window.history.replaceState(
+    const replaceAction = () => window.history.replaceState(
       {
         ...data,
         scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
@@ -178,6 +187,14 @@ class History {
       '',
       url,
     )
+
+    if (isChromeIOS) {
+      // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.pushState completes before replaceState is executed.
+      setTimeout(replaceAction)
+    } else {
+      replaceAction()
+    }
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
