@@ -84,8 +84,7 @@ export default function useForm<TForm extends FormDataType>(
     },
     data() {
       return Object.keys(data).reduce((carry, key) => {
-        set(carry, key, get(this, key))
-        return carry
+        return set(carry, key, get(this, key))
       }, {} as FormDataType) as TForm
     },
     transform(callback) {
@@ -113,8 +112,7 @@ export default function useForm<TForm extends FormDataType>(
           (fields as Array<FormDataKeys<TForm>>)
             .filter((key) => has(clonedData, key))
             .reduce((carry, key) => {
-              set(carry, key, get(clonedData, key))
-              return carry
+              return set(carry, key, get(clonedData, key))
             }, {} as FormDataType) as TForm,
         )
       }

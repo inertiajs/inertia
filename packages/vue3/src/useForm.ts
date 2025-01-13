@@ -63,8 +63,7 @@ export default function useForm<TForm extends FormDataType>(
     recentlySuccessful: false,
     data() {
       return (Object.keys(defaults) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
-        set(carry, key, get(this, key))
-        return carry
+        return set(carry, key, get(this, key))
       }, {} as Partial<TForm>) as TForm
     },
     transform(callback) {
