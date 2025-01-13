@@ -1,5 +1,5 @@
 import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import { has, isEqual, set } from 'lodash'
+import { cloneDeep, get, has, isEqual, set } from 'lodash'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
@@ -170,7 +170,10 @@ export default function useForm<TForm extends FormDataType>(
   const setDataFunction = useCallback(
     (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
-        setData((data) => set(data, keyOrData, maybeValue))
+        setData((data) => {
+          const newData = cloneDeep(data)
+          return set(newData, keyOrData, maybeValue)
+        })
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
@@ -186,9 +189,11 @@ export default function useForm<TForm extends FormDataType>(
         setDefaults(() => data)
       } else {
         setDefaults((defaults) => {
-          return typeof fieldOrFields === 'string'
-            ? set(defaults, fieldOrFields, maybeValue)
-            : { ...defaults, ...fieldOrFields }
+          const newDefaults = cloneDeep(defaults)
+          if (typeof fieldOrFields === 'string') {
+            return set(newDefaults, fieldOrFields, maybeValue)
+          }
+          return Object.assign(newDefaults, fieldOrFields)
         })
       }
     },
@@ -205,10 +210,9 @@ export default function useForm<TForm extends FormDataType>(
             .filter((key) => has(defaults, key))
             .reduce(
               (carry, key) => {
-                set(carry, key, get(defaults, key))
-                return carry
+                return set(carry, key, get(defaults, key))
               },
-              { ...data },
+              { ...data } as TForm,
             ),
         )
       }
@@ -219,8 +223,12 @@ export default function useForm<TForm extends FormDataType>(
   const setError = useCallback(
     (fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) => {
       setErrors((errors) => {
-        const newErrors =
-          typeof fieldOrFields === 'string' ? set(errors, fieldOrFields, maybeValue) : { ...errors, ...fieldOrFields }
+        const newErrors = cloneDeep(errors)
+        if (typeof fieldOrFields === 'string') {
+          set(newErrors, fieldOrFields, maybeValue)
+        } else {
+          Object.assign(newErrors, fieldOrFields)
+        }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
       })
@@ -232,7 +240,9 @@ export default function useForm<TForm extends FormDataType>(
     (...fields) => {
       setErrors((errors) => {
         const newErrors = (Object.keys(errors) as Array<FormDataKeys<TForm>>).reduce((carry, field) => {
-          return fields.length > 0 && !fields.includes(field) ? set(carry, field, get(errors, field)) : carry
+          return fields.length > 0 && !fields.includes(field)
+            ? set(carry, field, get(errors, field))
+            : (carry as Record<FormDataKeys<TForm>, string>)
         }, {})
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
@@ -244,7 +254,7 @@ export default function useForm<TForm extends FormDataType>(
   const createSubmitMethod = (method) => (url, options) => {
     submit(method, url, options)
   }
-  const get = useCallback(createSubmitMethod('get'), [submit])
+  const getMethod = useCallback(createSubmitMethod('get'), [submit])
   const post = useCallback(createSubmitMethod('post'), [submit])
   const put = useCallback(createSubmitMethod('put'), [submit])
   const patch = useCallback(createSubmitMethod('patch'), [submit])
@@ -276,7 +286,7 @@ export default function useForm<TForm extends FormDataType>(
     setError,
     clearErrors,
     submit,
-    get,
+    get: getMethod,
     post,
     put,
     patch,
