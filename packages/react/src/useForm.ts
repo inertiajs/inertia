@@ -170,10 +170,7 @@ export default function useForm<TForm extends FormDataType>(
   const setDataFunction = useCallback(
     (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
-        setData((data) => {
-          const newData = cloneDeep(data)
-          return set(newData, keyOrData, maybeValue)
-        })
+        setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
@@ -189,11 +186,9 @@ export default function useForm<TForm extends FormDataType>(
         setDefaults(() => data)
       } else {
         setDefaults((defaults) => {
-          const newDefaults = cloneDeep(defaults)
-          if (typeof fieldOrFields === 'string') {
-            return set(newDefaults, fieldOrFields, maybeValue)
-          }
-          return Object.assign(newDefaults, fieldOrFields)
+          return typeof fieldOrFields === 'string'
+            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
+            : Object.assign(cloneDeep(defaults), fieldOrFields)
         })
       }
     },
@@ -223,12 +218,10 @@ export default function useForm<TForm extends FormDataType>(
   const setError = useCallback(
     (fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) => {
       setErrors((errors) => {
-        const newErrors = cloneDeep(errors)
-        if (typeof fieldOrFields === 'string') {
-          set(newErrors, fieldOrFields, maybeValue)
-        } else {
-          Object.assign(newErrors, fieldOrFields)
-        }
+        const newErrors =
+          typeof fieldOrFields === 'string'
+            ? set(cloneDeep(errors), fieldOrFields, maybeValue)
+            : Object.assign(cloneDeep(errors), fieldOrFields)
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
       })
