@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.1...HEAD)
+
+- Nothing
+
+## [2.0.1](https://github.com/inertiajs/inertia/compare/v2.0.0...v2.0.1)
 
 - Fix playground dependencies ([#2070](https://github.com/inertiajs/inertia/pull/2070))
 - Removed Vitest tests + dependencies ([#2175](https://github.com/inertiajs/inertia/pull/2175))
