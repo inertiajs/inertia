@@ -11,6 +11,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 - Fix SSR with scroll restoration ([#2190](https://github.com/inertiajs/inertia/pull/2190))
 - Fix for scroll + back bug ([#2191](https://github.com/inertiajs/inertia/pull/2191))
+- Backport 1.x fixes from [v1.3.0](https://github.com/inertiajs/inertia/releases/tag/v1.3.0) release ([#2193](https://github.com/inertiajs/inertia/pull/2193))
 
 ## [2.0.1](https://github.com/inertiajs/inertia/compare/v2.0.0...v2.0.1)
 
