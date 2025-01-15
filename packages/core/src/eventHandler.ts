@@ -77,24 +77,22 @@ class EventHandler {
       return
     }
 
-    if (history.isValidState(state)) {
-      history
-        .decrypt(state.page)
-        .then((data) => {
-          currentPage.setQuietly(data, { preserveState: false }).then(() => {
-            Scroll.restore(history.getScrollRegions())
-            Scroll.restoreDocument()
-            fireNavigateEvent(currentPage.get())
-          })
-        })
-        .catch(() => {
-          this.onMissingHistoryItem()
-        })
-
-      return
+    if (!history.isValidState(state)) {
+      return this.onMissingHistoryItem()
     }
 
-    this.onMissingHistoryItem()
+    history
+      .decrypt(state.page)
+      .then((data) => {
+        currentPage.setQuietly(data, { preserveState: false }).then(() => {
+          Scroll.restore(history.getScrollRegions())
+          Scroll.restoreDocument()
+          fireNavigateEvent(currentPage.get())
+        })
+      })
+      .catch(() => {
+        this.onMissingHistoryItem()
+      })
   }
 }
 
