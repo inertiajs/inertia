@@ -10,6 +10,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.1...HEAD)
 
 - Fix SSR with scroll restoration ([#2190](https://github.com/inertiajs/inertia/pull/2190))
+- Fix for scroll + back bug ([#2191](https://github.com/inertiajs/inertia/pull/2191))
 
 ## [2.0.1](https://github.com/inertiajs/inertia/compare/v2.0.0...v2.0.1)
 
