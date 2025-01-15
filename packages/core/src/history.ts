@@ -37,10 +37,9 @@ class History {
       return
     }
 
-    cb = cb ?? (() => {})
-
     if (this.preserveUrl) {
-      return cb()
+      cb && cb()
+      return
     }
 
     this.current = page
@@ -51,7 +50,7 @@ class History {
         // Ensure any previous history.replaceState completes before pushState is executed.
         const doPush = () => {
           this.doPushState({ page: data }, page.url)
-          cb()
+          cb && cb()
         }
 
         if (isChromeIOS) {
@@ -142,10 +141,9 @@ class History {
       return
     }
 
-    cb = cb ?? (() => {})
-
     if (this.preserveUrl) {
-      return cb()
+      cb && cb()
+      return
     }
 
     this.current = page
@@ -156,7 +154,7 @@ class History {
         // Ensure any previous history.pushState completes before replaceState is executed.
         const doReplace = () => {
           this.doReplaceState({ page: data }, page.url)
-          cb()
+          cb && cb()
         }
 
         if (isChromeIOS) {
