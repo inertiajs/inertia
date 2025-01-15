@@ -114,6 +114,10 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
+    if (typeof window === 'undefined') {
+      return () => {}
+    }
+
     return eventHandler.onGlobalEvent(type, callback)
   }
 
