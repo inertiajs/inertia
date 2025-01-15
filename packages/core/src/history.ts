@@ -209,7 +209,7 @@ class History {
   }
 }
 
-if (window.history.scrollRestoration) {
+if (typeof window !== 'undefined' && window.history.scrollRestoration) {
   window.history.scrollRestoration = 'manual'
 }
 
