@@ -127,7 +127,9 @@ class CurrentPage {
   }
 
   public setUrlHash(hash: string): void {
-    this.page.url += hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
   }
 
   public remember(data: Page['rememberedState']): void {
