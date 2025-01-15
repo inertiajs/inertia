@@ -127,3 +127,14 @@ test('multi byte strings can be encrypted', async ({ page }) => {
   await expect(requests.requests).toHaveLength(0)
   await expect(page.getByText('Multi byte character: 😃')).toBeVisible()
 })
+
+test('url will update after scrolling and pressing back', async ({ page }) => {
+  // Weird bug that surfaced after setting scroll restoration to manual
+  await page.waitForURL('/history/1')
+  await clickAndWaitForResponse(page, 'Page 5', '/history/5')
+  await page.evaluate(() => (window as any).scrollTo(0, 1000))
+  await page.goBack()
+  await page.waitForURL('/history/1')
+  await page.waitForTimeout(200)
+  await page.waitForURL('/history/1')
+})
