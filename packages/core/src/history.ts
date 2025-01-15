@@ -5,8 +5,8 @@ import { SessionStorage } from './sessionStorage'
 import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
-
 const queue = new Queue<Promise<void>>()
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 
 class History {
   public rememberedState = 'rememberedState' as const
@@ -37,25 +37,28 @@ class History {
       return
     }
 
-    if (this.preserveUrl) {
-      cb && cb()
+    cb = cb ?? (() => {})
 
-      return
+    if (this.preserveUrl) {
+      return cb()
     }
 
     this.current = page
 
     queue.add(() => {
       return this.getPageData(page).then((data) => {
-        window.history.pushState(
-          {
-            page: data,
-          },
-          '',
-          page.url,
-        )
+        // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+        // Ensure any previous history.replaceState completes before pushState is executed.
+        const doPush = () => {
+          this.doPushState({ page: data }, page.url)
+          cb()
+        }
 
-        cb && cb()
+        if (isChromeIOS) {
+          setTimeout(doPush)
+        } else {
+          doPush()
+        }
       })
     })
   }
@@ -139,24 +142,28 @@ class History {
       return
     }
 
-    if (this.preserveUrl) {
-      cb && cb()
+    cb = cb ?? (() => {})
 
-      return
+    if (this.preserveUrl) {
+      return cb()
     }
 
     this.current = page
 
     queue.add(() => {
       return this.getPageData(page).then((data) => {
-        this.doReplaceState(
-          {
-            page: data,
-          },
-          page.url,
-        )
+        // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+        // Ensure any previous history.pushState completes before replaceState is executed.
+        const doReplace = () => {
+          this.doReplaceState({ page: data }, page.url)
+          cb()
+        }
 
-        cb && cb()
+        if (isChromeIOS) {
+          setTimeout(doReplace)
+        } else {
+          doReplace()
+        }
       })
     })
   }
@@ -178,6 +185,17 @@ class History {
       '',
       url,
     )
+  }
+
+  protected doPushState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url: string,
+  ): void {
+    window.history.pushState(data, '', url)
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
