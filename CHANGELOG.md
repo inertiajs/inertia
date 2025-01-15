@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.1...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.2...HEAD)
+
+- Nothing yet
+
+## [v2.0.2](https://github.com/inertiajs/inertia/compare/v2.0.1...v2.0.2)
 
 - Fix SSR with scroll restoration ([#2190](https://github.com/inertiajs/inertia/pull/2190))
 - Fix for scroll + back bug ([#2191](https://github.com/inertiajs/inertia/pull/2191))
 - Backport 1.x fixes from [v1.3.0](https://github.com/inertiajs/inertia/releases/tag/v1.3.0) release ([#2193](https://github.com/inertiajs/inertia/pull/2193))
 
-## [2.0.1](https://github.com/inertiajs/inertia/compare/v2.0.0...v2.0.1)
+## [v2.0.1](https://github.com/inertiajs/inertia/compare/v2.0.0...v2.0.1)
 
 - Fix playground dependencies ([#2070](https://github.com/inertiajs/inertia/pull/2070))
 - Removed Vitest tests + dependencies ([#2175](https://github.com/inertiajs/inertia/pull/2175))
