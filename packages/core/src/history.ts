@@ -200,6 +200,10 @@ class History {
     SessionStorage.remove(historySessionStorageKeys.iv)
   }
 
+  public setCurrent(page: Page): void {
+    this.current = page
+  }
+
   public isValidState(state: any): boolean {
     return !!state.page
   }
