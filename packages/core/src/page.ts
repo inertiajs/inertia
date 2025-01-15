@@ -80,7 +80,9 @@ class CurrentPage {
         this.isFirstPageLoad = false
 
         return this.swap({ component, page, preserveState }).then(() => {
-          preserveScroll ? Scroll.restore(history.getScrollRegions()) : Scroll.reset()
+          if (!preserveScroll) {
+            Scroll.reset()
+          }
 
           eventHandler.fireInternalEvent('loadDeferredProps')
 

@@ -93,6 +93,7 @@ export class InitialVisit {
     }
 
     currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true }).then(() => {
+      Scroll.restore(history.getScrollRegions())
       fireNavigateEvent(currentPage.get())
     })
   }
