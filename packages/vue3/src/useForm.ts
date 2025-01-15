@@ -6,7 +6,7 @@ import { reactive, watch } from 'vue'
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -80,6 +80,7 @@ export default function useForm<TForm extends FormDataType>(
 
       if (typeof fieldOrFields === 'undefined') {
         defaults = this.data()
+        this.isDirty = false
       } else {
         defaults = Object.assign(
           {},
