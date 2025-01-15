@@ -105,6 +105,7 @@ class CurrentPage {
     return this.resolve(page.component).then((component) => {
       this.page = page
       this.cleared = false
+      history.setCurrent(page)
       return this.swap({ component, page, preserveState })
     })
   }
