@@ -103,7 +103,7 @@ class History {
       return Promise.resolve().then(() => {
         this.doReplaceState(
           {
-            page: window.history.state.page,
+            page: window.history.state?.page,
             scrollRegions,
           },
           this.current.url!,
@@ -117,7 +117,7 @@ class History {
       return Promise.resolve().then(() => {
         this.doReplaceState(
           {
-            page: window.history.state.page,
+            page: window.history.state?.page,
             documentScrollPosition: scrollRegion,
           },
           this.current.url!,
