@@ -175,6 +175,20 @@ app.delete('/dump/delete', upload.any(), (req, res) =>
   }),
 )
 
+app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
+  if (req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'Visits/ReloadOnMount',
+      props: { name: 'mounted!' },
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'Visits/ReloadOnMount',
+    props: { name: 'not mounted!' },
+  })
+})
+
 app.get('/persistent-layouts/shorthand/simple/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
 )
