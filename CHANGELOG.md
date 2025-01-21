@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.2...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.3...HEAD)
 
 - Nothing yet
+
+## [v2.0.3](https://github.com/inertiajs/inertia/compare/v2.0.2...v2.0.3)
+
+- Fix: Reload on mount ([#2200](https://github.com/inertiajs/inertia/pull/2200))
 
 ## [v2.0.2](https://github.com/inertiajs/inertia/compare/v2.0.1...v2.0.2)
 
