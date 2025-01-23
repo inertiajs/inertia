@@ -1,1 +1,5 @@
+# exclude playgrounds/ since otherwise the project gets classified as mainly php based.
+# https://github.com/github-linguist/linguist/blob/master/docs/overrides.md#summary
+playgrounds/** linguist-vendored
+
 * text=auto

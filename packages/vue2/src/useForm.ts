@@ -5,7 +5,7 @@ import { reactive, watch } from 'vue'
 
 type FormDataType = object
 
-interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Record<keyof TForm, string>
   hasErrors: boolean
@@ -79,6 +79,7 @@ export default function useForm<TForm extends FormDataType>(...args): InertiaFor
 
       if (typeof key === 'undefined') {
         defaults = this.data()
+        this.isDirty = false
       } else {
         defaults = Object.assign({}, cloneDeep(defaults), value ? { [key]: value } : key)
       }

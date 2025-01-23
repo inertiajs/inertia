@@ -32,6 +32,12 @@ import {
 import { hrefToUrl, mergeDataIntoQueryString, urlWithoutHash } from './url'
 
 const isServer = typeof window === 'undefined'
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
+const nextFrame = (callback: () => void) => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(callback)
+  })
+}
 
 export class Router {
   protected page!: Page
@@ -70,7 +76,9 @@ export class Router {
 
   protected setNavigationType(): void {
     this.navigationType =
-      window.performance && window.performance.getEntriesByType('navigation').length > 0
+      window.performance &&
+      window.performance.getEntriesByType &&
+      window.performance.getEntriesByType('navigation').length > 0
         ? (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
         : 'navigate'
   }
@@ -82,8 +90,11 @@ export class Router {
   }
 
   protected handleInitialPageVisit(page: Page): void {
-    this.page.url += window.location.hash
-    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+    const hash = window.location.hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
+    this.setPage(page, { preserveScroll: true, preserveState: true }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -117,25 +128,27 @@ export class Router {
   }
 
   protected resetScrollPositions(): void {
-    window.scrollTo(0, 0)
-    this.scrollRegions().forEach((region) => {
-      if (typeof region.scrollTo === 'function') {
-        region.scrollTo(0, 0)
-      } else {
-        region.scrollTop = 0
-        region.scrollLeft = 0
+    nextFrame(() => {
+      window.scrollTo(0, 0)
+      this.scrollRegions().forEach((region) => {
+        if (typeof region.scrollTo === 'function') {
+          region.scrollTo(0, 0)
+        } else {
+          region.scrollTop = 0
+          region.scrollLeft = 0
+        }
+      })
+      this.saveScrollPositions()
+      if (window.location.hash) {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView()
       }
     })
-    this.saveScrollPositions()
-    if (window.location.hash) {
-      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
-      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
-    }
   }
 
   protected restoreScrollPositions(): void {
-    if (this.page.scrollRegions) {
+    nextFrame(() => {
+      if (!this.page.scrollRegions) return
+
       this.scrollRegions().forEach((region: Element, index: number) => {
         const scrollPosition = this.page.scrollRegions[index]
         if (!scrollPosition) {
@@ -147,7 +160,7 @@ export class Router {
           region.scrollLeft = scrollPosition.left
         }
       })
-    }
+    })
   }
 
   protected isBackForwardVisit(): boolean {
@@ -464,14 +477,13 @@ export class Router {
   ): Promise<void> {
     return Promise.resolve(this.resolveComponent(page.component)).then((component) => {
       if (visitId === this.visitId) {
-        page.scrollRegions = page.scrollRegions || []
+        page.scrollRegions = this.page.scrollRegions || []
         page.rememberedState = page.rememberedState || {}
         replace = replace || hrefToUrl(page.url).href === window.location.href
         replace ? this.replaceState(page) : this.pushState(page)
         this.swapComponent({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            this.resetScrollPositions()
-          }
+          preserveScroll ? this.restoreScrollPositions() : this.resetScrollPositions()
+
           if (!replace) {
             fireNavigateEvent(page)
           }
@@ -482,12 +494,24 @@ export class Router {
 
   protected pushState(page: Page): void {
     this.page = page
-    window.history.pushState(page, '', page.url)
+    if (isChromeIOS) {
+      // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.replaceState completes before pushState is executed.
+      setTimeout(() => window.history.pushState(page, '', page.url))
+    } else {
+      window.history.pushState(page, '', page.url)
+    }
   }
 
   protected replaceState(page: Page): void {
     this.page = page
-    window.history.replaceState(page, '', page.url)
+    if (isChromeIOS) {
+      // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+      // Ensure any previous history.pushState completes before replaceState is executed.
+      setTimeout(() => window.history.replaceState(page, '', page.url))
+    } else {
+      window.history.replaceState(page, '', page.url)
+    }
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
@@ -574,6 +598,10 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
+    if (isServer) {
+      return () => {}
+    }
+
     const listener = ((event: GlobalEvent<TEventName>) => {
       const response = callback(event)
       if (event.cancelable && !event.defaultPrevented && response === false) {
