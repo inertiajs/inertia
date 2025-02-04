@@ -18,6 +18,24 @@ const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
   await isPrefetchSwrPage(page, id)
 }
 
+test('will not prefetch current page', async ({ page }) => {
+  // These two prefetch requests should be made on mount
+  const prefetch2 = page.waitForResponse('prefetch/2')
+  const prefetch4 = page.waitForResponse('prefetch/4')
+
+  await page.goto('prefetch/1')
+
+  // These two prefetch requests should be made on mount
+  await prefetch2
+  await prefetch4
+
+  requests.listen(page)
+  await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
+  await page.waitForTimeout(100)
+  // This is the page we're already on, so it shouldn't make a request
+  await expect(requests.requests.length).toBe(0)
+})
+
 test('can prefetch using link props', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')

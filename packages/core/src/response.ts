@@ -3,44 +3,13 @@ import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent
 import { history } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
+import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
-class ResponseQueue {
-  protected queue: Response[] = []
-  protected processing = false
-
-  public add(response: Response) {
-    this.queue.push(response)
-  }
-
-  public async process(): Promise<void> {
-    if (this.processing) {
-      return Promise.resolve()
-    }
-
-    this.processing = true
-    await this.processQueue()
-    this.processing = false
-
-    return Promise.resolve()
-  }
-
-  protected async processQueue(): Promise<void> {
-    const nextResponse = this.queue.shift()
-
-    if (nextResponse) {
-      await nextResponse.process()
-      return this.processQueue()
-    }
-
-    return Promise.resolve()
-  }
-}
-
-const queue = new ResponseQueue()
+const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
   constructor(
@@ -60,8 +29,7 @@ export class Response {
   }
 
   public async handle() {
-    queue.add(this)
-    return queue.process()
+    return queue.add(() => this.process())
   }
 
   public async process() {
@@ -233,7 +201,7 @@ export class Response {
 
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
-    return responseUrl.href.split(responseUrl.host).pop()
+    return responseUrl.pathname + responseUrl.search + responseUrl.hash
   }
 
   protected mergeProps(pageResponse: Page): void {

@@ -56,38 +56,40 @@ class CurrentPage {
         return
       }
 
-      page.scrollRegions ??= []
       page.rememberedState ??= {}
+
       const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
-      replace ? history.replaceState(page) : history.pushState(page)
+      return new Promise((resolve) => {
+        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
+      }).then(() => {
+        const isNewComponent = !this.isTheSame(page)
 
-      const isNewComponent = !this.isTheSame(page)
+        this.page = page
+        this.cleared = false
 
-      this.page = page
-      this.cleared = false
-
-      if (isNewComponent) {
-        this.fireEventsFor('newComponent')
-      }
-
-      if (this.isFirstPageLoad) {
-        this.fireEventsFor('firstLoad')
-      }
-
-      this.isFirstPageLoad = false
-
-      return this.swap({ component, page, preserveState }).then(() => {
-        if (!preserveScroll) {
-          Scroll.reset(page)
+        if (isNewComponent) {
+          this.fireEventsFor('newComponent')
         }
 
-        eventHandler.fireInternalEvent('loadDeferredProps')
-
-        if (!replace) {
-          fireNavigateEvent(page)
+        if (this.isFirstPageLoad) {
+          this.fireEventsFor('firstLoad')
         }
+
+        this.isFirstPageLoad = false
+
+        return this.swap({ component, page, preserveState }).then(() => {
+          if (!preserveScroll) {
+            Scroll.reset()
+          }
+
+          eventHandler.fireInternalEvent('loadDeferredProps')
+
+          if (!replace) {
+            fireNavigateEvent(page)
+          }
+        })
       })
     })
   }
@@ -103,6 +105,7 @@ class CurrentPage {
     return this.resolve(page.component).then((component) => {
       this.page = page
       this.cleared = false
+      history.setCurrent(page)
       return this.swap({ component, page, preserveState })
     })
   }
@@ -124,15 +127,13 @@ class CurrentPage {
   }
 
   public setUrlHash(hash: string): void {
-    this.page.url += hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
   }
 
   public remember(data: Page['rememberedState']): void {
     this.page.rememberedState = data
-  }
-
-  public scrollRegions(regions: Page['scrollRegions']): void {
-    this.page.scrollRegions = regions
   }
 
   public swap({

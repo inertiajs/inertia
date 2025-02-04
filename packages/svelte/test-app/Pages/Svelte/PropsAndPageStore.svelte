@@ -1,9 +1,9 @@
 <script>
-  import { inertia, page, router, useForm } from '@inertiajs/svelte'
+  import { inertia, page, useForm } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 
   export let foo
-  
+
   const form = useForm({ foo })
 
   console.log('[script] foo prop is', foo)
