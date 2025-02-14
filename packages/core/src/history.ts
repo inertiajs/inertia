@@ -109,8 +109,7 @@ class History {
           {
             page: window.history.state.page,
             scrollRegions,
-          },
-          this.current.url!,
+          }
         )
       })
     })
@@ -123,8 +122,7 @@ class History {
           {
             page: window.history.state.page,
             documentScrollPosition: scrollRegion,
-          },
-          this.current.url!,
+          }
         )
       })
     })
@@ -176,7 +174,7 @@ class History {
       scrollRegions?: ScrollRegion[]
       documentScrollPosition?: ScrollRegion
     },
-    url: string,
+    url?: string,
   ): void {
     window.history.replaceState(
       {
