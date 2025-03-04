@@ -119,6 +119,10 @@ class History {
   public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
     queue.add(() => {
       return Promise.resolve().then(() => {
+        if (!window.history.state?.page) {
+          return
+        }
+
         this.doReplaceState(
           {
             page: window.history.state.page,
