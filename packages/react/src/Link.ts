@@ -9,12 +9,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import React, { ElementType, createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
 interface BaseInertiaLinkProps {
-  as?: string
+  as?: string | ElementType
   data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
@@ -209,6 +209,31 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
     }
 
+    const isAnchor: boolean = ['a', 'A'].includes(as)
+    const isCustomComponent: boolean = typeof as !== 'string'
+    const internalRef = useRef<HTMLElement | null>(null)
+    const combinedRef = (element: HTMLElement|null) => {
+      internalRef.current = element
+
+      if (!ref) {
+        return
+      }
+
+      if (typeof ref === 'function') {
+        ref(element)
+      } else {
+        ref.current = element
+      }
+    }
+
+    useEffect(() => {
+      const element = internalRef.current
+
+      if (element?.tagName !== 'A') {
+        element.removeAttribute('href')
+      }
+    }, [])
+
     if (method !== 'get') {
       as = 'button'
     }
@@ -223,7 +248,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       {
         ...props,
         ...(elProps[as] || {}),
-        ref,
+        ...(isAnchor || isCustomComponent ? href : {}),
+        ref: combinedRef,
         ...(() => {
           if (prefetchModes.includes('hover')) {
             return prefetchHoverEvents
