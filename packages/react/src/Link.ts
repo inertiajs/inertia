@@ -77,7 +77,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(null)
 
-    as = as.toLowerCase()
+    as = typeof as === 'string' ? as.toLowerCase() : as
     method = method.toLowerCase() as Method
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
@@ -209,7 +209,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
     }
 
-    const isAnchor: boolean = ['a', 'A'].includes(as)
+    const isAnchor: boolean = as === 'a' || as === 'A'
     const isCustomComponent: boolean = typeof as !== 'string'
     const internalRef = useRef<HTMLElement | null>(null)
     const combinedRef = (element: HTMLElement|null) => {

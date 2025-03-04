@@ -189,13 +189,17 @@ const Link: InertiaLink = defineComponent({
       clearTimeout(hoverTimeout.value)
     })
 
+    const as = typeof props.as === 'string' ? props.as.toLowerCase() : props.as
     const method = props.method.toLowerCase() as Method
-    const as = method !== 'get' ? 'button' : props.as.toLowerCase()
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat),
     )
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
+
+    if (method !== 'get') {
+      as.value = 'button'
+    }
 
     const elProps = computed(() => ({
       a: { href: href.value },
@@ -276,7 +280,7 @@ const Link: InertiaLink = defineComponent({
       },
     }
 
-    const isAnchor: boolean = ['a', 'A'].includes(props.as)
+    const isAnchor: boolean = as === 'a' || as === 'A'
     const isCustomComponent: boolean = typeof props.as !== 'string'
 
     return () => {
