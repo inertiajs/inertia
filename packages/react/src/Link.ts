@@ -77,8 +77,15 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(null)
 
-    as = typeof as === 'string' ? as.toLowerCase() : as
+    const isAnchor: boolean = as === 'a' || as === 'A'
+    const isCustomComponent: boolean = typeof as !== 'string'
     method = method.toLowerCase() as Method
+    if (isAnchor && method !== 'get') {
+      as = 'button'
+    } else if (typeof as === 'string') { 
+      as = as.toLocaleLowerCase()
+    }
+    
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
     data = _data
@@ -209,8 +216,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
     }
 
-    const isAnchor: boolean = as === 'a' || as === 'A'
-    const isCustomComponent: boolean = typeof as !== 'string'
     const internalRef = useRef<HTMLElement | null>(null)
     const combinedRef = (element: HTMLElement|null) => {
       internalRef.current = element
@@ -234,21 +239,11 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       }
     }, [])
 
-    if (method !== 'get') {
-      as = 'button'
-    }
-
-    const elProps = {
-      a: { href },
-      button: { type: 'button' },
-    }
-
     return createElement(
       as,
       {
         ...props,
-        ...(elProps[as] || {}),
-        ...(isAnchor || isCustomComponent ? href : {}),
+        ...(isAnchor || isCustomComponent ? { href } : {}),
         ref: combinedRef,
         ...(() => {
           if (prefetchModes.includes('hover')) {

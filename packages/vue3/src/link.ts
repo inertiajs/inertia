@@ -189,22 +189,23 @@ const Link: InertiaLink = defineComponent({
       clearTimeout(hoverTimeout.value)
     })
 
-    const as = typeof props.as === 'string' ? props.as.toLowerCase() : props.as
+    
+    const isAnchor: boolean = props.as === 'a' || props.as === 'A'
+    const isCustomComponent: boolean = typeof props.as !== 'string'
     const method = props.method.toLowerCase() as Method
+    let as = null;
+    if (isAnchor && method !== 'get') {
+      as = 'button';
+    } else if(typeof props.as === 'string') {
+      as = props.as.toLowerCase()
+    } else {
+      as  = props.as
+    }
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat),
     )
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
-
-    if (method !== 'get') {
-      as.value = 'button'
-    }
-
-    const elProps = computed(() => ({
-      a: { href: href.value },
-      button: { type: 'button' },
-    }))
 
     const baseParams = {
       data: data.value,
@@ -280,15 +281,11 @@ const Link: InertiaLink = defineComponent({
       },
     }
 
-    const isAnchor: boolean = as === 'a' || as === 'A'
-    const isCustomComponent: boolean = typeof props.as !== 'string'
-
     return () => {
       return h(
         as,
         {
           ...attrs,
-          ...(elProps.value[as] || {}),
           ...(isAnchor || isCustomComponent ? {href} : {}),
           ...(isCustomComponent ? {ref: internalRef} : {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
