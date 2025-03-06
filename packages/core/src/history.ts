@@ -135,11 +135,11 @@ class History {
   }
 
   public getScrollRegions(): ScrollRegion[] {
-    return window.history.state.scrollRegions || []
+    return window.history.state?.scrollRegions || []
   }
 
   public getDocumentScrollPosition(): ScrollRegion {
-    return window.history.state.documentScrollPosition || { top: 0, left: 0 }
+    return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
 
   public replaceState(page: Page, cb: (() => void) | null = null): void {
