@@ -10,6 +10,9 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.3...HEAD)
 
 - Fix history state errors by nicholaspufal ([#2265](https://github.com/inertiajs/inertia/pull/2265))
+- Bump axios from 1.7.9 to 1.8.2 ([#2269](https://github.com/inertiajs/inertia/pull/2269))
+- Bump esbuild from 0.16.17 to 0.25.0 #2231 ([#2231](https://github.com/inertiajs/inertia/pull/2231))
+- Bump vite from 5.4.11 to 5.4.12 ([#2201](https://github.com/inertiajs/inertia/pull/2201))
 
 ## [v2.0.4](https://github.com/inertiajs/inertia/compare/v2.0.3...v2.0.4)
 
