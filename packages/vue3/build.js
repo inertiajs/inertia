@@ -39,7 +39,8 @@ builds.forEach(async (build) => {
     console.log(`Watching ${build.entryPoints} (${build.format})…`)
     await context.watch()
   } else {
-    console.log(`Built ${build.entryPoints} (${build.format})…`)
+    await context.rebuild()
     context.dispose()
+    console.log(`Built ${build.entryPoints} (${build.format})…`)
   }
 })
