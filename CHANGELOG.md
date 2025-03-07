@@ -9,7 +9,11 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.3...HEAD)
 
-- Nothing yet
+- Nothing yet!
+
+## [v2.0.4](https://github.com/inertiajs/inertia/compare/v2.0.3...v2.0.4)
+
+- Fix anchor links on initial visits ([#2258](https://github.com/inertiajs/inertia/pull/2258))
 
 ## [v2.0.3](https://github.com/inertiajs/inertia/compare/v2.0.2...v2.0.3)
 
