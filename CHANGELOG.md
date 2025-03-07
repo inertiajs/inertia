@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.3...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.5...HEAD)
+
+- Nothing yet
+
+## [v2.0.5](https://github.com/inertiajs/inertia/compare/v2.0.4...v2.0.5)
 
 - Fix history state errors by nicholaspufal ([#2265](https://github.com/inertiajs/inertia/pull/2265))
 - Bump axios from 1.7.9 to 1.8.2 ([#2269](https://github.com/inertiajs/inertia/pull/2269))
