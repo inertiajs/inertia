@@ -9,7 +9,7 @@ For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.
 
 ## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.3...HEAD)
 
-- Nothing yet!
+- Fix history state errors by nicholaspufal ([#2265](https://github.com/inertiajs/inertia/pull/2265))
 
 ## [v2.0.4](https://github.com/inertiajs/inertia/compare/v2.0.3...v2.0.4)
 
