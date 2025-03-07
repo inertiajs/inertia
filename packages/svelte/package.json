@@ -54,7 +54,7 @@
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/html-escape": "^2.0.2",
     "@types/lodash": "^4.17.7",
-    "axios": "^1.7.6",
+    "axios": "^1.8.2",
     "publint": "^0.2.10",
     "svelte": "^4.2.16",
     "svelte-check": "^4.0.0",
