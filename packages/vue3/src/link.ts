@@ -188,12 +188,11 @@ const Link: InertiaLink = defineComponent({
     onUnmounted(() => {
       clearTimeout(hoverTimeout.value)
     })
-
     
     const isAnchor: boolean = props.as === 'a' || props.as === 'A'
     const isCustomComponent: boolean = typeof props.as !== 'string'
     const method = props.method.toLowerCase() as Method
-    let as = null;
+    let as: String|Object|Component|null = null;
     if (isAnchor && method !== 'get') {
       as = 'button';
     } else if(typeof props.as === 'string') {
@@ -286,7 +285,7 @@ const Link: InertiaLink = defineComponent({
         as,
         {
           ...attrs,
-          ...(isAnchor || isCustomComponent ? {href} : {}),
+          ...(isAnchor || isCustomComponent ? {href: href.value} : {}),
           ...(isCustomComponent ? {ref: internalRef} : {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
           ...(() => {
