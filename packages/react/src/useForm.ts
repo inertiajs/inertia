@@ -1,5 +1,5 @@
 import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import isEqual from 'lodash.isequal'
+import { isEqual } from 'es-toolkit'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
