@@ -59,7 +59,7 @@
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@gilbarbara/deep-equal": "^0.3.1",
-    "@inertiajs/core": "2.0.5"
+    "@inertiajs/core": "2.0.5",
+    "es-toolkit": "^1.33.0"
   }
 }

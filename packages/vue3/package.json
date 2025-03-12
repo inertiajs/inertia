@@ -58,8 +58,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@gilbarbara/deep-equal": "^0.3.1",
     "@inertiajs/core": "2.0.5",
-	  "klona": "^2.0.5"
+    "es-toolkit": "^1.33.0"
   }
 }

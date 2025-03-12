@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/core'
-import { klona } from 'klona/full'
+import { cloneDeep } from 'es-toolkit'
 import { ComponentOptions } from 'vue'
 
 const remember: ComponentOptions = {
@@ -52,7 +52,7 @@ const remember: ComponentOptions = {
             rememberable.reduce(
               (data, key) => ({
                 ...data,
-                [key]: klona(hasCallbacks(key) ? this[key].__remember() : this[key]),
+                [key]: cloneDeep(hasCallbacks(key) ? this[key].__remember() : this[key]),
               }),
               {},
             ),

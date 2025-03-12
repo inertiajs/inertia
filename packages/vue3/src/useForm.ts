@@ -1,6 +1,5 @@
 import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import { klona } from 'klona/full'
-import isDeepEqual from '@gilbarbara/deep-equal'
+import { cloneDeep, isEqual } from 'es-toolkit'
 import { reactive, watch } from 'vue'
 
 type FormDataType = Record<string, FormDataConvertible>
@@ -48,13 +47,13 @@ export default function useForm<TForm extends FormDataType>(
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
     : null
-  let defaults = typeof data === 'function' ? klona(data()) : klona(data)
+  let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
   const form = reactive({
-    ...(restored ? restored.data : klona(defaults)),
+    ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -84,7 +83,7 @@ export default function useForm<TForm extends FormDataType>(
       } else {
         defaults = Object.assign(
           {},
-          klona(defaults),
+          cloneDeep(defaults),
           typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
         )
       }
@@ -92,8 +91,8 @@ export default function useForm<TForm extends FormDataType>(
       return this
     },
     reset(...fields) {
-      const resolvedData = typeof data === 'function' ? klona(data()) : klona(defaults)
-      const clonedData = klona(resolvedData)
+      const resolvedData = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(defaults)
+      const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
         defaults = clonedData
         Object.assign(this, resolvedData)
@@ -171,7 +170,7 @@ export default function useForm<TForm extends FormDataType>(
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = klona(this.data())
+          defaults = cloneDeep(this.data())
           this.isDirty = false
           return onSuccess
         },
@@ -242,9 +241,9 @@ export default function useForm<TForm extends FormDataType>(
   watch(
     form,
     (newValue) => {
-      form.isDirty = !isDeepEqual(form.data(), defaults)
+      form.isDirty = !isEqual(form.data(), defaults)
       if (rememberKey) {
-        router.remember(klona(newValue.__remember()), rememberKey)
+        router.remember(cloneDeep(newValue.__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },
