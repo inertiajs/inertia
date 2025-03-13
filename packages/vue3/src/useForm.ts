@@ -3,10 +3,10 @@ import cloneDeep from 'lodash.clonedeep'
 import isEqual from 'lodash.isequal'
 import { reactive, watch } from 'vue'
 
-type FormDataType = Record<string, FormDataConvertible>
+type FormDataType<T> = { [K in keyof T]: FormDataConvertible }; 
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -23,23 +23,23 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Record<keyof TForm, string>): this
-  submit(method: Method, url: string, options?: FormOptions): void
-  get(url: string, options?: FormOptions): void
-  post(url: string, options?: FormOptions): void
-  put(url: string, options?: FormOptions): void
-  patch(url: string, options?: FormOptions): void
-  delete(url: string, options?: FormOptions): void
+  submit(method: Method, url: string, options?: Partial<FormOptions>): void
+  get(url: string, options?: Partial<FormOptions>): void
+  post(url: string, options?: Partial<FormOptions>): void
+  put(url: string, options?: Partial<FormOptions>): void
+  patch(url: string, options?: Partial<FormOptions>): void
+  delete(url: string, options?: Partial<FormOptions>): void
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends FormDataType<TForm>> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
@@ -128,7 +128,7 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    submit(method, url, options: FormOptions = {}) {
+    submit(method, url, options: Partial<FormOptions> = {}) {
       const data = transform(this.data())
       const _options = {
         ...options,
