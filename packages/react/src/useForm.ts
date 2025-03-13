@@ -6,10 +6,10 @@ import useRemember from './useRemember'
 type setDataByObject<TForm> = (data: TForm) => void
 type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
-type FormDataType = Record<string, FormDataConvertible>
+type FormDataType<T> = Record<keyof T, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   data: TForm
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
@@ -35,12 +35,12 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   delete: (url: string, options?: Partial<FormOptions>) => void
   cancel: () => void
 }
-export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(initialValues?: TForm): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   initialValues?: TForm,
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrInitialValues?: string | TForm,
   maybeInitialValues?: TForm,
 ): InertiaFormProps<TForm> {

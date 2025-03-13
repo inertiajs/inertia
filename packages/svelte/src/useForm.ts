@@ -15,10 +15,10 @@ import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import { writable, type Writable } from 'svelte/store'
 
-type FormDataType = Record<string, FormDataConvertible>
+type FormDataType<T> = Record<keyof T, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -46,14 +46,14 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType> = InertiaFormProps<TForm> & TForm
+export type InertiaForm<TForm extends FormDataType<TForm>> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
@@ -86,7 +86,7 @@ export default function useForm<TForm extends FormDataType>(
       return Object.keys(data).reduce((carry, key) => {
         carry[key] = this[key]
         return carry
-      }, {} as FormDataType) as TForm
+      }, {} as FormDataType<TForm>) as TForm
     },
     transform(callback) {
       transform = callback
@@ -114,7 +114,7 @@ export default function useForm<TForm extends FormDataType>(
             .reduce((carry, key) => {
               carry[key] = clonedData[key]
               return carry
-            }, {} as FormDataType) as TForm,
+            }, {} as FormDataType<TForm>) as TForm,
         )
       }
 

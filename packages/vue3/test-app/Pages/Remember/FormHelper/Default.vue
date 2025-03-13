@@ -1,10 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const untracked = ref('')
 
-const form = useForm({
+interface InputData {
+  name: string
+  handle: string
+  remember: boolean
+}
+
+const form = useForm<InputData>({
   name: 'foo',
   handle: 'example',
   remember: false,
