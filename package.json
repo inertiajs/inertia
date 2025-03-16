@@ -1,19 +1,20 @@
 {
   "name": "inertia",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "playgrounds/*"
-  ],
+  "type": "module",
   "scripts": {
-    "test:react": "cd tests && PACKAGE=react npx playwright test",
+    "build": "pnpm -r --filter './packages/*' build",
+    "watch": "pnpm -r --parallel --filter './packages/*' watch",
+    "test": "pnpm test:react && pnpm test:svelte && pnpm test:vue",
+    "test:react": "PACKAGE=react playwright test",
     "test:react:watch": "cd packages/react/test-app && npm run watch",
-    "test:svelte": "cd tests && PACKAGE=svelte npx playwright test",
+    "test:svelte": "PACKAGE=svelte playwright test",
     "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
-    "test:vue": "cd tests && PACKAGE=vue3 npx playwright test",
+    "test:vue": "PACKAGE=vue3 playwright test",
     "test:vue:watch": "cd packages/vue3/test-app && npm run watch"
   },
   "dependencies": {
+    "@playwright/test": "^1.51.0",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-svelte": "^3.2.3",
