@@ -17,10 +17,10 @@
     "url": "https://github.com/inertiajs/inertia/issues"
   },
   "scripts": {
-    "dev": "npm run package -- --watch",
-    "build": "npm run package && publint",
+    "watch": "pnpm package --watch",
+    "build": "pnpm package && publint",
     "package": "svelte-kit sync && svelte-package --input src",
-    "prepublishOnly": "npm run build",
+    "prepack": "pnpm build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
@@ -43,7 +43,7 @@
     "svelte": "^4.0.0 || ^5.0.0 || ^5.0.0-next.244"
   },
   "dependencies": {
-    "@inertiajs/core": "2.0.5",
+    "@inertiajs/core": "workspace:*",
     "html-escape": "^2.0.0",
     "lodash": "^4.5.0"
   },

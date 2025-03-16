@@ -1,8 +1,5 @@
 {
-    "scripts": {
-        "server:run": "vite build app && node app/server.js",
-        "watch": "vite build app --watch"
-    },
+    "private": true,
     "devDependencies": {
         "body-parser": "^1.19.0",
         "css-loader": "^5.0.1",

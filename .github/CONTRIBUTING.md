@@ -4,33 +4,26 @@ Thanks for your interest in contributing to Inertia.js!
 
 ## Packages
 
-To make local Inertia.js development easier, this project has been setup as a monorepo using [NPM Workspaces](https://docs.npmjs.com/using-npm/workspaces). To set it up, start by cloning the repository on your system.
+To make local Inertia.js development easier, this project has been setup as a monorepo using [pnpm](https://pnpm.io/workspaces). To set it up, start by cloning the repository on your system.
 
 ```sh
 git clone https://github.com/inertiajs/inertia.git inertia
 cd inertia
 ```
 
-Next, install the JavaScript dependencies:
+Next, install the JavaScript dependencies and build the packages:
 
 ```sh
-npm install
+pnpm install && pnpm build
 ```
 
-Next, build the packages:
+If you're making changes to one of the packages, you can setup a watcher to automatically run the build step whenever files are changed.
 
 ```sh
-npm run build --workspace=packages --if-present
+pnpm watch
 ```
 
-If you're making changes to one of the packages that requires a build step (`core`, `react`, `vue2`, `vue3`), you can setup a watcher to automatically run the build step whenever files are changed.
-
-```sh
-cd packages/core
-npm run dev
-```
-
-When proposing changes to one of the adapters (`react`, `vue2`, `vue3`, `svelte`), please try to apply the same changes to the other adapters where possible.
+When proposing changes to one of the adapters, please try to apply the same changes to the other adapters where possible.
 
 ## Playgrounds
 
@@ -38,7 +31,7 @@ It's often helpful to develop Inertia.js using a real application. The playgroun
 
 ```sh
 cd playgrounds/react
-npm run build
+pnpm build
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -49,30 +42,26 @@ php artisan serve
 To automatically see changes to the JavaScript files in the browser, start the development server:
 
 ```sh
-npm run dev
+pnpm dev
 ```
 
 To test the SSR mode, first run the build, and then start the SSR server:
 
 ```sh
-npm run build
+pnpm build
 php artisan inertia:start-ssr
 ```
 
 ## Testing
 
-Inertia.js uses [Playwright](https://playwright.dev/) for testing. To run the tests, use the following command:
-
-```sh
-cd tests && npx playwright test
-```
+Inertia.js uses [Playwright](https://playwright.dev/) for testing. To run the tests, use the `pnpm test` command.
 
 ## Publishing
 
 This section is really for the benefit of the core maintainers.
 
-1. Increment the version numbers in the `package.json` file for each package, making sure to also update the adapter dependencies on `@inertiajs/core`.
-2. Run `npm install` to update the top-level `package-lock.json` file.
-3. Update `CHANGELOG.md`.
-4. Run `npm publish` for each package. This will automatically run the necessary build step. When publishing beta releases, make sure to run `npm publish --tag=beta` or `npm publish --tag=next` if it's `next`.
+1. Increment the version numbers in the `package.json` file for each package,
+2. Run `pnpm install`,
+3. Update `CHANGELOG.md`,
+4. Run `pnpm publish -r` in the root directory. This will automatically run the necessary build steps and publish all packages. When publishing beta releases, make sure to run `pnpm publish -r --tag=beta` or `npm publish -r --tag=next` if it's `next`,
 5. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).
