@@ -1,7 +1,14 @@
-<script>
+<script lang="ts">
   import { page, useForm } from '@inertiajs/svelte'
 
-  const form = useForm({
+
+  interface InputData {
+    name: string
+    handle: string
+    remember: boolean
+  }
+
+  const form = useForm<InputData>({
     name: 'foo',
     handle: 'example',
     remember: false,

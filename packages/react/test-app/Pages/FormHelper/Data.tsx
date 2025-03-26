@@ -1,7 +1,14 @@
+
 import { useForm, usePage } from '@inertiajs/react'
 
+interface InputData {
+  name: string
+  handle: string
+  remember: boolean
+}
+
 export default (props) => {
-  const form = useForm({
+  const form = useForm<InputData>({
     name: 'foo',
     handle: 'example',
     remember: false,
