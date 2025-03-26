@@ -1,4 +1,5 @@
 .github/
+pnpm-lock.yaml
 **/.svelte-kit
 **/bootstrap/ssr
 **/composer.json

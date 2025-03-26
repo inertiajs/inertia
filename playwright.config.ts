@@ -1,11 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
-import path from 'path'
 
-const adapterPorts = {
-  vue3: 13715,
-  react: 13716,
-  svelte: 13717,
-}
+const adapter = process.env.PACKAGE || 'vue3'
+const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
+const url = `http://localhost:${adapterPorts[adapter]}`
 
 /**
  * Read environment variables from file.
@@ -18,7 +15,7 @@ const adapterPorts = {
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './',
+  testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -32,7 +29,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: `http://localhost:${adapterPorts[process.env.PACKAGE || 'vue3']}`,
+    baseURL: url,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -80,8 +77,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `cd ${path.resolve(__dirname, '../packages/', process.env.PACKAGE || 'vue3', 'test-app')} && npm run server:run && cd ${__dirname} && node app/server.js`,
-    url: `http://localhost:${adapterPorts[process.env.PACKAGE || 'vue3']}`,
+    command: `pnpm -r --filter './packages/${adapter}/test-app' server:run && node tests/app/server.js`,
+    url,
     reuseExistingServer: !process.env.CI,
   },
 })
