@@ -61,7 +61,7 @@ export class InitialVisit {
     }
 
     history
-      .decrypt()
+      .decrypt(currentPage.get())
       .then(() => {
         const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
         const scrollRegions = history.getScrollRegions()
