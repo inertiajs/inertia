@@ -9,12 +9,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import React, { ElementType, createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
 interface BaseInertiaLinkProps {
-  as?: string
+  as?: string | ElementType
   data?: Record<string, FormDataConvertible>
   href: string
   method?: Method
@@ -77,8 +77,15 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(null)
 
-    as = as.toLowerCase()
+    const isAnchor: boolean = as === 'a' || as === 'A'
+    const isCustomComponent: boolean = typeof as !== 'string'
     method = method.toLowerCase() as Method
+    if (isAnchor && method !== 'get') {
+      as = 'button'
+    } else if (typeof as === 'string') { 
+      as = as.toLocaleLowerCase()
+    }
+    
     const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
     href = _href
     data = _data
@@ -209,21 +216,35 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
     }
 
-    if (method !== 'get') {
-      as = 'button'
+    const internalRef = useRef<HTMLElement | null>(null)
+    const combinedRef = (element: HTMLElement|null) => {
+      internalRef.current = element
+
+      if (!ref) {
+        return
+      }
+
+      if (typeof ref === 'function') {
+        ref(element)
+      } else {
+        ref.current = element
+      }
     }
 
-    const elProps = {
-      a: { href },
-      button: { type: 'button' },
-    }
+    useEffect(() => {
+      const element = internalRef.current
+
+      if (element?.tagName !== 'A') {
+        element.removeAttribute('href')
+      }
+    }, [])
 
     return createElement(
       as,
       {
         ...props,
-        ...(elProps[as] || {}),
-        ref,
+        ...(isAnchor || isCustomComponent ? { href } : {}),
+        ref: combinedRef,
         ...(() => {
           if (prefetchModes.includes('hover')) {
             return prefetchHoverEvents
