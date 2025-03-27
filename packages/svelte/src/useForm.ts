@@ -11,8 +11,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import cloneDeep from 'lodash/cloneDeep'
-import isEqual from 'lodash/isEqual'
+import { cloneDeep, isEqual } from 'es-toolkit'
 import { writable, type Writable } from 'svelte/store'
 
 type FormDataType = Record<string, FormDataConvertible>
