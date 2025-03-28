@@ -4,7 +4,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue'
 </script>
 
 <template>

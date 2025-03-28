@@ -7,7 +7,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Deferred, Head, WhenVisible } from '@inertiajs/vue3'
+import { Deferred, Head, WhenVisible } from '@inertiajs/vue'
 
 defineProps<{
   users?: {

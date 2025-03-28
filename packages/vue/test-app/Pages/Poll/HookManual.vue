@@ -1,5 +1,5 @@
 <script setup>
-import { usePoll } from '@inertiajs/vue3'
+import { usePoll } from '@inertiajs/vue'
 
 const { start, stop } = usePoll(
   500,

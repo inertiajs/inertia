@@ -1,5 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue'
 import WithoutScrollRegion from '../../Layouts/WithoutScrollRegion.vue'
 
 defineOptions({

@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/vue3'
+import { createInertiaApp } from '@inertiajs/vue'
 import { createSSRApp, h, type DefineComponent } from 'vue'
 
 createInertiaApp({

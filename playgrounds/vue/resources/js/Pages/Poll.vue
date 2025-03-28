@@ -7,7 +7,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue'
 import { onMounted, ref } from 'vue'
 
 defineProps<{

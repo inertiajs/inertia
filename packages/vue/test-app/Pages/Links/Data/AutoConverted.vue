@@ -1,5 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue'
 
 const linkData = {
   file: new File([], 'example.jpg'),

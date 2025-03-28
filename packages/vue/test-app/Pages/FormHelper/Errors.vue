@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue'
 const form = useForm({
   name: 'foo',
   handle: 'example',

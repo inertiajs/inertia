@@ -1,5 +1,5 @@
 <script setup>
-import { Link, router, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue'
 import { getCurrentInstance } from 'vue'
 
 const props = defineProps({

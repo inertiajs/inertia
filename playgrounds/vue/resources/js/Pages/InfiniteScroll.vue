@@ -4,7 +4,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, router, WhenVisible } from '@inertiajs/vue3'
+import { Head, router, WhenVisible } from '@inertiajs/vue'
 import { ref } from 'vue'
 
 const props = defineProps<{

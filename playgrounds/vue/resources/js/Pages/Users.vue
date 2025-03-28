@@ -4,7 +4,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head, usePrefetch } from '@inertiajs/vue3'
+import { Head, usePrefetch } from '@inertiajs/vue'
 
 const { isPrefetching, isPrefetched, lastUpdatedAt, flush } = usePrefetch()
 

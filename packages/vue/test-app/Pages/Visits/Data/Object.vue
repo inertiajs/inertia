@@ -1,5 +1,5 @@
 <script setup>
-import { router } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue'
 
 const visitMethod = () => {
   router.visit('/dump/get', {

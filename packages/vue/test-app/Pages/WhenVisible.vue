@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { WhenVisible } from '@inertiajs/vue3'
+import { WhenVisible } from '@inertiajs/vue'
 import { ref } from 'vue'
 
 const count = ref(0)

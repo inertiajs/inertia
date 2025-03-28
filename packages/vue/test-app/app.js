@@ -1,4 +1,4 @@
-import { createInertiaApp, router } from '@inertiajs/vue3'
+import { createInertiaApp, router } from '@inertiajs/vue'
 import { createApp, h } from 'vue'
 
 window.testing = { Inertia: router }

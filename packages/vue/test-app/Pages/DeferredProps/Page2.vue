@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Deferred } from '@inertiajs/vue3'
+import { Deferred } from '@inertiajs/vue'
 
 defineProps<{
   baz?: string

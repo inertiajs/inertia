@@ -1,5 +1,5 @@
 <script setup>
-import { Link, router, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue'
 
 const payloadWithFile = {
   file: new File(['foobar'], 'example.bin'),

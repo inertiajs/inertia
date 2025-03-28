@@ -1,7 +1,7 @@
 <script setup>
 import ComponentA from '@/Pages/Remember/Components/ComponentA.vue'
 import ComponentB from '@/Pages/Remember/Components/ComponentB.vue'
-import { Link, useRemember } from '@inertiajs/vue3'
+import { Link, useRemember } from '@inertiajs/vue'
 import { ref } from 'vue'
 
 const untracked = ref('')

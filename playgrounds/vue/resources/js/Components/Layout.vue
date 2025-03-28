@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue'
 import { computed } from 'vue'
 
 const page = usePage()

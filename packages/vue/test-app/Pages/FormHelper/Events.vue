@@ -1,5 +1,5 @@
 <script setup>
-import { useForm, usePage } from '@inertiajs/vue3'
+import { useForm, usePage } from '@inertiajs/vue'
 
 window.events = []
 window.data = []

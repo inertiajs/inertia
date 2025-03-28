@@ -1,5 +1,5 @@
 <script setup>
-import { router, usePage } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue'
 import { onMounted } from 'vue'
 
 const props = defineProps({

@@ -4,7 +4,7 @@ export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue'
 
 defineProps({ user: Object })
 </script>

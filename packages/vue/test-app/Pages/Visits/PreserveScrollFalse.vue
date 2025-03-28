@@ -1,6 +1,6 @@
 <script setup>
 import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion.vue'
-import { router } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue'
 
 defineOptions({
   layout: WithoutScrollRegion,
