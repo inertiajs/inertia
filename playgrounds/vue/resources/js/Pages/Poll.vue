@@ -1,5 +1,5 @@
 <script lang="ts">
-import usePoll from '../../../../../packages/vue3/src/usePoll'
+import usePoll from '../../../../../packages/vue/src/usePoll'
 import Layout from '../Components/Layout.vue'
 import TestGrid from '../Components/TestGrid.vue'
 import TestGridItem from '../Components/TestGridItem.vue'
