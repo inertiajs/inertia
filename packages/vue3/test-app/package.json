@@ -10,6 +10,6 @@
     },
     "dependencies": {
         "@inertiajs/core": "file:../../core",
-        "@inertiajs/vue3": "file:.."
+        "@inertiajs/vue": "file:.."
     }
 }

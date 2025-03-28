@@ -1,5 +1,5 @@
 {
-  "name": "@inertiajs/vue3",
+  "name": "@inertiajs/vue",
   "version": "2.0.5",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/inertiajs/inertia.git",
-    "directory": "packages/vue3"
+    "directory": "packages/vue"
   },
   "bugs": {
     "url": "https://github.com/inertiajs/inertia/issues"
