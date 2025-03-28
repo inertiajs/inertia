@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('plugin', () => {
-  test.skip(process.env.PACKAGE !== 'vue3')
+  test.skip(process.env.PACKAGE !== 'vue')
 
   test.describe('$page helper', () => {
     test('has the helper injected into the Vue component', async ({ page }) => {

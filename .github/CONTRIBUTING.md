@@ -23,14 +23,14 @@ Next, build the packages:
 npm run build --workspace=packages --if-present
 ```
 
-If you're making changes to one of the packages that requires a build step (`core`, `react`, `vue2`, `vue3`), you can setup a watcher to automatically run the build step whenever files are changed.
+If you're making changes to one of the packages that requires a build step (`core`, `react`, `vue`), you can setup a watcher to automatically run the build step whenever files are changed.
 
 ```sh
 cd packages/core
 npm run dev
 ```
 
-When proposing changes to one of the adapters (`react`, `vue2`, `vue3`, `svelte`), please try to apply the same changes to the other adapters where possible.
+When proposing changes to one of the adapters (`react`, `vue`, `svelte`), please try to apply the same changes to the other adapters where possible.
 
 ## Playgrounds
 

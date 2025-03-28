@@ -346,9 +346,9 @@ app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 app.all('*', (req, res) => inertia.render(req, res))
 
 const adapterPorts = {
-  vue3: 13715,
+  vue: 13715,
   react: 13716,
   svelte: 13717,
 }
 
-app.listen(adapterPorts[process.env.PACKAGE || 'vue3'])
+app.listen(adapterPorts[process.env.PACKAGE || 'vue'])
