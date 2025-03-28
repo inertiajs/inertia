@@ -37,7 +37,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Errors): this
-  submit(method: Method, url: string, options?: FormOptions): void
+  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void
@@ -141,8 +141,14 @@ export default function useForm<TForm extends FormDataType>(
       )
       return this
     },
-    submit(method, url, options: FormOptions = {}) {
+    submit(...args) {
+      const objectPassed = typeof args[0] === 'object'
+
+      const method = objectPassed ? args[0].method : args[0]
+      const url = objectPassed ? args[0].url : args[1]
+      const options = (objectPassed ? args[1] : args[2]) ?? {}
       const data = transform(this.data()) as RequestPayload
+
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
         onCancelToken: (token: { cancel: () => void }) => {
