@@ -1,15 +1,15 @@
 ---
-name: Bug Report - Vue 3
-about: Submit a Vue 3 related issue.
+name: Bug Report - Vue
+about: Submit a Vue related issue.
 title: ''
-labels: vue.js v3
+labels: vue.js
 assignees: ''
 
 ---
 
 ### Version:
 
-- `@inertiajs/vue3` version: #.#.#
+- `@inertiajs/vue` version: #.#.#
 
 ### Describe the problem:
 
