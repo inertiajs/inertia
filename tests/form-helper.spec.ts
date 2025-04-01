@@ -237,6 +237,22 @@ test.describe('Form Helper', () => {
     })
   })
 
+  test.describe('Dirty', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      page.goto('/form-helper/dirty')
+    })
+
+    test('can check if the form is dirty', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'Joe')
+      await expect(page.locator('#name')).toHaveValue('Joe')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+      await page.getByRole('button', { name: 'Submit form' }).click()
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
+  })
+
   test.describe('Data', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)

@@ -1,0 +1,29 @@
+import { useForm } from '@inertiajs/react'
+
+export default (props) => {
+  const form = useForm({ name: 'foo' })
+
+  const submit = () => {
+    form.post('')
+  }
+
+  return (
+    <div>
+      <div>Form is {form.isDirty ? 'dirty' : 'clean'}</div>
+      <label>
+        Full Name
+        <input
+          type="text"
+          id="name"
+          name="name"
+          onChange={(e) => form.setData('name', e.target.value)}
+          value={form.data.name}
+        />
+      </label>
+
+      <button onClick={submit} className="submit">
+        Submit form
+      </button>
+    </div>
+  )
+}
