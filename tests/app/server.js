@@ -128,6 +128,15 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.get('/form-helper/dirty', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Dirty',
+    props: {},
+  }),
+)
+
+app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Errors',
