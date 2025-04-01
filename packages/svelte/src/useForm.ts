@@ -15,10 +15,10 @@ import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import { writable, type Writable } from 'svelte/store'
 
-type FormDataType = Record<string, FormDataConvertible>
+type FormDataType<T> = Record<keyof T, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
   errors: Partial<Record<keyof TForm, string>>
   hasErrors: boolean
@@ -37,23 +37,23 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: (keyof TForm)[]): this
   setError(field: keyof TForm, value: string): this
   setError(errors: Errors): this
-  submit(method: Method, url: string, options?: FormOptions): void
-  get(url: string, options?: FormOptions): void
-  post(url: string, options?: FormOptions): void
-  put(url: string, options?: FormOptions): void
-  patch(url: string, options?: FormOptions): void
-  delete(url: string, options?: FormOptions): void
+  submit(method: Method, url: string, options?: Partial<FormOptions>): void
+  get(url: string, options?: Partial<FormOptions>): void
+  post(url: string, options?: Partial<FormOptions>): void
+  put(url: string, options?: Partial<FormOptions>): void
+  patch(url: string, options?: Partial<FormOptions>): void
+  delete(url: string, options?: Partial<FormOptions>): void
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType> = InertiaFormProps<TForm> & TForm
+export type InertiaForm<TForm extends FormDataType<TForm>> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
@@ -86,7 +86,7 @@ export default function useForm<TForm extends FormDataType>(
       return Object.keys(data).reduce((carry, key) => {
         carry[key] = this[key]
         return carry
-      }, {} as FormDataType) as TForm
+      }, {} as FormDataType<TForm>) as TForm
     },
     transform(callback) {
       transform = callback
@@ -114,7 +114,7 @@ export default function useForm<TForm extends FormDataType>(
             .reduce((carry, key) => {
               carry[key] = clonedData[key]
               return carry
-            }, {} as FormDataType) as TForm,
+            }, {} as FormDataType<TForm>) as TForm,
         )
       }
 
@@ -141,7 +141,7 @@ export default function useForm<TForm extends FormDataType>(
       )
       return this
     },
-    submit(method, url, options: FormOptions = {}) {
+    submit(method, url, options: Partial<FormOptions> = {}) {
       const data = transform(this.data()) as RequestPayload
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
