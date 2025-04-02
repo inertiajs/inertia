@@ -8,7 +8,7 @@
   } from '@inertiajs/core'
   import { inertia } from '../index'
 
-  export let href: string
+  export let href: string | { url: string; method: Method } = ''
   export let as: keyof HTMLElementTagNameMap = 'a'
   export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
@@ -22,6 +22,9 @@
   export let async: boolean = false
   export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
   export let cacheFor: CacheForOption | CacheForOption[] = 0
+
+  method = typeof href === 'object' ? href.method : method
+  href = typeof href === 'object' ? href.url : href
 
   $: asProp = method !== 'get' ? 'button' : as.toLowerCase()
   $: elProps =

@@ -66,6 +66,8 @@ test.describe('methods', () => {
     { method: 'put', label: 'PUT', el: 'button' },
     { method: 'patch', label: 'PATCH', el: 'button' },
     { method: 'delete', label: 'DELETE', el: 'button' },
+    { method: 'post', label: 'OBJECT', el: 'button' },
+    { method: 'post', label: 'OBJECT METHOD OVERRIDE', el: 'button' },
   ] as const
 
   data.forEach(({ method, label, el }) => {

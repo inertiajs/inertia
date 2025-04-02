@@ -20,6 +20,12 @@ export default (props) => {
       <Link as="button" method="delete" href="/dump/delete" className="delete">
         DELETE Link
       </Link>
+      <Link as="button" href={{ url: '/dump/post', method: 'post' }}>
+        OBJECT Link
+      </Link>
+      <Link as="button" href={{ url: '/dump/post', method: 'post' }} method="put">
+        OBJECT METHOD OVERRIDE Link
+      </Link>
     </div>
   )
 }
