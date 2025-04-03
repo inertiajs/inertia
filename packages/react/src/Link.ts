@@ -16,7 +16,7 @@ const noop = () => undefined
 interface BaseInertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
-  href: string
+  href: string | { url: string; method: Method }
   method?: Method
   headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<Element>) => void
@@ -78,9 +78,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const hoverTimeout = useRef<number>(null)
 
     as = as.toLowerCase()
-    method = method.toLowerCase() as Method
-    const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
-    href = _href
+    method = typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
+    const [_href, _data] = mergeDataIntoQueryString(
+      method,
+      typeof href === 'object' ? href.url : href || '',
+      data,
+      queryStringArrayFormat,
+    )
+    const url = _href
     data = _data
 
     const baseParams = {
@@ -114,7 +119,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const doPrefetch = () => {
-      router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+      router.prefetch(url, baseParams, { cacheFor: cacheForValue })
     }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
@@ -171,7 +176,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         if (shouldIntercept(event)) {
           event.preventDefault()
 
-          router.visit(href, visitParams)
+          router.visit(url, visitParams)
         }
       },
     }
@@ -197,7 +202,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
       onMouseUp: (event) => {
         event.preventDefault()
-        router.visit(href, visitParams)
+        router.visit(url, visitParams)
       },
       onClick: (event) => {
         onClick(event)
@@ -214,7 +219,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const elProps = {
-      a: { href },
+      a: { href: url },
       button: { type: 'button' },
     }
 

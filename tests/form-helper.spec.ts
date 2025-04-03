@@ -14,6 +14,8 @@ test.describe('Form Helper', () => {
       { method: 'put', label: 'PUT' },
       { method: 'patch', label: 'PATCH' },
       { method: 'delete', label: 'DELETE' },
+      { method: 'post', label: 'SUBMIT' },
+      { method: 'post', label: 'SUBMIT OBJECT' },
     ] as const
 
     data.forEach(({ method, label }) => {
@@ -232,6 +234,22 @@ test.describe('Form Helper', () => {
       await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await handleError.textContent()).toEqual('Manually set Handle error')
       await expect(await nameError.textContent()).toEqual('Manually set Name error')
+    })
+  })
+
+  test.describe('Dirty', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      page.goto('/form-helper/dirty')
+    })
+
+    test('can check if the form is dirty', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'Joe')
+      await expect(page.locator('#name')).toHaveValue('Joe')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+      await page.getByRole('button', { name: 'Submit form' }).click()
+      await expect(page.getByText('Form is clean')).toBeVisible()
     })
   })
 

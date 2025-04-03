@@ -9,7 +9,7 @@ interface DeferredProps {
 
 const Deferred = ({ children, data, fallback }: DeferredProps) => {
   if (!data) {
-    throw new Error('`<Deferred>` requires a `data` prop')
+    throw new Error('`<Deferred>` requires a `data` prop to be a string or array of strings')
   }
 
   const [loaded, setLoaded] = useState(false)
