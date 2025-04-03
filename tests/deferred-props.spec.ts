@@ -88,3 +88,54 @@ test('props will re-defer if a link is clicked to go to the same page again', as
   await expect(page.getByText('foo value')).toBeVisible()
   await expect(page.getByText('bar value')).toBeVisible()
 })
+
+const shoulReload = ['only']
+
+shoulReload.forEach((type) => {
+  test(`it will handle partial reloads properly when deferred is being reloaded (${type})`, async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React only test')
+
+    await page.goto(`/deferred-props/with-partial-reload/${type}`)
+
+    await expect(page.getByText('Loading...')).toBeVisible()
+
+    await page.waitForResponse(page.url())
+
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+
+    const responsePromise = page.waitForResponse(page.url())
+
+    await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
+    await expect(page.getByText('Loading...')).toBeVisible()
+
+    await responsePromise
+
+    await expect(page.getByText('John Doe')).toBeVisible()
+  })
+})
+
+const noReload = ['except', 'only-other', 'none', 'except-other']
+
+noReload.forEach((type) => {
+  test(`it will handle partial reloads properly when deferred is not reloaded (${type})`, async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React only test')
+
+    await page.goto(`/deferred-props/with-partial-reload/${type}`)
+
+    await expect(page.getByText('Loading...')).toBeVisible()
+
+    await page.waitForResponse(page.url())
+
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+
+    const responsePromise = page.waitForResponse(page.url())
+    await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+
+    await responsePromise
+
+    await expect(page.getByText('John Doe')).toBeVisible()
+  })
+})
