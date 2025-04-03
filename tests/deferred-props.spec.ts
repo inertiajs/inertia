@@ -93,6 +93,8 @@ const shoulReload = ['only']
 
 shoulReload.forEach((type) => {
   test(`it will handle partial reloads properly when deferred is being reloaded (${type})`, async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React only test')
+
     await page.goto(`/deferred-props/with-partial-reload/${type}`)
 
     await expect(page.getByText('Loading...')).toBeVisible()
@@ -117,6 +119,8 @@ const noReload = ['except', 'only-other', 'none', 'except-other']
 
 noReload.forEach((type) => {
   test(`it will handle partial reloads properly when deferred is not reloaded (${type})`, async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React only test')
+
     await page.goto(`/deferred-props/with-partial-reload/${type}`)
 
     await expect(page.getByText('Loading...')).toBeVisible()
