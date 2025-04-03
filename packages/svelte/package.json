@@ -44,8 +44,8 @@
   },
   "dependencies": {
     "@inertiajs/core": "2.0.6",
-    "html-escape": "^2.0.0",
-    "lodash": "^4.5.0"
+    "es-toolkit": "^1.33.0",
+    "html-escape": "^2.0.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
@@ -53,7 +53,6 @@
     "@sveltejs/package": "^2.3.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/html-escape": "^2.0.2",
-    "@types/lodash": "^4.17.7",
     "axios": "^1.8.2",
     "publint": "^0.2.10",
     "svelte": "^4.2.16",
