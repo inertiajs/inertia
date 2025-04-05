@@ -59,7 +59,7 @@
     "svelte-check": "^4.0.0",
     "tslib": "^2.7.0",
     "typescript": "^5.5.4",
-    "vite": "^5.4.16"
+    "vite": "^5.4.17"
   },
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
