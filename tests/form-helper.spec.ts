@@ -766,3 +766,58 @@ test.describe('Form Helper', () => {
     })
   })
 })
+
+test.describe('Nested', () => {
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    page.goto('/form-helper/nested')
+  })
+
+  test('can handle nested data', async ({ page }) => {
+    await expect(await page.locator('#name').inputValue()).toEqual('foo')
+    await expect(await page.locator('#street').inputValue()).toEqual('123 Main St')
+    await expect(await page.locator('#city').inputValue()).toEqual('New York')
+    await expect(await page.locator('#foo').isChecked()).toEqual(true)
+    await expect(await page.locator('#bar').isChecked()).toEqual(true)
+    await expect(await page.locator('#baz').isChecked()).toEqual(false)
+    await expect(await page.locator('#repo-name').inputValue()).toEqual('inertiajs/inertia')
+    await expect(await page.locator('#organization-name').inputValue()).toEqual('Inertia')
+    await expect(await page.locator('#tag-0').isChecked()).toEqual(true)
+    await expect(await page.locator('#tag-1').isChecked()).toEqual(true)
+    await expect(await page.locator('#tag-2').isChecked()).toEqual(false)
+
+    await page.fill('#name', 'Joe')
+    await expect(page.locator('#name')).toHaveValue('Joe')
+
+    await page.fill('#street', '456 Elm St')
+    await expect(page.locator('#street')).toHaveValue('456 Elm St')
+
+    await page.check('#baz')
+    await expect(page.locator('#baz')).toBeChecked()
+
+    await page.uncheck('#bar')
+    await expect(page.locator('#bar')).not.toBeChecked()
+
+    await page.fill('#repo-name', 'inertiajs/inersha')
+    await expect(page.locator('#repo-name')).toHaveValue('inertiajs/inersha')
+
+    await page.check('#tag-2')
+    await expect(page.locator('#tag-2')).toBeChecked()
+
+    await page.uncheck('#tag-0')
+    await expect(page.locator('#tag-0')).not.toBeChecked()
+
+    await page.getByRole('button', { name: 'Submit form' }).click()
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toEqual('post')
+    await expect(dump.query).toEqual({})
+    await expect(dump.form.name).toEqual('Joe')
+    await expect(dump.form.address.street).toEqual('456 Elm St')
+    await expect(dump.form.address.city).toEqual('New York')
+    await expect(dump.form.checked).toEqual(['foo', 'baz'])
+    await expect(dump.form.organization.repo.name).toEqual('inertiajs/inersha')
+    await expect(dump.form.organization.name).toEqual('Inertia')
+    await expect(dump.form.organization.repo.tags).toEqual(['v0.2', 'v0.3'])
+  })
+})
