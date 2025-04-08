@@ -1,12 +1,20 @@
-import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import {
+  FormDataConvertible,
+  FormDataKeys,
+  FormDataValues,
+  Method,
+  Progress,
+  router,
+  VisitOptions,
+} from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-type setDataByObject<TForm> = (data: TForm) => void
-type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type setDataByKeyValuePair<TForm> = (key: FormDataKeys<TForm>, value: any) => void
+type SetDataByObject<TForm> = (data: TForm) => void
+type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
@@ -19,7 +27,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
+  setData: SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
   transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
   setDefaults(field: FormDataKeys<TForm>, value: FormDataConvertible): void

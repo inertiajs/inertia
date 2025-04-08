@@ -25,6 +25,16 @@ export type FormDataKeys<T> = {
   [K in keyof T & string]: T[K] extends object ? (T[K] extends Array<any> ? K : `${K}.${FormDataKeys<T[K]>}` | K) : K
 }[keyof T & string]
 
+export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
+  ? P extends keyof T
+    ? Rest extends FormDataKeys<T[P]>
+      ? FormDataValues<T[P], Rest>
+      : never
+    : never
+  : K extends keyof T
+    ? T[K]
+    : never
+
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
