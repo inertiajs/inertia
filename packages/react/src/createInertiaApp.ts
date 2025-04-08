@@ -45,7 +45,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOpti
         includeCSS?: boolean
         showSpinner?: boolean
       }
-  setup(options: SetupOptions<HTMLElement | null, SharedProps>): CreateInertiaAppSetupReturnType
+  setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
 
 type CreateInertiaAppSSRContent = { head: string[]; body: string }
@@ -76,7 +76,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 > {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const initialPage = page || JSON.parse(el.dataset.page)
   // @ts-expect-error
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
