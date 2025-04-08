@@ -1,4 +1,4 @@
-.import {
+import {
   FormDataConvertible,
   FormDataKeys,
   FormDataValues,
