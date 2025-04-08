@@ -21,6 +21,17 @@
   const deleteForm = () => {
     $form.delete('/dump/delete')
   }
+
+  const submitForm = () => {
+    $form.submit('post', '/dump/post')
+  }
+
+  const submitFormObject = () => {
+    $form.submit({
+      method: 'post',
+      url: '/dump/post',
+    })
+  }
 </script>
 
 <div>
@@ -37,4 +48,6 @@
   <button on:click={putForm} class="put">PUT form</button>
   <button on:click={patchForm} class="patch">PATCH form</button>
   <button on:click={deleteForm} class="delete">DELETE form</button>
+  <button on:click={submitForm} class="submit">SUBMIT form</button>
+  <button on:click={submitFormObject} class="submit-object">SUBMIT OBJECT form</button>
 </div>

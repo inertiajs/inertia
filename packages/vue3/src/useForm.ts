@@ -1,5 +1,5 @@
 import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import { cloneDeep, get, has, isEqual, set } from 'lodash'
+import { cloneDeep, get, has, isEqual, set } from 'es-toolkit'
 import { reactive, watch } from 'vue'
 
 type FormDataType = Record<string, FormDataConvertible>
@@ -22,7 +22,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
   setError(errors: Record<FormDataKeys<TForm>, string>): this
-  submit(method: Method, url: string, options?: FormOptions): void
+  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void
@@ -95,7 +95,7 @@ export default function useForm<TForm extends FormDataType>(
         defaults = clonedData
         Object.assign(this, resolvedData)
       } else {
-        (fields as Array<FormDataKeys<TForm>>)
+        ;(fields as Array<FormDataKeys<TForm>>)
           .filter((key) => has(clonedData, key))
           .forEach((key) => {
             set(defaults, key, get(clonedData, key))
@@ -125,7 +125,13 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    submit(method, url, options: FormOptions = {}) {
+    submit(...args) {
+      const objectPassed = typeof args[0] === 'object'
+
+      const method = objectPassed ? args[0].method : args[0]
+      const url = objectPassed ? args[0].url : args[1]
+      const options = (objectPassed ? args[1] : args[2]) ?? {}
+
       const data = transform(this.data())
       const _options = {
         ...options,

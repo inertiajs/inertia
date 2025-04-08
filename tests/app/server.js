@@ -128,6 +128,15 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.get('/form-helper/dirty', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Dirty',
+    props: {},
+  }),
+)
+
+app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Errors',
@@ -287,6 +296,52 @@ app.get('/deferred-props/page-1', (req, res) => {
         props: {
           foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
           bar: req.headers['x-inertia-partial-data']?.includes('bar') ? { text: 'bar value' } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
+app.get('/deferred-props/with-partial-reload/:mode', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithPartialReload',
+      deferredProps: {
+        default: ['users'],
+      },
+      props: {
+        withOnly: (() => {
+          if (req.params.mode === 'only') {
+            return ['users']
+          }
+
+          if (req.params.mode === 'only-other') {
+            return ['other']
+          }
+
+          return []
+        })(),
+        withExcept: (() => {
+          if (req.params.mode === 'except') {
+            return ['users']
+          }
+
+          if (req.params.mode === 'except-other') {
+            return ['other']
+          }
+
+          return []
+        })(),
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithPartialReload',
+        props: {
+          users: req.headers['x-inertia-partial-data']?.includes('users') ? [{ id: 1, name: 'John Doe' }] : undefined,
         },
       }),
     500,

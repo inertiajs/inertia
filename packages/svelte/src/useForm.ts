@@ -12,7 +12,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import { cloneDeep, get, has, isEqual, set } from 'lodash'
+import { cloneDeep, get, has, isEqual, set } from 'es-toolkit'
 import { writable, type Writable } from 'svelte/store'
 
 type FormDataType = Record<string, FormDataConvertible>
@@ -37,7 +37,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
   setError(errors: Errors): this
-  submit(method: Method, url: string, options?: FormOptions): void
+  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void
@@ -140,8 +140,14 @@ export default function useForm<TForm extends FormDataType>(
       )
       return this
     },
-    submit(method, url, options: FormOptions = {}) {
+    submit(...args) {
+      const objectPassed = typeof args[0] === 'object'
+
+      const method = objectPassed ? args[0].method : args[0]
+      const url = objectPassed ? args[0].url : args[1]
+      const options = (objectPassed ? args[1] : args[2]) ?? {}
       const data = transform(this.data()) as RequestPayload
+
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
         onCancelToken: (token: { cancel: () => void }) => {
@@ -182,6 +188,7 @@ export default function useForm<TForm extends FormDataType>(
           this.clearErrors()
           this.setStore('wasSuccessful', true)
           this.setStore('recentlySuccessful', true)
+          this.defaults(cloneDeep(this.data()))
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
           if (options.onSuccess) {

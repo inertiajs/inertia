@@ -21,6 +21,22 @@ test('can make a location visit', async ({ page }) => {
   await expect(dump['x-inertia']).toBeUndefined()
 })
 
+test('will avoid an extra reload after a location visit', async ({ page }) => {
+  pageLoads.watch(page, 2)
+
+  await page.goto('/links/location')
+  requests.listen(page)
+
+  await expect(requests.requests.length).toBe(0)
+  await page.getByRole('link', { name: 'Location visit' }).click()
+  const dump = await shouldBeDumpPage(page, 'get')
+  await expect(dump['x-inertia']).toBeUndefined()
+  // /location',
+  // /dump/get',
+  // /assets/index-*.js',
+  await expect(requests.requests.length).toBe(3)
+})
+
 test('will automatically cancel a pending visits when a new request is made', async ({ page }) => {
   pageLoads.watch(page)
 
@@ -50,6 +66,8 @@ test.describe('methods', () => {
     { method: 'put', label: 'PUT', el: 'button' },
     { method: 'patch', label: 'PATCH', el: 'button' },
     { method: 'delete', label: 'DELETE', el: 'button' },
+    { method: 'post', label: 'OBJECT', el: 'button' },
+    { method: 'post', label: 'OBJECT METHOD OVERRIDE', el: 'button' },
   ] as const
 
   data.forEach(({ method, label, el }) => {
