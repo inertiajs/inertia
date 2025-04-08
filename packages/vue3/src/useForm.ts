@@ -1,5 +1,6 @@
 import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import { cloneDeep, get, has, isEqual, set } from 'es-toolkit'
+import { cloneDeep, isEqual } from 'es-toolkit'
+import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 
 type FormDataType = Record<string, FormDataConvertible>
