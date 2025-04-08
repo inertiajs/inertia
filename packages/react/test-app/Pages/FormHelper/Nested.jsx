@@ -128,54 +128,60 @@ export default (props) => {
         />
       </label>
       Repository Tags
-      <input
-        type="checkbox"
-        id="tag-0"
-        name="organization.repo.tags[]"
-        value="v0.1"
-        onChange={(e) =>
-          form.setData(
-            'organization.repo.tags',
-            e.target.checked
-              ? [...form.data.organization.repo.tags, e.target.value]
-              : form.data.organization.repo.tags.filter((item) => item !== e.target.value),
-          )
-        }
-        checked={form.data.organization.repo.tags.includes('v0.1')}
-      />
-      <label htmlFor="tag-0">v0.1</label>
-      <input
-        type="checkbox"
-        id="tag-1"
-        name="organization.repo.tags[]"
-        value="v0.2"
-        onChange={(e) =>
-          form.setData(
-            'organization.repo.tags',
-            e.target.checked
-              ? [...form.data.organization.repo.tags, e.target.value]
-              : form.data.organization.repo.tags.filter((item) => item !== e.target.value),
-          )
-        }
-        checked={form.data.organization.repo.tags.includes('v0.2')}
-      />
-      <label htmlFor="tag-1">v0.2</label>
-      <input
-        type="checkbox"
-        id="tag-2"
-        name="organization.repo.tags[]"
-        value="v0.3"
-        onChange={(e) =>
-          form.setData(
-            'organization.repo.tags',
-            e.target.checked
-              ? [...form.data.organization.repo.tags, e.target.value]
-              : form.data.organization.repo.tags.filter((item) => item !== e.target.value),
-          )
-        }
-        checked={form.data.organization.repo.tags.includes('v0.3')}
-      />
-      <label htmlFor="tag-2">v0.3</label>
+      <label>
+        v0.1
+        <input
+          type="checkbox"
+          id="tag-0"
+          name="organization.repo.tags[]"
+          value="v0.1"
+          onChange={(e) =>
+            form.setData(
+              'organization.repo.tags',
+              e.target.checked
+                ? [...form.data.organization.repo.tags, e.target.value]
+                : form.data.organization.repo.tags.filter((item) => item !== e.target.value),
+            )
+          }
+          checked={form.data.organization.repo.tags.includes('v0.1')}
+        />
+      </label>
+      <label>
+        v0.2
+        <input
+          type="checkbox"
+          id="tag-1"
+          name="organization.repo.tags[]"
+          value="v0.2"
+          onChange={(e) =>
+            form.setData(
+              'organization.repo.tags',
+              e.target.checked
+                ? [...form.data.organization.repo.tags, e.target.value]
+                : form.data.organization.repo.tags.filter((item) => item !== e.target.value),
+            )
+          }
+          checked={form.data.organization.repo.tags.includes('v0.2')}
+        />
+      </label>
+      <label>
+        v0.3
+        <input
+          type="checkbox"
+          id="tag-2"
+          name="organization.repo.tags[]"
+          value="v0.3"
+          onChange={(e) =>
+            form.setData(
+              'organization.repo.tags',
+              e.target.checked
+                ? [...form.data.organization.repo.tags, e.target.value]
+                : form.data.organization.repo.tags.filter((item) => item !== e.target.value),
+            )
+          }
+          checked={form.data.organization.repo.tags.includes('v0.3')}
+        />
+      </label>
       <button onClick={submit} className="submit">
         Submit form
       </button>
