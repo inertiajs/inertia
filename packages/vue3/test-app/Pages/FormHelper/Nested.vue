@@ -21,31 +21,6 @@ const updateData = (key, value) => {
   form.setData(key, value)
 }
 
-const updateChecked = (event, value) => {
-  const checkedItems = form.data.checked
-  if (event.target.checked) {
-    form.setData('checked', [...checkedItems, value])
-  } else {
-    form.setData(
-      'checked',
-      checkedItems.filter((item) => item !== value),
-    )
-  }
-}
-
-const updateRepoTags = (event, tag) => {
-  const tags = form.data.organization.repo.tags
-  if (event.target.checked) {
-    form.setData('organization.repo.tags', [...tags, tag])
-  } else {
-    form.setData(
-      'organization.repo.tags',
-      tags.filter((item) => item !== tag),
-    )
-  }
-}
-
-// Function to submit the form
 const submit = () => {
   form.submit('post', '/dump/post')
 }
