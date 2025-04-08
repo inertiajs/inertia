@@ -21,11 +21,17 @@ export type FormDataConvertible =
   | null
   | undefined
 
-export type FormDataKeys<T> = {
-  [K in keyof T & string]: T[K] extends object ? (T[K] extends Array<any> ? K : `${K}.${FormDataKeys<T[K]>}` | K) : K
-}[keyof T & string]
+export type FormDataKeys<T extends Record<any, any>> = T extends T
+  ? keyof T extends infer Key extends Extract<keyof T, string>
+    ? Key extends Key
+      ? T[Key] extends Record<any, any>
+        ? `${Key}.${FormDataKeys<T[Key]>}` | Key
+        : Key
+      : never
+    : never
+  : never
 
-export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
+export type FormDataValues<T extends Record<any, any>, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
   ? P extends keyof T
     ? Rest extends FormDataKeys<T[P]>
       ? FormDataValues<T[P], Rest>
