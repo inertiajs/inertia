@@ -128,6 +128,12 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.post('/form-helper/nested', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Nested',
+  }),
+)
+
 app.get('/form-helper/dirty', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Dirty',
