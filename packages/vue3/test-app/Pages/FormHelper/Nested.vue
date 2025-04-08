@@ -102,7 +102,3 @@ const submit = () => {
   </div>
   {{ form }}
 </template>
-
-<style scoped>
-/* Add any required styles here */
-</style>
