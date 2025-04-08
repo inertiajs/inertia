@@ -7,9 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.6...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.7...master)
 
 - Nothing yet
+
+## [v2.0.7](https://github.com/inertiajs/inertia/compare/v2.0.6...v2.0.7) - 2025-04-08
+
+### What's Changed
+
+* Added missing pages to React and Svelte5 playrounds by [@Verox001](https://github.com/Verox001) in https://github.com/inertiajs/inertia/pull/2217
+* chore: replace lodash to decrease bundle size by [@lcdss](https://github.com/lcdss) in https://github.com/inertiajs/inertia/pull/2210
+* do not pass url when storing scroll state to history by [@miDeb](https://github.com/miDeb) in https://github.com/inertiajs/inertia/pull/2280
+* fix: react `Deferred` component error on partial visits by [@KaioFelps](https://github.com/KaioFelps) in https://github.com/inertiajs/inertia/pull/2223
+* Bump vite from 5.4.16 to 5.4.17 by [@dependabot](https://github.com/dependabot) in https://github.com/inertiajs/inertia/pull/2295
+* [2.x] SSR clustering by [@RobertBoes](https://github.com/RobertBoes) in https://github.com/inertiajs/inertia/pull/2206
+* Allow Object type for href prop by [@nckrtl](https://github.com/nckrtl) in https://github.com/inertiajs/inertia/pull/2292
+* Update GitHub Actions to Ubuntu 24.04 by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2299
+* [2.x]: Support for nested paths in forms by [@joaopalopes24](https://github.com/joaopalopes24) in https://github.com/inertiajs/inertia/pull/2181
+
+### New Contributors
+
+* [@Verox001](https://github.com/Verox001) made their first contribution in https://github.com/inertiajs/inertia/pull/2217
+* [@lcdss](https://github.com/lcdss) made their first contribution in https://github.com/inertiajs/inertia/pull/2210
+* [@miDeb](https://github.com/miDeb) made their first contribution in https://github.com/inertiajs/inertia/pull/2280
+* [@KaioFelps](https://github.com/KaioFelps) made their first contribution in https://github.com/inertiajs/inertia/pull/2223
+* [@nckrtl](https://github.com/nckrtl) made their first contribution in https://github.com/inertiajs/inertia/pull/2292
+* [@joaopalopes24](https://github.com/joaopalopes24) made their first contribution in https://github.com/inertiajs/inertia/pull/2181
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.6...v2.0.7
 
 ## [v2.0.6](https://github.com/inertiajs/inertia/compare/v2.0.5...v2.0.6)
 
