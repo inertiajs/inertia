@@ -53,7 +53,7 @@ const Link: InertiaLink = defineComponent({
       default: () => ({}),
     },
     href: {
-      type: [String, Object],
+      type: [String, Object] as PropType<InertiaLinkProps['href']>,
       required: true,
     },
     method: {
