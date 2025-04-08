@@ -75,5 +75,4 @@ const submit = () => {
     </label>
     <button @click="submit" class="submit">Submit form</button>
   </div>
-  {{ form }}
 </template>
