@@ -9,7 +9,6 @@ test('it will not encrypt history by default', async ({ page }) => {
   const historyState1 = await page.evaluate(() => window.history.state)
   await expect(historyState1.page.component).toBe('History/Page')
   await expect(historyState1.page.props.pageNumber).toBe('1')
-  await expect(historyState1.timestamp).toBeGreaterThan(0)
   await expect(page.getByText('This is page 1')).toBeVisible()
 
   await clickAndWaitForResponse(page, 'Page 2', '/history/2')
@@ -17,7 +16,6 @@ test('it will not encrypt history by default', async ({ page }) => {
   await expect(historyState2.page.component).toBe('History/Page')
   await expect(historyState2.page.props.pageNumber).toBe('2')
   await expect(page.getByText('This is page 2')).toBeVisible()
-  await expect(historyState2.timestamp).toBeGreaterThan(0)
 
   requests.listen(page)
 
@@ -39,7 +37,6 @@ test('it can encrypt history', async ({ page }) => {
   // but Playwright doesn't transfer it as such over the wire (page.evaluate),
   // so if the object is "empty" and the page check below works, it's working.
   await expect(historyState3.page).toEqual({})
-  await expect(historyState3.timestamp).toBeGreaterThan(0)
 
   requests.listen(page)
 
@@ -52,7 +49,6 @@ test('it can encrypt history', async ({ page }) => {
   const historyState1 = await page.evaluate(() => window.history.state)
   await expect(historyState1.page.component).toBe('History/Page')
   await expect(historyState1.page.props.pageNumber).toBe('1')
-  await expect(historyState1.timestamp).toBeGreaterThan(0)
 
   await page.goForward()
   await page.waitForURL('/history/3')
@@ -110,14 +106,13 @@ test('history can be cleared via props', async ({ page }) => {
   await expect(requests.requests).toHaveLength(1)
 })
 
-test('multi byte strings can be encrypyed', async ({ page }) => {
+test('multi byte strings can be encrypted', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 5', '/history/5')
   const historyState5 = await page.evaluate(() => window.history.state)
   // When history is encrypted, the page is an ArrayBuffer,
   // but Playwright doesn't transfer it as such over the wire (page.evaluate),
   // so if the object is "empty" and the page check below works, it's working.
   await expect(historyState5.page).toEqual({})
-  await expect(historyState5.timestamp).toBeGreaterThan(0)
   await expect(page.getByText('Multi byte character: 😃')).toBeVisible()
 
   await clickAndWaitForResponse(page, 'Page 1', '/history/1')
@@ -131,4 +126,15 @@ test('multi byte strings can be encrypyed', async ({ page }) => {
   await expect(page.getByText('This is page 5')).toBeVisible()
   await expect(requests.requests).toHaveLength(0)
   await expect(page.getByText('Multi byte character: 😃')).toBeVisible()
+})
+
+test('url will update after scrolling and pressing back', async ({ page }) => {
+  // Weird bug that surfaced after setting scroll restoration to manual
+  await page.waitForURL('/history/1')
+  await clickAndWaitForResponse(page, 'Page 5', '/history/5')
+  await page.evaluate(() => (window as any).scrollTo(0, 1000))
+  await page.goBack()
+  await page.waitForURL('/history/1')
+  await page.waitForTimeout(200)
+  await page.waitForURL('/history/1')
 })

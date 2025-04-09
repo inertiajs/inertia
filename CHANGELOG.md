@@ -7,9 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.0...HEAD)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.7...master)
 
-- Nothing
+- Nothing yet
+
+## [v2.0.7](https://github.com/inertiajs/inertia/compare/v2.0.6...v2.0.7) - 2025-04-08
+
+### What's Changed
+
+* Added missing pages to React and Svelte5 playrounds by [@Verox001](https://github.com/Verox001) in https://github.com/inertiajs/inertia/pull/2217
+* chore: replace lodash to decrease bundle size by [@lcdss](https://github.com/lcdss) in https://github.com/inertiajs/inertia/pull/2210
+* do not pass url when storing scroll state to history by [@miDeb](https://github.com/miDeb) in https://github.com/inertiajs/inertia/pull/2280
+* fix: react `Deferred` component error on partial visits by [@KaioFelps](https://github.com/KaioFelps) in https://github.com/inertiajs/inertia/pull/2223
+* Bump vite from 5.4.16 to 5.4.17 by [@dependabot](https://github.com/dependabot) in https://github.com/inertiajs/inertia/pull/2295
+* [2.x] SSR clustering by [@RobertBoes](https://github.com/RobertBoes) in https://github.com/inertiajs/inertia/pull/2206
+* Allow Object type for href prop by [@nckrtl](https://github.com/nckrtl) in https://github.com/inertiajs/inertia/pull/2292
+* Update GitHub Actions to Ubuntu 24.04 by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2299
+* [2.x]: Support for nested paths in forms by [@joaopalopes24](https://github.com/joaopalopes24) in https://github.com/inertiajs/inertia/pull/2181
+
+### New Contributors
+
+* [@Verox001](https://github.com/Verox001) made their first contribution in https://github.com/inertiajs/inertia/pull/2217
+* [@lcdss](https://github.com/lcdss) made their first contribution in https://github.com/inertiajs/inertia/pull/2210
+* [@miDeb](https://github.com/miDeb) made their first contribution in https://github.com/inertiajs/inertia/pull/2280
+* [@KaioFelps](https://github.com/KaioFelps) made their first contribution in https://github.com/inertiajs/inertia/pull/2223
+* [@nckrtl](https://github.com/nckrtl) made their first contribution in https://github.com/inertiajs/inertia/pull/2292
+* [@joaopalopes24](https://github.com/joaopalopes24) made their first contribution in https://github.com/inertiajs/inertia/pull/2181
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.6...v2.0.7
+
+## [v2.0.6](https://github.com/inertiajs/inertia/compare/v2.0.5...v2.0.6)
+
+- Deferred: More descriptive Deferred data prop error ([#2284](https://github.com/inertiajs/inertia/pull/2284))
+- Bump vite from 5.4.12 to 5.4.16 ([#2288](https://github.com/inertiajs/inertia/pull/2288))
+- Fix location return history decryption throwing error ([#2282](https://github.com/inertiajs/inertia/pull/2282))
+- Make isDirty reactive to defaults ([#2236](https://github.com/inertiajs/inertia/pull/2236))
+- Fix playground WhenVisible always ([#2203](https://github.com/inertiajs/inertia/pull/2203))
+- Wayfinder support ([#2290](https://github.com/inertiajs/inertia/pull/2290))
+
+## [v2.0.5](https://github.com/inertiajs/inertia/compare/v2.0.4...v2.0.5)
+
+- Fix history state errors by nicholaspufal ([#2265](https://github.com/inertiajs/inertia/pull/2265))
+- Bump axios from 1.7.9 to 1.8.2 ([#2269](https://github.com/inertiajs/inertia/pull/2269))
+- Bump esbuild from 0.16.17 to 0.25.0 #2231 ([#2231](https://github.com/inertiajs/inertia/pull/2231))
+- Bump vite from 5.4.11 to 5.4.12 ([#2201](https://github.com/inertiajs/inertia/pull/2201))
+
+## [v2.0.4](https://github.com/inertiajs/inertia/compare/v2.0.3...v2.0.4)
+
+- Fix anchor links on initial visits ([#2258](https://github.com/inertiajs/inertia/pull/2258))
+
+## [v2.0.3](https://github.com/inertiajs/inertia/compare/v2.0.2...v2.0.3)
+
+- Fix: Reload on mount ([#2200](https://github.com/inertiajs/inertia/pull/2200))
+
+## [v2.0.2](https://github.com/inertiajs/inertia/compare/v2.0.1...v2.0.2)
+
+- Fix SSR with scroll restoration ([#2190](https://github.com/inertiajs/inertia/pull/2190))
+- Fix for scroll + back bug ([#2191](https://github.com/inertiajs/inertia/pull/2191))
+- Backport 1.x fixes from [v1.3.0](https://github.com/inertiajs/inertia/releases/tag/v1.3.0) release ([#2193](https://github.com/inertiajs/inertia/pull/2193))
+
+## [v2.0.1](https://github.com/inertiajs/inertia/compare/v2.0.0...v2.0.1)
+
+- Fix playground dependencies ([#2070](https://github.com/inertiajs/inertia/pull/2070))
+- Removed Vitest tests + dependencies ([#2175](https://github.com/inertiajs/inertia/pull/2175))
+- Augment `vue` instead of `@vue/runtime-core` ([#2099](https://github.com/inertiajs/inertia/pull/2099))
+- Fix prefetch missing `cacheFor` default value ([#2136](https://github.com/inertiajs/inertia/pull/2136))
+- Fix `useForm` re-renders by memoizing functions in React [#2146](https://github.com/inertiajs/inertia/pull/2146)
+- WhenVisible useEffect function is not recreated when params change. ([#2153](https://github.com/inertiajs/inertia/pull/2153))
+- Ensure callback execution ([#2163](https://github.com/inertiajs/inertia/pull/2163))
+- More resilient logic for stripping the origin from page URLs ([#2164](https://github.com/inertiajs/inertia/pull/2164))
+- Add helper scripts for running tests ([#2173](https://github.com/inertiajs/inertia/pull/2173))
+- Export `InertiaFormProps` in React ([#2161](https://github.com/inertiajs/inertia/pull/2161))
+- Use default empty object in `useForm` Vue and Svelte ([#2052](https://github.com/inertiajs/inertia/pull/2052))
+- Remove `data` option from `useForm` options type ([#2060](https://github.com/inertiajs/inertia/pull/2060))
+- Take over scroll restoration from browser ([#2051](https://github.com/inertiajs/inertia/pull/2051))
 
 ## [v2.0.0](https://github.com/inertiajs/inertia/compare/v1.2.0...v2.0.0)
 

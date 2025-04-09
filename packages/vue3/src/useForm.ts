@@ -1,13 +1,14 @@
-import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import cloneDeep from 'lodash.clonedeep'
-import isEqual from 'lodash.isequal'
+import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { cloneDeep, isEqual } from 'es-toolkit'
+import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 
-type FormDataType = object
+type FormDataType = Record<string, FormDataConvertible>
+type FormOptions = Omit<VisitOptions, 'data'>
 
-interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
-  errors: Partial<Record<keyof TForm, string>>
+  errors: Partial<Record<FormDataKeys<TForm>, string>>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -16,18 +17,18 @@ interface InertiaFormProps<TForm extends FormDataType> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: keyof TForm, value: FormDataConvertible): this
+  defaults(field: FormDataKeys<TForm>, value: FormDataConvertible): this
   defaults(fields: Partial<TForm>): this
-  reset(...fields: (keyof TForm)[]): this
-  clearErrors(...fields: (keyof TForm)[]): this
-  setError(field: keyof TForm, value: string): this
-  setError(errors: Record<keyof TForm, string>): this
-  submit(method: Method, url: string, options?: Partial<VisitOptions>): void
-  get(url: string, options?: Partial<VisitOptions>): void
-  post(url: string, options?: Partial<VisitOptions>): void
-  put(url: string, options?: Partial<VisitOptions>): void
-  patch(url: string, options?: Partial<VisitOptions>): void
-  delete(url: string, options?: Partial<VisitOptions>): void
+  reset(...fields: FormDataKeys<TForm>[]): this
+  clearErrors(...fields: FormDataKeys<TForm>[]): this
+  setError(field: FormDataKeys<TForm>, value: string): this
+  setError(errors: Record<FormDataKeys<TForm>, string>): this
+  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
+  get(url: string, options?: FormOptions): void
+  post(url: string, options?: FormOptions): void
+  put(url: string, options?: FormOptions): void
+  patch(url: string, options?: FormOptions): void
+  delete(url: string, options?: FormOptions): void
   cancel(): void
 }
 
@@ -43,11 +44,11 @@ export default function useForm<TForm extends FormDataType>(
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData
+  const data = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
   const restored = rememberKey
-    ? (router.restore(rememberKey) as { data: TForm; errors: Record<keyof TForm, string> })
+    ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
     : null
-  let defaults = typeof data === 'object' ? cloneDeep(data) : cloneDeep(data())
+  let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
@@ -62,9 +63,8 @@ export default function useForm<TForm extends FormDataType>(
     wasSuccessful: false,
     recentlySuccessful: false,
     data() {
-      return (Object.keys(defaults) as Array<keyof TForm>).reduce((carry, key) => {
-        carry[key] = this[key]
-        return carry
+      return (Object.keys(defaults) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
+        return set(carry, key, get(this, key))
       }, {} as Partial<TForm>) as TForm
     },
     transform(callback) {
@@ -72,41 +72,41 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    defaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
+    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) {
       if (typeof data === 'function') {
         throw new Error('You cannot call `defaults()` when using a function to define your form data.')
       }
 
       if (typeof fieldOrFields === 'undefined') {
         defaults = this.data()
+        this.isDirty = false
       } else {
-        defaults = Object.assign(
-          {},
-          cloneDeep(defaults),
-          typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields,
-        )
+        defaults =
+          typeof fieldOrFields === 'string'
+            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
+            : Object.assign({}, cloneDeep(defaults), fieldOrFields)
       }
 
       return this
     },
     reset(...fields) {
-      const resolvedData = typeof data === 'object' ? cloneDeep(defaults) : cloneDeep(data())
+      const resolvedData = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(defaults)
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
         defaults = clonedData
         Object.assign(this, resolvedData)
       } else {
-        Object.keys(resolvedData)
-          .filter((key) => fields.includes(key))
+        ;(fields as Array<FormDataKeys<TForm>>)
+          .filter((key) => has(clonedData, key))
           .forEach((key) => {
-            defaults[key] = clonedData[key]
-            this[key] = resolvedData[key]
+            set(defaults, key, get(clonedData, key))
+            set(this, key, get(resolvedData, key))
           })
       }
 
       return this
     },
-    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    setError(fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0
@@ -126,7 +126,13 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    submit(method, url, options: VisitOptions = {}) {
+    submit(...args) {
+      const objectPassed = typeof args[0] === 'object'
+
+      const method = objectPassed ? args[0].method : args[0]
+      const url = objectPassed ? args[0].url : args[1]
+      const options = (objectPassed ? args[1] : args[2]) ?? {}
+
       const data = transform(this.data())
       const _options = {
         ...options,

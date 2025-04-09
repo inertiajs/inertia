@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "2.0.0",
+  "version": "2.0.7",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -50,7 +50,7 @@
   "devDependencies": {
     "@playwright/test": "^1.46.1",
     "@types/node": "^22.5.3",
-    "esbuild": "^0.16.13",
+    "esbuild": "^0.25.0",
     "typescript": "^4.9.4",
     "vue": "^3.0.0"
   },
@@ -58,8 +58,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@inertiajs/core": "2.0.0",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.isequal": "^4.5.0"
+    "@inertiajs/core": "2.0.7",
+    "es-toolkit": "^1.33.0"
   }
 }

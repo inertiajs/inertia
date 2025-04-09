@@ -114,6 +114,10 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
+    if (typeof window === 'undefined') {
+      return () => {}
+    }
+
     return eventHandler.onGlobalEvent(type, callback)
   }
 
@@ -152,7 +156,7 @@ export class Router {
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
+      Scroll.save()
     }
 
     const requestParams: PendingVisit & VisitCallbacks = {
@@ -187,7 +191,7 @@ export class Router {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 
-  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor }: PrefetchOptions) {
+  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor = 30_000 }: PrefetchOptions) {
     if (options.method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
     }
@@ -267,7 +271,7 @@ export class Router {
   protected clientVisit(params: ClientSideVisitOptions, { replace = false }: { replace?: boolean } = {}): void {
     const current = currentPage.get()
 
-    const props = typeof params.props === 'function' ? params.props(current.props) : params.props ?? current.props
+    const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
 
     currentPage.set(
       {

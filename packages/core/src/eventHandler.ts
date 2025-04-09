@@ -15,6 +15,7 @@ class EventHandler {
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
+      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
     }
 
     if (typeof document !== 'undefined') {
@@ -71,28 +72,26 @@ class EventHandler {
       url.hash = window.location.hash
 
       history.replaceState({ ...currentPage.get(), url: url.href })
-      Scroll.reset(currentPage.get())
+      Scroll.reset()
 
       return
     }
 
-    if (history.isValidState(state)) {
-      history
-        .decrypt(state.page)
-        .then((data) => {
-          currentPage.setQuietly(data, { preserveState: false }).then(() => {
-            Scroll.restore(currentPage.get())
-            fireNavigateEvent(currentPage.get())
-          })
-        })
-        .catch(() => {
-          this.onMissingHistoryItem()
-        })
-
-      return
+    if (!history.isValidState(state)) {
+      return this.onMissingHistoryItem()
     }
 
-    this.onMissingHistoryItem()
+    history
+      .decrypt(state.page)
+      .then((data) => {
+        currentPage.setQuietly(data, { preserveState: false }).then(() => {
+          Scroll.restore(history.getScrollRegions())
+          fireNavigateEvent(currentPage.get())
+        })
+      })
+      .catch(() => {
+        this.onMissingHistoryItem()
+      })
   }
 }
 
