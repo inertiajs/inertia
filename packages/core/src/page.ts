@@ -105,6 +105,7 @@ class CurrentPage {
     return this.resolve(page.component).then((component) => {
       this.page = page
       this.cleared = false
+      history.setCurrent(page)
       return this.swap({ component, page, preserveState })
     })
   }
@@ -126,7 +127,9 @@ class CurrentPage {
   }
 
   public setUrlHash(hash: string): void {
-    this.page.url += hash
+    if (!this.page.url.includes(hash)) {
+      this.page.url += hash
+    }
   }
 
   public remember(data: Page['rememberedState']): void {

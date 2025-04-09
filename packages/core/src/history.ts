@@ -5,8 +5,8 @@ import { SessionStorage } from './sessionStorage'
 import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
-
 const queue = new Queue<Promise<void>>()
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 
 class History {
   public rememberedState = 'rememberedState' as const
@@ -39,7 +39,6 @@ class History {
 
     if (this.preserveUrl) {
       cb && cb()
-
       return
     }
 
@@ -47,15 +46,18 @@ class History {
 
     queue.add(() => {
       return this.getPageData(page).then((data) => {
-        window.history.pushState(
-          {
-            page: data,
-          },
-          '',
-          page.url,
-        )
+        // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+        // Ensure any previous history.replaceState completes before pushState is executed.
+        const doPush = () => {
+          this.doPushState({ page: data }, page.url)
+          cb && cb()
+        }
 
-        cb && cb()
+        if (isChromeIOS) {
+          setTimeout(doPush)
+        } else {
+          doPush()
+        }
       })
     })
   }
@@ -99,12 +101,15 @@ class History {
   public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
     queue.add(() => {
       return Promise.resolve().then(() => {
+        if (!window.history.state?.page) {
+          return
+        }
+
         this.doReplaceState(
           {
             page: window.history.state.page,
             scrollRegions,
-          },
-          this.current.url!,
+          }
         )
       })
     })
@@ -113,23 +118,26 @@ class History {
   public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
     queue.add(() => {
       return Promise.resolve().then(() => {
+        if (!window.history.state?.page) {
+          return
+        }
+
         this.doReplaceState(
           {
             page: window.history.state.page,
             documentScrollPosition: scrollRegion,
-          },
-          this.current.url!,
+          }
         )
       })
     })
   }
 
   public getScrollRegions(): ScrollRegion[] {
-    return window.history.state.scrollRegions || []
+    return window.history.state?.scrollRegions || []
   }
 
   public getDocumentScrollPosition(): ScrollRegion {
-    return window.history.state.documentScrollPosition || { top: 0, left: 0 }
+    return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
 
   public replaceState(page: Page, cb: (() => void) | null = null): void {
@@ -141,7 +149,6 @@ class History {
 
     if (this.preserveUrl) {
       cb && cb()
-
       return
     }
 
@@ -149,14 +156,18 @@ class History {
 
     queue.add(() => {
       return this.getPageData(page).then((data) => {
-        this.doReplaceState(
-          {
-            page: data,
-          },
-          page.url,
-        )
+        // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+        // Ensure any previous history.pushState completes before replaceState is executed.
+        const doReplace = () => {
+          this.doReplaceState({ page: data }, page.url)
+          cb && cb()
+        }
 
-        cb && cb()
+        if (isChromeIOS) {
+          setTimeout(doReplace)
+        } else {
+          doReplace()
+        }
       })
     })
   }
@@ -167,7 +178,7 @@ class History {
       scrollRegions?: ScrollRegion[]
       documentScrollPosition?: ScrollRegion
     },
-    url: string,
+    url?: string,
   ): void {
     window.history.replaceState(
       {
@@ -178,6 +189,17 @@ class History {
       '',
       url,
     )
+  }
+
+  protected doPushState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url: string,
+  ): void {
+    window.history.pushState(data, '', url)
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
@@ -200,6 +222,10 @@ class History {
     SessionStorage.remove(historySessionStorageKeys.iv)
   }
 
+  public setCurrent(page: Page): void {
+    this.current = page
+  }
+
   public isValidState(state: any): boolean {
     return !!state.page
   }
@@ -209,7 +235,7 @@ class History {
   }
 }
 
-if (window.history.scrollRestoration) {
+if (typeof window !== 'undefined' && window.history.scrollRestoration) {
   window.history.scrollRestoration = 'manual'
 }
 

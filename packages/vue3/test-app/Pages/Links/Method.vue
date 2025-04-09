@@ -11,5 +11,7 @@ import { Link } from '@inertiajs/vue3'
     <Link as="button" method="put" href="/dump/put" class="put">PUT Link</Link>
     <Link as="button" method="patch" href="/dump/patch" class="patch">PATCH Link</Link>
     <Link as="button" method="delete" href="/dump/delete" class="delete">DELETE Link</Link>
+    <Link as="button" :href="{ url: '/dump/post', method: 'post' }">OBJECT Link</Link>
+    <Link as="button" :href="{ url: '/dump/post', method: 'post' }" method="put">OBJECT METHOD OVERRIDE Link</Link>
   </div>
 </template>

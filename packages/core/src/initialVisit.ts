@@ -61,7 +61,7 @@ export class InitialVisit {
     }
 
     history
-      .decrypt()
+      .decrypt(currentPage.get())
       .then(() => {
         const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
         const scrollRegions = history.getScrollRegions()
@@ -92,7 +92,10 @@ export class InitialVisit {
       currentPage.setUrlHash(window.location.hash)
     }
 
-    currentPage.set(currentPage.get(), { preserveState: true }).then(() => {
+    currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true }).then(() => {
+      if (navigationType.isReload()) {
+        Scroll.restore(history.getScrollRegions())
+      }
       fireNavigateEvent(currentPage.get())
     })
   }

@@ -106,7 +106,7 @@ test('history can be cleared via props', async ({ page }) => {
   await expect(requests.requests).toHaveLength(1)
 })
 
-test('multi byte strings can be encrypyed', async ({ page }) => {
+test('multi byte strings can be encrypted', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 5', '/history/5')
   const historyState5 = await page.evaluate(() => window.history.state)
   // When history is encrypted, the page is an ArrayBuffer,
@@ -126,4 +126,15 @@ test('multi byte strings can be encrypyed', async ({ page }) => {
   await expect(page.getByText('This is page 5')).toBeVisible()
   await expect(requests.requests).toHaveLength(0)
   await expect(page.getByText('Multi byte character: 😃')).toBeVisible()
+})
+
+test('url will update after scrolling and pressing back', async ({ page }) => {
+  // Weird bug that surfaced after setting scroll restoration to manual
+  await page.waitForURL('/history/1')
+  await clickAndWaitForResponse(page, 'Page 5', '/history/5')
+  await page.evaluate(() => (window as any).scrollTo(0, 1000))
+  await page.goBack()
+  await page.waitForURL('/history/1')
+  await page.waitForTimeout(200)
+  await page.waitForURL('/history/1')
 })

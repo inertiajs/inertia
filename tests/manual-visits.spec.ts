@@ -866,6 +866,11 @@ test.describe('Partial Reloads', () => {
   })
 })
 
+test('can reload on mount', async ({ page }) => {
+  await page.goto('/visits/reload-on-mount')
+  await expect(page.getByText('Name is mounted!')).toBeVisible()
+})
+
 test.describe('Error bags', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
