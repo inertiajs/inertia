@@ -9,7 +9,8 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {
-    "@inertiajs/svelte": "2.0.6",
+    "@inertiajs/core": "file:../../packages/core",
+    "@inertiajs/svelte": "file:../../packages/svelte",
     "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
     "@tsconfig/svelte": "^5.0.4",
     "autoprefixer": "^10.4.13",
