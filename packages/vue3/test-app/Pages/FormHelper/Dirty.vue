@@ -1,9 +1,17 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
-const form = useForm({ name: 'foo' })
+const form = useForm({ name: 'foo', foo: [] })
 
 const submit = () => {
   form.post('')
+}
+
+const defaults = () => {
+  form.defaults()
+}
+
+const pushValue = () => {
+  form.foo.push('bar')
 }
 </script>
 
@@ -16,5 +24,9 @@ const submit = () => {
     </label>
 
     <button @click="submit" class="submit">Submit form</button>
+
+    <button @click="defaults" class="defaults">Defaults</button>
+
+    <button @click="pushValue" class="push">Push value</button>
   </div>
 </template>
