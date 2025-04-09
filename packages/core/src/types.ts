@@ -62,6 +62,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps?: string[]
+  deepMergeProps?: string[]
 
   /** @internal */
   rememberedState: Record<string, unknown>

@@ -284,6 +284,29 @@ app.get('/merge-props', (req, res) => {
   })
 })
 
+app.get('/deep-merge-props', (req, res) => {
+  const labels = ['first', 'second', 'third', 'fourth', 'fifth']
+
+  const page = parseInt(req.query.page ?? -1, 10) + 1
+
+  inertia.render(req, res, {
+    component: 'DeepMergeProps',
+    props: {
+      bar: new Array(5).fill(1),
+      baz: new Array(5).fill(1),
+      foo: {
+        data: new Array(5).fill(1),
+        page,
+        per_page: 5,
+        meta: {
+          label: labels[page],
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['foo', 'baz'] }),
+  })
+})
+
 app.get('/deferred-props/page-1', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
