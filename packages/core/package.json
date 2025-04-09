@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "2.0.3",
+  "version": "2.0.7",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -51,16 +51,16 @@
     "test": "vitest"
   },
   "dependencies": {
-    "axios": "^1.6.0",
+    "axios": "^1.8.2",
     "deepmerge": "^4.0.0",
     "qs": "^6.9.0"
   },
   "devDependencies": {
     "@types/deepmerge": "^2.2.0",
-    "@types/node": "^14.0",
+    "@types/node": "^18.4",
     "@types/nprogress": "^0.2.0",
     "@types/qs": "^6.9.0",
-    "esbuild": "^0.16.13",
+    "esbuild": "^0.25.0",
     "esbuild-node-externals": "^1.6.0",
     "typescript": "^4.9.4"
   }

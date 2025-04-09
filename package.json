@@ -11,7 +11,8 @@
     "test:svelte": "cd tests && PACKAGE=svelte npx playwright test",
     "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
     "test:vue": "cd tests && PACKAGE=vue3 npx playwright test",
-    "test:vue:watch": "cd packages/vue3/test-app && npm run watch"
+    "test:vue:watch": "cd packages/vue3/test-app && npm run watch",
+    "build:all": "cd packages/core && npm run build && cd ../react && npm run build && cd ../vue3 && npm run build && cd ../svelte && npm run build"
   },
   "dependencies": {
     "prettier": "^3.2.5",

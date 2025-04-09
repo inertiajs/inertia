@@ -109,8 +109,7 @@ class History {
           {
             page: window.history.state.page,
             scrollRegions,
-          },
-          this.current.url!,
+          }
         )
       })
     })
@@ -119,23 +118,26 @@ class History {
   public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
     queue.add(() => {
       return Promise.resolve().then(() => {
+        if (!window.history.state?.page) {
+          return
+        }
+
         this.doReplaceState(
           {
             page: window.history.state.page,
             documentScrollPosition: scrollRegion,
-          },
-          this.current.url!,
+          }
         )
       })
     })
   }
 
   public getScrollRegions(): ScrollRegion[] {
-    return window.history.state.scrollRegions || []
+    return window.history.state?.scrollRegions || []
   }
 
   public getDocumentScrollPosition(): ScrollRegion {
-    return window.history.state.documentScrollPosition || { top: 0, left: 0 }
+    return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
 
   public replaceState(page: Page, cb: (() => void) | null = null): void {
@@ -176,7 +178,7 @@ class History {
       scrollRegions?: ScrollRegion[]
       documentScrollPosition?: ScrollRegion
     },
-    url: string,
+    url?: string,
   ): void {
     window.history.replaceState(
       {
