@@ -251,6 +251,16 @@ test.describe('Form Helper', () => {
       await page.getByRole('button', { name: 'Submit form' }).click()
       await expect(page.getByText('Form is clean')).toBeVisible()
     })
+
+    test('form should be dirty after setting the defaults', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.getByRole('button', { name: 'Defaults' }).click()
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.getByRole('button', { name: 'Push value' }).click()
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+    })
   })
 
   test.describe('Data', () => {
