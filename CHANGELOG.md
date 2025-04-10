@@ -7,9 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.7...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.8...master)
 
 - Nothing yet
+
+## [v2.0.8](https://github.com/inertiajs/inertia/compare/v2.0.7...v2.0.8) - 2025-04-10
+
+### What's Changed
+
+* Add deepMerge Support for Merging Nested Arrays and Objects in Props by [@HichemTab-tech](https://github.com/HichemTab-tech) in https://github.com/inertiajs/inertia/pull/2069
+* fix: build error because of invalid type definitions by [@fxnm](https://github.com/fxnm) in https://github.com/inertiajs/inertia/pull/2301
+* fix(vue/useForm/defaults): untrack before assign by [@Dsaquel](https://github.com/Dsaquel) in https://github.com/inertiajs/inertia/pull/2112
+* Improve type checking of request data by [@7nohe](https://github.com/7nohe) in https://github.com/inertiajs/inertia/pull/2304
+* Remove empty payload from GET requests by [@edgars-vasiljevs](https://github.com/edgars-vasiljevs) in https://github.com/inertiajs/inertia/pull/2305
+
+### New Contributors
+
+* [@HichemTab-tech](https://github.com/HichemTab-tech) made their first contribution in https://github.com/inertiajs/inertia/pull/2069
+* [@fxnm](https://github.com/fxnm) made their first contribution in https://github.com/inertiajs/inertia/pull/2301
+* [@Dsaquel](https://github.com/Dsaquel) made their first contribution in https://github.com/inertiajs/inertia/pull/2112
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.7...v2.0.8
 
 ## [v2.0.7](https://github.com/inertiajs/inertia/compare/v2.0.6...v2.0.7) - 2025-04-08
 
