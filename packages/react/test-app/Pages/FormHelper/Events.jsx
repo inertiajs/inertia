@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react'
+import { useForm, UsePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 
 window.events = []
@@ -33,7 +33,7 @@ const callbacks = (overrides = {}) => ({
 export default (props) => {
   const form = useForm({ name: 'foo', remember: false })
 
-  const page = usePage()
+  const page = UsePage()
 
   useEffect(() => {
     pushData('processing', form.processing)

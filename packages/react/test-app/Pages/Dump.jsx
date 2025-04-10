@@ -1,8 +1,8 @@
-import { usePage } from '@inertiajs/react'
+import { UsePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 
 export default (props) => {
-  const page = usePage()
+  const page = UsePage()
 
   const dump = {
     headers: props.headers,

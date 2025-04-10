@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 import { router } from '.'
-import usePage from './usePage'
+import UsePage from './usePage'
 
 interface DeferredProps {
   children: ReactElement | number | string
@@ -14,7 +14,7 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   }
 
   const [loaded, setLoaded] = useState(false)
-  const pageProps = usePage().props
+  const pageProps = UsePage().props
   const keys = useMemo(() => (Array.isArray(data) ? data : [data]), [data])
 
   useEffect(() => {

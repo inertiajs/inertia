@@ -1,4 +1,4 @@
-import { Deferred, router, usePage } from '@inertiajs/react'
+import { Deferred, router, UsePage } from '@inertiajs/react'
 
 const WithPartialReload = ({ withOnly, withExcept }) => {
   const handleTriggerPartialReload = () => {
@@ -19,7 +19,7 @@ const WithPartialReload = ({ withOnly, withExcept }) => {
 }
 
 const DeferredUsers = () => {
-  const props = usePage().props
+  const props = UsePage().props
 
   return (
     <div>

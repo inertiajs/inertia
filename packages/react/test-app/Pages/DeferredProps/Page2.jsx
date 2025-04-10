@@ -1,19 +1,19 @@
-import { Deferred, Link, usePage } from '@inertiajs/react'
+import { Deferred, Link, UsePage } from '@inertiajs/react'
 
 const Baz = () => {
-  const { baz } = usePage().props
+  const { baz } = UsePage().props
 
   return baz
 }
 
 const Qux = () => {
-  const { qux } = usePage().props
+  const { qux } = UsePage().props
 
   return qux
 }
 
 const Both = () => {
-  const { baz, qux } = usePage().props
+  const { baz, qux } = UsePage().props
 
   return `both ${baz} and ${qux}`
 }

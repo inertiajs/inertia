@@ -1,4 +1,4 @@
-import { Link, router, usePage } from '@inertiajs/react'
+import { Link, router, UsePage } from '@inertiajs/react'
 
 window.messages = []
 
@@ -7,7 +7,7 @@ export default () => {
     file: new File(['foobar'], 'example.bin'),
   }
 
-  const page = usePage()
+  const page = UsePage()
 
   const internalAlert = (...args) => {
     args.forEach((arg) => window.messages.push(arg))

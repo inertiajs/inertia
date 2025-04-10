@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react'
+import { useForm, UsePage } from '@inertiajs/react'
 
 export default (props) => {
   const form = useForm({
@@ -7,7 +7,7 @@ export default (props) => {
     remember: false,
   })
 
-  const page = usePage()
+  const page = UsePage()
 
   const submit = () => {
     form.post(page.url)

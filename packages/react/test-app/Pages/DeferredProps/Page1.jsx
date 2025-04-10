@@ -1,13 +1,13 @@
-import { Deferred, Link, usePage } from '@inertiajs/react'
+import { Deferred, Link, UsePage } from '@inertiajs/react'
 
 const Foo = () => {
-  const { foo } = usePage().props
+  const { foo } = UsePage().props
 
   return foo.text
 }
 
 const Bar = () => {
-  const { bar } = usePage().props
+  const { bar } = UsePage().props
 
   return bar.text
 }

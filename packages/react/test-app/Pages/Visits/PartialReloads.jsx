@@ -1,8 +1,8 @@
-import { router, usePage } from '@inertiajs/react'
+import { router, UsePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 
 export default ({ foo = 0, bar, baz, headers }) => {
-  const page = usePage()
+  const page = UsePage()
 
   useEffect(() => {
     window._inertia_props = page.props
