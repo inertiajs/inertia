@@ -1,4 +1,4 @@
-import deepmerge from 'deepmerge'
+import { merge } from 'es-toolkit'
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
@@ -45,7 +45,7 @@ export function mergeDataIntoQueryString(
   const url = new URL(href.toString(), 'http://localhost')
 
   if (method === 'get' && Object.keys(data).length) {
-    url.search = qs.stringify(deepmerge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
+    url.search = qs.stringify(merge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
       encodeValuesOnly: true,
       arrayFormat: qsArrayFormat,
     })

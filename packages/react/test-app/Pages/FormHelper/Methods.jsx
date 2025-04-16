@@ -19,6 +19,17 @@ export default (props) => {
     form.delete('/dump/delete')
   }
 
+  const submitForm = () => {
+    form.submit('post', '/dump/post')
+  }
+
+  const submitFormObject = () => {
+    form.submit({
+      url: '/dump/post',
+      method: 'post',
+    })
+  }
+
   return (
     <div>
       <label>
@@ -53,6 +64,12 @@ export default (props) => {
       </button>
       <button onClick={deleteForm} className="delete">
         DELETE form
+      </button>
+      <button onClick={submitForm} className="submit">
+        SUBMIT form
+      </button>
+      <button onClick={submitFormObject} className="submit-object">
+        SUBMIT OBJECT form
       </button>
     </div>
   )

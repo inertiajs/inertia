@@ -115,7 +115,7 @@ test.describe('Data', () => {
       await expect(dump.query).toEqual({ foo: 'visit' })
       await expect(dump.form).toEqual({})
       await expect(dump.files).toEqual({})
-      await expect(dump.headers['content-type']).toBe('application/json')
+      await expect(dump.headers['content-type']).not.toBe('application/json')
     })
 
     test.describe('GET method', () => {
@@ -128,7 +128,7 @@ test.describe('Data', () => {
         await expect(dump.query).toEqual({ bar: 'get' })
         await expect(dump.form).toEqual({})
         await expect(dump.files).toEqual({})
-        await expect(dump.headers['content-type']).toBe('application/json')
+        await expect(dump.headers['content-type']).not.toBe('application/json')
       })
 
       const data = [
@@ -148,7 +148,7 @@ test.describe('Data', () => {
           await expect(dump.query).toEqual({ a: ['b', 'c'] })
           await expect(dump.method).toBe('get')
           await expect(dump.form).toEqual({})
-          await expect(dump.headers['content-type']).toBe('application/json')
+          await expect(dump.headers['content-type']).not.toBe('application/json')
         })
       })
     })

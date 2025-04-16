@@ -128,6 +128,21 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.get('/form-helper/nested', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Nested',
+  }),
+)
+
+app.get('/form-helper/dirty', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Dirty',
+    props: {},
+  }),
+)
+
+app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Errors',
@@ -269,6 +284,29 @@ app.get('/merge-props', (req, res) => {
   })
 })
 
+app.get('/deep-merge-props', (req, res) => {
+  const labels = ['first', 'second', 'third', 'fourth', 'fifth']
+
+  const page = parseInt(req.query.page ?? -1, 10) + 1
+
+  inertia.render(req, res, {
+    component: 'DeepMergeProps',
+    props: {
+      bar: new Array(5).fill(1),
+      baz: new Array(5).fill(1),
+      foo: {
+        data: new Array(5).fill(1),
+        page,
+        per_page: 5,
+        meta: {
+          label: labels[page],
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['foo', 'baz'] }),
+  })
+})
+
 app.get('/deferred-props/page-1', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
@@ -287,6 +325,52 @@ app.get('/deferred-props/page-1', (req, res) => {
         props: {
           foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
           bar: req.headers['x-inertia-partial-data']?.includes('bar') ? { text: 'bar value' } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
+app.get('/deferred-props/with-partial-reload/:mode', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithPartialReload',
+      deferredProps: {
+        default: ['users'],
+      },
+      props: {
+        withOnly: (() => {
+          if (req.params.mode === 'only') {
+            return ['users']
+          }
+
+          if (req.params.mode === 'only-other') {
+            return ['other']
+          }
+
+          return []
+        })(),
+        withExcept: (() => {
+          if (req.params.mode === 'except') {
+            return ['users']
+          }
+
+          if (req.params.mode === 'except-other') {
+            return ['other']
+          }
+
+          return []
+        })(),
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithPartialReload',
+        props: {
+          users: req.headers['x-inertia-partial-data']?.includes('users') ? [{ id: 1, name: 'John Doe' }] : undefined,
         },
       }),
     500,

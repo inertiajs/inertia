@@ -15,7 +15,7 @@ import { Component, computed, defineComponent, DefineComponent, h, onMounted, on
 export interface InertiaLinkProps {
   as?: string | Component
   data?: Record<string, FormDataConvertible>
-  href: string
+  href: string | { url: string; method: Method }
   method?: Method
   headers?: Record<string, string>
   onClick?: (event: MouseEvent) => void
@@ -53,7 +53,7 @@ const Link: InertiaLink = defineComponent({
       default: () => ({}),
     },
     href: {
-      type: String,
+      type: [String, Object] as PropType<InertiaLinkProps['href']>,
       required: true,
     },
     method: {
@@ -188,10 +188,10 @@ const Link: InertiaLink = defineComponent({
     onUnmounted(() => {
       clearTimeout(hoverTimeout.value)
     })
-    
+
     const isAnchor: boolean = props.as === 'a' || props.as === 'A'
     const isCustomComponent: boolean = typeof props.as !== 'string'
-    const method = props.method.toLowerCase() as Method
+    const method = typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method)
     let as: String|Object|Component|null = null;
     if (isAnchor && method !== 'get') {
       as = 'button';
@@ -201,7 +201,12 @@ const Link: InertiaLink = defineComponent({
       as  = props.as
     }
     const mergeDataArray = computed(() =>
-      mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat),
+      mergeDataIntoQueryString(
+        method,
+        typeof props.href === 'object' ? props.href.url : props.href || '',
+        props.data,
+        props.queryStringArrayFormat,
+      ),
     )
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])

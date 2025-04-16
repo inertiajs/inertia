@@ -16,7 +16,7 @@ const noop = () => undefined
 interface BaseInertiaLinkProps {
   as?: string | ElementType
   data?: Record<string, FormDataConvertible>
-  href: string
+  href: string | { url: string; method: Method }
   method?: Method
   headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<Element>) => void
@@ -79,15 +79,20 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
 
     const isAnchor: boolean = as === 'a' || as === 'A'
     const isCustomComponent: boolean = typeof as !== 'string'
-    method = method.toLowerCase() as Method
+    method = typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
     if (isAnchor && method !== 'get') {
       as = 'button'
-    } else if (typeof as === 'string') { 
+    } else if (typeof as === 'string') {
       as = as.toLocaleLowerCase()
     }
-    
-    const [_href, _data] = mergeDataIntoQueryString(method, href || '', data, queryStringArrayFormat)
-    href = _href
+
+    const [_href, _data] = mergeDataIntoQueryString(
+      method,
+      typeof href === 'object' ? href.url : href || '',
+      data,
+      queryStringArrayFormat,
+    )
+    const url = _href
     data = _data
 
     const baseParams = {
@@ -121,7 +126,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const doPrefetch = () => {
-      router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+      router.prefetch(url, baseParams, { cacheFor: cacheForValue })
     }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
@@ -178,7 +183,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         if (shouldIntercept(event)) {
           event.preventDefault()
 
-          router.visit(href, visitParams)
+          router.visit(url, visitParams)
         }
       },
     }
@@ -204,7 +209,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
       onMouseUp: (event) => {
         event.preventDefault()
-        router.visit(href, visitParams)
+        router.visit(url, visitParams)
       },
       onClick: (event) => {
         onClick(event)
@@ -243,7 +248,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       as,
       {
         ...props,
-        ...(isAnchor || isCustomComponent ? { href } : {}),
+        ...(isAnchor || isCustomComponent ? { href: link } : {}),
         ref: combinedRef,
         ...(() => {
           if (prefetchModes.includes('hover')) {
