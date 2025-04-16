@@ -248,7 +248,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       as,
       {
         ...props,
-        ...(isAnchor || isCustomComponent ? { href: link } : {}),
+        ...(isAnchor || isCustomComponent ? { href: url } : {}),
         ref: combinedRef,
         ...(() => {
           if (prefetchModes.includes('hover')) {
