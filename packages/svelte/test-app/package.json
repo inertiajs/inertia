@@ -7,11 +7,11 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tsconfig/svelte": "^5.0.4",
-    "svelte": "^4.2.14",
+    "svelte": "^5.0.0",
     "typescript": "^5.6.2",
-    "vite": "^5.4.8"
+    "vite": "^6.3.0"
   },
   "dependencies": {
     "@inertiajs/core": "file:../../core",
