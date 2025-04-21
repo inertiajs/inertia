@@ -47,7 +47,9 @@ export function mergeDataIntoQueryString(
   if (method === 'get' && Object.keys(data).length) {
     url.search = qs.stringify(
       mergeWith(qs.parse(url.search, { ignoreQueryPrefix: true }), data, (_, sourceValue, key, target) => {
-        if (sourceValue === undefined) delete target[key]
+        if (sourceValue === undefined) {
+          delete target[key]
+        }
       }),
       {
         encodeValuesOnly: true,
