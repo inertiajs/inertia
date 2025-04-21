@@ -339,16 +339,18 @@ const injectCSS = (color: string): void => {
 }
 
 const show = () => {
-  const element = document.getElementById(baseComponentSelector);
+  const element = document.getElementById(baseComponentSelector)
+
   if (element) {
-    element.style.display = 'block';
+    element.style.display = ''
   }
 }
 
 const hide = () => {
-  const element = document.getElementById(baseComponentSelector);
+  const element = document.getElementById(baseComponentSelector)
+
   if (element) {
-    element.style.display = 'none';
+    element.style.display = 'none'
   }
 }
 
