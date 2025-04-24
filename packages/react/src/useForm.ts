@@ -14,9 +14,12 @@ import useRemember from './useRemember'
 
 type SetDataByObject<TForm> = (data: TForm) => void
 type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
+type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(
+  key: K,
+  value: FormDataValues<TForm, K>,
+) => void
 type FormDataType = Record<string, FormDataConvertible>
-type FormOptions = Omit<VisitOptions, 'data'>
+type FormOptions = Omit<VisitOptions, 'data'> & { target?: HTMLFormElement }
 
 export interface InertiaFormProps<TForm extends FormDataType> {
   data: TForm
@@ -84,7 +87,15 @@ export default function useForm<TForm extends FormDataType>(
 
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
-      const options = (objectPassed ? args[1] : args[2]) ?? {}
+      const options: FormOptions = (objectPassed ? args[1] : args[2]) ?? {}
+
+      let payload: Record<string, FormDataConvertible> = data
+
+      if (options.target && options.target instanceof HTMLFormElement) {
+        payload = Object.fromEntries(new FormData(options.target).entries())
+      }
+
+      const transformedPayload = transform.current(payload)
 
       const _options = {
         ...options,
@@ -175,9 +186,9 @@ export default function useForm<TForm extends FormDataType>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform.current(data) })
+        router.delete(url, { ..._options, data: transformedPayload })
       } else {
-        router[method](url, transform.current(data), _options)
+        router[method](url, transformedPayload, _options)
       }
     },
     [data, setErrors, transform],
@@ -264,7 +275,7 @@ export default function useForm<TForm extends FormDataType>(
     [setErrors, setHasErrors],
   )
 
-  const createSubmitMethod = (method) => (url, options) => {
+  const createSubmitMethod = (method: Method) => (url: string, options?: FormOptions) => {
     submit(method, url, options)
   }
   const getMethod = useCallback(createSubmitMethod('get'), [submit])

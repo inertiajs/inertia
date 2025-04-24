@@ -8,9 +8,11 @@ const Form = () => {
     role: '',
   })
 
-  function submit(e) {
+  function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    form.post('/user')
+    form.post('/user', {
+      target: e.currentTarget,
+    })
   }
 
   return (
@@ -28,9 +30,9 @@ const Form = () => {
             Name:
           </label>
           <input
+            name="name"
             type="text"
-            value={form.data.name}
-            onChange={(e) => form.setData('name', e.target.value)}
+            defaultValue={form.data.name}
             id="name"
             className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
           />
@@ -41,9 +43,9 @@ const Form = () => {
             Company:
           </label>
           <input
+            name="company"
             type="text"
-            value={form.data.company}
-            onChange={(e) => form.setData('company', e.target.value)}
+            defaultValue={form.data.company}
             id="company"
             className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
           />
@@ -57,6 +59,7 @@ const Form = () => {
             value={form.data.role}
             onChange={(e) => form.setData('role', e.target.value)}
             id="role"
+            name="role"
             className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
           >
             <option></option>
