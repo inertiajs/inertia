@@ -338,27 +338,19 @@ const injectCSS = (color: string): void => {
   document.head.appendChild(element)
 }
 
-const hiddenStyles = (() => {
-  if (typeof document === 'undefined') {
-    return null
-  }
-
-  const el = document.createElement('style')
-
-  el.innerHTML = `#${baseComponentSelector} { display: none; }`
-
-  return el
-})()
-
 const show = () => {
-  if (hiddenStyles && document.head.contains(hiddenStyles)) {
-    return document.head.removeChild(hiddenStyles)
+  const element = document.getElementById(baseComponentSelector)
+
+  if (element) {
+    element.style.display = ''
   }
 }
 
 const hide = () => {
-  if (hiddenStyles && !document.head.contains(hiddenStyles)) {
-    document.head.appendChild(hiddenStyles)
+  const element = document.getElementById(baseComponentSelector)
+
+  if (element) {
+    element.style.display = 'none'
   }
 }
 

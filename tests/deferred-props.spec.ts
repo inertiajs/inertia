@@ -139,3 +139,28 @@ noReload.forEach((type) => {
     await expect(page.getByText('John Doe')).toBeVisible()
   })
 })
+
+test('it will not revert to fallback when fetching a url that is different than the current page', async ({ page }) => {
+  test.skip(process.env.PACKAGE !== 'react', 'React only test')
+
+  await page.goto(`/deferred-props/with-partial-reload/only`)
+
+  await expect(page.getByText('Loading...')).toBeVisible()
+
+  await page.waitForResponse(page.url())
+
+  await expect(page.getByText('Loading...')).not.toBeVisible()
+  await expect(page.getByText('John Doe')).toBeVisible()
+
+  const responsePromise = page.waitForResponse('/deferred-props/page-1')
+
+  await page.getByRole('link', { name: 'Prefetch' }).hover()
+
+  await page.waitForTimeout(100)
+
+  await expect(page.getByText('Loading...')).not.toBeVisible()
+
+  await responsePromise
+
+  await expect(page.getByText('John Doe')).toBeVisible()
+})
