@@ -1,4 +1,4 @@
-import { Deferred, router, usePage } from '@inertiajs/react'
+import { Deferred, Link, router, usePage } from '@inertiajs/react'
 
 const WithPartialReload = ({ withOnly, withExcept }) => {
   const handleTriggerPartialReload = () => {
@@ -14,6 +14,9 @@ const WithPartialReload = ({ withOnly, withExcept }) => {
         <DeferredUsers />
       </Deferred>
       <button onClick={handleTriggerPartialReload}>Trigger a partial reload</button>
+      <Link href="/deferred-props/page-1" prefetch="hover">
+        Prefetch
+      </Link>
     </div>
   )
 }

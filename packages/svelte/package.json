@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
-    "@sveltejs/kit": "^2.5.26",
+    "@sveltejs/kit": "^2.20.6",
     "@sveltejs/package": "^2.3.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/html-escape": "^2.0.2",
@@ -59,7 +59,7 @@
     "svelte-check": "^4.0.0",
     "tslib": "^2.7.0",
     "typescript": "^5.5.4",
-    "vite": "^5.4.17"
+    "vite": "^5.4.18"
   },
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -2,6 +2,17 @@ import { ReactElement, useEffect, useMemo, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'
 
+const urlWithoutHash = (url: URL | Location): URL => {
+  url = new URL(url.href)
+  url.hash = ''
+
+  return url
+}
+
+const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boolean => {
+  return urlWithoutHash(url1).href === urlWithoutHash(url2).href
+}
+
 interface DeferredProps {
   children: ReactElement | number | string
   fallback: ReactElement | number | string
@@ -19,10 +30,10 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
 
   useEffect(() => {
     const removeListener = router.on('start', (e) => {
-      if (
-        (e.detail.visit.only.length === 0 && e.detail.visit.except.length === 0) ||
-        e.detail.visit.only.find((key) => keys.includes(key))
-      ) {
+      const isPartialVisit = e.detail.visit.only.length > 0 || e.detail.visit.except.length > 0
+      const isReloadingKey = e.detail.visit.only.find((key) => keys.includes(key))
+
+      if (isSameUrlWithoutHash(e.detail.visit.url, window.location) && (!isPartialVisit || isReloadingKey)) {
         setLoaded(false)
       }
     })
