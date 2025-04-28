@@ -85,7 +85,7 @@ export default function createHeadManager(
   }
 
   function reconnect(id: string): void {
-    if (id === null || Object.keys(states).indexOf(id) === -1) {
+    if (Object.keys(states).indexOf(id) === -1) {
       states[id] = []
     }
   }
