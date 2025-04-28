@@ -13,10 +13,12 @@ const Head: InertiaHead = function ({ children, title }) {
   const provider = useMemo(() => headManager.createProvider(), [headManager])
 
   useEffect(() => {
+    provider.reconnect()
+    provider.update(renderNodes(children))
     return () => {
       provider.disconnect()
     }
-  }, [provider])
+  }, [provider, children])
 
   function isUnaryTag(node) {
     return (
@@ -94,8 +96,6 @@ const Head: InertiaHead = function ({ children, title }) {
     }
     return computed
   }
-
-  provider.update(renderNodes(children))
 
   return null
 }
