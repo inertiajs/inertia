@@ -1,4 +1,4 @@
-import { Page, router, setupProgress } from '@inertiajs/core'
+import { Page, router, setupModal, setupProgress } from '@inertiajs/core'
 import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
@@ -17,6 +17,7 @@ interface CreateInertiaAppProps {
       }
   page?: Page
   render?: (app: VueApp) => Promise<string>
+  showModalOnNonInertiaResponse?: boolean
 }
 
 export default async function createInertiaApp({
@@ -27,6 +28,7 @@ export default async function createInertiaApp({
   progress = {},
   page,
   render,
+  showModalOnNonInertiaResponse = true,
 }: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
@@ -34,6 +36,10 @@ export default async function createInertiaApp({
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
+
+  if (!isServer) {
+    setupModal({ showOnNonInertiaResponse: showModalOnNonInertiaResponse })
+  }
 
   const vueApp = await Promise.all([
     resolveComponent(initialPage.component),

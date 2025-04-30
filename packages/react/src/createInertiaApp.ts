@@ -1,4 +1,4 @@
-import { Page, PageProps, PageResolver, router, setupProgress } from '@inertiajs/core'
+import { Page, PageProps, PageResolver, router, setupModal, setupProgress } from '@inertiajs/core'
 import { ComponentType, FunctionComponent, Key, ReactElement, ReactNode, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App'
@@ -30,6 +30,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
 type BaseInertiaAppOptions = {
   title?: HeadManagerTitleCallback
   resolve: PageResolver
+  showModalOnNonInertiaResponse?: boolean
 }
 
 type CreateInertiaAppSetupReturnType = ReactInstance | void
@@ -71,6 +72,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
+  showModalOnNonInertiaResponse = true,
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): Promise<
   CreateInertiaAppSetupReturnType | CreateInertiaAppSSRContent
 > {
@@ -81,6 +83,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
+
+  if (!isServer) {
+    setupModal({ showOnNonInertiaResponse: showModalOnNonInertiaResponse })
+  }
 
   const reactApp = await Promise.all([
     resolveComponent(initialPage.component),

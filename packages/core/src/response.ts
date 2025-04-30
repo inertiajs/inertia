@@ -90,7 +90,9 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return modal.show(response.data)
+      if (modal.getConfig().showOnNonInertiaResponse) {
+        return modal.show(response.data)
+      }
     }
   }
 
