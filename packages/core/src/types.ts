@@ -10,16 +10,21 @@ declare module 'axios' {
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
+export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | null | undefined
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
-  | Blob
-  | FormDataEntryValue
-  | Date
-  | boolean
-  | number
-  | null
-  | undefined
+  | FormDataConvertibleValue
+
+export type FormDataType<T extends object> = {
+  [K in keyof T]: T[K] extends FormDataConvertibleValue
+    ? T[K]
+    : T[K] extends (...args: unknown[]) => unknown
+      ? never
+      : T[K] extends object | Array<unknown>
+        ? FormDataType<T[K]>
+        : never
+}
 
 export type FormDataKeys<T extends Record<any, any>> = T extends T
   ? keyof T extends infer Key extends Extract<keyof T, string>

@@ -1,12 +1,11 @@
-import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataKeys, FormDataType, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 
-type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
   errors: Partial<Record<FormDataKeys<TForm>, string>>
   hasErrors: boolean
@@ -32,14 +31,14 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends FormDataType<TForm>> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {

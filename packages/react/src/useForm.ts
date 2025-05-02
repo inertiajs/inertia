@@ -1,6 +1,7 @@
 import {
   FormDataConvertible,
   FormDataKeys,
+  FormDataType,
   FormDataValues,
   Method,
   Progress,
@@ -14,11 +15,10 @@ import useRemember from './useRemember'
 
 type SetDataByObject<TForm> = (data: TForm) => void
 type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
-type FormDataType = Record<string, FormDataConvertible>
+type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   data: TForm
   isDirty: boolean
   errors: Partial<Record<FormDataKeys<TForm>, string>>
@@ -44,12 +44,12 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(initialValues?: TForm): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   initialValues?: TForm,
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrInitialValues?: string | TForm,
   maybeInitialValues?: TForm,
 ): InertiaFormProps<TForm> {
