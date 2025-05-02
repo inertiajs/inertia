@@ -1,5 +1,4 @@
 import {
-  FormDataConvertible,
   FormDataKeys,
   FormDataType,
   FormDataValues,
@@ -30,7 +29,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   setData: SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
   transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
-  setDefaults(field: FormDataKeys<TForm>, value: FormDataConvertible): void
+  setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
   reset: (...fields: FormDataKeys<TForm>[]) => void
   clearErrors: (...fields: FormDataKeys<TForm>[]) => void
@@ -197,7 +196,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const setDefaultsFunction = useCallback(
-    (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) => {
+    (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(() => data)
       } else {

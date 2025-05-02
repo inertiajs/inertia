@@ -1,9 +1,9 @@
 import type {
   ActiveVisit,
   Errors,
-  FormDataConvertible,
   FormDataKeys,
   FormDataType,
+  FormDataValues,
   Method,
   Page,
   PendingVisit,
@@ -28,12 +28,12 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   recentlySuccessful: boolean
   processing: boolean
   setStore(data: TForm): void
-  setStore(key: FormDataKeys<TForm>, value?: FormDataConvertible): void
+  setStore<T extends FormDataKeys<TForm>>(key: T, value: FormDataValues<TForm, T>): void
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
   defaults(fields: Partial<TForm>): this
-  defaults(field?: FormDataKeys<TForm>, value?: FormDataConvertible): this
+  defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
@@ -80,7 +80,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     wasSuccessful: false,
     recentlySuccessful: false,
     processing: false,
-    setStore(keyOrData, maybeValue = undefined) {
+    setStore(keyOrData: keyof InertiaFormProps<TForm> | FormDataKeys<TForm> | TForm, maybeValue = undefined) {
       store.update((store) => {
         return typeof keyOrData === 'string' ? set(store, keyOrData, maybeValue) : Object.assign(store, keyOrData)
       })
@@ -94,7 +94,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       transform = callback
       return this
     },
-    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) {
+    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
       if (typeof fieldOrFields === 'undefined') {
         defaults = cloneDeep(this.data())
       } else {

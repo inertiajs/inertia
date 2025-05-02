@@ -1,4 +1,4 @@
-import { FormDataKeys, FormDataType, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataKeys, FormDataType, FormDataValues, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
@@ -16,7 +16,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: FormDataKeys<TForm>, value: FormDataConvertible): this
+  defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
@@ -71,7 +71,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) {
+    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
       if (typeof data === 'function') {
         throw new Error('You cannot call `defaults()` when using a function to define your form data.')
       }

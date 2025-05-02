@@ -26,25 +26,39 @@ export type FormDataType<T extends object> = {
         : never
 }
 
-export type FormDataKeys<T extends Record<any, any>> = T extends T
-  ? keyof T extends infer Key extends Extract<keyof T, string>
-    ? Key extends Key
-      ? T[Key] extends Record<any, any>
-        ? `${Key}.${FormDataKeys<T[Key]>}` | Key
-        : Key
-      : never
-    : never
-  : never
+export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
+  ? never
+  : T extends Array<unknown>
+    ? number extends T['length']
+      ? `${number}` | `${number}.${FormDataKeys<T[number]>}`
+      :
+          | Extract<keyof T, `${number}`>
+          | {
+              [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
+            }[Extract<keyof T, `${number}`>]
+    :
+        | Extract<keyof T, string>
+        | {
+            [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
+          }[Extract<keyof T, string>]
 
-export type FormDataValues<T extends Record<any, any>, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
-  ? P extends keyof T
-    ? Rest extends FormDataKeys<T[P]>
-      ? FormDataValues<T[P], Rest>
+export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
+  ? T extends unknown[]
+    ? P extends `${infer I extends number}`
+      ? Rest extends FormDataKeys<T[I]>
+        ? FormDataValues<T[I], Rest>
+        : never
       : never
-    : never
+    : P extends keyof T
+      ? Rest extends FormDataKeys<T[P]>
+        ? FormDataValues<T[P], Rest>
+        : never
+      : never
   : K extends keyof T
     ? T[K]
-    : never
+    : T extends unknown[]
+      ? T[K & number]
+      : never
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
