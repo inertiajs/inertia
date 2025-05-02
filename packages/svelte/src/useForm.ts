@@ -1,6 +1,7 @@
 import type {
   ActiveVisit,
   Errors,
+  FormDataError,
   FormDataKeys,
   FormDataType,
   FormDataValues,
@@ -21,7 +22,7 @@ type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
-  errors: Partial<Record<FormDataKeys<TForm>, string>>
+  errors: FormDataError<TForm>
   hasErrors: boolean
   progress: Progress | null
   wasSuccessful: boolean
@@ -37,7 +38,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
-  setError(errors: Errors): this
+  setError(errors: FormDataError<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -122,7 +123,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | Errors, maybeValue?: string) {
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: string) {
       this.setStore('errors', {
         ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),

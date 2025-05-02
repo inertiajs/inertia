@@ -1,4 +1,13 @@
-import { FormDataKeys, FormDataType, FormDataValues, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import {
+  FormDataError,
+  FormDataKeys,
+  FormDataType,
+  FormDataValues,
+  Method,
+  Progress,
+  router,
+  VisitOptions,
+} from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
@@ -7,7 +16,7 @@ type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
-  errors: Partial<Record<FormDataKeys<TForm>, string>>
+  errors: FormDataError<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -105,7 +114,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) {
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: string) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0

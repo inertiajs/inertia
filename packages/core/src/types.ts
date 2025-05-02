@@ -60,6 +60,8 @@ export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}
       ? T[K & number]
       : never
 
+export type FormDataError<T> = Partial<Record<FormDataKeys<T>, string>>
+
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData

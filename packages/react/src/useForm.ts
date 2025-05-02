@@ -1,4 +1,5 @@
 import {
+  FormDataError,
   FormDataKeys,
   FormDataType,
   FormDataValues,
@@ -20,7 +21,7 @@ type FormOptions = Omit<VisitOptions, 'data'>
 export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   data: TForm
   isDirty: boolean
-  errors: Partial<Record<FormDataKeys<TForm>, string>>
+  errors: FormDataError<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -34,7 +35,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   reset: (...fields: FormDataKeys<TForm>[]) => void
   clearErrors: (...fields: FormDataKeys<TForm>[]) => void
   setError(field: FormDataKeys<TForm>, value: string): void
-  setError(errors: Record<FormDataKeys<TForm>, string>): void
+  setError(errors: FormDataError<TForm>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
@@ -61,8 +62,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
-    ? useRemember({} as Partial<Record<FormDataKeys<TForm>, string>>, `${rememberKey}:errors`)
-    : useState({} as Partial<Record<FormDataKeys<TForm>, string>>)
+    ? useRemember({} as FormDataError<TForm>, `${rememberKey}:errors`)
+    : useState({} as FormDataError<TForm>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -231,13 +232,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
-          ...(typeof fieldOrFields === 'string'
-            ? { [fieldOrFields]: maybeValue }
-            : (fieldOrFields as Record<FormDataKeys<TForm>, string>)),
+          ...(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
