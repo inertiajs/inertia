@@ -1,4 +1,5 @@
 import {
+  ErrorValue,
   FormDataError,
   FormDataKeys,
   FormDataType,
@@ -34,7 +35,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   setDefaults(fields: Partial<TForm>): void
   reset: (...fields: FormDataKeys<TForm>[]) => void
   clearErrors: (...fields: FormDataKeys<TForm>[]) => void
-  setError(field: FormDataKeys<TForm>, value: string): void
+  setError(field: FormDataKeys<TForm>, value: ErrorValue): void
   setError(errors: FormDataError<TForm>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void

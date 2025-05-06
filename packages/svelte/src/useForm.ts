@@ -1,6 +1,7 @@
 import type {
   ActiveVisit,
   Errors,
+  ErrorValue,
   FormDataError,
   FormDataKeys,
   FormDataType,
@@ -37,7 +38,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
-  setError(field: FormDataKeys<TForm>, value: string): this
+  setError(field: FormDataKeys<TForm>, value: ErrorValue): this
   setError(errors: FormDataError<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
@@ -123,7 +124,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: string) {
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: ErrorValue) {
       this.setStore('errors', {
         ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),

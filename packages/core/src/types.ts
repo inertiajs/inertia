@@ -7,7 +7,30 @@ declare module 'axios' {
   }
 }
 
-export type Errors = Record<string, string>
+export type DefaultInertiaConfig = {
+  errorValueType: string
+}
+/** 
+ * Designed to allow overriding of some core types using TypeScript
+ * interface declaration merging.
+ * 
+ * @see {@link DefaultInertiaConfig} for keys to override
+ * @example
+ * ```ts
+ * declare module '@inertiajs/core' {
+ *   export interface InertiaConfig {
+ *     errorValueType: string[]
+ *   }
+ * }
+ * ```
+ */
+export interface InertiaConfig {}
+export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key extends keyof InertiaConfig
+  ? InertiaConfig[Key]
+  : DefaultInertiaConfig[Key]
+export type ErrorValue = InertiaConfigFor<'errorValueType'>
+
+export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
 
 export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | null | undefined
@@ -60,7 +83,7 @@ export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}
       ? T[K & number]
       : never
 
-export type FormDataError<T> = Partial<Record<FormDataKeys<T>, string>>
+export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
