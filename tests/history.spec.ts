@@ -138,3 +138,17 @@ test('url will update after scrolling and pressing back', async ({ page }) => {
   await page.waitForTimeout(200)
   await page.waitForURL('/history/1')
 })
+
+test('will pull from server if history version is different than current version when pressing back', async ({
+  page,
+}) => {
+  await page.goto('/history/version/1')
+  await page.waitForURL('/history/version/1')
+  await clickAndWaitForResponse(page, 'Page 2', '/history/version/2')
+
+  requests.listen(page)
+
+  await page.goBack()
+  await page.waitForURL('/history/version/1')
+  await expect(requests.requests).toHaveLength(1)
+})
