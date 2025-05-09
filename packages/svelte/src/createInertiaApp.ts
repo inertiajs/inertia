@@ -1,4 +1,4 @@
-import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
+import { router, setupProgress, type InertiaAppResponse, type Page, PageProps } from '@inertiajs/core'
 import escape from 'html-escape'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -36,10 +36,10 @@ export default async function createInertiaApp({
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name))
+  const resolveComponent = (name: string, props: PageProps) => Promise.resolve(resolve(name, props))
 
   const [initialComponent] = await Promise.all([
-    resolveComponent(initialPage.component),
+    resolveComponent(initialPage.component, initialPage.props),
     router.decryptHistory().catch(() => {}),
   ])
 
