@@ -336,6 +336,10 @@ export type ProgressSettings = {
   color: string
 }
 
+export type ModalConfig = {
+  showOnNonInertiaResponse?: boolean
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
