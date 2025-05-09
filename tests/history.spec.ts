@@ -150,5 +150,6 @@ test('will pull from server if history version is different than current version
 
   await page.goBack()
   await page.waitForURL('/history/version/1')
+  await page.waitForTimeout(200)
   await expect(requests.requests).toHaveLength(1)
 })
