@@ -63,6 +63,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps?: string[]
   deepMergeProps?: string[]
+  mergeStrategies?: string[]
 
   /** @internal */
   rememberedState: Record<string, unknown>
