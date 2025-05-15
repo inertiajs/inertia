@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.9...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.10...master)
 
 - Nothing yet
+
+## [v2.0.10](https://github.com/inertiajs/inertia/compare/v2.0.9...v2.0.10) - 2025-05-15
+
+### What's Changed
+
+* Don't show progress bar on prefetch hover by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2347
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.9...v2.0.10
 
 ## [v2.0.9](https://github.com/inertiajs/inertia/compare/v2.0.8...v2.0.9) - 2025-05-09
 
