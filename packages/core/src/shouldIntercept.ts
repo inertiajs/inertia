@@ -3,16 +3,20 @@
 // are present in both types).
 
 export default function shouldIntercept(
-  event: Pick<
-    MouseEvent,
-    'altKey' | 'ctrlKey' | 'defaultPrevented' | 'target' | 'currentTarget' | 'metaKey' | 'shiftKey' | 'button'
-  >,
+  event:
+    | Pick<
+        MouseEvent,
+        'altKey' | 'ctrlKey' | 'defaultPrevented' | 'target' | 'currentTarget' | 'metaKey' | 'shiftKey' | 'button'
+      >
+    | KeyboardEvent
+    | import('react').MouseEvent<Element>,
 ): boolean {
   const isLink = (event.currentTarget as HTMLElement).tagName.toLowerCase() === 'a'
 
   return !(
     (event.target && (event?.target as HTMLElement).isContentEditable) ||
     event.defaultPrevented ||
+    (isLink && 'which' in event && event.which > 1) ||
     (isLink && event.altKey) ||
     (isLink && event.ctrlKey) ||
     (isLink && event.metaKey) ||
