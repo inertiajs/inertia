@@ -10,10 +10,10 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
-  as?: string
+  as?: string | Component
   data?: Record<string, FormDataConvertible>
   href: string | { url: string; method: Method }
   method?: Method
@@ -45,7 +45,7 @@ const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
     as: {
-      type: String,
+      type: [String, Object] as PropType<string | Component>,
       default: 'a',
     },
     data: {
@@ -136,6 +136,7 @@ const Link: InertiaLink = defineComponent({
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
     const hoverTimeout = ref(null)
+    const internalRef = ref(null);
 
     const prefetchModes: LinkPrefetchOption[] = (() => {
       if (props.prefetch === true) {
@@ -173,14 +174,32 @@ const Link: InertiaLink = defineComponent({
       if (prefetchModes.includes('mount')) {
         prefetch()
       }
+
+      if(!internalRef.value) {
+        return
+      }
+
+      const element = internalRef.value.$el
+      if (element.tagName !== 'A') {
+        element.removeAttribute('href')
+      }
     })
 
     onUnmounted(() => {
       clearTimeout(hoverTimeout.value)
     })
 
+    const isAnchor: boolean = props.as === 'a' || props.as === 'A'
+    const isCustomComponent: boolean = typeof props.as !== 'string'
     const method = typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method)
-    const as = method !== 'get' ? 'button' : props.as.toLowerCase()
+    let as: String|Object|Component|null = null;
+    if (isAnchor && method !== 'get') {
+      as = 'button';
+    } else if(typeof props.as === 'string') {
+      as = props.as.toLowerCase()
+    } else {
+      as  = props.as
+    }
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method,
@@ -191,11 +210,6 @@ const Link: InertiaLink = defineComponent({
     )
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
-
-    const elProps = computed(() => ({
-      a: { href: href.value },
-      button: { type: 'button' },
-    }))
 
     const baseParams = {
       data: data.value,
@@ -276,7 +290,8 @@ const Link: InertiaLink = defineComponent({
         as,
         {
           ...attrs,
-          ...(elProps.value[as] || {}),
+          ...(isAnchor || isCustomComponent ? {href: href.value} : {}),
+          ...(isCustomComponent ? {ref: internalRef} : {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
           ...(() => {
             if (prefetchModes.includes('hover')) {
