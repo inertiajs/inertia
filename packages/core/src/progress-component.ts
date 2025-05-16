@@ -98,6 +98,8 @@ const set = (n: number) => {
 
       setTimeout(() => {
         remove()
+        progress.style.transition = ''
+        progress.style.opacity = ''
         next()
       }, speed)
     }, speed)
