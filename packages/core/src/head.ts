@@ -84,6 +84,12 @@ export default function createHeadManager(
     commit()
   }
 
+  function reconnect(id: string): void {
+    if (Object.keys(states).indexOf(id) === -1) {
+      states[id] = []
+    }
+  }
+
   function update(id: string, elements: Array<string> = []): void {
     if (id !== null && Object.keys(states).indexOf(id) > -1) {
       states[id] = elements
@@ -139,6 +145,7 @@ export default function createHeadManager(
       const id = connect()
 
       return {
+        reconnect: () => reconnect(id),
         update: (elements) => update(id, elements),
         disconnect: () => disconnect(id),
       }
