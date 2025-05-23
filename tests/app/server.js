@@ -259,6 +259,16 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/history/version/:pageNumber', (req, res) => {
+  inertia.render(req, res, {
+    component: 'History/Version',
+    props: {
+      pageNumber: req.params.pageNumber,
+    },
+    version: req.params.pageNumber === '1' ? 'version-1' : 'version-2',
+  })
+})
+
 app.get('/when-visible', (req, res) => {
   const page = () =>
     inertia.render(req, res, {
@@ -271,6 +281,17 @@ app.get('/when-visible', (req, res) => {
   } else {
     page()
   }
+})
+
+app.get('/progress/:pageNumber', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Progress',
+        props: { pageNumber: req.params.pageNumber },
+      }),
+    500,
+  )
 })
 
 app.get('/merge-props', (req, res) => {
