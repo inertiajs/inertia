@@ -9,7 +9,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
 type SetDataByObject<TForm> = (data: TForm) => void
@@ -223,10 +223,6 @@ export default function useForm<TForm extends FormDataType>(
   useEffect(() => {
     setPendingDefaultsToDataUpdate(false) // Immediately reset the flag after updating defaults so that new data will not update the defaults again
   }, [pendingDefaultsToDataUpdate])
-
-  const isDirty = useMemo(() => {
-    return !isEqual(data, defaults)
-  }, [data, defaults])
 
   const reset = useCallback(
     (...fields) => {
