@@ -9,7 +9,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
 type SetDataByObject<TForm> = (data: TForm) => void
@@ -196,10 +196,13 @@ export default function useForm<TForm extends FormDataType>(
     [setData],
   )
 
+  const [pendingDefaultsToDataUpdate, setPendingDefaultsToDataUpdate] = useState(false)
+
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) => {
       if (typeof fieldOrFields === 'undefined') {
-        setDefaults(() => data)
+        setDefaults(cloneDeep(data)) // Set it immediately in case data has already been updated in the previous render
+        setPendingDefaultsToDataUpdate(true) // Set a flag to update defaults after the next render
       } else {
         setDefaults((defaults) => {
           return typeof fieldOrFields === 'string'
@@ -210,6 +213,20 @@ export default function useForm<TForm extends FormDataType>(
     },
     [data, setDefaults],
   )
+
+  useEffect(() => {
+    if (pendingDefaultsToDataUpdate) {
+      setDefaults(cloneDeep(data)) // Update defaults after the next render
+    }
+  }, [data])
+
+  useEffect(() => {
+    setPendingDefaultsToDataUpdate(false) // Immediately reset the flag after updating defaults so that new data will not update the defaults again
+  }, [pendingDefaultsToDataUpdate])
+
+  const isDirty = useMemo(() => {
+    return !isEqual(data, defaults)
+  }, [data, defaults])
 
   const reset = useCallback(
     (...fields) => {
