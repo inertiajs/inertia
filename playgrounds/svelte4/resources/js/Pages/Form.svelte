@@ -26,7 +26,7 @@
 
 <form on:submit|preventDefault={submit} class="mt-6 max-w-md space-y-4">
   {#if $form.isDirty}
-    <div class="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">There are unsaved changes!</div>
+    <div class="my-5 rounded-sm border border-amber-100 bg-amber-50 p-3 text-amber-800">There are unsaved changes!</div>
   {/if}
   <div>
     <label class="block" for="name">Name:</label>
@@ -34,7 +34,7 @@
       type="text"
       bind:value={$form.name}
       id="name"
-      class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
+      class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
     />
     {#if $form.errors.name}
       <div class="mt-2 text-sm text-red-600">{$form.errors.name}</div>
@@ -46,7 +46,7 @@
       type="text"
       bind:value={$form.company}
       id="company"
-      class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
+      class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
     />
     {#if $form.errors.company}
       <div class="mt-2 text-sm text-red-600">{$form.errors.company}</div>
@@ -54,7 +54,7 @@
   </div>
   <div>
     <label class="block" for="role">Role:</label>
-    <select bind:value={$form.role} id="role" class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm">
+    <select bind:value={$form.role} id="role" class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1">
       <option />
       <option>User</option>
       <option>Admin</option>
@@ -65,7 +65,7 @@
     {/if}
   </div>
   <div class="flex gap-4">
-    <button type="submit" disabled={$form.processing} class="rounded bg-slate-800 px-6 py-2 text-white">
+    <button type="submit" disabled={$form.processing} class="rounded-sm bg-slate-800 px-6 py-2 text-white">
       Submit
     </button>
     <button type="button" on:click={() => $form.reset()}>Reset</button>
