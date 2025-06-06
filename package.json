@@ -8,10 +8,17 @@
     "test": "pnpm test:react && pnpm test:svelte && pnpm test:vue",
     "test:react": "PACKAGE=react playwright test",
     "test:react:watch": "cd packages/react/test-app && npm run watch",
+    "test:react:serve": "PACKAGE=react node tests/app/server.js",
     "test:svelte": "PACKAGE=svelte playwright test",
     "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
+    "test:svelte:serve": "PACKAGE=svelte node tests/app/server.js",
     "test:vue": "PACKAGE=vue3 playwright test",
     "test:vue:watch": "cd packages/vue3/test-app && npm run watch",
+    "test:vue:serve": "PACKAGE=vue3 node tests/app/server.js",
+    "playground:react": "cd playgrounds/react && composer run dev",
+    "playground:svelte4": "cd playgrounds/svelte4 && composer run dev",
+    "playground:svelte5": "cd playgrounds/svelte5 && composer run dev",
+    "playground:vue": "cd playgrounds/vue3 && composer run dev",
     "build:all": "pnpm build"
   },
   "dependencies": {

@@ -39,6 +39,13 @@ php artisan serve
 # visit the site at http://127.0.0.1:8000
 ```
 
+Or if you prefer to watch for changes:
+
+```sh
+# in the project root
+pnpm playground:react
+```
+
 To automatically see changes to the JavaScript files in the browser, start the development server:
 
 ```sh

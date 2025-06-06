@@ -49,6 +49,10 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185\" \"php artisan serve\" \"php artisan pail --timeout=0\" \"pnpm run dev\" --names=server,logs,vite"
         ]
     },
     "extra": {
