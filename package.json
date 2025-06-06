@@ -2,6 +2,7 @@
   "name": "inertia",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.11.1",
   "scripts": {
     "build": "pnpm -r --filter './packages/*' build",
     "watch": "pnpm -r --parallel --filter './packages/*' watch",
