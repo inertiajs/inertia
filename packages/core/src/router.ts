@@ -352,7 +352,7 @@ export class Router {
       mergedOptions.queryStringArrayFormat,
     )
 
-    return {
+    const visit = {
       cancelled: false,
       completed: false,
       interrupted: false,
@@ -361,6 +361,12 @@ export class Router {
       url,
       data: _data,
     }
+
+    if (visit.prefetch) {
+      visit.headers['Purpose'] = 'prefetch'
+    }
+
+    return visit
   }
 
   protected getVisitEvents(options: VisitOptions): VisitCallbacks {
