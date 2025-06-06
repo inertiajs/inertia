@@ -263,6 +263,13 @@ export type RouterInitParams = {
   initialPage: Page
   resolveComponent: PageResolver
   swapComponent: PageHandler
+  handleScroll: boolean
+}
+
+export type CurrentPageInitParams = Omit<RouterInitParams, 'handleScroll'>
+
+export type EventHandlerInitParams = {
+  handleScroll: boolean
 }
 
 export type PendingVisitOptions = {
