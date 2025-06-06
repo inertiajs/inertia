@@ -10,6 +10,11 @@ const defaults = () => {
   form.defaults()
 }
 
+const dataAndDefaults = () => {
+  pushValue()
+  defaults()
+}
+
 const pushValue = () => {
   form.foo.push('bar')
 }
@@ -26,6 +31,8 @@ const pushValue = () => {
     <button @click="submit" class="submit">Submit form</button>
 
     <button @click="defaults" class="defaults">Defaults</button>
+
+    <button @click="dataAndDefaults" class="data-and-defaults">Data and Defaults</button>
 
     <button @click="pushValue" class="push">Push value</button>
   </div>
