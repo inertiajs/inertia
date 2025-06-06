@@ -1,5 +1,8 @@
 packages:
-  - 'packages/*'
-  - 'packages/*/test-app'
-  - 'playgrounds/*'
-  - 'tests/app'
+  - packages/*
+  - packages/*/test-app
+  - playgrounds/*
+  - tests/app
+
+onlyBuiltDependencies:
+  - esbuild
