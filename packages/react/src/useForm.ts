@@ -70,6 +70,7 @@ export default function useForm<TForm extends FormDataType>(
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
   const transform = useRef((data) => data)
+  const isDirty = useMemo(() => !isEqual(data, defaults), [data, defaults])
 
   useEffect(() => {
     isMounted.current = true
@@ -196,7 +197,7 @@ export default function useForm<TForm extends FormDataType>(
     [setData],
   )
 
-  const setDefaultsCalledWithoutArgs = useRef(false)
+  const [dataAsDefaults, setDataAsDefaults] = useState(false)
 
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) => {
@@ -205,7 +206,7 @@ export default function useForm<TForm extends FormDataType>(
         // If setData was called right before setDefaults, data was not
         // updated in that render yet, so we set a flag to update
         // defaults right after the next render.
-        setDefaultsCalledWithoutArgs.current = true
+        setDataAsDefaults(true)
       } else {
         setDefaults((defaults) => {
           return typeof fieldOrFields === 'string'
@@ -216,11 +217,8 @@ export default function useForm<TForm extends FormDataType>(
     },
     [data, setDefaults],
   )
-
-  const isDirty = useMemo(() => !isEqual(data, defaults), [data, defaults])
-
   useLayoutEffect(() => {
-    if (!setDefaultsCalledWithoutArgs.current) {
+    if (!dataAsDefaults) {
       return
     }
 
@@ -230,8 +228,8 @@ export default function useForm<TForm extends FormDataType>(
       setDefaults(data)
     }
 
-    setDefaultsCalledWithoutArgs.current = false
-  }, [setDefaultsCalledWithoutArgs.current])
+    setDataAsDefaults(false)
+  }, [dataAsDefaults])
 
   const reset = useCallback(
     (...fields) => {
