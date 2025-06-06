@@ -217,6 +217,7 @@ export default function useForm<TForm extends FormDataType>(
     },
     [data, setDefaults],
   )
+  
   useLayoutEffect(() => {
     if (!dataAsDefaults) {
       return
