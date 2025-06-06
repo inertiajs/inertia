@@ -211,12 +211,18 @@ export class Response {
 
     const propsToMerge = pageResponse.mergeProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
+    const mergeStrategies = pageResponse.mergeStrategies || []
 
     propsToMerge.forEach((prop) => {
       const incomingProp = pageResponse.props[prop]
 
       if (Array.isArray(incomingProp)) {
-        pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
+        pageResponse.props[prop] = mergeArrayWithStrategy(
+          (currentPage.get().props[prop] || []) as any[],
+          incomingProp,
+          prop,
+          mergeStrategies
+        )
       } else if (typeof incomingProp === 'object' && incomingProp !== null) {
         pageResponse.props[prop] = {
           ...((currentPage.get().props[prop] || []) as Record<string, any>),
@@ -230,17 +236,16 @@ export class Response {
       const currentProp = currentPage.get().props[prop]
 
       // Deep merge function to handle nested objects and arrays
-      const deepMerge = (target: any, source: any) => {
+      const deepMerge = (target: any, source: any, currentKey: string) => {
         if (Array.isArray(source)) {
-          // Merge arrays by concatenating the existing and incoming elements
-          return [...(Array.isArray(target) ? target : []), ...source]
+          return mergeArrayWithStrategy(target, source, currentKey, mergeStrategies)
         }
 
         if (typeof source === 'object' && source !== null) {
           // Merge objects by iterating over keys
           return Object.keys(source).reduce(
             (acc, key) => {
-              acc[key] = deepMerge(target ? target[key] : undefined, source[key])
+              acc[key] = deepMerge(target ? target[key] : undefined, source[key], `${currentKey}.${key}`)
               return acc
             },
             { ...target },
@@ -252,7 +257,7 @@ export class Response {
       }
 
       // Assign the deeply merged result back to props.
-      pageResponse.props[prop] = deepMerge(currentProp, incomingProp)
+      pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
     })
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
@@ -277,4 +282,39 @@ export class Response {
 
     return errors[this.requestParams.all().errorBag || ''] || {}
   }
+}
+
+function mergeArrayWithStrategy(target: any[], source: any[], currentKey: string, mergeStrategies: string[]) {
+  // Find the mergeStrategy that matches the currentKey
+  // For example: posts.data.id matches posts.data
+  const mergeStrategy = mergeStrategies.find((strategy) => {
+    const path = strategy.split('.').slice(0, -1).join('.')
+    return path === currentKey
+  })
+
+  if (mergeStrategy) {
+    const uniqueProperty = mergeStrategy.split('.').pop() || ''
+    const targetArray = Array.isArray(target) ? target : []
+    const map = new Map<any, any>()
+
+    targetArray.forEach(item => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+    
+    source.forEach(item => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+    
+    return Array.from(map.values())
+  }
+  // No mergeStrategy: default to concatenation
+  return [...(Array.isArray(target) ? target : []), ...source]
 }
