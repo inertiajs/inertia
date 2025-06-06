@@ -115,7 +115,7 @@ test.describe('Data', () => {
       await expect(dump.query).toEqual({ foo: 'visit' })
       await expect(dump.form).toEqual({})
       await expect(dump.files).toEqual({})
-      await expect(dump.headers['content-type']).toBe('application/json')
+      await expect(dump.headers['content-type']).not.toBe('application/json')
     })
 
     test.describe('GET method', () => {
@@ -128,16 +128,17 @@ test.describe('Data', () => {
         await expect(dump.query).toEqual({ bar: 'get' })
         await expect(dump.form).toEqual({})
         await expect(dump.files).toEqual({})
-        await expect(dump.headers['content-type']).toBe('application/json')
+        await expect(dump.headers['content-type']).not.toBe('application/json')
       })
 
       const data = [
-        { label: 'QSAF Brackets', formatter: 'brackets', expected: '?a[]=b&a[]=c' },
-        { label: 'QSAF Indices', formatter: 'indices', expected: '?a[0]=b&a[1]=c' },
-        { label: 'QSAF Default', formatter: 'default', expected: '?a[]=b&a[]=c' },
+        { label: 'QSAF Brackets', formatter: 'brackets', expected: '?a[]=b&a[]=c', expectedObject: { a: ['b', 'c'] } },
+        { label: 'QSAF Indices', formatter: 'indices', expected: '?a[0]=b&a[1]=c', expectedObject: { a: ['b', 'c'] } },
+        { label: 'QSAF Default', formatter: 'default', expected: '?a[]=b&a[]=c', expectedObject: { a: ['b', 'c'] } },
+        { label: 'Delete Query Param', formatter: 'delete param', expected: '', expectedObject: {} },
       ]
 
-      data.forEach(({ label, formatter, expected }) => {
+      data.forEach(({ label, formatter, expected, expectedObject }) => {
         test(`can use the ${formatter} query string array formatter`, async ({ page }) => {
           await page.getByRole('link', { name: label }).click()
 
@@ -145,10 +146,10 @@ test.describe('Data', () => {
 
           // TODO: Should this be in the query string? It's not, but... should it be?
 
-          await expect(dump.query).toEqual({ a: ['b', 'c'] })
+          await expect(dump.query).toEqual(expectedObject)
           await expect(dump.method).toBe('get')
           await expect(dump.form).toEqual({})
-          await expect(dump.headers['content-type']).toBe('application/json')
+          await expect(dump.headers['content-type']).not.toBe('application/json')
         })
       })
     })

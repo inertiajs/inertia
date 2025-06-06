@@ -11,7 +11,8 @@
     "test:svelte": "PACKAGE=svelte playwright test",
     "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
     "test:vue": "PACKAGE=vue3 playwright test",
-    "test:vue:watch": "cd packages/vue3/test-app && npm run watch"
+    "test:vue:watch": "cd packages/vue3/test-app && npm run watch",
+    "build:all": "pnpm build"
   },
   "dependencies": {
     "@playwright/test": "^1.51.0",

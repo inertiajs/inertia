@@ -1,3 +1,4 @@
+import { cloneDeep } from 'es-toolkit'
 import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'
@@ -205,23 +206,35 @@ class PrefetchedRequests {
     )
   }
 
+  protected withoutPurposePrefetchHeader(params: ActiveVisit): ActiveVisit {
+    const newParams = cloneDeep(params)
+    if (newParams.headers['Purpose'] === 'prefetch') {
+      delete newParams.headers['Purpose']
+    }
+    return newParams
+  }
+
   protected paramsAreEqual(params1: ActiveVisit, params2: ActiveVisit): boolean {
-    return objectsAreEqual<ActiveVisit>(params1, params2, [
-      'showProgress',
-      'replace',
-      'prefetch',
-      'onBefore',
-      'onStart',
-      'onProgress',
-      'onFinish',
-      'onCancel',
-      'onSuccess',
-      'onError',
-      'onPrefetched',
-      'onCancelToken',
-      'onPrefetching',
-      'async',
-    ])
+    return objectsAreEqual<ActiveVisit>(
+      this.withoutPurposePrefetchHeader(params1),
+      this.withoutPurposePrefetchHeader(params2),
+      [
+        'showProgress',
+        'replace',
+        'prefetch',
+        'onBefore',
+        'onStart',
+        'onProgress',
+        'onFinish',
+        'onCancel',
+        'onSuccess',
+        'onError',
+        'onPrefetched',
+        'onCancelToken',
+        'onPrefetching',
+        'async',
+      ],
+    )
   }
 }
 

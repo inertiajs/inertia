@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/core'
-import cloneDeep from 'lodash.clonedeep'
+import { cloneDeep } from 'es-toolkit'
 import { ComponentOptions } from 'vue'
 
 const remember: ComponentOptions = {

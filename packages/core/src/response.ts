@@ -205,24 +205,57 @@ export class Response {
   }
 
   protected mergeProps(pageResponse: Page): void {
-    if (this.requestParams.isPartial() && pageResponse.component === currentPage.get().component) {
-      const propsToMerge = pageResponse.mergeProps || []
-
-      propsToMerge.forEach((prop) => {
-        const incomingProp = pageResponse.props[prop]
-
-        if (Array.isArray(incomingProp)) {
-          pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
-        } else if (typeof incomingProp === 'object') {
-          pageResponse.props[prop] = {
-            ...((currentPage.get().props[prop] || []) as Record<string, any>),
-            ...incomingProp,
-          }
-        }
-      })
-
-      pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
+    if (!this.requestParams.isPartial() || pageResponse.component !== currentPage.get().component) {
+      return
     }
+
+    const propsToMerge = pageResponse.mergeProps || []
+    const propsToDeepMerge = pageResponse.deepMergeProps || []
+
+    propsToMerge.forEach((prop) => {
+      const incomingProp = pageResponse.props[prop]
+
+      if (Array.isArray(incomingProp)) {
+        pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
+      } else if (typeof incomingProp === 'object' && incomingProp !== null) {
+        pageResponse.props[prop] = {
+          ...((currentPage.get().props[prop] || []) as Record<string, any>),
+          ...incomingProp,
+        }
+      }
+    })
+
+    propsToDeepMerge.forEach((prop) => {
+      const incomingProp = pageResponse.props[prop]
+      const currentProp = currentPage.get().props[prop]
+
+      // Deep merge function to handle nested objects and arrays
+      const deepMerge = (target: any, source: any) => {
+        if (Array.isArray(source)) {
+          // Merge arrays by concatenating the existing and incoming elements
+          return [...(Array.isArray(target) ? target : []), ...source]
+        }
+
+        if (typeof source === 'object' && source !== null) {
+          // Merge objects by iterating over keys
+          return Object.keys(source).reduce(
+            (acc, key) => {
+              acc[key] = deepMerge(target ? target[key] : undefined, source[key])
+              return acc
+            },
+            { ...target },
+          )
+        }
+
+        // If the source is neither an array nor an object, return it directly
+        return source
+      }
+
+      // Assign the deeply merged result back to props.
+      pageResponse.props[prop] = deepMerge(currentProp, incomingProp)
+    })
+
+    pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
   }
 
   protected async setRememberedState(pageResponse: Page): Promise<void> {

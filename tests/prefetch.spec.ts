@@ -26,8 +26,11 @@ test('will not prefetch current page', async ({ page }) => {
   await page.goto('prefetch/1')
 
   // These two prefetch requests should be made on mount
-  await prefetch2
-  await prefetch4
+  const request2 = await prefetch2
+  const request4 = await prefetch4
+
+  expect(request2.request().headers().purpose).toBe('prefetch')
+  expect(request4.request().headers().purpose).toBe('prefetch')
 
   requests.listen(page)
   await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
