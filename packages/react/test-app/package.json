@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "server:run": "vite build .",
+    "build": "vite build .",
     "watch": "vite build . --watch"
   },
   "devDependencies": {
