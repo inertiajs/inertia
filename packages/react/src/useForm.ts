@@ -9,7 +9,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
 type SetDataByObject<TForm> = (data: TForm) => void
@@ -196,13 +196,16 @@ export default function useForm<TForm extends FormDataType>(
     [setData],
   )
 
-  const [pendingDefaultsToDataUpdate, setPendingDefaultsToDataUpdate] = useState(false)
+  const setDefaultsCalledWithoutArgs = useRef(false)
 
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) => {
       if (typeof fieldOrFields === 'undefined') {
-        setDefaults(cloneDeep(data)) // Set it immediately in case data has already been updated in the previous render
-        setPendingDefaultsToDataUpdate(true) // Set a flag to update defaults after the next render
+        setDefaults(data)
+        // If setData was called right before setDefaults, data was not
+        // updated in that render yet, so we set a flag to update
+        // defaults right after the next render.
+        setDefaultsCalledWithoutArgs.current = true
       } else {
         setDefaults((defaults) => {
           return typeof fieldOrFields === 'string'
@@ -214,15 +217,21 @@ export default function useForm<TForm extends FormDataType>(
     [data, setDefaults],
   )
 
-  useEffect(() => {
-    if (pendingDefaultsToDataUpdate) {
-      setDefaults(cloneDeep(data)) // Update defaults after the next render
-    }
-  }, [data])
+  const isDirty = useMemo(() => !isEqual(data, defaults), [data, defaults])
 
-  useEffect(() => {
-    setPendingDefaultsToDataUpdate(false) // Immediately reset the flag after updating defaults so that new data will not update the defaults again
-  }, [pendingDefaultsToDataUpdate])
+  useLayoutEffect(() => {
+    if (!setDefaultsCalledWithoutArgs.current) {
+      return
+    }
+
+    if (isDirty) {
+      // Data has been updated in this next render and is different from
+      // the defaults, so now we can set defaults to the current data.
+      setDefaults(data)
+    }
+
+    setDefaultsCalledWithoutArgs.current = false
+  }, [setDefaultsCalledWithoutArgs.current])
 
   const reset = useCallback(
     (...fields) => {
@@ -299,7 +308,7 @@ export default function useForm<TForm extends FormDataType>(
   return {
     data,
     setData: setDataFunction,
-    isDirty: !isEqual(data, defaults),
+    isDirty,
     errors,
     hasErrors,
     processing,
