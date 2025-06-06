@@ -26,24 +26,24 @@ const Defer = ({
     <>
       <Head title="Form" />
       <h1 className="text-3xl">Defer</h1>
-      <div className="mt-6 rounded border border-yellow-500 bg-yellow-200 p-4">
+      <div className="mt-6 rounded-sm border border-yellow-500 bg-yellow-200 p-4">
         <p>Page is loaded!</p>
       </div>
 
       <div className="mt-6 flex space-x-6">
-        <div className="w-1/2 rounded border border-black p-4">
+        <div className="w-1/2 rounded-sm border border-gray-200 p-4">
           <Deferred data="users" fallback={<p>Loading Users...</p>}>
             <DeferredUsers />
           </Deferred>
         </div>
 
-        <div className="w-1/2 rounded border border-black p-4">
+        <div className="w-1/2 rounded-sm border border-gray-200 p-4">
           {/* <Suspense fallback={<p>Loading Food...</p>}>
             <DeferredFood />
           </Suspense> */}
         </div>
 
-        <div className="w-1/2 rounded border border-black p-4">
+        <div className="w-1/2 rounded-sm border border-gray-200 p-4">
           {/* <Suspense fallback={<p>Loading Organizations...</p>}>
             <DeferredOrganizations />
           </Suspense> */}
