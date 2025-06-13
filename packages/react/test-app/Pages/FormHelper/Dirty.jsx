@@ -11,6 +11,11 @@ export default (props) => {
     form.setDefaults()
   }
 
+  const dataAndDefaults = () => {
+    pushValue()
+    defaults()
+  }
+
   const pushValue = () => {
     form.setData('foo', [...form.data.foo, 'bar'])
   }
@@ -35,6 +40,10 @@ export default (props) => {
 
       <button onClick={defaults} className="defaults">
         Defaults
+      </button>
+
+      <button onClick={dataAndDefaults} className="data-and-defaults">
+        Data and Defaults
       </button>
 
       <button onClick={pushValue}>Push Value</button>

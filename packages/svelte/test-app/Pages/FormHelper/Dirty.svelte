@@ -17,6 +17,11 @@
   const pushValue = () => {
     $form.foo.push('bar')
   }
+
+  const dataAndDefaults = () => {
+    pushValue()
+    defaults()
+  }
 </script>
 
 <div>
@@ -28,6 +33,7 @@
 
   <button on:click={submit} class="submit">Submit form</button>
   <button on:click={defaults} class="defaults">Defaults</button>
+  <button on:click={dataAndDefaults} class="data-and-defaults">Data and Defaults</button>
   <button on:click={pushValue} class="push">Push value</button>
 
 </div>
