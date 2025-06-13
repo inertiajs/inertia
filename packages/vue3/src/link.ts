@@ -10,12 +10,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string
   data?: Record<string, FormDataConvertible>
-  href: string
+  href: string | { url: string; method: Method }
   method?: Method
   headers?: Record<string, string>
   onClick?: (event: MouseEvent) => void
@@ -54,7 +54,7 @@ const Link: InertiaLink = defineComponent({
       default: () => ({}),
     },
     href: {
-      type: String,
+      type: [String, Object] as PropType<InertiaLinkProps['href']>,
       required: true,
     },
     method: {
@@ -184,17 +184,26 @@ const Link: InertiaLink = defineComponent({
       clearTimeout(hoverTimeout.value)
     })
 
-    const method = props.method.toLowerCase() as Method
+    const method = typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method)
     const as = method !== 'get' ? 'button' : props.as.toLowerCase()
-    const [href, data] = mergeDataIntoQueryString(method, props.href || '', props.data, props.queryStringArrayFormat)
+    const mergeDataArray = computed(() =>
+      mergeDataIntoQueryString(
+        method,
+        typeof props.href === 'object' ? props.href.url : props.href || '',
+        props.data,
+        props.queryStringArrayFormat,
+      ),
+    )
+    const href = computed(() => mergeDataArray.value[0])
+    const data = computed(() => mergeDataArray.value[1])
 
-    const elProps = {
-      a: { href },
+    const elProps = computed(() => ({
+      a: { href: href.value },
       button: { type: 'button', disabled: props.disabled },
-    }
+    }))
 
     const baseParams = {
-      data: data,
+      data: data.value,
       method: method,
       replace: props.replace,
       preserveScroll: props.preserveScroll,
@@ -225,7 +234,7 @@ const Link: InertiaLink = defineComponent({
 
     const prefetch = () => {
       if (!props.disabled) {
-        router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+        router.prefetch(href.value, baseParams, { cacheFor: cacheForValue })
       }
     }
 
@@ -234,7 +243,7 @@ const Link: InertiaLink = defineComponent({
         if (shouldIntercept(event)) {
           event.preventDefault()
           if (!props.disabled) {
-            router.visit(href, visitParams)
+            router.visit(href.value, visitParams)
           }
         }
       },
@@ -262,7 +271,7 @@ const Link: InertiaLink = defineComponent({
       onMouseup: (event) => {
         event.preventDefault()
         if (!props.disabled) {
-          router.visit(href, visitParams)
+          router.visit(href.value, visitParams)
         }
       },
       onClick: (event) => {
@@ -278,7 +287,7 @@ const Link: InertiaLink = defineComponent({
         as,
         {
           ...attrs,
-          ...(elProps[as] || {}),
+          ...(elProps.value[as] || {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
           ...(() => {
             if (prefetchModes.includes('hover')) {

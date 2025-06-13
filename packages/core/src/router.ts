@@ -11,6 +11,7 @@ import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
   ActiveVisit,
+  ClientSideVisitOptions,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
@@ -64,27 +65,46 @@ export class Router {
     })
   }
 
-  public get(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
+  public get<T extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
     return this.visit(url, { ...options, method: 'get', data })
   }
 
-  public post(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
+  public post<T extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'post', data })
   }
 
-  public put(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
+  public put<T extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'put', data })
   }
 
-  public patch(url: URL | string, data: RequestPayload = {}, options: VisitHelperOptions = {}): void {
+  public patch<T extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'patch', data })
   }
 
-  public delete(url: URL | string, options: Omit<VisitOptions, 'method'> = {}): void {
+  public delete<T extends RequestPayload = RequestPayload>(
+    url: URL | string,
+    options: Omit<VisitOptions<T>, 'method'> = {},
+  ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
-  public reload(options: ReloadOptions = {}): void {
+  public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
     if (typeof window === 'undefined') {
       return
     }
@@ -113,6 +133,10 @@ export class Router {
     type: TEventName,
     callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
   ): VoidFunction {
+    if (typeof window === 'undefined') {
+      return () => {}
+    }
+
     return eventHandler.onGlobalEvent(type, callback)
   }
 
@@ -132,7 +156,7 @@ export class Router {
     })
   }
 
-  public visit(href: string | URL, options: VisitOptions = {}): void {
+  public visit<T extends RequestPayload = RequestPayload>(href: string | URL, options: VisitOptions<T> = {}): void {
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,
@@ -151,7 +175,7 @@ export class Router {
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
-      Scroll.save(currentPage.get())
+      Scroll.save()
     }
 
     const requestParams: PendingVisit & VisitCallbacks = {
@@ -186,7 +210,7 @@ export class Router {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 
-  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor }: PrefetchOptions) {
+  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor = 30_000 }: PrefetchOptions) {
     if (options.method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
     }
@@ -197,6 +221,14 @@ export class Router {
       showProgress: false,
       prefetch: true,
     })
+
+    const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
+    const currentUrl = window.location.origin + window.location.pathname + window.location.search
+
+    if (visitUrl === currentUrl) {
+      // Don't prefetch the current page, you're already on it
+      return
+    }
 
     const events = this.getVisitEvents(options)
 
@@ -214,13 +246,29 @@ export class Router {
       ...events,
     }
 
-    prefetchedRequests.add(
-      requestParams,
-      (params) => {
-        this.asyncRequestStream.send(Request.create(params, currentPage.get()))
-      },
-      { cacheFor },
-    )
+    const ensureCurrentPageIsSet = (): Promise<void> => {
+      return new Promise((resolve) => {
+        const checkIfPageIsDefined = () => {
+          if (currentPage.get()) {
+            resolve()
+          } else {
+            setTimeout(checkIfPageIsDefined, 50)
+          }
+        }
+
+        checkIfPageIsDefined()
+      })
+    }
+
+    ensureCurrentPageIsSet().then(() => {
+      prefetchedRequests.add(
+        requestParams,
+        (params) => {
+          this.asyncRequestStream.send(Request.create(params, currentPage.get()))
+        },
+        { cacheFor },
+      )
+    })
   }
 
   public clearHistory(): void {
@@ -229,6 +277,33 @@ export class Router {
 
   public decryptHistory(): Promise<Page> {
     return history.decrypt()
+  }
+
+  public replace(params: ClientSideVisitOptions): void {
+    this.clientVisit(params, { replace: true })
+  }
+
+  public push(params: ClientSideVisitOptions): void {
+    this.clientVisit(params)
+  }
+
+  protected clientVisit(params: ClientSideVisitOptions, { replace = false }: { replace?: boolean } = {}): void {
+    const current = currentPage.get()
+
+    const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
+
+    currentPage.set(
+      {
+        ...current,
+        ...params,
+        props,
+      },
+      {
+        replace,
+        preserveScroll: params.preserveScroll,
+        preserveState: params.preserveState,
+      },
+    )
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
@@ -277,7 +352,7 @@ export class Router {
       mergedOptions.queryStringArrayFormat,
     )
 
-    return {
+    const visit = {
       cancelled: false,
       completed: false,
       interrupted: false,
@@ -286,6 +361,12 @@ export class Router {
       url,
       data: _data,
     }
+
+    if (visit.prefetch) {
+      visit.headers['Purpose'] = 'prefetch'
+    }
+
+    return visit
   }
 
   protected getVisitEvents(options: VisitOptions): VisitCallbacks {

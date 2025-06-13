@@ -72,6 +72,14 @@ app.get('/links/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Links/Headers', version: 'example-version-header' }),
 )
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
+app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
+
+app.get('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server' },
+  }),
+)
 
 app.get('/links/disabled', (req, res) => inertia.render(req, res, { component: 'Links/Disabled' }))
 
@@ -122,6 +130,21 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.get('/form-helper/nested', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Nested',
+  }),
+)
+
+app.get('/form-helper/dirty', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Dirty',
+    props: {},
+  }),
+)
+
+app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Errors',
@@ -168,6 +191,20 @@ app.delete('/dump/delete', upload.any(), (req, res) =>
     props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files },
   }),
 )
+
+app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
+  if (req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'Visits/ReloadOnMount',
+      props: { name: 'mounted!' },
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'Visits/ReloadOnMount',
+    props: { name: 'not mounted!' },
+  })
+})
 
 app.get('/persistent-layouts/shorthand/simple/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
@@ -224,6 +261,16 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/history/version/:pageNumber', (req, res) => {
+  inertia.render(req, res, {
+    component: 'History/Version',
+    props: {
+      pageNumber: req.params.pageNumber,
+    },
+    version: req.params.pageNumber === '1' ? 'version-1' : 'version-2',
+  })
+})
+
 app.get('/when-visible', (req, res) => {
   const page = () =>
     inertia.render(req, res, {
@@ -231,11 +278,22 @@ app.get('/when-visible', (req, res) => {
       props: {},
     })
 
-  if (req.headers['x-inertia-partial-data']) {
-    setTimeout(page, 500)
+  if (req.headers['x-inertia-partial-data'] || req.query.count) {
+    setTimeout(page, 250)
   } else {
     page()
   }
+})
+
+app.get('/progress/:pageNumber', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Progress',
+        props: { pageNumber: req.params.pageNumber },
+      }),
+    500,
+  )
 })
 
 app.get('/merge-props', (req, res) => {
@@ -246,6 +304,29 @@ app.get('/merge-props', (req, res) => {
       foo: new Array(5).fill(1),
     },
     ...(req.headers['x-inertia-reset'] ? {} : { mergeProps: ['foo'] }),
+  })
+})
+
+app.get('/deep-merge-props', (req, res) => {
+  const labels = ['first', 'second', 'third', 'fourth', 'fifth']
+
+  const page = parseInt(req.query.page ?? -1, 10) + 1
+
+  inertia.render(req, res, {
+    component: 'DeepMergeProps',
+    props: {
+      bar: new Array(5).fill(1),
+      baz: new Array(5).fill(1),
+      foo: {
+        data: new Array(5).fill(1),
+        page,
+        per_page: 5,
+        meta: {
+          label: labels[page],
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['foo', 'baz'] }),
   })
 })
 
@@ -267,6 +348,52 @@ app.get('/deferred-props/page-1', (req, res) => {
         props: {
           foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
           bar: req.headers['x-inertia-partial-data']?.includes('bar') ? { text: 'bar value' } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
+app.get('/deferred-props/with-partial-reload/:mode', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithPartialReload',
+      deferredProps: {
+        default: ['users'],
+      },
+      props: {
+        withOnly: (() => {
+          if (req.params.mode === 'only') {
+            return ['users']
+          }
+
+          if (req.params.mode === 'only-other') {
+            return ['other']
+          }
+
+          return []
+        })(),
+        withExcept: (() => {
+          if (req.params.mode === 'except') {
+            return ['users']
+          }
+
+          if (req.params.mode === 'except-other') {
+            return ['other']
+          }
+
+          return []
+        })(),
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithPartialReload',
+        props: {
+          users: req.headers['x-inertia-partial-data']?.includes('users') ? [{ id: 1, name: 'John Doe' }] : undefined,
         },
       }),
     500,
@@ -313,7 +440,7 @@ app.get('/deferred-props/page-2', (req, res) => {
 })
 
 app.get('/svelte/props-and-page-store', (req, res) =>
-  inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' }}),
+  inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))

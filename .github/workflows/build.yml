@@ -4,7 +4,7 @@ jobs:
   build:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     timeout-minutes: 15
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
@@ -20,7 +20,7 @@ jobs:
           node-version: 20.15
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
           path: |
@@ -30,11 +30,6 @@ jobs:
 
       - name: Build Inertia
         run: |
-          rm package-lock.json
           npm install
           cd packages/core && npm run build
           cd ../${{ matrix.adapter }} && npm run build
-
-    #   - name: Build Playground
-    #     run: |
-    #       cd playgrounds/${{ matrix.adapter }} && npm run build

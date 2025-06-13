@@ -5,10 +5,22 @@
     "packages/*",
     "playgrounds/*"
   ],
+  "scripts": {
+    "test:react": "cd tests && PACKAGE=react npx playwright test",
+    "test:react:watch": "cd packages/react/test-app && npm run watch",
+    "test:svelte": "cd tests && PACKAGE=svelte npx playwright test",
+    "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
+    "test:vue": "cd tests && PACKAGE=vue3 npx playwright test",
+    "test:vue:watch": "cd packages/vue3/test-app && npm run watch",
+    "build:all": "cd packages/core && npm run build && cd ../react && npm run build && cd ../vue3 && npm run build && cd ../svelte && npm run build"
+  },
   "dependencies": {
     "prettier": "^3.2.5",
-    "prettier-plugin-organize-imports": "^3.2.4",
+    "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-svelte": "^3.2.3",
-    "prettier-plugin-tailwindcss": "^0.5.14"
+    "prettier-plugin-tailwindcss": "^0.6.9"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.28.1"
   }
 }
