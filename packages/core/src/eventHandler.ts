@@ -84,6 +84,11 @@ class EventHandler {
     history
       .decrypt(state.page)
       .then((data) => {
+        if (currentPage.get().version !== data.version) {
+          this.onMissingHistoryItem()
+          return
+        }
+
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           Scroll.restore(history.getScrollRegions())
           fireNavigateEvent(currentPage.get())

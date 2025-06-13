@@ -259,6 +259,16 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/history/version/:pageNumber', (req, res) => {
+  inertia.render(req, res, {
+    component: 'History/Version',
+    props: {
+      pageNumber: req.params.pageNumber,
+    },
+    version: req.params.pageNumber === '1' ? 'version-1' : 'version-2',
+  })
+})
+
 app.get('/when-visible', (req, res) => {
   const page = () =>
     inertia.render(req, res, {
@@ -271,6 +281,17 @@ app.get('/when-visible', (req, res) => {
   } else {
     page()
   }
+})
+
+app.get('/progress/:pageNumber', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Progress',
+        props: { pageNumber: req.params.pageNumber },
+      }),
+    500,
+  )
 })
 
 app.get('/merge-props', (req, res) => {
@@ -304,6 +325,52 @@ app.get('/deep-merge-props', (req, res) => {
       },
     },
     ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['foo', 'baz'] }),
+  })
+})
+
+app.get('/merge-strategies', (req, res) => {
+  const labels = ['first', 'second', 'third', 'fourth', 'fifth']
+
+  const perPage = 5
+  const page = parseInt(req.query.page ?? -1, 10) + 1
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: index + 1,
+    name: `User ${index + 1}`,
+  }))
+
+  const companies = new Array(perPage).fill(1).map((_, index) => ({
+    otherId: index + 1,
+    name: `Company ${index + 1}`,
+  }))
+
+  const teams = new Array(perPage).fill(1).map((_, index) => ({
+    uuid: (Math.random() + 1).toString(36).substring(7),
+    name: `Team ${perPage * page + index + 1}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'MergeStrategies',
+    props: {
+      bar: new Array(perPage).fill(1),
+      baz: new Array(perPage).fill(1),
+      foo: {
+        data: users,
+        companies,
+        teams,
+        page,
+        per_page: 5,
+        meta: {
+          label: labels[page],
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : {
+          deepMergeProps: ['foo', 'baz'],
+          mergeStrategies: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+        }),
   })
 })
 
