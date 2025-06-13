@@ -35,6 +35,8 @@ export default function App({
           page,
           key: preserveState ? current.key : Date.now(),
         }))
+
+        return new Promise((resolve) => window.requestAnimationFrame(resolve))
       },
     })
 

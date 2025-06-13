@@ -39,6 +39,8 @@
 
         renderProps = resolveRenderProps(component, page, key)
         setPage(page)
+
+        return new Promise((resolve) => window.requestAnimationFrame(resolve))
       },
     })
   }

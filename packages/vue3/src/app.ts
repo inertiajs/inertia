@@ -73,6 +73,8 @@ const App: InertiaApp = defineComponent({
           component.value = markRaw(args.component)
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
+
+          return new Promise((resolve) => window.requestAnimationFrame(resolve))
         },
       })
 
