@@ -1,37 +1,47 @@
-import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
-import isEqual from 'lodash.isequal'
+import {
+  FormDataConvertible,
+  FormDataKeys,
+  FormDataValues,
+  Method,
+  Progress,
+  router,
+  VisitOptions,
+} from '@inertiajs/core'
+import { cloneDeep, isEqual } from 'es-toolkit'
+import { get, has, set } from 'es-toolkit/compat'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-type setDataByObject<TForm> = (data: TForm) => void
-type setDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type setDataByKeyValuePair<TForm> = <K extends keyof TForm>(key: K, value: TForm[K]) => void
-type FormDataType = object
+type SetDataByObject<TForm> = (data: TForm) => void
+type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
+type FormDataType = Record<string, FormDataConvertible>
+type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType> {
   data: TForm
   isDirty: boolean
-  errors: Partial<Record<keyof TForm, string>>
+  errors: Partial<Record<FormDataKeys<TForm>, string>>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  setData: setDataByObject<TForm> & setDataByMethod<TForm> & setDataByKeyValuePair<TForm>
+  setData: SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
   transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
-  setDefaults(field: keyof TForm, value: FormDataConvertible): void
+  setDefaults(field: FormDataKeys<TForm>, value: FormDataConvertible): void
   setDefaults(fields: Partial<TForm>): void
-  reset: (...fields: (keyof TForm)[]) => void
-  clearErrors: (...fields: (keyof TForm)[]) => void
-  setError(field: keyof TForm, value: string): void
-  setError(errors: Record<keyof TForm, string>): void
-  submit: (method: Method, url: string, options?: VisitOptions) => void
-  get: (url: string, options?: VisitOptions) => void
-  patch: (url: string, options?: VisitOptions) => void
-  post: (url: string, options?: VisitOptions) => void
-  put: (url: string, options?: VisitOptions) => void
-  delete: (url: string, options?: VisitOptions) => void
+  reset: (...fields: FormDataKeys<TForm>[]) => void
+  clearErrors: (...fields: FormDataKeys<TForm>[]) => void
+  setError(field: FormDataKeys<TForm>, value: string): void
+  setError(errors: Record<FormDataKeys<TForm>, string>): void
+  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
+  get: (url: string, options?: FormOptions) => void
+  patch: (url: string, options?: FormOptions) => void
+  post: (url: string, options?: FormOptions) => void
+  put: (url: string, options?: FormOptions) => void
+  delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
 export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
@@ -52,14 +62,14 @@ export default function useForm<TForm extends FormDataType>(
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
-    ? useRemember({} as Partial<Record<keyof TForm, string>>, `${rememberKey}:errors`)
-    : useState({} as Partial<Record<keyof TForm, string>>)
+    ? useRemember({} as Partial<Record<FormDataKeys<TForm>, string>>, `${rememberKey}:errors`)
+    : useState({} as Partial<Record<FormDataKeys<TForm>, string>>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  let transform = (data) => data
+  const transform = useRef((data) => data)
 
   useEffect(() => {
     isMounted.current = true
@@ -69,7 +79,13 @@ export default function useForm<TForm extends FormDataType>(
   }, [])
 
   const submit = useCallback(
-    (method, url, options: VisitOptions = {}) => {
+    (...args) => {
+      const objectPassed = typeof args[0] === 'object'
+
+      const method = objectPassed ? args[0].method : args[0]
+      const url = objectPassed ? args[0].url : args[1]
+      const options = (objectPassed ? args[1] : args[2]) ?? {}
+
       const _options = {
         ...options,
         onCancelToken: (token) => {
@@ -110,6 +126,7 @@ export default function useForm<TForm extends FormDataType>(
             setHasErrors(false)
             setWasSuccessful(true)
             setRecentlySuccessful(true)
+            setDefaults(cloneDeep(data))
             recentlySuccessfulTimeoutId.current = setTimeout(() => {
               if (isMounted.current) {
                 setRecentlySuccessful(false)
@@ -158,77 +175,82 @@ export default function useForm<TForm extends FormDataType>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform(data) })
+        router.delete(url, { ..._options, data: transform.current(data) })
       } else {
-        router[method](url, transform(data), _options)
+        router[method](url, transform.current(data), _options)
       }
     },
     [data, setErrors, transform],
   )
 
-  return {
-    data,
-    setData(keyOrData: keyof TForm | Function | TForm, maybeValue?: TForm[keyof TForm]) {
+  const setDataFunction = useCallback(
+    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
-        setData((data) => ({ ...data, [keyOrData]: maybeValue }))
+        setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
         setData(keyOrData as TForm)
       }
     },
-    isDirty: !isEqual(data, defaults),
-    errors,
-    hasErrors,
-    processing,
-    progress,
-    wasSuccessful,
-    recentlySuccessful,
-    transform(callback) {
-      transform = callback
-    },
-    setDefaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
+    [setData],
+  )
+
+  const setDefaultsFunction = useCallback(
+    (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) => {
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(() => data)
       } else {
-        setDefaults((defaults) => ({
-          ...defaults,
-          ...(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : (fieldOrFields as TForm)),
-        }))
+        setDefaults((defaults) => {
+          return typeof fieldOrFields === 'string'
+            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
+            : Object.assign(cloneDeep(defaults), fieldOrFields)
+        })
       }
     },
-    reset(...fields) {
+    [data, setDefaults],
+  )
+
+  const reset = useCallback(
+    (...fields) => {
       if (fields.length === 0) {
         setData(defaults)
       } else {
-        setData(
-          (Object.keys(defaults) as Array<keyof TForm>)
-            .filter((key) => fields.includes(key))
+        setData((data) =>
+          (fields as Array<FormDataKeys<TForm>>)
+            .filter((key) => has(defaults, key))
             .reduce(
               (carry, key) => {
-                carry[key] = defaults[key]
-                return carry
+                return set(carry, key, get(defaults, key))
               },
-              { ...data },
+              { ...data } as TForm,
             ),
         )
       }
     },
-    setError(fieldOrFields: keyof TForm | Record<keyof TForm, string>, maybeValue?: string) {
+    [setData, defaults],
+  )
+
+  const setError = useCallback(
+    (fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
           ...(typeof fieldOrFields === 'string'
             ? { [fieldOrFields]: maybeValue }
-            : (fieldOrFields as Record<keyof TForm, string>)),
+            : (fieldOrFields as Record<FormDataKeys<TForm>, string>)),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
       })
     },
-    clearErrors(...fields) {
+    [setErrors, setHasErrors],
+  )
+
+  const clearErrors = useCallback(
+    (...fields) => {
       setErrors((errors) => {
-        const newErrors = (Object.keys(errors) as Array<keyof TForm>).reduce(
+        const newErrors = (Object.keys(errors) as Array<FormDataKeys<TForm>>).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
@@ -239,26 +261,49 @@ export default function useForm<TForm extends FormDataType>(
         return newErrors
       })
     },
+    [setErrors, setHasErrors],
+  )
+
+  const createSubmitMethod = (method) => (url, options) => {
+    submit(method, url, options)
+  }
+  const getMethod = useCallback(createSubmitMethod('get'), [submit])
+  const post = useCallback(createSubmitMethod('post'), [submit])
+  const put = useCallback(createSubmitMethod('put'), [submit])
+  const patch = useCallback(createSubmitMethod('patch'), [submit])
+  const deleteMethod = useCallback(createSubmitMethod('delete'), [submit])
+
+  const cancel = useCallback(() => {
+    if (cancelToken.current) {
+      cancelToken.current.cancel()
+    }
+  }, [])
+
+  const transformFunction = useCallback((callback) => {
+    transform.current = callback
+  }, [])
+
+  return {
+    data,
+    setData: setDataFunction,
+    isDirty: !isEqual(data, defaults),
+    errors,
+    hasErrors,
+    processing,
+    progress,
+    wasSuccessful,
+    recentlySuccessful,
+    transform: transformFunction,
+    setDefaults: setDefaultsFunction,
+    reset,
+    setError,
+    clearErrors,
     submit,
-    get(url, options) {
-      submit('get', url, options)
-    },
-    post(url, options) {
-      submit('post', url, options)
-    },
-    put(url, options) {
-      submit('put', url, options)
-    },
-    patch(url, options) {
-      submit('patch', url, options)
-    },
-    delete(url, options) {
-      submit('delete', url, options)
-    },
-    cancel() {
-      if (cancelToken.current) {
-        cancelToken.current.cancel()
-      }
-    },
+    get: getMethod,
+    post,
+    put,
+    patch,
+    delete: deleteMethod,
+    cancel,
   }
 }

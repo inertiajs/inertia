@@ -42,7 +42,7 @@ export class RequestParams {
   }
 
   public data() {
-    return this.params.method === 'get' ? {} : this.params.data
+    return this.params.method === 'get' ? null : this.params.data
   }
 
   public queryParams() {

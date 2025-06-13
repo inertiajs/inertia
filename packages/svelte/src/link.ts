@@ -21,7 +21,7 @@ interface ActionElement extends HTMLElement {
 }
 
 type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
-  href?: string
+  href?: string | { url: string; method: Method }
   data?: Record<string, FormDataConvertible>
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
   cacheFor?: CacheForOption | CacheForOption[]
@@ -117,7 +117,7 @@ function link(
       return 30_000
     })()
 
-    method = (params.method?.toLowerCase() || 'get') as Method
+    method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
     ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
@@ -166,7 +166,7 @@ function link(
   function hrefAndData(method: Method, params: ActionParameters) {
     return mergeDataIntoQueryString(
       method,
-      node.href || params.href || '',
+      typeof params.href === 'object' ? params.href.url : node.href || params.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
     )
