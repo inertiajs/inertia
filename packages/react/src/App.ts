@@ -35,8 +35,6 @@ export default function App({
           page,
           key: preserveState ? current.key : Date.now(),
         }))
-
-        return Promise.resolve()
       },
     })
 

@@ -39,8 +39,6 @@
 
         renderProps = resolveRenderProps(component, page, key)
         setPage(page)
-
-        return Promise.resolve()
       },
     })
   }
