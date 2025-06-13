@@ -1,6 +1,22 @@
+import { ModalConfig } from './types'
+
+const settings: ModalConfig = {
+  showOnNonInertiaResponse: true,
+}
+
+export const setupModal = (options: Partial<ModalConfig>): void => {
+  Object.assign(settings, options)
+}
+
+export const getConfig = (): ModalConfig => {
+  return { ...settings }
+}
+
 export default {
   modal: null,
   listener: null,
+  setupModal,
+  getConfig,
 
   show(html: Record<string, unknown> | string): void {
     if (typeof html === 'object') {
