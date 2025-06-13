@@ -18,7 +18,7 @@ const Head: InertiaHead = function ({ children, title }) {
     return () => {
       provider.disconnect()
     }
-  }, [provider, children])
+  }, [provider, children, title])
 
   function isUnaryTag(node) {
     return (
