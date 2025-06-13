@@ -789,6 +789,72 @@ test.describe('data-loading attribute', () => {
   })
 })
 
+test.describe('disabled attribute', () => {
+  test('disables the link when the disabled attribute is set to true', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('link', { name: 'Disabled', exact: true })
+    await expect(link).not.toHaveAttribute('disabled')
+    await link.click()
+    await expect(page).toHaveURL('/links/disabled')
+  })
+
+  test('disables the link when the disabled attribute exists', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('link', { name: 'Disabled Default', exact: true })
+    await expect(link).not.toHaveAttribute('disabled')
+    await link.click()
+    await expect(page).toHaveURL('/links/disabled')
+  })
+
+  test('does not disable the link when the disabled attribute is set to false', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('link', { name: 'Enabled', exact: true })
+    await expect(link).not.toHaveAttribute('disabled')
+    await link.click()
+    await expect(page).toHaveURL('/links/disabled')
+  })
+
+  test('does not disable the link when the disabled attribute not exists', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('link', { name: 'Enabled Default', exact: true })
+    await expect(link).not.toHaveAttribute('disabled')
+    await link.click()
+    await expect(page).toHaveURL('/links/disabled')
+  })
+
+  test('disables the link (as=button) when the disabled attribute is set to true', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('button', { name: 'Disabled Button', exact: true })
+    await expect(link).toBeDisabled()
+    await expect(link).toHaveAttribute('disabled')
+  })
+
+  test('disables the link (as=button) when the disabled attribute is set', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('button', { name: 'Disabled Default Button', exact: true })
+    await expect(link).toBeDisabled()
+    await expect(link).toHaveAttribute('disabled')
+  })
+
+  test('does not disable the link (as=button) when the disabled attribute is set to false', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('button', { name: 'Enabled Button', exact: true })
+    await expect(link).not.toBeDisabled()
+    await expect(link).not.toHaveAttribute('disabled')
+    await link.click()
+    await expect(page).toHaveURL('/links/disabled')
+  })
+
+  test('does not disable the link (as=button) when the disabled attribute is not set', async ({ page }) => {
+    await page.goto('/links/disabled')
+    const link = await page.getByRole('button', { name: 'Enabled Default Button', exact: true })
+    await expect(link).not.toBeDisabled()
+    await expect(link).not.toHaveAttribute('disabled')
+    await link.click()
+    await expect(page).toHaveURL('/links/disabled')
+  })
+})
+
 test('will update href if prop is updated', async ({ page }) => {
   await page.goto('/links/prop-update')
   const link = await page.getByRole('link', { name: 'The Link' })
