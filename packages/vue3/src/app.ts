@@ -74,7 +74,7 @@ const App: InertiaApp = defineComponent({
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
 
-          return new Promise((resolve) => window.requestAnimationFrame(resolve))
+          return Promise.resolve()
         },
       })
 
