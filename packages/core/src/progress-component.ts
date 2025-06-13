@@ -5,6 +5,8 @@ import { ProgressSettings } from './types'
 
 const baseComponentSelector = 'nprogress'
 
+let progress: HTMLDivElement
+
 const settings: ProgressSettings = {
   minimum: 0.08,
   easing: 'linear',
@@ -36,6 +38,10 @@ const configure = (options: Partial<ProgressSettings>) => {
   if (settings.includeCSS) {
     injectCSS(settings.color)
   }
+
+  progress = document.createElement('div')
+  progress.id = baseComponentSelector
+  progress.innerHTML = settings.template
 }
 
 /**
@@ -92,6 +98,8 @@ const set = (n: number) => {
 
       setTimeout(() => {
         remove()
+        progress.style.transition = ''
+        progress.style.opacity = ''
         next()
       }, speed)
     }, speed)
@@ -185,10 +193,6 @@ const render = (fromStart: boolean) => {
 
   document.documentElement.classList.add(`${baseComponentSelector}-busy`)
 
-  const progress = document.createElement('div')
-  progress.id = baseComponentSelector
-  progress.innerHTML = settings.template
-
   const bar = progress.querySelector(settings.barSelector)! as HTMLElement
   const perc = fromStart ? '-100' : toBarPercentage(status || 0)
   const parent = getParent()
@@ -216,7 +220,7 @@ const getParent = (): HTMLElement => {
 const remove = () => {
   document.documentElement.classList.remove(`${baseComponentSelector}-busy`)
   getParent().classList.remove(`${baseComponentSelector}-custom-parent`)
-  document.getElementById(baseComponentSelector)?.remove()
+  progress?.remove()
 }
 
 const isRendered = () => {
@@ -339,18 +343,14 @@ const injectCSS = (color: string): void => {
 }
 
 const show = () => {
-  const element = document.getElementById(baseComponentSelector)
-
-  if (element) {
-    element.style.display = ''
+  if (progress) {
+    progress.style.display = ''
   }
 }
 
 const hide = () => {
-  const element = document.getElementById(baseComponentSelector)
-
-  if (element) {
-    element.style.display = 'none'
+  if (progress) {
+    progress.style.display = 'none'
   }
 }
 

@@ -283,6 +283,17 @@ app.get('/when-visible', (req, res) => {
   }
 })
 
+app.get('/progress/:pageNumber', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Progress',
+        props: { pageNumber: req.params.pageNumber },
+      }),
+    500,
+  )
+})
+
 app.get('/merge-props', (req, res) => {
   inertia.render(req, res, {
     component: 'MergeProps',
