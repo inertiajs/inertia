@@ -11,6 +11,8 @@ export default function App({
   titleCallback,
   onHeadUpdate,
 }) {
+  let currentIsInitialPage = true
+
   const [current, setCurrent] = useState({
     component: initialComponent || null,
     page: initialPage,
@@ -30,6 +32,11 @@ export default function App({
       initialPage,
       resolveComponent,
       swapComponent: async ({ component, page, preserveState }) => {
+        if (currentIsInitialPage) {
+          currentIsInitialPage = false
+          return
+        }
+
         setCurrent((current) => ({
           component,
           page,
