@@ -1,5 +1,5 @@
 import { mergeWith } from 'es-toolkit'
-import * as qs from 'qs'
+import * as qs from 'neoqs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
 import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
