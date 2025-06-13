@@ -331,20 +331,33 @@ app.get('/deep-merge-props', (req, res) => {
 app.get('/merge-strategies', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
+  const perPage = 5
   const page = parseInt(req.query.page ?? -1, 10) + 1
 
-  const users = new Array(5).fill(1).map((_, index) => ({
+  const users = new Array(perPage).fill(1).map((_, index) => ({
     id: index + 1,
     name: `User ${index + 1}`,
+  }))
+
+  const companies = new Array(perPage).fill(1).map((_, index) => ({
+    otherId: index + 1,
+    name: `Company ${index + 1}`,
+  }))
+
+  const teams = new Array(perPage).fill(1).map((_, index) => ({
+    uuid: (Math.random() + 1).toString(36).substring(7),
+    name: `Team ${perPage * page + index + 1}`,
   }))
 
   inertia.render(req, res, {
     component: 'MergeStrategies',
     props: {
-      bar: new Array(5).fill(1),
-      baz: new Array(5).fill(1),
+      bar: new Array(perPage).fill(1),
+      baz: new Array(perPage).fill(1),
       foo: {
         data: users,
+        companies,
+        teams,
         page,
         per_page: 5,
         meta: {
@@ -352,10 +365,12 @@ app.get('/merge-strategies', (req, res) => {
         },
       },
     },
-    ...(req.headers['x-inertia-reset'] ? {} : { 
-      deepMergeProps: ['foo', 'baz'],
-      mergeStrategies: ['foo.data.id']
-    }),
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : {
+          deepMergeProps: ['foo', 'baz'],
+          mergeStrategies: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+        }),
   })
 })
 
