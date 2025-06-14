@@ -33,8 +33,6 @@ export default function App({
       resolveComponent,
       swapComponent: async () => {},
     })
-
-    router.on('navigate', () => headManager.forceUpdate())
     isRouterInitialized = true
   }
 
@@ -46,6 +44,8 @@ export default function App({
         key: preserveState ? current.key : Date.now(),
       }))
     })
+
+    router.on('navigate', () => headManager.forceUpdate())
   }, [])
 
   if (!current.component) {
