@@ -1,5 +1,5 @@
 import { createHeadManager, router } from '@inertiajs/core'
-import { createElement, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 
@@ -31,18 +31,22 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
-        setCurrent((current) => ({
-          component,
-          page,
-          key: preserveState ? current.key : Date.now(),
-        }))
-      },
+      swapComponent: async () => {},
     })
 
     router.on('navigate', () => headManager.forceUpdate())
     isRouterInitialized = true
   }
+
+  useEffect(() => {
+    router.setSwapComponent(async ({ component, page, preserveState }) => {
+      setCurrent((current) => ({
+        component,
+        page,
+        key: preserveState ? current.key : Date.now(),
+      }))
+    })
+  }, [])
 
   if (!current.component) {
     return createElement(
