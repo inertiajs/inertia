@@ -34,6 +34,10 @@ class CurrentPage {
     return this
   }
 
+  public setSwapComponent(swapComponent: PageHandler): void {
+    this.swapComponent = swapComponent
+  }
+
   public set(
     page: Page,
     {
