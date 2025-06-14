@@ -1,7 +1,9 @@
 import { createHeadManager, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createElement, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+
+let isRouterInitialized = false
 
 export default function App({
   children,
@@ -25,7 +27,7 @@ export default function App({
     )
   }, [])
 
-  useEffect(() => {
+  if (!isRouterInitialized) {
     router.init({
       initialPage,
       resolveComponent,
@@ -39,7 +41,8 @@ export default function App({
     })
 
     router.on('navigate', () => headManager.forceUpdate())
-  }, [])
+    isRouterInitialized = true
+  }
 
   if (!current.component) {
     return createElement(
