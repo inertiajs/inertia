@@ -1,5 +1,12 @@
 import test, { expect } from '@playwright/test'
-import { clickAndWaitForResponse, consoleMessages, pageLoads, requests, shouldBeDumpPage } from './support'
+import {
+  clickAndWaitForResponse,
+  consoleMessages,
+  pageLoads,
+  requests,
+  scrollElementTo,
+  shouldBeDumpPage,
+} from './support'
 
 test('visits a different page', async ({ page }) => {
   pageLoads.watch(page)
@@ -108,7 +115,7 @@ test.describe('Data', () => {
       await expect(dump.query).toEqual({ foo: 'visit' })
       await expect(dump.form).toEqual({})
       await expect(dump.files).toEqual({})
-      await expect(dump.headers['content-type']).toBe('application/json')
+      await expect(dump.headers['content-type']).not.toBe('application/json')
     })
 
     test.describe('GET method', () => {
@@ -121,16 +128,17 @@ test.describe('Data', () => {
         await expect(dump.query).toEqual({ bar: 'get' })
         await expect(dump.form).toEqual({})
         await expect(dump.files).toEqual({})
-        await expect(dump.headers['content-type']).toBe('application/json')
+        await expect(dump.headers['content-type']).not.toBe('application/json')
       })
 
       const data = [
-        { label: 'QSAF Brackets', formatter: 'brackets', expected: '?a[]=b&a[]=c' },
-        { label: 'QSAF Indices', formatter: 'indices', expected: '?a[0]=b&a[1]=c' },
-        { label: 'QSAF Default', formatter: 'default', expected: '?a[]=b&a[]=c' },
+        { label: 'QSAF Brackets', formatter: 'brackets', expected: '?a[]=b&a[]=c', expectedObject: { a: ['b', 'c'] } },
+        { label: 'QSAF Indices', formatter: 'indices', expected: '?a[0]=b&a[1]=c', expectedObject: { a: ['b', 'c'] } },
+        { label: 'QSAF Default', formatter: 'default', expected: '?a[]=b&a[]=c', expectedObject: { a: ['b', 'c'] } },
+        { label: 'Delete Query Param', formatter: 'delete param', expected: '', expectedObject: {} },
       ]
 
-      data.forEach(({ label, formatter, expected }) => {
+      data.forEach(({ label, formatter, expected, expectedObject }) => {
         test(`can use the ${formatter} query string array formatter`, async ({ page }) => {
           await page.getByRole('link', { name: label }).click()
 
@@ -138,10 +146,10 @@ test.describe('Data', () => {
 
           // TODO: Should this be in the query string? It's not, but... should it be?
 
-          await expect(dump.query).toEqual({ a: ['b', 'c'] })
+          await expect(dump.query).toEqual(expectedObject)
           await expect(dump.method).toBe('get')
           await expect(dump.form).toEqual({})
-          await expect(dump.headers['content-type']).toBe('application/json')
+          await expect(dump.headers['content-type']).not.toBe('application/json')
         })
       })
     })
@@ -429,10 +437,14 @@ test.describe('Preserve scroll', () => {
       await page.goto('/visits/preserve-scroll-false')
       await expect(page.getByText('Foo is now default')).toBeVisible()
 
-      await page.evaluate(() => window.scrollTo(5, 7))
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(10, 15))
-
+      await scrollElementTo(
+        page,
+        page.evaluate(() => window.scrollTo(5, 7)),
+      )
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
+      )
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
     })
@@ -482,8 +494,10 @@ test.describe('Preserve scroll', () => {
       await expect(page).toHaveURL('/visits/preserve-scroll-false-page-two')
       await expect(page.getByText('Foo is now bar')).toBeVisible()
 
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+      )
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
       await page.goBack()
@@ -500,8 +514,10 @@ test.describe('Preserve scroll', () => {
       await expect(page).toHaveURL('/visits/preserve-scroll-false-page-two')
       await expect(page.getByText('Foo is now baz')).toBeVisible()
 
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+      )
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
       await page.goBack()
@@ -522,8 +538,10 @@ test.describe('Preserve scroll', () => {
       await expect(page).toHaveURL('/visits/preserve-scroll-false-page-two')
       await expect(page.getByText('Foo is now baz')).toBeVisible()
 
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+      )
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
       const message = JSON.parse(consoleMessages.messages[0])
@@ -562,10 +580,14 @@ test.describe('Preserve scroll', () => {
       await page.goto('/visits/preserve-scroll')
       await expect(page.getByText('Foo is now default')).toBeVisible()
 
-      await page.evaluate(() => window.scrollTo(5, 7))
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(10, 15))
-
+      await scrollElementTo(
+        page,
+        page.evaluate(() => window.scrollTo(5, 7)),
+      )
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
+      )
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
     })
@@ -648,8 +670,10 @@ test.describe('Preserve scroll', () => {
 
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two')
 
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+      )
 
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
@@ -666,8 +690,10 @@ test.describe('Preserve scroll', () => {
 
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two')
 
-      // @ts-ignore
-      await page.evaluate(() => document.querySelector('#slot').scrollTo(0, 0))
+      await scrollElementTo(
+        page,
+        page.evaluate(() => document.querySelector('#slot')?.scrollTo(0, 0)),
+      )
 
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
@@ -839,6 +865,11 @@ test.describe('Partial Reloads', () => {
       await expect(page.getByText('Baz is now 4')).toBeVisible()
     })
   })
+})
+
+test('can reload on mount', async ({ page }) => {
+  await page.goto('/visits/reload-on-mount')
+  await expect(page.getByText('Name is mounted!')).toBeVisible()
 })
 
 test.describe('Error bags', () => {

@@ -94,10 +94,10 @@ export default defineComponent({
       els.push(h(this.$props.as))
     }
 
-    if (this.loaded) {
-      els.push(this.$slots.default())
-    } else {
+    if (!this.loaded) {
       els.push(this.$slots.fallback ? this.$slots.fallback() : null)
+    } else if (this.$slots.default) {
+      els.push(this.$slots.default())
     }
 
     return els

@@ -49,6 +49,13 @@ export default (props) => {
     })
   }
 
+  const deleteQueryParam = (e) => {
+    e.preventDefault()
+    router.visit('/dump/get', {
+      data: { a: undefined },
+    })
+  }
+
   return (
     <div>
       <span className="text">This is the page that demonstrates manual visit data passing through plain objects</span>
@@ -80,6 +87,9 @@ export default (props) => {
       </a>
       <a href="#" onClick={qsafBrackets} className="qsaf-brackets">
         QSAF Brackets
+      </a>
+      <a href="#" onClick={deleteQueryParam} className="delete-query-param">
+        Delete Query Param
       </a>
     </div>
   )

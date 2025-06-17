@@ -3,10 +3,9 @@ import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
-import { GlobalEvent, GlobalEventNames, GlobalEventResult } from './types'
+import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
 import { hrefToUrl } from './url'
 
-type InternalEvent = 'missingHistoryItem'
 class EventHandler {
   protected internalListeners: {
     event: InternalEvent
@@ -16,6 +15,7 @@ class EventHandler {
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
+      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
     }
 
     if (typeof document !== 'undefined') {
@@ -54,7 +54,7 @@ class EventHandler {
     this.fireInternalEvent('missingHistoryItem')
   }
 
-  protected fireInternalEvent(event: InternalEvent): void {
+  public fireInternalEvent(event: InternalEvent): void {
     this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
   }
 
@@ -72,28 +72,31 @@ class EventHandler {
       url.hash = window.location.hash
 
       history.replaceState({ ...currentPage.get(), url: url.href })
-      Scroll.reset(currentPage.get())
+      Scroll.reset()
 
       return
     }
 
-    if (history.isValidState(state)) {
-      history
-        .decrypt(state.page)
-        .then((data) => {
-          currentPage.setQuietly(data, { preserveState: false }).then(() => {
-            Scroll.restore(currentPage.get())
-            fireNavigateEvent(currentPage.get())
-          })
-        })
-        .catch(() => {
+    if (!history.isValidState(state)) {
+      return this.onMissingHistoryItem()
+    }
+
+    history
+      .decrypt(state.page)
+      .then((data) => {
+        if (currentPage.get().version !== data.version) {
           this.onMissingHistoryItem()
+          return
+        }
+
+        currentPage.setQuietly(data, { preserveState: false }).then(() => {
+          Scroll.restore(history.getScrollRegions())
+          fireNavigateEvent(currentPage.get())
         })
-
-      return
-    }
-
-    this.onMissingHistoryItem()
+      })
+      .catch(() => {
+        this.onMissingHistoryItem()
+      })
   }
 }
 

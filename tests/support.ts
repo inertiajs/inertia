@@ -60,3 +60,9 @@ export const shouldBeDumpPage = async (page: Page, method: 'get' | 'post' | 'pat
 
   return dump
 }
+
+export const scrollElementTo = async (page: Page, promise: Promise<void>) => {
+  await promise
+  // Wait for scroll listener debounce
+  await page.waitForTimeout(100)
+}

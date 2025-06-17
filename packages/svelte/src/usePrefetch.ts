@@ -7,8 +7,8 @@ export default function usePrefetch(options: VisitOptions = {}) {
   const isPrefetching = writable(false)
   const lastUpdatedAt = writable<number | null>(null)
 
-  const cached = router.getCached(window.location.pathname, options)
-  const inFlight = router.getPrefetching(window.location.pathname, options)
+  const cached = typeof window === 'undefined' ? null : router.getCached(window.location.pathname, options)
+  const inFlight = typeof window === 'undefined' ? null : router.getPrefetching(window.location.pathname, options)
 
   isPrefetched.set(cached !== null)
   isPrefetching.set(inFlight !== null)
@@ -33,8 +33,13 @@ export default function usePrefetch(options: VisitOptions = {}) {
   })
 
   onDestroy(() => {
-    removePrefetchedListener()
-    removePrefetchingListener()
+    if (removePrefetchedListener) {
+      removePrefetchedListener()
+    }
+
+    if (removePrefetchingListener) {
+      removePrefetchingListener()
+    }
   })
 
   return {

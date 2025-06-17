@@ -9,7 +9,20 @@ const config = {
   minify: true,
   sourcemap: true,
   target: 'es2020',
-  plugins: [nodeExternalsPlugin()],
+  plugins: [
+    nodeExternalsPlugin(),
+    {
+      name: 'inertia',
+      setup(build) {
+        let count = 0
+        build.onEnd((result) => {
+          if (count++ !== 0) {
+            console.log(`Rebuilding ${build.initialOptions.entryPoints} (${build.initialOptions.format})…`)
+          }
+        })
+      },
+    },
+  ],
 }
 
 const builds = [
@@ -19,22 +32,15 @@ const builds = [
   { entryPoints: ['src/server.ts'], format: 'cjs', outfile: 'dist/server.js', platform: 'node' },
 ]
 
-builds.forEach((build) => {
-  esbuild
-    .build({ ...config, ...build, ...watcher(build) })
-    .then(() => console.log(`${watch ? 'Watching' : 'Built'} ${build.entryPoints} (${build.format})…`))
-    .catch(() => process.exit(1))
-})
+builds.forEach(async (build) => {
+  const context = await esbuild.context({ ...config, ...build })
 
-function watcher(build) {
-  return watch
-    ? {
-        watch: {
-          onRebuild: (error) =>
-            error
-              ? console.error('Watch failed:', error)
-              : console.log(`Rebuilding ${build.entryPoints} (${build.format})…`),
-        },
-      }
-    : {}
-}
+  if (watch) {
+    console.log(`Watching ${build.entryPoints} (${build.format})…`)
+    await context.watch()
+  } else {
+    await context.rebuild()
+    context.dispose()
+    console.log(`Built ${build.entryPoints} (${build.format})…`)
+  }
+})

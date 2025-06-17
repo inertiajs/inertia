@@ -1,16 +1,18 @@
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
+import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
-import { Page } from './types'
+import { Page, ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
+const queue = new Queue<Promise<void>>()
+const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 
 class History {
   public rememberedState = 'rememberedState' as const
   public scrollRegions = 'scrollRegions' as const
   public preserveUrl = false
   protected current: Partial<Page> = {}
-  protected queue: (() => Promise<void>)[] = []
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
 
@@ -30,23 +32,32 @@ class History {
     }
   }
 
-  public pushState(page: Page): void {
-    if (isServer || this.preserveUrl) {
+  public pushState(page: Page, cb: (() => void) | null = null): void {
+    if (isServer) {
+      return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb()
       return
     }
 
     this.current = page
 
-    this.addToQueue(() => {
+    queue.add(() => {
       return this.getPageData(page).then((data) => {
-        window.history.pushState(
-          {
-            page: data,
-            timestamp: Date.now(),
-          },
-          '',
-          page.url,
-        )
+        // Defer history.pushState to the next event loop tick to prevent timing conflicts.
+        // Ensure any previous history.replaceState completes before pushState is executed.
+        const doPush = () => {
+          this.doPushState({ page: data }, page.url)
+          cb && cb()
+        }
+
+        if (isChromeIOS) {
+          setTimeout(doPush)
+        } else {
+          doPush()
+        }
       })
     })
   }
@@ -58,13 +69,7 @@ class History {
   }
 
   public processQueue(): Promise<void> {
-    const next = this.queue.shift()
-
-    if (next) {
-      return next().then(() => this.processQueue())
-    }
-
-    return Promise.resolve()
+    return queue.process()
   }
 
   public decrypt(page: Page | null = null): Promise<Page> {
@@ -93,32 +98,108 @@ class History {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 
-  public replaceState(page: Page): void {
-    currentPage.merge(page)
+  public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
+    queue.add(() => {
+      return Promise.resolve().then(() => {
+        if (!window.history.state?.page) {
+          return
+        }
 
-    if (isServer || this.preserveUrl) {
-      return
-    }
-
-    this.current = page
-
-    this.addToQueue(() => {
-      return this.getPageData(page).then((data) => {
-        window.history.replaceState(
+        this.doReplaceState(
           {
-            page: data,
-            timestamp: Date.now(),
-          },
-          '',
-          page.url,
+            page: window.history.state.page,
+            scrollRegions,
+          }
         )
       })
     })
   }
 
-  protected addToQueue(fn: () => Promise<void>): void {
-    this.queue.push(fn)
-    this.processQueue()
+  public saveDocumentScrollPosition(scrollRegion: ScrollRegion): void {
+    queue.add(() => {
+      return Promise.resolve().then(() => {
+        if (!window.history.state?.page) {
+          return
+        }
+
+        this.doReplaceState(
+          {
+            page: window.history.state.page,
+            documentScrollPosition: scrollRegion,
+          }
+        )
+      })
+    })
+  }
+
+  public getScrollRegions(): ScrollRegion[] {
+    return window.history.state?.scrollRegions || []
+  }
+
+  public getDocumentScrollPosition(): ScrollRegion {
+    return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
+  }
+
+  public replaceState(page: Page, cb: (() => void) | null = null): void {
+    currentPage.merge(page)
+
+    if (isServer) {
+      return
+    }
+
+    if (this.preserveUrl) {
+      cb && cb()
+      return
+    }
+
+    this.current = page
+
+    queue.add(() => {
+      return this.getPageData(page).then((data) => {
+        // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
+        // Ensure any previous history.pushState completes before replaceState is executed.
+        const doReplace = () => {
+          this.doReplaceState({ page: data }, page.url)
+          cb && cb()
+        }
+
+        if (isChromeIOS) {
+          setTimeout(doReplace)
+        } else {
+          doReplace()
+        }
+      })
+    })
+  }
+
+  protected doReplaceState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url?: string,
+  ): void {
+    window.history.replaceState(
+      {
+        ...data,
+        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+      },
+      '',
+      url,
+    )
+  }
+
+  protected doPushState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url: string,
+  ): void {
+    window.history.pushState(data, '', url)
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
@@ -141,6 +222,10 @@ class History {
     SessionStorage.remove(historySessionStorageKeys.iv)
   }
 
+  public setCurrent(page: Page): void {
+    this.current = page
+  }
+
   public isValidState(state: any): boolean {
     return !!state.page
   }
@@ -148,6 +233,10 @@ class History {
   public getAllState(): Page {
     return this.current as Page
   }
+}
+
+if (typeof window !== 'undefined' && window.history.scrollRestoration) {
+  window.history.scrollRestoration = 'manual'
 }
 
 export const history = new History()

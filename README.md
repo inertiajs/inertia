@@ -4,16 +4,16 @@ Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps 
 
 ## Contributing
 
-If you're interested in contributing to Inertia.js, please read our [contributing guide](https://github.com/inertiajs/inertia/blob/master/.github/CONTRIBUTING.md).
+Thank you for considering contributing to Inertia! You can read the contribution guide [here](.github/CONTRIBUTING.md).
 
-## Sponsors
+## Code of Conduct
 
-A huge thanks to all [our sponsors](https://inertiajs.com/sponsors) who help push Inertia.js development forward! In particular, we'd like to say a special thank you to our partners:
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-<p>
-  <a href="https://forge.laravel.com">
-    <img src="./.github/sponsors/forge.svg" width="150" alt="Laravel Forge">
-  </a>
-</p>
+## Security Vulnerabilities
 
-If you'd like to become a sponsor, please [see here](https://github.com/sponsors/reinink) for more information. 💜
+Please review [our security policy](https://github.com/inertiajs/inertia/security/policy) on how to report security vulnerabilities.
+
+## License
+
+Inertia is open-sourced software licensed under the [MIT license](LICENSE.md).
