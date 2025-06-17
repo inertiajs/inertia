@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -44,8 +44,8 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "html-escape": "^2.0.0",
-    "es-toolkit": "^1.33.0"
+    "es-toolkit": "^1.33.0",
+    "html-escape": "^2.0.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
