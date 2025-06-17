@@ -33,7 +33,9 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async () => {},
+      swapComponent: async () => {
+        currentIsInitialPage = false
+      },
     })
     isRouterInitialized = true
   }
