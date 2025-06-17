@@ -4,6 +4,7 @@ import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 
 let isRouterInitialized = false
+let currentIsInitialPage = true
 
 export default function App({
   children,
@@ -33,12 +34,13 @@ export default function App({
       resolveComponent,
       swapComponent: async () => {},
     })
+    isRouterInitialized = true
   }
 
   useEffect(() => {
     router.setSwapComponent(async ({ component, page, preserveState }) => {
-      if (!isRouterInitialized) {
-        isRouterInitialized = true
+      if (currentIsInitialPage) {
+        currentIsInitialPage = false
         return
       }
 
