@@ -1,10 +1,23 @@
 import { useForm } from '@inertiajs/react'
 
 export default (props) => {
-  const form = useForm({ name: 'foo' })
+  const form = useForm({ name: 'foo', foo: [] })
 
   const submit = () => {
     form.post('')
+  }
+
+  const defaults = () => {
+    form.setDefaults()
+  }
+
+  const dataAndDefaults = () => {
+    pushValue()
+    defaults()
+  }
+
+  const pushValue = () => {
+    form.setData('foo', [...form.data.foo, 'bar'])
   }
 
   return (
@@ -24,6 +37,16 @@ export default (props) => {
       <button onClick={submit} className="submit">
         Submit form
       </button>
+
+      <button onClick={defaults} className="defaults">
+        Defaults
+      </button>
+
+      <button onClick={dataAndDefaults} className="data-and-defaults">
+        Data and Defaults
+      </button>
+
+      <button onClick={pushValue}>Push Value</button>
     </div>
   )
 }

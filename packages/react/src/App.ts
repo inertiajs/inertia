@@ -3,6 +3,8 @@ import { createElement, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 
+let isRouterInitialized = false
+
 export default function App({
   children,
   initialPage,
@@ -11,6 +13,8 @@ export default function App({
   titleCallback,
   onHeadUpdate,
 }) {
+  let currentIsInitialPage = true
+
   const [current, setCurrent] = useState({
     component: initialComponent || null,
     page: initialPage,
@@ -25,17 +29,29 @@ export default function App({
     )
   }, [])
 
-  useEffect(() => {
+  if (!isRouterInitialized) {
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
-        setCurrent((current) => ({
-          component,
-          page,
-          key: preserveState ? current.key : Date.now(),
-        }))
+      swapComponent: async () => {
+        currentIsInitialPage = false
       },
+    })
+    isRouterInitialized = true
+  }
+
+  useEffect(() => {
+    router.setSwapComponent(async ({ component, page, preserveState }) => {
+      if (currentIsInitialPage) {
+        currentIsInitialPage = false
+        return
+      }
+
+      setCurrent((current) => ({
+        component,
+        page,
+        key: preserveState ? current.key : Date.now(),
+      }))
     })
 
     router.on('navigate', () => headManager.forceUpdate())

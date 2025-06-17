@@ -7,9 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.7...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.12...master)
 
 - Nothing yet
+
+## [v2.0.12](https://github.com/inertiajs/inertia/compare/v2.0.11...v2.0.12) - 2025-06-10
+
+### What's Changed
+
+* Send `Purpose: prefetch` header on prefetching by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2367
+
+### New Contributors
+
+* [@pascalbaljet](https://github.com/pascalbaljet) made their first contribution in https://github.com/inertiajs/inertia/pull/2367
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.11...v2.0.12
+
+## [v2.0.11](https://github.com/inertiajs/inertia/compare/v2.0.10...v2.0.11) - 2025-05-16
+
+### What's Changed
+
+* Fix progress bar not showing on subsequent page clicks by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2349
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.10...v2.0.11
+
+## [v2.0.10](https://github.com/inertiajs/inertia/compare/v2.0.9...v2.0.10) - 2025-05-15
+
+### What's Changed
+
+* Don't show progress bar on prefetch hover by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2347
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.9...v2.0.10
+
+## [v2.0.9](https://github.com/inertiajs/inertia/compare/v2.0.8...v2.0.9) - 2025-05-09
+
+### What's Changed
+
+* Bump [@sveltejs](https://github.com/sveltejs)/kit from 2.11.1 to 2.20.6 by [@dependabot](https://github.com/dependabot) in https://github.com/inertiajs/inertia/pull/2312
+* Bump vite from 5.4.17 to 5.4.18 by [@dependabot](https://github.com/dependabot) in https://github.com/inertiajs/inertia/pull/2307
+* Fix for deferred props + prefetch links by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2321
+* Progress: Make hide and reveal CSP-compatible by [@flexponsive](https://github.com/flexponsive) in https://github.com/inertiajs/inertia/pull/2316
+* Corrected URL search parameter merge logic to match behavior prior to v2.0.8 by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2341
+* Corrects url search parameter merge logic to match behavior prior to v2.0.8 by [@CTOJoe](https://github.com/CTOJoe) in https://github.com/inertiajs/inertia/pull/2320
+* Bump vite from 5.4.18 to 5.4.19 by [@dependabot](https://github.com/dependabot) in https://github.com/inertiajs/inertia/pull/2334
+* On back button, fetch from server if version hash is not current by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2342
+* Allow custom URL protocols by [@mpociot](https://github.com/mpociot) in https://github.com/inertiajs/inertia/pull/2329
+
+### New Contributors
+
+* [@flexponsive](https://github.com/flexponsive) made their first contribution in https://github.com/inertiajs/inertia/pull/2316
+* [@CTOJoe](https://github.com/CTOJoe) made their first contribution in https://github.com/inertiajs/inertia/pull/2320
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.8...v2.0.9
+
+## [v2.0.8](https://github.com/inertiajs/inertia/compare/v2.0.7...v2.0.8) - 2025-04-10
+
+### What's Changed
+
+* Add deepMerge Support for Merging Nested Arrays and Objects in Props by [@HichemTab-tech](https://github.com/HichemTab-tech) in https://github.com/inertiajs/inertia/pull/2069
+* fix: build error because of invalid type definitions by [@fxnm](https://github.com/fxnm) in https://github.com/inertiajs/inertia/pull/2301
+* fix(vue/useForm/defaults): untrack before assign by [@Dsaquel](https://github.com/Dsaquel) in https://github.com/inertiajs/inertia/pull/2112
+* Improve type checking of request data by [@7nohe](https://github.com/7nohe) in https://github.com/inertiajs/inertia/pull/2304
+* Remove empty payload from GET requests by [@edgars-vasiljevs](https://github.com/edgars-vasiljevs) in https://github.com/inertiajs/inertia/pull/2305
+
+### New Contributors
+
+* [@HichemTab-tech](https://github.com/HichemTab-tech) made their first contribution in https://github.com/inertiajs/inertia/pull/2069
+* [@fxnm](https://github.com/fxnm) made their first contribution in https://github.com/inertiajs/inertia/pull/2301
+* [@Dsaquel](https://github.com/Dsaquel) made their first contribution in https://github.com/inertiajs/inertia/pull/2112
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.7...v2.0.8
 
 ## [v2.0.7](https://github.com/inertiajs/inertia/compare/v2.0.6...v2.0.7) - 2025-04-08
 

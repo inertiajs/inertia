@@ -62,6 +62,8 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps?: string[]
+  deepMergeProps?: string[]
+  mergeStrategies?: string[]
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -102,9 +104,9 @@ export type LocationVisit = {
   preserveScroll: boolean
 }
 
-export type Visit = {
+export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
-  data: RequestPayload
+  data: T
   replace: boolean
   preserveScroll: PreserveStateOption
   preserveState: PreserveStateOption
@@ -244,16 +246,19 @@ export type VisitCallbacks = {
   onPrefetching: GlobalEventCallback<'prefetching'>
 }
 
-export type VisitOptions = Partial<Visit & VisitCallbacks>
+export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks>
 
-export type ReloadOptions = Omit<VisitOptions, 'preserveScroll' | 'preserveState'>
+export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
+  VisitOptions<T>,
+  'preserveScroll' | 'preserveState'
+>
 
 export type PollOptions = {
   keepAlive?: boolean
   autoStart?: boolean
 }
 
-export type VisitHelperOptions = Omit<VisitOptions, 'method' | 'data'>
+export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
 export type RouterInitParams = {
   initialPage: Page

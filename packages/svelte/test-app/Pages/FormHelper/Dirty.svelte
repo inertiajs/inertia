@@ -3,10 +3,24 @@
 
   const form = useForm({
     name: 'foo',
+    foo: [],
   })
 
   const submit = () => {
     $form.post('')
+  }
+
+  const defaults = () => {
+    $form.defaults()
+  }
+
+  const pushValue = () => {
+    $form.foo.push('bar')
+  }
+
+  const dataAndDefaults = () => {
+    pushValue()
+    defaults()
   }
 </script>
 
@@ -18,4 +32,8 @@
   </label>
 
   <button on:click={submit} class="submit">Submit form</button>
+  <button on:click={defaults} class="defaults">Defaults</button>
+  <button on:click={dataAndDefaults} class="data-and-defaults">Data and Defaults</button>
+  <button on:click={pushValue} class="push">Push value</button>
+
 </div>

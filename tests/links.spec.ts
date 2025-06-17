@@ -108,7 +108,7 @@ test.describe('data', () => {
         await expect(dump.query).toEqual({ a: ['b', 'c'] })
         await expect(dump.method).toBe('get')
         await expect(dump.form).toEqual({})
-        await expect(dump.headers['content-type']).toBe('application/json')
+        await expect(dump.headers['content-type']).not.toBe('application/json')
       })
     })
   })
@@ -132,7 +132,7 @@ test.describe('data', () => {
       await expect(dump.query).toEqual({ foo: 'get' })
       await expect(dump.method).toBe('get')
       await expect(dump.form).toEqual({})
-      await expect(dump.headers['content-type']).toBe('application/json')
+      await expect(dump.headers['content-type']).not.toBe('application/json')
     })
 
     const data = [
