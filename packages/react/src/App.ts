@@ -42,7 +42,7 @@ export default function App({
     router.setSwapComponent(async ({ component, page, preserveState }) => {
       if (currentIsInitialPage) {
         currentIsInitialPage = false
-        return
+        // return
       }
 
       setCurrent((current) => ({
