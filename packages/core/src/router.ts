@@ -17,6 +17,7 @@ import {
   GlobalEventResult,
   InFlightPrefetch,
   Page,
+  PageHandler,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -63,6 +64,10 @@ export class Router {
     eventHandler.on('loadDeferredProps', () => {
       this.loadDeferredProps()
     })
+  }
+
+  public setSwapComponent(swapComponent: PageHandler): void {
+    currentPage.setSwapComponent(swapComponent)
   }
 
   public get<T extends RequestPayload = RequestPayload>(
@@ -352,7 +357,7 @@ export class Router {
       mergedOptions.queryStringArrayFormat,
     )
 
-    return {
+    const visit = {
       cancelled: false,
       completed: false,
       interrupted: false,
@@ -361,6 +366,12 @@ export class Router {
       url,
       data: _data,
     }
+
+    if (visit.prefetch) {
+      visit.headers['Purpose'] = 'prefetch'
+    }
+
+    return visit
   }
 
   protected getVisitEvents(options: VisitOptions): VisitCallbacks {
