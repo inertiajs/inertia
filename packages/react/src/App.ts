@@ -4,7 +4,6 @@ import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 
 let isRouterInitialized = false
-let currentIsInitialPage = true
 
 export default function App({
   children,
@@ -14,6 +13,8 @@ export default function App({
   titleCallback,
   onHeadUpdate,
 }) {
+  let currentIsInitialPage = true
+
   const [current, setCurrent] = useState({
     component: initialComponent || null,
     page: initialPage,
