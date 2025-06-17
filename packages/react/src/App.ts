@@ -48,6 +48,10 @@ export default function App({
               key: preserveState ? current.key : Date.now(),
             },
       )
+
+      if (currentIsInitialPage) {
+        currentIsInitialPage = false
+      }
     })
 
     router.on('navigate', () => headManager.forceUpdate())
