@@ -2,7 +2,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build .",
-    "watch": "vite build . --watch",
+    "dev": "vite build . --watch",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },

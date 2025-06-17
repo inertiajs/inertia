@@ -17,7 +17,7 @@
     "url": "https://github.com/inertiajs/inertia/issues"
   },
   "scripts": {
-    "watch": "pnpm package --watch",
+    "dev": "pnpm package --watch",
     "build": "pnpm package && publint",
     "package": "svelte-kit sync && svelte-package --input src",
     "prepack": "pnpm build",

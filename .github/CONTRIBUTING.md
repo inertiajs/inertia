@@ -17,10 +17,10 @@ Next, install the JavaScript dependencies and build the packages:
 pnpm install && pnpm build
 ```
 
-If you're making changes to one of the packages, you can setup a watcher to automatically run the build step whenever files are changed.
+If you're making changes to one of the packages, you can run the dev server to automatically rebuild the package when changes are made:
 
 ```sh
-pnpm watch
+pnpm dev
 ```
 
 When proposing changes to one of the adapters, please try to apply the same changes to the other adapters where possible.
