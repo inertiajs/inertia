@@ -13,6 +13,8 @@ export default function App({
   titleCallback,
   onHeadUpdate,
 }) {
+  let currentIsInitialPage = true
+
   const [current, setCurrent] = useState({
     component: initialComponent || null,
     page: initialPage,
@@ -31,13 +33,20 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async () => {},
+      swapComponent: async () => {
+        currentIsInitialPage = false
+      },
     })
     isRouterInitialized = true
   }
 
   useEffect(() => {
     router.setSwapComponent(async ({ component, page, preserveState }) => {
+      if (currentIsInitialPage) {
+        currentIsInitialPage = false
+        return
+      }
+
       setCurrent((current) => ({
         component,
         page,
