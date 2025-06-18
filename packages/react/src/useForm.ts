@@ -12,9 +12,11 @@ import { get, has, set } from 'es-toolkit/compat'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-type SetDataByObject<TForm> = (data: TForm) => void
-type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
+export type SetDataByObject<TForm> = (data: TForm) => void
+export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+export type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
+export type SetDataAction<TForm> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
@@ -27,7 +29,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  setData: SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+  setData: SetDataAction<TForm>
   transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
   setDefaults(field: FormDataKeys<TForm>, value: FormDataConvertible): void
