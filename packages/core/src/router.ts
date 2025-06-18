@@ -12,11 +12,13 @@ import { Scroll } from './scroll'
 import {
   ActiveVisit,
   ClientSideVisitOptions,
+  Component,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
   Page,
+  PageHandler,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -63,6 +65,10 @@ export class Router {
     eventHandler.on('loadDeferredProps', () => {
       this.loadDeferredProps()
     })
+  }
+
+  public setSwapComponent(swapComponent: PageHandler): void {
+    currentPage.setSwapComponent(swapComponent)
   }
 
   public get<T extends RequestPayload = RequestPayload>(
@@ -279,6 +285,10 @@ export class Router {
     return history.decrypt()
   }
 
+  public resolveComponent(component: string): Promise<Component> {
+    return currentPage.resolve(component)
+  }
+
   public replace(params: ClientSideVisitOptions): void {
     this.clientVisit(params, { replace: true })
   }
@@ -352,7 +362,7 @@ export class Router {
       mergedOptions.queryStringArrayFormat,
     )
 
-    return {
+    const visit = {
       cancelled: false,
       completed: false,
       interrupted: false,
@@ -361,6 +371,12 @@ export class Router {
       url,
       data: _data,
     }
+
+    if (visit.prefetch) {
+      visit.headers['Purpose'] = 'prefetch'
+    }
+
+    return visit
   }
 
   protected getVisitEvents(options: VisitOptions): VisitCallbacks {
