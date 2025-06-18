@@ -61,5 +61,12 @@ const preserveCallbackFalse = (page) => {
     >
 
     <a href="/non-inertia" class="off-site" style="display: block">Off-site link</a>
+
+    <Link
+      href="/article"
+      class="article"
+      data-testid="article"
+      >Article</Link
+    >
   </div>
 </template>

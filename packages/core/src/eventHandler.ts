@@ -90,7 +90,9 @@ class EventHandler {
         }
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          Scroll.restore(history.getScrollRegions())
+          window.requestAnimationFrame(() => {
+            Scroll.restore(history.getScrollRegions())
+          })
           fireNavigateEvent(currentPage.get())
         })
       })

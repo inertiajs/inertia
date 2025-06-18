@@ -42,6 +42,14 @@ app.get('/', (req, res) =>
   }),
 )
 
+app.get('/article', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Article',
+    props: {},
+    encryptHistory: true,
+  }),
+)
+
 app.get('/links/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Links/PartialReloads',
