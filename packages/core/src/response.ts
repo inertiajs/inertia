@@ -235,7 +235,7 @@ export class Response {
       const incomingProp = pageResponse.props[prop]
       const currentProp = currentPage.get().props[prop]
 
-      // Deep merge function to handle nested objects and arrays
+      // Function to recursively merge objects and arrays
       const deepMerge = (target: any, source: any, currentKey: string) => {
         if (Array.isArray(source)) {
           return this.mergeOrMatchItems(target, source, currentKey, matchPropsOn)
@@ -252,11 +252,11 @@ export class Response {
           )
         }
 
-        // If the source is neither an array nor an object, return it directly
+        // f the source is neither an array nor an object, simply return the it
         return source
       }
 
-      // Assign the deeply merged result back to props.
+      // Apply the deep merge and update the page response
       pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
     })
 
@@ -264,8 +264,8 @@ export class Response {
   }
 
   protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
-    // Find the key to match on.
-    // For example: posts.data.id matches posts.data
+    // Determine if there's a specific key to match items.
+    // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
     const matchOn = matchPropsOn.find((key) => {
       const path = key.split('.').slice(0, -1).join('.')
       return path === currentKey
@@ -276,13 +276,13 @@ export class Response {
       return [...(Array.isArray(target) ? target : []), ...source]
     }
 
-    // Extract the unique property to match on, for example: 'id' from 'posts.data.id'
+    // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
     const uniqueProperty = matchOn.split('.').pop() || ''
     const targetArray = Array.isArray(target) ? target : []
     const map = new Map<any, any>()
 
-    // Loop through the target array and create a map of unique items by the unique property
-    // If the item is not an object or does not have the unique property, use a unique symbol as the key
+    // Populate the map with items from the target array, using the unique property as the key.
+    // If an item doesn't have the unique property or isn't an object, a unique Symbol is used as the key.
     targetArray.forEach((item) => {
       if (item && typeof item === 'object' && uniqueProperty in item) {
         map.set(item[uniqueProperty], item)
@@ -291,8 +291,8 @@ export class Response {
       }
     })
 
-    // Then loop through the source array and replace an item in the map if it exists,
-    // or add it if it doesn't exist.
+    // Iterate through the source array. If an item's unique property matches an existing key in the map,
+    // update the item. Otherwise, add the new item to the map.
     source.forEach((item) => {
       if (item && typeof item === 'object' && uniqueProperty in item) {
         map.set(item[uniqueProperty], item)
