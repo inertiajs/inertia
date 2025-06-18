@@ -89,6 +89,8 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.get('/links/disabled', (req, res) => inertia.render(req, res, { component: 'Links/Disabled' }))
+
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/PartialReloads',
