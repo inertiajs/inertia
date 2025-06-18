@@ -48,9 +48,9 @@ jobs:
       - name: Run Playwright Tests
         run: cd tests && npx playwright test
 
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: packages/${{ matrix.adapter }}/playwright-report/
-          retention-days: 30
+          name: playwright-failure-screenshots-${{ matrix.adapter }}
+          path: test-results
