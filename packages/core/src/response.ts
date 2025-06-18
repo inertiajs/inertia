@@ -211,17 +211,17 @@ export class Response {
 
     const propsToMerge = pageResponse.mergeProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
-    const mergeStrategies = pageResponse.mergeStrategies || []
+    const matchPropsOn = pageResponse.matchPropsOn || []
 
     propsToMerge.forEach((prop) => {
       const incomingProp = pageResponse.props[prop]
 
       if (Array.isArray(incomingProp)) {
-        pageResponse.props[prop] = mergeArrayWithStrategy(
+        pageResponse.props[prop] = this.mergeOrMatchItems(
           (currentPage.get().props[prop] || []) as any[],
           incomingProp,
           prop,
-          mergeStrategies
+          matchPropsOn,
         )
       } else if (typeof incomingProp === 'object' && incomingProp !== null) {
         pageResponse.props[prop] = {
@@ -238,7 +238,7 @@ export class Response {
       // Deep merge function to handle nested objects and arrays
       const deepMerge = (target: any, source: any, currentKey: string) => {
         if (Array.isArray(source)) {
-          return mergeArrayWithStrategy(target, source, currentKey, mergeStrategies)
+          return this.mergeOrMatchItems(target, source, currentKey, matchPropsOn)
         }
 
         if (typeof source === 'object' && source !== null) {
@@ -263,6 +263,47 @@ export class Response {
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
   }
 
+  protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
+    // Find the key to match on.
+    // For example: posts.data.id matches posts.data
+    const matchOn = matchPropsOn.find((key) => {
+      const path = key.split('.').slice(0, -1).join('.')
+      return path === currentKey
+    })
+
+    if (!matchOn) {
+      // No key found to match on, just concatenate the arrays
+      return [...(Array.isArray(target) ? target : []), ...source]
+    }
+
+    // Extract the unique property to match on, for example: 'id' from 'posts.data.id'
+    const uniqueProperty = matchOn.split('.').pop() || ''
+    const targetArray = Array.isArray(target) ? target : []
+    const map = new Map<any, any>()
+
+    // Loop through the target array and create a map of unique items by the unique property
+    // If the item is not an object or does not have the unique property, use a unique symbol as the key
+    targetArray.forEach((item) => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+
+    // Then loop through the source array and replace an item in the map if it exists,
+    // or add it if it doesn't exist.
+    source.forEach((item) => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+
+    return Array.from(map.values())
+  }
+
   protected async setRememberedState(pageResponse: Page): Promise<void> {
     const rememberedState = await history.getState<Page['rememberedState']>(history.rememberedState, {})
 
@@ -282,39 +323,4 @@ export class Response {
 
     return errors[this.requestParams.all().errorBag || ''] || {}
   }
-}
-
-function mergeArrayWithStrategy(target: any[], source: any[], currentKey: string, mergeStrategies: string[]) {
-  // Find the mergeStrategy that matches the currentKey
-  // For example: posts.data.id matches posts.data
-  const mergeStrategy = mergeStrategies.find((strategy) => {
-    const path = strategy.split('.').slice(0, -1).join('.')
-    return path === currentKey
-  })
-
-  if (mergeStrategy) {
-    const uniqueProperty = mergeStrategy.split('.').pop() || ''
-    const targetArray = Array.isArray(target) ? target : []
-    const map = new Map<any, any>()
-
-    targetArray.forEach(item => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
-      }
-    })
-    
-    source.forEach(item => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
-      }
-    })
-    
-    return Array.from(map.values())
-  }
-  // No mergeStrategy: default to concatenation
-  return [...(Array.isArray(target) ? target : []), ...source]
 }
