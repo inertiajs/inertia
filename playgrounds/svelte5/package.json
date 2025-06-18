@@ -11,7 +11,7 @@
   "devDependencies": {
     "@inertiajs/core": "file:../../packages/core",
     "@inertiajs/svelte": "file:../../packages/svelte",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "autoprefixer": "^10.4.13",
     "axios": "^1.8.2",
@@ -22,6 +22,6 @@
     "svelte-check": "^4.0.0",
     "tailwindcss": "^3.2.4",
     "typescript": "^5.6.2",
-    "vite": "^5.4.19"
+    "vite": "^6.3.0"
   }
 }
