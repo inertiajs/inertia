@@ -55,7 +55,7 @@
     "@types/html-escape": "^2.0.2",
     "axios": "^1.8.2",
     "publint": "^0.2.10",
-    "svelte": "^4.2.16",
+    "svelte": "4.2.19",
     "svelte-check": "^4.0.0",
     "tslib": "^2.7.0",
     "typescript": "^5.5.4",
