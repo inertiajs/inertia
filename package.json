@@ -19,7 +19,7 @@
     "playground:vue": "cd playgrounds/vue3 && composer run dev"
   },
   "dependencies": {
-    "@playwright/test": "^1.51.0",
+    "@playwright/test": ">=1.51.0 <1.53.0",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-svelte": "^3.2.3",
