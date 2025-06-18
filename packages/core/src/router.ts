@@ -12,6 +12,7 @@ import { Scroll } from './scroll'
 import {
   ActiveVisit,
   ClientSideVisitOptions,
+  Component,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
@@ -282,6 +283,10 @@ export class Router {
 
   public decryptHistory(): Promise<Page> {
     return history.decrypt()
+  }
+
+  public resolveComponent(component: string): Promise<Component> {
+    return currentPage.resolve(component)
   }
 
   public replace(params: ClientSideVisitOptions): void {

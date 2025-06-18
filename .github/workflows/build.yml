@@ -16,8 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.15
-          cache: pnpm
+          node-version: 22.14
 
       - name: Install dependencies
         run: pnpm install
