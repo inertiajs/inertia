@@ -54,4 +54,13 @@
   </a>
 
   <a href="/non-inertia" class="off-site" style="display: block">Off-site link</a>
+
+  <a
+    href="/article"
+    use:inertia={{ }}
+    class="article"
+    data-testid="article"
+  >
+    Article
+  </a>
 </div>

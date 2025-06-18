@@ -580,6 +580,39 @@ test.describe('enabled', () => {
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
 
+  test('restores the document scroll position when pressing the back button with history encryption enabled', async ({
+    page,
+  }) => {
+    await page.getByTestId('article').click()
+
+    await expect(page).toHaveURL('/article')
+    await expect(page.getByText('Article Header')).toBeVisible()
+
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#home')?.scrollIntoView()),
+    )
+
+    const bottomScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(bottomScrollPosition).toBeGreaterThan(500)
+
+    await page.getByTestId('home').click()
+
+    await expect(page).toHaveURL('/')
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+
+    const homeScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(homeScrollPosition).toBe(0)
+
+    await page.goBack()
+
+    await expect(page).toHaveURL('/article')
+    await expect(page.getByText('Article Header')).toBeVisible()
+
+    const restoredScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(restoredScrollPosition).toBe(bottomScrollPosition)
+  })
+
   test.skip('restores all tracked scroll regions when pressing the back button from another website', async ({
     page,
   }) => {
