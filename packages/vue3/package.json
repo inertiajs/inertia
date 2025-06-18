@@ -48,7 +48,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@playwright/test": "1.51.0",
+    "@playwright/test": "1.52.0",
     "@types/node": "^22.5.3",
     "esbuild": "^0.25.0",
     "typescript": "^4.9.4",
