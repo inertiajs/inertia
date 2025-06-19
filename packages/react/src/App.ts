@@ -1,7 +1,16 @@
 import { createHeadManager, PageHandler, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useRef, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+
+let currentIsInitialPage = true
+let routerIsInitialized = false
+let swapComponent: PageHandler = async () => {
+  // Dummy function so we can init the router outside of the useEffect hook. This is
+  // needed so `router.reload()` works right away (on mount) in any of the user's
+  // components. We swap in the real function in the useEffect hook below.
+  currentIsInitialPage = false
+}
 
 export default function App({
   children,
@@ -25,30 +34,22 @@ export default function App({
     )
   }, [])
 
-  const currentIsInitialPage = useRef(true)
-  const routerIsInitialized = useRef(false)
-
-  const swapComponentRef = useRef<PageHandler>(async () => {
-    // Dummy function so we can init the router synchronously. This is needed
-    // so `router.reload()` works right away on mount in any component.
-    // We swap in the real function with the useEffect hook below.
-    currentIsInitialPage.current = false
-  })
-
-  if (!routerIsInitialized.current) {
+  if (!routerIsInitialized) {
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: (args) => swapComponentRef.current(args),
+      swapComponent: async (args) => swapComponent(args),
     })
 
-    routerIsInitialized.current = true
+    routerIsInitialized = true
   }
 
   useEffect(() => {
-    swapComponentRef.current = async ({ component, page, preserveState }) => {
-      if (currentIsInitialPage.current) {
-        currentIsInitialPage.current = false
+    swapComponent = async ({ component, page, preserveState }) => {
+      if (currentIsInitialPage) {
+        // We block setting the current page on the initial page to
+        // prevent the initial page from being re-rendered again.
+        currentIsInitialPage = false
         return
       }
 
