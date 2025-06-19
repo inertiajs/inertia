@@ -29,9 +29,10 @@ export default function App({
   const routerIsInitialized = useRef(false)
 
   const swapComponentRef = useRef<PageHandler>(async () => {
-    // Dummy function so that we can initialize the router outside of the
-    // useEffect hook, so that router.reload() can be called on mount.
-    // We set the real swapComponent function in the useEffect below.
+    // Dummy function so we can init the router synchronously. This is needed
+    // so `router.reload()` works right away on mount in any component.
+    // We swap in the real function with the useEffect hook below.
+    currentIsInitialPage.current = false
   })
 
   if (!routerIsInitialized.current) {
