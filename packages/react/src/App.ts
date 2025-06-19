@@ -1,4 +1,4 @@
-import { createHeadManager, router } from '@inertiajs/core'
+import { createHeadManager, PageHandler, router } from '@inertiajs/core'
 import { createElement, useEffect, useMemo, useRef, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
@@ -28,7 +28,7 @@ export default function App({
   const currentIsInitialPage = useRef(true)
   const routerIsInitialized = useRef(false)
 
-  const swapComponentRef = useRef(async (params) => {
+  const swapComponentRef = useRef<PageHandler>(async () => {
     // Dummy function so that we can initialize the router outside of the
     // useEffect hook, so that router.reload() can be called on mount.
     // We set the real swapComponent function in the useEffect below.
@@ -38,7 +38,7 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: (params) => swapComponentRef.current(params),
+      swapComponent: (args) => swapComponentRef.current(args),
     })
 
     routerIsInitialized.current = true
