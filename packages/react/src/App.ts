@@ -1,10 +1,7 @@
 import { createHeadManager, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useRef, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-
-let routerIsInitialized = false
-let currentIsInitialPage = true
 
 export default function App({
   children,
@@ -28,27 +25,39 @@ export default function App({
     )
   }, [])
 
-  if (!routerIsInitialized) {
+  const currentIsInitialPage = useRef(true)
+  const routerIsInitialized = useRef(false)
+
+  const swapComponentRef = useRef(async (params) => {
+    // Dummy function so that we can initialize the router outside of the
+    // useEffect hook, so that router.reload() can be called on mount.
+    // We set the real swapComponent function in the useEffect below.
+  })
+
+  if (!routerIsInitialized.current) {
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
-        if (currentIsInitialPage) {
-          currentIsInitialPage = false
-          return
-        }
-
-        setCurrent((current) => ({
-          component,
-          page,
-          key: preserveState ? current.key : Date.now(),
-        }))
-      },
+      swapComponent: (params) => swapComponentRef.current(params),
     })
-    routerIsInitialized = true
+
+    routerIsInitialized.current = true
   }
 
   useEffect(() => {
+    swapComponentRef.current = async ({ component, page, preserveState }) => {
+      if (currentIsInitialPage.current) {
+        currentIsInitialPage.current = false
+        return
+      }
+
+      setCurrent((current) => ({
+        component,
+        page,
+        key: preserveState ? current.key : Date.now(),
+      }))
+    }
+
     router.on('navigate', () => headManager.forceUpdate())
   }, [])
 
