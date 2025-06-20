@@ -1,5 +1,6 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { createElement, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { createElement, ReactElement, useCallback, useEffect, useMemo, useRef } from 'react'
+import usePage from './usePage'
 
 interface WhenVisibleProps {
   children: ReactElement | number | string
@@ -16,15 +17,29 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   as = as ?? 'div'
   fallback = fallback ?? null
 
-  const [loaded, setLoaded] = useState(false)
+  const loaded = useRef<boolean>(false)
   const hasFetched = useRef<boolean>(false)
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
+  const pageProps = usePage().props
+  const keys = useMemo(() => (params ? (params.only ?? []) : Array.isArray(data) ? data : [data]), [data, params])
+
+  loaded.current = useMemo(() => {
+    if (fetching.current || !loaded.current) return loaded.current
+
+    const propsLoaded = !keys.length ? true : keys.every((key) => pageProps[key] !== undefined)
+
+    if (!propsLoaded) {
+      hasFetched.current = false
+    }
+
+    return propsLoaded
+  }, [pageProps, keys])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
     if (data) {
       return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
+        only: keys,
       }
     }
 
@@ -33,10 +48,10 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     }
 
     return params
-  }, [params, data])
+  }, [params, data, keys])
 
   useEffect(() => {
-    if (!ref.current) {
+    if (!ref.current || loaded.current) {
       return
     }
 
@@ -66,7 +81,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
             reloadParams.onStart?.(e)
           },
           onFinish: (e) => {
-            setLoaded(true)
+            loaded.current = true
             fetching.current = false
             reloadParams.onFinish?.(e)
 
@@ -86,20 +101,20 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     return () => {
       observer.disconnect()
     }
-  }, [ref, getReloadParams, buffer])
+  }, [ref, getReloadParams, buffer, loaded.current])
 
-  if (always || !loaded) {
+  if (always || !loaded.current) {
     return createElement(
       as,
       {
         props: null,
         ref,
       },
-      loaded ? children : fallback,
+      loaded.current ? children : fallback,
     )
   }
 
-  return loaded ? children : null
+  return loaded.current ? children : null
 }
 
 WhenVisible.displayName = 'InertiaWhenVisible'
