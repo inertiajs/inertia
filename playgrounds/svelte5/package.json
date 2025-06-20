@@ -9,13 +9,12 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {
-    "@inertiajs/core": "file:../../packages/core",
-    "@inertiajs/svelte": "file:../../packages/svelte",
+    "@inertiajs/svelte": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "autoprefixer": "^10.4.13",
     "axios": "^1.8.2",
-    "laravel-vite-plugin": "^1.0.5",
+    "laravel-vite-plugin": "^1.2.0",
     "lodash": "^4.17.19",
     "postcss": "^8.4.31",
     "svelte": "^5.0.0-next.244",

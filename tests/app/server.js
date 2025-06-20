@@ -510,4 +510,8 @@ const adapterPorts = {
   svelte: 13717,
 }
 
-app.listen(adapterPorts[process.env.PACKAGE || 'vue3'])
+console.log(
+  `Serving test app on port ${adapterPorts[inertia.package]}. Visit http://localhost:${adapterPorts[inertia.package]}/`,
+)
+
+app.listen(adapterPorts[inertia.package])
