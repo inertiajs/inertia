@@ -277,14 +277,32 @@ app.get('/history/version/:pageNumber', (req, res) => {
   })
 })
 
-app.get('/when-visible', (req, res) => {
+app.get('/when-visible/page', (req, res) => {
   const page = () =>
     inertia.render(req, res, {
-      component: 'WhenVisible',
+      // TODO: move page on other packages
+      component: process.env.PACKAGE === 'react' ? 'WhenVisible/Page' : 'WhenVisible',
       props: {},
     })
 
   if (req.headers['x-inertia-partial-data'] || req.query.count) {
+    setTimeout(page, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/when-visible/with-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisible/WithReload',
+      props: {
+        foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo is visible!' } : undefined,
+        bar: req.headers['x-inertia-partial-data']?.includes('bar') ? { text: 'bar is visible!' } : undefined,
+      },
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
     setTimeout(page, 250)
   } else {
     page()

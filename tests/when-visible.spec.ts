@@ -1,11 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { requests } from './support'
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/when-visible')
-})
-
 test('it will wait to fire the reload until element is visible', async ({ page }) => {
+  await page.goto('/when-visible/page')
+
   requests.listen(page)
 
   await page.evaluate(() => (window as any).scrollTo(0, 1000))
@@ -84,4 +82,32 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await expect(page.getByText('Count is now 1')).toBeVisible()
   await page.waitForResponse(page.url() + '?count=1')
   await expect(page.getByText('Count is now 2')).toBeVisible()
+})
+
+test('it will reload the props when page reloads', async ({ page }) => {
+  // TODO: implement test for other packages
+  test.skip(process.env.PACKAGE !== 'react', 'React only test')
+  await page.goto('/when-visible/with-reload')
+
+  requests.listen(page)
+
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+  await expect(page.getByText('Loading bar...')).toBeVisible()
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Loading foo...')).not.toBeVisible()
+  await expect(page.getByText('Loading bar...')).not.toBeVisible()
+  await expect(page.getByText('foo is visible!')).toBeVisible()
+  await expect(page.getByText('bar is visible!')).toBeVisible()
+
+  const responsePromise = page.waitForResponse(page.url())
+
+  console.log('clicking reload')
+  await page.getByRole('button', { exact: true, name: 'Trigger page reload' }).click()
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+  await expect(page.getByText('Loading bar...')).toBeVisible()
+
+  await responsePromise
+
+  await expect(page.getByText('foo is visible!')).toBeVisible()
+  await expect(page.getByText('bar is visible!')).toBeVisible()
 })
