@@ -18,7 +18,6 @@ import {
   GlobalEventResult,
   InFlightPrefetch,
   Page,
-  PageHandler,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -65,10 +64,6 @@ export class Router {
     eventHandler.on('loadDeferredProps', () => {
       this.loadDeferredProps()
     })
-  }
-
-  public setSwapComponent(swapComponent: PageHandler): void {
-    currentPage.setSwapComponent(swapComponent)
   }
 
   public get<T extends RequestPayload = RequestPayload>(
