@@ -28,7 +28,9 @@ class History {
 
   public restore(key: string): unknown {
     if (!isServer) {
-      return this.initialState?.[this.rememberedState]?.[key]
+      return this.current[this.rememberedState]
+        ? this.current[this.rememberedState]?.[key]
+        : this.initialState?.[this.rememberedState]?.[key]
     }
   }
 
