@@ -11,6 +11,7 @@ type InertiaHead = FunctionComponent<InertiaHeadProps>
 const Head: InertiaHead = function ({ children, title }) {
   const headManager = useContext(HeadContext)
   const provider = useMemo(() => headManager.createProvider(), [headManager])
+  const isServer = typeof window === 'undefined'
 
   useEffect(() => {
     provider.reconnect()
@@ -97,7 +98,9 @@ const Head: InertiaHead = function ({ children, title }) {
     return computed
   }
 
-  provider.update(renderNodes(children))
+  if (isServer) {
+    provider.update(renderNodes(children))
+  }
 
   return null
 }
