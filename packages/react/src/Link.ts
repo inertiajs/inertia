@@ -34,6 +34,7 @@ interface BaseInertiaLinkProps {
   onSuccess?: () => void
   onError?: () => void
   queryStringArrayFormat?: 'indices' | 'brackets'
+  skipNullsInQueryString?: boolean
   async?: boolean
   cacheFor?: number | string
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
@@ -58,6 +59,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       except = [],
       headers = {},
       queryStringArrayFormat = 'brackets',
+      skipNullsInQueryString = false,
       async = false,
       onClick = noop,
       onCancelToken = noop,
@@ -84,6 +86,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       typeof href === 'object' ? href.url : href || '',
       data,
       queryStringArrayFormat,
+      skipNullsInQueryString,
     )
     const url = _href
     data = _data

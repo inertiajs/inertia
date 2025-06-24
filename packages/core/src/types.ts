@@ -116,6 +116,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   errorBag: string | null
   forceFormData: boolean
   queryStringArrayFormat: 'indices' | 'brackets'
+  skipNullsInQueryString: boolean
   async: boolean
   showProgress: boolean
   prefetch: boolean

@@ -340,6 +340,7 @@ export class Router {
       errorBag: '',
       forceFormData: false,
       queryStringArrayFormat: 'brackets',
+      skipNullsInQueryString: false,
       async: false,
       showProgress: true,
       fresh: false,
@@ -355,6 +356,7 @@ export class Router {
       mergedOptions.method,
       mergedOptions.forceFormData,
       mergedOptions.queryStringArrayFormat,
+      mergedOptions.skipNullsInQueryString,
     )
 
     const visit = {

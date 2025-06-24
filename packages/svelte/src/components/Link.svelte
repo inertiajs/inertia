@@ -19,6 +19,7 @@
   export let except: string[] = []
   export let headers: Record<string, string> = {}
   export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
+  export let skipNullsInQueryString: boolean = false
   export let async: boolean = false
   export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
   export let cacheFor: CacheForOption | CacheForOption[] = 0
@@ -48,6 +49,7 @@
     except,
     headers,
     queryStringArrayFormat,
+    skipNullsInQueryString,
     async,
     prefetch,
     cacheFor,

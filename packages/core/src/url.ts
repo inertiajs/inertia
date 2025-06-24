@@ -14,6 +14,7 @@ export const transformUrlAndData = (
   method: Method,
   forceFormData: VisitOptions['forceFormData'],
   queryStringArrayFormat: VisitOptions['queryStringArrayFormat'],
+  skipNullsInQueryString: VisitOptions['skipNullsInQueryString'] = false,
 ): [URL, RequestPayload] => {
   let url = typeof href === 'string' ? hrefToUrl(href) : href
 
@@ -25,7 +26,7 @@ export const transformUrlAndData = (
     return [url, data]
   }
 
-  const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat)
+  const [_href, _data] = mergeDataIntoQueryString(method, url, data, queryStringArrayFormat, skipNullsInQueryString)
 
   return [hrefToUrl(_href), _data]
 }
@@ -35,6 +36,7 @@ export function mergeDataIntoQueryString(
   href: URL | string,
   data: Record<string, FormDataConvertible>,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
+  skipNullsInQueryString: boolean = false,
 ): [string, Record<string, FormDataConvertible>] {
   const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
@@ -54,6 +56,7 @@ export function mergeDataIntoQueryString(
       {
         encodeValuesOnly: true,
         arrayFormat: qsArrayFormat,
+        skipNulls: skipNullsInQueryString,
       },
     )
     data = {}

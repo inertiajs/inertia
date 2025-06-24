@@ -33,6 +33,7 @@ export interface InertiaLinkProps {
   onSuccess?: () => void
   onError?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
+  skipNullsInQueryString?: boolean
   async?: boolean
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
   cacheFor?: CacheForOption | CacheForOption[]
@@ -87,6 +88,10 @@ const Link: InertiaLink = defineComponent({
     queryStringArrayFormat: {
       type: String as PropType<'brackets' | 'indices'>,
       default: 'brackets',
+    },
+    skipNullsInQueryString: {
+      type: Boolean,
+      default: false,
     },
     async: {
       type: Boolean,
@@ -187,6 +192,7 @@ const Link: InertiaLink = defineComponent({
         typeof props.href === 'object' ? props.href.url : props.href || '',
         props.data,
         props.queryStringArrayFormat,
+        props.skipNullsInQueryString,
       ),
     )
     const href = computed(() => mergeDataArray.value[0])
