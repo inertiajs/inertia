@@ -97,6 +97,8 @@ const Head: InertiaHead = function ({ children, title }) {
     return computed
   }
 
+  provider.update(renderNodes(children))
+
   return null
 }
 export default Head
