@@ -15,7 +15,7 @@ import useRemember from './useRemember'
 export type SetDataByObject<TForm> = (data: TForm) => void
 export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 export type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
-export type SetDataAction<TForm> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
 
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
