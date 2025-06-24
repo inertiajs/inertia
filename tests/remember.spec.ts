@@ -73,6 +73,18 @@ test.describe('Remember (local state caching)', () => {
     await expect(page.locator('.b-name')).toHaveValue('B1')
     await expect(page.locator('.b-remember')).toBeChecked()
     await expect(page.locator('.b-untracked')).toHaveValue('')
+
+    // try again with updated values
+    await page.fill('#name', 'E')
+    await page.uncheck('#remember')
+
+    await page.getByRole('link', { name: 'Navigate away' }).click()
+    await shouldBeDumpPage(page, 'get')
+    await page.goBack()
+
+    await expect(page).toHaveURL('remember/multiple-components')
+    await expect(page.locator('#name')).toHaveValue('E')
+    await expect(page.locator('#remember')).not.toBeChecked()
   })
 
   test('restores remembered data when pressing the back button from another website', async ({ page }) => {
