@@ -41,7 +41,7 @@ test('we are not caching deferred props after reload', async ({ page }) => {
   await page.goto('/deferred-props/page-1')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
-  await expect(page.getByText('Loading foo...')).toBeVisible()
+  await expect(page.getByText('Loading bar...')).toBeVisible()
   await expect(page.getByText('foo value')).not.toBeVisible()
   await expect(page.getByText('bar value')).not.toBeVisible()
 
