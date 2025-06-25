@@ -4,9 +4,13 @@
   export let foo;
   export let bar;
 
+  let replaced = 0;
+
   const replace = () => {
     router.replace({
+      preserveState: true,
       props: (props) => ({ ...props, foo: 'foo from client' }),
+      onSuccess: () => replaced++,
     });
   };
 
@@ -24,4 +28,5 @@
   <div>{bar}</div>
   <button on:click={replace}>Replace</button>
   <button on:click={push}>Push</button>
+  <div>Replaced: {replaced}</div>
 </div>

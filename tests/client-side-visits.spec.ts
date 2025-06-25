@@ -11,6 +11,7 @@ test('replaces the page client side', async ({ page }) => {
   await expect(page.getByText('foo from server')).toBeVisible()
   await expect(page.getByText('bar from server')).toBeVisible()
   await expect(page.getByText('foo from client')).not.toBeVisible()
+  await expect(page.getByText('Replaced: 0')).toBeVisible()
 
   await page.getByRole('button', { name: 'Replace' }).click()
 
@@ -18,6 +19,7 @@ test('replaces the page client side', async ({ page }) => {
   await expect(page.getByText('foo from server')).not.toBeVisible()
   await expect(page.getByText('foo from client')).toBeVisible()
   await expect(page.getByText('bar from server')).toBeVisible()
+  await expect(page.getByText('Replaced: 1')).toBeVisible()
 
   await expect(requests.requests.length).toBe(0)
 
