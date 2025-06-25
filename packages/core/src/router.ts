@@ -297,10 +297,12 @@ export class Router {
 
     const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
 
+    const { onSuccess, ...pageParams } = params
+
     currentPage.set(
       {
         ...current,
-        ...params,
+        ...pageParams,
         props,
       },
       {
@@ -308,7 +310,7 @@ export class Router {
         preserveScroll: params.preserveScroll,
         preserveState: params.preserveState,
       },
-    )
+    ).then(() => onSuccess?.())
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
