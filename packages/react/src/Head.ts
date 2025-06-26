@@ -1,3 +1,4 @@
+import { escape } from 'es-toolkit'
 import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
@@ -52,7 +53,7 @@ const Head: InertiaHead = function ({ children, title }) {
       if (value === '') {
         return carry + ` ${name}`
       } else {
-        return carry + ` ${name}="${value}"`
+        return carry + ` ${name}="${escape(value)}"`
       }
     }, '')
     return `<${node.type}${attrs}>`
