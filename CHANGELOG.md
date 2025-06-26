@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.13...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.14...master)
 
 - Nothing yet
+
+## [v2.0.14](https://github.com/inertiajs/inertia/compare/v2.0.13...v2.0.14) - 2025-06-26
+
+### What's Changed
+
+* fix: fixed type error in `useForm SetDataAction` type by [@fxnm](https://github.com/fxnm) in https://github.com/inertiajs/inertia/pull/2395
+* Call `provider.update` outside useEffect block to support SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2397
+* Improve state restore logic in `useRemember` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2401
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.13...v2.0.14
 
 ## [v2.0.13](https://github.com/inertiajs/inertia/compare/v2.0.12...v2.0.13) - 2025-06-20
 
