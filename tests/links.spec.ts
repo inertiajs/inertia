@@ -839,7 +839,7 @@ test.describe('path traversal', () => {
     await expect(page).toHaveURL('/links/sub/')
   })
 
-  test('it goes two level up with an new path', async ({ page }) => {
+  test('it goes two levels up with a new path', async ({ page }) => {
     await page.goto('/links/sub/sub/')
 
     await page.getByRole('link', { name: 'Up two levels and open method' }).click()
