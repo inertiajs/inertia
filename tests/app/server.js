@@ -81,6 +81,8 @@ app.get('/links/headers/version', (req, res) =>
 )
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
 app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
+app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
+app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
