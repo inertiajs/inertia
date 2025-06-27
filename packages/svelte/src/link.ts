@@ -169,6 +169,7 @@ function link(
       typeof params.href === 'object' ? params.href.url : node.href || params.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
+      params.skipNullsInQueryString || false,
     )
   }
 
