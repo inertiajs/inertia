@@ -129,7 +129,6 @@ export default function useForm<TForm extends FormDataType>(
             setHasErrors(false)
             setWasSuccessful(true)
             setRecentlySuccessful(true)
-            setDefaults(cloneDeep(data))
             recentlySuccessfulTimeoutId.current = setTimeout(() => {
               if (isMounted.current) {
                 setRecentlySuccessful(false)
@@ -137,9 +136,13 @@ export default function useForm<TForm extends FormDataType>(
             }, 2000)
           }
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
+          const onSuccess = options.onSuccess ? options.onSuccess(page) : null;
+          
+          if (isMounted.current) {
+            setDefaults(cloneDeep(data))
           }
+
+          return onSuccess;
         },
         onError: (errors) => {
           if (isMounted.current) {
