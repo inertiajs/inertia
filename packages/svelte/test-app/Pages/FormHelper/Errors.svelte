@@ -29,6 +29,14 @@
   const setError = () => {
     $form.setError('handle', 'Manually set Handle error')
   }
+
+  const resetAll = () => {
+    $form.resetAll()
+  }
+
+  const resetHandle = () => {
+    $form.resetAll('handle')
+  }
 </script>
 
 <div>
@@ -60,6 +68,8 @@
   <button on:click={clearError} class="clear-one">Clear one error</button>
   <button on:click={setErrors} class="set">Set errors</button>
   <button on:click={setError} class="set-one">Set one error</button>
+  <button on:click={resetAll} class="reset-all">Reset all</button>
+  <button on:click={resetHandle} class="reset-handle">Reset handle</button>
 
   <span class="errors-status">Form has {$form.hasErrors ? '' : 'no '}errors</span>
 </div>
