@@ -39,6 +39,7 @@ export function mergeDataIntoQueryString(
   const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
+  const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
   const hasSearch = href.toString().includes('?') || (method === 'get' && Object.keys(data).length)
   const hasHash = href.toString().includes('#')
 
@@ -63,7 +64,7 @@ export function mergeDataIntoQueryString(
     [
       hasHost ? `${url.protocol}//${url.host}` : '',
       hasAbsolutePath ? url.pathname : '',
-      hasRelativePath ? url.pathname.substring(1) : '',
+      hasRelativePath ? url.pathname.substring(hasRelativePathWithDotPrefix ? 0 : 1) : '',
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
     ].join(''),
