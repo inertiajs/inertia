@@ -55,16 +55,8 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
       continue
     }
 
-    const existing = get(form, path)
-
-    if (existing === undefined) {
-      set(form, path, value)
-    } else if (Array.isArray(existing)) {
-      // Is this really needed?
-      existing.push(value)
-    } else {
-      set(form, path, [existing, value])
-    }
+    // No brackets: last value wins
+    set(form, path, value)
   }
 
   return form
