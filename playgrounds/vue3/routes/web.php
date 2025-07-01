@@ -129,6 +129,27 @@ Route::get('/form', function () {
     return inertia('Form');
 });
 
+Route::get('/form-component', function () {
+    return inertia('FormComponent');
+});
+
+Route::post('/form-component', function () {
+    $data = request()->validate([
+        'name' => ['required'],
+        'role' => ['required', 'in:User,Admin,Super'],
+        'plan' => ['required', 'in:free,pro,enterprise'],
+        'subscribe' => ['required', 'in:yes'],
+        'interests' => ['required', 'array', 'min:2', 'in:sports,music,tech'],
+        'skills' => ['required', 'array', 'min:2', 'in:vue,react,angular,svelte'],
+        'avatar' => ['required', 'file', 'image'],
+        'documents' => ['required', 'array', 'min:2'],
+        'documents.*' => ['file'],
+        'bio' => ['required', 'string', 'max:500'],
+    ]);
+
+    dd($data);
+});
+
 Route::post('/user', function () {
     return inertia('User', [
         'user' => request()->validate([
