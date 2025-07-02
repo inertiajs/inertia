@@ -1,4 +1,3 @@
-import { mergeWith } from 'es-toolkit'
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
@@ -47,13 +46,7 @@ export function mergeDataIntoQueryString(
   if (method === 'get' && Object.keys(data).length) {
     const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
     url.search = qs.stringify(
-      mergeWith(qs.parse(url.search, parseOptions), data, (_, sourceValue, key, target) => {
-        if (sourceValue === undefined) {
-          delete target[key]
-        } else if (typeof sourceValue === 'object') {
-          return sourceValue
-        }
-      }),
+      { ...qs.parse(url.search, parseOptions), ...data },
       {
         encodeValuesOnly: true,
         arrayFormat: qsArrayFormat,
