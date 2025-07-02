@@ -45,10 +45,13 @@ export function mergeDataIntoQueryString(
   const url = new URL(href.toString(), 'http://localhost')
 
   if (method === 'get' && Object.keys(data).length) {
+    const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
     url.search = qs.stringify(
-      mergeWith(qs.parse(url.search, { ignoreQueryPrefix: true }), data, (_, sourceValue, key, target) => {
+      mergeWith(qs.parse(url.search, parseOptions), data, (_, sourceValue, key, target) => {
         if (sourceValue === undefined) {
           delete target[key]
+        } else if (typeof sourceValue === 'object') {
+          return sourceValue
         }
       }),
       {
