@@ -25,6 +25,13 @@ test.describe('url.ts', () => {
         expect(data).toEqual({})
       })
 
+      test('keeps key when new value is null', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/page?foo=bar&keep=yes', { foo: null })
+
+        expect(href).toBe('/page?foo=&keep=yes')
+        expect(data).toEqual({})
+      })
+
       test('removes query string keys when their corresponding data value is undefined', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?q=keep&remove=me', { remove: undefined })
 
@@ -69,12 +76,12 @@ test.describe('url.ts', () => {
       })
 
       test('replaces nested objects without merging with existing keys', () => {
-        const [href] = mergeDataIntoQueryString('get', '/filter?filters[type]=a&filters[category]=b', {
+        const [href, data] = mergeDataIntoQueryString('get', '/filter?filters[type]=a&filters[category]=b', {
           filters: { type: 'x' },
         })
 
         expect(href).toBe('/filter?filters[type]=x')
-        expect(href.includes('filters[category]')).toBe(false)
+        expect(data).toEqual({})
       })
 
       test('retains indexed object keys in the query string during parsing and stringification', () => {
