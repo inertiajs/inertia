@@ -235,6 +235,61 @@ test.describe('Form Helper', () => {
       await expect(await handleError.textContent()).toEqual('Manually set Handle error')
       await expect(await nameError.textContent()).toEqual('Manually set Name error')
     })
+
+    test('can reset all errors and reset all fields to their initial values', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit form' }).click()
+
+      await expect(page).toHaveURL('form-helper/errors')
+
+      await page.waitForSelector('.remember_error', { state: 'detached' })
+
+      const errorsStatus = await page.locator('.errors-status')
+      const nameError = await page.locator('.name_error')
+      const handleError = await page.locator('.handle_error')
+
+      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      await expect(await nameError.textContent()).toEqual('Some name error')
+      await expect(await handleError.textContent()).toEqual('The Handle was invalid')
+
+      await page.getByRole('button', { name: 'Reset all' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('foo')
+      await expect(page.locator('#handle')).toHaveValue('example')
+      await expect(page.locator('#remember')).not.toBeChecked()
+
+      await page.waitForSelector('.name_error', { state: 'detached' })
+      await page.waitForSelector('.handle_error', { state: 'detached' })
+      await page.waitForSelector('.remember_error', { state: 'detached' })
+
+      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+    })
+
+    test('can reset a single error and reset a single field to its initial value', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit form' }).click()
+
+      await expect(page).toHaveURL('form-helper/errors')
+
+      await page.waitForSelector('.remember_error', { state: 'detached' })
+
+      const errorsStatus = await page.locator('.errors-status')
+      const nameError = await page.locator('.name_error')
+      const handleError = await page.locator('.handle_error')
+
+      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      await expect(await nameError.textContent()).toEqual('Some name error')
+      await expect(await handleError.textContent()).toEqual('The Handle was invalid')
+
+      await page.getByRole('button', { name: 'Reset handle' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('A')
+      await expect(page.locator('#handle')).toHaveValue('example')
+      await expect(page.locator('#remember')).toBeChecked()
+
+      await expect(await nameError.textContent()).toEqual('Some name error')
+      await page.waitForSelector('.handle_error', { state: 'detached' })
+      await page.waitForSelector('.remember_error', { state: 'detached' })
+      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+    })
   })
 
   test.describe('Dirty', () => {

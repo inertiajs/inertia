@@ -36,6 +36,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   defaults(field?: FormDataKeys<TForm>, value?: FormDataConvertible): this
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
+  resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
   setError(errors: Errors): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
@@ -139,6 +140,11 @@ export default function useForm<TForm extends FormDataType>(
           {},
         ) as Errors,
       )
+      return this
+    },
+    resetAndClearErrors(...fields) {
+      this.reset(...fields)
+      this.clearErrors(...fields)
       return this
     },
     submit(...args) {

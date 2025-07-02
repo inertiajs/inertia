@@ -26,6 +26,14 @@ export default (props) => {
     form.setError('handle', 'Manually set Handle error')
   }
 
+  const resetAndClearErrors = () => {
+    form.resetAndClearErrors()
+  }
+
+  const resetHandle = () => {
+    form.resetAndClearErrors('handle')
+  }
+
   return (
     <div>
       <label>
@@ -77,6 +85,12 @@ export default (props) => {
       </button>
       <button onClick={setError} className="set-one">
         Set one error
+      </button>
+      <button onClick={resetAndClearErrors} className="reset-all">
+        Reset all
+      </button>
+      <button onClick={resetHandle} className="reset-handle">
+        Reset handle
       </button>
 
       <span className="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
