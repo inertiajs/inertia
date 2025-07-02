@@ -351,14 +351,16 @@ export class Router {
       prefetch: false,
     }
 
-    const options: Visit = this.defaultVisitOptionsCallback
-      ? {
-          ...defaultOptions,
-          ...this.defaultVisitOptionsCallback(href, defaultOptions),
-        }
-      : defaultOptions
+    if (!this.defaultVisitOptionsCallback) {
+      return { ...defaultOptions, ...mergeOptions }
+    }
 
-    return mergeWith(options, mergeOptions, (originalValue, mergeValue, key) => {
+    const options = {
+      ...defaultOptions,
+      ...this.defaultVisitOptionsCallback(href, defaultOptions),
+    }
+
+    return mergeWith(options, mergeOptions, (originalValue, mergeValue) => {
       if (Array.isArray(mergeValue) && Array.isArray(originalValue)) {
         return [...originalValue, ...mergeValue]
       }
