@@ -1,4 +1,4 @@
-import { Page, router, setupProgress } from '@inertiajs/core'
+import { Page, router, setupProgress, Visit } from '@inertiajs/core'
 import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
@@ -17,6 +17,9 @@ interface CreateInertiaAppProps {
       }
   page?: Page
   render?: (app: VueApp) => Promise<string>
+  defaults?: {
+    visitOptions?: (href: string | URL, options: Visit) => Partial<Visit>
+  }
 }
 
 export default async function createInertiaApp({
@@ -27,6 +30,7 @@ export default async function createInertiaApp({
   progress = {},
   page,
   render,
+  defaults,
 }: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
@@ -48,6 +52,7 @@ export default async function createInertiaApp({
         resolveComponent,
         titleCallback: title,
         onHeadUpdate: isServer ? (elements) => (head = elements) : null,
+        defaults,
       },
       plugin,
     })
