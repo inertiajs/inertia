@@ -1,25 +1,32 @@
-name: Bug Report - Vue 3
-description: "Submit a Vue 3 related issue."
-labels: ["vue 3"]
+name: Bug Report
+description: "Submit an issue."
 body:
   - type: markdown
     attributes:
       value: "Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports."
+  - type: checkboxes
+    attributes:
+      label: Inertia adapter(s) affected
+      description: Select all frontend adapters that are impacted by this issue.
+      options:
+        - label: React
+        - label: Vue 3
+        - label: Svelte
+        - label: Not Applicable
   - type: input
     attributes:
-      label: "@inertiajs/vue3 Version"
-      description: Provide the version of `@inertiajs/vue3` you are using.
+      label: "JS package version"
+      description: Provide the version of `@inertiajs/{adapter}` you are using.
       placeholder: 2.0.0
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Backend Stack (optional)
+      label: Backend stack (optional)
       description: If this bug depends on backend integration, provide details such as Laravel version, PHP version, or other relevant environment info.
       placeholder: |
         Laravel 12.x
         PHP 8.4
-      value: " "
     validations:
       required: false
   - type: textarea

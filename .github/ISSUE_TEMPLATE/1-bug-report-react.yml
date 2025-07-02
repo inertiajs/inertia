@@ -1,27 +1,24 @@
-name: Bug Report - Svelte
-description: "Submit a Svelte related issue."
-labels: [svelte]
-assignees:
-  - pedroborges
+name: Bug Report - React
+description: "Submit a React related issue."
+labels: [react]
 body:
   - type: markdown
     attributes:
       value: "Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports."
   - type: input
     attributes:
-      label: "@inertiajs/svelte Version"
-      description: Provide the version of `@inertiajs/svelte` you are using.
+      label: "@inertiajs/react Version"
+      description: Provide the version of `@inertiajs/react` you are using.
       placeholder: 2.0.0
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Backend Stack (optional)
+      label: Backend stack (optional)
       description: If this bug depends on backend integration, provide details such as Laravel version, PHP version, or other relevant environment info.
       placeholder: |
         Laravel 12.x
         PHP 8.4
-      value: " "
     validations:
       required: false
   - type: textarea
