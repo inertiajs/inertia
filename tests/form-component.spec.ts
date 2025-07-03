@@ -110,4 +110,87 @@ test.describe('Form Component', () => {
       await expect(page.locator('#name')).toHaveValue('')
     })
   })
+
+  test.describe('Headers', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/headers')
+    })
+
+    test('can submit the form and send default headers', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit' }).click()
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.method).toEqual('post')
+      await expect(dump.headers).toMatchObject({
+        'x-foo': 'Bar',
+      })
+    })
+
+    test('can submit the form and override headers via props', async ({ page }) => {
+      await page.getByRole('button', { name: 'Add Custom Header' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.method).toEqual('post')
+      await expect(dump.headers).toMatchObject({
+        'x-foo': 'Bar',
+        'x-custom': 'MyCustomValue',
+      })
+    })
+  })
+
+  test.describe('Errors', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/errors')
+    })
+
+    test('shows no errors by default', async ({ page }) => {
+      await expect(page.getByText('Form has errors')).not.toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('')
+      await expect(page.locator('#error_handle')).toHaveText('')
+    })
+
+    test('can set errors manually', async ({ page }) => {
+      await page.getByRole('button', { name: 'Set Errors' }).click()
+
+      await expect(page.getByText('Form has errors')).toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('The name field is required.')
+      await expect(page.locator('#error_handle')).toHaveText('The handle field is invalid.')
+    })
+
+    test('can clear all errors', async ({ page }) => {
+      await page.getByRole('button', { name: 'Set Errors' }).click()
+      await expect(page.getByText('Form has errors')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Clear Errors' }).click()
+
+      await expect(page.getByText('Form has errors')).not.toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('')
+      await expect(page.locator('#error_handle')).toHaveText('')
+    })
+
+    test('can clear a specific error', async ({ page }) => {
+      await page.getByRole('button', { name: 'Set Errors' }).click()
+      await expect(page.getByText('Form has errors')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Clear Name Error' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('')
+      await expect(page.locator('#error_handle')).toHaveText('The handle field is invalid.')
+      await expect(page.getByText('Form has errors')).toBeVisible()
+    })
+
+    test('shows server-side errors when submitting the form', async ({ page }) => {
+      await page.fill('#name', 'Some Name')
+      await page.fill('#handle', 'Invalid Handle')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.getByText('Form has errors')).toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('Some name error')
+      await expect(page.locator('#error_handle')).toHaveText('The Handle was invalid')
+    })
+  })
 })

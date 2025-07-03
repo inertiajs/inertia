@@ -14,7 +14,7 @@ import { Form, Head } from '@inertiajs/vue3'
   <Form
     method="post"
     action="/form-component"
-    #default="{ setData, errors, reset, isDirty, processing }"
+    #default="{ errors, reset, isDirty, processing }"
     :data="{ additional: 'data' }"
     class="mt-6 max-w-md space-y-4"
   >

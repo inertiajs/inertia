@@ -1,5 +1,6 @@
 import {
   FormDataConvertible,
+  FormDataKeys,
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
@@ -10,7 +11,7 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
-import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 import useForm from './useForm'
 
 export interface InertiaFormProps {
@@ -44,11 +45,13 @@ export interface InertiaFormProps {
 
 type InertiaForm = DefineComponent<InertiaFormProps>
 type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+type FormDataType = Record<string, FormDataConvertible>
 
 // @ts-ignore
 const Form: InertiaForm = defineComponent({
   name: 'Form',
   props: {
+    // TODO: Does rememberKey make sense in this context?
     rememberKey: {
       type: String,
     },
@@ -196,45 +199,6 @@ const Form: InertiaForm = defineComponent({
       form.transform(() => data).submit(method, action, params)
     }
 
-    const slotProps = computed(() => {
-      // console.log(Object.keys(form.value))
-      // "isDirty"
-      // "errors"
-      // "hasErrors"
-      // "processing"
-      // "progress"
-      // "wasSuccessful"
-      // "recentlySuccessful"
-      // "data"
-      // "transform"
-      // "defaults"
-      // "reset"
-      // "setError"
-      // "clearErrors"
-      // "submit"
-      // "get"
-      // "post"
-      // "put"
-      // "patch"
-      // "delete"
-      // "cancel"
-
-      const { errors, hasErrors, processing, progress, wasSuccessful, recentlySuccessful, setError, clearErrors } = form
-
-      return {
-        errors,
-        hasErrors,
-        processing,
-        progress,
-        wasSuccessful,
-        recentlySuccessful,
-        setError,
-        clearErrors,
-        isDirty: isDirty.value,
-        reset: () => formEl.value.reset(),
-      }
-    })
-
     return () => {
       return h(
         'form',
@@ -249,7 +213,20 @@ const Form: InertiaForm = defineComponent({
             submit()
           },
         },
-        slots.default ? slots.default({ ...slotProps.value }) : [],
+        slots.default
+          ? slots.default({
+              errors: form.errors,
+              hasErrors: form.hasErrors,
+              processing: form.processing,
+              progress: form.progress,
+              wasSuccessful: form.wasSuccessful,
+              recentlySuccessful: form.recentlySuccessful,
+              setError: (field: FormDataKeys<FormDataType>, value: string) => form.setError(field, value),
+              clearErrors: (...fields: FormDataKeys<FormDataType>[]) => form.clearErrors(...fields),
+              isDirty: isDirty.value,
+              reset: () => formEl.value.reset(),
+            })
+          : [],
       )
     }
   },
