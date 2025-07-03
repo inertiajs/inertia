@@ -510,7 +510,23 @@ app.post('/form-component/errors', (req, res) =>
     props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
   }),
 )
+
+app.get('/form-component/events', (req, res) => inertia.render(req, res, { component: 'FormComponent/Events' }))
+app.post('/form-component/events/delay', async (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
+)
+app.post('/form-component/events/success', async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/Events' }),
+)
+app.post('/form-component/events/errors', async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Events',
+    props: { errors: { field: 'Something went wrong' } },
+  }),
+)
+
 app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
+app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 
 app.all('*', (req, res) => inertia.render(req, res))
 

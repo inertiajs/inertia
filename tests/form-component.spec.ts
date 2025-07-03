@@ -193,4 +193,57 @@ test.describe('Form Component', () => {
       await expect(page.locator('#error_handle')).toHaveText('The Handle was invalid')
     })
   })
+
+  test.describe('Events', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/events')
+    })
+
+    test('fires events in order on success', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const eventOrder = await page.locator('#events').innerText()
+      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
+    })
+
+    test('fires events in order on error', async ({ page }) => {
+      await page.getByRole('button', { name: 'Fail Request' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const eventOrder = await page.locator('#events').innerText()
+      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
+    })
+
+    test('fires only onBefore and onCancel when canceled via event cancellation', async ({ page }) => {
+      await page.getByRole('button', { name: 'Cancel in onBefore' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const eventOrder = await page.locator('#events').innerText()
+      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancel'])
+    })
+
+    test('fires onCancelToken and cancels the request via the token', async ({ page }) => {
+      await page.getByRole('button', { name: 'Use Cancel Token' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await page.getByRole('button', { name: 'Cancel Visit' }).click()
+
+      const eventOrder = await page.locator('#events').innerText()
+      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
+    })
+
+    test('fires onProgress during file upload', async ({ page }) => {
+      const file = {
+        name: 'test.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      }
+
+      await page.setInputFiles('#avatar', file)
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const eventOrder = await page.locator('#events').innerText()
+      expect(eventOrder.split(',')).toContain('onProgress')
+    })
+  })
 })

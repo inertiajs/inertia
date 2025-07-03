@@ -225,6 +225,7 @@ const Form: InertiaForm = defineComponent({
               clearErrors: (...fields: FormDataKeys<FormDataType>[]) => form.clearErrors(...fields),
               isDirty: isDirty.value,
               reset: () => formEl.value.reset(),
+              submit,
             })
           : [],
       )
