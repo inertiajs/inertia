@@ -10,6 +10,18 @@ declare module 'axios' {
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
+// View Transition API types
+export type ViewTransitionType = string | string[]
+
+export type ViewTransitionOptions = {
+  enabled?: boolean
+  types?: ViewTransitionType
+  updateCallback?: () => void | Promise<void>
+  onViewTransitionStart?: (transition: any) => void
+  onViewTransitionEnd?: (transition: any) => void
+  onViewTransitionError?: (error: Error) => void
+}
+
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
@@ -122,6 +134,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  viewTransition?: ViewTransitionOptions
 }
 
 export type GlobalEventsMap = {
@@ -209,6 +222,22 @@ export type GlobalEventsMap = {
     }
     result: void
   }
+  'view-transition-start': {
+    parameters: [any, ActiveVisit]
+    details: {
+      transition: any
+      visit: ActiveVisit
+    }
+    result: void
+  }
+  'view-transition-end': {
+    parameters: [any, ActiveVisit]
+    details: {
+      transition: any
+      visit: ActiveVisit
+    }
+    result: void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -275,7 +304,9 @@ export type PendingVisitOptions = {
 
 export type PendingVisit = Visit & PendingVisitOptions
 
-export type ActiveVisit = PendingVisit & Required<VisitOptions>
+export type ActiveVisit = PendingVisit & Required<VisitOptions> & {
+  viewTransition: ViewTransitionOptions
+}
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
@@ -348,5 +379,7 @@ declare global {
     'inertia:exception': GlobalEvent<'exception'>
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:view-transition-start': GlobalEvent<'view-transition-start'>
+    'inertia:view-transition-end': GlobalEvent<'view-transition-end'>
   }
 }

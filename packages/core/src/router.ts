@@ -30,10 +30,19 @@ import {
   VisitCallbacks,
   VisitHelperOptions,
   VisitOptions,
+  ViewTransitionOptions,
 } from './types'
 import { transformUrlAndData } from './url'
 
 export class Router {
+  /**
+   * Default view transition options for all visits.
+   * Can be overridden per visit by passing viewTransition options.
+   */
+  protected defaultViewTransitionOptions: ViewTransitionOptions = {
+    enabled: false,
+  }
+
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
     interruptible: true,
@@ -157,6 +166,25 @@ export class Router {
     })
   }
 
+  /**
+   * Configure default view transition options for all visits.
+   * 
+   * @example
+   * ```typescript
+   * // Enable view transitions globally
+   * router.setDefaultViewTransition({ enabled: true })
+   * 
+   * // Enable with custom types
+   * router.setDefaultViewTransition({ 
+   *   enabled: true, 
+   *   types: ['slide'] 
+   * })
+   * ```
+   */
+  public setDefaultViewTransition(options: ViewTransitionOptions): void {
+    this.defaultViewTransitionOptions = { ...this.defaultViewTransitionOptions, ...options }
+  }
+
   public visit<T extends RequestPayload = RequestPayload>(href: string | URL, options: VisitOptions<T> = {}): void {
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
@@ -179,10 +207,11 @@ export class Router {
       Scroll.save()
     }
 
-    const requestParams: PendingVisit & VisitCallbacks = {
+    const requestParams: ActiveVisit = {
       ...visit,
       ...events,
-    }
+      viewTransition: visit.viewTransition || this.defaultViewTransitionOptions,
+    } as ActiveVisit
 
     const prefetched = prefetchedRequests.get(requestParams)
 
@@ -242,10 +271,11 @@ export class Router {
 
     this.asyncRequestStream.interruptInFlight()
 
-    const requestParams: PendingVisit & VisitCallbacks = {
+    const requestParams: ActiveVisit = {
       ...visit,
       ...events,
-    }
+      viewTransition: visit.viewTransition || this.defaultViewTransitionOptions,
+    } as ActiveVisit
 
     const ensureCurrentPageIsSet = (): Promise<void> => {
       return new Promise((resolve) => {
@@ -312,15 +342,19 @@ export class Router {
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
+    const visit = this.getPendingVisit(href, {
+      ...options,
+      async: true,
+      showProgress: false,
+      prefetch: true,
+    })
+    const events = this.getVisitEvents(options)
+    
     return {
-      ...this.getPendingVisit(href, {
-        ...options,
-        async: true,
-        showProgress: false,
-        prefetch: true,
-      }),
-      ...this.getVisitEvents(options),
-    }
+      ...visit,
+      ...events,
+      viewTransition: visit.viewTransition || this.defaultViewTransitionOptions,
+    } as ActiveVisit
   }
 
   protected getPendingVisit(
@@ -346,6 +380,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
+      viewTransition: this.defaultViewTransitionOptions,
       ...options,
     }
 

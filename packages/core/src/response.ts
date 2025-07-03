@@ -8,6 +8,7 @@ import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
+import { ViewTransitionManager } from './viewTransition'
 
 const queue = new Queue<Promise<boolean | void>>()
 
@@ -151,10 +152,15 @@ export class Response {
 
     pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
-    return currentPage.set(pageResponse, {
-      replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll,
-      preserveState: this.requestParams.all().preserveState,
+    const visit = this.requestParams.all()
+
+    // Use view transition if enabled
+    return ViewTransitionManager.createFallbackWrapper(visit, () => {
+      return currentPage.set(pageResponse, {
+        replace: visit.replace,
+        preserveScroll: visit.preserveScroll,
+        preserveState: visit.preserveState,
+      })
     })
   }
 
