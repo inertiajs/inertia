@@ -1,3 +1,4 @@
+import { escape } from 'es-toolkit'
 import { defineComponent, DefineComponent } from 'vue'
 
 export type InertiaHead = DefineComponent<{
@@ -51,7 +52,7 @@ const Head: InertiaHead = defineComponent({
         } else if (value === '') {
           return carry + ` ${name}`
         } else {
-          return carry + ` ${name}="${value}"`
+          return carry + ` ${name}="${escape(value)}"`
         }
       }, '')
       return `<${node.type}${attrs}>`
