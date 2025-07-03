@@ -11,7 +11,7 @@ function setErrorBag(bag) {
 
 <template>
   <Form
-    action="/form-component/errors"
+    :action="errorBag ? '/form-component/errors/bag' : '/form-component/errors'"
     method="post"
     v-slot="{ errors, hasErrors, setError, clearErrors }"
     :error-bag="errorBag"

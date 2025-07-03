@@ -3,7 +3,7 @@ import { Form } from '@inertiajs/vue3'
 </script>
 
 <template>
-  <Form action="/dump/post" method="post" :headers="{ 'X-Foo': 'Bar' }" v-slot="{ isDirty }">
+  <Form action="/dump/post" method="post" v-slot="{ isDirty }">
     <h1>Form Elements</h1>
     <div>Form is <span v-if="isDirty">dirty</span><span v-else>clean</span></div>
 

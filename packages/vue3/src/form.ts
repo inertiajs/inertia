@@ -14,7 +14,21 @@ import { isEqual } from 'es-toolkit'
 import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
 import useForm from './useForm'
 
-export interface InertiaFormProps {
+interface InertiaFormSlotProps {
+  errors: Record<string, string>
+  hasErrors: boolean
+  processing: boolean
+  progress: Progress | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  setError: (field: FormDataKeys<Record<string, FormDataConvertible>>, value: string) => void
+  clearErrors: (...fields: FormDataKeys<Record<string, FormDataConvertible>>[]) => void
+  isDirty: boolean
+  reset: () => void
+  submit: () => void
+}
+
+interface InertiaFormProps {
   data?: Record<string, FormDataConvertible>
   action: string | { url: string; method: Method }
   method?: Method
@@ -36,7 +50,6 @@ export interface InertiaFormProps {
   onError?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
   errorBag?: string | null
-  async?: boolean
   showProgress?: boolean
 }
 
@@ -44,7 +57,6 @@ type InertiaForm = DefineComponent<InertiaFormProps>
 type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 type FormDataType = Record<string, FormDataConvertible>
 
-// @ts-ignore
 const Form: InertiaForm = defineComponent({
   name: 'Form',
   props: {
@@ -128,9 +140,9 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
       default: () => {},
     },
-    async: {
-      type: Boolean,
-      default: false,
+    errorBag: {
+      type: [String, null] as PropType<InertiaFormProps['errorBag']>,
+      default: null,
     },
     showProgress: {
       type: Boolean,
@@ -139,7 +151,7 @@ const Form: InertiaForm = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const form = useForm(props.data)
-    const formEl = ref()
+    const formElement = ref()
     const method = computed(() =>
       typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
     )
@@ -161,18 +173,16 @@ const Form: InertiaForm = defineComponent({
 
     onMounted(() => {
       defaults = getData()
-      formEvents.forEach((e) => formEl.value.addEventListener(e, onFormUpdate))
+      formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
 
-    onBeforeUnmount(() => {
-      formEvents.forEach((e) => formEl.value.removeEventListener(e, onFormUpdate))
-    })
+    onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
     const getData = (): Record<string, FormDataConvertible> => {
       // Leverage the objectToFormData() method to merge the props.data with the form data.
       // Then convert it back to an object because submitting a FormData instance will
       // lead to incorrect data with nested/array values.
-      return formDataToObject(objectToFormData(props.data || {}, new FormData(formEl.value)))
+      return formDataToObject(objectToFormData(props.data || {}, new FormData(formElement.value)))
     }
 
     const submit = () => {
@@ -200,11 +210,9 @@ const Form: InertiaForm = defineComponent({
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
-        async: props.async,
+        errorBag: props.errorBag,
         showProgress: props.showProgress,
       }
-
-      console.log(params)
 
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => data).submit(method.value, action, params)
@@ -214,7 +222,7 @@ const Form: InertiaForm = defineComponent({
       return h(
         'form',
         {
-          ref: formEl,
+          ref: formElement,
           action: props.action,
           method: method.value,
           submit,
@@ -225,7 +233,7 @@ const Form: InertiaForm = defineComponent({
           },
         },
         slots.default
-          ? slots.default({
+          ? slots.default(<InertiaFormSlotProps>{
               errors: form.errors,
               hasErrors: form.hasErrors,
               processing: form.processing,
@@ -235,7 +243,7 @@ const Form: InertiaForm = defineComponent({
               setError: (field: FormDataKeys<FormDataType>, value: string) => form.setError(field, value),
               clearErrors: (...fields: FormDataKeys<FormDataType>[]) => form.clearErrors(...fields),
               isDirty: isDirty.value,
-              reset: () => formEl.value.reset(),
+              reset: () => formElement.value.reset(),
               submit,
             })
           : [],

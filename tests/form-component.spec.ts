@@ -2,7 +2,7 @@ import test, { expect } from '@playwright/test'
 import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
-  test.skip(process.env.PACKAGE !== 'vue3', 'Currently only implemented for Vue 3')
+  test.skip(process.env.PACKAGE === 'svelte', 'Currently only implemented for React and Vue 3')
 
   test.describe('Elements', () => {
     test.beforeEach(async ({ page }) => {
@@ -405,11 +405,12 @@ test.describe('Form Component', () => {
     })
   })
 
-  test.describe('Progress and Async', () => {
+  test.describe('Progress', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
       await page.goto('/form-component/progress')
       requests.listen(page)
+      requests.listenForFinished(page)
       await expect(requests.requests).toHaveLength(0)
       await expect(page.locator('#nprogress-appearances')).toHaveText('0')
     })
@@ -424,25 +425,9 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Disable Progress' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      await expect(requests.requests).toHaveLength(1)
+      await expect.poll(() => requests.finished.length).toBe(1)
+
       await expect(page.locator('#nprogress-appearances')).toHaveText('0')
-    })
-
-    test('does not show progress when using async by default', async ({ page }) => {
-      await page.getByRole('button', { name: 'Enable Async' }).click()
-      await page.getByRole('button', { name: 'Submit' }).click()
-
-      await expect(requests.requests).toHaveLength(1)
-      await expect(page.locator('#nprogress-appearances')).toHaveText('0')
-    })
-
-    test('shows progress when using async with showProgress true', async ({ page }) => {
-      await page.getByRole('button', { name: 'Enable Async' }).click()
-      await page.getByRole('button', { name: 'Enable Progress' }).click()
-      await page.getByRole('button', { name: 'Submit' }).click()
-
-      await expect(requests.requests).toHaveLength(1)
-      await expect(page.locator('#nprogress-appearances')).toHaveText('1')
     })
   })
 
