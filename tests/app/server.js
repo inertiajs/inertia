@@ -512,7 +512,7 @@ app.post('/form-component/errors', (req, res) =>
 )
 
 app.get('/form-component/events', (req, res) => inertia.render(req, res, { component: 'FormComponent/Events' }))
-app.post('/form-component/events/delay', async (req, res) =>
+app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
 app.post('/form-component/events/success', async (req, res) =>

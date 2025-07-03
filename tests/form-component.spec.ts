@@ -194,7 +194,7 @@ test.describe('Form Component', () => {
     })
   })
 
-  test.describe('Events', () => {
+  test.describe('Events and State', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
       await page.goto('/form-component/events')
@@ -224,7 +224,7 @@ test.describe('Form Component', () => {
     })
 
     test('fires onCancelToken and cancels the request via the token', async ({ page }) => {
-      await page.getByRole('button', { name: 'Use Cancel Token' }).click()
+      await page.getByRole('button', { name: 'Should Delay' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
       await page.getByRole('button', { name: 'Cancel Visit' }).click()
 
@@ -244,6 +244,46 @@ test.describe('Form Component', () => {
 
       const eventOrder = await page.locator('#events').innerText()
       expect(eventOrder.split(',')).toContain('onProgress')
+    })
+
+    test('updates processing during request', async ({ page }) => {
+      await page.getByRole('button', { name: 'Should Delay' }).click()
+      await expect(page.locator('#processing')).toHaveText('false')
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await expect(page.locator('#processing')).toHaveText('true')
+      await page.waitForSelector('#processing:has-text("false")')
+    })
+
+    test('shows progress during file upload', async ({ page }) => {
+      const file = {
+        name: 'test.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      }
+
+      await page.getByRole('button', { name: 'Should Delay' }).click()
+      await page.setInputFiles('#avatar', file)
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      // Wait for #progress not being 0
+      await page.waitForSelector('#progress.uploading')
+
+      const percentage = parseInt(await page.locator('#progress').innerText())
+      expect(percentage).toBeLessThanOrEqual(100)
+    })
+
+    test('updates wasSuccessful and recentlySuccessful after success', async ({ page }) => {
+      await expect(page.locator('#was-successful')).toHaveText('false')
+      await expect(page.locator('#recently-successful')).toHaveText('false')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#was-successful')).toHaveText('true')
+      await expect(page.locator('#recently-successful')).toHaveText('true')
+
+      await page.waitForTimeout(2500)
+
+      await expect(page.locator('#recently-successful')).toHaveText('false')
     })
   })
 })
