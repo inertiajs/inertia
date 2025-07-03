@@ -1,10 +1,12 @@
 <script setup>
 import { Form } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import Article from './../Article.vue'
 
 const only = ref([])
 const except = ref([])
 const replace = ref(false)
+const state = ref('Default State')
 const preserveScroll = ref(false)
 const preserveState = ref(false)
 const queryStringArrayFormat = ref(undefined)
@@ -16,12 +18,45 @@ function setOnly() {
 function setExcept() {
   except.value = ['stats']
 }
+
+function enableReplace() {
+  replace.value = true
+}
+
+function enablePreserveScroll() {
+  preserveScroll.value = true
+}
+
+function enablePreserveState() {
+  preserveState.value = true
+  state.value = 'Replaced State'
+}
+
+const action = computed(() => {
+  if (preserveScroll.value) {
+    return '/article'
+  }
+
+  if (preserveState.value) {
+    return '/form-component/options'
+  }
+
+  return queryStringArrayFormat.value ? '/dump/get' : '/dump/post'
+})
+
+const method = computed(() => {
+  if (preserveScroll.value || preserveState.value) {
+    return 'get'
+  }
+
+  return queryStringArrayFormat.value ? 'get' : 'post'
+})
 </script>
 
 <template>
   <Form
-    :action="queryStringArrayFormat ? '/dump/get' : '/dump/post'"
-    :method="queryStringArrayFormat ? 'get' : 'post'"
+    :action="action"
+    :method="method"
     :only="only"
     :except="except"
     :replace="replace"
@@ -35,11 +70,20 @@ function setExcept() {
     <input type="text" name="tags[]" value="beta" />
 
     <div>
+      State: <span id="state">{{ state }}</span>
+    </div>
+
+    <div>
       <button type="button" @click="setOnly">Set Only (users)</button>
       <button type="button" @click="setExcept">Set Except (stats)</button>
       <button type="button" @click="queryStringArrayFormat = 'brackets'">Use Brackets Format</button>
       <button type="button" @click="queryStringArrayFormat = 'indices'">Use Indices Format</button>
+      <button type="button" @click="enablePreserveScroll">Enable Preserve Scroll</button>
+      <button type="button" @click="enablePreserveState">Enable Preserve State</button>
+      <button type="button" @click="enableReplace">Enable Replace</button>
       <button type="submit">Submit</button>
     </div>
   </Form>
+
+  <Article v-if="preserveScroll" />
 </template>

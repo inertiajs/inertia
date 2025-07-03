@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { pageLoads, shouldBeDumpPage } from './support'
+import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
   test.skip(process.env.PACKAGE !== 'vue3', 'Currently only implemented for Vue 3')
@@ -333,6 +333,52 @@ test.describe('Form Component', () => {
       const dump = await shouldBeDumpPage(page, 'get')
 
       expect(dump.url).toEqual(expect.stringContaining('/dump/get?tags[0]=alpha&tags[1]=beta'))
+    })
+
+    test('replaces the browser history when replace is enabled', async ({ page }) => {
+      // Add some history...
+      await page.goto('/article')
+      await page.goto('/form-component/options')
+
+      await page.getByRole('button', { name: 'Enable Replace' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await shouldBeDumpPage(page, 'post')
+
+      await page.goBack()
+      await expect(page).toHaveURL('/article')
+    })
+
+    test('preserves the scroll position when preserveScroll is enabled', async ({ page }) => {
+      await page.getByRole('button', { name: 'Enable Preserve Scroll' }).click()
+      await scrollElementTo(
+        page,
+        page.evaluate(() => window.scrollTo(0, 100)),
+      )
+
+      const scrollBefore = await page.evaluate(() => window.scrollY)
+      expect(scrollBefore).toBeGreaterThan(0)
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await page.waitForURL('/article')
+
+      const scrollAfter = await page.evaluate(() => window.scrollY)
+      // TODO: why is this not exactly 100?
+      expect(scrollAfter).toBeGreaterThan(90)
+    })
+
+    test('preserves the form state when preserveState is enabled', async ({ page }) => {
+      requests.listen(page)
+
+      await expect(requests.requests).toHaveLength(0)
+
+      expect(await page.locator('#state').innerText()).toEqual('Default State')
+      await page.getByRole('button', { name: 'Enable Preserve State' }).click()
+      expect(await page.locator('#state').innerText()).toEqual('Replaced State')
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(requests.requests).toHaveLength(1)
+      expect(await page.locator('#state').innerText()).toEqual('Replaced State')
     })
   })
 })
