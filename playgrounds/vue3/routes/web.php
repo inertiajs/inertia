@@ -134,6 +134,8 @@ Route::get('/form-component', function () {
 });
 
 Route::post('/form-component', function () {
+    // dd(request()->all());
+
     $data = request()->validate([
         'name' => ['required'],
         'role' => ['required', 'in:User,Admin,Super'],
@@ -147,7 +149,7 @@ Route::post('/form-component', function () {
         'bio' => ['required', 'string', 'max:500'],
     ]);
 
-    dd($data);
+    dd($data, request()->all());
 });
 
 Route::post('/user', function () {
@@ -188,9 +190,9 @@ Route::get('/infinite-scroll', function () {
             function () use ($start, $end, $itemType) {
                 sleep(1);
 
-                return collect(range($start, $end))->map(fn($i) => [
+                return collect(range($start, $end))->map(fn ($i) => [
                     'id' => $i,
-                    'name' => ucwords($itemType) . ' ' . $i,
+                    'name' => ucwords($itemType).' '.$i,
                 ])->toArray();
             }
         )->merge(),

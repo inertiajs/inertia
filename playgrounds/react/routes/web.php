@@ -74,13 +74,36 @@ Route::get('/form', function () {
     return inertia('Form');
 });
 
+Route::get('/form-component', function () {
+    return inertia('FormComponent');
+});
+
+Route::post('/form-component', function () {
+    // dd(request()->all());
+
+    $data = request()->validate([
+        'name' => ['required'],
+        'role' => ['required', 'in:User,Admin,Super'],
+        'plan' => ['required', 'in:free,pro,enterprise'],
+        'subscribe' => ['required', 'in:yes'],
+        'interests' => ['required', 'array', 'min:2', 'in:sports,music,tech'],
+        'skills' => ['required', 'array', 'min:2', 'in:vue,react,angular,svelte'],
+        'avatar' => ['required', 'file', 'image'],
+        'documents' => ['required', 'array', 'min:2'],
+        'documents.*' => ['file'],
+        'bio' => ['required', 'string', 'max:500'],
+    ]);
+
+    dd($data, request()->all());
+});
+
 Route::post('/user', function () {
     return inertia('User', [
         'user' => request()->validate([
             'name' => ['required'],
             'company' => ['required'],
             'role' => ['required', 'in:User,Admin,Super'],
-        ])
+        ]),
     ]);
 });
 
@@ -91,7 +114,6 @@ Route::get('/login', function () {
 Route::post('/logout', function () {
     return redirect('/login');
 });
-
 
 Route::get('/async', function () {
     return inertia('Async', [
@@ -112,7 +134,7 @@ Route::post('/async/checkbox', function () {
     Cache::put('taylor', request('taylor'), 10);
     Cache::put('joe', request('joe'), 10);
 
-    if (!$previousJoe && request()->boolean('joe')) {
+    if (! $previousJoe && request()->boolean('joe')) {
         return redirect('article');
     }
 
@@ -120,10 +142,11 @@ Route::post('/async/checkbox', function () {
 });
 
 Route::get('/defer', function () {
-    info("defer route");
+    info('defer route');
+
     return inertia('Defer', [
         'users' => Inertia::defer(function () {
-            info("resolving users");
+            info('resolving users');
             sleep(1);
 
             return [
@@ -141,11 +164,11 @@ Route::get('/defer', function () {
                     'id' => 3,
                     'name' => 'Joe Tannenbaum',
                     'email' => 'yo@tannenbaum.edu',
-                ]
+                ],
             ];
         }, 'u'),
         'foods' => Inertia::defer(function () {
-            info("resolving foods");
+            info('resolving foods');
             sleep(3);
 
             return [
@@ -164,7 +187,7 @@ Route::get('/defer', function () {
             ];
         }, 'f'),
         'organizations' => Inertia::defer(function () {
-            info("resolving organizations");
+            info('resolving organizations');
             sleep(2);
 
             return [
@@ -191,7 +214,6 @@ Route::get('/defer', function () {
 Route::get('/goodbye', function () {
     return Inertia::location('https://inertiajs.com/redirects');
 });
-
 
 Route::get('/poll', function () {
     return inertia('Poll', [
@@ -222,10 +244,12 @@ Route::get('/elsewhere', function () {
 
 Route::get('/sleepy/{duration}', function ($duration) {
     sleep($duration);
+
     return inertia('Users');
 });
 
 Route::post('/sleepy/{duration}', function ($duration) {
     sleep($duration);
+
     return inertia('Article');
 });

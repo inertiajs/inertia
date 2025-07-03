@@ -80,6 +80,7 @@ const Form = ({
   showProgress = true,
   errorBag,
   children,
+  ...props
 }: InertiaFormProps) => {
   const form = useForm(data)
   const formElement = useRef<HTMLFormElement>(null)
@@ -149,6 +150,7 @@ const Form = ({
         event.preventDefault()
         submit()
       },
+      ...props,
     },
     typeof children === 'function'
       ? children({
