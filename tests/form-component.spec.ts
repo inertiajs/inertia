@@ -335,20 +335,6 @@ test.describe('Form Component', () => {
       expect(dump.url).toEqual(expect.stringContaining('/dump/get?tags[0]=alpha&tags[1]=beta'))
     })
 
-    test('replaces the browser history when replace is enabled', async ({ page }) => {
-      // Add some history...
-      await page.goto('/article')
-      await page.goto('/form-component/options')
-
-      await page.getByRole('button', { name: 'Enable Replace' }).click()
-      await page.getByRole('button', { name: 'Submit' }).click()
-
-      await shouldBeDumpPage(page, 'post')
-
-      await page.goBack()
-      await expect(page).toHaveURL('/article')
-    })
-
     test('preserves the scroll position when preserveScroll is enabled', async ({ page }) => {
       await page.getByRole('button', { name: 'Enable Preserve Scroll' }).click()
       await scrollElementTo(
@@ -380,5 +366,18 @@ test.describe('Form Component', () => {
       await expect(requests.requests).toHaveLength(1)
       expect(await page.locator('#state').innerText()).toEqual('Replaced State')
     })
+  })
+
+  test('replaces the browser history when replace is enabled', async ({ page }) => {
+    await page.goto('/article')
+    await page.goto('/form-component/options')
+
+    await page.getByRole('button', { name: 'Enable Replace' }).click()
+    await page.getByRole('button', { name: 'Submit' }).click()
+
+    await shouldBeDumpPage(page, 'post')
+
+    await page.goBack()
+    await expect(page).toHaveURL('/article')
   })
 })
