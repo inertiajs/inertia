@@ -11,7 +11,7 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
-import { defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
 import useForm from './useForm'
 
 export interface InertiaFormProps {
@@ -133,7 +133,9 @@ const Form: InertiaForm = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    const method = typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method)
+    const method = computed(() =>
+      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
+    )
     const form = useForm(props.rememberKey, props.data)
     const formEl = ref()
 
@@ -157,7 +159,7 @@ const Form: InertiaForm = defineComponent({
       formEvents.forEach((e) => formEl.value.addEventListener(e, onFormUpdate))
     })
 
-    onUnmounted(() => {
+    onBeforeUnmount(() => {
       formEvents.forEach((e) => formEl.value.removeEventListener(e, onFormUpdate))
     })
 
@@ -170,17 +172,17 @@ const Form: InertiaForm = defineComponent({
 
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
-        method,
+        method.value,
         typeof props.action === 'object' ? props.action.url : props.action || '',
         getData(),
         props.queryStringArrayFormat,
       )
 
       const params: FormOptions = {
-        method,
+        method: method.value,
         replace: props.replace,
         preserveScroll: props.preserveScroll,
-        preserveState: props.preserveState ?? method !== 'get',
+        preserveState: props.preserveState ?? method.value !== 'get',
         only: props.only,
         except: props.except,
         headers: props.headers,
@@ -196,7 +198,7 @@ const Form: InertiaForm = defineComponent({
       }
 
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => data).submit(method, action, params)
+      form.transform(() => data).submit(method.value, action, params)
     }
 
     return () => {
@@ -205,7 +207,7 @@ const Form: InertiaForm = defineComponent({
         {
           ref: formEl,
           action: props.action,
-          method,
+          method: method.value,
           submit,
           ...attrs,
           onSubmit: (event) => {

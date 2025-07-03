@@ -286,4 +286,53 @@ test.describe('Form Component', () => {
       await expect(page.locator('#recently-successful')).toHaveText('false')
     })
   })
+
+  test.describe('Form Options', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/options')
+    })
+
+    test('submits the form and requests only the users prop', async ({ page }) => {
+      await page.getByRole('button', { name: 'Set Only (users)' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.headers).toMatchObject({
+        'x-inertia-partial-data': 'users',
+        'x-inertia-partial-component': 'FormComponent/Options',
+      })
+    })
+
+    test('submits the form and excludes the stats prop from the response', async ({ page }) => {
+      await page.getByRole('button', { name: 'Set Except (stats)' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.headers).toMatchObject({
+        'x-inertia-partial-except': 'stats',
+        'x-inertia-partial-component': 'FormComponent/Options',
+      })
+    })
+
+    test('submits the form and encodes arrays using brackets format', async ({ page }) => {
+      await page.getByRole('button', { name: 'Use Brackets Format' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'get')
+
+      expect(dump.url).toEqual(expect.stringContaining('/dump/get?tags[]=alpha&tags[]=beta'))
+    })
+
+    test('submits the form and encodes arrays using indices format', async ({ page }) => {
+      await page.getByRole('button', { name: 'Use Indices Format' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'get')
+
+      expect(dump.url).toEqual(expect.stringContaining('/dump/get?tags[0]=alpha&tags[1]=beta'))
+    })
+  })
 })

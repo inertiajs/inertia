@@ -167,35 +167,22 @@ app.post('/form-helper/events/errors', (req, res) => {
   }, 250)
 })
 
-app.get('/dump/get', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.post('/dump/post', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.put('/dump/put', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'put', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.patch('/dump/patch', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.delete('/dump/delete', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files },
-  }),
+const methods = ['get', 'post', 'put', 'patch', 'delete']
+
+methods.forEach((method) =>
+  app[method](`/dump/${method}`, upload.any(), (req, res) =>
+    inertia.render(req, res, {
+      component: 'Dump',
+      props: {
+        headers: req.headers,
+        method,
+        form: req.body,
+        query: req.query,
+        files: req.files,
+        url: req.originalUrl,
+      },
+    }),
+  ),
 )
 
 app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
@@ -526,6 +513,7 @@ app.post('/form-component/events/errors', async (req, res) =>
 )
 
 app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
+app.get('/form-component/options', (req, res) => inertia.render(req, res, { component: 'FormComponent/Options' }))
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 
 app.all('*', (req, res) => inertia.render(req, res))
