@@ -21,6 +21,7 @@ export interface InertiaFormProps {
   headers?: Record<string, string>
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
+  preserveUrl?: boolean
   replace?: boolean
   only?: string[]
   except?: string[]
@@ -37,8 +38,6 @@ export interface InertiaFormProps {
   errorBag?: string | null
   async?: boolean
   showProgress?: boolean
-  // TODO: check props below
-  preserveUrl?: boolean
 }
 
 type InertiaForm = DefineComponent<InertiaFormProps>
@@ -72,6 +71,10 @@ const Form: InertiaForm = defineComponent({
     preserveState: {
       type: Boolean,
       default: null,
+    },
+    preserveUrl: {
+      type: Boolean,
+      default: false,
     },
     only: {
       type: Array<string>,
@@ -184,6 +187,7 @@ const Form: InertiaForm = defineComponent({
         replace: props.replace,
         preserveScroll: props.preserveScroll,
         preserveState: props.preserveState ?? method.value !== 'get',
+        preserveUrl: props.preserveUrl,
         only: props.only,
         except: props.except,
         reset: props.reset,

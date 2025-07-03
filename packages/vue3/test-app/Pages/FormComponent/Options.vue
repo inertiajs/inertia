@@ -10,6 +10,7 @@ const replace = ref(false)
 const state = ref('Default State')
 const preserveScroll = ref(false)
 const preserveState = ref(false)
+const preserveUrl = ref(false)
 const queryStringArrayFormat = ref(undefined)
 
 function setOnly() {
@@ -37,6 +38,10 @@ function enablePreserveState() {
   state.value = 'Replaced State'
 }
 
+function enablePreserveUrl() {
+  preserveUrl.value = true
+}
+
 const action = computed(() => {
   if (preserveScroll.value) {
     return '/article'
@@ -46,11 +51,15 @@ const action = computed(() => {
     return '/form-component/options'
   }
 
+  if (preserveUrl.value) {
+    return '/form-component/options?page=2'
+  }
+
   return queryStringArrayFormat.value ? '/dump/get' : '/dump/post'
 })
 
 const method = computed(() => {
-  if (preserveScroll.value || preserveState.value) {
+  if (preserveScroll.value || preserveState.value || preserveUrl.value) {
     return 'get'
   }
 
@@ -68,6 +77,7 @@ const method = computed(() => {
     :replace="replace"
     :preserve-scroll="preserveScroll"
     :preserve-state="preserveState"
+    :preserve-url="preserveUrl"
     :query-string-array-format="queryStringArrayFormat"
   >
     <h1>Form Options</h1>
@@ -87,6 +97,7 @@ const method = computed(() => {
       <button type="button" @click="queryStringArrayFormat = 'indices'">Use Indices Format</button>
       <button type="button" @click="enablePreserveScroll">Enable Preserve Scroll</button>
       <button type="button" @click="enablePreserveState">Enable Preserve State</button>
+      <button type="button" @click="enablePreserveUrl">Enable Preserve URL</button>
       <button type="button" @click="enableReplace">Enable Replace</button>
       <button type="submit">Submit</button>
     </div>

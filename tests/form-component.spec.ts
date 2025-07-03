@@ -391,6 +391,18 @@ test.describe('Form Component', () => {
       await expect(requests.requests).toHaveLength(1)
       expect(await page.locator('#state').innerText()).toEqual('Replaced State')
     })
+
+    test('preserves the URL when preserveUrl is enabled', async ({ page }) => {
+      requests.listen(page)
+
+      await expect(requests.requests).toHaveLength(0)
+
+      await page.getByRole('button', { name: 'Enable Preserve Url' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(requests.requests).toHaveLength(1)
+      await expect(page).toHaveURL('form-component/options')
+    })
   })
 
   test.describe('Progress and Async', () => {
