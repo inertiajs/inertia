@@ -1,9 +1,14 @@
 import { router } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default ({ foo, bar }) => {
+  const [replaced, setReplaced] = useState(0)
+
   const replace = () => {
     router.replace({
+      preserveState: true,
       props: (props) => ({ ...props, foo: 'foo from client' }),
+      onSuccess: () => setReplaced(replaced + 1),
     })
   }
 
@@ -21,6 +26,7 @@ export default ({ foo, bar }) => {
       <div>{bar}</div>
       <button onClick={replace}>Replace</button>
       <button onClick={push}>Push</button>
+      <div>Replaced: {replaced}</div>
     </div>
   )
 }

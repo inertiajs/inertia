@@ -82,6 +82,7 @@ export interface ClientSideVisitOptions {
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
+  onSuccess?: () => void
 }
 
 export type PageResolver = (name: string) => Component
