@@ -34,13 +34,6 @@ export class ViewTransitionManager {
         }
       })
 
-      // Set transition types if provided
-      if (vtOptions?.types && transition.types) {
-        const types = Array.isArray(vtOptions.types) ? vtOptions.types : [vtOptions.types]
-        transition.types.clear()
-        types.forEach((type: string) => transition.types.add(type))
-      }
-
       // Fire start event
       fireViewTransitionStartEvent(transition, visit)
       vtOptions?.onViewTransitionStart?.(transition)

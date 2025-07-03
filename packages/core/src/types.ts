@@ -11,11 +11,8 @@ export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
 // View Transition API types
-export type ViewTransitionType = string | string[]
-
 export type ViewTransitionOptions = {
   enabled?: boolean
-  types?: ViewTransitionType
   updateCallback?: () => void | Promise<void>
   onViewTransitionStart?: (transition: any) => void
   onViewTransitionEnd?: (transition: any) => void

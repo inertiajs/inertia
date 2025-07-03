@@ -174,10 +174,10 @@ export class Router {
    * // Enable view transitions globally
    * router.setDefaultViewTransition({ enabled: true })
    * 
-   * // Enable with custom types
+   * // Enable with custom callbacks
    * router.setDefaultViewTransition({ 
    *   enabled: true, 
-   *   types: ['slide'] 
+   *   onViewTransitionStart: (t) => console.log('Starting transition')
    * })
    * ```
    */
