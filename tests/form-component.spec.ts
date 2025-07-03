@@ -329,6 +329,19 @@ test.describe('Form Component', () => {
       })
     })
 
+    test('submits the form and resets the orders prop from the response', async ({ page }) => {
+      await page.getByRole('button', { name: 'Set Reset (orders)' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.headers).toMatchObject({
+        'x-inertia-partial-data': 'orders',
+        'x-inertia-partial-component': 'FormComponent/Options',
+        'x-inertia-reset': 'orders',
+      })
+    })
+
     test('submits the form and encodes arrays using brackets format', async ({ page }) => {
       await page.getByRole('button', { name: 'Use Brackets Format' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()

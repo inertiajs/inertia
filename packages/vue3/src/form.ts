@@ -24,6 +24,7 @@ export interface InertiaFormProps {
   replace?: boolean
   only?: string[]
   except?: string[]
+  reset?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: (visit: PendingVisit) => void
@@ -37,8 +38,6 @@ export interface InertiaFormProps {
   async?: boolean
   showProgress?: boolean
   // TODO: check props below
-  fresh?: boolean
-  reset?: string[]
   preserveUrl?: boolean
 }
 
@@ -79,6 +78,10 @@ const Form: InertiaForm = defineComponent({
       default: () => [],
     },
     except: {
+      type: Array<string>,
+      default: () => [],
+    },
+    reset: {
       type: Array<string>,
       default: () => [],
     },
@@ -183,6 +186,7 @@ const Form: InertiaForm = defineComponent({
         preserveState: props.preserveState ?? method.value !== 'get',
         only: props.only,
         except: props.except,
+        reset: props.reset,
         headers: props.headers,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,

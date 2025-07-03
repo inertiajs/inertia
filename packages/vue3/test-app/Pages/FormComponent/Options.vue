@@ -5,6 +5,7 @@ import Article from './../Article.vue'
 
 const only = ref([])
 const except = ref([])
+const reset = ref([])
 const replace = ref(false)
 const state = ref('Default State')
 const preserveScroll = ref(false)
@@ -17,6 +18,10 @@ function setOnly() {
 
 function setExcept() {
   except.value = ['stats']
+}
+
+function setReset() {
+  reset.value = ['orders']
 }
 
 function enableReplace() {
@@ -59,6 +64,7 @@ const method = computed(() => {
     :method="method"
     :only="only"
     :except="except"
+    :reset="reset"
     :replace="replace"
     :preserve-scroll="preserveScroll"
     :preserve-state="preserveState"
@@ -76,6 +82,7 @@ const method = computed(() => {
     <div>
       <button type="button" @click="setOnly">Set Only (users)</button>
       <button type="button" @click="setExcept">Set Except (stats)</button>
+      <button type="button" @click="setReset">Set Reset (orders)</button>
       <button type="button" @click="queryStringArrayFormat = 'brackets'">Use Brackets Format</button>
       <button type="button" @click="queryStringArrayFormat = 'indices'">Use Indices Format</button>
       <button type="button" @click="enablePreserveScroll">Enable Preserve Scroll</button>
