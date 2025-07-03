@@ -31,17 +31,20 @@ function parseKey(key: string): (string | number | '')[] {
 export function formDataToObject(source: FormData): Record<string, FormDataConvertible> {
   const form: Record<string, any> = {}
 
-  // formData.entries() returns an iterator where the first element is the key and the second is the value.
-  // Examples of the keys are "user[name]", "tags[]", "items[0][name]", etc.
+  // formData.entries() returns an iterator where the first element is the key and the second element
+  // is the value. Examples of the keys are "user[name]", "tags[]", "items[0][name]", etc.
+  // We should construct a new (nested) object based on these keys.
   for (const [key, value] of source.entries()) {
     if (value instanceof File && value.size === 0 && value.name === '') {
-      // Check if the given value is an empty file.
+      // Check if the given value is an empty file. We want to filter
+      // those out as they prevent us from comparing objects with
+      // each other, which we do to set the isDirty prop.
       continue
     }
 
     const path = parseKey(key)
 
-    // If key ends with "", treat as array push as this is something like "tags[]"
+    // If the key ends with an empty string (''), treat it as an array push (e.g., "tags[]")
     if (path[path.length - 1] === '') {
       const arrayPath = path.slice(0, -1)
       const existing = get(form, arrayPath)
@@ -55,7 +58,7 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
       continue
     }
 
-    // No brackets: last value wins
+    // No brackets: last value wins when multiple fields have the same key
     set(form, path, value)
   }
 
