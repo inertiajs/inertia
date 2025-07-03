@@ -497,6 +497,12 @@ app.post('/form-component/errors', (req, res) =>
     props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
   }),
 )
+app.post('/form-component/errors/bag', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Errors',
+    props: { errors: { bag: { name: 'Some name error', handle: 'The Handle was invalid' } } },
+  }),
+)
 
 app.get('/form-component/events', (req, res) => inertia.render(req, res, { component: 'FormComponent/Events' }))
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
@@ -514,6 +520,10 @@ app.post('/form-component/events/errors', async (req, res) =>
 
 app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
 app.get('/form-component/options', (req, res) => inertia.render(req, res, { component: 'FormComponent/Options' }))
+app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
+app.post('/form-component/progress', async (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
+)
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 
 app.all('*', (req, res) => inertia.render(req, res))

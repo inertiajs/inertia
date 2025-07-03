@@ -192,6 +192,18 @@ test.describe('Form Component', () => {
       await expect(page.locator('#error_name')).toHaveText('Some name error')
       await expect(page.locator('#error_handle')).toHaveText('The Handle was invalid')
     })
+
+    test('shows server-side errors when submitting the form with an error bag', async ({ page }) => {
+      await page.fill('#name', 'Some Name')
+      await page.fill('#handle', 'Invalid Handle')
+
+      await page.getByRole('button', { name: 'Use Error Bag' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.getByText('Form has errors')).toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('Some name error')
+      await expect(page.locator('#error_handle')).toHaveText('The Handle was invalid')
+    })
   })
 
   test.describe('Events and State', () => {
@@ -365,6 +377,47 @@ test.describe('Form Component', () => {
 
       await expect(requests.requests).toHaveLength(1)
       expect(await page.locator('#state').innerText()).toEqual('Replaced State')
+    })
+  })
+
+  test.describe('Progress and Async', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/progress')
+      requests.listen(page)
+      await expect(requests.requests).toHaveLength(0)
+      await expect(page.locator('#nprogress-appearances')).toHaveText('0')
+    })
+
+    test('shows progress during a normal request', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await expect(requests.requests).toHaveLength(1)
+      await expect(page.locator('#nprogress-appearances')).toHaveText('1')
+    })
+
+    test('does not show progress when showProgress is false', async ({ page }) => {
+      await page.getByRole('button', { name: 'Disable Progress' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(requests.requests).toHaveLength(1)
+      await expect(page.locator('#nprogress-appearances')).toHaveText('0')
+    })
+
+    test('does not show progress when using async by default', async ({ page }) => {
+      await page.getByRole('button', { name: 'Enable Async' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(requests.requests).toHaveLength(1)
+      await expect(page.locator('#nprogress-appearances')).toHaveText('0')
+    })
+
+    test('shows progress when using async with showProgress true', async ({ page }) => {
+      await page.getByRole('button', { name: 'Enable Async' }).click()
+      await page.getByRole('button', { name: 'Enable Progress' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(requests.requests).toHaveLength(1)
+      await expect(page.locator('#nprogress-appearances')).toHaveText('1')
     })
   })
 

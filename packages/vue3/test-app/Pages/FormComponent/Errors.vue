@@ -1,9 +1,21 @@
 <script setup>
 import { Form } from '@inertiajs/vue3'
+import { ref } from 'vue'
+
+const errorBag = ref(null)
+
+function setErrorBag(bag) {
+  errorBag.value = bag
+}
 </script>
 
 <template>
-  <Form action="/form-component/errors" method="post" v-slot="{ errors, hasErrors, setError, clearErrors }">
+  <Form
+    action="/form-component/errors"
+    method="post"
+    v-slot="{ errors, hasErrors, setError, clearErrors }"
+    :error-bag="errorBag"
+  >
     <h1>Form Errors</h1>
 
     <div>
@@ -37,6 +49,7 @@ import { Form } from '@inertiajs/vue3'
       </button>
       <button type="button" @click="clearErrors()">Clear Errors</button>
       <button type="button" @click="clearErrors('name')">Clear Name Error</button>
+      <button type="button" @click="setErrorBag('bag')">Use Error Bag</button>
     </div>
 
     <button type="submit">Submit</button>

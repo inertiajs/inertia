@@ -15,7 +15,6 @@ import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMount
 import useForm from './useForm'
 
 export interface InertiaFormProps {
-  rememberKey?: string
   data?: Record<string, FormDataConvertible>
   action: string | { url: string; method: Method }
   method?: Method
@@ -34,10 +33,10 @@ export interface InertiaFormProps {
   onSuccess?: () => void
   onError?: () => void
   queryStringArrayFormat?: 'brackets' | 'indices'
-  async?: boolean
-  // TODO: check props below
   errorBag?: string | null
+  async?: boolean
   showProgress?: boolean
+  // TODO: check props below
   fresh?: boolean
   reset?: string[]
   preserveUrl?: boolean
@@ -51,10 +50,6 @@ type FormDataType = Record<string, FormDataConvertible>
 const Form: InertiaForm = defineComponent({
   name: 'Form',
   props: {
-    // TODO: Does rememberKey make sense in this context?
-    rememberKey: {
-      type: String,
-    },
     data: {
       type: Object,
       default: () => ({}),
@@ -95,10 +90,6 @@ const Form: InertiaForm = defineComponent({
       type: String as PropType<'brackets' | 'indices'>,
       default: 'brackets',
     },
-    async: {
-      type: Boolean,
-      default: false,
-    },
     onStart: {
       type: Function as PropType<(visit: PendingVisit) => void>,
       default: (_visit: PendingVisit) => {},
@@ -131,13 +122,21 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
       default: () => {},
     },
+    async: {
+      type: Boolean,
+      default: false,
+    },
+    showProgress: {
+      type: Boolean,
+      default: true,
+    },
   },
   setup(props, { slots, attrs }) {
+    const form = useForm(props.data)
+    const formEl = ref()
     const method = computed(() =>
       typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
     )
-    const form = useForm(props.rememberKey, props.data)
-    const formEl = ref()
 
     // Can't use computed because FormData is not reactive
     const isDirty = ref(false)
@@ -179,14 +178,12 @@ const Form: InertiaForm = defineComponent({
       )
 
       const params: FormOptions = {
-        method: method.value,
         replace: props.replace,
         preserveScroll: props.preserveScroll,
         preserveState: props.preserveState ?? method.value !== 'get',
         only: props.only,
         except: props.except,
         headers: props.headers,
-        async: props.async,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,
         onStart: props.onStart,
@@ -195,7 +192,11 @@ const Form: InertiaForm = defineComponent({
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
+        async: props.async,
+        showProgress: props.showProgress,
       }
+
+      console.log(params)
 
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => data).submit(method.value, action, params)
