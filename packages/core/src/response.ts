@@ -151,10 +151,29 @@ export class Response {
 
     pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
-    return currentPage.set(pageResponse, {
-      replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll,
-      preserveState: this.requestParams.all().preserveState,
+    const setCurrentPage = () =>
+      currentPage.set(pageResponse, {
+        replace: this.requestParams.all().replace,
+        preserveScroll: this.requestParams.all().preserveScroll,
+        preserveState: this.requestParams.all().preserveState,
+      })
+
+    const shouldTransition =
+      document &&
+      'startViewTransition' in document &&
+      !this.requestParams.all().preserveState &&
+      pageResponse.component !== currentPage.get().component
+
+    return new Promise((resolve) => {
+      if (!shouldTransition) {
+        setCurrentPage().then(resolve)
+        return
+      }
+
+      // @ts-ignore
+      window.document.startViewTransition(() => {
+        setCurrentPage().then(resolve)
+      })
     })
   }
 
