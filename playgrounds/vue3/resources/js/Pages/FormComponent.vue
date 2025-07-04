@@ -21,6 +21,38 @@ const errorBag = ref('custom-bag')
   <Head title="Form Component" />
   <h1 class="text-3xl">Form Component</h1>
 
+  <Form
+    action="/users"
+    method="post"
+    :headers="{ 'X-Custom-Header': 'Demo' }"
+    error-bag="custom-bag"
+    @success="() => // do something..."
+    #default="{
+      errors,
+      hasErrors,
+      processing,
+      progress,
+      wasSuccessful,
+      recentlySuccessful,
+      setError,
+      clearErrors,
+      isDirty,
+      reset,
+      submit,
+    }"
+    class="mt-6 max-w-2xl space-y-6"
+  >
+    <div v-if="isDirty">There are unsaved changes!</div>
+
+    <div>
+      <label for="name">Name</label>
+      <input type="text" name="name" />
+      <div v-if="errors.name">{{ errors.name }}</div>
+    </div>
+
+    <button type="submit" :disabled="processing">Submit</button>
+  </Form>
+
   <!-- Main Demo Form -->
   <Form
     action="/form-component"
@@ -30,6 +62,7 @@ const errorBag = ref('custom-bag')
     :only="['foo']"
     :reset="['bar']"
     :data="{ demo: 'data' }"
+    @success="() => null"
     #default="{
       errors,
       hasErrors,

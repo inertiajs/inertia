@@ -75,26 +75,31 @@ Route::get('/form', function () {
 });
 
 Route::get('/form-component', function () {
-    return inertia('FormComponent');
+    return inertia('FormComponent', [
+        'foo' => fn () => now()->getTimestampMs(),
+        'bar' => fn () => now()->getTimestampMs(),
+        'quux' => fn () => now()->getTimestampMs(),
+    ]);
 });
 
 Route::post('/form-component', function () {
-    // dd(request()->all());
-
-    $data = request()->validate([
-        'name' => ['required'],
-        'role' => ['required', 'in:User,Admin,Super'],
-        'plan' => ['required', 'in:free,pro,enterprise'],
-        'subscribe' => ['required', 'in:yes'],
-        'interests' => ['required', 'array', 'min:2', 'in:sports,music,tech'],
-        'skills' => ['required', 'array', 'min:2', 'in:vue,react,angular,svelte'],
-        'avatar' => ['required', 'file', 'image'],
-        'documents' => ['required', 'array', 'min:2'],
-        'documents.*' => ['file'],
-        'bio' => ['required', 'string', 'max:500'],
+    $data = request()->validateWithBag('custom-bag', [
+        'name' => ['required', 'string', 'max:255'],
+        'avatar' => ['nullable', 'file', 'image', 'max:2048'],
+        'skills' => ['nullable', 'array', 'min:2'],
+        'skills.*' => ['string', 'in:vue,react,laravel,tailwind'],
+        'tags' => ['nullable', 'array'],
+        'tags.*' => ['string', 'max:50'],
+        'user.address.street' => ['nullable', 'string', 'max:255'],
+        'user.address.city' => ['nullable', 'string', 'max:255'],
     ]);
 
-    dd($data, request()->all());
+    // Simulate file upload progress
+    if (request()->hasFile('avatar')) {
+        sleep(1);
+    }
+
+    return back();
 });
 
 Route::post('/user', function () {

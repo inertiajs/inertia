@@ -1,7 +1,11 @@
+import { useState } from 'react'
 import Layout from '../Components/Layout'
 import { Form, Head } from '@inertiajs/react'
 
 const FormComponent = () => {
+  const [customHeaders, setCustomHeaders] = useState({ 'X-Custom-Header': 'Demo-Value' })
+  const [errorBag, setErrorBag] = useState('custom-bag')
+
   return (
     <>
       <Head title="Form Component" />
@@ -9,92 +13,209 @@ const FormComponent = () => {
       <h1 className="text-3xl">Form Component</h1>
 
       <Form
-        method="post"
         action="/form-component"
-        data={{ additional: 'data' }}
-        className="mt-6 max-w-md space-y-4"
+        method="post"
+        headers={customHeaders}
+        errorBag={errorBag}
+        only={['foo']}
+        reset={['bar']}
+        data={{ demo: 'data' }}
+        className="mt-6 max-w-2xl space-y-6"
       >
-        {({ errors, reset, isDirty, processing }) => (
+        {({
+          errors,
+          hasErrors,
+          processing,
+          progress,
+          wasSuccessful,
+          recentlySuccessful,
+          setError,
+          clearErrors,
+          isDirty,
+          reset,
+          submit,
+        }) => (
           <>
+            <div className="rounded border border-gray-200 bg-gray-50 p-4">
+              <h3 className="mb-3 text-lg font-medium">Form Status (slot props)</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  isDirty: <span className={`font-mono ${isDirty ? 'text-orange-600' : 'text-gray-500'}`}>{String(isDirty)}</span>
+                </div>
+                <div>
+                  hasErrors: <span className={`font-mono ${hasErrors ? 'text-red-600' : 'text-gray-500'}`}>{String(hasErrors)}</span>
+                </div>
+                <div>
+                  processing: <span className={`font-mono ${processing ? 'text-blue-600' : 'text-gray-500'}`}>{String(processing)}</span>
+                </div>
+                <div>
+                  wasSuccessful: <span className={`font-mono ${wasSuccessful ? 'text-green-600' : 'text-gray-500'}`}>{String(wasSuccessful)}</span>
+                </div>
+                <div>
+                  recentlySuccessful: <span className={`font-mono ${recentlySuccessful ? 'text-green-600' : 'text-gray-500'}`}>{String(recentlySuccessful)}</span>
+                </div>
+                {progress && (
+                  <div>
+                    progress: <span className="font-mono text-blue-600">{Math.round(progress.percentage)}%</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {isDirty && (
-              <div className="my-5 rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">
+              <div className="rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">
                 There are unsaved changes!
               </div>
             )}
 
-            <div className="space-y-4 *:w-full *:border *:p-2">
-              <input type="text" name="name" id="name" placeholder="Name" />
-
-              <select name="role" id="role" defaultValue="">
-                <option value="" disabled>Role</option>
-                <option>User</option>
-                <option>Admin</option>
-                <option>Super</option>
-              </select>
-
-              <div className="flex gap-4">
-                <label><input type="radio" name="plan" value="free" /> Free</label>
-                <label><input type="radio" name="plan" value="pro" /> Pro</label>
-                <label><input type="radio" name="plan" value="enterprise" /> Enterprise</label>
+            <div className="space-y-4">
+              <div>
+                <label className="block font-medium" htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Enter your name"
+                  className={`mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm ${errors.name ? 'border-red-500' : ''}`}
+                />
+                {errors.name && <div className="mt-1 text-sm text-red-600">{errors.name}</div>}
               </div>
 
               <div>
-                <input type="checkbox" name="subscribe" value="yes" id="subscribe" />
-                <label htmlFor="subscribe">Subscribe to newsletter</label>
+                <label className="block font-medium" htmlFor="avatar">Avatar</label>
+                <input
+                  type="file"
+                  name="avatar"
+                  id="avatar"
+                  className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
+                />
+                {errors.avatar && <div className="mt-1 text-sm text-red-600">{errors.avatar}</div>}
               </div>
 
-              <div className="flex gap-4">
-                <label><input type="checkbox" name="interests[]" value="sports" /> Sports</label>
-                <label><input type="checkbox" name="interests[]" value="music" /> Music</label>
-                <label><input type="checkbox" name="interests[]" value="tech" /> Tech</label>
+              <div>
+                <label className="block font-medium" htmlFor="skills">Skills (Multiple)</label>
+                <select
+                  name="skills[]"
+                  id="skills"
+                  multiple
+                  className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
+                  defaultValue={[]}
+                >
+                  <option value="vue">Vue.js</option>
+                  <option value="react">React</option>
+                  <option value="laravel">Laravel</option>
+                  <option value="tailwind">Tailwind CSS</option>
+                </select>
+                {errors.skills && <div className="mt-1 text-sm text-red-600">{errors.skills}</div>}
               </div>
 
-              <select name="skills[]" id="skills" multiple defaultValue="">
-                <option disabled value="">Skills</option>
-                <option value="vue">Vue</option>
-                <option value="react">React</option>
-                <option value="angular">Angular</option>
-                <option value="svelte">Svelte</option>
-              </select>
+              <div>
+                <label className="block font-medium">Tags</label>
+                <div className="mt-1 space-y-2">
+                  <input type="text" name="tags[]" placeholder="Tag 1" className="w-full appearance-none rounded border px-2 py-1 shadow-sm" />
+                  {errors['tags.0'] && <div className="text-sm text-red-600">{errors['tags.0']}</div>}
+                  <input type="text" name="tags[]" placeholder="Tag 2" className="w-full appearance-none rounded border px-2 py-1 shadow-sm" />
+                  {errors['tags.1'] && <div className="text-sm text-red-600">{errors['tags.1']}</div>}
+                </div>
+              </div>
 
-              <input type="file" name="avatar" id="avatar" placeholder="Avatar" />
-              <input type="file" name="documents[]" id="documents" multiple placeholder="Documents" />
-
-              <textarea name="bio" id="bio" rows={3} placeholder="Bio" />
-
-              <input type="hidden" name="token" value="abc123" />
-
-              <input type="number" name="age" id="age" placeholder="Age" />
-
-              <input type="text" name="user[address][street]" placeholder="Street" />
-
-              <input type="text" name="items[0][name]" defaultValue="Item A" />
-              <input type="text" name="items[1][name]" defaultValue="Item B" />
-
-              <input type="text" name="disabled_field" value="Ignore me" disabled />
+              <div>
+                <label className="block font-medium">Address</label>
+                <div className="mt-1 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    name="user[address][street]"
+                    placeholder="Street"
+                    className="appearance-none rounded border px-2 py-1 shadow-sm"
+                  />
+                  <input
+                    type="text"
+                    name="user[address][city]"
+                    placeholder="City"
+                    className="appearance-none rounded border px-2 py-1 shadow-sm"
+                  />
+                </div>
+              </div>
             </div>
 
-            {Object.entries(errors).map(([field, error]) => (
-              <div key={field} className="mt-2 text-red-600">
-                {field}: {error}
-              </div>
-            ))}
-
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="submit"
                 disabled={processing}
-                className="rounded bg-slate-800 px-6 py-2 text-white"
+                className="rounded bg-slate-800 px-4 py-2 text-white disabled:opacity-50"
               >
                 Submit
               </button>
-              <button type="button" onClick={reset}>
+
+              <button
+                type="button"
+                onClick={reset}
+                className="rounded bg-gray-500 px-4 py-2 text-white"
+              >
                 Reset
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setError({ name: 'Name is required', avatar: 'Please select a file' })}
+                className="rounded bg-red-500 px-4 py-2 text-white"
+              >
+                Set Errors
+              </button>
+
+              <button
+                type="button"
+                onClick={() => clearErrors()}
+                className="rounded bg-green-500 px-4 py-2 text-white"
+              >
+                Clear Errors
               </button>
             </div>
           </>
         )}
       </Form>
+
+      <div className="mt-8 max-w-2xl space-y-4">
+        <h2 className="text-2xl">Form Configuration</h2>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="rounded border border-gray-200 bg-gray-50 p-4 space-y-1 text-sm">
+            <div>
+              <strong>Headers:</strong> <code className="text-xs">{JSON.stringify(customHeaders)}</code>
+            </div>
+            <div>
+              <strong>Error Bag:</strong> <code>{errorBag}</code>
+            </div>
+            <div><strong>Only:</strong> <code>['foo']</code></div>
+            <div><strong>Reset:</strong> <code>['bar']</code></div>
+            <div><strong>Method:</strong> <code>POST</code></div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium">Error Bag</label>
+              <input
+                type="text"
+                value={errorBag}
+                onChange={(e) => setErrorBag(e.target.value)}
+                className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
+                placeholder="Error bag name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium">Custom Header Value</label>
+              <input
+                type="text"
+                value={customHeaders['X-Custom-Header']}
+                onChange={(e) => setCustomHeaders({ 'X-Custom-Header': e.target.value })}
+                className="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
+                placeholder="Header value"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
