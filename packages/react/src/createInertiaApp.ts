@@ -1,6 +1,7 @@
 import { Page, PageProps, PageResolver, router, setupProgress } from '@inertiajs/core'
 import { ComponentType, FunctionComponent, Key, ReactElement, ReactNode, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
+import { AxiosInstance } from 'axios'
 import App from './App'
 
 type ReactInstance = ReactElement
@@ -46,6 +47,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOpti
         showSpinner?: boolean
       }
   setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
+  axiosInstance?: AxiosInstance
 }
 
 type CreateInertiaAppSSRContent = { head: string[]; body: string }
@@ -55,6 +57,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOpti
   render: typeof renderToString
   progress?: undefined
   setup(options: SetupOptions<null, SharedProps>): ReactInstance
+  axiosInstance?: undefined
 }
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
@@ -71,6 +74,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
+  axiosInstance,
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): Promise<
   CreateInertiaAppSetupReturnType | CreateInertiaAppSSRContent
 > {
@@ -81,6 +85,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head = []
+
+  if (!isServer && axiosInstance) {
+    router.setAxiosInstance(axiosInstance)
+  }
 
   const reactApp = await Promise.all([
     resolveComponent(initialPage.component),

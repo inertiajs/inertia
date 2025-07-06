@@ -3,6 +3,7 @@ import escape from 'html-escape'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import type { ComponentResolver } from './types'
+import { AxiosInstance } from 'axios'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
@@ -24,6 +25,7 @@ interface CreateInertiaAppProps {
         showSpinner?: boolean
       }
   page?: Page
+  axiosInstance?: AxiosInstance
 }
 
 export default async function createInertiaApp({
@@ -32,12 +34,17 @@ export default async function createInertiaApp({
   setup,
   progress = {},
   page,
+  axiosInstance
 }: CreateInertiaAppProps): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
-
+  
+  if (!isServer && axiosInstance) {
+    router.setAxiosInstance(axiosInstance)
+  }
+  
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
