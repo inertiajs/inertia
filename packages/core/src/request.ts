@@ -1,4 +1,4 @@
-import { default as axios, AxiosProgressEvent, AxiosRequestConfig } from 'axios'
+import { default as axios, AxiosInstance, AxiosProgressEvent, AxiosRequestConfig } from 'axios'
 import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
@@ -7,6 +7,8 @@ import { ActiveVisit, Page } from './types'
 import { urlWithoutHash } from './url'
 
 export class Request {
+  protected static axiosInstance: AxiosInstance = axios
+
   protected response!: Response
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
@@ -18,6 +20,10 @@ export class Request {
   ) {
     this.requestParams = RequestParams.create(params)
     this.cancelToken = new AbortController()
+  }
+
+  public static setAxiosInstance(axiosInstance: AxiosInstance): void {
+    Request.axiosInstance = axiosInstance
   }
 
   public static create(params: ActiveVisit, page: Page): Request {
@@ -40,7 +46,7 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
-    return axios({
+    return Request.axiosInstance({
       method: this.requestParams.all().method,
       url: urlWithoutHash(this.requestParams.all().url).href,
       data: this.requestParams.data(),
