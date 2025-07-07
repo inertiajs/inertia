@@ -1,5 +1,4 @@
 import { ActiveVisit, ViewTransitionOptions } from './types'
-import { fireViewTransitionStartEvent, fireViewTransitionEndEvent } from './events'
 
 export class ViewTransitionManager {
   private static isViewTransitionSupported(): boolean {
@@ -34,14 +33,12 @@ export class ViewTransitionManager {
         }
       })
 
-      // Fire start event
-      fireViewTransitionStartEvent(transition, visit)
+      // Call custom callback if provided
       vtOptions?.onViewTransitionStart?.(transition)
 
       // Handle transition completion
       transition.finished
         .then(() => {
-          fireViewTransitionEndEvent(transition, visit)
           vtOptions?.onViewTransitionEnd?.(transition)
         })
         .catch((error: Error) => {

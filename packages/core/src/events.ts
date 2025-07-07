@@ -50,11 +50,3 @@ export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, 
 export const firePrefetchingEvent: GlobalEventTrigger<'prefetching'> = (visit) => {
   return fireEvent('prefetching', { detail: { visit } })
 }
-
-export const fireViewTransitionStartEvent: GlobalEventTrigger<'view-transition-start'> = (transition, visit) => {
-  return fireEvent('view-transition-start', { detail: { transition, visit } })
-}
-
-export const fireViewTransitionEndEvent: GlobalEventTrigger<'view-transition-end'> = (transition, visit) => {
-  return fireEvent('view-transition-end', { detail: { transition, visit } })
-}

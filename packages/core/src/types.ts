@@ -13,7 +13,6 @@ export type ErrorBag = Record<string, Errors>
 // View Transition API types
 export type ViewTransitionOptions = {
   enabled?: boolean
-  updateCallback?: () => void | Promise<void>
   onViewTransitionStart?: (transition: any) => void
   onViewTransitionEnd?: (transition: any) => void
   onViewTransitionError?: (error: Error) => void
@@ -219,22 +218,6 @@ export type GlobalEventsMap = {
     }
     result: void
   }
-  'view-transition-start': {
-    parameters: [any, ActiveVisit]
-    details: {
-      transition: any
-      visit: ActiveVisit
-    }
-    result: void
-  }
-  'view-transition-end': {
-    parameters: [any, ActiveVisit]
-    details: {
-      transition: any
-      visit: ActiveVisit
-    }
-    result: void
-  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -376,7 +359,5 @@ declare global {
     'inertia:exception': GlobalEvent<'exception'>
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:navigate': GlobalEvent<'navigate'>
-    'inertia:view-transition-start': GlobalEvent<'view-transition-start'>
-    'inertia:view-transition-end': GlobalEvent<'view-transition-end'>
   }
 }
