@@ -42,7 +42,7 @@ export function mergeDataIntoQueryString(
   const hasSearch = href.toString().includes('?') || (method === 'get' && Object.keys(data).length)
   const hasHash = href.toString().includes('#')
 
-  const url = hrefToUrl(href.toString())
+  const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
   if (method === 'get' && Object.keys(data).length) {
     const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
