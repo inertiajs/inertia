@@ -1,4 +1,5 @@
-import { mergeDataIntoQueryString } from '@inertiajs/core'
+// TODO: Fix import path?
+import { mergeDataIntoQueryString } from '../../packages/core/dist/index.esm.js'
 import test, { expect } from '@playwright/test'
 
 test.describe('url.ts', () => {
