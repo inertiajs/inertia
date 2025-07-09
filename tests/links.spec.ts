@@ -656,6 +656,21 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   })
 })
 
+test('does not scroll when clicking the same fragment link', async ({ page }) => {
+  /** @see https://github.com/inertiajs/inertia/issues/1921 */
+  await page.goto('/article#far-down')
+
+  await page.getByRole('button', { exact: true, name: 'Enable Smooth Scroll' }).click()
+  await page.getByRole('button', { exact: true, name: 'Clear Scroll Log' }).click()
+  await expect(page.getByText('Scroll log: []')).toBeVisible()
+
+  // Click the same link again
+  for (let i = 0; i < 5; i++) {
+    await page.getByRole('link', { exact: true, name: 'Article Far Down' }).click()
+  }
+  await expect(page.getByText('Scroll log: []')).toBeVisible()
+})
+
 test.describe('partial reloads', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
