@@ -80,7 +80,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `pnpm -r --filter './packages/${adapter}/test-app' build && node tests/app/server.js`,
+    command: `pnpm -r --filter './packages/${adapter}/test-app' build && cd tests/app && PACKAGE=${adapter} pnpm serve`,
     url,
     reuseExistingServer: !process.env.CI,
   },

@@ -1,5 +1,5 @@
+import { mergeDataIntoQueryString } from '@inertiajs/core'
 import test, { expect } from '@playwright/test'
-import { mergeDataIntoQueryString } from '../../packages/core'
 
 test.describe('url.ts', () => {
   test.describe('mergeDataIntoQueryString', () => {
