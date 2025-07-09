@@ -1,6 +1,7 @@
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { router } from './index'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
@@ -65,6 +66,9 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
+    // Cancel ongoing synchronous requests
+    router.cancel()
+
     const state = event.state || null
 
     if (state === null) {

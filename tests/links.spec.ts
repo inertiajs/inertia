@@ -822,6 +822,17 @@ test.describe('data-loading attribute', () => {
   })
 })
 
+test('cancels pending request when navigating back', async ({ page }) => {
+  await page.goto('/links/cancel-sync-request/1')
+  await page.getByRole('link', { name: 'Go to Page 2' }).click()
+  await expect(page).toHaveURL('/links/cancel-sync-request/2')
+  await page.getByRole('link', { name: 'Go to Page 3' }).click() // This one is slow (500ms)
+  await page.goBack()
+  await expect(page).toHaveURL('/links/cancel-sync-request/1')
+  await page.waitForTimeout(750)
+  await expect(page).toHaveURL('/links/cancel-sync-request/1')
+})
+
 test('will update href if prop is updated', async ({ page }) => {
   await page.goto('/links/prop-update')
   const link = await page.getByRole('link', { name: 'The Link' })

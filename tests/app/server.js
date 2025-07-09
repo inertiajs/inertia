@@ -82,6 +82,14 @@ app.get('/links/headers/version', (req, res) =>
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
 app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
 
+app.get('/links/cancel-sync-request/:page', (req, res) => {
+  const page = req.params.page
+  setTimeout(
+    () => inertia.render(req, res, { component: 'Links/CancelSyncRequest', props: { page } }),
+    page == 3 ? 500 : 0,
+  )
+})
+
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Page1',
