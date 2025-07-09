@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-test('can merge props with custom strategies', async ({ page }) => {
-  await page.goto('/merge-strategies')
+test('can match props by a key', async ({ page }) => {
+  await page.goto('/match-props-on-key')
 
   await expect(page.getByText('bar count is 5')).toBeVisible()
   await expect(page.getByText('baz count is 5')).toBeVisible()

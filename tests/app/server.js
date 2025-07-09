@@ -42,6 +42,14 @@ app.get('/', (req, res) =>
   }),
 )
 
+app.get('/article', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Article',
+    props: {},
+    encryptHistory: true,
+  }),
+)
+
 app.get('/links/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Links/PartialReloads',
@@ -328,7 +336,7 @@ app.get('/deep-merge-props', (req, res) => {
   })
 })
 
-app.get('/merge-strategies', (req, res) => {
+app.get('/match-props-on-key', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
   const perPage = 5
@@ -350,7 +358,7 @@ app.get('/merge-strategies', (req, res) => {
   }))
 
   inertia.render(req, res, {
-    component: 'MergeStrategies',
+    component: 'MatchPropsOnKey',
     props: {
       bar: new Array(perPage).fill(1),
       baz: new Array(perPage).fill(1),
@@ -369,7 +377,7 @@ app.get('/merge-strategies', (req, res) => {
       ? {}
       : {
           deepMergeProps: ['foo', 'baz'],
-          mergeStrategies: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+          matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
         }),
   })
 })
