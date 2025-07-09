@@ -1,74 +1,228 @@
 # Contributing
 
-Thanks for your interest in contributing to Inertia.js!
+Thank you for your interest in contributing to Inertia.js. We’re excited to have your help in making this project better for everyone.
 
-## Packages
+## Project Overview
 
-To make local Inertia.js development easier, this project has been setup as a monorepo using [pnpm](https://pnpm.io/workspaces). To set it up, start by cloning the repository on your system.
+Inertia.js is a monorepo powered by [pnpm workspaces](https://pnpm.io/workspaces). Here's how everything fits together:
+
+```
+inertia/
+├── packages/          Core Inertia.js packages
+│   ├── core/          Framework-agnostic library
+│   ├── react/         React adapter
+│   │   └── test-app/  React test application
+│   ├── svelte/        Svelte adapter
+│   │   └── test-app/  Svelte test application
+│   └── vue3/          Vue 3 adapter
+│       └── test-app/  Vue 3 test application
+├── playgrounds/       Full Laravel apps for manual testing
+│   ├── react/         Laravel + React
+│   ├── svelte4/       Laravel + Svelte 4
+│   ├── svelte5/       Laravel + Svelte 5
+│   └── vue3/          Laravel + Vue 3
+└── tests/             End-to-end tests and test server
+    ├── app/           Node.js server powering the test apps
+    └── *.spec.ts      Playwright test suites
+```
+
+### Key Components
+
+* **Test Applications:** Minimal frontend apps for automated testing (`packages/*/test-app/`).
+* **Test Server:** A shared Node.js backend (`tests/app/`).
+* **Playwright Tests:** Framework-agnostic E2E tests (`tests/*.spec.ts`).
+* **Playgrounds:** Full Laravel apps for manual testing (`playgrounds/`).
+
+## Getting Started
+
+Clone the repository and install the dependencies:
 
 ```sh
 git clone https://github.com/inertiajs/inertia.git inertia
 cd inertia
+pnpm install
 ```
 
-Next, install the JavaScript dependencies and build the packages:
+Build all packages:
 
 ```sh
-pnpm install && pnpm build
+pnpm build:all
 ```
 
-If you're making changes to one of the packages, you can run the dev server to automatically rebuild the package when changes are made:
+## Development Workflow
+
+### Developing Packages
+
+Run all package watchers in parallel:
 
 ```sh
 pnpm dev
 ```
 
-When proposing changes to one of the adapters, please try to apply the same changes to the other adapters where possible.
+Or watch individual packages from their directory:
 
-## Playgrounds
+```sh
+cd packages/react && pnpm dev
+cd packages/svelte && pnpm dev
+cd packages/vue3 && pnpm dev
+cd packages/core && pnpm dev
+```
 
-It's often helpful to develop Inertia.js using a real application. The playground folder contains an example Laravel project for each of the adapters. Here's how to get a playground running:
+### Running Test Applications
+
+Start all test apps:
+
+```sh
+pnpm dev:test-app
+```
+
+Or run them individually:
+
+```sh
+pnpm dev:test-app:react
+pnpm dev:test-app:svelte
+pnpm dev:test-app:vue
+```
+
+Each test app runs:
+
+* A Node.js server (auto-restarts when changed)
+* A Vite watcher (rebuilds on file changes)
+
+## Playgrounds (Optional)
+
+> **Heads up:** Playgrounds are provided for manual exploration. They’re not required for developing or testing Inertia.js itself.
+
+Run a playground:
+
+```sh
+pnpm dev:playground:react
+pnpm dev:playground:svelte4
+pnpm dev:playground:svelte5
+pnpm dev:playground:vue
+```
+
+If setting up a playground for the first time:
 
 ```sh
 cd playgrounds/react
-pnpm build
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan serve
-# visit the site at http://127.0.0.1:8000
+pnpm dev:playground:react
 ```
 
-Or if you prefer to watch for changes:
+Visit the app at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+## Running Tests
+
+Run all tests for a specific adapter:
 
 ```sh
-# in the project root
-pnpm playground:react
+pnpm test:react
+pnpm test:svelte
+pnpm test:vue
 ```
 
-To automatically see changes to the JavaScript files in the browser, start the development server:
+Run a filtered test:
 
 ```sh
-pnpm dev
+pnpm test:react -g "partial reload"
 ```
 
-To test the SSR mode, first run the build, and then start the SSR server:
+Run tests in headed mode:
 
 ```sh
-pnpm build
-php artisan inertia:start-ssr
+pnpm test:vue --headed
 ```
 
-## Testing
+Run tests in debug mode:
 
-Inertia.js uses [Playwright](https://playwright.dev/) for testing. To run the tests, use the `pnpm test` command.
+```sh
+pnpm test:vue --debug
+```
 
-## Publishing
+## How the Tests Work
 
-This section is really for the benefit of the core maintainers.
+The test setup is shared across frameworks:
 
-1. Increment the version numbers in the `package.json` file for each package,
-2. Run `pnpm install`,
-3. Update `CHANGELOG.md`,
-4. Run `pnpm publish -r` in the root directory. This will automatically run the necessary build steps and publish all packages. When publishing beta releases, make sure to run `pnpm publish -r --tag=beta` or `npm publish -r --tag=next` if it's `next`,
-5. Add release notes to [GitHub](https://github.com/inertiajs/inertia/releases).
+```
+tests/app/server.js         Shared Node.js backend
+├── serves: react test app  (when PACKAGE=react)
+├── serves: svelte test app (when PACKAGE=svelte)
+└── serves: vue test app    (when PACKAGE=vue3)
+
+tests/*.spec.ts             Same Playwright tests for all adapters
+```
+
+## Adding Tests for New Features
+
+When adding a feature or fixing a bug, you must test it across all adapters.
+
+### 1. Create Frontend Pages
+
+Add the same page in each framework’s test app:
+
+```
+packages/react/test-app/Pages/YourFeature.jsx
+packages/svelte/test-app/Pages/YourFeature.svelte
+packages/vue3/test-app/Pages/YourFeature.vue
+```
+
+Each page should behave the same.
+
+### 2. Write Playwright Tests
+
+Add a framework-agnostic test:
+
+```typescript
+// tests/your-feature.spec.ts
+import { test, expect } from '@playwright/test'
+
+test('your feature works', async ({ page }) => {
+    await page.goto('/your-feature')
+    // Your assertions here
+})
+```
+
+### 3. Add Backend Routes (If Needed)
+
+If your feature needs backend routes, add them to the test server:
+
+```javascript
+// tests/app/server.js
+app.get('/your-feature', (req, res) =>
+  inertia.render(req, res, {
+    component: 'YourFeature',
+    props: { foo: 'bar' },
+  }),
+)
+```
+
+### 4. Run the Tests
+
+```sh
+pnpm test:react -g "your feature"
+pnpm test:svelte -g "your feature"
+pnpm test:vue -g "your feature"
+```
+
+All tests must pass in all frameworks.
+
+## Publishing (For Maintainers)
+
+1. Bump versions in `package.json` files.
+
+2. Run `pnpm install` to update the lockfile.
+
+3. Update the `CHANGELOG.md`.
+
+4. Publish:
+
+   ```sh
+   pnpm publish -r
+   ```
+
+   Use `--tag=beta` for pre-releases.
+
+5. Create a new release on [GitHub Releases](https://github.com/inertiajs/inertia/releases).
