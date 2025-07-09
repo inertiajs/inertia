@@ -82,9 +82,6 @@ class EventHandler {
       return this.onMissingHistoryItem()
     }
 
-    // Cancel ongoing synchronous requests
-    router.cancel()
-
     history
       .decrypt(state.page)
       .then((data) => {
@@ -92,6 +89,9 @@ class EventHandler {
           this.onMissingHistoryItem()
           return
         }
+
+        // Cancel ongoing synchronous requests
+        router.cancel()
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           window.requestAnimationFrame(() => {
