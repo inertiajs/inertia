@@ -511,7 +511,7 @@ const adapterPorts = {
 }
 
 console.log(
-  `Serving test app on port ${adapterPorts[inertia.package]}. Visit http://localhost:${adapterPorts[inertia.package]}/`,
+  `Serving test app for package "${inertia.package}" on port ${adapterPorts[inertia.package]}. Visit http://localhost:${adapterPorts[inertia.package]}/`,
 )
 
 app.listen(adapterPorts[inertia.package])

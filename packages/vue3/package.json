@@ -45,7 +45,7 @@
     "dev": "./build.js --watch",
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
     "clean": "rm -rf types && rm -rf dist",
-    "prepack": "pnpm build"
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^22.5.3",
