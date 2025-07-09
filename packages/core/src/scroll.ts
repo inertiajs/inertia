@@ -16,13 +16,10 @@ export class Scroll {
   }
 
   public static reset(): void {
-    const isServer = typeof window === 'undefined'
-    const hashTargetElement =
-      !isServer && window.location.hash ? document.getElementById(window.location.hash.slice(1)) : null
+    const hasHash = typeof window !== 'undefined' && window.location.hash
 
-    if (!isServer && !hashTargetElement) {
-      // Reset the document scroll position if there is no hash. If there
-      // is a hash, the scrollIntoView call below will take care of it.
+    if (!hasHash) {
+      // Reset the document scroll position if there is no hash.
       window.scrollTo(0, 0)
     }
 
@@ -37,10 +34,10 @@ export class Scroll {
 
     this.save()
 
-    if (hashTargetElement) {
+    if (hasHash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
       // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => hashTargetElement.scrollIntoView())
+      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
     }
   }
 
