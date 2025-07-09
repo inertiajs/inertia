@@ -831,6 +831,11 @@ test('cancels pending request when navigating back', async ({ page }) => {
   await expect(page).toHaveURL('/links/cancel-sync-request/1')
   await page.waitForTimeout(750)
   await expect(page).toHaveURL('/links/cancel-sync-request/1')
+  // make sure page 2 is still in the history stack
+  await page.goForward()
+  await expect(page).toHaveURL('/links/cancel-sync-request/2')
+  await page.goBack()
+  await expect(page).toHaveURL('/links/cancel-sync-request/1')
 })
 
 test('will update href if prop is updated', async ({ page }) => {

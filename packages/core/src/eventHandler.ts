@@ -66,9 +66,6 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
-    // Cancel ongoing synchronous requests
-    router.cancel()
-
     const state = event.state || null
 
     if (state === null) {
@@ -84,6 +81,9 @@ class EventHandler {
     if (!history.isValidState(state)) {
       return this.onMissingHistoryItem()
     }
+
+    // Cancel ongoing synchronous requests
+    router.cancel()
 
     history
       .decrypt(state.page)
