@@ -9,6 +9,12 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ extended: true }))
 const upload = multer()
 
+const adapters = ['react', 'svelte', 'vue3']
+
+if (!adapters.includes(inertia.package)) {
+  throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
+}
+
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
 app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
 
