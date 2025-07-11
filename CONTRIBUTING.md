@@ -171,8 +171,8 @@ If your change requires a backend route, add it to the shared Node.js test serve
 
 ```javascript
 // tests/app/server.js
-app.get('/your-feature', (request, response) =>
-  inertia.render(request, response, {
+app.get('/your-feature', (req, res) =>
+  inertia.render(req, res, {
     component: 'YourFeature',
     props: { foo: 'bar' },
   }),
