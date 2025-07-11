@@ -1,37 +1,38 @@
 # Contributing
 
-Thank you for your interest in contributing to Inertia.js. We’re excited to have your help in making this project better for everyone.
+Thank you for your interest in contributing to Inertia.js! Your contributions help make this project better for everyone.
 
-## Project Overview
+Inertia.js is maintained as a monorepo powered by [pnpm workspaces](https://pnpm.io/workspaces). Below you’ll find an overview of the repository and how to get your development environment running smoothly.
 
-Inertia.js is a monorepo powered by [pnpm workspaces](https://pnpm.io/workspaces). Here's how everything fits together:
+## Repository Overview
 
 ```
 inertia/
-├── packages/          Core Inertia.js packages
-│   ├── core/          Framework-agnostic library
+├── packages/          Core libraries and framework adapters
+│   ├── core/          Framework-agnostic core library
 │   ├── react/         React adapter
 │   │   └── test-app/  React test application
 │   ├── svelte/        Svelte adapter
 │   │   └── test-app/  Svelte test application
 │   └── vue3/          Vue 3 adapter
 │       └── test-app/  Vue 3 test application
-├── playgrounds/       Full Laravel apps for manual testing
+├── playgrounds/       Full Laravel applications for manual testing
 │   ├── react/         Laravel + React
 │   ├── svelte4/       Laravel + Svelte 4
 │   ├── svelte5/       Laravel + Svelte 5
 │   └── vue3/          Laravel + Vue 3
 └── tests/             End-to-end tests and test server
-    ├── app/           Node.js server powering the test apps
+    ├── app/           Shared Node.js backend
     └── *.spec.ts      Playwright test suites
 ```
 
 ### Key Components
 
-* **Test Applications:** Minimal frontend apps for automated testing (`packages/*/test-app/`).
-* **Test Server:** A shared Node.js backend (`tests/app/`).
-* **Playwright Tests:** Framework-agnostic E2E tests (`tests/*.spec.ts`).
-* **Playgrounds:** Full Laravel apps for manual testing (`playgrounds/`).
+* **Core Library:** The framework-agnostic engine powering all adapters (`packages/core`).
+* **Adapters:** Framework-specific integrations for React, Svelte, and Vue.
+* **Test Applications:** Minimal frontend apps used for automated testing (`packages/*/test-app/`).
+* **Playwright Tests:** Framework-agnostic end-to-end tests that verify behavior across adapters (`tests/*.spec.ts`).
+* **Playgrounds:** Full Laravel applications for manual testing (`playgrounds/`). These are optional and may eventually be removed.
 
 ## Getting Started
 
@@ -43,80 +44,28 @@ cd inertia
 pnpm install
 ```
 
-Build all packages:
-
-```sh
-pnpm build:all
-```
-
-## Development Workflow
-
-### Developing Packages
-
-Run all package watchers in parallel:
+Then, start the development environment:
 
 ```sh
 pnpm dev
 ```
 
-Or watch individual packages from their directory:
+This builds the core library and all adapters, and starts a file watcher that will automatically rebuild each package when changes are made.
+
+If you prefer, you can also start individual watchers from each package directory. For example:
 
 ```sh
-cd packages/react && pnpm dev
-cd packages/svelte && pnpm dev
-cd packages/vue3 && pnpm dev
 cd packages/core && pnpm dev
+cd packages/react && pnpm dev
 ```
 
-### Running Test Applications
-
-Start all test apps:
-
-```sh
-pnpm dev:test-app
-```
-
-Or run them individually:
-
-```sh
-pnpm dev:test-app:react
-pnpm dev:test-app:svelte
-pnpm dev:test-app:vue
-```
-
-Each test app runs:
-
-* A Node.js server (auto-restarts when changed)
-* A Vite watcher (rebuilds on file changes)
-
-## Playgrounds (Optional)
-
-> **Heads up:** Playgrounds are provided for manual exploration. They’re not required for developing or testing Inertia.js itself.
-
-Run a playground:
-
-```sh
-pnpm dev:playground:react
-pnpm dev:playground:svelte4
-pnpm dev:playground:svelte5
-pnpm dev:playground:vue
-```
-
-If setting up a playground for the first time:
-
-```sh
-cd playgrounds/react
-composer install
-cp .env.example .env
-php artisan key:generate
-pnpm dev:playground:react
-```
-
-Visit the app at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+> **Note:** The core package (`packages/core`) must always be running, as all adapters depend on it.
 
 ## Running Tests
 
-Run all tests for a specific adapter:
+Inertia.js uses Playwright to run a shared end-to-end test suite against each adapter. This is how we verify that Inertia behaves the same across React, Svelte, and Vue.
+
+Run the test suite for a specific adapter:
 
 ```sh
 pnpm test:react
@@ -124,27 +73,35 @@ pnpm test:svelte
 pnpm test:vue
 ```
 
-Run a filtered test:
+These commands automatically set a `PACKAGE` environment variable that tells the Node.js test server which adapter to serve. For example, when running `pnpm test:react`, the test server loads the React test application.
+
+If you want to run Playwright directly, you can pass the environment variable yourself:
+
+```sh
+PACKAGE=react playwright test
+```
+
+You may filter tests by name:
 
 ```sh
 pnpm test:react -g "partial reload"
 ```
 
-Run tests in headed mode:
+Run tests in headed mode (to see the browser):
 
 ```sh
 pnpm test:vue --headed
 ```
 
-Run tests in debug mode:
+Or in debug mode:
 
 ```sh
 pnpm test:vue --debug
 ```
 
-## How the Tests Work
+### How the Test Setup Works
 
-The test setup is shared across frameworks:
+All adapters share the same Node.js test server and the same Playwright test suites. The only difference is which adapter’s test app is served.
 
 ```
 tests/app/server.js         Shared Node.js backend
@@ -152,16 +109,53 @@ tests/app/server.js         Shared Node.js backend
 ├── serves: svelte test app (when PACKAGE=svelte)
 └── serves: vue test app    (when PACKAGE=vue3)
 
-tests/*.spec.ts             Same Playwright tests for all adapters
+tests/*.spec.ts             Shared Playwright test suites
 ```
 
-## Adding Tests for New Features
+When running a test command, the correct adapter is selected automatically:
 
-When adding a feature or fixing a bug, you must test it across all adapters.
+| Adapter | `PACKAGE` value | Test server port | App URL                                            |
+| ------- | --------------- | ---------------- | -------------------------------------------------- |
+| React   | `react`         | 13716            | [http://localhost:13716/](http://localhost:13716/) |
+| Svelte  | `svelte`        | 13717            | [http://localhost:13717/](http://localhost:13717/) |
+| Vue 3   | `vue3`          | 13715            | [http://localhost:13715/](http://localhost:13715/) |
 
-### 1. Create Frontend Pages
+### Automatic Test Server Boot
 
-Add the same page in each framework’s test app:
+You do not need to start the test server manually. When you run a test, Playwright automatically builds the frontend for the selected adapter and boots the Node.js test server before running the tests. This is configured in the Playwright config (`playwright.config.ts`) using the [`webServer`](https://playwright.dev/docs/test-configuration#webserver) option. If a server is already running (for example, during local development), Playwright will reuse it.
+
+## Running Test Applications
+
+The test applications are the primary development environments for Inertia.js. These minimal apps cover all supported features and are used for both manual development and automated end-to-end testing.
+
+Run all test apps at once:
+
+```sh
+pnpm dev:test-app
+```
+
+Or start an individual one:
+
+```sh
+pnpm dev:test-app:react
+pnpm dev:test-app:svelte
+pnpm dev:test-app:vue
+```
+
+Each test app runs two servers:
+
+* A Node.js backend that automatically restarts when changed
+* A Vite development server for the frontend
+
+If you are developing a new feature or fixing a bug, this is the environment where you’ll make changes and verify your work.
+
+## Adding Tests
+
+If you are fixing a bug, adding a feature, or improving existing functionality, please verify that your changes work across all adapters, not just one.
+
+### 1. Add Frontend Pages
+
+Create the same frontend page in each test application:
 
 ```
 packages/react/test-app/Pages/YourFeature.jsx
@@ -169,11 +163,25 @@ packages/svelte/test-app/Pages/YourFeature.svelte
 packages/vue3/test-app/Pages/YourFeature.vue
 ```
 
-Each page should behave the same.
+Each page should provide the same behavior and functionality.
 
-### 2. Write Playwright Tests
+### 2. Add Backend Routes (If Needed)
 
-Add a framework-agnostic test:
+If your change requires a backend route, add it to the shared Node.js test server:
+
+```javascript
+// tests/app/server.js
+app.get('/your-feature', (request, response) =>
+  inertia.render(request, response, {
+    component: 'YourFeature',
+    props: { foo: 'bar' },
+  }),
+)
+```
+
+### 3. Write a Playwright Test
+
+Add a new Playwright test to verify your change. Playwright allows us to test features across all adapters without duplicating test logic.
 
 ```typescript
 // tests/your-feature.spec.ts
@@ -185,21 +193,9 @@ test('your feature works', async ({ page }) => {
 })
 ```
 
-### 3. Add Backend Routes (If Needed)
+### 4. Run the Tests in All Adapters
 
-If your feature needs backend routes, add them to the test server:
-
-```javascript
-// tests/app/server.js
-app.get('/your-feature', (req, res) =>
-  inertia.render(req, res, {
-    component: 'YourFeature',
-    props: { foo: 'bar' },
-  }),
-)
-```
-
-### 4. Run the Tests
+Be sure to run your test for each adapter:
 
 ```sh
 pnpm test:react -g "your feature"
@@ -207,22 +203,62 @@ pnpm test:svelte -g "your feature"
 pnpm test:vue -g "your feature"
 ```
 
-All tests must pass in all frameworks.
+Your work is not considered complete until it works consistently across all frameworks.
 
-## Publishing (For Maintainers)
+## Using the Playgrounds (Optional)
 
-1. Bump versions in `package.json` files.
+The repository also includes several full Laravel applications that integrate Inertia.js. These are optional and mostly useful for manually exploring how Inertia works inside a real Laravel app.
+
+The playgrounds are provided as-is and are not part of the automated test setup. They may be removed in the future.
+
+### Getting Started
+
+If setting up a playground for the first time:
+
+```sh
+cd playgrounds/react
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Then start the playground:
+
+```sh
+pnpm dev:playground:react
+```
+
+Visit the application at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+Each playground has its own pnpm script:
+
+```sh
+pnpm dev:playground:react
+pnpm dev:playground:svelte4
+pnpm dev:playground:svelte5
+pnpm dev:playground:vue
+```
+
+## Publishing (Maintainers Only)
+
+When preparing a release:
+
+1. Bump the versions in each `package.json` file.
 
 2. Run `pnpm install` to update the lockfile.
 
-3. Update the `CHANGELOG.md`.
+3. Update the `CHANGELOG.md` with a summary of changes.
 
-4. Publish:
+4. Publish the packages:
 
    ```sh
    pnpm publish -r
    ```
 
-   Use `--tag=beta` for pre-releases.
+   For beta releases, add the `--tag=beta` flag:
 
-5. Create a new release on [GitHub Releases](https://github.com/inertiajs/inertia/releases).
+   ```sh
+   pnpm publish -r --tag=beta
+   ```
+
+5. Tag a new release on [GitHub Releases](https://github.com/inertiajs/inertia/releases).
