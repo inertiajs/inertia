@@ -7,13 +7,41 @@ defineProps<{
   bar: string
 }>()
 
-const replaced = ref(0)
+const errors = ref(0)
+const finished = ref(0)
+const success = ref(0)
+
+const bagErrors = () => {
+  router.replace({
+    preserveState: true,
+    props: (props) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
+    errorBag: 'bag',
+    onError: (err) => {
+      errors.value = Object.keys(err).length
+    },
+    onFinish: () => finished.value++,
+    onSuccess: () => success.value++,
+  })
+}
+
+const defaultErrors = () => {
+  router.replace({
+    preserveState: true,
+    props: (props) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
+    onError: (err) => {
+      errors.value = Object.keys(err).length
+    },
+    onFinish: () => finished.value++,
+    onSuccess: () => success.value++,
+  })
+}
 
 const replace = () => {
   router.replace({
     preserveState: true,
     props: (props) => ({ ...props, foo: 'foo from client' }),
-    onSuccess: () => replaced.value++,
+    onFinish: () => finished.value++,
+    onSuccess: () => success.value++,
   })
 }
 
@@ -33,5 +61,9 @@ const push = () => {
   <div>{{ bar }}</div>
   <button @click="replace">Replace</button>
   <button @click="push">Push</button>
-  <div>Replaced: {{ replaced }}</div>
+  <button @click="defaultErrors">Errors (default)</button>
+  <button @click="bagErrors">Errors (bag)</button>
+  <div>Errors: {{ errors }}</div>
+  <div>Finished: {{ finished }}</div>
+  <div>Success: {{ success }}</div>
 </template>

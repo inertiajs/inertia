@@ -2,13 +2,41 @@ import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
 export default ({ foo, bar }) => {
-  const [replaced, setReplaced] = useState(0)
+  const [errors, setErrors] = useState(0)
+  const [finished, setFinished] = useState(0)
+  const [success, setSuccess] = useState(0)
+
+  const bagErrors = () => {
+    router.replace({
+      preserveState: true,
+      props: (props) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
+      errorBag: 'bag',
+      onError: (err) => {
+        setErrors(Object.keys(err).length)
+      },
+      onFinish: () => setFinished(finished + 1),
+      onSuccess: () => setSuccess(success + 1),
+    })
+  }
+
+  const defaultErrors = () => {
+    router.replace({
+      preserveState: true,
+      props: (props) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
+      onError: (err) => {
+        setErrors(Object.keys(err).length)
+      },
+      onFinish: () => setFinished(finished + 1),
+      onSuccess: () => setSuccess(success + 1),
+    })
+  }
 
   const replace = () => {
     router.replace({
       preserveState: true,
       props: (props) => ({ ...props, foo: 'foo from client' }),
-      onSuccess: () => setReplaced(replaced + 1),
+      onFinish: () => setFinished(finished + 1),
+      onSuccess: () => setSuccess(success + 1),
     })
   }
 
@@ -26,7 +54,11 @@ export default ({ foo, bar }) => {
       <div>{bar}</div>
       <button onClick={replace}>Replace</button>
       <button onClick={push}>Push</button>
-      <div>Replaced: {replaced}</div>
+      <button onClick={defaultErrors}>Errors (default)</button>
+      <button onClick={bagErrors}>Errors (bag)</button>
+      <div>Errors: {errors}</div>
+      <div>Finished: {finished}</div>
+      <div>Success: {success}</div>
     </div>
   )
 }
