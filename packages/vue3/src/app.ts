@@ -1,4 +1,4 @@
-import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
+import { createHeadManager, Page, PageProps, router, Visit } from '@inertiajs/core'
 import {
   computed,
   DefineComponent,
@@ -21,6 +21,9 @@ export interface InertiaAppProps {
   resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
   titleCallback?: (title: string) => string
   onHeadUpdate?: (elements: string[]) => void
+  defaults?: {
+    visitOptions?: (href: string | URL, options: Visit) => Partial<Visit>
+  }
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -56,8 +59,15 @@ const App: InertiaApp = defineComponent({
       required: false,
       default: () => () => {},
     },
+    defaults: {
+      type: Object as PropType<{
+        visitOptions?: (href: string | URL, options: Visit) => Partial<Visit>
+      }>,
+      required: false,
+      default: () => ({}),
+    },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate, defaults }) {
     component.value = initialComponent ? markRaw(initialComponent) : null
     page.value = initialPage
     key.value = null
@@ -75,6 +85,10 @@ const App: InertiaApp = defineComponent({
           key.value = args.preserveState ? key.value : Date.now()
         },
       })
+
+      if (defaults?.visitOptions) {
+        router.withDefaultVisitOptions(defaults.visitOptions)
+      }
 
       router.on('navigate', () => headManager.forceUpdate())
     }

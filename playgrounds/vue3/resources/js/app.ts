@@ -14,4 +14,14 @@ createInertiaApp({
       .use(plugin)
       .mount(el)
   },
+  defaults: {
+    visitOptions: (href, options) => {
+      return {
+        // queryStringArrayFormat: 'indices',
+        // headers: {
+        //   'X-Foo': 'bar',
+        // },
+      }
+    },
+  },
 })
