@@ -1,6 +1,5 @@
-// TODO: Fix import path?
-import { mergeDataIntoQueryString } from '../../packages/core/dist/index.esm.js'
 import test, { expect } from '@playwright/test'
+import { mergeDataIntoQueryString } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
   test.describe('mergeDataIntoQueryString', () => {
