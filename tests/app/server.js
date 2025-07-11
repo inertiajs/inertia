@@ -3,6 +3,7 @@ const express = require('express')
 const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const { showServerStatus } = require('./server-status')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -516,8 +517,6 @@ const adapterPorts = {
   svelte: 13717,
 }
 
-console.log(
-  `Serving test app for package "${inertia.package}" on port ${adapterPorts[inertia.package]}. Visit http://localhost:${adapterPorts[inertia.package]}/`,
-)
+showServerStatus(inertia.package, adapterPorts[inertia.package])
 
 app.listen(adapterPorts[inertia.package])
