@@ -315,15 +315,15 @@ export class Router {
       .then(() => {
         const errors = currentPage.get().props.errors || {}
 
-        if (Object.keys(errors).length > 0) {
-          const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
-
-          onError?.(scopedErrors)
-        } else {
-          onSuccess?.()
+        if (Object.keys(errors).length === 0) {
+          return onSuccess?.(currentPage.get())
         }
+
+        const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
+
+        return onError?.(scopedErrors)
       })
-      .finally(() => onFinish?.())
+      .finally(() => onFinish?.(params))
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
