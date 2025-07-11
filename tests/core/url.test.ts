@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { mergeDataIntoQueryString } from '../../packages/core'
+import { mergeDataIntoQueryString } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
   test.describe('mergeDataIntoQueryString', () => {
