@@ -91,6 +91,92 @@ test.describe('url.ts', () => {
         expect(href).toBe('/search?filter[12]=213&q=bar')
         expect(data).toEqual({})
       })
+
+      test('handles empty arrays and objects', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/filter', { tags: [], filters: {} })
+
+        expect(href).toBe('/filter')
+        expect(data).toEqual({})
+      })
+
+      test('handles nested arrays within objects', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/filter', {
+          filters: { tags: ['red', 'blue'], categories: ['A', 'B'] }
+        })
+
+        expect(href).toBe('/filter?filters[tags][]=red&filters[tags][]=blue&filters[categories][]=A&filters[categories][]=B')
+        expect(data).toEqual({})
+      })
+
+      test('handles deep nesting of objects', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/api', {
+          user: { profile: { settings: { theme: 'dark' } } }
+        })
+
+        expect(href).toBe('/api?user[profile][settings][theme]=dark')
+        expect(data).toEqual({})
+      })
+
+      test('handles URLs with fragments containing query-like syntax', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/docs#section?param=value', { page: 2 })
+
+        expect(href).toBe('/docs?page=2#section?param=value')
+        expect(data).toEqual({})
+      })
+
+      test('handles query strings with keys but no values', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search?flag&other=value', { new: 'param' })
+
+        expect(href).toBe('/search?flag=&other=value&new=param')
+        expect(data).toEqual({})
+      })
+
+      test('handles URLs that are only query strings', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '?existing=value', { new: 'param' })
+
+        expect(href).toBe('?existing=value&new=param')
+        expect(data).toEqual({})
+      })
+
+      test('handles URLs that are only hash fragments', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '#section', { param: 'value' })
+
+        expect(href).toBe('?param=value#section')
+        expect(data).toEqual({})
+      })
+
+      test('handles already encoded values in URLs', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search?q=hello%20world', { filter: 'café' })
+
+        expect(href).toBe('/search?q=hello%20world&filter=caf%C3%A9')
+        expect(data).toEqual({})
+      })
+
+      test('handles arrays with mixed data types', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/filter', {
+          mixed: [1, 'string', true, null]
+        })
+
+        expect(href).toBe('/filter?mixed[]=1&mixed[]=string&mixed[]=true&mixed[]=')
+        expect(data).toEqual({})
+      })
+
+      test('handles objects with numeric keys', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/api', {
+          items: { 0: 'first', 1: 'second', 10: 'tenth' }
+        })
+
+        expect(href).toBe('/api?items[0]=first&items[1]=second&items[10]=tenth')
+        expect(data).toEqual({})
+      })
+
+      test('handles URL objects as input', () => {
+        const url = new URL('https://example.com/search?existing=value')
+        const [href, data] = mergeDataIntoQueryString('get', url, { new: 'param' })
+
+        expect(href).toBe('https://example.com/search?existing=value&new=param')
+        expect(data).toEqual({})
+      })
     })
 
     test.describe('non-GET request', () => {
@@ -127,6 +213,27 @@ test.describe('url.ts', () => {
 
         expect(href).toBe('https://example.com/submit?token=abc')
         expect(data).toEqual({ token: 'xyz' })
+      })
+
+      test('preserves complex data structures unchanged', () => {
+        const complexData = {
+          user: { profile: { settings: { theme: 'dark' } } },
+          tags: ['red', 'blue'],
+          active: true,
+          count: 42
+        }
+        const [href, data] = mergeDataIntoQueryString('post', '/api/update', complexData)
+
+        expect(href).toBe('/api/update')
+        expect(data).toEqual(complexData)
+      })
+
+      test('handles URL objects as input for non-GET requests', () => {
+        const url = new URL('https://example.com/api?existing=value#section')
+        const [href, data] = mergeDataIntoQueryString('put', url, { new: 'data' })
+
+        expect(href).toBe('https://example.com/api?existing=value#section')
+        expect(data).toEqual({ new: 'data' })
       })
     })
   })
