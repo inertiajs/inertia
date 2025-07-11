@@ -861,3 +861,26 @@ test('will update href if prop is updated', async ({ page }) => {
   await button.click()
   await expect(link).toHaveAttribute('href', /\/something-else$/)
 })
+
+test.describe('path traversal', () => {
+  test('it goes one level up', async ({ page }) => {
+    await page.goto('/links/sub/sub/')
+
+    await page.getByRole('link', { name: 'Up one level' }).click()
+    await expect(page).toHaveURL('/links/sub/')
+  })
+
+  test('it goes two levels up with a new path', async ({ page }) => {
+    await page.goto('/links/sub/sub/')
+
+    await page.getByRole('link', { name: 'Up two levels and open method' }).click()
+    await expect(page).toHaveURL('/links/method')
+  })
+
+  test('it goes three levels up', async ({ page }) => {
+    await page.goto('/links/sub/sub/')
+
+    await page.getByRole('link', { name: 'Up three levels' }).click()
+    await expect(page).toHaveURL('/')
+  })
+})
