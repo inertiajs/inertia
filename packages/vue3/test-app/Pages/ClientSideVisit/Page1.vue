@@ -40,8 +40,16 @@ const replace = () => {
   router.replace({
     preserveState: true,
     props: (props) => ({ ...props, foo: 'foo from client' }),
-    onFinish: () => finished.value++,
-    onSuccess: () => success.value++,
+    onFinish: (visit) => {
+      if (visit.preserveState) {
+        finished.value++
+      }
+    },
+    onSuccess: (page) => {
+      if (page.props.foo === 'foo from client') {
+        success.value++
+      }
+    },
   })
 }
 
