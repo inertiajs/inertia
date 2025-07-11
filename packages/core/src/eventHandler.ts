@@ -90,8 +90,8 @@ class EventHandler {
           return
         }
 
-        // Cancel ongoing synchronous requests
-        router.cancel()
+        // Cancel ongoing requests
+        router.cancelAll()
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           window.requestAnimationFrame(() => {
