@@ -2,23 +2,14 @@ import { Link } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 
 export default ({ page }) => {
-	const [documentScrollTop, setDocumentScrollTop] = useState(0)
-
-	const handleScrollEvent = () => {
-		setDocumentScrollTop(document.documentElement.scrollTop)
-	}
-
 	useEffect(() => {
-		document.addEventListener('scroll', handleScrollEvent)
-		return () => document.removeEventListener('scroll', handleScrollEvent)
-	})
+		console.log('LongPage mounted!' + Date.now())
+	}, []);
 
 	return Array.from({ length: 3000 }, (_, i) => (
 		<>
-			{i === 0 && (
-				<h1 style={{ 'fontSize': '40px', }}>Page {page}</h1>
-			)}
 			<h1 style={{ 'fontSize': '40px', }}>Article Header</h1>
+			{i === 0 && (<h2 style={{ 'fontSize': '40px', }}>Page {page}</h2>)}
 			<article style={{ 'fontSize': '20px', 'maxWidth': '500px' }}>
 				<p>
 					Sunt culpa sit sunt enim aliquip. Esse ea ea quis voluptate. Enim consectetur aliqua ex ex magna cupidatat id
@@ -26,6 +17,11 @@ export default ({ page }) => {
 					elit cupidatat minim qui id non enim ad. Culpa aliquip ad Lorem sit consectetur ullamco culpa duis nisi et
 					fugiat mollit eiusmod. Laboris voluptate veniam consequat proident in nulla irure velit.
 				</p>
+				{i === 0 && (
+					<Link href={`/long-page/${parseInt(page) + 1}`} style={{ 'display': 'block', 'marginTop': '20px' }}>
+						Go to page {parseInt(page) + 1}
+					</Link>
+				)}
 				<p>
 					Sit sint laboris sunt eiusmod ipsum laborum eiusmod amet commodo exercitation in duis magna. Proident sunt
 					minim in elit qui. Id pariatur commodo fugiat excepteur in deserunt Lorem ipsum occaecat est. Excepteur sit
@@ -79,18 +75,6 @@ export default ({ page }) => {
 					irure et. Commodo qui ipsum Lorem magna consequat consequat et minim eiusmod Lorem eiusmod cupidatat
 					voluptate.
 				</p>
-
-				{i === 0 && (
-					<>
-						<div className="document-position">
-							Document scroll top position is {documentScrollTop}
-						</div>
-
-						<Link href={`/long-page/${parseInt(page) + 1}`} style={{ 'display': 'block', 'marginTop': '20px' }}>
-							Go to page {parseInt(page) + 1}
-						</Link>
-					</>
-				)}
 			</article>
 		</>
 	))
