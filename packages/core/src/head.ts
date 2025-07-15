@@ -20,13 +20,13 @@ const Renderer = {
   },
 
   isInertiaManagedElement(element: Element): boolean {
-    return element.nodeType === Node.ELEMENT_NODE && element.getAttribute('inertia') !== null
+    return element.nodeType === Node.ELEMENT_NODE && element.getAttribute('data-inertia') !== null
   },
 
   findMatchingElementIndex(element: Element, elements: Array<Element>): number {
-    const key = element.getAttribute('inertia')
+    const key = element.getAttribute('data-inertia')
     if (key !== null) {
-      return elements.findIndex((element) => element.getAttribute('inertia') === key)
+      return elements.findIndex((element) => element.getAttribute('data-inertia') === key)
     }
 
     return -1
@@ -102,7 +102,7 @@ export default function createHeadManager(
     const title = titleCallback('')
 
     const defaults: Record<string, string> = {
-      ...(title ? { title: `<title inertia="">${title}</title>` } : {}),
+      ...(title ? { title: `<title data-inertia="">${title}</title>` } : {}),
     }
 
     const elements = Object.values(states)
@@ -118,7 +118,7 @@ export default function createHeadManager(
           return carry
         }
 
-        const match = element.match(/ inertia="[^"]+"/)
+        const match = element.match(/ data-inertia="[^"]+"/)
         if (match) {
           carry[match[0]] = element
         } else {

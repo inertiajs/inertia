@@ -5,7 +5,7 @@ test('renders the title tag and children', async ({ page }) => {
 
   await page.goto('/head')
 
-  const inertiaTitle = await page.evaluate(() => document.querySelector('title[inertia]')?.textContent)
+  const inertiaTitle = await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)
 
   await expect(inertiaTitle).toBe('Test Head Component')
   await expect(page.locator('meta[name="viewport"]')).toHaveAttribute('content', 'width=device-width, initial-scale=1')

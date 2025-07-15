@@ -81,7 +81,7 @@ const Head: InertiaHead = function ({ children, title }) {
 
   function ensureNodeHasInertiaProp(node) {
     return React.cloneElement(node, {
-      inertia: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
+      ['data-inertia']: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
     })
   }
 
@@ -94,7 +94,7 @@ const Head: InertiaHead = function ({ children, title }) {
       .filter((node) => node)
       .map((node) => renderNode(node))
     if (title && !computed.find((tag) => tag.startsWith('<title'))) {
-      computed.push(`<title inertia>${title}</title>`)
+      computed.push(`<title data-inertia>${title}</title>`)
     }
     return computed
   }
