@@ -6,30 +6,23 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-24.04
 
-    strategy:
-      matrix:
-        adapter: ['react', 'vue3', 'svelte']
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.14
+          cache: pnpm
 
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.OS }}-npm-cache-${{ hashFiles('package-lock.json') }}
-          path: |
-            ~/.cache
-            node_modules
-            packages/${{ matrix.adapter }}/tests/node_modules
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Build Inertia
-        run: |
-          npm install
-          cd packages/core && npm run build
-          cd ../${{ matrix.adapter }} && npm run build
+        run: pnpm build:all
