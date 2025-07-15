@@ -63,7 +63,7 @@ class PrefetchedRequests {
         params: { ...params },
         staleTimestamp: Date.now() + stale,
         response: promise,
-        singleUse: cacheFor === 0,
+        singleUse: expires === 0,
         timestamp: Date.now(),
         inFlight: false,
       })
