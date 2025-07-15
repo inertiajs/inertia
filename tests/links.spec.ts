@@ -671,6 +671,24 @@ test('does not scroll when clicking the same fragment link', async ({ page }) =>
   await expect(page.getByText('Scroll log: []')).toBeVisible()
 })
 
+test('does not scroll to top until page is rendered', async ({ page }) => {
+  /** @see https://github.com/inertiajs/inertia/issues/2125 */
+  await page.goto('/long-page/1')
+  await expect(page.getByText('Page 1')).toBeVisible()
+
+  await scrollElementTo(
+    page,
+    page.evaluate(() => window.scrollTo(0, 1500)),
+  )
+
+  await expect(page.getByText('Document scroll top position is 1500')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Go to page 2' }).click()
+
+  await expect(page.getByText('Document scroll top position is 0')).toBeVisible()
+  await expect(page.getByText('Page 2')).toBeVisible()
+})
+
 test.describe('partial reloads', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
