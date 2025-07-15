@@ -227,7 +227,7 @@ php artisan key:generate
 Then start the playground:
 
 ```sh
-pnpm dev:playground:react
+pnpm playground:react
 ```
 
 Visit the application at [http://127.0.0.1:8000](http://127.0.0.1:8000).
@@ -235,10 +235,10 @@ Visit the application at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 Each playground has its own pnpm script:
 
 ```sh
-pnpm dev:playground:react
-pnpm dev:playground:svelte4
-pnpm dev:playground:svelte5
-pnpm dev:playground:vue
+pnpm playground:react
+pnpm playground:svelte4
+pnpm playground:svelte5
+pnpm playground:vue
 ```
 
 ## Publishing (Maintainers Only)
