@@ -2,7 +2,9 @@
 
 Thank you for your interest in contributing to Inertia.js! Your contributions help make this project better for everyone.
 
-Inertia.js is maintained as a monorepo powered by [pnpm workspaces](https://pnpm.io/workspaces). Below you’ll find an overview of the repository and how to get your development environment running smoothly.
+Inertia.js is maintained as a monorepo using [pnpm workspaces](https://pnpm.io/workspaces). Below you'll find an overview of the repository and how to get your development environment running.
+
+> **Note:** You'll need **pnpm version 10 or higher**. If you're unsure which version you have, run `pnpm -v`.
 
 ## Repository Overview
 
@@ -23,7 +25,7 @@ inertia/
 │   └── vue3/          Laravel + Vue 3
 └── tests/             End-to-end tests and test server
     ├── app/           Shared Node.js backend
-    └── *.spec.ts      Playwright test suites
+    └── *.spec.ts      Playwright test suite
 ```
 
 ### Key Components
@@ -101,7 +103,7 @@ pnpm test:vue --debug
 
 ### How the Test Setup Works
 
-All adapters share the same Node.js test server and the same Playwright test suites. The only difference is which adapter’s test app is served.
+All adapters use the same Node.js backend and Playwright test suite. The only difference is which adapter's test app is served.
 
 ```
 tests/app/server.js         Shared Node.js backend
@@ -109,7 +111,7 @@ tests/app/server.js         Shared Node.js backend
 ├── serves: svelte test app (when PACKAGE=svelte)
 └── serves: vue test app    (when PACKAGE=vue3)
 
-tests/*.spec.ts             Shared Playwright test suites
+tests/*.spec.ts             Shared Playwright test suite
 ```
 
 When running a test command, the correct adapter is selected automatically:
@@ -147,7 +149,7 @@ Each test app runs two servers:
 * A Node.js backend that automatically restarts when changed
 * A Vite development server for the frontend
 
-If you are developing a new feature or fixing a bug, this is the environment where you’ll make changes and verify your work.
+If you are developing a new feature or fixing a bug, you can use these test apps to develop and test your changes.
 
 ## Adding Tests
 

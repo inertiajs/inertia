@@ -2,7 +2,6 @@
   "name": "inertia",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.11.1",
   "scripts": {
     "build:all": "pnpm -r --filter './packages/*' build",
     "dev": "pnpm -r --parallel --filter './packages/*' dev",
