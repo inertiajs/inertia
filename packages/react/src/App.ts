@@ -5,6 +5,7 @@ import PageContext from './PageContext'
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
+let swapPromise = null
 let swapComponent: PageHandler = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
@@ -58,10 +59,19 @@ export default function App({
         page,
         key: preserveState ? current.key : Date.now(),
       }))
+
+      return new Promise((resolve) => {
+        swapPromise = resolve
+      })
     }
 
     router.on('navigate', () => headManager.forceUpdate())
   }, [])
+
+  useEffect(() => {
+    swapPromise?.()
+    swapPromise = null
+  }, [swapPromise])
 
   if (!current.component) {
     return createElement(
