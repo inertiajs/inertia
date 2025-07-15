@@ -171,7 +171,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, prefetchModes)
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: Parameters<InertiaLinkProps['onClick']>[0]) => {
         onClick(event)
 
         if (shouldIntercept(event)) {
@@ -180,9 +180,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
           router.visit(url, visitParams)
         }
       },
-    }
-
-    const prefetchHoverEvents = {
       onMouseEnter: () => {
         hoverTimeout.current = window.setTimeout(() => {
           doPrefetch()
@@ -191,6 +188,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)
       },
+    }
+
+    const prefetchHoverEvents = {
+      onMouseEnter: regularEvents.onMouseEnter,
+      onMouseLeave: regularEvents.onMouseLeave,
+      onTouchStart: regularEvents.onMouseEnter,
+      onFocus: regularEvents.onMouseEnter,
+      onBlur: regularEvents.onMouseLeave,
       onClick: regularEvents.onClick,
     }
 
