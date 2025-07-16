@@ -7,12 +7,19 @@ const method = ref<Method>('get')
 const href = ref('/dump/get')
 const data = ref({ foo: 'bar' })
 const headers = ref({ 'X-Custom-Header': 'value' })
+const prefetch = ref(false)
+const cacheFor = ref(0)
 
 const change = () => {
   method.value = 'post'
   href.value = '/dump/post'
   data.value = { foo: 'baz' }
   headers.value = { 'X-Custom-Header': 'new-value' }
+}
+
+const changePrefetch = () => {
+  prefetch.value = 'hover'
+  cacheFor.value = '5s'
 }
 </script>
 
@@ -24,5 +31,9 @@ const change = () => {
 
     <Link :method="method" :href="href" :data="data" :headers="headers">Submit</Link>
     <button @click="change">Change Link props</button>
+
+    <Link href="/dump/get" :prefetch="prefetch" :cache-for="cacheFor"> Prefetch Link </Link>
+
+    <button @click="changePrefetch">Enable Prefetch</button>
   </div>
 </template>

@@ -881,6 +881,27 @@ test.describe('reactivity', () => {
     await expect(dump.form).toEqual({ foo: 'baz' })
     await expect(dump.headers['x-custom-header']).toBe('new-value')
   })
+
+  test('will update prefetch and cacheFor when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    requests.listen(page)
+
+    const link = await page.getByRole('link', { name: 'Prefetch Link' })
+
+    await link.hover()
+    await page.waitForTimeout(100)
+    await expect(requests.requests.length).toBe(0)
+
+    await page.getByRole('button', { name: 'Enable Prefetch' }).click()
+
+    const prefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose === 'prefetch',
+    )
+
+    await link.hover()
+    await prefetchPromise
+  })
 })
 
 test.describe('path traversal', () => {
