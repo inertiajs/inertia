@@ -137,7 +137,7 @@ const Link: InertiaLink = defineComponent({
     const inFlightCount = ref(0)
     const hoverTimeout = ref(null)
 
-    const prefetchModes: LinkPrefetchOption[] = (() => {
+    const prefetchModes = computed<LinkPrefetchOption[]>(() => {
       if (props.prefetch === true) {
         return ['hover']
       }
@@ -151,15 +151,15 @@ const Link: InertiaLink = defineComponent({
       }
 
       return [props.prefetch]
-    })()
+    })
 
-    const cacheForValue = (() => {
+    const cacheForValue = computed(() => {
       if (props.cacheFor !== 0) {
         // If they've provided a value, respect it
         return props.cacheFor
       }
 
-      if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
+      if (prefetchModes.value.length === 1 && prefetchModes.value[0] === 'click') {
         // If they've only provided a prefetch mode of 'click',
         // we should only prefetch for the next request but not keep it around
         return 0
@@ -167,10 +167,10 @@ const Link: InertiaLink = defineComponent({
 
       // Otherwise, default to 30 seconds
       return 30_000
-    })()
+    })
 
     onMounted(() => {
-      if (prefetchModes.includes('mount')) {
+      if (prefetchModes.value.includes('mount')) {
         prefetch()
       }
     })
@@ -230,7 +230,7 @@ const Link: InertiaLink = defineComponent({
     }))
 
     const prefetch = () => {
-      router.prefetch(href.value, baseParams.value, { cacheFor: cacheForValue })
+      router.prefetch(href.value, baseParams.value, { cacheFor: cacheForValue.value })
     }
 
     const regularEvents = {
@@ -281,11 +281,11 @@ const Link: InertiaLink = defineComponent({
           ...(elProps.value[as.value] || {}),
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
           ...(() => {
-            if (prefetchModes.includes('hover')) {
+            if (prefetchModes.value.includes('hover')) {
               return prefetchHoverEvents
             }
 
-            if (prefetchModes.includes('click')) {
+            if (prefetchModes.value.includes('click')) {
               return prefetchClickEvents
             }
 
