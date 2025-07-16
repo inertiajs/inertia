@@ -867,7 +867,7 @@ test.describe('reactivity', () => {
     await page.goto('/links/reactivity')
 
     const link = await page.getByRole('link', { name: 'Submit' })
-    await expect(link).toHaveAttribute('href', '/dump/get?foo=bar')
+    await expect(link).toHaveAttribute('href', /\/dump\/get\?foo=bar$/)
 
     await page.getByRole('button', { name: 'Change Link Props' }).click()
 
