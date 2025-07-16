@@ -1,6 +1,5 @@
 import {
   FormDataConvertible,
-  FormDataKeys,
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
@@ -20,8 +19,10 @@ interface InertiaFormSlotProps {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  setError: (field: FormDataKeys<Record<string, FormDataConvertible>>, value: string) => void
-  clearErrors: (...fields: FormDataKeys<Record<string, FormDataConvertible>>[]) => void
+  clearErrors: (...fields: string[]) => void
+  resetAndClearErrors: (...fields: string[]) => void
+  setError(field: string, value: string): void
+  setError(errors: Record<string, string>): void
   isDirty: boolean
   reset: () => void
   submit: () => void
@@ -153,6 +154,7 @@ const Form = ({
   return createElement(
     'form',
     {
+      ...props,
       ref: formElement,
       action: typeof action === 'object' ? action.url : action,
       method: resolvedMethod,
@@ -160,7 +162,6 @@ const Form = ({
         event.preventDefault()
         submit()
       },
-      ...props,
     },
     typeof children === 'function'
       ? children({
@@ -172,6 +173,7 @@ const Form = ({
           recentlySuccessful: form.recentlySuccessful,
           setError: form.setError,
           clearErrors: form.clearErrors,
+          resetAndClearErrors: form.resetAndClearErrors,
           isDirty,
           reset: () => formElement.current?.reset(),
           submit,

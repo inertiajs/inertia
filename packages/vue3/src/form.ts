@@ -1,6 +1,5 @@
 import {
   FormDataConvertible,
-  FormDataKeys,
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
@@ -20,8 +19,10 @@ interface InertiaFormSlotProps {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  setError: (field: FormDataKeys<Record<string, FormDataConvertible>>, value: string) => void
-  clearErrors: (...fields: FormDataKeys<Record<string, FormDataConvertible>>[]) => void
+  clearErrors: (...fields: string[]) => void
+  resetAndClearErrors: (...fields: string[]) => void
+  setError(field: string, value: string): void
+  setError(errors: Record<string, string>): void
   isDirty: boolean
   reset: () => void
   submit: () => void
@@ -136,7 +137,7 @@ const Form: InertiaForm = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
-    const form = useForm({})
+    const form = useForm({} as Record<string, FormDataConvertible>)
     const formElement = ref()
     const method = computed(() =>
       typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
@@ -208,11 +209,10 @@ const Form: InertiaForm = defineComponent({
       return h(
         'form',
         {
+          ...attrs,
           ref: formElement,
           action: props.action,
           method: method.value,
-          submit,
-          ...attrs,
           onSubmit: (event) => {
             event.preventDefault()
             submit()
@@ -226,8 +226,10 @@ const Form: InertiaForm = defineComponent({
               progress: form.progress,
               wasSuccessful: form.wasSuccessful,
               recentlySuccessful: form.recentlySuccessful,
-              setError: form.setError,
-              clearErrors: form.clearErrors,
+              setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
+                form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
+              clearErrors: (...fields: string[]) => form.clearErrors(...fields),
+              resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
               isDirty: isDirty.value,
               reset: () => formElement.value.reset(),
               submit,
