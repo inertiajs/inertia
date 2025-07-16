@@ -185,6 +185,16 @@
     })
   }
 
+  const onSuccessResetValue = () => {
+    $form.post($page.url, {
+      ...callbacks({
+        onSuccess: (page) => {
+          $form.reset()
+        },
+      }),
+    })
+  }
+
   const onErrorVisit = () => {
     $form.post('/form-helper/events/errors', {
       ...callbacks({
@@ -383,6 +393,7 @@
   <button on:click|preventDefault={onSuccessProcessing} class="success-processing">onSuccess resets processing</button>
   <button on:click|preventDefault={onSuccessResetErrors} class="success-reset-errors">onSuccess resets errors</button>
   <button on:click|preventDefault={onSuccessPromiseVisit} class="success-promise">onSuccess promise</button>
+  <button on:click|preventDefault={onSuccessResetValue} class="success-reset-value">onSuccess resets value</button>
 
   <button on:click|preventDefault={onErrorVisit} class="error">onError</button>
   <button on:click|preventDefault={onErrorProgress} class="error-progress">onError progress property</button>
@@ -394,4 +405,7 @@
 
   <span class="success-status">Form was {$form.wasSuccessful ? '' : 'not '}successful</span>
   <span class="recently-status">Form was {$form.recentlySuccessful ? '' : 'not '}recently successful</span>
+
+  <input type="text" class="name-input" bind:value={$form.name} />
+  <input type="checkbox" class="remember-input" bind:checked={$form.remember} />
 </div>

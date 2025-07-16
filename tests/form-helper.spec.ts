@@ -742,6 +742,24 @@ test.describe('Form Helper', () => {
         await expect(page.locator('.success-status')).toHaveText('Form was successful')
         await expect(page.locator('.recently-status')).toHaveText('Form was not recently successful')
       })
+
+      test('resets the input value to the default value', async ({ page }) => {
+        await expect(page.locator('.name-input')).toHaveValue('foo')
+        await expect(page.locator('.remember-input')).not.toBeChecked()
+
+        await page.fill('.name-input', 'bar')
+        await page.check('.remember-input')
+
+        await expect(page.locator('.name-input')).toHaveValue('bar')
+        await expect(page.locator('.remember-input')).toBeChecked()
+
+        await clickAndWaitForResponse(page, 'onSuccess resets value', null, 'button')
+
+        await page.waitForTimeout(2020)
+
+        await expect(page.locator('.name-input')).toHaveValue('foo')
+        await expect(page.locator('.remember-input')).not.toBeChecked()
+      })
     })
 
     test.describe('onError', () => {
