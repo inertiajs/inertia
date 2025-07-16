@@ -812,6 +812,8 @@ test.describe('"as" attribute', () => {
   })
 
   test('can render custom components', async ({ page }) => {
+    test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
+
     await page.goto('/links/custom-component')
 
     await expect(page.getByRole('button', { name: 'Regular Button' })).toBeVisible()

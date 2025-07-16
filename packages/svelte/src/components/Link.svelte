@@ -7,10 +7,9 @@
     PreserveStateOption,
   } from '@inertiajs/core'
   import { inertia } from '../index'
-  import type { SvelteComponent } from 'svelte'
 
   export let href: string | { url: string; method: Method } = ''
-  export let as: keyof HTMLElementTagNameMap | typeof SvelteComponent = 'a'
+  export let as: keyof HTMLElementTagNameMap = 'a'
   export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
   export let replace: boolean = false
@@ -27,13 +26,19 @@
   $: _method = typeof href === 'object' ? href.method : method
   $: _href = typeof href === 'object' ? href.url : href
 
-  // For custom components, we always use a button wrapper
-  $: elementType = typeof as !== 'string' ? 'button' : (_method !== 'get' ? 'button' : as.toLowerCase())
-  $: elProps = elementType === 'button' ? { type: 'button' } :
-               elementType === 'a' ? { href: _href } : {}
+  $: asProp = _method !== 'get' ? 'button' : as.toLowerCase()
+  $: elProps =
+    {
+      a: { href: _href },
+      button: { type: 'button' },
+    }[asProp] || {}
+</script>
 
-  $: inertiaConfig = {
-    ...(elementType !== 'a' ? { href: _href } : {}),
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<svelte:element
+  this={asProp}
+  use:inertia={{
+    ...(asProp !== 'a' ? { href: _href } : {}),
     data,
     method: _method,
     replace,
@@ -46,16 +51,9 @@
     async,
     prefetch,
     cacheFor,
-  }
-</script>
-
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<svelte:element
-  this={elementType}
-  use:inertia={inertiaConfig}
+  }}
   {...$$restProps}
   {...elProps}
-  {...(typeof as !== 'string' ? { style: 'background: none; border: none; padding: 0; font: inherit; cursor: pointer; outline: inherit; display: inline-block;' } : {})}
   on:focus
   on:blur
   on:click
@@ -74,11 +72,5 @@
   on:success
   on:error
 >
-  {#if typeof as === 'string'}
-    <slot />
-  {:else}
-    <svelte:component this={as}>
-      <slot />
-    </svelte:component>
-  {/if}
+  <slot />
 </svelte:element>
