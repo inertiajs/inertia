@@ -4,7 +4,6 @@ import {
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
-  objectToFormData,
   PendingVisit,
   PreserveStateOption,
   Progress,
@@ -28,11 +27,7 @@ interface InertiaFormSlotProps {
   submit: () => void
 }
 
-interface InertiaFormProps {
-  data?: Record<string, FormDataConvertible>
-  action: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
+interface InertiaFormSubmitProps {
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   preserveUrl?: boolean
@@ -40,6 +35,17 @@ interface InertiaFormProps {
   only?: string[]
   except?: string[]
   reset?: string[]
+}
+
+interface InertiaFormProps {
+  action: string | { url: string; method: Method }
+  method?: Method
+  headers?: Record<string, string>
+  queryStringArrayFormat?: 'brackets' | 'indices'
+  errorBag?: string | null
+  showProgress?: boolean
+  transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  submitOptions?: InertiaFormSubmitProps
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: (visit: PendingVisit) => void
@@ -48,9 +54,6 @@ interface InertiaFormProps {
   onCancel?: () => void
   onSuccess?: () => void
   onError?: () => void
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  errorBag?: string | null
-  showProgress?: boolean
 }
 
 type InertiaForm = DefineComponent<InertiaFormProps>
@@ -60,10 +63,6 @@ type FormDataType = Record<string, FormDataConvertible>
 const Form: InertiaForm = defineComponent({
   name: 'Form',
   props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
     action: {
       type: [String, Object] as PropType<InertiaFormProps['action']>,
       required: true,
@@ -72,34 +71,6 @@ const Form: InertiaForm = defineComponent({
       type: String as PropType<Method>,
       default: 'get',
     },
-    replace: {
-      type: Boolean,
-      default: false,
-    },
-    preserveScroll: {
-      type: Boolean,
-      default: false,
-    },
-    preserveState: {
-      type: Boolean,
-      default: null,
-    },
-    preserveUrl: {
-      type: Boolean,
-      default: false,
-    },
-    only: {
-      type: Array<string>,
-      default: () => [],
-    },
-    except: {
-      type: Array<string>,
-      default: () => [],
-    },
-    reset: {
-      type: Array<string>,
-      default: () => [],
-    },
     headers: {
       type: Object,
       default: () => ({}),
@@ -107,6 +78,38 @@ const Form: InertiaForm = defineComponent({
     queryStringArrayFormat: {
       type: String as PropType<'brackets' | 'indices'>,
       default: 'brackets',
+    },
+    errorBag: {
+      type: [String, null] as PropType<InertiaFormProps['errorBag']>,
+      default: null,
+    },
+    showProgress: {
+      type: Boolean,
+      default: true,
+    },
+    transform: {
+      type: Function as PropType<(data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>>,
+      default: (data) => data,
+    },
+    submitOptions: {
+      type: Object as PropType<InertiaFormSubmitProps>,
+      default: () => ({
+        replace: false,
+        preserveScroll: false,
+        preserveState: null,
+        preserveUrl: false,
+        only: [],
+        except: [],
+        reset: [],
+      }),
+    },
+    onCancelToken: {
+      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
+      default: () => {},
+    },
+    onBefore: {
+      type: Function as PropType<() => void>,
+      default: () => {},
     },
     onStart: {
       type: Function as PropType<(visit: PendingVisit) => void>,
@@ -118,10 +121,6 @@ const Form: InertiaForm = defineComponent({
     },
     onFinish: {
       type: Function as PropType<(visit: PendingVisit) => void>,
-      default: () => {},
-    },
-    onBefore: {
-      type: Function as PropType<() => void>,
       default: () => {},
     },
     onCancel: {
@@ -136,21 +135,9 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<() => void>,
       default: () => {},
     },
-    onCancelToken: {
-      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
-      default: () => {},
-    },
-    errorBag: {
-      type: [String, null] as PropType<InertiaFormProps['errorBag']>,
-      default: null,
-    },
-    showProgress: {
-      type: Boolean,
-      default: true,
-    },
   },
   setup(props, { slots, attrs }) {
-    const form = useForm(props.data)
+    const form = useForm({})
     const formElement = ref()
     const method = computed(() =>
       typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
@@ -179,10 +166,10 @@ const Form: InertiaForm = defineComponent({
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
     const getData = (): Record<string, FormDataConvertible> => {
-      // Leverage the objectToFormData() method to merge the props.data with the form data.
-      // Then convert it back to an object because submitting a FormData instance will
-      // lead to incorrect data with nested/array values.
-      return formDataToObject(objectToFormData(props.data || {}, new FormData(formElement.value)))
+      // Convert the FormData to an object because we can't compare two FormData
+      // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+      // expects an object, and submitting a FormData instance directly causes problems with nested objects.
+      return formDataToObject(new FormData(formElement.value))
     }
 
     const submit = () => {
@@ -194,14 +181,9 @@ const Form: InertiaForm = defineComponent({
       )
 
       const params: FormOptions = {
-        replace: props.replace,
-        preserveScroll: props.preserveScroll,
-        preserveState: props.preserveState ?? method.value !== 'get',
-        preserveUrl: props.preserveUrl,
-        only: props.only,
-        except: props.except,
-        reset: props.reset,
         headers: props.headers,
+        errorBag: props.errorBag,
+        showProgress: props.showProgress,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,
         onStart: props.onStart,
@@ -210,12 +192,17 @@ const Form: InertiaForm = defineComponent({
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
-        errorBag: props.errorBag,
-        showProgress: props.showProgress,
+        replace: props.submitOptions.replace,
+        preserveScroll: props.submitOptions.preserveScroll,
+        preserveState: props.submitOptions.preserveState ?? method.value !== 'get',
+        preserveUrl: props.submitOptions.preserveUrl,
+        only: props.submitOptions.only,
+        except: props.submitOptions.except,
+        reset: props.submitOptions.reset,
       }
 
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => data).submit(method.value, action, params)
+      form.transform(() => props.transform(data)).submit(method.value, action, params)
     }
 
     return () => {

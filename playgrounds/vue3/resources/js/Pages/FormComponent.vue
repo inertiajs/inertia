@@ -29,7 +29,7 @@ const errorBag = ref('custom-bag')
     :error-bag="errorBag"
     :only="['foo']"
     :reset="['bar']"
-    :data="{ demo: 'data' }"
+    :transform="(data) => ({ ...data, demo: 'data' })"
     #default="{
       errors,
       hasErrors,

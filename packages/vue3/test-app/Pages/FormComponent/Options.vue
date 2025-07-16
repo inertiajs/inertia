@@ -71,13 +71,15 @@ const method = computed(() => {
   <Form
     :action="action"
     :method="method"
-    :only="only"
-    :except="except"
-    :reset="reset"
-    :replace="replace"
-    :preserve-scroll="preserveScroll"
-    :preserve-state="preserveState"
-    :preserve-url="preserveUrl"
+    :submit-options="{
+      only,
+      except,
+      reset,
+      replace,
+      preserveScroll,
+      preserveState,
+      preserveUrl,
+    }"
     :query-string-array-format="queryStringArrayFormat"
   >
     <h1>Form Options</h1>
