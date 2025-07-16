@@ -4,7 +4,6 @@ import {
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
-  objectToFormData,
   PendingVisit,
   PreserveStateOption,
   Progress,
@@ -28,11 +27,7 @@ interface InertiaFormSlotProps {
   submit: () => void
 }
 
-interface InertiaFormProps {
-  data?: Record<string, FormDataConvertible>
-  action: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
+interface InertiaFormSubmitProps {
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   preserveUrl?: boolean
@@ -40,6 +35,17 @@ interface InertiaFormProps {
   only?: string[]
   except?: string[]
   reset?: string[]
+}
+
+interface InertiaFormProps {
+  action: string | { url: string; method: Method }
+  method?: Method
+  headers?: Record<string, string>
+  queryStringArrayFormat?: 'brackets' | 'indices'
+  errorBag?: string | null
+  showProgress?: boolean
+  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  submitOptions?: InertiaFormSubmitProps
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => boolean | void
   onStart?: (visit: PendingVisit) => void
@@ -48,27 +54,28 @@ interface InertiaFormProps {
   onCancel?: () => void
   onSuccess?: () => void
   onError?: () => void
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  errorBag?: string | null
-  showProgress?: boolean
   children: (props: InertiaFormSlotProps) => ReactNode
 }
 
 type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const Form = ({
-  data = {},
   action,
   method = 'get',
-  replace = false,
-  preserveScroll = false,
-  preserveState,
-  preserveUrl = false,
-  only = [],
-  except = [],
-  reset = [],
   headers = {},
   queryStringArrayFormat = 'brackets',
+  errorBag = null,
+  showProgress = true,
+  transform = (data) => data,
+  submitOptions = {
+    replace: false,
+    preserveScroll: false,
+    preserveState: null,
+    preserveUrl: false,
+    only: [],
+    except: [],
+    reset: [],
+  },
   onStart = () => {},
   onProgress = () => {},
   onFinish = () => {},
@@ -77,12 +84,10 @@ const Form = ({
   onSuccess = () => {},
   onError = () => {},
   onCancelToken = () => {},
-  showProgress = true,
-  errorBag,
   children,
   ...props
 }: InertiaFormProps) => {
-  const form = useForm(data)
+  const form = useForm({})
   const formElement = useRef<HTMLFormElement>(null)
 
   const resolvedMethod = useMemo(() => {
@@ -92,7 +97,12 @@ const Form = ({
   const [isDirty, setIsDirty] = useState(false)
   const defaultValues = useRef<Record<string, FormDataConvertible>>({})
 
-  const getData = () => formDataToObject(objectToFormData(data || {}, new FormData(formElement.current)))
+  const getData = (): Record<string, FormDataConvertible> => {
+    // Convert the FormData to an object because we can't compare two FormData
+    // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+    // expects an object, and submitting a FormData instance directly causes problems with nested objects.
+    return formDataToObject(new FormData(formElement.current))
+  }
 
   const updateDirtyState = (event: Event) =>
     setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), defaultValues.current))
@@ -116,14 +126,9 @@ const Form = ({
     )
 
     const options: FormOptions = {
-      replace,
-      preserveScroll,
-      preserveState: preserveState ?? resolvedMethod !== 'get',
-      preserveUrl,
-      only,
-      except,
-      reset,
       headers,
+      errorBag,
+      showProgress,
       onCancelToken,
       onBefore,
       onStart,
@@ -132,11 +137,16 @@ const Form = ({
       onCancel,
       onSuccess,
       onError,
-      showProgress,
-      errorBag,
+      replace: submitOptions.replace,
+      preserveScroll: submitOptions.preserveScroll,
+      preserveState: submitOptions.preserveState ?? resolvedMethod !== 'get',
+      preserveUrl: submitOptions.preserveUrl,
+      only: submitOptions.only,
+      except: submitOptions.except,
+      reset: submitOptions.reset,
     }
 
-    form.transform(() => _data)
+    form.transform(() => transform(_data))
     form.submit(resolvedMethod, url, options)
   }
 

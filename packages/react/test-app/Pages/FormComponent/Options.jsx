@@ -70,13 +70,15 @@ export default () => {
     <Form
       action={action}
       method={method}
-      only={only}
-      except={except}
-      reset={reset}
-      replace={replace}
-      preserveScroll={preserveScroll}
-      preserveState={preserveState}
-      preserveUrl={preserveUrl}
+      submitOptions={{
+        only,
+        except,
+        reset,
+        replace,
+        preserveScroll,
+        preserveState,
+        preserveUrl,
+      }}
       queryStringArrayFormat={queryStringArrayFormat}
     >
       <h1>Form Options</h1>

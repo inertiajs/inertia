@@ -17,9 +17,11 @@ const FormComponent = () => {
         method="post"
         headers={customHeaders}
         errorBag={errorBag}
-        only={['foo']}
-        reset={['bar']}
-        data={{ demo: 'data' }}
+        submitOptions={{
+          only: ['foo'],
+          reset: ['bar'],
+        }}
+        transform={(data) => ({ ...data, demo: 'data' })}
         className="mt-6 max-w-2xl space-y-6"
       >
         {({
