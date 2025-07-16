@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
+declare const process: { env: { PACKAGE?: string } }
+
 test.beforeEach(async ({ page }) => {})
 
 test('visits a different page', async ({ page }) => {
@@ -810,22 +812,65 @@ test.describe('"as" attribute', () => {
       await expect(page.getByRole('button', { name: `${label} button Link` })).toBeVisible()
     })
   })
+})
+
+test.describe('custom component', () => {
+  test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
 
   test('can render custom components', async ({ page }) => {
-    test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
-
     await page.goto('/links/custom-component')
 
-    await expect(page.getByRole('button', { name: 'Regular Button' })).toBeVisible()
+    const button = await page.getByRole('button', { name: 'GET Custom Component' }).first()
+    await expect(button).toHaveCSS('background-color', 'rgb(0, 0, 255)')
+    await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(button).toHaveCSS('padding', '10px')
 
-    const customButton = await page.getByText('Custom Button')
-    await expect(customButton).toHaveCSS('background-color', 'rgb(0, 0, 255)')
-    await expect(customButton).toHaveCSS('color', 'rgb(255, 255, 255)')
-    await expect(customButton).toHaveCSS('padding', '10px')
+    await button.click()
 
-    await customButton.click()
     const dump = await shouldBeDumpPage(page, 'get')
     await expect(dump.method).toBe('get')
+  })
+
+  test('can render custom components with different methods', async ({ page }) => {
+    await page.goto('/links/custom-component')
+
+    await page.getByText('POST Custom Component').click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    await expect(dump.method).toBe('post')
+  })
+
+  test('can render custom components with data', async ({ page }) => {
+    await page.goto('/links/custom-component')
+
+    await page.getByText('Custom Component with Data').click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    await expect(dump.form).toEqual({ test: 'data' })
+  })
+
+  test('can render custom components with headers', async ({ page }) => {
+    await page.goto('/links/custom-component')
+
+    await page.getByText('Custom Component with Headers').click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.headers['x-test']).toBe('header')
+  })
+
+  test('can render custom components with event handlers', async ({ page }) => {
+    await page.goto('/links/custom-component')
+
+    await page.getByText('Custom Component with Events').click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.method).toBe('get')
+
+    // Check that events were tracked
+    const events = await page.evaluate(() => window.customComponentEvents)
+    await expect(events.length).toBe(3)
+
+    await expect(events.map(e => e.eventName)).toEqual(['onStart', 'onSuccess', 'onFinish'])
   })
 })
 
