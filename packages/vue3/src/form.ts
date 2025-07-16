@@ -44,7 +44,7 @@ interface InertiaFormProps {
   queryStringArrayFormat?: 'brackets' | 'indices'
   errorBag?: string | null
   showProgress?: boolean
-  transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   submitOptions?: InertiaFormSubmitProps
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
@@ -58,7 +58,6 @@ interface InertiaFormProps {
 
 type InertiaForm = DefineComponent<InertiaFormProps>
 type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
-type FormDataType = Record<string, FormDataConvertible>
 
 const Form: InertiaForm = defineComponent({
   name: 'Form',
@@ -89,7 +88,7 @@ const Form: InertiaForm = defineComponent({
     },
     transform: {
       type: Function as PropType<(data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>>,
-      default: (data) => data,
+      default: (data: Record<string, FormDataConvertible>) => data,
     },
     submitOptions: {
       type: Object as PropType<InertiaFormSubmitProps>,
@@ -227,8 +226,8 @@ const Form: InertiaForm = defineComponent({
               progress: form.progress,
               wasSuccessful: form.wasSuccessful,
               recentlySuccessful: form.recentlySuccessful,
-              setError: (field: FormDataKeys<FormDataType>, value: string) => form.setError(field, value),
-              clearErrors: (...fields: FormDataKeys<FormDataType>[]) => form.clearErrors(...fields),
+              setError: form.setError,
+              clearErrors: form.clearErrors,
               isDirty: isDirty.value,
               reset: () => formElement.value.reset(),
               submit,
