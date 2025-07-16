@@ -84,8 +84,8 @@ export interface ClientSideVisitOptions {
   preserveState?: VisitOptions['preserveState']
   errorBag: string | null
   onError?: (errors: Errors) => void
-  onFinish?: () => void
-  onSuccess?: () => void
+  onFinish?: (visit: ClientSideVisitOptions) => void
+  onSuccess?: (page: Page) => void
 }
 
 export type PageResolver = (name: string) => Component

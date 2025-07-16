@@ -3,11 +3,18 @@ const express = require('express')
 const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const { showServerStatus } = require('./server-status')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ extended: true }))
 const upload = multer()
+
+const adapters = ['react', 'svelte', 'vue3']
+
+if (!adapters.includes(inertia.package)) {
+  throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
+}
 
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
 app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
@@ -520,4 +527,6 @@ const adapterPorts = {
   svelte: 13717,
 }
 
-app.listen(adapterPorts[process.env.PACKAGE || 'vue3'])
+showServerStatus(inertia.package, adapterPorts[inertia.package])
+
+app.listen(adapterPorts[inertia.package])

@@ -1,20 +1,24 @@
 {
   "name": "inertia",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "playgrounds/*"
-  ],
+  "type": "module",
   "scripts": {
-    "test:react": "cd tests && PACKAGE=react npx playwright test",
-    "test:react:watch": "cd packages/react/test-app && npm run watch",
-    "test:svelte": "cd tests && PACKAGE=svelte npx playwright test",
-    "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
-    "test:vue": "cd tests && PACKAGE=vue3 npx playwright test",
-    "test:vue:watch": "cd packages/vue3/test-app && npm run watch",
-    "build:all": "cd packages/core && npm run build && cd ../react && npm run build && cd ../vue3 && npm run build && cd ../svelte && npm run build"
+    "build:all": "pnpm -r --filter './packages/*' build",
+    "dev": "pnpm -r --parallel --filter './packages/*' dev",
+    "dev:test-app": "pnpx concurrently -c \"#93c5fd,#c4b5fd,#fb7185\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
+    "dev:test-app:react": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:svelte": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:vue": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
+    "test:react": "PACKAGE=react playwright test",
+    "test:svelte": "PACKAGE=svelte playwright test",
+    "test:vue": "PACKAGE=vue3 playwright test",
+    "playground:react": "cd playgrounds/react && composer run dev",
+    "playground:svelte4": "cd playgrounds/svelte4 && composer run dev",
+    "playground:svelte5": "cd playgrounds/svelte5 && composer run dev",
+    "playground:vue": "cd playgrounds/vue3 && composer run dev"
   },
   "dependencies": {
+    "@playwright/test": ">=1.51.0 <1.53.0",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-svelte": "^3.2.3",

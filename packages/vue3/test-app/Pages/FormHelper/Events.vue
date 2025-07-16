@@ -187,6 +187,16 @@ const onSuccessPromiseVisit = () => {
   })
 }
 
+const onSuccessResetValue = () => {
+  form.post(page.url, {
+    ...callbacks({
+      onSuccess: (page) => {
+        form.reset()
+      },
+    }),
+  })
+}
+
 const onErrorVisit = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
@@ -386,6 +396,7 @@ const progressNoFiles = () => {
     <button @click.prevent="onSuccessProcessing" class="success-processing">onSuccess resets processing</button>
     <button @click.prevent="onSuccessResetErrors" class="success-reset-errors">onSuccess resets errors</button>
     <button @click.prevent="onSuccessPromiseVisit" class="success-promise">onSuccess promise</button>
+    <button @click.prevent="onSuccessResetValue" class="success-reset-value">onSuccess resets value</button>
 
     <button @click.prevent="onErrorVisit" class="error">onError</button>
     <button @click.prevent="onErrorProgress" class="error-progress">onError progress property</button>
@@ -397,5 +408,8 @@ const progressNoFiles = () => {
 
     <span class="success-status">Form was {{ form.wasSuccessful ? '' : 'not ' }}successful</span>
     <span class="recently-status">Form was {{ form.recentlySuccessful ? '' : 'not ' }}recently successful</span>
+
+    <input type="text" class="name-input" v-model="form.name" />
+    <input type="checkbox" class="remember-input" v-model="form.remember" />
   </div>
 </template>

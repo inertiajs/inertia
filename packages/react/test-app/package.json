@@ -1,14 +1,14 @@
 {
   "scripts": {
-    "server:run": "vite build .",
-    "watch": "vite build . --watch"
+    "build": "vite build .",
+    "dev": "vite build . --watch"
   },
   "devDependencies": {
     "vite": "^6.3.0"
   },
   "dependencies": {
-    "@inertiajs/core": "file:../../core",
-    "@inertiajs/react": "file:..",
+    "@inertiajs/core": "workspace:*",
+    "@inertiajs/react": "workspace:*",
     "@vitejs/plugin-react": "^4.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

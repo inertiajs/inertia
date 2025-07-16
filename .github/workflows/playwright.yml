@@ -7,50 +7,37 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        adapter: ['vue3', 'react', 'svelte']
-    env:
-        PACKAGE: ${{ matrix.adapter }}
+        adapter: ["vue", "react", "svelte"]
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 22.14
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
 
-    - name: Build Inertia
-      run: |
-        npm install
-        cd packages/core
-        npm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+          cache: pnpm
 
-    - name: Build Adapter
-      run: |
-        cd packages/${{ matrix.adapter }}
-        npm run build
+      - name: Install dependencies
+        run: pnpm install
 
-    - name: Install Test Dependencies
-      run: |
-        cd packages/${{ matrix.adapter }}/test-app
-        npm install
+      - name: Build Inertia
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
 
-    - name: Local-link @inertiajs/core
-      run: cd packages/core && npm link
+      - name: Install Playwright Browsers
+        run: pnpm playwright install chromium
 
-    - name: Local-link @inertiajs/${{ matrix.adapter }}
-      run: cd packages/${{ matrix.adapter }} && npm link
+      - name: Run Playwright Tests
+        run: pnpm test:${{ matrix.adapter }}
 
-    - name: Install Playwright Browsers
-      run:  cd packages/${{ matrix.adapter }} && npx playwright install --with-deps
-
-    - name: Install Playwright Test Dependencies
-      run:  cd tests/app && npm install
-
-    - name: Run Playwright Tests
-      run:  cd tests && npx playwright test
-
-    - name: Upload failure screenshots
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-failure-screenshots-${{ matrix.adapter }}
-        path: test-results
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots-${{ matrix.adapter }}
+          path: test-results
