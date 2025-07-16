@@ -810,6 +810,21 @@ test.describe('"as" attribute', () => {
       await expect(page.getByRole('button', { name: `${label} button Link` })).toBeVisible()
     })
   })
+
+  test('can render custom components', async ({ page }) => {
+    await page.goto('/links/custom-component')
+
+    await expect(page.getByRole('button', { name: 'Regular Button' })).toBeVisible()
+
+    const customButton = await page.getByText('Custom Button')
+    await expect(customButton).toHaveCSS('background-color', 'rgb(0, 0, 255)')
+    await expect(customButton).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(customButton).toHaveCSS('padding', '10px')
+
+    await customButton.click()
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.method).toBe('get')
+  })
 })
 
 test.describe('data-loading attribute', () => {
