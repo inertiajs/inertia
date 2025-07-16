@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "2.0.11",
+  "version": "2.0.14",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -42,10 +42,10 @@
     }
   },
   "scripts": {
-    "watch": "./build.js --watch",
+    "dev": "./build.js --watch",
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
     "clean": "rm -rf types && rm -rf dist",
-    "prepack": "pnpm build"
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^22.5.3",

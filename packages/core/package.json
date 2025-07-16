@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "2.0.11",
+  "version": "2.0.14",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -44,10 +44,10 @@
     }
   },
   "scripts": {
-    "watch": "./build.js --watch",
+    "dev": "./build.js --watch",
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly",
     "clean": "rm -rf types && rm -rf dist",
-    "prepack": "pnpm build"
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "axios": "^1.8.2",

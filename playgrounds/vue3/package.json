@@ -7,18 +7,16 @@
   },
   "devDependencies": {
     "@inertiajs/vue3": "workspace:*",
-    "@tailwindcss/vite": "^4.1.8",
     "@vitejs/plugin-vue": "^5.0.5",
-    "@volar/vue-typescript": "^1.0.22",
     "@vue/server-renderer": "^3.3.4",
     "axios": "^1.8.2",
     "laravel-vite-plugin": "^1.2.0",
     "lodash": "^4.17.19",
     "tailwindcss": "^4.1.8",
     "typescript": "^5.5.4",
-    "vite": "^5.4.19",
+    "vite": "^6.3.0",
     "vue": "^3.3.4",
-    "vue-tsc": "^2.0.0"
+    "vue-tsc": "^2.2.8"
   },
   "type": "module"
 }

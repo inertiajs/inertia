@@ -1,7 +1,16 @@
-import { createHeadManager, router } from '@inertiajs/core'
+import { createHeadManager, PageHandler, router } from '@inertiajs/core'
 import { createElement, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+
+let currentIsInitialPage = true
+let routerIsInitialized = false
+let swapComponent: PageHandler = async () => {
+  // Dummy function so we can init the router outside of the useEffect hook. This is
+  // needed so `router.reload()` works right away (on mount) in any of the user's
+  // components. We swap in the real function in the useEffect hook below.
+  currentIsInitialPage = false
+}
 
 export default function App({
   children,
@@ -25,18 +34,31 @@ export default function App({
     )
   }, [])
 
-  useEffect(() => {
+  if (!routerIsInitialized) {
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async ({ component, page, preserveState }) => {
-        setCurrent((current) => ({
-          component,
-          page,
-          key: preserveState ? current.key : Date.now(),
-        }))
-      },
+      swapComponent: async (args) => swapComponent(args),
     })
+
+    routerIsInitialized = true
+  }
+
+  useEffect(() => {
+    swapComponent = async ({ component, page, preserveState }) => {
+      if (currentIsInitialPage) {
+        // We block setting the current page on the initial page to
+        // prevent the initial page from being re-rendered again.
+        currentIsInitialPage = false
+        return
+      }
+
+      setCurrent((current) => ({
+        component,
+        page,
+        key: preserveState ? current.key : Date.now(),
+      }))
+    }
 
     router.on('navigate', () => headManager.forceUpdate())
   }, [])

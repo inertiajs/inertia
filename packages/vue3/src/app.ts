@@ -136,6 +136,7 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     deferredProps: computed(() => page.value?.deferredProps),
     mergeProps: computed(() => page.value?.mergeProps),
     deepMergeProps: computed(() => page.value?.deepMergeProps),
+    matchPropsOn: computed(() => page.value?.matchPropsOn),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
   })

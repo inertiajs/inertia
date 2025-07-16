@@ -3,11 +3,18 @@ const express = require('express')
 const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const { showServerStatus } = require('./server-status')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ extended: true }))
 const upload = multer()
+
+const adapters = ['react', 'svelte', 'vue3']
+
+if (!adapters.includes(inertia.package)) {
+  throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
+}
 
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
 app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
@@ -42,6 +49,14 @@ app.get('/', (req, res) =>
   }),
 )
 
+app.get('/article', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Article',
+    props: {},
+    encryptHistory: true,
+  }),
+)
+
 app.get('/links/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Links/PartialReloads',
@@ -73,6 +88,16 @@ app.get('/links/headers/version', (req, res) =>
 )
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
 app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
+app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
+app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
+
+app.get('/links/cancel-sync-request/:page', (req, res) => {
+  const page = req.params.page
+  setTimeout(
+    () => inertia.render(req, res, { component: 'Links/CancelSyncRequest', props: { page } }),
+    page == 3 ? 500 : 0,
+  )
+})
 
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
@@ -328,6 +353,52 @@ app.get('/deep-merge-props', (req, res) => {
   })
 })
 
+app.get('/match-props-on-key', (req, res) => {
+  const labels = ['first', 'second', 'third', 'fourth', 'fifth']
+
+  const perPage = 5
+  const page = parseInt(req.query.page ?? -1, 10) + 1
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: index + 1,
+    name: `User ${index + 1}`,
+  }))
+
+  const companies = new Array(perPage).fill(1).map((_, index) => ({
+    otherId: index + 1,
+    name: `Company ${index + 1}`,
+  }))
+
+  const teams = new Array(perPage).fill(1).map((_, index) => ({
+    uuid: (Math.random() + 1).toString(36).substring(7),
+    name: `Team ${perPage * page + index + 1}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'MatchPropsOnKey',
+    props: {
+      bar: new Array(perPage).fill(1),
+      baz: new Array(perPage).fill(1),
+      foo: {
+        data: users,
+        companies,
+        teams,
+        page,
+        per_page: 5,
+        meta: {
+          label: labels[page],
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : {
+          deepMergeProps: ['foo', 'baz'],
+          matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+        }),
+  })
+})
+
 app.get('/deferred-props/page-1', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
@@ -456,8 +527,6 @@ const adapterPorts = {
   svelte: 13717,
 }
 
-console.log(
-  `Serving test app on port ${adapterPorts[inertia.package]}. Visit http://localhost:${adapterPorts[inertia.package]}/`,
-)
+showServerStatus(inertia.package, adapterPorts[inertia.package])
 
 app.listen(adapterPorts[inertia.package])

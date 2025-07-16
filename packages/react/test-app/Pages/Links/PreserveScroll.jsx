@@ -49,6 +49,14 @@ const PreserveScroll = ({ foo = 'default' }) => {
       <a href="/non-inertia" className="off-site">
         Off-site link
       </a>
+
+      <Link
+        href="/article"
+        data-testid="article"
+        className="article"
+      >
+        Article
+      </Link>
     </div>
   )
 }

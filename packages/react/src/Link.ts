@@ -1,4 +1,5 @@
 import {
+  CacheForOption,
   FormDataConvertible,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -35,7 +36,7 @@ interface BaseInertiaLinkProps {
   onError?: () => void
   queryStringArrayFormat?: 'indices' | 'brackets'
   async?: boolean
-  cacheFor?: number | string
+  cacheFor?: CacheForOption | CacheForOption[]
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
 }
 

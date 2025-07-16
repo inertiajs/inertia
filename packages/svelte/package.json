@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "2.0.11",
+  "version": "2.0.14",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -17,10 +17,10 @@
     "url": "https://github.com/inertiajs/inertia/issues"
   },
   "scripts": {
-    "watch": "pnpm package --watch",
+    "dev": "pnpm package --watch",
     "build": "pnpm package && publint",
     "package": "svelte-kit sync && svelte-package --input src",
-    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
@@ -44,8 +44,8 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "html-escape": "^2.0.0",
-    "es-toolkit": "^1.33.0"
+    "es-toolkit": "^1.33.0",
+    "html-escape": "^2.0.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
@@ -55,7 +55,7 @@
     "@types/html-escape": "^2.0.2",
     "axios": "^1.8.2",
     "publint": "^0.2.10",
-    "svelte": "^4.2.16",
+    "svelte": "^4.2.19",
     "svelte-check": "^4.0.0",
     "tslib": "^2.7.0",
     "typescript": "^5.5.4",

@@ -2,7 +2,10 @@ blank_issues_enabled: false
 contact_links:
   - name: Feature Request
     url: https://github.com/inertiajs/inertia/discussions/new?category=ideas
-    about: 'Suggest ideas in our discussion forums.'
-  - name: Help
+    about: 'For ideas or feature requests, start a new discussion'
+  - name: Support Questions & Other
     url: https://github.com/inertiajs/inertia/discussions/new?category=help
-    about: 'Ask questions and get help in our discussion forums.'
+    about: 'This repository is only for reporting bugs. If you have a question or need help using the library, click:'
+  - name: Documentation issue
+    url: https://github.com/inertiajs/inertiajs.com
+    about: For documentation issues, open a pull request at the inertiajs/inertiajs.com repository

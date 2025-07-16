@@ -4,6 +4,12 @@ const adapter = process.env.PACKAGE || 'vue3'
 const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
 const url = `http://localhost:${adapterPorts[adapter]}`
 
+const adapters = ['react', 'svelte', 'vue3']
+
+if (!adapters.includes(adapter)) {
+  throw new Error(`Invalid adapter package "${adapter}". Expected one of: ${adapters.join(', ')}.`)
+}
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -33,6 +39,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Collect screenshots on failure */
+    screenshot: 'only-on-failure',
   },
 
   timeout: 5 * 1000,
@@ -77,7 +86,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `pnpm -r --filter './packages/${adapter}/test-app' build && node tests/app/server.js`,
+    command: `pnpm -r --filter './packages/${adapter}/test-app' build && cd tests/app && PACKAGE=${adapter} pnpm serve`,
     url,
     reuseExistingServer: !process.env.CI,
   },

@@ -5,5 +5,4 @@ packages:
   - tests/app
 
 onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
   - esbuild

@@ -7,18 +7,20 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        adapter: ['vue', 'react', 'svelte']
+        adapter: ["vue", "react", "svelte"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+        with:
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 21.7.3
+          node-version: 22.14
           cache: pnpm
 
       - name: Install dependencies
@@ -32,3 +34,10 @@ jobs:
 
       - name: Run Playwright Tests
         run: pnpm test:${{ matrix.adapter }}
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots-${{ matrix.adapter }}
+          path: test-results
