@@ -755,8 +755,6 @@ test.describe('Form Helper', () => {
 
         await clickAndWaitForResponse(page, 'onSuccess resets value', null, 'button')
 
-        await page.waitForTimeout(2020)
-
         await expect(page.locator('.name-input')).toHaveValue('foo')
         await expect(page.locator('.remember-input')).not.toBeChecked()
       })
