@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
-import { defineComponent, h, ref, onMounted } from 'vue'
-
-window.customComponentEvents = []
+import { defineComponent, h, ref } from 'vue'
 
 const CustomButton = defineComponent({
   name: 'CustomButton',
@@ -21,13 +19,23 @@ const CustomButton = defineComponent({
   },
 })
 
+defineProps({
+  page: Number,
+})
+
+window.customComponentEvents = []
+
 const trackEvent = (eventName: string, data: any = null) => {
   window.customComponentEvents.push({ eventName, data, timestamp: Date.now() })
 }
+
+const state = ref(crypto.randomUUID())
 </script>
 
 <template>
   <div>
+    <h1>Link Custom Component - Page {{ page }}</h1>
+    <p id="state">State: {{ state }}</p>
     <Link :as="CustomButton" href="/dump/get" class="get"> GET Custom Component </Link>
     <Link :as="CustomButton" method="post" href="/dump/post" class="post"> POST Custom Component </Link>
     <Link :as="CustomButton" method="post" href="/dump/post" :data="{ test: 'data' }" class="data">
@@ -36,16 +44,18 @@ const trackEvent = (eventName: string, data: any = null) => {
     <Link :as="CustomButton" href="/dump/get" :headers="{ 'X-Test': 'header' }" class="headers">
       Custom Component with Headers
     </Link>
-    <Link :as="CustomButton" href="/dump/get" :preserveState="true" class="preserve">
+    <Link :as="CustomButton" href="/links/custom-component/2" :preserve-state="true" class="preserve">
       Custom Component with Preserve State
     </Link>
-    <Link :as="CustomButton" href="/dump/get" :replace="true" class="replace">Custom Component with Replace</Link>
+    <Link :as="CustomButton" href="/links/custom-component/3" :replace="true" class="replace"
+      >Custom Component with Replace</Link
+    >
     <Link
       :as="CustomButton"
       href="/dump/get"
-      :onStart="(event) => trackEvent('onStart', event)"
-      :onFinish="(event) => trackEvent('onFinish', event)"
-      :onSuccess="(page) => trackEvent('onSuccess', page)"
+      @start="(event) => trackEvent('onStart', event)"
+      @finish="(event) => trackEvent('onFinish', event)"
+      @success="(page) => trackEvent('onSuccess', page)"
       class="events"
     >
       Custom Component with Events

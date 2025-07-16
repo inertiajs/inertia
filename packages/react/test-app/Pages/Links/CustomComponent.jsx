@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react'
+import { useRef } from 'react'
 
 window.customComponentEvents = []
 
@@ -15,13 +16,17 @@ const CustomButton = ({ children, ...props }) => (
   </button>
 )
 
-export default () => {
+export default ({ page }) => {
+  const state = useRef(crypto.randomUUID())
+
   const trackEvent = (eventName, data = null) => {
     window.customComponentEvents.push({ eventName, data, timestamp: Date.now() })
   }
 
   return (
     <div>
+      <h1>Link Custom Component - Page {page}</h1>
+      <p id="state">State: {state.current}</p>
       <Link as={CustomButton} href="/dump/get" className="get">
         GET Custom Component
       </Link>
@@ -34,10 +39,10 @@ export default () => {
       <Link as={CustomButton} href="/dump/get" headers={{ 'X-Test': 'header' }} className="headers">
         Custom Component with Headers
       </Link>
-      <Link as={CustomButton} href="/dump/get" preserveState={true} className="preserve">
+      <Link as={CustomButton} href="/links/custom-component/2" preserveState={true} className="preserve">
         Custom Component with Preserve State
       </Link>
-      <Link as={CustomButton} href="/dump/get" replace={true} className="replace">
+      <Link as={CustomButton} href="/links/custom-component/3" replace={true} className="replace">
         Custom Component with Replace
       </Link>
       <Link
