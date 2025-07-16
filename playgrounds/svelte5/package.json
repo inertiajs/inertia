@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@inertiajs/svelte": "workspace:*",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tailwindcss/vite": "^4.1.8",
     "@tsconfig/svelte": "^5.0.4",
     "axios": "^1.8.2",
