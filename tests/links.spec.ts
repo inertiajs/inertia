@@ -853,13 +853,34 @@ test('cancels pending request when navigating back', async ({ page }) => {
   await expect(page).toHaveURL('/links/cancel-sync-request/1')
 })
 
-test('will update href if prop is updated', async ({ page }) => {
-  await page.goto('/links/prop-update')
-  const link = await page.getByRole('link', { name: 'The Link' })
-  const button = await page.getByRole('button', { name: 'Change URL' })
-  await expect(link).toHaveAttribute('href', /\/sleep$/)
-  await button.click()
-  await expect(link).toHaveAttribute('href', /\/something-else$/)
+test.describe('reactivity', () => {
+  test('will update href if prop is updated', async ({ page }) => {
+    await page.goto('/links/prop-update')
+    const link = await page.getByRole('link', { name: 'The Link' })
+    const button = await page.getByRole('button', { name: 'Change URL' })
+    await expect(link).toHaveAttribute('href', /\/sleep$/)
+    await button.click()
+    await expect(link).toHaveAttribute('href', /\/something-else$/)
+  })
+
+  test('will update the method, href, data, and headers when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    const link = await page.getByRole('link', { name: 'Submit' })
+    await expect(link).toHaveAttribute('href', '/dump/get?foo=bar')
+
+    await page.getByRole('button', { name: 'Change Link Props' }).click()
+
+    await expect(link).not.toBeVisible()
+    const button = await page.getByRole('button', { name: 'Submit' })
+    await button.click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toBe('post')
+    await expect(dump.form).toEqual({ foo: 'baz' })
+    await expect(dump.headers['x-custom-header']).toBe('new-value')
+  })
 })
 
 test.describe('path traversal', () => {

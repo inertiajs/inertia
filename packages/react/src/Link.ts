@@ -78,13 +78,15 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(null)
 
-    const _as = useMemo(() => {
-      return as.toLowerCase()
-    }, [as])
-
     const _method = useMemo(() => {
       return typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
     }, [href, method])
+
+    const _as = useMemo(() => {
+      as = as.toLowerCase()
+
+      return _method !== 'get' ? 'button' : as
+    }, [as, _method])
 
     const mergeDataArray = useMemo(
       () =>
