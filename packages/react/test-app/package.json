@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "vite build .",
-    "dev": "nodemon --watch . --ext js,jsx,ts,tsx,html,css,scss --ignore dist/ --exec 'vite build .'"
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../react/dist --ext js,jsx,ts,tsx,html,css,scss --ignore dist/ --exec 'vite build .'"
   },
   "devDependencies": {
     "vite": "^6.3.0",
