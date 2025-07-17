@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Method } from '@inertiajs/core'
+import { CacheForOption, LinkPrefetchOption, Method } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
@@ -7,8 +7,8 @@ const method = ref<Method>('get')
 const href = ref('/dump/get')
 const data = ref({ foo: 'bar' })
 const headers = ref({ 'X-Custom-Header': 'value' })
-const prefetch = ref(false)
-const cacheFor = ref(0)
+const prefetch = ref<LinkPrefetchOption>(false)
+const cacheFor = ref<CacheForOption>(0)
 
 const change = () => {
   method.value = 'post'
@@ -17,9 +17,9 @@ const change = () => {
   headers.value = { 'X-Custom-Header': 'new-value' }
 }
 
-const changePrefetch = () => {
+const enablePrefetch = () => {
   prefetch.value = 'hover'
-  cacheFor.value = '5s'
+  cacheFor.value = '1s'
 }
 </script>
 
@@ -34,6 +34,6 @@ const changePrefetch = () => {
 
     <Link href="/dump/get" :prefetch="prefetch" :cache-for="cacheFor"> Prefetch Link </Link>
 
-    <button @click="changePrefetch">Enable Prefetch</button>
+    <button @click="enablePrefetch">Enable Prefetch (1s cache)</button>
   </div>
 </template>
