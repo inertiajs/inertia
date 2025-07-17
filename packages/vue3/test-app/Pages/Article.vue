@@ -1,5 +1,19 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
+import { onMounted, onUnmounted, ref } from 'vue'
+
+const enableSmoothScroll = () => {
+  document.documentElement.style.scrollBehavior = 'smooth'
+}
+
+const scrollLog = ref([])
+
+const handleScrollEvent = () => {
+  scrollLog.value.push(document.documentElement.scrollTop)
+}
+
+onMounted(() => document.addEventListener('scroll', handleScrollEvent))
+onUnmounted(() => document.removeEventListener('scroll', handleScrollEvent))
 </script>
 
 <template>
@@ -96,13 +110,53 @@ import { Link } from '@inertiajs/vue3'
       Lorem magna consequat consequat et minim eiusmod Lorem eiusmod
       cupidatat voluptate.
     </p>
+
+    <h2 id="far-down">Far down</h2>
+
+    <p>
+      Ex eiusmod id est laborum sunt ex ea aute adipisicing ad magna
+      deserunt duis. Nostrud velit dolore id commodo quis enim fugiat.
+      Sint non quis consectetur voluptate aliqua dolore nulla. Irure sit
+      reprehenderit sint laboris non elit. Duis minim nisi esse dolor. Sit
+      ex in consequat non occaecat commodo irure et. Commodo qui ipsum
+      Lorem magna consequat consequat et minim eiusmod Lorem eiusmod
+      cupidatat voluptate.
+    </p>
   </article>
 
-  <Link
+  <div class="document-position">
+    Scroll log: {{ JSON.stringify(scrollLog) }}
+  </div>
+
+  <Link 
     id="home"
     data-testid="home"
     href="/"
   >
     Home
   </Link>
+
+  <Link
+    id="article-far-down"
+    data-testid="article-far-down"
+    href="/article#far-down"
+  > 
+    Article Far Down
+  </Link>
+
+  <button 
+    id="enable-smooth-scroll"
+    data-testid="enable-smooth-scroll"
+    @click="enableSmoothScroll"
+  >
+    Enable Smooth Scroll
+  </button>
+
+  <button 
+    id="clear-scroll-log" 
+    data-testid="clear-scroll-log" 
+    @click="scrollLog = []"
+  >
+    Clear Scroll Log
+  </button>
 </template>

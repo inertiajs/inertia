@@ -327,18 +327,33 @@ export class Router {
 
     const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
 
-    currentPage.set(
-      {
-        ...current,
-        ...params,
-        props,
-      },
-      {
-        replace,
-        preserveScroll: params.preserveScroll,
-        preserveState: params.preserveState,
-      },
-    )
+    const { onError, onFinish, onSuccess, ...pageParams } = params
+
+    currentPage
+      .set(
+        {
+          ...current,
+          ...pageParams,
+          props,
+        },
+        {
+          replace,
+          preserveScroll: params.preserveScroll,
+          preserveState: params.preserveState,
+        },
+      )
+      .then(() => {
+        const errors = currentPage.get().props.errors || {}
+
+        if (Object.keys(errors).length === 0) {
+          return onSuccess?.(currentPage.get())
+        }
+
+        const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
+
+        return onError?.(scopedErrors)
+      })
+      .finally(() => onFinish?.(params))
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
