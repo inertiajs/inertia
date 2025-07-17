@@ -78,46 +78,65 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(null)
 
-    as = as.toLowerCase()
-    method = typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
-    const [_href, _data] = mergeDataIntoQueryString(
-      method,
-      typeof href === 'object' ? href.url : href || '',
-      data,
-      queryStringArrayFormat,
+    const _method = useMemo(() => {
+      return typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
+    }, [href, method])
+
+    const _as = useMemo(() => {
+      as = as.toLowerCase()
+
+      return _method !== 'get' ? 'button' : as
+    }, [as, _method])
+
+    const mergeDataArray = useMemo(
+      () =>
+        mergeDataIntoQueryString(
+          _method,
+          typeof href === 'object' ? href.url : href || '',
+          data,
+          queryStringArrayFormat,
+        ),
+      [href, _method, data, queryStringArrayFormat],
     )
-    const url = _href
-    data = _data
 
-    const baseParams = {
-      data,
-      method,
-      preserveScroll,
-      preserveState: preserveState ?? method !== 'get',
-      replace,
-      only,
-      except,
-      headers,
-      async,
-    }
+    const url = useMemo(() => mergeDataArray[0], [mergeDataArray])
+    const _data = useMemo(() => mergeDataArray[1], [mergeDataArray])
 
-    const visitParams = {
-      ...baseParams,
-      onCancelToken,
-      onBefore,
-      onStart(event) {
-        setInFlightCount((count) => count + 1)
-        onStart(event)
-      },
-      onProgress,
-      onFinish(event) {
-        setInFlightCount((count) => count - 1)
-        onFinish(event)
-      },
-      onCancel,
-      onSuccess,
-      onError,
-    }
+    const baseParams = useMemo(
+      () => ({
+        data: _data,
+        method: _method,
+        preserveScroll,
+        preserveState: preserveState ?? _method !== 'get',
+        replace,
+        only,
+        except,
+        headers,
+        async,
+      }),
+      [_data, _method, preserveScroll, preserveState, replace, only, except, headers, async],
+    )
+
+    const visitParams = useMemo(
+      () => ({
+        ...baseParams,
+        onCancelToken,
+        onBefore,
+        onStart(event) {
+          setInFlightCount((count) => count + 1)
+          onStart(event)
+        },
+        onProgress,
+        onFinish(event) {
+          setInFlightCount((count) => count - 1)
+          onFinish(event)
+        },
+        onCancel,
+        onSuccess,
+        onError,
+      }),
+      [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
+    )
 
     const doPrefetch = () => {
       router.prefetch(url, baseParams, { cacheFor: cacheForValue })
@@ -215,20 +234,19 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
     }
 
-    if (method !== 'get') {
-      as = 'button'
-    }
-
-    const elProps = {
-      a: { href: url },
-      button: { type: 'button' },
-    }
+    const elProps = useMemo(
+      () => ({
+        a: { href: url },
+        button: { type: 'button' },
+      }),
+      [url],
+    )
 
     return createElement(
-      as,
+      _as,
       {
         ...props,
-        ...(elProps[as] || {}),
+        ...(elProps[_as] || {}),
         ref,
         ...(() => {
           if (prefetchModes.includes('hover')) {

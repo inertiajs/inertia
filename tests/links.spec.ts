@@ -853,13 +853,68 @@ test('cancels pending request when navigating back', async ({ page }) => {
   await expect(page).toHaveURL('/links/cancel-sync-request/1')
 })
 
-test('will update href if prop is updated', async ({ page }) => {
-  await page.goto('/links/prop-update')
-  const link = await page.getByRole('link', { name: 'The Link' })
-  const button = await page.getByRole('button', { name: 'Change URL' })
-  await expect(link).toHaveAttribute('href', /\/sleep$/)
-  await button.click()
-  await expect(link).toHaveAttribute('href', /\/something-else$/)
+test.describe('reactivity', () => {
+  test('will update href if prop is updated', async ({ page }) => {
+    await page.goto('/links/prop-update')
+    const link = await page.getByRole('link', { name: 'The Link' })
+    const button = await page.getByRole('button', { name: 'Change URL' })
+    await expect(link).toHaveAttribute('href', /\/sleep$/)
+    await button.click()
+    await expect(link).toHaveAttribute('href', /\/something-else$/)
+  })
+
+  test('will update the method, href, data, and headers when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    const link = await page.getByRole('link', { name: 'Submit' })
+    await expect(link).toHaveAttribute('href', /\/dump\/get\?foo=bar$/)
+
+    await page.getByRole('button', { name: 'Change Link Props' }).click()
+
+    await expect(link).not.toBeVisible()
+    const button = await page.getByRole('button', { name: 'Submit' })
+    await button.click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toBe('post')
+    await expect(dump.form).toEqual({ foo: 'baz' })
+    await expect(dump.headers['x-custom-header']).toBe('new-value')
+  })
+
+  test('will update prefetch and cacheFor when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const link = await page.getByRole('link', { name: 'Prefetch Link' })
+    const prefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose === 'prefetch',
+    )
+
+    // Wait for the page to be prefetched
+    await link.hover()
+    await prefetchPromise
+
+    // Visit the page and check that it was prefetched
+    requests.listen(page)
+    await link.click()
+    await expect(page).toHaveURL('dump/get')
+    await expect(requests.requests.length).toBe(0)
+
+    // Wait for cache to expire
+    await page.waitForTimeout(1200)
+
+    // Click the link again without hovering first
+    await page.goBack()
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const nonPrefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose !== 'prefetch',
+    )
+    await link.click()
+    await nonPrefetchPromise
+
+    await expect(requests.requests.length).toBe(1)
+  })
 })
 
 test.describe('path traversal', () => {

@@ -90,7 +90,7 @@ app.get('/links/data-loading', (req, res) => inertia.render(req, res, { componen
 app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
 app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
-
+app.get('/links/reactivity', (req, res) => inertia.render(req, res, { component: 'Links/Reactivity' }))
 app.get('/links/cancel-sync-request/:page', (req, res) => {
   const page = req.params.page
   setTimeout(
