@@ -4,7 +4,7 @@ Inertia.js lets you quickly build modern single-page React, Vue and Svelte apps 
 
 ## Contributing
 
-Thank you for considering contributing to Inertia! You can read the contribution guide [here](.github/CONTRIBUTING.md).
+Thank you for considering contributing to Inertia! You can read the contribution guide [here](CONTRIBUTING.md).
 
 ## Code of Conduct
 

@@ -12,6 +12,7 @@ import { Scroll } from './scroll'
 import {
   ActiveVisit,
   ClientSideVisitOptions,
+  Component,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
@@ -279,6 +280,10 @@ export class Router {
     return history.decrypt()
   }
 
+  public resolveComponent(component: string): Promise<Component> {
+    return currentPage.resolve(component)
+  }
+
   public replace(params: ClientSideVisitOptions): void {
     this.clientVisit(params, { replace: true })
   }
@@ -292,18 +297,33 @@ export class Router {
 
     const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
 
-    currentPage.set(
-      {
-        ...current,
-        ...params,
-        props,
-      },
-      {
-        replace,
-        preserveScroll: params.preserveScroll,
-        preserveState: params.preserveState,
-      },
-    )
+    const { onError, onFinish, onSuccess, ...pageParams } = params
+
+    currentPage
+      .set(
+        {
+          ...current,
+          ...pageParams,
+          props,
+        },
+        {
+          replace,
+          preserveScroll: params.preserveScroll,
+          preserveState: params.preserveState,
+        },
+      )
+      .then(() => {
+        const errors = currentPage.get().props.errors || {}
+
+        if (Object.keys(errors).length === 0) {
+          return onSuccess?.(currentPage.get())
+        }
+
+        const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
+
+        return onError?.(scopedErrors)
+      })
+      .finally(() => onFinish?.(params))
   }
 
   protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
@@ -352,7 +372,7 @@ export class Router {
       mergedOptions.queryStringArrayFormat,
     )
 
-    return {
+    const visit = {
       cancelled: false,
       completed: false,
       interrupted: false,
@@ -361,6 +381,12 @@ export class Router {
       url,
       data: _data,
     }
+
+    if (visit.prefetch) {
+      visit.headers['Purpose'] = 'prefetch'
+    }
+
+    return visit
   }
 
   protected getVisitEvents(options: VisitOptions): VisitCallbacks {

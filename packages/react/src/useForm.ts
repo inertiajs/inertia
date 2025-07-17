@@ -11,12 +11,14 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-type SetDataByObject<TForm> = (data: TForm) => void
-type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
+export type SetDataByObject<TForm> = (data: TForm) => void
+export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
+export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
+export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+
 type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
@@ -28,13 +30,14 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  setData: SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+  setData: SetDataAction<TForm>
   transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
   setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
   reset: (...fields: FormDataKeys<TForm>[]) => void
   clearErrors: (...fields: FormDataKeys<TForm>[]) => void
+  resetAndClearErrors: (...fields: FormDataKeys<TForm>[]) => void
   setError(field: FormDataKeys<TForm>, value: ErrorValue): void
   setError(errors: FormDataError<TForm>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
@@ -71,6 +74,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
   const transform = useRef((data) => data)
+  const isDirty = useMemo(() => !isEqual(data, defaults), [data, defaults])
 
   useEffect(() => {
     isMounted.current = true
@@ -197,10 +201,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     [setData],
   )
 
+  const [dataAsDefaults, setDataAsDefaults] = useState(false)
+
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
       if (typeof fieldOrFields === 'undefined') {
-        setDefaults(() => data)
+        setDefaults(data)
+        // If setData was called right before setDefaults, data was not
+        // updated in that render yet, so we set a flag to update
+        // defaults right after the next render.
+        setDataAsDefaults(true)
       } else {
         setDefaults((defaults) => {
           return typeof fieldOrFields === 'string'
@@ -211,6 +221,20 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     },
     [data, setDefaults],
   )
+
+  useLayoutEffect(() => {
+    if (!dataAsDefaults) {
+      return
+    }
+
+    if (isDirty) {
+      // Data has been updated in this next render and is different from
+      // the defaults, so now we can set defaults to the current data.
+      setDefaults(data)
+    }
+
+    setDataAsDefaults(false)
+  }, [dataAsDefaults])
 
   const reset = useCallback(
     (...fields) => {
@@ -263,6 +287,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     [setErrors, setHasErrors],
   )
 
+  const resetAndClearErrors = useCallback(
+    (...fields) => {
+      reset(...fields)
+      clearErrors(...fields)
+    },
+    [reset, clearErrors],
+  )
+
   const createSubmitMethod = (method) => (url, options) => {
     submit(method, url, options)
   }
@@ -285,7 +317,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   return {
     data,
     setData: setDataFunction,
-    isDirty: !isEqual(data, defaults),
+    isDirty,
     errors,
     hasErrors,
     processing,
@@ -297,6 +329,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     reset,
     setError,
     clearErrors,
+    resetAndClearErrors,
     submit,
     get: getMethod,
     post,

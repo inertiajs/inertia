@@ -38,6 +38,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
+  resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: ErrorValue): this
   setError(errors: FormDataError<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
@@ -145,6 +146,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       )
       return this
     },
+    resetAndClearErrors(...fields) {
+      this.reset(...fields)
+      this.clearErrors(...fields)
+      return this
+    },
     submit(...args) {
       const objectPassed = typeof args[0] === 'object'
 
@@ -193,12 +199,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           this.clearErrors()
           this.setStore('wasSuccessful', true)
           this.setStore('recentlySuccessful', true)
-          this.defaults(cloneDeep(this.data()))
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          this.defaults(cloneDeep(this.data()))
+          return onSuccess
         },
         onError: (errors: Errors) => {
           this.setStore('processing', false)

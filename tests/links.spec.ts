@@ -580,6 +580,39 @@ test.describe('enabled', () => {
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
 
+  test('restores the document scroll position when pressing the back button with history encryption enabled', async ({
+    page,
+  }) => {
+    await page.getByTestId('article').click()
+
+    await expect(page).toHaveURL('/article')
+    await expect(page.getByText('Article Header')).toBeVisible()
+
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#home')?.scrollIntoView()),
+    )
+
+    const bottomScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(bottomScrollPosition).toBeGreaterThan(500)
+
+    await page.getByTestId('home').click()
+
+    await expect(page).toHaveURL('/')
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+
+    const homeScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(homeScrollPosition).toBe(0)
+
+    await page.goBack()
+
+    await expect(page).toHaveURL('/article')
+    await expect(page.getByText('Article Header')).toBeVisible()
+
+    const restoredScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(restoredScrollPosition).toBe(bottomScrollPosition)
+  })
+
   test.skip('restores all tracked scroll regions when pressing the back button from another website', async ({
     page,
   }) => {
@@ -621,6 +654,21 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
     await expect(page).toHaveURL('/links/url-fragments#non-existent-fragment')
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
   })
+})
+
+test('does not scroll when clicking the same fragment link', async ({ page }) => {
+  /** @see https://github.com/inertiajs/inertia/issues/1921 */
+  await page.goto('/article#far-down')
+
+  await page.getByRole('button', { exact: true, name: 'Enable Smooth Scroll' }).click()
+  await page.getByRole('button', { exact: true, name: 'Clear Scroll Log' }).click()
+  await expect(page.getByText('Scroll log: []')).toBeVisible()
+
+  // Click the same link again
+  for (let i = 0; i < 5; i++) {
+    await page.getByRole('link', { exact: true, name: 'Article Far Down' }).click()
+  }
+  await expect(page.getByText('Scroll log: []')).toBeVisible()
 })
 
 test.describe('partial reloads', () => {
@@ -789,11 +837,105 @@ test.describe('data-loading attribute', () => {
   })
 })
 
-test('will update href if prop is updated', async ({ page }) => {
-  await page.goto('/links/prop-update')
-  const link = await page.getByRole('link', { name: 'The Link' })
-  const button = await page.getByRole('button', { name: 'Change URL' })
-  await expect(link).toHaveAttribute('href', /\/sleep$/)
-  await button.click()
-  await expect(link).toHaveAttribute('href', /\/something-else$/)
+test('cancels pending request when navigating back', async ({ page }) => {
+  await page.goto('/links/cancel-sync-request/1')
+  await page.getByRole('link', { name: 'Go to Page 2' }).click()
+  await expect(page).toHaveURL('/links/cancel-sync-request/2')
+  await page.getByRole('link', { name: 'Go to Page 3' }).click() // This one is slow (500ms)
+  await page.goBack()
+  await expect(page).toHaveURL('/links/cancel-sync-request/1')
+  await page.waitForTimeout(750)
+  await expect(page).toHaveURL('/links/cancel-sync-request/1')
+  // make sure page 2 is still in the history stack
+  await page.goForward()
+  await expect(page).toHaveURL('/links/cancel-sync-request/2')
+  await page.goBack()
+  await expect(page).toHaveURL('/links/cancel-sync-request/1')
+})
+
+test.describe('reactivity', () => {
+  test('will update href if prop is updated', async ({ page }) => {
+    await page.goto('/links/prop-update')
+    const link = await page.getByRole('link', { name: 'The Link' })
+    const button = await page.getByRole('button', { name: 'Change URL' })
+    await expect(link).toHaveAttribute('href', /\/sleep$/)
+    await button.click()
+    await expect(link).toHaveAttribute('href', /\/something-else$/)
+  })
+
+  test('will update the method, href, data, and headers when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    const link = await page.getByRole('link', { name: 'Submit' })
+    await expect(link).toHaveAttribute('href', /\/dump\/get\?foo=bar$/)
+
+    await page.getByRole('button', { name: 'Change Link Props' }).click()
+
+    await expect(link).not.toBeVisible()
+    const button = await page.getByRole('button', { name: 'Submit' })
+    await button.click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toBe('post')
+    await expect(dump.form).toEqual({ foo: 'baz' })
+    await expect(dump.headers['x-custom-header']).toBe('new-value')
+  })
+
+  test('will update prefetch and cacheFor when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const link = await page.getByRole('link', { name: 'Prefetch Link' })
+    const prefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose === 'prefetch',
+    )
+
+    // Wait for the page to be prefetched
+    await link.hover()
+    await prefetchPromise
+
+    // Visit the page and check that it was prefetched
+    requests.listen(page)
+    await link.click()
+    await expect(page).toHaveURL('dump/get')
+    await expect(requests.requests.length).toBe(0)
+
+    // Wait for cache to expire
+    await page.waitForTimeout(1200)
+
+    // Click the link again without hovering first
+    await page.goBack()
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const nonPrefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose !== 'prefetch',
+    )
+    await link.click()
+    await nonPrefetchPromise
+
+    await expect(requests.requests.length).toBe(1)
+  })
+})
+
+test.describe('path traversal', () => {
+  test('it goes one level up', async ({ page }) => {
+    await page.goto('/links/sub/sub/')
+
+    await page.getByRole('link', { name: 'Up one level' }).click()
+    await expect(page).toHaveURL('/links/sub/')
+  })
+
+  test('it goes two levels up with a new path', async ({ page }) => {
+    await page.goto('/links/sub/sub/')
+
+    await page.getByRole('link', { name: 'Up two levels and open method' }).click()
+    await expect(page).toHaveURL('/links/method')
+  })
+
+  test('it goes three levels up', async ({ page }) => {
+    await page.goto('/links/sub/sub/')
+
+    await page.getByRole('link', { name: 'Up three levels' }).click()
+    await expect(page).toHaveURL('/')
+  })
 })

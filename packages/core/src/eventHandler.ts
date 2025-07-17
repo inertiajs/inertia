@@ -1,6 +1,7 @@
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { router } from './index'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
@@ -84,8 +85,18 @@ class EventHandler {
     history
       .decrypt(state.page)
       .then((data) => {
+        if (currentPage.get().version !== data.version) {
+          this.onMissingHistoryItem()
+          return
+        }
+
+        // Cancel ongoing requests
+        router.cancelAll()
+
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          Scroll.restore(history.getScrollRegions())
+          window.requestAnimationFrame(() => {
+            Scroll.restore(history.getScrollRegions())
+          })
           fireNavigateEvent(currentPage.get())
         })
       })

@@ -1,15 +1,15 @@
 {
     "scripts": {
-        "server:run": "vite build .",
-        "watch": "vite build . --watch"
+        "build": "vite build .",
+        "dev": "vite build . --watch"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.5",
-        "vite": "^5.4.8",
+        "vite": "^6.3.0",
         "vue": "^3.4.33"
     },
     "dependencies": {
-        "@inertiajs/core": "file:../../core",
-        "@inertiajs/vue3": "file:.."
+        "@inertiajs/core": "workspace:*",
+        "@inertiajs/vue3": "workspace:*"
     }
 }

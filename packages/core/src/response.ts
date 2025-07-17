@@ -211,12 +211,18 @@ export class Response {
 
     const propsToMerge = pageResponse.mergeProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
+    const matchPropsOn = pageResponse.matchPropsOn || []
 
     propsToMerge.forEach((prop) => {
       const incomingProp = pageResponse.props[prop]
 
       if (Array.isArray(incomingProp)) {
-        pageResponse.props[prop] = [...((currentPage.get().props[prop] || []) as any[]), ...incomingProp]
+        pageResponse.props[prop] = this.mergeOrMatchItems(
+          (currentPage.get().props[prop] || []) as any[],
+          incomingProp,
+          prop,
+          matchPropsOn,
+        )
       } else if (typeof incomingProp === 'object' && incomingProp !== null) {
         pageResponse.props[prop] = {
           ...((currentPage.get().props[prop] || []) as Record<string, any>),
@@ -229,33 +235,73 @@ export class Response {
       const incomingProp = pageResponse.props[prop]
       const currentProp = currentPage.get().props[prop]
 
-      // Deep merge function to handle nested objects and arrays
-      const deepMerge = (target: any, source: any) => {
+      // Function to recursively merge objects and arrays
+      const deepMerge = (target: any, source: any, currentKey: string) => {
         if (Array.isArray(source)) {
-          // Merge arrays by concatenating the existing and incoming elements
-          return [...(Array.isArray(target) ? target : []), ...source]
+          return this.mergeOrMatchItems(target, source, currentKey, matchPropsOn)
         }
 
         if (typeof source === 'object' && source !== null) {
           // Merge objects by iterating over keys
           return Object.keys(source).reduce(
             (acc, key) => {
-              acc[key] = deepMerge(target ? target[key] : undefined, source[key])
+              acc[key] = deepMerge(target ? target[key] : undefined, source[key], `${currentKey}.${key}`)
               return acc
             },
             { ...target },
           )
         }
 
-        // If the source is neither an array nor an object, return it directly
+        // f the source is neither an array nor an object, simply return the it
         return source
       }
 
-      // Assign the deeply merged result back to props.
-      pageResponse.props[prop] = deepMerge(currentProp, incomingProp)
+      // Apply the deep merge and update the page response
+      pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
     })
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
+  }
+
+  protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
+    // Determine if there's a specific key to match items.
+    // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
+    const matchOn = matchPropsOn.find((key) => {
+      const path = key.split('.').slice(0, -1).join('.')
+      return path === currentKey
+    })
+
+    if (!matchOn) {
+      // No key found to match on, just concatenate the arrays
+      return [...(Array.isArray(target) ? target : []), ...source]
+    }
+
+    // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
+    const uniqueProperty = matchOn.split('.').pop() || ''
+    const targetArray = Array.isArray(target) ? target : []
+    const map = new Map<any, any>()
+
+    // Populate the map with items from the target array, using the unique property as the key.
+    // If an item doesn't have the unique property or isn't an object, a unique Symbol is used as the key.
+    targetArray.forEach((item) => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+
+    // Iterate through the source array. If an item's unique property matches an existing key in the map,
+    // update the item. Otherwise, add the new item to the map.
+    source.forEach((item) => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+
+    return Array.from(map.values())
   }
 
   protected async setRememberedState(pageResponse: Page): Promise<void> {

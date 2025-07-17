@@ -56,6 +56,13 @@
       queryStringArrayFormat: 'brackets',
     })
   }
+
+  const deleteQueryParam = (e) => {
+    e.preventDefault()
+    router.visit('/dump/get', {
+      data: { a: undefined },
+    })
+  }
 </script>
 
 <div>
@@ -71,4 +78,5 @@
   <a href="#" on:click={qsafDefault} class="qsaf-default">QSAF Defaults</a>
   <a href="#" on:click={qsafIndices} class="qsaf-indices">QSAF Indices</a>
   <a href="#" on:click={qsafBrackets} class="qsaf-brackets">QSAF Brackets</a>
+  <a href="#" on:click={deleteQueryParam} class="delete-query-param">Delete Query Param</a>
 </div>

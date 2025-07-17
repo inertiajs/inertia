@@ -1,4 +1,3 @@
-import { merge } from 'es-toolkit'
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
@@ -36,19 +35,24 @@ export function mergeDataIntoQueryString(
   data: Record<string, FormDataConvertible>,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
 ): [string, Record<string, FormDataConvertible>] {
-  const hasHost = /^https?:\/\//.test(href.toString())
+  const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
+  const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
   const hasSearch = href.toString().includes('?') || (method === 'get' && Object.keys(data).length)
   const hasHash = href.toString().includes('#')
 
-  const url = new URL(href.toString(), 'http://localhost')
+  const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
   if (method === 'get' && Object.keys(data).length) {
-    url.search = qs.stringify(merge(qs.parse(url.search, { ignoreQueryPrefix: true }), data), {
-      encodeValuesOnly: true,
-      arrayFormat: qsArrayFormat,
-    })
+    const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
+    url.search = qs.stringify(
+      { ...qs.parse(url.search, parseOptions), ...data },
+      {
+        encodeValuesOnly: true,
+        arrayFormat: qsArrayFormat,
+      },
+    )
     data = {}
   }
 
@@ -56,7 +60,7 @@ export function mergeDataIntoQueryString(
     [
       hasHost ? `${url.protocol}//${url.host}` : '',
       hasAbsolutePath ? url.pathname : '',
-      hasRelativePath ? url.pathname.substring(1) : '',
+      hasRelativePath ? url.pathname.substring(hasRelativePathWithDotPrefix ? 0 : 1) : '',
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
     ].join(''),
