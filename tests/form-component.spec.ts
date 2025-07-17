@@ -2,7 +2,6 @@ import test, { expect } from '@playwright/test'
 import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
-  test.skip(process.env.PACKAGE === 'svelte', 'Currently only implemented for React and Vue 3')
 
   test.describe('Elements', () => {
     test.beforeEach(async ({ page }) => {
