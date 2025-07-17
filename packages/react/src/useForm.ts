@@ -48,14 +48,16 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends FormDataType<TForm>>(initialValues?: TForm): InertiaFormProps<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
-  rememberKey: string,
-  initialValues?: TForm,
+  initialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
-  rememberKeyOrInitialValues?: string | TForm,
-  maybeInitialValues?: TForm,
+  rememberKey: string,
+  initialValues?: TForm | (() => TForm),
+): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  rememberKeyOrInitialValues?: string | TForm | (() => TForm),
+  maybeInitialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm> {
   const isMounted = useRef(null)
   const rememberKey = typeof rememberKeyOrInitialValues === 'string' ? rememberKeyOrInitialValues : null
