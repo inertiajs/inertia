@@ -885,22 +885,35 @@ test.describe('reactivity', () => {
   test('will update prefetch and cacheFor when props are updated', async ({ page }) => {
     await page.goto('/links/reactivity')
 
-    requests.listen(page)
-
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
     const link = await page.getByRole('link', { name: 'Prefetch Link' })
-
-    await link.hover()
-    await page.waitForTimeout(100)
-    await expect(requests.requests.length).toBe(0)
-
-    await page.getByRole('button', { name: 'Enable Prefetch' }).click()
-
     const prefetchPromise = page.waitForRequest(
       (request) => request.url().includes('/dump/get') && request.headers().purpose === 'prefetch',
     )
 
+    // Wait for the page to be prefetched
     await link.hover()
     await prefetchPromise
+
+    // Visit the page and check that it was prefetched
+    requests.listen(page)
+    await link.click()
+    await expect(page).toHaveURL('dump/get')
+    await expect(requests.requests.length).toBe(0)
+
+    // Wait for cache to expire
+    await page.waitForTimeout(1200)
+
+    // Click the link again without hovering first
+    await page.goBack()
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const nonPrefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose !== 'prefetch',
+    )
+    await link.click()
+    await nonPrefetchPromise
+
+    await expect(requests.requests.length).toBe(1)
   })
 })
 

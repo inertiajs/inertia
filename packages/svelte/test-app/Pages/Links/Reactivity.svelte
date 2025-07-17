@@ -15,9 +15,9 @@
     headers = { 'X-Custom-Header': 'new-value' }
   }
 
-  function changePrefetch() {
+  function enablePrefetch() {
     prefetch = 'hover'
-    cacheFor = '5s'
+    cacheFor = '1s'
   }
 </script>
 
@@ -26,15 +26,11 @@
     This page demonstrates reactivity in Inertia links. Click the button to change the link properties.
   </span>
 
-  <Link method={method} href={href} data={data} headers={headers}>
-    Submit
-  </Link>
+  <Link {method} {href} {data} {headers}>Submit</Link>
 
   <button on:click={change}>Change Link Props</button>
 
-  <Link href="/dump/get" {prefetch} {cacheFor}>
-    Prefetch Link
-  </Link>
+  <Link href="/dump/get" {prefetch} {cacheFor}>Prefetch Link</Link>
 
-  <button on:click={changePrefetch}>Enable Prefetch</button>
+  <button on:click={enablePrefetch}>Enable Prefetch (1s cache)</button>
 </div>

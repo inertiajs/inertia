@@ -16,9 +16,9 @@ export default () => {
     setHeaders({ 'X-Custom-Header': 'new-value' })
   }
 
-  const changePrefetch = () => {
+  const enablePrefetch = () => {
     setPrefetch('hover')
-    setCacheFor('5s')
+    setCacheFor('1s')
   }
 
   return (
@@ -37,7 +37,7 @@ export default () => {
         Prefetch Link
       </Link>
 
-      <button onClick={changePrefetch}>Enable Prefetch</button>
+      <button onClick={enablePrefetch}>Enable Prefetch (1s cache)</button>
     </div>
   )
 }
