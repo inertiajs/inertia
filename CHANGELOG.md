@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.16...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.17...master)
 
 - Nothing yet
+
+## [v2.0.17](https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17) - 2025-07-18
+
+### What's Changed
+
+* Bump multer from 2.0.1 to 2.0.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2447
+* Bump vite from 5.4.12 to 5.4.19 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2450
+* Bump esbuild from 0.21.5 to 0.25.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2451
+* Explicit string coercion in `Head` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2453
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17
 
 ## [v2.0.16](https://github.com/inertiajs/inertia/compare/v2.0.15...v2.0.16) - 2025-07-18
 
