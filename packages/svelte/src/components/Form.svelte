@@ -22,10 +22,10 @@
   export let transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible> = (data) =>
     data
   export let visitOptions: FormComponentVisitOptions = {}
-  export let onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void = () => {}
+  export let onCancelToken: ({ cancel }: { cancel: () => void }) => void = () => {}
   export let onBefore: () => boolean | void = () => {}
   export let onStart: (visit: PendingVisit) => void = () => {}
-  export let onProgress: (progress: Progress) => void = () => {}
+  export let onProgress: (progress: Progress | undefined) => void = () => {}
   export let onFinish: (visit: PendingVisit) => void = () => {}
   export let onCancel: () => void = () => {}
   export let onSuccess: () => void = () => {}
