@@ -28,7 +28,7 @@ interface InertiaFormSlotProps {
   submit: () => void
 }
 
-interface InertiaFormSubmitProps {
+interface InertiaFormVisitOptions {
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   preserveUrl?: boolean
@@ -46,7 +46,7 @@ interface InertiaFormProps {
   errorBag?: string | null
   showProgress?: boolean
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
-  submitOptions?: InertiaFormSubmitProps
+  visitOptions?: InertiaFormVisitOptions
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => boolean | void
   onStart?: (visit: PendingVisit) => void
@@ -68,7 +68,7 @@ const Form = ({
   errorBag = null,
   showProgress = true,
   transform = (data) => data,
-  submitOptions = {
+  visitOptions = {
     replace: false,
     preserveScroll: false,
     preserveState: null,
@@ -138,13 +138,13 @@ const Form = ({
       onCancel,
       onSuccess,
       onError,
-      replace: submitOptions.replace,
-      preserveScroll: submitOptions.preserveScroll,
-      preserveState: submitOptions.preserveState ?? resolvedMethod !== 'get',
-      preserveUrl: submitOptions.preserveUrl,
-      only: submitOptions.only,
-      except: submitOptions.except,
-      reset: submitOptions.reset,
+      replace: visitOptions.replace,
+      preserveScroll: visitOptions.preserveScroll,
+      preserveState: visitOptions.preserveState ?? resolvedMethod !== 'get',
+      preserveUrl: visitOptions.preserveUrl,
+      only: visitOptions.only,
+      except: visitOptions.except,
+      reset: visitOptions.reset,
     }
 
     form.transform(() => transform(_data))

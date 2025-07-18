@@ -31,7 +31,7 @@
   export let showProgress: boolean = true
   export let transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible> = (data) =>
     data
-  export let submitOptions: InertiaFormSubmitProps = {
+  export let visitOptions: InertiaFormSubmitProps = {
     replace: false,
     preserveScroll: false,
     preserveState: null,
@@ -87,13 +87,13 @@
       onCancel,
       onSuccess,
       onError,
-      replace: submitOptions.replace,
-      preserveScroll: submitOptions.preserveScroll,
-      preserveState: submitOptions.preserveState ?? _method !== 'get',
-      preserveUrl: submitOptions.preserveUrl,
-      only: submitOptions.only || [],
-      except: submitOptions.except || [],
-      reset: submitOptions.reset || [],
+      replace: visitOptions.replace,
+      preserveScroll: visitOptions.preserveScroll,
+      preserveState: visitOptions.preserveState ?? _method !== 'get',
+      preserveUrl: visitOptions.preserveUrl,
+      only: visitOptions.only || [],
+      except: visitOptions.except || [],
+      reset: visitOptions.reset || [],
     }
 
     $form.transform(() => transform(_data)).submit(_method, url, options)

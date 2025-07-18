@@ -28,7 +28,7 @@ interface InertiaFormSlotProps {
   submit: () => void
 }
 
-interface InertiaFormSubmitProps {
+interface InertiaFormVisitOptions {
   preserveScroll?: PreserveStateOption
   preserveState?: PreserveStateOption
   preserveUrl?: boolean
@@ -46,7 +46,7 @@ interface InertiaFormProps {
   errorBag?: string | null
   showProgress?: boolean
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
-  submitOptions?: InertiaFormSubmitProps
+  visitOptions?: InertiaFormVisitOptions
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   onBefore?: () => void
   onStart?: (visit: PendingVisit) => void
@@ -91,8 +91,8 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<(data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>>,
       default: (data: Record<string, FormDataConvertible>) => data,
     },
-    submitOptions: {
-      type: Object as PropType<InertiaFormSubmitProps>,
+    visitOptions: {
+      type: Object as PropType<InertiaFormVisitOptions>,
       default: () => ({
         replace: false,
         preserveScroll: false,
@@ -192,13 +192,13 @@ const Form: InertiaForm = defineComponent({
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
-        replace: props.submitOptions.replace,
-        preserveScroll: props.submitOptions.preserveScroll,
-        preserveState: props.submitOptions.preserveState ?? method.value !== 'get',
-        preserveUrl: props.submitOptions.preserveUrl,
-        only: props.submitOptions.only,
-        except: props.submitOptions.except,
-        reset: props.submitOptions.reset,
+        replace: props.visitOptions.replace,
+        preserveScroll: props.visitOptions.preserveScroll,
+        preserveState: props.visitOptions.preserveState ?? method.value !== 'get',
+        preserveUrl: props.visitOptions.preserveUrl,
+        only: props.visitOptions.only,
+        except: props.visitOptions.except,
+        reset: props.visitOptions.reset,
       }
 
       // We need transform because we can't override the default data with different keys (by design)

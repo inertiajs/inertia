@@ -70,7 +70,7 @@ export default () => {
     <Form
       action={action}
       method={method}
-      submitOptions={{
+      visitOptions={{
         only,
         except,
         reset,
