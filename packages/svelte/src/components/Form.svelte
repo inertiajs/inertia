@@ -91,9 +91,9 @@
       preserveScroll: submitOptions.preserveScroll,
       preserveState: submitOptions.preserveState ?? _method !== 'get',
       preserveUrl: submitOptions.preserveUrl,
-      only: submitOptions.only,
-      except: submitOptions.except,
-      reset: submitOptions.reset,
+      only: submitOptions.only || [],
+      except: submitOptions.except || [],
+      reset: submitOptions.reset || [],
     }
 
     $form.transform(() => transform(_data)).submit(_method, url, options)
