@@ -2,7 +2,6 @@ import test, { expect } from '@playwright/test'
 import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
-
   test.describe('Elements', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
@@ -441,5 +440,149 @@ test.describe('Form Component', () => {
 
     await page.goBack()
     await expect(page).toHaveURL('/article')
+  })
+
+  test.describe('Methods', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/methods')
+    })
+
+    test('submits GET request with query parameters', async ({ page }) => {
+      await page.getByRole('button', { name: 'GET', exact: true }).click()
+      await page.getByRole('button', { name: 'Submit GET' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'get')
+
+      await expect(dump.method).toEqual('get')
+      await expect(dump.query).toEqual({
+        name: 'John Doe',
+        active: 'true',
+      })
+    })
+
+    test('submits POST request with form data', async ({ page }) => {
+      await page.getByRole('button', { name: 'POST' }).click()
+      await page.getByRole('button', { name: 'Submit POST' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.method).toEqual('post')
+      await expect(dump.form).toEqual({
+        name: 'John Doe',
+        active: 'true',
+      })
+    })
+
+    test('submits PUT request with form data', async ({ page }) => {
+      await page.getByRole('button', { name: 'PUT' }).click()
+      await page.getByRole('button', { name: 'Submit PUT' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'put')
+
+      await expect(dump.method).toEqual('put')
+      await expect(dump.form).toEqual({
+        name: 'John Doe',
+        active: 'true',
+      })
+    })
+
+    test('submits PATCH request with form data', async ({ page }) => {
+      await page.getByRole('button', { name: 'PATCH' }).click()
+      await page.getByRole('button', { name: 'Submit PATCH' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'patch')
+
+      await expect(dump.method).toEqual('patch')
+      await expect(dump.form).toEqual({
+        name: 'John Doe',
+        active: 'true',
+      })
+    })
+
+    test('submits DELETE request with form data', async ({ page }) => {
+      await page.getByRole('button', { name: 'DELETE' }).click()
+      await page.getByRole('button', { name: 'Submit DELETE' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'delete')
+
+      await expect(dump.method).toEqual('delete')
+      await expect(dump.form).toEqual({
+        name: 'John Doe',
+        active: 'true',
+      })
+    })
+  })
+
+  test.describe('Transform', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/transform')
+    })
+
+    test('submits data without transformation when transform is none', async ({ page }) => {
+      await page.getByRole('button', { name: 'None' }).click()
+      await page.getByRole('button', { name: 'Submit with Transform' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form).toEqual({
+        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
+      })
+    })
+
+    test('transforms data to uppercase when uppercase transform is selected', async ({ page }) => {
+      await page.getByRole('button', { name: 'Uppercase' }).click()
+      await page.getByRole('button', { name: 'Submit with Transform' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form).toEqual({
+        name: 'JOHN DOE',
+        firstName: 'John',
+        lastName: 'Doe',
+      })
+    })
+
+    test('formats data when format transform is selected', async ({ page }) => {
+      await page.getByRole('button', { name: 'Format' }).click()
+      await page.getByRole('button', { name: 'Submit with Transform' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form).toEqual({
+        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
+        fullName: 'John Doe',
+      })
+    })
+
+    test('transforms update input data correctly', async ({ page }) => {
+      await page.fill('input[name="name"]', 'jane smith')
+      await page.fill('input[name="firstName"]', 'jane')
+      await page.fill('input[name="lastName"]', 'smith')
+      await page.getByRole('button', { name: 'Uppercase' }).click()
+      await page.getByRole('button', { name: 'Submit with Transform' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form).toEqual({
+        name: 'JANE SMITH',
+        firstName: 'jane',
+        lastName: 'smith',
+      })
+    })
+
+    test('format transform adds fullName from updated firstName and lastName', async ({ page }) => {
+      await page.fill('input[name="firstName"]', 'Jane')
+      await page.fill('input[name="lastName"]', 'Smith')
+      await page.getByRole('button', { name: 'Format' }).click()
+      await page.getByRole('button', { name: 'Submit with Transform' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form.fullName).toEqual('Jane Smith')
+    })
   })
 })
