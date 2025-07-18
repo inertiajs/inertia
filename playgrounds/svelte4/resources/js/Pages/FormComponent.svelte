@@ -46,7 +46,7 @@
 >
   <!-- Status Display -->
   <div class="rounded border border-gray-200 bg-gray-50 p-4">
-    <h3 class="mb-3 text-lg font-medium">Form Status (slot props)</h3>
+    <h3 class="mb-3 text-lg font-medium">Form Status</h3>
     <div class="grid grid-cols-2 gap-4 text-sm">
       <div>
         isDirty: <span class="font-mono" class:text-orange-600={isDirty} class:text-gray-500={!isDirty}>{isDirty}</span>

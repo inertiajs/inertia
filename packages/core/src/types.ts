@@ -346,23 +346,13 @@ export type FormComponentVisitOptions = Pick<
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
 >
 
-export type FormComponentProps = {
+export type FormComponentProps = Partial<
+  Pick<Visit, 'method' | 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
+    Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
+> & {
   action?: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  errorBag?: string | null
-  showProgress?: boolean
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   visitOptions?: FormComponentVisitOptions
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (visit: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (visit: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
 }
 
 export type FormComponentSlotProps = {
