@@ -161,9 +161,9 @@ export class Router {
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,
-    })
+    } as VisitOptions)
 
-    const events = this.getVisitEvents(options)
+    const events = this.getVisitEvents(options as VisitOptions)
 
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
