@@ -89,7 +89,7 @@
     $form.resetAndClearErrors(...fields)
   }
 
-  function setError(field: string | object, value?: any) {
+  function setError(field: string | object, value?: string) {
     if (typeof field === 'string') {
       // @ts-expect-error
       $form.setError(field, value)
