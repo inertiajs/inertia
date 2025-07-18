@@ -10,7 +10,7 @@ import { ref } from 'vue'
 defineProps({
   foo: Number,
   bar: Number,
-  quux: String,
+  quux: Number,
 })
 
 const customHeaders = ref({ 'X-Custom-Header': 'Demo-Value' })
@@ -27,9 +27,11 @@ const errorBag = ref('custom-bag')
     method="post"
     :headers="customHeaders"
     :error-bag="errorBag"
-    :only="['foo']"
-    :reset="['bar']"
     :transform="(data) => ({ ...data, demo: 'data' })"
+    :visit-options="{
+      only: ['foo'],
+      reset: ['bar'],
+    }"
     #default="{
       errors,
       hasErrors,
