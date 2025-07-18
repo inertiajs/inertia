@@ -1,10 +1,12 @@
 import {
   FormDataConvertible,
   formDataToObject,
+  FormComponentProps,
+  FormComponentSlotProps,
+  FormComponentVisitOptions,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
   Progress,
   VisitOptions,
 } from '@inertiajs/core'
@@ -12,59 +14,14 @@ import { isEqual } from 'es-toolkit'
 import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
 import useForm from './useForm'
 
-interface InertiaFormSlotProps {
-  errors: Record<string, string>
-  hasErrors: boolean
-  processing: boolean
-  progress: Progress | null
-  wasSuccessful: boolean
-  recentlySuccessful: boolean
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
-  isDirty: boolean
-  reset: () => void
-  submit: () => void
-}
-
-interface InertiaFormVisitOptions {
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  preserveUrl?: boolean
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  reset?: string[]
-}
-
-interface InertiaFormProps {
-  action: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  errorBag?: string | null
-  showProgress?: boolean
-  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
-  visitOptions?: InertiaFormVisitOptions
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (visit: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (visit: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
-}
-
-type InertiaForm = DefineComponent<InertiaFormProps>
+type InertiaForm = DefineComponent<FormComponentProps>
 type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const Form: InertiaForm = defineComponent({
   name: 'Form',
   props: {
     action: {
-      type: [String, Object] as PropType<InertiaFormProps['action']>,
+      type: [String, Object] as PropType<FormComponentProps['action']>,
       required: true,
     },
     method: {
@@ -80,7 +37,7 @@ const Form: InertiaForm = defineComponent({
       default: 'brackets',
     },
     errorBag: {
-      type: [String, null] as PropType<InertiaFormProps['errorBag']>,
+      type: [String, null] as PropType<FormComponentProps['errorBag']>,
       default: null,
     },
     showProgress: {
@@ -92,7 +49,7 @@ const Form: InertiaForm = defineComponent({
       default: (data: Record<string, FormDataConvertible>) => data,
     },
     visitOptions: {
-      type: Object as PropType<InertiaFormVisitOptions>,
+      type: Object as PropType<FormComponentVisitOptions>,
       default: () => ({}),
     },
     onCancelToken: {
@@ -205,7 +162,7 @@ const Form: InertiaForm = defineComponent({
           },
         },
         slots.default
-          ? slots.default(<InertiaFormSlotProps>{
+          ? slots.default(<FormComponentSlotProps>{
               errors: form.errors,
               hasErrors: form.hasErrors,
               processing: form.processing,

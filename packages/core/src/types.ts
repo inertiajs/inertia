@@ -341,6 +341,46 @@ export type ProgressSettings = {
   color: string
 }
 
+export type FormComponentVisitOptions = Pick<
+  VisitOptions,
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+>
+
+export type FormComponentProps = {
+  action?: string | { url: string; method: Method }
+  method?: Method
+  headers?: Record<string, string>
+  queryStringArrayFormat?: 'brackets' | 'indices'
+  errorBag?: string | null
+  showProgress?: boolean
+  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  visitOptions?: FormComponentVisitOptions
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  onBefore?: () => void
+  onStart?: (visit: PendingVisit) => void
+  onProgress?: (progress: Progress) => void
+  onFinish?: (visit: PendingVisit) => void
+  onCancel?: () => void
+  onSuccess?: () => void
+  onError?: () => void
+}
+
+export type FormComponentSlotProps = {
+  errors: Record<string, string>
+  hasErrors: boolean
+  processing: boolean
+  progress: Progress | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  clearErrors: (...fields: string[]) => void
+  resetAndClearErrors: (...fields: string[]) => void
+  setError(field: string, value: string): void
+  setError(errors: Record<string, string>): void
+  isDirty: boolean
+  reset: () => void
+  submit: () => void
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>

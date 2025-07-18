@@ -1,61 +1,18 @@
 import {
   FormDataConvertible,
   formDataToObject,
+  FormComponentProps,
+  FormComponentSlotProps,
   mergeDataIntoQueryString,
   Method,
-  PendingVisit,
-  PreserveStateOption,
-  Progress,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
 import { createElement, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import useForm from './useForm'
 
-interface InertiaFormSlotProps {
-  errors: Record<string, string>
-  hasErrors: boolean
-  processing: boolean
-  progress: Progress | null
-  wasSuccessful: boolean
-  recentlySuccessful: boolean
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
-  isDirty: boolean
-  reset: () => void
-  submit: () => void
-}
-
-interface InertiaFormVisitOptions {
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  preserveUrl?: boolean
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  reset?: string[]
-}
-
-interface InertiaFormProps {
-  action: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  errorBag?: string | null
-  showProgress?: boolean
-  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
-  visitOptions?: InertiaFormVisitOptions
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => boolean | void
-  onStart?: (visit: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (visit: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
-  children: (props: InertiaFormSlotProps) => ReactNode
+type ComponentProps = FormComponentProps & {
+  children: (props: FormComponentSlotProps) => ReactNode
 }
 
 type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
@@ -79,7 +36,7 @@ const Form = ({
   onCancelToken = () => {},
   children,
   ...props
-}: InertiaFormProps) => {
+}: ComponentProps) => {
   const form = useForm({})
   const formElement = useRef<HTMLFormElement>(null)
 

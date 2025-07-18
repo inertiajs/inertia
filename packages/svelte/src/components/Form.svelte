@@ -3,25 +3,15 @@
     formDataToObject,
     mergeDataIntoQueryString,
     type FormDataConvertible,
+    type FormComponentVisitOptions,
     type Method,
     type PendingVisit,
-    type PreserveStateOption,
     type Progress,
     type VisitOptions,
   } from '@inertiajs/core'
   import { isEqual } from 'es-toolkit'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
-
-  interface InertiaFormSubmitProps {
-    preserveScroll?: PreserveStateOption
-    preserveState?: PreserveStateOption
-    preserveUrl?: boolean
-    replace?: boolean
-    only?: string[]
-    except?: string[]
-    reset?: string[]
-  }
 
   export let action: string | { url: string; method: Method }
   export let method: Method = 'get'
@@ -31,7 +21,7 @@
   export let showProgress: boolean = true
   export let transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible> = (data) =>
     data
-  export let visitOptions: InertiaFormSubmitProps = {}
+  export let visitOptions: FormComponentVisitOptions = {}
   export let onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void = () => {}
   export let onBefore: () => boolean | void = () => {}
   export let onStart: (visit: PendingVisit) => void = () => {}
@@ -60,12 +50,7 @@
   }
 
   function submit() {
-    const [url, _data] = mergeDataIntoQueryString(
-      _method,
-      _action,
-      getData(),
-      queryStringArrayFormat,
-    )
+    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
     const options: FormOptions = {
       headers,
@@ -79,7 +64,7 @@
       onCancel,
       onSuccess,
       onError,
-      ...visitOptions
+      ...visitOptions,
     }
 
     $form.transform(() => transform(_data)).submit(_method, url, options)
@@ -110,8 +95,7 @@
   bind:this={formElement}
   action={_action}
   method={_method}
-  on:submit={handleSubmit}
-  {...$$restProps}
+  on:submit={handleSubmit} {...$$restProps}
 >
   <slot
     errors={$form.errors}
