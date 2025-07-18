@@ -48,7 +48,7 @@ const setItemType = (type: string) => {
     </button>
   </div>
 
-  <div class="w-full max-w-2xl mt-6 overflow-hidden border rounded shadow-sm">
+  <div class="w-full max-w-2xl mt-6 overflow-hidden border border-gray-200 rounded-sm shadow-xs">
     <table class="w-full text-left">
       <thead>
         <tr>
@@ -57,7 +57,7 @@ const setItemType = (type: string) => {
         </tr>
       </thead>
       <tbody v-if="items">
-        <tr v-for="item in items" :key="item.id" class="border-t">
+        <tr v-for="item in items" :key="item.id" class="border-t border-gray-200">
           <td class="px-4 py-2">{{ item.id }}</td>
           <td class="px-4 py-2">{{ item.name }}</td>
         </tr>
