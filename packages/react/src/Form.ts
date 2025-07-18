@@ -11,7 +11,9 @@ import { isEqual } from 'es-toolkit'
 import { createElement, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import useForm from './useForm'
 
-type ComponentProps = FormComponentProps & {
+type ComponentProps = (FormComponentProps &
+  Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
+  Omit<React.AllHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'>) & {
   children: (props: FormComponentSlotProps) => ReactNode
 }
 
