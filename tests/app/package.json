@@ -9,7 +9,7 @@
         "css-loader": "^5.0.1",
         "eslint": "^7.17.0",
         "express": "^4.21.1",
-        "multer": "^2.0.1",
+        "multer": "^2.0.2",
         "nodemon": "^3.0.0"
     }
 }
