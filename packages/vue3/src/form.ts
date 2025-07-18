@@ -93,15 +93,7 @@ const Form: InertiaForm = defineComponent({
     },
     visitOptions: {
       type: Object as PropType<InertiaFormVisitOptions>,
-      default: () => ({
-        replace: false,
-        preserveScroll: false,
-        preserveState: null,
-        preserveUrl: false,
-        only: [],
-        except: [],
-        reset: [],
-      }),
+      default: () => ({}),
     },
     onCancelToken: {
       type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
@@ -180,7 +172,7 @@ const Form: InertiaForm = defineComponent({
         props.queryStringArrayFormat,
       )
 
-      const params: FormOptions = {
+      const options: FormOptions = {
         headers: props.headers,
         errorBag: props.errorBag,
         showProgress: props.showProgress,
@@ -192,17 +184,11 @@ const Form: InertiaForm = defineComponent({
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
-        replace: props.visitOptions.replace,
-        preserveScroll: props.visitOptions.preserveScroll,
-        preserveState: props.visitOptions.preserveState ?? method.value !== 'get',
-        preserveUrl: props.visitOptions.preserveUrl,
-        only: props.visitOptions.only,
-        except: props.visitOptions.except,
-        reset: props.visitOptions.reset,
+        ...props.visitOptions,
       }
 
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => props.transform(data)).submit(method.value, action, params)
+      form.transform(() => props.transform(data)).submit(method.value, action, options)
     }
 
     return () => {

@@ -31,15 +31,7 @@
   export let showProgress: boolean = true
   export let transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible> = (data) =>
     data
-  export let visitOptions: InertiaFormSubmitProps = {
-    replace: false,
-    preserveScroll: false,
-    preserveState: null,
-    preserveUrl: false,
-    only: [],
-    except: [],
-    reset: [],
-  }
+  export let visitOptions: InertiaFormSubmitProps = {}
   export let onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void = () => {}
   export let onBefore: () => boolean | void = () => {}
   export let onStart: (visit: PendingVisit) => void = () => {}
@@ -87,13 +79,7 @@
       onCancel,
       onSuccess,
       onError,
-      replace: visitOptions.replace,
-      preserveScroll: visitOptions.preserveScroll,
-      preserveState: visitOptions.preserveState ?? _method !== 'get',
-      preserveUrl: visitOptions.preserveUrl,
-      only: visitOptions.only || [],
-      except: visitOptions.except || [],
-      reset: visitOptions.reset || [],
+      ...visitOptions
     }
 
     $form.transform(() => transform(_data)).submit(_method, url, options)

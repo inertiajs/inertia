@@ -68,15 +68,7 @@ const Form = ({
   errorBag = null,
   showProgress = true,
   transform = (data) => data,
-  visitOptions = {
-    replace: false,
-    preserveScroll: false,
-    preserveState: null,
-    preserveUrl: false,
-    only: [],
-    except: [],
-    reset: [],
-  },
+  visitOptions = {},
   onStart = () => {},
   onProgress = () => {},
   onFinish = () => {},
@@ -138,13 +130,7 @@ const Form = ({
       onCancel,
       onSuccess,
       onError,
-      replace: visitOptions.replace,
-      preserveScroll: visitOptions.preserveScroll,
-      preserveState: visitOptions.preserveState ?? resolvedMethod !== 'get',
-      preserveUrl: visitOptions.preserveUrl,
-      only: visitOptions.only,
-      except: visitOptions.except,
-      reset: visitOptions.reset,
+      ...visitOptions,
     }
 
     form.transform(() => transform(_data))
