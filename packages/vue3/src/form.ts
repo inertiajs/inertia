@@ -1,9 +1,9 @@
 import {
-  FormDataConvertible,
-  formDataToObject,
   FormComponentProps,
   FormComponentSlotProps,
   FormComponentVisitOptions,
+  FormDataConvertible,
+  formDataToObject,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
@@ -15,7 +15,7 @@ import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMount
 import useForm from './useForm'
 
 type InertiaForm = DefineComponent<FormComponentProps>
-type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const Form: InertiaForm = defineComponent({
   name: 'Form',
@@ -129,7 +129,7 @@ const Form: InertiaForm = defineComponent({
         props.queryStringArrayFormat,
       )
 
-      const options: FormOptions = {
+      const options: FormSubmitOptions = {
         headers: props.headers,
         errorBag: props.errorBag,
         showProgress: props.showProgress,

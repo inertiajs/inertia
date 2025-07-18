@@ -1,8 +1,8 @@
 import {
-  FormDataConvertible,
-  formDataToObject,
   FormComponentProps,
   FormComponentSlotProps,
+  FormDataConvertible,
+  formDataToObject,
   mergeDataIntoQueryString,
   Method,
   VisitOptions,
@@ -15,7 +15,7 @@ type ComponentProps = FormComponentProps & {
   children: (props: FormComponentSlotProps) => ReactNode
 }
 
-type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const Form = ({
   action,
@@ -75,7 +75,7 @@ const Form = ({
       queryStringArrayFormat,
     )
 
-    const options: FormOptions = {
+    const options: FormSubmitOptions = {
       headers,
       errorBag,
       showProgress,

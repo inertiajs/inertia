@@ -31,7 +31,7 @@
   export let onSuccess: () => void = () => {}
   export let onError: () => void = () => {}
 
-  type FormOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+  type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
   const form = useForm({})
   let formElement: HTMLFormElement
@@ -52,7 +52,7 @@
   function submit() {
     const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
-    const options: FormOptions = {
+    const options: FormSubmitOptions = {
       headers,
       errorBag,
       showProgress,
