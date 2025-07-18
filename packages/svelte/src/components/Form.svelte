@@ -79,6 +79,26 @@
     formElement.reset()
   }
 
+  function clearErrors(...fields: string[]) {
+    // @ts-expect-error
+    $form.clearErrors(...fields)
+  }
+
+  function resetAndClearErrors(...fields: string[]) {
+    // @ts-expect-error
+    $form.resetAndClearErrors(...fields)
+  }
+
+  function setError(field: string | object, value?: any) {
+    if (typeof field === 'string') {
+      // @ts-expect-error
+      $form.setError(field, value)
+    } else {
+      // @ts-expect-error
+      $form.setError(field)
+    }
+  }
+
   onMount(() => {
     defaultValues = getData()
 
@@ -104,19 +124,9 @@
     progress={$form.progress}
     wasSuccessful={$form.wasSuccessful}
     recentlySuccessful={$form.recentlySuccessful}
-    clearErrors={(...fields) => {
-      $form.clearErrors(...fields)
-    }}
-    resetAndClearErrors={(...fields) => {
-      $form.resetAndClearErrors(...fields)
-    }}
-    setError={(field, value) => {
-      if (typeof field === 'string') {
-        $form.setError(field, value)
-      } else {
-        $form.setError(field)
-      }
-    }}
+    {clearErrors}
+    {resetAndClearErrors}
+    {setError}
     {isDirty}
     {reset}
     {submit}
