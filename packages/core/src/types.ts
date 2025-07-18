@@ -277,7 +277,7 @@ export type PendingVisitOptions = {
   interrupted: boolean
 }
 
-export type PendingVisit = Visit & PendingVisitOptions
+export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
 export type ActiveVisit = PendingVisit & Required<VisitOptions>
 
