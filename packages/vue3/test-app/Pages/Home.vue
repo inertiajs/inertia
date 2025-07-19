@@ -35,6 +35,7 @@ const page = usePage()
 
     <Link href="/links/method" class="links-method">Basic Links</Link>
     <Link href="/links/replace" class="links-replace">'Replace' Links</Link>
+    <Link href="/links/custom-component" class="links-custom-component">Custom Component</Link>
 
     <a href="#" @click="visitsMethod" class="visits-method">Manual basic visits</a>
     <a href="#" @click="visitsReplace" class="visits-replace">Manual 'Replace' visits</a>
