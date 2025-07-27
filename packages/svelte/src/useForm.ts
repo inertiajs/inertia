@@ -38,7 +38,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
-  setError(errors: Errors): this
+  setError(errors: Partial<Record<FormDataKeys<TForm>, string>>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -121,7 +121,7 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | Errors, maybeValue?: string) {
+    setError(fieldOrFields: FormDataKeys<TForm> | Partial<Record<FormDataKeys<TForm>, string>>, maybeValue?: string) {
       this.setStore('errors', {
         ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
