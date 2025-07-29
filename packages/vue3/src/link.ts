@@ -1,38 +1,22 @@
 import {
   ActiveVisit,
   CacheForOption,
-  FormDataConvertible,
   GlobalEventCallback,
+  LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
   router,
   shouldIntercept,
-  VisitCallbacks,
 } from '@inertiajs/core'
 import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 const noop = () => {}
 
-export interface InertiaLinkProps extends Partial<Omit<VisitCallbacks, 'onCancelToken'>> {
+export interface InertiaLinkProps extends LinkComponentBaseProps {
   as?: string
-  data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
   onClick?: (event: MouseEvent) => void
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  async?: boolean
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>

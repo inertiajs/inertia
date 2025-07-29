@@ -5,6 +5,7 @@ import {
   type CacheForOption,
   type FormDataConvertible,
   type GlobalEventsMap,
+  type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
@@ -20,11 +21,8 @@ interface ActionElement extends HTMLElement {
   href?: string
 }
 
-type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
+type ActionParameters = Omit<LinkComponentBaseProps, 'onCancelToken'> & Omit<VisitOptions, keyof LinkComponentBaseProps> & {
   href?: string | { url: string; method: Method }
-  data?: Record<string, FormDataConvertible>
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error' | 'prefetching' | 'prefetched'

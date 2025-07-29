@@ -1,37 +1,20 @@
 import {
   ActiveVisit,
-  CacheForOption,
-  FormDataConvertible,
+  LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
   router,
   shouldIntercept,
-  VisitCallbacks,
 } from '@inertiajs/core'
 import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
-interface BaseInertiaLinkProps extends Partial<Omit<VisitCallbacks, 'onCancelToken'>> {
+interface BaseInertiaLinkProps extends LinkComponentBaseProps {
   as?: string
-  data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<Element>) => void
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  queryStringArrayFormat?: 'indices' | 'brackets'
-  async?: boolean
-  cacheFor?: CacheForOption | CacheForOption[]
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
