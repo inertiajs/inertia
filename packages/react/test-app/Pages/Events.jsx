@@ -652,6 +652,7 @@ export default () => {
 
       {/* Events: Prefetch */}
       <Link
+        as="button"
         href="/prefetch/2"
         prefetch="hover"
         onPrefetching={(visit) => internalAlert('linkOnPrefetching', visit)}

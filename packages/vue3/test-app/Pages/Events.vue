@@ -597,8 +597,9 @@ const callbackSuccessErrorPromise = (eventName) => {
     <a href="#" @click.prevent="navigateVisit" class="navigate">Navigate Event</a>
 
     <!-- Events: Prefetch -->
-    <Link 
-      href="/prefetch/2" 
+    <Link
+      as="button"
+      href="/prefetch/2"
       prefetch="hover"
       @prefetching="(visit) => internalAlert('linkOnPrefetching', visit)"
       @prefetched="(response, visit) => internalAlert('linkOnPrefetched', response, visit)"

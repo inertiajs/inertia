@@ -613,10 +613,7 @@ test.describe('Events', () => {
     test('fires when using Link component event handlers', async ({ page }) => {
       const prefetchResponse = page.waitForResponse('**/prefetch/2')
 
-      const prefetchElement = page
-        .getByRole('link', { name: 'Prefetch Event Link (Hover)' })
-        .or(page.getByRole('button', { name: 'Prefetch Event Link (Hover)' }))
-      await prefetchElement.hover()
+      await page.getByRole('button', { name: 'Prefetch Event Link (Hover)' }).hover()
       await prefetchResponse
 
       const messages = await page.evaluate(() => (window as any).messages)
