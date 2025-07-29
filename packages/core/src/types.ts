@@ -219,7 +219,7 @@ export type PageEvent = 'newComponent' | 'firstLoad'
 
 export type GlobalEventNames<T extends RequestPayload = RequestPayload> = keyof GlobalEventsMap<T>
 
-export type GlobalEvent<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = CustomEvent<GlobalEventDetails<TEventName>>
+export type GlobalEvent<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = CustomEvent<GlobalEventDetails<TEventName, T>>
 
 export type GlobalEventParameters<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['parameters']
 
@@ -279,7 +279,7 @@ export type PendingVisitOptions = {
 
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
-export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions>
+export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions<T>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
