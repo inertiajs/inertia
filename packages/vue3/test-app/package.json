@@ -1,12 +1,13 @@
 {
     "scripts": {
         "build": "vite build .",
-        "dev": "vite build . --watch"
+        "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.5",
         "vite": "^6.3.0",
-        "vue": "^3.4.33"
+        "vue": "^3.4.33",
+        "nodemon": "^3.0.0"
     },
     "dependencies": {
         "@inertiajs/core": "workspace:*",
