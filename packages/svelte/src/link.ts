@@ -27,7 +27,7 @@ type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
   cacheFor?: CacheForOption | CacheForOption[]
 }
 
-type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
+type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error' | 'prefetching' | 'prefetched'
 type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
 type ActionAttributes = {
   [K in keyof SelectedGlobalEventsMap as `on:${K}` | `on${K}`]?: (
@@ -154,6 +154,8 @@ function link(
       onSuccess: (page) => dispatchEvent('success', { detail: { page } }),
       onError: (errors) => dispatchEvent('error', { detail: { errors } }),
       onCancelToken: (token) => dispatchEvent('cancel-token', { detail: { token } }),
+      onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+      onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
     }
 
     updateEventListeners()
@@ -173,7 +175,11 @@ function link(
   }
 
   function prefetch() {
-    router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+    router.prefetch(href, {
+      ...baseParams,
+      onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+      onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
+    }, { cacheFor: cacheForValue })
   }
 
   function updateNodeAttributes() {

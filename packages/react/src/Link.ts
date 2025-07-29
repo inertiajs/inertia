@@ -1,4 +1,5 @@
 import {
+  ActiveVisit,
   CacheForOption,
   FormDataConvertible,
   LinkPrefetchOption,
@@ -6,15 +7,15 @@ import {
   Method,
   PendingVisit,
   PreserveStateOption,
-  Progress,
   router,
   shouldIntercept,
+  VisitCallbacks,
 } from '@inertiajs/core'
 import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
-interface BaseInertiaLinkProps {
+interface BaseInertiaLinkProps extends Partial<Omit<VisitCallbacks, 'onCancelToken'>> {
   as?: string
   data?: Record<string, FormDataConvertible>
   href: string | { url: string; method: Method }
@@ -27,13 +28,6 @@ interface BaseInertiaLinkProps {
   only?: string[]
   except?: string[]
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (event: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (event: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
   queryStringArrayFormat?: 'indices' | 'brackets'
   async?: boolean
   cacheFor?: CacheForOption | CacheForOption[]
@@ -69,6 +63,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onCancel = noop,
       onSuccess = noop,
       onError = noop,
+      onPrefetching = noop,
+      onPrefetched = noop,
       prefetch = false,
       cacheFor = 0,
       ...props
@@ -122,14 +118,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         ...baseParams,
         onCancelToken,
         onBefore,
-        onStart(event) {
+        onStart(visit: PendingVisit) {
           setInFlightCount((count) => count + 1)
-          onStart(event)
+          onStart(visit)
         },
         onProgress,
-        onFinish(event) {
+        onFinish(visit: ActiveVisit) {
           setInFlightCount((count) => count - 1)
-          onFinish(event)
+          onFinish(visit)
         },
         onCancel,
         onSuccess,
@@ -137,10 +133,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       }),
       [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
     )
-
-    const doPrefetch = () => {
-      router.prefetch(url, baseParams, { cacheFor: cacheForValue })
-    }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
       () => {
@@ -176,6 +168,16 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       // Otherwise, default to 30 seconds
       return 30_000
     }, [cacheFor, prefetchModes])
+
+    const doPrefetch = useMemo(() => {
+      return () => {
+        router.prefetch(url, {
+          ...baseParams,
+          onPrefetching,
+          onPrefetched,
+        }, { cacheFor: cacheForValue })
+      }
+    }, [url, baseParams, onPrefetching, onPrefetched, cacheForValue])
 
     useEffect(() => {
       return () => {
