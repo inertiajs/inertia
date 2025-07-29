@@ -300,21 +300,21 @@ export type PrefetchOptions = {
 
 export interface LinkComponentBaseProps
   extends Partial<
-      Pick<
-        Visit<Record<string, FormDataConvertible>>,
-        | 'data'
-        | 'method'
-        | 'replace'
-        | 'preserveScroll'
-        | 'preserveState'
-        | 'only'
-        | 'except'
-        | 'headers'
-        | 'queryStringArrayFormat'
-        | 'async'
-      >
-    >,
-    Partial<Omit<VisitCallbacks, 'onCancelToken'>> {
+    Pick<
+      Visit<Record<string, FormDataConvertible>>,
+      | 'data'
+      | 'method'
+      | 'replace'
+      | 'preserveScroll'
+      | 'preserveState'
+      | 'only'
+      | 'except'
+      | 'headers'
+      | 'queryStringArrayFormat'
+      | 'async'
+    > &
+      Omit<VisitCallbacks, 'onCancelToken'>
+  > {
   href: string | { url: string; method: Method }
   onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
