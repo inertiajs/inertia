@@ -238,12 +238,18 @@ importers:
       nodemon:
         specifier: ^3.0.0
         version: 3.1.10
+      typescript:
+        specifier: ^5.2.2
+        version: 5.7.2
       vite:
         specifier: ^6.3.0
         version: 6.3.5(@types/node@24.0.14)(jiti@1.21.6)(terser@5.43.1)(tsx@4.20.3)(yaml@2.6.1)
       vue:
         specifier: ^3.4.33
         version: 3.5.13(typescript@5.7.2)
+      vue-tsc:
+        specifier: ^2.2.4
+        version: 2.2.10(typescript@5.7.2)
 
   playgrounds/react:
     devDependencies:
@@ -3703,6 +3709,7 @@ snapshots:
   '@types/node@24.0.14':
     dependencies:
       undici-types: 7.8.0
+    optional: true
 
   '@types/nprogress@0.2.3': {}
 
@@ -4748,7 +4755,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 24.0.14
+      '@types/node': 22.10.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -5624,7 +5631,8 @@ snapshots:
 
   undici-types@6.20.0: {}
 
-  undici-types@7.8.0: {}
+  undici-types@7.8.0:
+    optional: true
 
   unpipe@1.0.0: {}
 
