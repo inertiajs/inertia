@@ -1,4 +1,4 @@
-import type { Page, Router } from '@inertiajs/core'
+import type { Method, Page, PageProps, Router } from '@inertiajs/core'
 
 declare global {
   interface Window {
@@ -6,6 +6,22 @@ declare global {
       Inertia: Router
     }
     initialPage: Page
+    _inertia_request_dump: {
+      headers: Record<string, string>
+      method: Method
+      form: Record<string, any> | undefined
+      files: MulterFile[] | object
+      query: Record<string, any>
+      $page: Page
+    }
+    _inertia_page_key: number | undefined
+    _inertia_props: PageProps
+    _inertia_layout_id: number | undefined
+    _inertia_site_layout_props: PageProps
+    _inertia_nested_layout_id: number | undefined
+    _inertia_nested_layout_props: PageProps
+    _inertia_page_props: PageProps
+    _plugin_global_props: object
   }
 
   interface ImportMeta {
@@ -13,4 +29,4 @@ declare global {
   }
 }
 
-export {}
+export type MulterFile = Express.Multer.File

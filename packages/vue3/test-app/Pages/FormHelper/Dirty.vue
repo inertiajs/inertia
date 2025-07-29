@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-const form = useForm({ name: 'foo', foo: [] })
+const form = useForm({ name: 'foo', foo: [] as string[] })
 
 const submit = () => {
   form.post('')
