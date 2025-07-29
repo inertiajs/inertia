@@ -1,7 +1,7 @@
 {
     "scripts": {
         "build": "vite build .",
-        "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,ts,vue,html,css,scss --ignore dist/ --exec 'vite build .'"
+        "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.5",
