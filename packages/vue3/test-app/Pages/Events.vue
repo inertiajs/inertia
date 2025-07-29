@@ -596,6 +596,17 @@ const callbackSuccessErrorPromise = (eventName) => {
     <!-- Events: Navigate -->
     <a href="#" @click.prevent="navigateVisit" class="navigate">Navigate Event</a>
 
+    <!-- Events: Prefetch -->
+    <Link 
+      href="/prefetch/2" 
+      prefetch="hover"
+      @prefetching="(visit) => internalAlert('linkOnPrefetching', visit)"
+      @prefetched="(response, visit) => internalAlert('linkOnPrefetched', response, visit)"
+      class="link-prefetch-hover"
+    >
+      Prefetch Event Link (Hover)
+    </Link>
+
     <!-- Lifecycles -->
     <a href="#" @click.prevent="lifecycleSuccess" class="lifecycle-success">Lifecycle Success</a>
     <a href="#" @click.prevent="lifecycleError" class="lifecycle-error">Lifecycle Error</a>

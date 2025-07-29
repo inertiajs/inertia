@@ -409,7 +409,7 @@ test.describe('Events', () => {
 
       test('can delay onFinish from firing by returning a promise (link)', async ({ page }) => {
         test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
-          
+
         await page.getByRole('button', { exact: true, name: 'Error Event Link (delaying onFinish w/ Promise)' }).click()
 
         await page.waitForTimeout(25)
@@ -606,6 +606,36 @@ test.describe('Events', () => {
 
       // Global Native Event Listener
       await expect(messages[2]).toBe('addEventListener(inertia:navigate)')
+    })
+  })
+
+  test.describe('prefetching/prefetched', () => {
+    test('fires when using Link component event handlers', async ({ page }) => {
+      const prefetchResponse = page.waitForResponse('**/prefetch/2')
+
+      const prefetchElement = page
+        .getByRole('link', { name: 'Prefetch Event Link (Hover)' })
+        .or(page.getByRole('button', { name: 'Prefetch Event Link (Hover)' }))
+      await prefetchElement.hover()
+      await prefetchResponse
+
+      const messages = await page.evaluate(() => (window as any).messages)
+
+      // Link Event Callbacks
+      const prefetchingIndex = messages.findIndex((msg) => msg === 'linkOnPrefetching')
+      const prefetchedIndex = messages.findIndex((msg) => msg === 'linkOnPrefetched')
+
+      await expect(prefetchingIndex).toBeGreaterThanOrEqual(0)
+      await expect(prefetchedIndex).toBeGreaterThanOrEqual(0)
+      await expect(prefetchingIndex).toBeLessThan(prefetchedIndex)
+
+      // Verify the visit and response objects were passed correctly
+      const visitObject = messages[prefetchingIndex + 1]
+      const responseObject = messages[prefetchedIndex + 1]
+
+      await assertVisitObject(visitObject)
+      await expect(visitObject.url.pathname).toBe('/prefetch/2')
+      await expect(responseObject.status).toBe(200)
     })
   })
 })
