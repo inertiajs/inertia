@@ -9,7 +9,7 @@ declare global {
   }
 
   interface ImportMeta {
-    glob: <T>(pattern: string, options?: { eager?: boolean }) => Record<string, () => Promise<T>>
+    readonly glob: <T>(pattern: string, options: { eager: true }) => Record<string, T>
   }
 }
 
