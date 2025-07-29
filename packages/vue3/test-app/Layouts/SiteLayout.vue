@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { usePage } from '@inertiajs/vue3'
 import { getCurrentInstance, onMounted, ref } from 'vue'
 
-const createdAt = ref(null)
+const createdAt = ref<number | null>(null)
 
 onMounted(() => {
   window._inertia_layout_id = getCurrentInstance().uid

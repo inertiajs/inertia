@@ -1,5 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3'
+
+declare global {
+  interface Window {
+    messages: any[]
+  }
+}
 
 const payloadWithFile = {
   file: new File(['foobar'], 'example.bin'),
@@ -9,7 +15,7 @@ const page = usePage()
 
 window.messages = []
 
-const internalAlert = (...args) => {
+const internalAlert = (...args: any[]) => {
   window.messages.push(...args)
 }
 

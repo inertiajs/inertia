@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { getCurrentInstance } from 'vue'
 

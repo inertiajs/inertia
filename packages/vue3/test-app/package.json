@@ -1,12 +1,15 @@
 {
     "scripts": {
         "build": "vite build .",
-        "dev": "vite build . --watch"
+        "dev": "vite build . --watch",
+        "type-check": "vue-tsc --noEmit"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.5",
+        "typescript": "^5.2.2",
         "vite": "^6.3.0",
-        "vue": "^3.4.33"
+        "vue": "^3.4.33",
+        "vue-tsc": "^2.2.4"
     },
     "dependencies": {
         "@inertiajs/core": "workspace:*",
