@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3'
 
 window.events = []
