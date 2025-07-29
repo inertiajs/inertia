@@ -8,12 +8,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
 interface BaseInertiaLinkProps extends LinkComponentBaseProps {
-  as?: string
+  as?: ElementType
   onClick?: (event: React.MouseEvent<Element>) => void
 }
 
@@ -62,9 +62,12 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [href, method])
 
     const _as = useMemo(() => {
-      as = as.toLowerCase()
+      if (typeof as !== 'string') {
+        // Custom component
+        return as
+      }
 
-      return _method !== 'get' ? 'button' : as
+      return _method !== 'get' ? 'button' : as.toLowerCase()
     }, [as, _method])
 
     const mergeDataArray = useMemo(
@@ -154,11 +157,15 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
 
     const doPrefetch = useMemo(() => {
       return () => {
-        router.prefetch(url, {
-          ...baseParams,
-          onPrefetching,
-          onPrefetched,
-        }, { cacheFor: cacheForValue })
+        router.prefetch(
+          url,
+          {
+            ...baseParams,
+            onPrefetching,
+            onPrefetched,
+          },
+          { cacheFor: cacheForValue },
+        )
       }
     }, [url, baseParams, onPrefetching, onPrefetched, cacheForValue])
 
@@ -219,19 +226,23 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       },
     }
 
-    const elProps = useMemo(
-      () => ({
-        a: { href: url },
-        button: { type: 'button' },
-      }),
-      [url],
-    )
+    const elProps = useMemo(() => {
+      if (_as === 'button') {
+        return { type: 'button' }
+      }
+
+      if (_as === 'a' || typeof _as !== 'string') {
+        return { href: url }
+      }
+
+      return {}
+    }, [_as, url])
 
     return createElement(
       _as,
       {
         ...props,
-        ...(elProps[_as] || {}),
+        ...elProps,
         ref,
         ...(() => {
           if (prefetchModes.includes('hover')) {

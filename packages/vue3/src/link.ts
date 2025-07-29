@@ -10,12 +10,12 @@ import {
   router,
   shouldIntercept,
 } from '@inertiajs/core'
-import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 const noop = () => {}
 
 export interface InertiaLinkProps extends LinkComponentBaseProps {
-  as?: string
+  as?: string | Component
   onClick?: (event: MouseEvent) => void
 }
 
@@ -25,7 +25,7 @@ const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
     as: {
-      type: String,
+      type: [String, Object] as PropType<string | Component>,
       default: 'a',
     },
     data: {
@@ -170,7 +170,14 @@ const Link: InertiaLink = defineComponent({
     const method = computed(() =>
       typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method),
     )
-    const as = computed(() => (method.value !== 'get' ? 'button' : props.as.toLowerCase()))
+    const as = computed(() => {
+      if (typeof props.as !== 'string') {
+        // Custom component
+        return props.as
+      }
+
+      return method.value !== 'get' ? 'button' : props.as.toLowerCase()
+    })
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
@@ -182,10 +189,17 @@ const Link: InertiaLink = defineComponent({
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
 
-    const elProps = computed(() => ({
-      a: { href: href.value },
-      button: { type: 'button' },
-    }))
+    const elProps = computed(() => {
+      if (as.value === 'button') {
+        return { type: 'button' }
+      }
+
+      if (as.value === 'a' || typeof as.value !== 'string') {
+        return { href: href.value }
+      }
+
+      return {}
+    })
 
     const baseParams = computed(() => ({
       data: data.value,
@@ -276,7 +290,7 @@ const Link: InertiaLink = defineComponent({
         as.value,
         {
           ...attrs,
-          ...(elProps.value[as.value] || {}),
+          ...elProps.value,
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
           ...(() => {
             if (prefetchModes.value.includes('hover')) {
