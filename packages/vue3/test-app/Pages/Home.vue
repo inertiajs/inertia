@@ -22,9 +22,9 @@ const redirectExternal = () => {
   router.post('/redirect-external')
 }
 
-window._inertia_page_key = getCurrentInstance().uid
+window._inertia_page_key = getCurrentInstance()?.uid
 window._inertia_props = props
-window._plugin_global_props = getCurrentInstance().appContext.config.globalProperties
+window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProperties || {}
 
 const page = usePage()
 </script>

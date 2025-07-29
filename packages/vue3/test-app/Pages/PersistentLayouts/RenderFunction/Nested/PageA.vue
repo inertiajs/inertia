@@ -1,9 +1,10 @@
 <script lang="ts">
+import type { Component } from 'vue'
 import NestedLayout from '@/Layouts/NestedLayout.vue'
 import SiteLayout from '@/Layouts/SiteLayout.vue'
 
 export default {
-  layout: (h, page) => {
+  layout: (h: Function, page: Component) => {
     return h(SiteLayout, [h(NestedLayout, [page])])
   },
 }
