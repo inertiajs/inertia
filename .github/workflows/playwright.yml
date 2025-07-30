@@ -31,7 +31,7 @@ jobs:
 
       - name: Type-check test-app
         if: matrix.adapter != 'svelte'
-        run: cd packages/${{ matrix.adapter }}/test-app && pnpm run type-check
+        run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run type-check
 
       - name: Install Playwright Browsers
         run: pnpm playwright install chromium
