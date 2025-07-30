@@ -29,6 +29,10 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
 
+      - name: Type-check test-app
+        if: matrix.adapter != 'svelte'
+        run: cd packages/${{ matrix.adapter }}/test-app && pnpm run type-check
+
       - name: Install Playwright Browsers
         run: pnpm playwright install chromium
 
