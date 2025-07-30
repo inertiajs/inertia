@@ -184,6 +184,16 @@ export default (props) => {
     form.post(page.url, callbacks())
   }
 
+  const onSuccessResetValue = () => {
+    form.post(page.url, {
+      ...callbacks({
+        onSuccess: (page) => {
+          form.reset()
+        },
+      }),
+    })
+  }
+
   const onErrorProcessing = () => {
     form.post('/form-helper/events/errors', callbacks())
   }
@@ -246,6 +256,10 @@ export default (props) => {
       <button onClick={onSuccessPromiseVisit} className="success-promise">
         onSuccess promise
       </button>
+      <button onClick={onSuccessResetValue} className="success-reset-value">
+        onSuccess resets value
+      </button>
+
 
       <button onClick={onErrorVisit} className="error">
         onError
@@ -269,6 +283,9 @@ export default (props) => {
 
       <span className="success-status">Form was {form.wasSuccessful ? '' : 'not '}successful</span>
       <span className="recently-status">Form was {form.recentlySuccessful ? '' : 'not '}recently successful</span>
+
+      <input type="text" className="name-input" value={form.data.name} onChange={e => form.setData('name', e.target.value)} />
+      <input type="checkbox" className="remember-input" checked={form.data.remember} onChange={e => form.setData('remember', e.target.value)} />
     </div>
   )
 }

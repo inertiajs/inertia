@@ -2,7 +2,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build .",
-    "dev": "vite build . --watch",
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../svelte/dist --ext js,ts,svelte,html,json --ignore dist/ --exec 'vite build .'",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
@@ -11,7 +11,8 @@
     "@tsconfig/svelte": "^5.0.4",
     "svelte": "^4.2.14",
     "typescript": "^5.6.2",
-    "vite": "^5.4.8"
+    "vite": "^5.4.19",
+    "nodemon": "^3.0.0"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

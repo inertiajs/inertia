@@ -195,12 +195,11 @@ export default function useForm<TForm extends FormDataType>(
           this.clearErrors()
           this.setStore('wasSuccessful', true)
           this.setStore('recentlySuccessful', true)
-          this.defaults(cloneDeep(this.data()))
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
-          }
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+          this.defaults(cloneDeep(this.data()))
+          return onSuccess
         },
         onError: (errors: Errors) => {
           this.setStore('processing', false)

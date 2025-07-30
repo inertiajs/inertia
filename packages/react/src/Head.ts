@@ -49,7 +49,7 @@ const Head: InertiaHead = function ({ children, title }) {
       if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
       }
-      const value = node.props[name]
+      const value = String(node.props[name])
       if (value === '') {
         return carry + ` ${name}`
       } else {
