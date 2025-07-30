@@ -7,39 +7,83 @@ declare module 'axios' {
   }
 }
 
-export type Errors = Record<string, string>
+export type DefaultInertiaConfig = {
+  errorValueType: string
+}
+/** 
+ * Designed to allow overriding of some core types using TypeScript
+ * interface declaration merging.
+ * 
+ * @see {@link DefaultInertiaConfig} for keys to override
+ * @example
+ * ```ts
+ * declare module '@inertiajs/core' {
+ *   export interface InertiaConfig {
+ *     errorValueType: string[]
+ *   }
+ * }
+ * ```
+ */
+export interface InertiaConfig {}
+export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key extends keyof InertiaConfig
+  ? InertiaConfig[Key]
+  : DefaultInertiaConfig[Key]
+export type ErrorValue = InertiaConfigFor<'errorValueType'>
+
+export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
 
+export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | null | undefined
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
-  | Blob
-  | FormDataEntryValue
-  | Date
-  | boolean
-  | number
-  | null
-  | undefined
+  | FormDataConvertibleValue
 
-export type FormDataKeys<T extends Record<any, any>> = T extends T
-  ? keyof T extends infer Key extends Extract<keyof T, string>
-    ? Key extends Key
-      ? T[Key] extends Record<any, any>
-        ? `${Key}.${FormDataKeys<T[Key]>}` | Key
-        : Key
-      : never
-    : never
-  : never
+export type FormDataType<T extends object> = {
+  [K in keyof T]: T[K] extends FormDataConvertibleValue
+    ? T[K]
+    : T[K] extends (...args: unknown[]) => unknown
+      ? never
+      : T[K] extends object | Array<unknown>
+        ? FormDataType<T[K]>
+        : never
+}
 
-export type FormDataValues<T extends Record<any, any>, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
-  ? P extends keyof T
-    ? Rest extends FormDataKeys<T[P]>
-      ? FormDataValues<T[P], Rest>
+export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
+  ? never
+  : T extends Array<unknown>
+    ? number extends T['length']
+      ? `${number}` | `${number}.${FormDataKeys<T[number]>}`
+      :
+          | Extract<keyof T, `${number}`>
+          | {
+              [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
+            }[Extract<keyof T, `${number}`>]
+    :
+        | Extract<keyof T, string>
+        | {
+            [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
+          }[Extract<keyof T, string>]
+
+export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
+  ? T extends unknown[]
+    ? P extends `${infer I extends number}`
+      ? Rest extends FormDataKeys<T[I]>
+        ? FormDataValues<T[I], Rest>
+        : never
       : never
-    : never
+    : P extends keyof T
+      ? Rest extends FormDataKeys<T[P]>
+        ? FormDataValues<T[P], Rest>
+        : never
+      : never
   : K extends keyof T
     ? T[K]
-    : never
+    : T extends unknown[]
+      ? T[K & number]
+      : never
+
+export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 

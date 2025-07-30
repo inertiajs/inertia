@@ -1,14 +1,23 @@
-import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import {
+  ErrorValue,
+  FormDataError,
+  FormDataKeys,
+  FormDataType,
+  FormDataValues,
+  Method,
+  Progress,
+  router,
+  VisitOptions,
+} from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 
-type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   isDirty: boolean
-  errors: Partial<Record<FormDataKeys<TForm>, string>>
+  errors: FormDataError<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -17,13 +26,13 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
-  defaults(field: FormDataKeys<TForm>, value: FormDataConvertible): this
+  defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
   reset(...fields: FormDataKeys<TForm>[]): this
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
-  setError(field: FormDataKeys<TForm>, value: string): this
-  setError(errors: Partial<Record<FormDataKeys<TForm>, string>>): this
+  setError(field: FormDataKeys<TForm>, value: ErrorValue): this
+  setError(errors: Record<FormDataKeys<TForm>, ErrorValue>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -33,14 +42,14 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends FormDataType<TForm>> = TForm & InertiaFormProps<TForm>
 
-export default function useForm<TForm extends FormDataType>(data: TForm | (() => TForm)): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
@@ -73,7 +82,7 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) {
+    defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
       if (typeof data === 'function') {
         throw new Error('You cannot call `defaults()` when using a function to define your form data.')
       }
@@ -107,7 +116,7 @@ export default function useForm<TForm extends FormDataType>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | Partial<Record<FormDataKeys<TForm>, string>>, maybeValue?: string) {
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: ErrorValue) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0
