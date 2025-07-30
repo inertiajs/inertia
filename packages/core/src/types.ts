@@ -298,6 +298,29 @@ export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
 }
 
+export interface LinkComponentBaseProps
+  extends Partial<
+    Pick<
+      Visit<Record<string, FormDataConvertible>>,
+      | 'data'
+      | 'method'
+      | 'replace'
+      | 'preserveScroll'
+      | 'preserveState'
+      | 'only'
+      | 'except'
+      | 'headers'
+      | 'queryStringArrayFormat'
+      | 'async'
+    > &
+      Omit<VisitCallbacks, 'onCancelToken'>
+  > {
+  href: string | { url: string; method: Method }
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+  cacheFor?: CacheForOption | CacheForOption[]
+}
+
 type PrefetchObject = {
   params: ActiveVisit
   response: Promise<Response>

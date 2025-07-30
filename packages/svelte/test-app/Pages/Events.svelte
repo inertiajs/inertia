@@ -583,6 +583,16 @@
   <!-- Events: Navigate -->
   <a href="#" on:click|preventDefault={navigateVisit} class="navigate">Navigate Event</a>
 
+  <!-- Events: Prefetch -->
+  <button
+    use:inertia={{ href: '/prefetch/2', prefetch: 'hover' }}
+    on:prefetching={(event) => internalAlert('linkOnPrefetching', event.detail.visit)}
+    on:prefetched={(event) => internalAlert('linkOnPrefetched', event.detail.response, event.detail.visit)}
+    class="link-prefetch-hover"
+  >
+    Prefetch Event Link (Hover)
+  </button>
+
   <!-- Lifecycles -->
   <a href="#" on:click|preventDefault={lifecycleSuccess} class="lifecycle-success">Lifecycle Success</a>
   <a href="#" on:click|preventDefault={lifecycleError} class="lifecycle-error">Lifecycle Error</a>

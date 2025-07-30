@@ -650,6 +650,18 @@ export default () => {
         Navigate Event
       </a>
 
+      {/* Events: Prefetch */}
+      <Link
+        as="button"
+        href="/prefetch/2"
+        prefetch="hover"
+        onPrefetching={(visit) => internalAlert('linkOnPrefetching', visit)}
+        onPrefetched={(response, visit) => internalAlert('linkOnPrefetched', response, visit)}
+        className="link-prefetch-hover"
+      >
+        Prefetch Event Link (Hover)
+      </Link>
+
       {/* Lifecycles */}
       <a href="#" onClick={lifecycleSuccess} className="lifecycle-success">
         Lifecycle Success
