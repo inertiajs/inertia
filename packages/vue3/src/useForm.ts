@@ -32,7 +32,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   clearErrors(...fields: FormDataKeys<TForm>[]): this
   resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: ErrorValue): this
-  setError(errors: Record<FormDataKeys<TForm>, ErrorValue>): this
+  setError(errors: FormDataError<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
