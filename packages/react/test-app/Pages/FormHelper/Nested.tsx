@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react'
 
-export default ({}) => {
+export default () => {
   const form = useForm({
     name: 'foo',
     address: {

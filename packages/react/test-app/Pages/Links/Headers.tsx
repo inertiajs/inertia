@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react'
-export default ({}) => {
+
+export default () => {
   return (
     <div>
       <span className="text">This is the links page that demonstrates passing custom headers</span>

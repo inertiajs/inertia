@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
 
-export default ({}) => {
+export default () => {
   const replace = (e: React.MouseEvent) => {
     e.preventDefault()
     router.visit('/dump/get', { replace: true })

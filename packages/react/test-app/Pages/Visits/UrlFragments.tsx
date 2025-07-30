@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 
-export default ({}) => {
+export default () => {
   const [documentScrollTop, setDocumentScrollTop] = useState(0)
   const [documentScrollLeft, setDocumentScrollLeft] = useState(0)
 

@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
 
-export default ({}) => {
+export default () => {
   const defaultVisit = (e: React.MouseEvent) => {
     e.preventDefault()
     router.post('/dump/post')

@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
 
-export default ({}) => {
+export default () => {
   const formData = { file: new File([], 'example.jpg'), foo: 'bar' }
 
   const visitMethod = (e: React.MouseEvent) => {

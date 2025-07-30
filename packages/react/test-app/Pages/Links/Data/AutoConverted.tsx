@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react'
 
-export default ({}) => {
+export default () => {
   const linkData = { file: new File([], 'example.jpg'), foo: 'bar' }
 
   return (

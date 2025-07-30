@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
 
-export default ({}) => {
+export default () => {
   const invalidVisit = () => {
     router.post('/non-inertia')
   }
