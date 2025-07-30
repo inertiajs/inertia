@@ -347,7 +347,7 @@ export type PrefetchOptions = {
 export interface LinkComponentBaseProps
   extends Partial<
     Pick<
-      Visit<Record<string, FormDataConvertible>>,
+      Visit<RequestPayload>,
       | 'data'
       | 'method'
       | 'replace'
