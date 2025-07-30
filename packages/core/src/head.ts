@@ -1,5 +1,7 @@
 import debounce from './debounce'
 
+const INERTIA_ATTRIBUTES = ['data-inertia', 'inertia']
+
 const Renderer = {
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
@@ -20,13 +22,17 @@ const Renderer = {
   },
 
   isInertiaManagedElement(element: Element): boolean {
-    return element.nodeType === Node.ELEMENT_NODE && element.getAttribute('data-inertia') !== null
+    return (
+      element.nodeType === Node.ELEMENT_NODE && INERTIA_ATTRIBUTES.some((attr) => element.getAttribute(attr) !== null)
+    )
   },
 
   findMatchingElementIndex(element: Element, elements: Array<Element>): number {
-    const key = element.getAttribute('data-inertia')
-    if (key !== null) {
-      return elements.findIndex((element) => element.getAttribute('data-inertia') === key)
+    for (const attr of INERTIA_ATTRIBUTES) {
+      const key = element.getAttribute(attr)
+      if (key !== null) {
+        return elements.findIndex((el) => el.getAttribute(attr) === key)
+      }
     }
 
     return -1
@@ -66,6 +72,18 @@ export default function createHeadManager(
     disconnect: () => void
   }
 } {
+  // Detect which attribute to use based on existing elements
+  let preferredAttribute = 'inertia'
+
+  if (!isServer) {
+    const hasLegacyAttribute = document.querySelector('[inertia]')
+    const hasDataAttribute = document.querySelector('[data-inertia]')
+
+    if (!hasLegacyAttribute && hasDataAttribute) {
+      preferredAttribute = 'data-inertia'
+    }
+  }
+
   const states: Record<string, Array<string>> = {}
   let lastProviderId = 0
 
@@ -102,7 +120,7 @@ export default function createHeadManager(
     const title = titleCallback('')
 
     const defaults: Record<string, string> = {
-      ...(title ? { title: `<title data-inertia="">${title}</title>` } : {}),
+      ...(title ? { title: `<title ${preferredAttribute}="">${title}</title>` } : {}),
     }
 
     const elements = Object.values(states)
@@ -118,10 +136,19 @@ export default function createHeadManager(
           return carry
         }
 
-        const match = element.match(/ data-inertia="[^"]+"/)
-        if (match) {
-          carry[match[0]] = element
-        } else {
+        let matchFound = false
+
+        for (const attr of INERTIA_ATTRIBUTES) {
+          const match = element.match(new RegExp(` ${attr}="[^"]+"`))
+
+          if (match) {
+            carry[match[0]] = element
+            matchFound = true
+            break
+          }
+        }
+
+        if (!matchFound) {
           carry[Object.keys(carry).length] = element
         }
 
@@ -148,6 +175,9 @@ export default function createHeadManager(
         reconnect: () => reconnect(id),
         update: (elements) => update(id, elements),
         disconnect: () => disconnect(id),
+        get preferredAttribute() {
+          return preferredAttribute
+        },
       }
     },
   }

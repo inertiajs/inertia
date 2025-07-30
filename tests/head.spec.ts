@@ -1,19 +1,29 @@
 import { expect, test } from '@playwright/test'
 
-test('renders the title tag and children', async ({ page }) => {
-  test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')
+const supportedAttributes = [undefined, 'inertia', 'data-inertia']
 
-  await page.goto('/head')
+supportedAttributes.forEach((attribute) => {
+  test(`renders the title tag and children with ${attribute ?? 'no'} attribute`, async ({ page }) => {
+    test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')
 
-  const inertiaTitle = await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)
+    await page.goto(attribute ? `/head/${attribute}` : '/head')
 
-  await expect(inertiaTitle).toBe('Test Head Component')
-  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute('content', 'width=device-width, initial-scale=1')
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'This is an "escape" example')
-  await expect(page.locator('meta[name="number"]')).toHaveAttribute('content', '0')
-  await expect(page.locator('meta[name="boolean"]')).toHaveAttribute('content', 'true')
-  await expect(page.locator('meta[name="false"]')).toHaveAttribute('content', 'false')
-  await expect(page.locator('meta[name="null"]')).toHaveAttribute('content', 'null')
-  await expect(page.locator('meta[name="undefined"]')).toHaveAttribute('content', 'undefined')
-  await expect(page.locator('meta[name="float"]')).toHaveAttribute('content', '3.14')
+    const inertiaTitle = await page.evaluate(
+      (attribute) => document.querySelector(`title[${attribute}]`)?.textContent,
+      attribute ?? 'inertia', // it defaults to 'inertia' if no attribute is provided
+    )
+
+    await expect(inertiaTitle).toBe('Test Head Component')
+    await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+      'content',
+      'width=device-width, initial-scale=1',
+    )
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'This is an "escape" example')
+    await expect(page.locator('meta[name="number"]')).toHaveAttribute('content', '0')
+    await expect(page.locator('meta[name="boolean"]')).toHaveAttribute('content', 'true')
+    await expect(page.locator('meta[name="false"]')).toHaveAttribute('content', 'false')
+    await expect(page.locator('meta[name="null"]')).toHaveAttribute('content', 'null')
+    await expect(page.locator('meta[name="undefined"]')).toHaveAttribute('content', 'undefined')
+    await expect(page.locator('meta[name="float"]')).toHaveAttribute('content', '3.14')
+  })
 })
