@@ -1,5 +1,18 @@
 <script setup lang="ts">
+import { Errors, Page, PendingVisit, Progress } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/vue3'
+import { CancelTokenSource } from 'axios'
+
+declare global {
+  interface Window {
+    events: string[]
+    data: {
+      type: string
+      data: unknown
+      event: string | null
+    }[]
+  }
+}
 
 window.events = []
 window.data = []
@@ -9,11 +22,11 @@ const form = useForm({
   remember: false,
 })
 
-const pushEvent = (message) => {
+const pushEvent = (message: string) => {
   window.events.push(message)
 }
 
-const pushData = (event, type, data) => {
+const pushData = (event: string | null, type: string, data: unknown) => {
   window.data.push({
     type,
     data,
@@ -102,7 +115,7 @@ const errorsSetOnError = () => {
 const onBeforeVisit = () => {
   form.post('/sleep', {
     ...callbacks({
-      onBefore: (visit) => {
+      onBefore: (visit: PendingVisit) => {
         pushEvent('onBefore')
         pushData('onBefore', 'visit', visit)
       },
@@ -113,7 +126,7 @@ const onBeforeVisit = () => {
 const onBeforeVisitCancelled = () => {
   form.post('/sleep', {
     ...callbacks({
-      onBefore: (visit) => {
+      onBefore: (visit: PendingVisit) => {
         pushEvent('onBefore')
         return false
       },
@@ -124,7 +137,7 @@ const onBeforeVisitCancelled = () => {
 const onStartVisit = () => {
   form.post('/form-helper/events', {
     ...callbacks({
-      onStart: (visit) => {
+      onStart: (visit: PendingVisit) => {
         pushEvent('onStart')
         pushData('onStart', 'visit', visit)
       },
@@ -140,7 +153,7 @@ const onProgressVisit = () => {
     }))
     .post('/dump/post', {
       ...callbacks({
-        onProgress: (event) => {
+        onProgress: (event: Progress) => {
           pushEvent('onProgress')
           pushData('onProgress', 'progressEvent', event)
         },
@@ -151,7 +164,7 @@ const onProgressVisit = () => {
 const cancelledVisit = () => {
   form.post('/sleep', {
     ...callbacks({
-      onCancelToken: (token) => {
+      onCancelToken: (token: CancelTokenSource) => {
         pushEvent('onCancelToken')
 
         setTimeout(() => {
@@ -166,7 +179,7 @@ const cancelledVisit = () => {
 const onSuccessVisit = () => {
   form.post('/dump/post', {
     ...callbacks({
-      onSuccess: (page) => {
+      onSuccess: (page: Page) => {
         pushEvent('onSuccess')
         pushData('onSuccess', 'page', page)
       },
@@ -177,7 +190,7 @@ const onSuccessVisit = () => {
 const onSuccessPromiseVisit = () => {
   form.post('/dump/post', {
     ...callbacks({
-      onSuccess: (page) => {
+      onSuccess: (page: Page) => {
         pushEvent('onSuccess')
 
         setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
@@ -190,7 +203,7 @@ const onSuccessPromiseVisit = () => {
 const onSuccessResetValue = () => {
   form.post(page.url, {
     ...callbacks({
-      onSuccess: (page) => {
+      onSuccess: (page: Page) => {
         form.reset()
       },
     }),
@@ -200,7 +213,7 @@ const onSuccessResetValue = () => {
 const onErrorVisit = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
-      onError: (errors) => {
+      onError: (errors: Errors) => {
         pushEvent('onError')
         pushData('onError', 'errors', errors)
       },
@@ -211,7 +224,7 @@ const onErrorVisit = () => {
 const onErrorPromiseVisit = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
-      onError: (errors) => {
+      onError: (errors: Errors) => {
         pushEvent('onError')
 
         setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)

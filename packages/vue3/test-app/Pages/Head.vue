@@ -7,7 +7,7 @@ import { Head } from '@inertiajs/vue3'
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content='This is an "escape" example' />
     <meta name="undefined" :content="undefined" />
-    <!-- @vue-expect-error The conetent attribute must be a string -->
+    <!-- @vue-expect-error - The content attribute must be a string, we support passing other types for backwards compatibility -->
     <meta name="number" :content="0" />
     <!-- @vue-expect-error -->
     <meta name="boolean" :content="true" />

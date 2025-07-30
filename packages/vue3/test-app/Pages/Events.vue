@@ -115,6 +115,7 @@ const beforeVisitPreventGlobalNative = () => {
 }
 
 const cancelTokenVisit = () => {
+  // @ts-expect-error - We're testing that the router doesn't have an onCancelToken listener
   router.on('cancelToken', () => internalAlert('This listener should not have been called.'))
   document.addEventListener('inertia:cancelToken', () => internalAlert('This listener should not have been called.'))
 
@@ -212,6 +213,7 @@ const cancelVisit = () => {
     {},
     {
       onCancelToken: (token) => token.cancel(),
+      // @ts-expect-error - We're testing that the onCancel callback has no arguments, so event will be undefined
       onCancel: (event) => {
         internalAlert('onCancel')
         internalAlert(event)
@@ -329,6 +331,7 @@ const invalidVisit = () => {
     '/non-inertia',
     {},
     {
+      // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onInvalid method
       onInvalid: () => internalAlert('This listener should not have been called.'),
     },
   )
@@ -349,6 +352,7 @@ const exceptionVisit = () => {
     '/disconnect',
     {},
     {
+      // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onException method
       onException: () => internalAlert('This listener should not have been called.'),
     },
   )
@@ -369,6 +373,7 @@ const navigateVisit = () => {
     '/',
     {},
     {
+      // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onNavigate method
       onNavigate: () => internalAlert('This listener should not have been called.'),
     },
   )
@@ -376,6 +381,7 @@ const navigateVisit = () => {
 
 const registerAllListeners = () => {
   router.on('before', () => internalAlert('Inertia.on(before)'))
+  // @ts-expect-error - We're testing that the router doesn't have an onCancelToken listener
   router.on('cancelToken', () => internalAlert('Inertia.on(cancelToken)'))
   router.on('cancel', () => internalAlert('Inertia.on(cancel)'))
   router.on('start', () => internalAlert('Inertia.on(start)'))
@@ -436,23 +442,27 @@ const lifecycleCancel = () => {
 }
 
 const lifecycleCancelAfterFinish = () => {
-  let cancelToken = null
+  type CancelToken = {
+    cancel: () => void
+  }
+
+  let cancelToken = <CancelToken | null>null
 
   router.post(page.url, payloadWithFile, {
     ...registerAllListeners(),
-    onCancelToken: (token) => {
+    onCancelToken: (token: CancelToken) => {
       internalAlert('onCancelToken')
       cancelToken = token
     },
     onFinish: () => {
       internalAlert('onFinish')
       internalAlert('CANCELLING!')
-      cancelToken.cancel()
+      cancelToken?.cancel()
     },
   })
 }
 
-const callbackSuccessErrorPromise = (eventName) => {
+const callbackSuccessErrorPromise = (eventName: string) => {
   internalAlert(eventName)
   setTimeout(() => internalAlert('onFinish should have been fired by now if Promise functionality did not work'), 5)
   return new Promise((resolve) => setTimeout(resolve, 20))
@@ -508,6 +518,8 @@ const callbackSuccessErrorPromise = (eventName) => {
 
     <!-- Events: Cancel -->
     <a href="#" @click.prevent="cancelVisit" class="cancel">Cancel Event</a>
+
+    <!-- @vue-expect-error - We're testing that the onCancel callback has no arguments, so event will be undefined -->
     <Link
       :href="$page.url"
       method="post"
