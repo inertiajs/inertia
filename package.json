@@ -12,6 +12,8 @@
     "test:react": "PACKAGE=react playwright test",
     "test:svelte": "PACKAGE=svelte playwright test",
     "test:vue": "PACKAGE=vue3 playwright test",
+    "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
+    "type-check:test-app:vue": "cd packages/vue3/test-app && pnpm run type-check",
     "playground:react": "cd playgrounds/react && composer run dev",
     "playground:svelte4": "cd playgrounds/svelte4 && composer run dev",
     "playground:svelte5": "cd playgrounds/svelte5 && composer run dev",
