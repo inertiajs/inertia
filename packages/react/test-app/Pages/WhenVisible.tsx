@@ -29,6 +29,7 @@ export default () => {
       </div>
 
       <div style={{ marginTop: '5000px' }}>
+        {/* @ts-expect-error - WhenVisible requires a child, we should check whether this is a bug or not */}
         <WhenVisible data="foo" fallback={<div>Loading fourth one...</div>}></WhenVisible>
       </div>
 
