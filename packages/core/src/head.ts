@@ -23,13 +23,15 @@ const Renderer = {
 
   isInertiaManagedElement(element: Element): boolean {
     return (
-      element.nodeType === Node.ELEMENT_NODE && INERTIA_ATTRIBUTES.some((attr) => element.getAttribute(attr) !== null)
+      element.nodeType === Node.ELEMENT_NODE &&
+      INERTIA_ATTRIBUTES.some((attribute) => element.getAttribute(attribute) !== null)
     )
   },
 
   findMatchingElementIndex(element: Element, elements: Array<Element>): number {
     for (const attr of INERTIA_ATTRIBUTES) {
       const key = element.getAttribute(attr)
+
       if (key !== null) {
         return elements.findIndex((el) => el.getAttribute(attr) === key)
       }
@@ -70,7 +72,7 @@ export default function createHeadManager(
   createProvider: () => {
     update: (elements: string[]) => void
     disconnect: () => void
-    get preferredAttribute(): string
+    preferredAttribute: () => string
   }
 } {
   // Detect which attribute to use based on existing elements
@@ -176,9 +178,7 @@ export default function createHeadManager(
         reconnect: () => reconnect(id),
         update: (elements) => update(id, elements),
         disconnect: () => disconnect(id),
-        get preferredAttribute() {
-          return preferredAttribute
-        },
+        preferredAttribute: () => preferredAttribute,
       }
     },
   }
