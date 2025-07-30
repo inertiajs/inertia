@@ -70,6 +70,7 @@ export default function createHeadManager(
   createProvider: () => {
     update: (elements: string[]) => void
     disconnect: () => void
+    get preferredAttribute(): string
   }
 } {
   // Detect which attribute to use based on existing elements
