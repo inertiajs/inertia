@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { Link } from '@inertiajs/react'
-import type { Method } from '@inertiajs/core'
+import type { CacheForOption, LinkPrefetchOption, Method } from '@inertiajs/core'
 
 export default () => {
   const [method, setMethod] = useState<Method>('get')
   const [href, setHref] = useState('/dump/get')
   const [data, setData] = useState({ foo: 'bar' })
   const [headers, setHeaders] = useState({ 'X-Custom-Header': 'value' })
-  const [prefetch, setPrefetch] = useState<boolean | string>(false)
-  const [cacheFor, setCacheFor] = useState<number | string>(0)
+  const [prefetch, setPrefetch] = useState<boolean | LinkPrefetchOption>(false)
+  const [cacheFor, setCacheFor] = useState<CacheForOption>(0)
 
   const change = () => {
-    setMethod('post' as Method)
+    setMethod('post')
     setHref('/dump/post')
     setData({ foo: 'baz' })
     setHeaders({ 'X-Custom-Header': 'new-value' })
@@ -34,7 +34,7 @@ export default () => {
 
       <button onClick={change}>Change Link Props</button>
 
-      <Link href="/dump/get" prefetch={prefetch as any} cacheFor={cacheFor}>
+      <Link href="/dump/get" prefetch={prefetch} cacheFor={cacheFor}>
         Prefetch Link
       </Link>
 
