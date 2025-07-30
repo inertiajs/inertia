@@ -38,7 +38,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   clearErrors: (...fields: FormDataKeys<TForm>[]) => void
   resetAndClearErrors: (...fields: FormDataKeys<TForm>[]) => void
   setError(field: FormDataKeys<TForm>, value: string): void
-  setError(errors: Record<FormDataKeys<TForm>, string>): void
+  setError(errors: Partial<Record<FormDataKeys<TForm>, string>>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
@@ -256,7 +256,7 @@ export default function useForm<TForm extends FormDataType>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeys<TForm> | Partial<Record<FormDataKeys<TForm>, string>>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
