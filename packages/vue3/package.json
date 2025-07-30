@@ -43,7 +43,7 @@
   },
   "scripts": {
     "dev": "./build.js --watch",
-    "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "pnpm clean && ./build.js && tsc",
     "clean": "rm -rf types && rm -rf dist",
     "prepublishOnly": "pnpm build"
   },

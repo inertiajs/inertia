@@ -9,6 +9,7 @@
 
     "declaration": true,
     "declarationDir": "types",
+    "emitDeclarationOnly": true,
 
     "module": "ES2020",
     "moduleResolution": "Node",
@@ -24,5 +25,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "exclude": ["tests"]
+  "exclude": ["tests","types"]
 }
