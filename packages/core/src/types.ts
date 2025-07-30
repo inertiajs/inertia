@@ -172,18 +172,18 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   preserveUrl: boolean
 }
 
-export type GlobalEventsMap = {
+export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
   before: {
-    parameters: [PendingVisit]
+    parameters: [PendingVisit<T>]
     details: {
-      visit: PendingVisit
+      visit: PendingVisit<T>
     }
     result: boolean | void
   }
   start: {
-    parameters: [PendingVisit]
+    parameters: [PendingVisit<T>]
     details: {
-      visit: PendingVisit
+      visit: PendingVisit<T>
     }
     result: void
   }
@@ -195,9 +195,9 @@ export type GlobalEventsMap = {
     result: void
   }
   finish: {
-    parameters: [ActiveVisit]
+    parameters: [ActiveVisit<T>]
     details: {
-      visit: ActiveVisit
+      visit: ActiveVisit<T>
     }
     result: void
   }
@@ -242,18 +242,18 @@ export type GlobalEventsMap = {
     result: boolean | void
   }
   prefetched: {
-    parameters: [AxiosResponse, ActiveVisit]
+    parameters: [AxiosResponse, ActiveVisit<T>]
     details: {
       response: AxiosResponse
       fetchedAt: number
-      visit: ActiveVisit
+      visit: ActiveVisit<T>
     }
     result: void
   }
   prefetching: {
-    parameters: [ActiveVisit]
+    parameters: [ActiveVisit<T>]
     details: {
-      visit: ActiveVisit
+      visit: ActiveVisit<T>
     }
     result: void
   }
@@ -261,40 +261,40 @@ export type GlobalEventsMap = {
 
 export type PageEvent = 'newComponent' | 'firstLoad'
 
-export type GlobalEventNames = keyof GlobalEventsMap
+export type GlobalEventNames<T extends RequestPayload = RequestPayload> = keyof GlobalEventsMap<T>
 
-export type GlobalEvent<TEventName extends GlobalEventNames> = CustomEvent<GlobalEventDetails<TEventName>>
+export type GlobalEvent<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = CustomEvent<GlobalEventDetails<TEventName, T>>
 
-export type GlobalEventParameters<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['parameters']
+export type GlobalEventParameters<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['parameters']
 
-export type GlobalEventResult<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['result']
+export type GlobalEventResult<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['result']
 
-export type GlobalEventDetails<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['details']
+export type GlobalEventDetails<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['details']
 
-export type GlobalEventTrigger<TEventName extends GlobalEventNames> = (
-  ...params: GlobalEventParameters<TEventName>
-) => GlobalEventResult<TEventName>
+export type GlobalEventTrigger<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = (
+  ...params: GlobalEventParameters<TEventName, T>
+) => GlobalEventResult<TEventName, T>
 
-export type GlobalEventCallback<TEventName extends GlobalEventNames> = (
-  ...params: GlobalEventParameters<TEventName>
-) => GlobalEventResult<TEventName>
+export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = (
+  ...params: GlobalEventParameters<TEventName, T>
+) => GlobalEventResult<TEventName, T>
 
 export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 
-export type VisitCallbacks = {
+export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
-  onBefore: GlobalEventCallback<'before'>
-  onStart: GlobalEventCallback<'start'>
-  onProgress: GlobalEventCallback<'progress'>
-  onFinish: GlobalEventCallback<'finish'>
-  onCancel: GlobalEventCallback<'cancel'>
-  onSuccess: GlobalEventCallback<'success'>
-  onError: GlobalEventCallback<'error'>
-  onPrefetched: GlobalEventCallback<'prefetched'>
-  onPrefetching: GlobalEventCallback<'prefetching'>
+  onBefore: GlobalEventCallback<'before', T>
+  onStart: GlobalEventCallback<'start', T>
+  onProgress: GlobalEventCallback<'progress', T>
+  onFinish: GlobalEventCallback<'finish', T>
+  onCancel: GlobalEventCallback<'cancel', T>
+  onSuccess: GlobalEventCallback<'success', T>
+  onError: GlobalEventCallback<'error', T>
+  onPrefetched: GlobalEventCallback<'prefetched', T>
+  onPrefetching: GlobalEventCallback<'prefetching', T>
 }
 
-export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks>
+export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks<T>>
 
 export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
   VisitOptions<T>,
@@ -321,9 +321,9 @@ export type PendingVisitOptions = {
   interrupted: boolean
 }
 
-export type PendingVisit = Visit & PendingVisitOptions
+export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
-export type ActiveVisit = PendingVisit & Required<VisitOptions>
+export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions<T>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
@@ -340,6 +340,29 @@ export type CacheForOption = number | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
+}
+
+export interface LinkComponentBaseProps
+  extends Partial<
+    Pick<
+      Visit<Record<string, FormDataConvertible>>,
+      | 'data'
+      | 'method'
+      | 'replace'
+      | 'preserveScroll'
+      | 'preserveState'
+      | 'only'
+      | 'except'
+      | 'headers'
+      | 'queryStringArrayFormat'
+      | 'async'
+    > &
+      Omit<VisitCallbacks, 'onCancelToken'>
+  > {
+  href: string | { url: string; method: Method }
+  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
+  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type PrefetchObject = {
