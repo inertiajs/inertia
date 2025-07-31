@@ -465,6 +465,25 @@
     setTimeout(() => internalAlert('onFinish should have been fired by now if Promise functionality did not work'), 5)
     return new Promise((resolve) => setTimeout(resolve, 20))
   }
+
+  const handleCancelToken = (event: CustomEvent) => {
+    (event.detail as {token: {cancel: () => void}}).token.cancel()
+  }
+
+  const handleCancel = (event: Event | CustomEvent) => {
+    const customEvent = event as CustomEvent
+    internalAlert('linkOnCancel', customEvent.detail || undefined)
+  }
+
+  const handleProgress = (event: Event | CustomEvent<{progress: unknown}>) => {
+    const customEvent = event as CustomEvent<{progress: unknown}>
+    internalAlert('linkOnProgress', customEvent.detail.progress)
+  }
+
+  const handleError = (event: Event | CustomEvent<{errors: unknown}>) => {
+    const customEvent = event as CustomEvent<{errors: unknown}>
+    internalAlert('linkOnError', customEvent.detail.errors)
+  }
 </script>
 
 <div>
@@ -504,7 +523,7 @@
   <a href={'#'} on:click|preventDefault={cancelTokenVisit} class="canceltoken">Cancel Token Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
-    on:cancel-token={(event) => internalAlert('linkOnCancelToken', event)}
+    on:cancel-token={(event) => internalAlert('linkOnCancelToken', event.detail)}
     class="link-canceltoken">Cancel Token Event Link</button
   >
 
@@ -512,8 +531,8 @@
   <a href={'#'} on:click|preventDefault={cancelVisit} class="cancel">Cancel Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
-    on:cancel-token={({ detail }) => detail.cancel()}
-    on:cancel={(event) => internalAlert('linkOnCancel', event)}
+    on:cancel-token={handleCancelToken}
+    on:cancel={handleCancel}
     class="link-cancel">Cancel Event Link</button
   >
 
@@ -532,13 +551,13 @@
   >
   <button
     use:inertia={{ href: $page.url, method: 'post', data: payloadWithFile }}
-    on:progress={(event) => internalAlert('linkOnProgress', event)}
+    on:progress={handleProgress}
     class="link-progress">Progress Event Link</button
   >
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:before={() => internalAlert('linkProgressNoFilesOnBefore')}
-    on:progress={(event) => internalAlert('linkOnProgress', event)}
+    on:progress={handleProgress}
     class="link-progress-no-files">Progress Event Link (no files)</button
   >
 
@@ -549,7 +568,7 @@
   >
   <button
     use:inertia={{ href: '/events/errors', method: 'post' }}
-    on:error={(event) => internalAlert('linkOnError', event)}
+    on:error={handleError}
     on:success={() => internalAlert('This listener should not have been called')}
     class="link-error">Error Event Link</button
   >
@@ -590,7 +609,7 @@
   <a href={'#'} on:click|preventDefault={finishVisit} class="finish">Finish Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
-    on:finish={(event) => internalAlert('linkOnFinish', event)}
+    on:finish={(event) => internalAlert('linkOnFinish', event.detail.visit)}
     class="link-finish">Finish Event Link</button
   >
 

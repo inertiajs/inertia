@@ -30,7 +30,6 @@ jobs:
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
 
       - name: Type-check test-app
-        if: matrix.adapter != 'svelte'
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run type-check
 
       - name: Install Playwright Browsers

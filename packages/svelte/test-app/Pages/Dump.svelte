@@ -7,7 +7,7 @@
   export let headers: Record<string, string>
   export let method: Method
   export let form: Record<string, unknown>
-  export let files: MulterFile[] | object
+  export let files: MulterFile[] | object = {}
   export let query: Record<string, unknown>
 
   const dump = {
