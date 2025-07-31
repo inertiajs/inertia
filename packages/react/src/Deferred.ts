@@ -48,7 +48,7 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   }, [pageProps, keys])
 
   if (!loaded) {
-    return fallback
+    return typeof fallback === 'function' ? fallback() : fallback
   }
 
   return typeof children === 'function' ? children() : children

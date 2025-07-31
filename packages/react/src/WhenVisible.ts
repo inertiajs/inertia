@@ -88,9 +88,8 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     }
   }, [ref, getReloadParams, buffer])
 
-  if (loaded && typeof children === 'function') {
-    children = children()
-  }
+  const resolveChildren = () => (typeof children === 'function' ? children() : children)
+  const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)
 
   if (always || !loaded) {
     return createElement(
@@ -99,11 +98,11 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
         props: null,
         ref,
       },
-      loaded ? (children as ReactNode) : fallback,
+      loaded ? resolveChildren() : resolveFallback(),
     )
   }
 
-  return loaded ? (children as ReactNode) : null
+  return loaded ? resolveChildren() : null
 }
 
 WhenVisible.displayName = 'InertiaWhenVisible'
