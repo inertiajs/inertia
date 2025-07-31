@@ -34,7 +34,7 @@ const Link: InertiaLink = defineComponent({
     },
     href: {
       type: [String, Object] as PropType<InertiaLinkProps['href']>,
-      required: true,
+      default: '',
     },
     method: {
       type: String as PropType<Method>,
@@ -181,7 +181,7 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        typeof props.href === 'object' ? props.href.url : props.href || '',
+        typeof props.href === 'object' ? props.href.url : props.href,
         props.data,
         props.queryStringArrayFormat,
       ),

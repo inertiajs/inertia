@@ -27,7 +27,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       children,
       as = 'a',
       data = {},
-      href,
+      href = '',
       method = 'get',
       preserveScroll = false,
       preserveState = null,
@@ -71,13 +71,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [as, _method])
 
     const mergeDataArray = useMemo(
-      () =>
-        mergeDataIntoQueryString(
-          _method,
-          typeof href === 'object' ? href.url : href || '',
-          data,
-          queryStringArrayFormat,
-        ),
+      () => mergeDataIntoQueryString(_method, typeof href === 'object' ? href.url : href, data, queryStringArrayFormat),
       [href, _method, data, queryStringArrayFormat],
     )
 

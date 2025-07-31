@@ -304,7 +304,7 @@ export class Router {
         {
           ...current,
           ...pageParams,
-          props,
+          props: props as Page['props'],
         },
         {
           replace,

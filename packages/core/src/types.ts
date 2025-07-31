@@ -10,10 +10,10 @@ declare module 'axios' {
 export type DefaultInertiaConfig = {
   errorValueType: string
 }
-/** 
+/**
  * Designed to allow overriding of some core types using TypeScript
  * interface declaration merging.
- * 
+ *
  * @see {@link DefaultInertiaConfig} for keys to override
  * @example
  * ```ts
@@ -121,7 +121,7 @@ export type ScrollRegion = {
 export interface ClientSideVisitOptions {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: Page['props']) => Page['props']) | Page['props']
+  props?: ((props: Page['props']) => PageProps) | PageProps
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
@@ -345,7 +345,7 @@ export type PrefetchOptions = {
 export interface LinkComponentBaseProps
   extends Partial<
     Pick<
-      Visit<Record<string, FormDataConvertible>>,
+      Visit<RequestPayload>,
       | 'data'
       | 'method'
       | 'replace'
@@ -357,13 +357,13 @@ export interface LinkComponentBaseProps
       | 'queryStringArrayFormat'
       | 'async'
     > &
-      Omit<VisitCallbacks, 'onCancelToken'>
-  > {
-  href: string | { url: string; method: Method }
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
-}
+      Omit<VisitCallbacks, 'onCancelToken'> & {
+        href: string | { url: string; method: Method }
+        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
+        prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+        cacheFor: CacheForOption | CacheForOption[]
+      }
+  > {}
 
 type PrefetchObject = {
   params: ActiveVisit
