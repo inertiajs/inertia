@@ -611,8 +611,11 @@ test.describe('enabled', () => {
     await expect(page).toHaveURL('/article')
     await expect(page.getByText('Article Header')).toBeVisible()
 
-    const restoredScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
-    expect(restoredScrollPosition).toBe(bottomScrollPosition)
+    await page.waitForFunction(
+      (expectedPosition) => document.documentElement.scrollTop === expectedPosition,
+      bottomScrollPosition,
+      { timeout: 1000 },
+    )
   })
 
   test.skip('restores all tracked scroll regions when pressing the back button from another website', async ({
