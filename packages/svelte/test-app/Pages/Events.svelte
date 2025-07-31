@@ -1,3 +1,11 @@
+<script context="module" lang="ts">
+  declare global {
+    interface Window {
+      messages: unknown[]
+    }
+  }
+</script>
+
 <script lang="ts">
   import { inertia, page, router } from '@inertiajs/svelte'
 
@@ -107,7 +115,7 @@
   }
 
   const cancelTokenVisit = () => {
-    // @ts-expect-error - Testing that cancelToken is not a valid event
+    // @ts-expect-error - We're testing that the router doesn't have an onCancelToken listener
     router.on('cancelToken', () => internalAlert('This listener should not have been called.'))
     document.addEventListener('inertia:cancelToken', () => internalAlert('This listener should not have been called.'))
 
@@ -207,6 +215,7 @@
         onCancelToken: (token) => {
           token.cancel()
         },
+        // @ts-expect-error - We're testing that the onCancel callback has no arguments, so event will be undefined
         onCancel: (event) => {
           internalAlert('onCancel')
           internalAlert(event)
@@ -324,7 +333,7 @@
       '/non-inertia',
       {},
       {
-        // @ts-expect-error - Testing that onInvalid is not a valid callback
+        // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onInvalid method
         onInvalid: () => internalAlert('This listener should not have been called.'),
       },
     )
@@ -345,7 +354,7 @@
       '/disconnect',
       {},
       {
-        // @ts-expect-error - Testing that onException is not a valid callback
+        // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onException method
         onException: () => internalAlert('This listener should not have been called.'),
       },
     )
@@ -366,7 +375,7 @@
       '/',
       {},
       {
-        // @ts-expect-error - Testing that onNavigate is not a valid callback
+        // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onNavigate method
         onNavigate: () => internalAlert('This listener should not have been called.'),
       },
     )
@@ -374,7 +383,7 @@
 
   const registerAllListeners = () => {
     router.on('before', () => internalAlert('Inertia.on(before)'))
-    // @ts-expect-error - Testing that cancelToken is not a valid event
+    // @ts-expect-error - We're testing that the router doesn't have an onCancelToken listener
     router.on('cancelToken', () => internalAlert('Inertia.on(cancelToken)'))
     router.on('cancel', () => internalAlert('Inertia.on(cancel)'))
     router.on('start', () => internalAlert('Inertia.on(start)'))
@@ -456,18 +465,6 @@
     setTimeout(() => internalAlert('onFinish should have been fired by now if Promise functionality did not work'), 5)
     return new Promise((resolve) => setTimeout(resolve, 20))
   }
-
-  const handleProgressEvent = (event: Event | CustomEvent) => {
-    if ('detail' in event) {
-      internalAlert('linkOnProgress', event.detail.progress)
-    }
-  }
-
-  const handleErrorEvent = (event: Event | CustomEvent) => {
-    if ('detail' in event) {
-      internalAlert('linkOnError', event.detail.errors)
-    }
-  }
 </script>
 
 <div>
@@ -516,7 +513,7 @@
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:cancel-token={({ detail }) => detail.cancel()}
-    on:cancel={(event) => internalAlert('linkOnCancel', undefined)}
+    on:cancel={(event) => internalAlert('linkOnCancel', event)}
     class="link-cancel">Cancel Event Link</button
   >
 
@@ -535,7 +532,7 @@
   >
   <button
     use:inertia={{ href: $page.url, method: 'post', data: payloadWithFile }}
-    on:progress={handleProgressEvent}
+    on:progress={(event) => internalAlert('linkOnProgress', event)}
     class="link-progress">Progress Event Link</button
   >
   <button
@@ -552,7 +549,7 @@
   >
   <button
     use:inertia={{ href: '/events/errors', method: 'post' }}
-    on:error={handleErrorEvent}
+    on:error={(event) => internalAlert('linkOnError', event)}
     on:success={() => internalAlert('This listener should not have been called')}
     class="link-error">Error Event Link</button
   >

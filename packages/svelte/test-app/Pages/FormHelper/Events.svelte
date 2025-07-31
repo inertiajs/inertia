@@ -1,3 +1,12 @@
+<script context="module" lang="ts">
+  declare global {
+    interface Window {
+      events: string[]
+      data: Array<{ type: string; data: unknown; event: unknown }>
+    }
+  }
+</script>
+
 <script lang="ts">
   import { page, useForm } from '@inertiajs/svelte'
   import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
