@@ -105,7 +105,7 @@ test.describe('data', () => {
 
         const dump = await shouldBeDumpPage(page, 'get')
 
-        // TODO: Should this be in the query string? It's not, but... should it be?
+        // TODO: Should this be in the query string? It's not, but... should it be? => See 'url' key in helpers.js
 
         await expect(dump.query).toEqual({ a: ['b', 'c'] })
         await expect(dump.method).toBe('get')
@@ -127,7 +127,7 @@ test.describe('data', () => {
 
       const dump = await shouldBeDumpPage(page, 'get')
 
-      // TODO: Should this be in the query string? It's not, but... should it be?
+      // TODO: Should this be in the query string? It's not, but... should it be? => See 'url' key in helpers.js
       // const params = await page.evaluate(() => window.location.search)
       // await expect(params).toBe('?foo=get')
 

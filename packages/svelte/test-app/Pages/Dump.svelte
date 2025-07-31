@@ -6,6 +6,7 @@
   export let method
   export let form
   export let files = {}
+  export let url
   export let query
 
   const dump = {
@@ -14,18 +15,12 @@
     form,
     files,
     query,
+    url,
     $page: $page,
   }
 
   beforeUpdate(() => {
-    window._inertia_request_dump = {
-      headers,
-      method,
-      form,
-      files,
-      query,
-      $page: $page,
-    }
+    window._inertia_request_dump = dump
   })
 </script>
 

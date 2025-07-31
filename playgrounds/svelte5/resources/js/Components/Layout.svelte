@@ -10,6 +10,7 @@
   <a href="/users" use:inertia class="hover:underline">Users</a>
   <a href="/article" use:inertia class="hover:underline">Article</a>
   <a href="/form" use:inertia class="hover:underline">Form</a>
+  <a href="/form-component" use:inertia class="hover:underline">Form Component</a>
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
 </nav>
 

@@ -19,6 +19,9 @@ export default function Layout({ children }) {
         <Link href="/form" className="hover:underline" prefetch={['mount', 'click']} stale-after="1m">
           Form
         </Link>
+        <Link href="/form-component" className="hover:underline">
+          Form Component
+        </Link>
         <Link href="/async" className="hover:underline">
           Async
         </Link>

@@ -14,6 +14,7 @@ const appName = computed(() => page.props.appName)
     <Link href="/users" class="hover:underline" prefetch :cache-for="['2s', '1m']">Users</Link>
     <Link href="/article" class="hover:underline" prefetch="click">Article</Link>
     <Link href="/form" class="hover:underline" :prefetch="['mount', 'click']" cache-for="1m">Form</Link>
+    <Link href="/form-component" class="hover:underline">Form Component</Link>
     <Link href="/logout" method="post" class="hover:underline">Logout</Link>
     <Link href="/goodbye" class="hover:underline">External</Link>
     <Link href="/async" class="hover:underline">Async Request</Link>

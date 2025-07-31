@@ -108,7 +108,7 @@ test.describe('Data', () => {
     test('passes data as params by default when using the visit method', async ({ page }) => {
       await page.getByRole('link', { name: 'Visit Link' }).click()
 
-      // TODO: Should the url actually be /dump/get?foo=visit
+      // TODO: Should the url actually be /dump/get?foo=visit => See 'url' key in helpers.js
       const dump = await shouldBeDumpPage(page, 'get')
 
       await expect(dump.method).toBe('get')
@@ -144,7 +144,7 @@ test.describe('Data', () => {
 
           const dump = await shouldBeDumpPage(page, 'get')
 
-          // TODO: Should this be in the query string? It's not, but... should it be?
+          // TODO: Should this be in the query string? It's not, but... should it be? => See 'url' key in helpers.js
 
           await expect(dump.query).toEqual(expectedObject)
           await expect(dump.method).toBe('get')
