@@ -2,7 +2,7 @@
   declare global {
     interface Window {
       events: string[]
-      data: Array<{ type: string; data: unknown; event: unknown }>
+      data: Array<{ type: string; data: unknown; event: string | null }>
     }
   }
 </script>
@@ -24,7 +24,7 @@
     window.events.push(message)
   }
 
-  const pushData = (event: unknown, type: string, data: unknown) => {
+  const pushData = (event: string | null, type: string, data: unknown) => {
     window.data.push({
       type,
       data,

@@ -1,7 +1,9 @@
 <script context="module" lang="ts">
-  declare namespace svelteHTML {
-    interface HTMLAttributes {
-      'scroll-region'?: boolean | '' | undefined
+  declare global {
+    namespace svelteHTML {
+      interface HTMLAttributes {
+        'scroll-region'?: boolean | '' | undefined
+      }
     }
   }
 </script>
