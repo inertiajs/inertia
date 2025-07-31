@@ -19,8 +19,8 @@ export default () => {
         <Foo />
       </Deferred>
 
-      <Deferred data="bar" fallback={<div>Loading bar...</div>}>
-        <Bar />
+      <Deferred data="bar" fallback={() => <div>Loading bar...</div>}>
+        {() => <Bar />}
       </Deferred>
 
       <Link href="/deferred-props/page-1">Page 1</Link>

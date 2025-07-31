@@ -47,11 +47,11 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
     setLoaded(keys.every((key) => pageProps[key] !== undefined))
   }, [pageProps, keys])
 
-  if (!loaded) {
-    return typeof fallback === 'function' ? fallback() : fallback
+  if (loaded) {
+    return typeof children === 'function' ? children() : children
   }
 
-  return typeof children === 'function' ? children() : children
+  return typeof fallback === 'function' ? fallback() : fallback
 }
 
 Deferred.displayName = 'InertiaDeferred'
