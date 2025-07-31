@@ -211,17 +211,17 @@ export class Response {
 
     const propsToMerge = pageResponse.mergeProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
-    const mergeStrategies = pageResponse.mergeStrategies || []
+    const matchPropsOn = pageResponse.matchPropsOn || []
 
     propsToMerge.forEach((prop) => {
       const incomingProp = pageResponse.props[prop]
 
       if (Array.isArray(incomingProp)) {
-        pageResponse.props[prop] = mergeArrayWithStrategy(
+        pageResponse.props[prop] = this.mergeOrMatchItems(
           (currentPage.get().props[prop] || []) as any[],
           incomingProp,
           prop,
-          mergeStrategies
+          matchPropsOn,
         )
       } else if (typeof incomingProp === 'object' && incomingProp !== null) {
         pageResponse.props[prop] = {
@@ -235,10 +235,10 @@ export class Response {
       const incomingProp = pageResponse.props[prop]
       const currentProp = currentPage.get().props[prop]
 
-      // Deep merge function to handle nested objects and arrays
+      // Function to recursively merge objects and arrays
       const deepMerge = (target: any, source: any, currentKey: string) => {
         if (Array.isArray(source)) {
-          return mergeArrayWithStrategy(target, source, currentKey, mergeStrategies)
+          return this.mergeOrMatchItems(target, source, currentKey, matchPropsOn)
         }
 
         if (typeof source === 'object' && source !== null) {
@@ -252,15 +252,56 @@ export class Response {
           )
         }
 
-        // If the source is neither an array nor an object, return it directly
+        // f the source is neither an array nor an object, simply return the it
         return source
       }
 
-      // Assign the deeply merged result back to props.
+      // Apply the deep merge and update the page response
       pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
     })
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
+  }
+
+  protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
+    // Determine if there's a specific key to match items.
+    // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
+    const matchOn = matchPropsOn.find((key) => {
+      const path = key.split('.').slice(0, -1).join('.')
+      return path === currentKey
+    })
+
+    if (!matchOn) {
+      // No key found to match on, just concatenate the arrays
+      return [...(Array.isArray(target) ? target : []), ...source]
+    }
+
+    // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
+    const uniqueProperty = matchOn.split('.').pop() || ''
+    const targetArray = Array.isArray(target) ? target : []
+    const map = new Map<any, any>()
+
+    // Populate the map with items from the target array, using the unique property as the key.
+    // If an item doesn't have the unique property or isn't an object, a unique Symbol is used as the key.
+    targetArray.forEach((item) => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+
+    // Iterate through the source array. If an item's unique property matches an existing key in the map,
+    // update the item. Otherwise, add the new item to the map.
+    source.forEach((item) => {
+      if (item && typeof item === 'object' && uniqueProperty in item) {
+        map.set(item[uniqueProperty], item)
+      } else {
+        map.set(Symbol(), item)
+      }
+    })
+
+    return Array.from(map.values())
   }
 
   protected async setRememberedState(pageResponse: Page): Promise<void> {
@@ -282,39 +323,4 @@ export class Response {
 
     return errors[this.requestParams.all().errorBag || ''] || {}
   }
-}
-
-function mergeArrayWithStrategy(target: any[], source: any[], currentKey: string, mergeStrategies: string[]) {
-  // Find the mergeStrategy that matches the currentKey
-  // For example: posts.data.id matches posts.data
-  const mergeStrategy = mergeStrategies.find((strategy) => {
-    const path = strategy.split('.').slice(0, -1).join('.')
-    return path === currentKey
-  })
-
-  if (mergeStrategy) {
-    const uniqueProperty = mergeStrategy.split('.').pop() || ''
-    const targetArray = Array.isArray(target) ? target : []
-    const map = new Map<any, any>()
-
-    targetArray.forEach(item => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
-      }
-    })
-    
-    source.forEach(item => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
-      }
-    })
-    
-    return Array.from(map.values())
-  }
-  // No mergeStrategy: default to concatenation
-  return [...(Array.isArray(target) ? target : []), ...source]
 }

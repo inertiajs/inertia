@@ -7,9 +7,98 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.12...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.17...master)
 
 - Nothing yet
+
+## [v2.0.17](https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17) - 2025-07-18
+
+### What's Changed
+
+* Bump multer from 2.0.1 to 2.0.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2447
+* Bump vite from 5.4.12 to 5.4.19 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2450
+* Bump esbuild from 0.21.5 to 0.25.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2451
+* Explicit string coercion in `Head` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2453
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17
+
+## [v2.0.16](https://github.com/inertiajs/inertia/compare/v2.0.15...v2.0.16) - 2025-07-18
+
+### What's Changed
+
+* Make errorBag parameter optional by [@joelstein](https://github.com/joelstein) in https://github.com/inertiajs/inertia/pull/2445
+
+### New Contributors
+
+* [@joelstein](https://github.com/joelstein) made their first contribution in https://github.com/inertiajs/inertia/pull/2445
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.15...v2.0.16
+
+## [v2.0.15](https://github.com/inertiajs/inertia/compare/v2.0.14...v2.0.15) - 2025-07-17
+
+### What's Changed
+
+* Improve GitHub issue templates by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2418
+* Escape the attribute values that are passed into the `Head` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2403
+* Introduce single method to reset form state and clear errors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2414
+* Use `CacheForOption` type in React `Link` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2426
+* Improve query string merging in `mergeDataIntoQueryString()`  by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2417
+* Improve scrolling when using anchor hash by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2428
+* Cancel sync request on popstate event by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2429
+* Support for path traversal by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2413
+* Add event callbacks to `ClientSideVisitOptions` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2405
+* Pass parameters to `onFinish` and `onSuccess` callbacks on Client Side Visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2433
+* Prevent JS builds and test apps from being minified by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2424
+* Migrate to pnpm by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2276
+* Fix single-use prefetching by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2440
+* Change defaults values order in onSuccess callback of useForm by [@yilanboy](https://github.com/yilanboy) in https://github.com/inertiajs/inertia/pull/2437
+* Improve reactivity of Link components by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2441
+
+### New Contributors
+
+* [@yilanboy](https://github.com/yilanboy) made their first contribution in https://github.com/inertiajs/inertia/pull/2437
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.14...v2.0.15
+
+## [v2.0.14](https://github.com/inertiajs/inertia/compare/v2.0.13...v2.0.14) - 2025-06-26
+
+### What's Changed
+
+* fix: fixed type error in `useForm SetDataAction` type by [@fxnm](https://github.com/fxnm) in https://github.com/inertiajs/inertia/pull/2395
+* Call `provider.update` outside useEffect block to support SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2397
+* Improve state restore logic in `useRemember` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2401
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.13...v2.0.14
+
+## [v2.0.13](https://github.com/inertiajs/inertia/compare/v2.0.12...v2.0.13) - 2025-06-20
+
+### What's Changed
+
+* Allow deepMerge on custom properties by [@mpociot](https://github.com/mpociot) in https://github.com/inertiajs/inertia/pull/2344
+* fix: React StrictMode breaking Inertia Head by [@jordanhavard](https://github.com/jordanhavard) in https://github.com/inertiajs/inertia/pull/2328
+* Bump multer from 1.4.4 to 2.0.1 in /tests/app by [@dependabot](https://github.com/dependabot) in https://github.com/inertiajs/inertia/pull/2373
+* Initialize router before components in React by [@chack1172](https://github.com/chack1172) in https://github.com/inertiajs/inertia/pull/2379
+* Prevent duplicate render of the initial page in React by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2377
+* Update default state when `setDefault()` is called right after `setData()` is called by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2364
+* [2.x] Restore `router.resolveComponent()` method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2039
+* Move `currentIsInitialPage` variable outside of `App` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2381
+* Don't overwrite Vite class in Svelte playgrounds by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2368
+* Dependency update + Prevent Playwright 1.53.0 due to Svelte bug by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2382
+* Update to Vite 6 by [@SuperDJ](https://github.com/SuperDJ) in https://github.com/inertiajs/inertia/pull/2315
+* Fix React scroll restoration on popState by [@sebastiandedeyne](https://github.com/sebastiandedeyne) in https://github.com/inertiajs/inertia/pull/2357
+* feat(useForm): export granular setData types and introduce SetDataAction<TForm> by [@hasib-devs](https://github.com/hasib-devs) in https://github.com/inertiajs/inertia/pull/2356
+* Refactor `mergeStrategies` to `matchOn` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2384
+* Remove `setSwapComponent` method and cleanup after PR #2379 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2383
+
+### New Contributors
+
+* [@jordanhavard](https://github.com/jordanhavard) made their first contribution in https://github.com/inertiajs/inertia/pull/2328
+* [@chack1172](https://github.com/chack1172) made their first contribution in https://github.com/inertiajs/inertia/pull/2379
+* [@jrmajor](https://github.com/jrmajor) made their first contribution in https://github.com/inertiajs/inertia/pull/2368
+* [@SuperDJ](https://github.com/SuperDJ) made their first contribution in https://github.com/inertiajs/inertia/pull/2315
+* [@hasib-devs](https://github.com/hasib-devs) made their first contribution in https://github.com/inertiajs/inertia/pull/2356
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.12...v2.0.13
 
 ## [v2.0.12](https://github.com/inertiajs/inertia/compare/v2.0.11...v2.0.12) - 2025-06-10
 

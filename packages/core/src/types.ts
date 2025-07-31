@@ -63,7 +63,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps?: string[]
   deepMergeProps?: string[]
-  mergeStrategies?: string[]
+  matchPropsOn?: string[]
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -82,6 +82,10 @@ export interface ClientSideVisitOptions {
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
+  errorBag?: string | null
+  onError?: (errors: Errors) => void
+  onFinish?: (visit: ClientSideVisitOptions) => void
+  onSuccess?: (page: Page) => void
 }
 
 export type PageResolver = (name: string) => Component

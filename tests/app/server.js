@@ -3,11 +3,18 @@ const express = require('express')
 const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const { showServerStatus } = require('./server-status')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ extended: true }))
 const upload = multer()
+
+const adapters = ['react', 'svelte', 'vue3']
+
+if (!adapters.includes(inertia.package)) {
+  throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
+}
 
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
 app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
@@ -81,6 +88,19 @@ app.get('/links/headers/version', (req, res) =>
 )
 app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
 app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
+app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
+app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
+app.get('/links/reactivity', (req, res) => inertia.render(req, res, { component: 'Links/Reactivity' }))
+app.get('/links/custom-component/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/CustomComponent', props: { page: req.params.page } }),
+)
+app.get('/links/cancel-sync-request/:page', (req, res) => {
+  const page = req.params.page
+  setTimeout(
+    () => inertia.render(req, res, { component: 'Links/CancelSyncRequest', props: { page } }),
+    page == 3 ? 500 : 0,
+  )
+})
 
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
@@ -336,7 +356,7 @@ app.get('/deep-merge-props', (req, res) => {
   })
 })
 
-app.get('/merge-strategies', (req, res) => {
+app.get('/match-props-on-key', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
   const perPage = 5
@@ -358,7 +378,7 @@ app.get('/merge-strategies', (req, res) => {
   }))
 
   inertia.render(req, res, {
-    component: 'MergeStrategies',
+    component: 'MatchPropsOnKey',
     props: {
       bar: new Array(perPage).fill(1),
       baz: new Array(perPage).fill(1),
@@ -377,7 +397,7 @@ app.get('/merge-strategies', (req, res) => {
       ? {}
       : {
           deepMergeProps: ['foo', 'baz'],
-          mergeStrategies: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+          matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
         }),
   })
 })
@@ -510,4 +530,6 @@ const adapterPorts = {
   svelte: 13717,
 }
 
-app.listen(adapterPorts[process.env.PACKAGE || 'vue3'])
+showServerStatus(inertia.package, adapterPorts[inertia.package])
+
+app.listen(adapterPorts[inertia.package])

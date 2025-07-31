@@ -1,3 +1,4 @@
+import { escape } from 'es-toolkit'
 import { defineComponent, DefineComponent } from 'vue'
 
 export type InertiaHead = DefineComponent<{
@@ -45,13 +46,13 @@ const Head: InertiaHead = defineComponent({
       node.props = node.props || {}
       node.props.inertia = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
       const attrs = Object.keys(node.props).reduce((carry, name) => {
-        const value = node.props[name]
+        const value = String(node.props[name])
         if (['key', 'head-key'].includes(name)) {
           return carry
         } else if (value === '') {
           return carry + ` ${name}`
         } else {
-          return carry + ` ${name}="${value}"`
+          return carry + ` ${name}="${escape(value)}"`
         }
       }, '')
       return `<${node.type}${attrs}>`

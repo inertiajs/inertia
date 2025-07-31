@@ -1,3 +1,4 @@
+import { escape } from 'es-toolkit'
 import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
@@ -11,6 +12,7 @@ type InertiaHead = FunctionComponent<InertiaHeadProps>
 const Head: InertiaHead = function ({ children, title }) {
   const headManager = useContext(HeadContext)
   const provider = useMemo(() => headManager.createProvider(), [headManager])
+  const isServer = typeof window === 'undefined'
 
   useEffect(() => {
     provider.reconnect()
@@ -47,11 +49,11 @@ const Head: InertiaHead = function ({ children, title }) {
       if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
       }
-      const value = node.props[name]
+      const value = String(node.props[name])
       if (value === '') {
         return carry + ` ${name}`
       } else {
-        return carry + ` ${name}="${value}"`
+        return carry + ` ${name}="${escape(value)}"`
       }
     }, '')
     return `<${node.type}${attrs}>`
@@ -95,6 +97,10 @@ const Head: InertiaHead = function ({ children, title }) {
       computed.push(`<title inertia>${title}</title>`)
     }
     return computed
+  }
+
+  if (isServer) {
+    provider.update(renderNodes(children))
   }
 
   return null
