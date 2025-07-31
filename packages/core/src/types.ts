@@ -118,14 +118,10 @@ export type ScrollRegion = {
   left: number
 }
 
-export type ClientSidePageProps = Omit<PageProps, 'errors'> & {
-  errors?: Errors
-}
-
 export interface ClientSideVisitOptions {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: Page['props']) => ClientSidePageProps) | ClientSidePageProps
+  props?: ((props: Page['props']) => PageProps) | PageProps
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
