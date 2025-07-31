@@ -1,7 +1,7 @@
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
+import { Method, RequestPayload, VisitOptions } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
@@ -32,19 +32,20 @@ export const transformUrlAndData = (
 export function mergeDataIntoQueryString(
   method: Method,
   href: URL | string,
-  data: Record<string, FormDataConvertible>,
+  data: RequestPayload,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
-): [string, Record<string, FormDataConvertible>] {
+): [string, RequestPayload] {
+  const hasData = isFormData(data) ? [...data.entries()].length > 0 : Object.keys(data).length > 0
   const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
-  const hasSearch = href.toString().includes('?') || (method === 'get' && Object.keys(data).length)
+  const hasSearch = href.toString().includes('?') || (method === 'get' && hasData)
   const hasHash = href.toString().includes('#')
 
   const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
-  if (method === 'get' && Object.keys(data).length) {
+  if (method === 'get' && hasData) {
     const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
     url.search = qs.stringify(
       { ...qs.parse(url.search, parseOptions), ...data },

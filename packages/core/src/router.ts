@@ -296,6 +296,7 @@ export class Router {
     const current = currentPage.get()
 
     const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
+    props.errors = props.errors || {}
 
     const { onError, onFinish, onSuccess, ...pageParams } = params
 
@@ -304,7 +305,7 @@ export class Router {
         {
           ...current,
           ...pageParams,
-          props,
+          props: props as Page['props'],
         },
         {
           replace,
