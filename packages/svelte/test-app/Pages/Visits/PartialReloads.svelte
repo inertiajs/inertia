@@ -2,7 +2,7 @@
   import { page, router } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 
-  export let foo = 0
+  export let foo
   export let bar
   export let baz
   export let headers
