@@ -2,7 +2,7 @@
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
   import type { ComponentType } from 'svelte'
 
-  export const layout = (h: (component: ComponentType, children: unknown[]) => unknown, page: unknown) => h(SiteLayout, [page])
+  export const layout = (h: (component: ComponentType, children: ComponentType[]) => ComponentType, page: ComponentType) => h(SiteLayout, [page])
 </script>
 
 <script lang="ts">
