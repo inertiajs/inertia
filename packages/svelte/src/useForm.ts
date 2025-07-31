@@ -32,7 +32,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   setStore(data: TForm): void
   setStore<T extends FormDataKeys<TForm>>(key: T, value: FormDataValues<TForm, T>): void
   data(): TForm
-  transform(callback: (data: TForm) => object): this
+  transform(callback: (data: TForm) => FormDataType<TForm>): this
   defaults(): this
   defaults(fields: Partial<TForm>): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
@@ -208,7 +208,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         onError: (errors: Errors) => {
           this.setStore('processing', false)
           this.setStore('progress', null)
-          this.clearErrors().setError(errors)
+          this.clearErrors().setError(errors as FormDataError<TForm>)
 
           if (options.onError) {
             return options.onError(errors)
