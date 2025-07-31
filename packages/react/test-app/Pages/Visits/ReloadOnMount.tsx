@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react'
 import { useEffect } from 'react'
 
-export default (props: { name?: string }) => {
+export default (props: { name: string }) => {
   useEffect(() => {
     router.reload({ only: ['name'] })
   }, [])

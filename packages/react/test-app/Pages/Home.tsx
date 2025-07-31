@@ -1,6 +1,6 @@
 import { Link, router } from '@inertiajs/react'
 
-export default ({ example }: { example: string }) => {
+export default (props: { example: string }) => {
   const visitsMethod = (e: React.MouseEvent) => {
     e.preventDefault()
     router.visit('/visits/method')
@@ -22,7 +22,7 @@ export default ({ example }: { example: string }) => {
   }
 
   // window._inertia_page_key = getCurrentInstance().uid
-  window._inertia_props = { example }
+  window._inertia_props = props
   // window._plugin_global_props = getCurrentInstance().appContext.config.globalProperties
 
   return (
