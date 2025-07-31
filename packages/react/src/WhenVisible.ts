@@ -1,9 +1,9 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { createElement, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import { createElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 interface WhenVisibleProps {
-  children: ReactElement | number | string
-  fallback: ReactElement | number | string
+  children: ReactNode
+  fallback: ReactNode
   data?: string | string[]
   params?: ReloadOptions
   buffer?: number
