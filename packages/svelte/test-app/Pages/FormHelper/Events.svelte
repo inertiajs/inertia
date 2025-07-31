@@ -10,6 +10,7 @@
 <script lang="ts">
   import { page, useForm } from '@inertiajs/svelte'
   import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
+  import type { CancelTokenSource } from 'axios'
 
   window.events = []
   window.data = []
@@ -159,7 +160,7 @@
   const cancelledVisit = () => {
     $form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: { cancel: () => void }) => {
+        onCancelToken: (token: CancelTokenSource) => {
           pushEvent('onCancelToken')
 
           setTimeout(() => {

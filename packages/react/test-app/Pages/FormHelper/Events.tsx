@@ -1,6 +1,7 @@
 import { useForm, usePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 import type { PendingVisit, Page, Errors } from '@inertiajs/core'
+import type { CancelTokenSource } from 'axios'
 
 declare global {
   interface Window {
@@ -131,7 +132,7 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
   const cancelledVisit = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: any) => {
+        onCancelToken: (token: CancelTokenSource) => {
           pushEvent('onCancelToken')
           setTimeout(() => {
             pushEvent('CANCELLING!')

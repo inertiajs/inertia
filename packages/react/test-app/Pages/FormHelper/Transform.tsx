@@ -32,8 +32,7 @@ export default () => {
           id="name"
           name="name"
           onChange={(e) => form.setData('name', e.target.value)}
-          // @ts-expect-error - Testing direct property access instead of form.data.name
-          value={form.name}
+          value={form.data.name}
         />
       </label>
       <label>
@@ -43,8 +42,7 @@ export default () => {
           id="remember"
           name="remember"
           onChange={(e) => form.setData('remember', e.target.checked)}
-          // @ts-expect-error - Testing direct property access instead of form.data.remember
-          checked={form.remember}
+          checked={form.data.remember}
         />
       </label>
 

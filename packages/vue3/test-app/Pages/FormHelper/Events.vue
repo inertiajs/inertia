@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Errors, Page, PendingVisit, Progress } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/vue3'
-import { CancelTokenSource } from 'axios'
+import type { CancelTokenSource } from 'axios'
 
 declare global {
   interface Window {
