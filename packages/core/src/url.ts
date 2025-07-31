@@ -35,17 +35,17 @@ export function mergeDataIntoQueryString(
   data: RequestPayload,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
 ): [string, RequestPayload] {
-  const hasData = isFormData(data) ? [...data.entries()].length > 0 : Object.keys(data).length > 0
+  const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
   const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
-  const hasSearch = href.toString().includes('?') || (method === 'get' && hasData)
+  const hasSearch = href.toString().includes('?') || hasDataForQueryString
   const hasHash = href.toString().includes('#')
 
   const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
-  if (method === 'get' && hasData) {
+  if (hasDataForQueryString) {
     const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
     url.search = qs.stringify(
       { ...qs.parse(url.search, parseOptions), ...data },
