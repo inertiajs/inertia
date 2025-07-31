@@ -16,7 +16,7 @@ interface FooProps {
   };
 }
 
-export default ({ bar, foo, baz }: { bar: any[]; foo: FooProps; baz: any[] }) => {
+export default ({ bar, foo, baz }: { bar: number[]; foo: FooProps; baz: number[] }) => {
   const [page, setPage] = useState(foo.page)
 
   const reloadIt = () => {

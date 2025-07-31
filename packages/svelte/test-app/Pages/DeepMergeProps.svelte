@@ -1,9 +1,9 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo
-  export let bar
-  export let baz
+  export let foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
+  export let bar: number[]
+  export let baz: number[]
 
   let page = foo.page
 
@@ -14,7 +14,7 @@
       },
       only: ['foo', 'baz'],
       onSuccess(visit) {
-        page = visit.props.foo.page
+        page = (visit.props as unknown as { foo: { page: number } }).foo.page
       },
     })
   }

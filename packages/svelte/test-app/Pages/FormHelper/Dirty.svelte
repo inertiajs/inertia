@@ -3,7 +3,7 @@
 
   const form = useForm({
     name: 'foo',
-    foo: [],
+    foo: [] as string[],
   })
 
   const submit = () => {

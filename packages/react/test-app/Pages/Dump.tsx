@@ -1,8 +1,9 @@
 import { usePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 import type { Method } from '@inertiajs/core'
+import type { MulterFile } from '../types'
 
-export default ({ headers, method, form, query, files }: { headers: Record<string, string>; method: Method; form: Record<string, unknown>; query: Record<string, unknown>; files: unknown[] }) => {
+export default ({ headers, method, form, query, files }: { headers: Record<string, string>; method: Method; form: Record<string, unknown>; query: Record<string, unknown>; files: MulterFile[]|object }) => {
   const page = usePage()
 
   const dump = {

@@ -1,11 +1,11 @@
-<script context="module">
+<script context="module" lang="ts">
   export { default as layout } from '@/Layouts/WithoutScrollRegion.svelte'
 </script>
 
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo = 'default'
+  export let foo: string = 'default'
 
   const preserve = () => {
     router.visit('/visits/preserve-scroll-false-page-two', {

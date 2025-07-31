@@ -57,7 +57,7 @@
     })
   }
 
-  const deleteQueryParam = (e) => {
+  const deleteQueryParam = (e: Event) => {
     e.preventDefault()
     router.visit('/dump/get', {
       data: { a: undefined },

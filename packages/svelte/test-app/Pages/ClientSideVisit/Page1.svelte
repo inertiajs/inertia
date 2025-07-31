@@ -1,8 +1,8 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo;
-  export let bar;
+  export let foo: string;
+  export let bar: string;
 
   let errors = 0;
   let finished = 0;

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo = []
-  export let bar = []
+  export let foo: number[] = []
+  export let bar: number[] = []
 
   const reloadIt = () => {
     router.reload({

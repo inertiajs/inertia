@@ -1,12 +1,14 @@
 <script lang="ts">
   import { beforeUpdate } from 'svelte'
   import { page } from '@inertiajs/svelte'
+  import type { Method } from '@inertiajs/core'
+  import type { MulterFile } from '../types'
 
-  export let headers
-  export let method
-  export let form
-  export let files = {}
-  export let query
+  export let headers: Record<string, string>
+  export let method: Method
+  export let form: Record<string, unknown>
+  export let files: MulterFile[] | object
+  export let query: Record<string, unknown>
 
   const dump = {
     headers,

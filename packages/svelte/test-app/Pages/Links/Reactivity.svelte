@@ -1,12 +1,13 @@
 <script lang="ts">
   import { Link } from '@inertiajs/svelte'
+  import type { CacheForOption, LinkPrefetchOption, Method } from '@inertiajs/core'
 
-  let method = 'get'
+  let method: Method = 'get'
   let href = '/dump/get'
   let data = { foo: 'bar' }
   let headers = { 'X-Custom-Header': 'value' }
-  let prefetch = false
-  let cacheFor = 0
+  let prefetch: boolean | LinkPrefetchOption = false
+  let cacheFor: CacheForOption = 0
 
   function change() {
     method = 'post'

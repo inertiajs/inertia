@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
 
-export default ({ bar, foo }: { bar: any[]; foo: any[] }) => {
+export default ({ bar, foo }: { bar: number[]; foo: number[] }) => {
   const reloadIt = () => {
     router.reload({
       only: ['foo'],

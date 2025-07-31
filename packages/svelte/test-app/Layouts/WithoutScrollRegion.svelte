@@ -1,5 +1,5 @@
 <script lang="ts">
-  let slot
+  let slot: HTMLDivElement
   let documentScrollTop = 0
   let documentScrollLeft = 0
   let slotScrollTop = 0

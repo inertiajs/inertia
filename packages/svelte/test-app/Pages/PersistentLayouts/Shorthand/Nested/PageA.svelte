@@ -1,4 +1,4 @@
-<script context="module">
+<script context="module" lang="ts">
   import NestedLayout from '@/Layouts/NestedLayout.svelte'
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
 
