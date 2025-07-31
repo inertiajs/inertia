@@ -10,10 +10,10 @@ declare module 'axios' {
 export type DefaultInertiaConfig = {
   errorValueType: string
 }
-/** 
+/**
  * Designed to allow overriding of some core types using TypeScript
  * interface declaration merging.
- * 
+ *
  * @see {@link DefaultInertiaConfig} for keys to override
  * @example
  * ```ts
@@ -118,12 +118,10 @@ export type ScrollRegion = {
   left: number
 }
 
-export type ClientSidePageProps = Omit<Page['props'], 'errors'>
-
 export interface ClientSideVisitOptions {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: Page['props']) => ClientSidePageProps) | ClientSidePageProps
+  props?: ((props: Page['props']) => PageProps) | PageProps
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
