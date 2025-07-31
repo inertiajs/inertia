@@ -2,7 +2,7 @@
   export { default as layout } from '@/Layouts/WithoutScrollRegion.svelte'
 </script>
 
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 
   export let foo = 'default'

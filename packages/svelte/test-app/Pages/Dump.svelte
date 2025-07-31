@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { beforeUpdate } from 'svelte'
   import { page } from '@inertiajs/svelte'
 

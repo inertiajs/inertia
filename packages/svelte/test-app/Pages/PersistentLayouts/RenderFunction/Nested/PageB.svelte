@@ -7,7 +7,7 @@
   }
 </script>
 
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 </script>
 

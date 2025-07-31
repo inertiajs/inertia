@@ -5,7 +5,7 @@
   export const layout = [SiteLayout, NestedLayout]
 </script>
 
-<script>
+<script lang="ts">
   import { inertia, page } from '@inertiajs/svelte'
 
   window._inertia_page_props = $page.props

@@ -2,7 +2,7 @@
   export { default as layout } from '@/Layouts/WithoutScrollRegion.svelte'
 </script>
 
-<script>
+<script lang="ts">
   import { onMount } from 'svelte'
   import { inertia } from '@inertiajs/svelte'
 

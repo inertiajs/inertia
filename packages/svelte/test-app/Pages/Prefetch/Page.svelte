@@ -2,7 +2,7 @@
   export { default as layout } from '@/Layouts/Prefetch.svelte'
 </script>
 
-<script>
+<script lang="ts">
   export let pageNumber
   export let lastLoaded
 </script>

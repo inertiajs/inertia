@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Deferred, inertia } from '@inertiajs/svelte'
 
   export let foo

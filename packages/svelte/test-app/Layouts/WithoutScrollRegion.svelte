@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   let slot
   let documentScrollTop = 0
   let documentScrollLeft = 0

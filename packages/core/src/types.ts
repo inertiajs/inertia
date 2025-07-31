@@ -359,13 +359,13 @@ export interface LinkComponentBaseProps
       | 'queryStringArrayFormat'
       | 'async'
     > &
-      Omit<VisitCallbacks, 'onCancelToken'>
-  > {
-  href: string | { url: string; method: Method }
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
-}
+      Omit<VisitCallbacks, 'onCancelToken'> & {
+        href: string | { url: string; method: Method }
+        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
+        prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+        cacheFor: CacheForOption | CacheForOption[]
+      }
+  > {}
 
 type PrefetchObject = {
   params: ActiveVisit

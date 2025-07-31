@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Deferred } from '@inertiajs/svelte'
 
   export let baz
