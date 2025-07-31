@@ -1,3 +1,11 @@
+<script context="module" lang="ts">
+  declare namespace svelteHTML {
+    interface HTMLAttributes {
+      'scroll-region'?: boolean | '' | undefined
+    }
+  }
+</script>
+
 <script lang="ts">
   let slot: HTMLDivElement
   let documentScrollTop = 0

@@ -30,9 +30,3 @@ declare global {
 }
 
 export type MulterFile = Express.Multer.File
-
-declare namespace svelteHTML {
-  interface HTMLAttributes<T> {
-    'scroll-region'?: boolean | '' | undefined
-  }
-}
