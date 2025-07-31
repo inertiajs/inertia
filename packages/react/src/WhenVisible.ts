@@ -2,8 +2,8 @@ import { ReloadOptions, router } from '@inertiajs/core'
 import { createElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 interface WhenVisibleProps {
-  children: ReactNode
-  fallback: ReactNode
+  children: ReactNode | (() => ReactNode)
+  fallback: ReactNode | (() => ReactNode)
   data?: string | string[]
   params?: ReloadOptions
   buffer?: number
@@ -88,6 +88,9 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     }
   }, [ref, getReloadParams, buffer])
 
+  const resolveChildren = () => (typeof children === 'function' ? children() : children)
+  const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)
+
   if (always || !loaded) {
     return createElement(
       as,
@@ -95,11 +98,11 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
         props: null,
         ref,
       },
-      loaded ? children : fallback,
+      loaded ? resolveChildren() : resolveFallback(),
     )
   }
 
-  return loaded ? children : null
+  return loaded ? resolveChildren() : null
 }
 
 WhenVisible.displayName = 'InertiaWhenVisible'
