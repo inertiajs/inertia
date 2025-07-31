@@ -5,7 +5,7 @@ const package = process.env.PACKAGE || 'vue3'
 
 module.exports = {
   package,
-  render: (req, res, data) => {
+  render: (req, res, data, titleAttribute = '') => {
     data = {
       component: req.path
         .slice(1)
@@ -46,7 +46,8 @@ module.exports = {
       fs
         .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
         .toString()
-        .replace("'{{ placeholder }}'", JSON.stringify(data)),
+        .replace("'{{ placeholder }}'", JSON.stringify(data))
+        .replace('{{ titleAttribute }}', titleAttribute),
     )
   },
   location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),

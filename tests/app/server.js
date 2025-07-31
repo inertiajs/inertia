@@ -109,6 +109,8 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.get('/head/:attribute', (req, res) => inertia.render(req, res, { component: 'Head' }, req.params.attribute))
+
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/PartialReloads',
