@@ -17,8 +17,8 @@ export default () => {
       </div>
 
       <div style={{ marginTop: '5000px' }}>
-        <WhenVisible buffer={1000} data="foo" fallback={<div>Loading second one...</div>}>
-          <Foo label="Second one is visible!" />
+        <WhenVisible buffer={1000} data="foo" fallback={() => <div>Loading second one...</div>}>
+          {() => <Foo label="Second one is visible!" />}
         </WhenVisible>
       </div>
 
