@@ -1,4 +1,4 @@
-import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
+import { router, setupModal, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
 import escape from 'html-escape'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -24,6 +24,7 @@ interface CreateInertiaAppProps {
         showSpinner?: boolean
       }
   page?: Page
+  showModalOnNonInertiaResponse?: boolean
 }
 
 export default async function createInertiaApp({
@@ -32,11 +33,16 @@ export default async function createInertiaApp({
   setup,
   progress = {},
   page,
+  showModalOnNonInertiaResponse = true,
 }: CreateInertiaAppProps): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
+
+  if (!isServer) {
+    setupModal({ showOnNonInertiaResponse: showModalOnNonInertiaResponse })
+  }
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component),
