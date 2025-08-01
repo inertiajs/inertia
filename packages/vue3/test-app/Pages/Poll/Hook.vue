@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Link, usePoll } from '@inertiajs/vue3'
 
 usePoll(500, {

@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte'
   import { page } from '@inertiajs/svelte'
 
-  let createdAt = null
+  let createdAt: number | null = null
 
   onMount(() => {
     window._inertia_layout_id = crypto.randomUUID()

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import WithScrollRegion from '@/Layouts/WithScrollRegion.vue'
 import { router } from '@inertiajs/vue3'
 

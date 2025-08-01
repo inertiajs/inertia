@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { useRemember } from '@inertiajs/svelte'
 
   let untracked = ''

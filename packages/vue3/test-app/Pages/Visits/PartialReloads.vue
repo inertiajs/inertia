@@ -1,12 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { router, usePage } from '@inertiajs/vue3'
 import { onMounted } from 'vue'
 
 const props = defineProps({
-  foo: {
-    type: Number,
-    default: 0,
-  },
+  foo: Number,
   bar: Number,
   baz: Number,
   headers: Object,

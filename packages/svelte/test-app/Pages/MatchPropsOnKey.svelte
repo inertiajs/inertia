@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo
-  export let bar
-  export let baz
+  export let foo: { page: number; data: Array<{ name: string }>; companies: Array<{ name: string }>; teams: Array<{ name: string }>; per_page: number; meta: { label: string } }
+  export let bar: number[]
+  export let baz: number[]
 
   let page = foo.page
 
@@ -14,7 +14,8 @@
       },
       only: ['foo', 'baz'],
       onSuccess(visit) {
-        page = visit.props.foo.page
+        // TODO: Refactor 'any' to a more specific type
+        page = (visit.props as any as { foo: { page: number } }).foo.page
       },
     })
   }
