@@ -1,6 +1,7 @@
 import {
   ErrorValue,
   FlexibleFormDataKeys,
+  FormDataError,
   FormDataKeys,
   FormDataType,
   FormDataValues,
@@ -13,13 +14,14 @@ import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 
-type ShallowKeys<T> = Extract<keyof T, string>
-
+type StringKeyRecord<T> = { [K in Extract<keyof T, string>]?: T[K] }
+type AnyStringRecord = Record<string, ErrorValue>
+type ErrorBagFor<T> = StringKeyRecord<string extends keyof T ? AnyStringRecord : FormDataError<T>>
 type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
-  errors: Partial<Record<ShallowKeys<TForm>, ErrorValue>> & Record<string, ErrorValue>
+  errors: ErrorBagFor<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -34,7 +36,7 @@ export interface InertiaFormProps<TForm extends object> {
   clearErrors(...fields: FlexibleFormDataKeys<TForm>[]): this
   resetAndClearErrors(...fields: FlexibleFormDataKeys<TForm>[]): this
   setError(field: FlexibleFormDataKeys<TForm>, value: ErrorValue): this
-  setError(errors: Partial<Record<ShallowKeys<TForm>, ErrorValue>> & Record<string, ErrorValue>): this
+  setError(errors: ErrorBagFor<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -118,10 +120,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(
-      fieldOrFields: FlexibleFormDataKeys<TForm> | Partial<Record<ShallowKeys<TForm>, ErrorValue>>,
-      maybeValue?: ErrorValue,
-    ) {
+    setError(fieldOrFields: FlexibleFormDataKeys<TForm> | ErrorBagFor<TForm>, maybeValue?: ErrorValue) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0
