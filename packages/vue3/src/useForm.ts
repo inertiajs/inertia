@@ -19,7 +19,7 @@ type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
-  errors: Partial<Record<ShallowKeys<TForm>, ErrorValue>>
+  errors: Partial<Record<ShallowKeys<TForm>, ErrorValue>> & Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -44,7 +44,7 @@ export interface InertiaFormProps<TForm extends object> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType<TForm>> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends object> = TForm & InertiaFormProps<TForm>
 
 export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
