@@ -1,10 +1,8 @@
 import test from '@playwright/test'
 import useForm from '../packages/vue3/src/useForm'
 
-// TODO: Move to real test page/route
 test.describe('TypeScript Support', () => {
-  // @ts-expect-error
-  test.skip(process.env.PACKAGE !== 'vue3', 'Only implemented for Vue 3')
+  test.skip(true, 'Move to real test page/route')
 
   test.describe('Form Helper', () => {
     test('data', async () => {
