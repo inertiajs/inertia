@@ -16,31 +16,62 @@ const defaultData = {
 
 const form = useForm<FormData>(defaultData)
 
-$form.clearErrors('users.0.name')
-$form.resetAndClearErrors('users.0.name')
-$form.setError('name', 'Name is required')
-$form.setError({ name: 'Name is required' })
+// Clear Errors
 $form.clearErrors('name')
-$form.resetAndClearErrors('name')
-// @ts-expect-error - A form has no email field
-$form.setError({ email: 'Email is required' })
-
-// Nested errors
-$form.errors['company.name']
-$form.setError('company.name', 'Company name is required')
-$form.setError({ 'company.name': 'Company name is required' })
+$form.clearErrors('company')
 $form.clearErrors('company.name')
-$form.resetAndClearErrors('company.name')
-// @ts-expect-error - A company has no street field
-$form.setError({ 'company.street': 'Company street is required' })
-
-// Array errors
-$form.errors['users.0.name']
-$form.setError('users.0.name', 'User name is required')
-$form.setError({ 'users.0.name': 'User name is required' })
+$form.clearErrors('users')
+$form.clearErrors('users.0')
 $form.clearErrors('users.0.name')
+
+// Reset and Clear Errors
+$form.resetAndClearErrors('name')
+$form.resetAndClearErrors('company')
+$form.resetAndClearErrors('company.name')
+$form.resetAndClearErrors('users')
+$form.resetAndClearErrors('users.0')
 $form.resetAndClearErrors('users.0.name')
-$form.setError('users.0.name', 'User name is required')
+
+// Set error by key
+$form.setError('name', 'Validation error')
+$form.setError('company', 'Validation error')
+$form.setError('company.name', 'Validation error')
+$form.setError('users', 'Validation error')
+$form.setError('users.0', 'Validation error')
+$form.setError('users.0.name', 'Validation error')
+
+// Set error by object
+$form.setError({ name: 'Validation error' })
+$form.setError({ company: 'Validation error' })
+$form.setError({ 'company.name': 'Validation error' })
+$form.setError({ users: 'Validation error' })
+$form.setError({ 'users.0': 'Validation error' })
+$form.setError({ 'users.0.name': 'Validation error' })
+
+// @ts-expect-error - Form has no email field
+$form.clearErrors('email')
+// @ts-expect-error - Form has no email field
+$form.resetAndClearErrors('email')
+// @ts-expect-error - Form has no email field
+$form.setError('email', 'Validation error')
+// @ts-expect-error - Form has no email field
+$form.setError({ email: 'Validation error' })
+
+// @ts-expect-error - Company has no email field
+$form.clearErrors('company.email')
+// @ts-expect-error - Company has no email field
+$form.resetAndClearErrors('company.email')
+// @ts-expect-error - Company has no email field
+$form.setError('company.email', 'Validation error')
+// @ts-expect-error - Company has no email field
+$form.setError({ 'company.email': 'Validation error' })
+
 // @ts-expect-error - A user has no email field
-$form.setError({ 'users.0.email': 'User email is required' })
+$form.clearErrors('users.0.email')
+// @ts-expect-error - A user has no email field
+$form.resetAndClearErrors('users.0.email')
+// @ts-expect-error - A user has no email field
+$form.setError('users.0.email', 'Validation error')
+// @ts-expect-error - A user has no email field
+$form.setError({ 'users.0.email': 'Validation error' })
 </script>
