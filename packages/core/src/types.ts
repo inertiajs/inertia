@@ -68,6 +68,10 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
 
 export type FormDataKeyOrString<T> = FormDataKeys<T> | string
 
+export type FormErrorsFor<T> = {
+  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
+}
+
 export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
   ? T extends unknown[]
     ? P extends `${infer I extends number}`

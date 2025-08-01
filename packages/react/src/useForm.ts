@@ -1,10 +1,10 @@
 import {
   ErrorValue,
-  FormDataError,
   FormDataKeyOrString,
   FormDataKeys,
   FormDataType,
   FormDataValues,
+  FormErrorsFor,
   Method,
   Progress,
   router,
@@ -20,15 +20,12 @@ export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => v
 export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
 export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
 
-type ErrorsFor<T> = {
-  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
-}
 type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends object> {
   data: TForm
   isDirty: boolean
-  errors: ErrorsFor<TForm>
+  errors: FormErrorsFor<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -43,7 +40,7 @@ export interface InertiaFormProps<TForm extends object> {
   clearErrors: (...fields: FormDataKeyOrString<TForm>[]) => void
   resetAndClearErrors: (...fields: FormDataKeyOrString<TForm>[]) => void
   setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): void
-  setError(errors: ErrorsFor<TForm>): void
+  setError(errors: FormErrorsFor<TForm>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
@@ -72,8 +69,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
-    ? useRemember({} as ErrorsFor<TForm>, `${rememberKey}:errors`)
-    : useState({} as ErrorsFor<TForm>)
+    ? useRemember({} as FormErrorsFor<TForm>, `${rememberKey}:errors`)
+    : useState({} as FormErrorsFor<TForm>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -263,7 +260,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeyOrString<TForm> | ErrorsFor<TForm>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeyOrString<TForm> | FormErrorsFor<TForm>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
