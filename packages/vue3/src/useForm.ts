@@ -14,9 +14,9 @@ import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 
-type StringKeyRecord<T> = { [K in Extract<keyof T, string>]?: T[K] }
-type AnyStringRecord = Record<string, ErrorValue>
-type ErrorBagFor<T> = StringKeyRecord<string extends keyof T ? AnyStringRecord : FormDataError<T>>
+type ErrorBagFor<T> = {
+  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
+}
 type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends object> {
