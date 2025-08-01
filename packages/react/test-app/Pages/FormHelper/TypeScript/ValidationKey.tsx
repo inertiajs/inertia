@@ -1,6 +1,6 @@
-<script setup lang="ts">
+// This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
 import type { FormDataConvertible } from '@inertiajs/core'
-import type { InertiaFormProps } from '@inertiajs/vue3'
+import type { InertiaFormProps } from '@inertiajs/react'
 
 const validation = <T extends Record<string, FormDataConvertible>>(errors: () => InertiaFormProps<T>['errors']) => {
   type Key = keyof ReturnType<typeof errors>
@@ -8,7 +8,7 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
   const filterAndMap = (key: Key) => {
     const err = errors()
 
-    return (Object.keys(err).filter((k) => k.startsWith(key)) as [keyof ReturnType<typeof errors>]).map((k) => err[k])
+    return (Object.keys(err).filter((k) => typeof key === 'string' && k.startsWith(key)) as [keyof ReturnType<typeof errors>]).map((k) => err[k])
   }
 
   const unique = (key: Key) => {
@@ -17,4 +17,11 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
 
   return { filterAndMap, unique }
 }
-</script>
+
+export default function ValidationKey() {
+  return (
+    <div>
+      {/* ValidationKey component */}
+    </div>
+  )
+}

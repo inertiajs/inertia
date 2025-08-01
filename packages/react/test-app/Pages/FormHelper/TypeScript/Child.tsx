@@ -1,3 +1,4 @@
+// This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
 import type { InertiaFormProps } from '@inertiajs/react'
 
 interface ChildProps {
