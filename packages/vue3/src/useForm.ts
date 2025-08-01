@@ -1,9 +1,10 @@
 import {
   ErrorValue,
-  FormDataError,
+  FormDataKeyOrString,
   FormDataKeys,
   FormDataType,
   FormDataValues,
+  FormErrorsFor,
   Method,
   Progress,
   router,
@@ -15,9 +16,9 @@ import { reactive, watch } from 'vue'
 
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
+export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
-  errors: FormDataError<TForm>
+  errors: FormErrorsFor<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -28,11 +29,11 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   defaults(): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
-  reset(...fields: FormDataKeys<TForm>[]): this
-  clearErrors(...fields: FormDataKeys<TForm>[]): this
-  resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
-  setError(field: FormDataKeys<TForm>, value: ErrorValue): this
-  setError(errors: FormDataError<TForm>): this
+  reset(...fields: FormDataKeyOrString<TForm>[]): this
+  clearErrors(...fields: FormDataKeyOrString<TForm>[]): this
+  resetAndClearErrors(...fields: FormDataKeyOrString<TForm>[]): this
+  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): this
+  setError(errors: FormErrorsFor<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -42,7 +43,7 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType<TForm>> = TForm & InertiaFormProps<TForm>
+export type InertiaForm<TForm extends object> = TForm & InertiaFormProps<TForm>
 
 export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
@@ -116,7 +117,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: ErrorValue) {
+    setError(fieldOrFields: FormDataKeyOrString<TForm> | FormErrorsFor<TForm>, maybeValue?: ErrorValue) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0
