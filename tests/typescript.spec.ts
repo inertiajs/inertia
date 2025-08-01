@@ -26,8 +26,10 @@ test.describe('TypeScript Support', () => {
       form.users = [{ name: 'Jane Doe' }]
       // @ts-expect-error - A form has no email field
       form.email = 'john@example.com'
-      // @ts-expect-error - A form has no street field
+      // @ts-expect-error - A company has no street field
       form.company.street = '123 Main St'
+      // @ts-expect-error - A company has no street field
+      form.company = { name: 'Acme Corp', street: '123 Main St' }
       // @ts-expect-error - A form has no email field
       form.users = [{ name: 'Jane Doe', email: 'jane@example.com' }]
     })
@@ -53,6 +55,8 @@ test.describe('TypeScript Support', () => {
       form.setError({ name: 'Name is required' })
       form.clearErrors('name')
       form.resetAndClearErrors('name')
+      // @ts-expect-error - A form has no email field
+      form.setError({ email: 'Email is required' })
 
       // Nested errors
       form.errors['company.name']
@@ -60,6 +64,8 @@ test.describe('TypeScript Support', () => {
       form.setError({ 'company.name': 'Company name is required' })
       form.clearErrors('company.name')
       form.resetAndClearErrors('company.name')
+      // @ts-expect-error - A company has no street field
+      form.setError({ 'company.street': 'Company street is required' })
 
       // Array errors
       form.errors['users.0.name']
@@ -68,6 +74,8 @@ test.describe('TypeScript Support', () => {
       form.clearErrors('users.0.name')
       form.resetAndClearErrors('users.0.name')
       form.setError('users.0.name', 'User name is required')
+      // @ts-expect-error - A user has no email field
+      form.setError({ 'users.0.email': 'User email is required' })
     })
   })
 })
