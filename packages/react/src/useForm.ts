@@ -2,7 +2,6 @@ import {
   ErrorValue,
   FormDataKeyOrString,
   FormDataKeys,
-  FormDataType,
   FormDataValues,
   FormErrorsFor,
   Method,
@@ -15,7 +14,7 @@ import { get, has, set } from 'es-toolkit/compat'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export type SetDataByObject<TForm> = (data: TForm) => void
+export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
 export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
 export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
 export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
@@ -49,14 +48,14 @@ export interface InertiaFormProps<TForm extends object> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends FormDataType<TForm>>(
+export default function useForm<TForm extends object>(
   initialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType<TForm>>(
+export default function useForm<TForm extends object>(
   rememberKey: string,
   initialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType<TForm>>(
+export default function useForm<TForm extends object>(
   rememberKeyOrInitialValues?: string | TForm | (() => TForm),
   maybeInitialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm> {
@@ -192,7 +191,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const setDataFunction = useCallback(
-    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: any) => {
+    (keyOrData: FormDataKeys<TForm> | Function | Partial<TForm>, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
         setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
