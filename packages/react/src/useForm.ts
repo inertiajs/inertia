@@ -1,6 +1,7 @@
 import {
   ErrorValue,
   FormDataError,
+  FormDataKeyOrString,
   FormDataKeys,
   FormDataType,
   FormDataValues,
@@ -19,12 +20,15 @@ export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => v
 export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
 export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
 
+type ErrorsFor<T> = {
+  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
+}
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
+export interface InertiaFormProps<TForm extends object> {
   data: TForm
   isDirty: boolean
-  errors: FormDataError<TForm>
+  errors: ErrorsFor<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -35,11 +39,11 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   setDefaults(): void
   setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
-  reset: (...fields: FormDataKeys<TForm>[]) => void
-  clearErrors: (...fields: FormDataKeys<TForm>[]) => void
-  resetAndClearErrors: (...fields: FormDataKeys<TForm>[]) => void
-  setError(field: FormDataKeys<TForm>, value: ErrorValue): void
-  setError(errors: FormDataError<TForm>): void
+  reset: (...fields: FormDataKeyOrString<TForm>[]) => void
+  clearErrors: (...fields: FormDataKeyOrString<TForm>[]) => void
+  resetAndClearErrors: (...fields: FormDataKeyOrString<TForm>[]) => void
+  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): void
+  setError(errors: ErrorsFor<TForm>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
@@ -68,8 +72,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
-    ? useRemember({} as FormDataError<TForm>, `${rememberKey}:errors`)
-    : useState({} as FormDataError<TForm>)
+    ? useRemember({} as ErrorsFor<TForm>, `${rememberKey}:errors`)
+    : useState({} as ErrorsFor<TForm>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -259,7 +263,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeyOrString<TForm> | ErrorsFor<TForm>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
@@ -275,7 +279,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const clearErrors = useCallback(
     (...fields) => {
       setErrors((errors) => {
-        const newErrors = (Object.keys(errors) as Array<FormDataKeys<TForm>>).reduce(
+        const newErrors = Object.keys(errors).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
