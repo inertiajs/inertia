@@ -68,8 +68,6 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
 
 export type FlexibleFormDataKeys<T> = FormDataKeys<T> | string
 
-export type FlexibleFormDataKeys<T> = FormDataKeys<T> | string
-
 export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
   ? T extends unknown[]
     ? P extends `${infer I extends number}`

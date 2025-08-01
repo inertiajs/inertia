@@ -78,3 +78,4 @@ test.describe('TypeScript Support', () => {
       form.setError({ 'users.0.email': 'User email is required' })
     })
   })
+})
