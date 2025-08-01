@@ -424,4 +424,3 @@ declare global {
     'inertia:navigate': GlobalEvent<'navigate'>
   }
 }
-
