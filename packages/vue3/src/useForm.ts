@@ -1,10 +1,9 @@
 import {
   ErrorValue,
-  FormDataKeyOrString,
+  FormDataErrors,
   FormDataKeys,
   FormDataType,
   FormDataValues,
-  FormErrorsFor,
   Method,
   Progress,
   router,
@@ -18,7 +17,7 @@ type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
-  errors: FormErrorsFor<TForm>
+  errors: FormDataErrors<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -29,11 +28,11 @@ export interface InertiaFormProps<TForm extends object> {
   defaults(): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
-  reset(...fields: FormDataKeyOrString<TForm>[]): this
-  clearErrors(...fields: FormDataKeyOrString<TForm>[]): this
-  resetAndClearErrors(...fields: FormDataKeyOrString<TForm>[]): this
-  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): this
-  setError(errors: FormErrorsFor<TForm>): this
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
+  setError(errors: FormDataErrors<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -67,7 +66,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const form = reactive({
     ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
-    errors: restored ? restored.errors : {},
+    errors: (restored ? restored.errors : {}) as FormDataErrors<TForm>,
     hasErrors: false,
     processing: false,
     progress: null,
@@ -117,7 +116,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeyOrString<TForm> | FormErrorsFor<TForm>, maybeValue?: ErrorValue) {
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0
