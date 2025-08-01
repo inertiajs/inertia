@@ -3,9 +3,11 @@ import type {
   Errors,
   ErrorValue,
   FormDataError,
+  FormDataKeyOrString,
   FormDataKeys,
   FormDataType,
   FormDataValues,
+  FormErrorsFor,
   Method,
   Page,
   PendingVisit,
@@ -21,9 +23,9 @@ import { writable, type Writable } from 'svelte/store'
 
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
+export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
-  errors: FormDataError<TForm>
+  errors: FormErrorsFor<TForm>
   hasErrors: boolean
   progress: Progress | null
   wasSuccessful: boolean
@@ -36,11 +38,11 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   defaults(): this
   defaults(fields: Partial<TForm>): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
-  reset(...fields: FormDataKeys<TForm>[]): this
-  clearErrors(...fields: FormDataKeys<TForm>[]): this
-  resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
-  setError(field: FormDataKeys<TForm>, value: ErrorValue): this
-  setError(errors: FormDataError<TForm>): this
+  reset(...fields: FormDataKeyOrString<TForm>[]): this
+  clearErrors(...fields: FormDataKeyOrString<TForm>[]): this
+  resetAndClearErrors(...fields: FormDataKeyOrString<TForm>[]): this
+  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): this
+  setError(errors: FormErrorsFor<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -50,16 +52,16 @@ export interface InertiaFormProps<TForm extends FormDataType<TForm>> {
   cancel(): void
 }
 
-export type InertiaForm<TForm extends FormDataType<TForm>> = InertiaFormProps<TForm> & TForm
+export type InertiaForm<TForm extends object> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends FormDataType<TForm>>(
+export default function useForm<TForm extends object>(
   data: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends FormDataType<TForm>>(
+export default function useForm<TForm extends object>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends FormDataType<TForm>>(
+export default function useForm<TForm extends object>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
@@ -115,7 +117,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         this.setStore(clonedData)
       } else {
         this.setStore(
-          (fields as Array<FormDataKeys<TForm>>)
+          fields
             .filter((key) => has(clonedData, key))
             .reduce((carry, key) => {
               return set(carry, key, get(clonedData, key))
@@ -125,7 +127,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeys<TForm> | FormDataError<TForm>, maybeValue?: ErrorValue) {
+    setError(fieldOrFields: FormDataKeyOrString<TForm> | FormErrorsFor<TForm>, maybeValue?: ErrorValue) {
       this.setStore('errors', {
         ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
@@ -136,7 +138,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     clearErrors(...fields) {
       this.setStore(
         'errors',
-        (Object.keys(this.errors) as FormDataKeys<TForm>[]).reduce(
+        Object.keys(this.errors).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),

@@ -66,7 +66,11 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
               [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
             }[Extract<keyof T, string>]
 
-export type FlexibleFormDataKeys<T> = FormDataKeys<T> | string
+export type FormDataKeyOrString<T> = FormDataKeys<T> | string
+
+export type FormErrorsFor<T> = {
+  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
+}
 
 export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
   ? T extends unknown[]
@@ -424,4 +428,3 @@ declare global {
     'inertia:navigate': GlobalEvent<'navigate'>
   }
 }
-

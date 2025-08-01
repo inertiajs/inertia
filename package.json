@@ -26,8 +26,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-svelte": "^3.2.3",
-    "prettier-plugin-tailwindcss": "^0.6.9",
-    "typescript": "^5.3.0"
+    "prettier-plugin-tailwindcss": "^0.6.9"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.28.1"
