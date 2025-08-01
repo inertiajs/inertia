@@ -1,10 +1,9 @@
 import {
   ErrorValue,
-  FormDataKeyOrString,
+  FormDataErrors,
   FormDataKeys,
   FormDataType,
   FormDataValues,
-  FormDataErrors,
   Method,
   Progress,
   router,
@@ -29,10 +28,10 @@ export interface InertiaFormProps<TForm extends object> {
   defaults(): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
-  reset(...fields: FormDataKeyOrString<TForm>[]): this
-  clearErrors(...fields: FormDataKeyOrString<TForm>[]): this
-  resetAndClearErrors(...fields: FormDataKeyOrString<TForm>[]): this
-  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): this
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
@@ -117,7 +116,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeyOrString<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
       Object.assign(this.errors, typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields)
 
       this.hasErrors = Object.keys(this.errors).length > 0

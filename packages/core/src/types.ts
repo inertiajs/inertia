@@ -66,8 +66,6 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
               [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
             }[Extract<keyof T, string>]
 
-export type FormDataKeyOrString<T> = FormDataKeys<T> | string
-
 type PartialFormDataErrors<T> = {
   [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
 }

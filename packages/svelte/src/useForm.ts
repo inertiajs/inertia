@@ -3,7 +3,6 @@ import type {
   Errors,
   ErrorValue,
   FormDataErrors,
-  FormDataKeyOrString,
   FormDataKeys,
   FormDataValues,
   Method,
@@ -36,11 +35,11 @@ export interface InertiaFormProps<TForm extends object> {
   defaults(): this
   defaults(fields: Partial<TForm>): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
-  reset(...fields: FormDataKeyOrString<TForm>[]): this
-  clearErrors(...fields: FormDataKeyOrString<TForm>[]): this
-  resetAndClearErrors(...fields: FormDataKeyOrString<TForm>[]): this
-  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): this
-  setError(errors: FormDataErrors<TForm>): this
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
+  setError(errors: FormDataKeys<TForm>): this
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
@@ -123,24 +122,11 @@ export default function useForm<TForm extends object>(
 
       return this
     },
-    setError(fieldOrFields: FormDataKeyOrString<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
-      let newErrors
-      if (typeof fieldOrFields === 'string') {
-        // Only set the error if maybeValue is not undefined
-        if (maybeValue !== undefined) {
-          newErrors = { ...this.errors, [fieldOrFields]: maybeValue }
-        } else {
-          newErrors = this.errors
-        }
-      } else {
-        // Filter out undefined values from the errors object
-        const filteredErrors = Object.fromEntries(
-          Object.entries(fieldOrFields).filter(([, value]) => value !== undefined)
-        )
-        newErrors = { ...this.errors, ...filteredErrors }
-      }
-      
-      this.setStore('errors', newErrors as FormDataErrors<TForm>)
+    setError(fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
+      this.setStore('errors', {
+        ...this.errors,
+        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
+      })
 
       return this
     },

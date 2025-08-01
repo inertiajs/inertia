@@ -1,9 +1,8 @@
 import {
   ErrorValue,
-  FormDataKeyOrString,
+  FormDataErrors,
   FormDataKeys,
   FormDataValues,
-  FormDataErrors,
   Method,
   Progress,
   router,
@@ -16,8 +15,13 @@ import useRemember from './useRemember'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
 export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
-export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(
+  key: K,
+  value: FormDataValues<TForm, K>,
+) => void
+export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> &
+  SetDataByMethod<TForm> &
+  SetDataByKeyValuePair<TForm>
 
 type FormOptions = Omit<VisitOptions, 'data'>
 
@@ -35,10 +39,10 @@ export interface InertiaFormProps<TForm extends object> {
   setDefaults(): void
   setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
-  reset: (...fields: FormDataKeyOrString<TForm>[]) => void
-  clearErrors: (...fields: FormDataKeyOrString<TForm>[]) => void
-  resetAndClearErrors: (...fields: FormDataKeyOrString<TForm>[]) => void
-  setError(field: FormDataKeyOrString<TForm>, value: ErrorValue): void
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): void
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
   setError(errors: FormDataErrors<TForm>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
@@ -48,9 +52,7 @@ export interface InertiaFormProps<TForm extends object> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends object>(
-  initialValues?: TForm | (() => TForm),
-): InertiaFormProps<TForm>
+export default function useForm<TForm extends object>(initialValues?: TForm | (() => TForm)): InertiaFormProps<TForm>
 export default function useForm<TForm extends object>(
   rememberKey: string,
   initialValues?: TForm | (() => TForm),
@@ -259,7 +261,7 @@ export default function useForm<TForm extends object>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeyOrString<TForm> | FormDataErrors<TForm>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
