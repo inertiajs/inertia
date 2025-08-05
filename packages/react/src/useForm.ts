@@ -2,6 +2,7 @@ import {
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
+  FormDataType,
   FormDataValues,
   Method,
   Progress,
@@ -52,12 +53,14 @@ export interface InertiaFormProps<TForm extends object> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends object>(initialValues?: TForm | (() => TForm)): InertiaFormProps<TForm>
-export default function useForm<TForm extends object>(
+export default function useForm<TForm extends FormDataType<TForm>>(
+  initialValues?: TForm | (() => TForm),
+): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   initialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends object>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrInitialValues?: string | TForm | (() => TForm),
   maybeInitialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm> {
