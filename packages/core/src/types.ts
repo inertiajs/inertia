@@ -127,17 +127,17 @@ export type ScrollRegion = {
   left: number
 }
 
-export interface ClientSideVisitOptions {
+export interface ClientSideVisitOptions<TProps = Page['props']> {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: Page['props']) => PageProps) | PageProps
+  props?: ((props: TProps) => PageProps) | PageProps
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
   errorBag?: string | null
   onError?: (errors: Errors) => void
-  onFinish?: (visit: ClientSideVisitOptions) => void
+  onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onSuccess?: (page: Page) => void
 }
 
