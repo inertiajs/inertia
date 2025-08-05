@@ -1,7 +1,13 @@
+import { Page } from '@inertiajs/core';
 import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
-export default ({ foo, bar }: { foo: string; bar: string }) => {
+interface PageProps {
+  foo: string;
+  bar: string;
+}
+
+export default ({ foo, bar }: PageProps) => {
   const [errors, setErrors] = useState(0)
   const [finished, setFinished] = useState(0)
   const [success, setSuccess] = useState(0)
@@ -9,7 +15,7 @@ export default ({ foo, bar }: { foo: string; bar: string }) => {
   const bagErrors = () => {
     router.replace({
       preserveState: true,
-      props: (props) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
+      props: (props: Page['props']) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
       errorBag: 'bag',
       onError: (err) => {
         setErrors(Object.keys(err).length)
@@ -22,7 +28,7 @@ export default ({ foo, bar }: { foo: string; bar: string }) => {
   const defaultErrors = () => {
     router.replace({
       preserveState: true,
-      props: (props) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
+      props: (props: PageProps) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
       onError: (err) => {
         setErrors(Object.keys(err).length)
       },

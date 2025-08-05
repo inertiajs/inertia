@@ -1,5 +1,11 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
+  import type { Page } from '@inertiajs/core'
+
+  interface PageProps {
+    foo: string
+    bar: string
+  }
 
   export let foo: string;
   export let bar: string;
@@ -11,7 +17,7 @@
   const bagErrors = () => {
     router.replace({
       preserveState: true,
-      props: (props) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
+      props: (props: Page['props']) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
       errorBag: 'bag',
       onError: (err) => {
         errors = Object.keys(err).length
@@ -24,7 +30,7 @@
   const defaultErrors = () => {
     router.replace({
       preserveState: true,
-      props: (props) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
+      props: (props: PageProps) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
       onError: (err) => {
         errors = Object.keys(err).length
       },
