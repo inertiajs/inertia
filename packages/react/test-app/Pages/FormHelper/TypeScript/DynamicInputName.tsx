@@ -6,16 +6,16 @@ interface ClientForm {
     [key: string]: any;
 }
 
-const { data, setData } = useForm<ClientForm>({
-	name: '',
-});
-
-const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target as HTMLInputElement;
-    setData(name, value);
-};
-
 export default function DynamicInputName() {
+	const { data, setData } = useForm<ClientForm>({
+		name: '',
+	});
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+		const { name, value } = e.target as HTMLInputElement;
+		setData(name, value);
+	};
+
 	return (
 		<input
 			name="name"
