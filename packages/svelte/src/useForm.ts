@@ -4,6 +4,7 @@ import type {
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
+  FormDataType,
   FormDataValues,
   Method,
   Page,
@@ -51,12 +52,12 @@ export interface InertiaFormProps<TForm extends object> {
 
 export type InertiaForm<TForm extends object> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends object>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends object>(
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>>
-export default function useForm<TForm extends object>(
+export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
 ): Writable<InertiaForm<TForm>> {
