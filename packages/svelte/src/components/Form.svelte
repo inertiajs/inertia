@@ -3,7 +3,7 @@
     formDataToObject,
     mergeDataIntoQueryString,
     type FormDataConvertible,
-    type FormComponentVisitOptions,
+    type FormComponentOptions,
     type Method,
     type PendingVisit,
     type Progress,
@@ -21,7 +21,7 @@
   export let showProgress: boolean = true
   export let transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible> = (data) =>
     data
-  export let visitOptions: FormComponentVisitOptions = {}
+  export let options: FormComponentOptions = {}
   export let onCancelToken: ({ cancel }: { cancel: () => void }) => void = () => {}
   export let onBefore: () => boolean | void = () => {}
   export let onStart: (visit: PendingVisit) => void = () => {}
@@ -52,7 +52,7 @@
   function submit() {
     const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
-    const options: FormSubmitOptions = {
+    const submitOptions: FormSubmitOptions = {
       headers,
       errorBag,
       showProgress,
@@ -64,10 +64,10 @@
       onCancel,
       onSuccess,
       onError,
-      ...visitOptions,
+      ...options,
     }
 
-    $form.transform(() => transform(_data)).submit(_method, url, options)
+    $form.transform(() => transform(_data)).submit(_method, url, submitOptions)
   }
 
   function handleSubmit(event: Event) {

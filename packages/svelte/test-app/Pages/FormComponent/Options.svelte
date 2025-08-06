@@ -65,7 +65,7 @@
     return queryStringArrayFormat ? 'get' : 'post'
   })()
 
-  $: visitOptions = {
+  $: options = {
     only,
     except,
     reset,
@@ -79,7 +79,7 @@
 <Form
   {action}
   {method}
-  {visitOptions}
+  {options}
   {queryStringArrayFormat}
 >
   <h1>Form Options</h1>

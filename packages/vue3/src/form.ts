@@ -1,7 +1,7 @@
 import {
   FormComponentProps,
   FormComponentSlotProps,
-  FormComponentVisitOptions,
+  FormComponentOptions,
   FormDataConvertible,
   formDataToObject,
   mergeDataIntoQueryString,
@@ -48,8 +48,8 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<(data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>>,
       default: (data: Record<string, FormDataConvertible>) => data,
     },
-    visitOptions: {
-      type: Object as PropType<FormComponentVisitOptions>,
+    options: {
+      type: Object as PropType<FormComponentOptions>,
       default: () => ({}),
     },
     onCancelToken: {
@@ -129,7 +129,7 @@ const Form: InertiaForm = defineComponent({
         props.queryStringArrayFormat,
       )
 
-      const options: FormSubmitOptions = {
+      const submitOptions: FormSubmitOptions = {
         headers: props.headers,
         errorBag: props.errorBag,
         showProgress: props.showProgress,
@@ -141,11 +141,11 @@ const Form: InertiaForm = defineComponent({
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
-        ...props.visitOptions,
+        ...props.options,
       }
 
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => props.transform(data)).submit(method.value, action, options)
+      form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
 
     return () => {

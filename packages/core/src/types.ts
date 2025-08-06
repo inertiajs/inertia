@@ -341,7 +341,7 @@ export type ProgressSettings = {
   color: string
 }
 
-export type FormComponentVisitOptions = Pick<
+export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
 >
@@ -352,7 +352,7 @@ export type FormComponentProps = Partial<
 > & {
   action?: string | { url: string; method: Method }
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
-  visitOptions?: FormComponentVisitOptions
+  options?: FormComponentOptions
 }
 
 export type FormComponentSlotProps = {

@@ -71,7 +71,7 @@ const method = computed(() => {
   <Form
     :action="action"
     :method="method"
-    :visit-options="{
+    :options="{
       only,
       except,
       reset,

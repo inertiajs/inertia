@@ -27,7 +27,7 @@ const Form = ({
   errorBag = null,
   showProgress = true,
   transform = (data) => data,
-  visitOptions = {},
+  options = {},
   onStart = () => {},
   onProgress = () => {},
   onFinish = () => {},
@@ -77,7 +77,7 @@ const Form = ({
       queryStringArrayFormat,
     )
 
-    const options: FormSubmitOptions = {
+    const submitOptions: FormSubmitOptions = {
       headers,
       errorBag,
       showProgress,
@@ -89,11 +89,11 @@ const Form = ({
       onCancel,
       onSuccess,
       onError,
-      ...visitOptions,
+      ...options,
     }
 
     form.transform(() => transform(_data))
-    form.submit(resolvedMethod, url, options)
+    form.submit(resolvedMethod, url, submitOptions)
   }
 
   return createElement(

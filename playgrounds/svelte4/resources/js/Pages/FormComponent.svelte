@@ -26,7 +26,7 @@
   method="post"
   headers={customHeaders}
   errorBag={errorBag}
-  visitOptions={{
+  options={{
     only: ['foo'],
     reset: ['bar'],
   }}
