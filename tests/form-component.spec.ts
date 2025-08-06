@@ -585,4 +585,74 @@ test.describe('Form Component', () => {
       await expect(dump.form.fullName).toEqual('Jane Smith')
     })
   })
+
+  test.describe('Dotted Keys', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/dotted-keys')
+    })
+
+    test('transforms basic and nested dotted keys into nested objects', async ({ page }) => {
+      await page.fill('input[name="user.name"]', 'John Doe')
+      await page.fill('input[name="user.profile.city"]', 'Paris')
+      await page.locator('input[name="user.skills[]"]').nth(0).fill('JavaScript')
+      await page.locator('input[name="user.skills[]"]').nth(1).fill('Python')
+      await page.fill('input[name="company.address.street"]', '123 Tech Ave')
+      await page.getByRole('button', { name: 'Submit Basic' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.method).toEqual('post')
+      expect(dump.form).toEqual({
+        user: {
+          name: 'John Doe',
+          profile: {
+            city: 'Paris',
+          },
+          skills: ['JavaScript', 'Python'],
+        },
+        company: {
+          address: {
+            street: '123 Tech Ave',
+          },
+        },
+      })
+    })
+
+    test('handles escaped dots as literal keys', async ({ page }) => {
+      await page.fill('input[name="config\\\\.app\\\\.name"]', 'My App')
+      await page.fill('input[name="settings.theme\\\\.mode"]', 'dark')
+      await page.getByRole('button', { name: 'Submit Escaped' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.method).toEqual('post')
+      expect(dump.form).toEqual({
+        'config.app.name': 'My App',
+        settings: {
+          'theme.mode': 'dark',
+        },
+      })
+    })
+
+    test('handles mixed bracket and dotted notation correctly', async ({ page }) => {
+      await page.fill('input[name="settings.ui.theme"]', 'light')
+      await page.getByRole('button', { name: 'Submit Mixed' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.method).toEqual('post')
+      expect(dump.form).toEqual({
+        user: {
+          roles: ['admin', 'editor'],
+        },
+        settings: {
+          ui: {
+            theme: 'light',
+          },
+        },
+      })
+    })
+
+  })
 })

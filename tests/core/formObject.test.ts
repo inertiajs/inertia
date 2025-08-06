@@ -175,11 +175,78 @@ test.describe('formObject.ts', () => {
       expect(result.attachments[1].name).toBe('file.txt')
     })
 
-    test('treats unbracketed nested keys as flat strings', () => {
-      const formData = makeFormData([['user.address.city', 'Tokyo']])
+    test('converts dotted keys into nested objects', () => {
+      const formData = makeFormData([
+        ['user.name', 'John'],
+        ['user.email', 'john@example.com'],
+        ['user.address.city', 'Paris'],
+        ['user.address.country', 'France'],
+      ])
 
       expect(formDataToObject(formData)).toEqual({
-        'user.address.city': 'Tokyo',
+        user: {
+          name: 'John',
+          email: 'john@example.com',
+          address: {
+            city: 'Paris',
+            country: 'France',
+          },
+        },
+      })
+    })
+
+    test('handles escaped dots as literal characters in keys', () => {
+      const formData = makeFormData([
+        ['user\\.name', 'Literal key'],
+        ['config.app\\.version', '1.0.0'],
+        ['deeply\\.nested\\.key\\.with\\.escapes', 'value'],
+      ])
+
+      expect(formDataToObject(formData)).toEqual({
+        'user.name': 'Literal key',
+        config: {
+          'app.version': '1.0.0',
+        },
+        'deeply.nested.key.with.escapes': 'value',
+      })
+    })
+
+    test('handles complex mixed dotted and bracket notation', () => {
+      const formData = makeFormData([
+        ['users.company[address].street', '123 Main St'],
+        ['users.company[address].number', '42'],
+        ['users.profile.settings[theme].mode', 'dark'],
+        ['data.items[0].tags[]', 'urgent'],
+        ['data.items[0].tags[]', 'important'],
+        ['data.items[1].name', 'Second Item'],
+      ])
+
+      expect(formDataToObject(formData)).toEqual({
+        users: {
+          company: {
+            address: {
+              street: '123 Main St',
+              number: '42',
+            },
+          },
+          profile: {
+            settings: {
+              theme: {
+                mode: 'dark',
+              },
+            },
+          },
+        },
+        data: {
+          items: [
+            {
+              tags: ['urgent', 'important'],
+            },
+            {
+              name: 'Second Item',
+            },
+          ],
+        },
       })
     })
   })

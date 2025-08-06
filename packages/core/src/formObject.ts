@@ -2,6 +2,39 @@ import { get, set } from 'es-toolkit/compat'
 import { FormDataConvertible } from './types'
 
 /**
+ * Transform dotted notation to bracket notation.
+ *
+ * Examples:
+ *   user.name => user[name]
+ *   user.profile.city => user[profile][city]
+ *   user.skills[] => user[skills][]
+ *   users.company[address].street => users[company][address][street]
+ *   config\.app\.name => config.app.name (escaped, literal)
+ */
+function undotKey(key: string): string {
+  if (!key.includes('.')) {
+    return key
+  }
+
+  const transformSegment = (segment: string): string => {
+    if (segment.startsWith('[') && segment.endsWith(']')) {
+      return segment // Already in bracket notation - leave untouched
+    }
+
+    // Convert dotted segment to bracket notation: "user.name" → "user[name]"
+    return segment.split('.').reduce((result, part, index) => (index === 0 ? part : `${result}[${part}]`))
+  }
+
+  return key
+    .replace(/\\\./g, '__ESCAPED_DOT__') // Temporarily replace escaped dots (\.) to protect them from transformation
+    .split(/(\[[^\]]*\])/) // Split on bracket notation while preserving the brackets in the result array
+    .filter(Boolean) // Remove empty strings from the split operation
+    .map(transformSegment) // Transform each segment: dotted parts become bracketed, existing brackets stay as-is
+    .join('') // Reassemble all segments back into a single string
+    .replace(/__ESCAPED_DOT__/g, '.') // Restore the escaped dots as literal dots in the final result
+}
+
+/**
  * Parse a key into an array of path segments.
  *
  * Examples:
@@ -32,7 +65,7 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
   const form: Record<string, any> = {}
 
   // formData.entries() returns an iterator where the first element is the key and the second element
-  // is the value. Examples of the keys are "user[name]", "tags[]", "items[0][name]", etc.
+  // is the value. Examples of the keys are "user[name]", "tags[]", "items[0][name]", "user.name", etc.
   // We should construct a new (nested) object based on these keys.
   for (const [key, value] of source.entries()) {
     if (value instanceof File && value.size === 0 && value.name === '') {
@@ -42,7 +75,7 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
       continue
     }
 
-    const path = parseKey(key)
+    const path = parseKey(undotKey(key))
 
     // If the key ends with an empty string (''), treat it as an array push (e.g., "tags[]")
     if (path[path.length - 1] === '') {
