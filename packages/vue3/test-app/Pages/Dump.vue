@@ -8,7 +8,6 @@ const props = defineProps({
   form: Object,
   files: Array,
   query: Object,
-  url: String,
 })
 
 const page = usePage()
@@ -19,12 +18,18 @@ const dump = {
   form: props.form,
   files: props.files ? props.files : {},
   query: props.query,
-  url: props.url,
   $page: page,
 }
 
 onBeforeMount(() => {
-  window._inertia_request_dump = dump
+  window._inertia_request_dump = {
+    headers: props.headers,
+    method: props.method,
+    form: props.form,
+    files: props.files ? props.files : {},
+    query: props.query,
+    $page: page,
+  }
 })
 </script>
 

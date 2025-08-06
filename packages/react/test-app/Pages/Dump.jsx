@@ -10,12 +10,18 @@ export default (props) => {
     form: props.form,
     files: props.files ? props.files : {},
     query: props.query,
-    url: props.url,
     $page: page,
   }
 
   useEffect(() => {
-    window._inertia_request_dump = dump
+    window._inertia_request_dump = {
+      headers: props.headers,
+      method: props.method,
+      form: props.form,
+      files: props.files ? props.files : {},
+      query: props.query,
+      $page: page,
+    }
   }, [])
 
   return (
