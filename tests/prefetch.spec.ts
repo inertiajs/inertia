@@ -39,6 +39,22 @@ test('will not prefetch current page', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
+test('removes single-use prefetch from cache when cacheFor is 0', async ({ page }) => {
+  const prefetch5 = page.waitForResponse('prefetch/5')
+
+  await page.goto('prefetch/1')
+  await prefetch5
+
+  requests.listen(page)
+  await page.getByRole('link', { name: 'On Mount (Once)' }).click()
+  await isPrefetchPage(page, 5)
+  await expect(requests.requests.length).toBe(0)
+
+  // Now that we've used it, it should be removed from the cache
+  await page.getByRole('link', { name: 'On Mount (Once)' }).click()
+  await expect(requests.requests.length).toBe(1)
+})
+
 test('can prefetch using link props', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
@@ -52,7 +68,7 @@ test('can prefetch using link props', async ({ page }) => {
 
   requests.listen(page)
 
-  await page.getByRole('link', { name: 'On Mount' }).click()
+  await page.getByRole('link', { name: 'On Mount', exact: true }).click()
   await isPrefetchPage(page, 2)
   await expect(requests.requests.length).toBe(0)
 

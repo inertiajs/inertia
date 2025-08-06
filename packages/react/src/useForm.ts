@@ -36,6 +36,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   setDefaults(fields: Partial<TForm>): void
   reset: (...fields: FormDataKeys<TForm>[]) => void
   clearErrors: (...fields: FormDataKeys<TForm>[]) => void
+  resetAndClearErrors: (...fields: FormDataKeys<TForm>[]) => void
   setError(field: FormDataKeys<TForm>, value: string): void
   setError(errors: Record<FormDataKeys<TForm>, string>): void
   submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
@@ -219,7 +220,7 @@ export default function useForm<TForm extends FormDataType>(
     },
     [data, setDefaults],
   )
-  
+
   useLayoutEffect(() => {
     if (!dataAsDefaults) {
       return
@@ -287,6 +288,14 @@ export default function useForm<TForm extends FormDataType>(
     [setErrors, setHasErrors],
   )
 
+  const resetAndClearErrors = useCallback(
+    (...fields) => {
+      reset(...fields)
+      clearErrors(...fields)
+    },
+    [reset, clearErrors],
+  )
+
   const createSubmitMethod = (method) => (url, options) => {
     submit(method, url, options)
   }
@@ -321,6 +330,7 @@ export default function useForm<TForm extends FormDataType>(
     reset,
     setError,
     clearErrors,
+    resetAndClearErrors,
     submit,
     get: getMethod,
     post,

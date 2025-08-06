@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "2.0.14",
+  "version": "2.0.17",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -43,14 +43,15 @@
   },
   "scripts": {
     "dev": "./build.js --watch",
-    "build": "npm run clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
     "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
-    "@playwright/test": ">=1.46.1 <1.53.0",
     "@types/node": "^22.5.3",
+    "axios": "^1.8.2",
     "esbuild": "^0.25.0",
+    "esbuild-node-externals": "^1.6.0",
     "typescript": "^4.9.4",
     "vue": "^3.0.0"
   },
@@ -58,7 +59,7 @@
     "vue": "^3.0.0"
   },
   "dependencies": {
-    "@inertiajs/core": "2.0.14",
+    "@inertiajs/core": "workspace:*",
     "es-toolkit": "^1.33.0"
   }
 }

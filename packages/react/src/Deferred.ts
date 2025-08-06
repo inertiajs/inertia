@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'
 
@@ -14,8 +14,8 @@ const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boole
 }
 
 interface DeferredProps {
-  children: ReactElement | number | string
-  fallback: ReactElement | number | string
+  children: ReactNode | (() => ReactNode)
+  fallback: ReactNode | (() => ReactNode)
   data: string | string[]
 }
 
@@ -47,7 +47,11 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
     setLoaded(keys.every((key) => pageProps[key] !== undefined))
   }, [pageProps, keys])
 
-  return loaded ? children : fallback
+  if (loaded) {
+    return typeof children === 'function' ? children() : children
+  }
+
+  return typeof fallback === 'function' ? fallback() : fallback
 }
 
 Deferred.displayName = 'InertiaDeferred'

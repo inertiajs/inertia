@@ -7,6 +7,7 @@
   <a href="/prefetch/2" use:inertia={{ prefetch: 'mount' }}>On Mount</a>
   <a href="/prefetch/3" use:inertia={{ prefetch: 'click' }}>On Click</a>
   <a href="/prefetch/4" use:inertia={{ prefetch: ['hover', 'mount'], cacheFor: '1s' }}>On Hover + Mount</a>
+  <a href="/prefetch/5" use:inertia={{ prefetch: 'mount', cacheFor: '0' }}>On Mount (Once)</a>
   <div>
     <slot />
   </div>
