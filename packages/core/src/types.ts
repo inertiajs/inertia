@@ -90,7 +90,7 @@ export interface ClientSideVisitOptions {
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
-  errorBag: string | null
+  errorBag?: string | null
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions) => void
   onSuccess?: (page: Page) => void

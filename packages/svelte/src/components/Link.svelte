@@ -23,13 +23,13 @@
   export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
   export let cacheFor: CacheForOption | CacheForOption[] = 0
 
-  method = typeof href === 'object' ? href.method : method
-  href = typeof href === 'object' ? href.url : href
+  $: _method = typeof href === 'object' ? href.method : method
+  $: _href = typeof href === 'object' ? href.url : href
 
-  $: asProp = method !== 'get' ? 'button' : as.toLowerCase()
+  $: asProp = _method !== 'get' ? 'button' : as.toLowerCase()
   $: elProps =
     {
-      a: { href },
+      a: { href: _href },
       button: { type: 'button' },
     }[asProp] || {}
 </script>
@@ -38,12 +38,12 @@
 <svelte:element
   this={asProp}
   use:inertia={{
-    ...(as !== 'a' ? { href } : {}),
+    ...(asProp !== 'a' ? { href: _href } : {}),
     data,
-    method,
+    method: _method,
     replace,
     preserveScroll,
-    preserveState: preserveState ?? method !== 'get',
+    preserveState: preserveState ?? _method !== 'get',
     only,
     except,
     headers,

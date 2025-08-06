@@ -37,6 +37,10 @@ export default (props) => {
         'Replace' Links
       </Link>
 
+      <Link href="/links/custom-component" className="links-custom-component">
+        Custom Component
+      </Link>
+
       <a href="#" onClick={visitsMethod} className="visits-method">
         Manual basic visits
       </a>

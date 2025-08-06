@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
+declare const process: { env: { PACKAGE?: string } }
+
 test.beforeEach(async ({ page }) => {})
 
 test('visits a different page', async ({ page }) => {
@@ -609,8 +611,11 @@ test.describe('enabled', () => {
     await expect(page).toHaveURL('/article')
     await expect(page.getByText('Article Header')).toBeVisible()
 
-    const restoredScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
-    expect(restoredScrollPosition).toBe(bottomScrollPosition)
+    await page.waitForFunction(
+      (expectedPosition) => document.documentElement.scrollTop === expectedPosition,
+      bottomScrollPosition,
+      { timeout: 1000 },
+    )
   })
 
   test.skip('restores all tracked scroll regions when pressing the back button from another website', async ({
@@ -812,6 +817,83 @@ test.describe('"as" attribute', () => {
   })
 })
 
+test.describe('custom component', () => {
+  test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/links/custom-component/1')
+  })
+
+  test('can render custom components', async ({ page }) => {
+    const button = await page.getByRole('button', { name: 'GET Custom Component' }).first()
+    await expect(button).toHaveCSS('background-color', 'rgb(0, 0, 255)')
+    await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(button).toHaveCSS('padding', '10px')
+
+    await button.click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.method).toBe('get')
+  })
+
+  test('can render custom components with different methods', async ({ page }) => {
+    await page.getByText('POST Custom Component').click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    await expect(dump.method).toBe('post')
+  })
+
+  test('can render custom components with data', async ({ page }) => {
+    await page.getByText('Custom Component with Data').click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    await expect(dump.form).toEqual({ test: 'data' })
+  })
+
+  test('can render custom components with headers', async ({ page }) => {
+    await page.getByText('Custom Component with Headers').click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.headers['x-test']).toBe('header')
+  })
+
+  test('can render custom components with event handlers', async ({ page }) => {
+    await page.getByText('Custom Component with Events').click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.method).toBe('get')
+
+    // Check that events were tracked
+    const events = await page.evaluate(() => window.customComponentEvents)
+    await expect(events.length).toBe(3)
+
+    await expect(events.map((e) => e.eventName)).toEqual(['onStart', 'onSuccess', 'onFinish'])
+  })
+
+  test('can render custom components with "replace" prop', async ({ page }) => {
+    await page.goto('/links/custom-component/2')
+
+    await page.getByRole('button', { name: 'Custom Component with Replace' }).click()
+    await expect(page).toHaveURL('/links/custom-component/3')
+
+    await page.goBack()
+    await expect(page).toHaveURL('/links/custom-component/1')
+  })
+
+  test('can render custom components with "preserveState" prop', async ({ page }) => {
+    await page.goto('/links/custom-component/1')
+
+    const componentState = await page.locator('#state').textContent()
+
+    await page.getByRole('button', { name: 'Custom Component with Preserve State' }).click()
+    await expect(page).toHaveURL('/links/custom-component/2')
+
+    const newComponentState = await page.locator('#state').textContent()
+
+    await expect(newComponentState).toBe(componentState)
+  })
+})
+
 test.describe('data-loading attribute', () => {
   test('adds data-loading attribute to link component', async ({ page }) => {
     await page.goto('/links/data-loading')
@@ -853,13 +935,68 @@ test('cancels pending request when navigating back', async ({ page }) => {
   await expect(page).toHaveURL('/links/cancel-sync-request/1')
 })
 
-test('will update href if prop is updated', async ({ page }) => {
-  await page.goto('/links/prop-update')
-  const link = await page.getByRole('link', { name: 'The Link' })
-  const button = await page.getByRole('button', { name: 'Change URL' })
-  await expect(link).toHaveAttribute('href', /\/sleep$/)
-  await button.click()
-  await expect(link).toHaveAttribute('href', /\/something-else$/)
+test.describe('reactivity', () => {
+  test('will update href if prop is updated', async ({ page }) => {
+    await page.goto('/links/prop-update')
+    const link = await page.getByRole('link', { name: 'The Link' })
+    const button = await page.getByRole('button', { name: 'Change URL' })
+    await expect(link).toHaveAttribute('href', /\/sleep$/)
+    await button.click()
+    await expect(link).toHaveAttribute('href', /\/something-else$/)
+  })
+
+  test('will update the method, href, data, and headers when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    const link = await page.getByRole('link', { name: 'Submit' })
+    await expect(link).toHaveAttribute('href', /\/dump\/get\?foo=bar$/)
+
+    await page.getByRole('button', { name: 'Change Link Props' }).click()
+
+    await expect(link).not.toBeVisible()
+    const button = await page.getByRole('button', { name: 'Submit' })
+    await button.click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toBe('post')
+    await expect(dump.form).toEqual({ foo: 'baz' })
+    await expect(dump.headers['x-custom-header']).toBe('new-value')
+  })
+
+  test('will update prefetch and cacheFor when props are updated', async ({ page }) => {
+    await page.goto('/links/reactivity')
+
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const link = await page.getByRole('link', { name: 'Prefetch Link' })
+    const prefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose === 'prefetch',
+    )
+
+    // Wait for the page to be prefetched
+    await link.hover()
+    await prefetchPromise
+
+    // Visit the page and check that it was prefetched
+    requests.listen(page)
+    await link.click()
+    await expect(page).toHaveURL('dump/get')
+    await expect(requests.requests.length).toBe(0)
+
+    // Wait for cache to expire
+    await page.waitForTimeout(1200)
+
+    // Click the link again without hovering first
+    await page.goBack()
+    await page.getByRole('button', { name: 'Enable Prefetch (1s cache)' }).click()
+    const nonPrefetchPromise = page.waitForRequest(
+      (request) => request.url().includes('/dump/get') && request.headers().purpose !== 'prefetch',
+    )
+    await link.click()
+    await nonPrefetchPromise
+
+    await expect(requests.requests.length).toBe(1)
+  })
 })
 
 test.describe('path traversal', () => {
