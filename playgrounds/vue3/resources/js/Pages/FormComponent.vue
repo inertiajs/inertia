@@ -28,7 +28,7 @@ const errorBag = ref('custom-bag')
     :headers="customHeaders"
     :error-bag="errorBag"
     :transform="(data) => ({ ...data, demo: 'data' })"
-    :visit-options="{
+    :options="{
       only: ['foo'],
       reset: ['bar'],
     }"
