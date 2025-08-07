@@ -412,14 +412,14 @@ test.describe('tags', () => {
     await isTagsPage(page, 2)
     await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
 
-    await page.goto('prefetch/tags/1')
+    await page.goBack()
 
     requests.listen(page)
     await page.getByRole('link', { name: 'Product Page 3' }).click()
     await isTagsPage(page, 3)
     await expect(requests.requests.length).toBe(0)
 
-    await page.goto('prefetch/tags/1')
+    await page.goBack()
 
     requests.listen(page)
     await page.getByRole('link', { name: 'Untagged Page 6' }).click()
