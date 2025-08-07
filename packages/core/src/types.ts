@@ -126,6 +126,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  invalidate: string[]
 }
 
 export type GlobalEventsMap = {
@@ -296,6 +297,7 @@ export type CacheForOption = number | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
+  tags?: string[]
 }
 
 type PrefetchObject = {
@@ -318,6 +320,7 @@ export type PrefetchedResponse = PrefetchObject & {
   timestamp: number
   singleUse: boolean
   inFlight: false
+  tags: string[]
 }
 
 export type PrefetchRemovalTimer = {

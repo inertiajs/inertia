@@ -36,6 +36,7 @@ export interface InertiaLinkProps {
   async?: boolean
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
   cacheFor?: CacheForOption | CacheForOption[]
+  tags?: string[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
@@ -131,6 +132,10 @@ const Link: InertiaLink = defineComponent({
     onCancelToken: {
       type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
       default: () => {},
+    },
+    tags: {
+      type: Array as PropType<string[]>,
+      default: () => [],
     },
   },
   setup(props, { slots, attrs }) {
@@ -244,7 +249,7 @@ const Link: InertiaLink = defineComponent({
     }))
 
     const prefetch = () => {
-      router.prefetch(href.value, baseParams.value, { cacheFor: cacheForValue.value })
+      router.prefetch(href.value, baseParams.value, { cacheFor: cacheForValue.value, tags: props.tags })
     }
 
     const regularEvents = {

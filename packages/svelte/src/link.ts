@@ -25,6 +25,7 @@ type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
   data?: Record<string, FormDataConvertible>
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
   cacheFor?: CacheForOption | CacheForOption[]
+  tags?: string[]
 }
 
 type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
@@ -48,6 +49,7 @@ function link(
   // Variables initialized and controlled by the "update" function
   let prefetchModes: LinkPrefetchOption[] = []
   let cacheForValue: CacheForOption | CacheForOption[]
+  let tags: string[] = []
   let method: Method
   let href: string
   let data
@@ -88,7 +90,7 @@ function link(
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, ...params }: ActionParameters) {
+  function update({ cacheFor = 0, prefetch = false, tags: tagValues = [], ...params }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -116,6 +118,8 @@ function link(
       // Otherwise, default to 30 seconds
       return 30_000
     })()
+
+    tags = tagValues
 
     method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
     ;[href, data] = hrefAndData(method, params)
@@ -173,7 +177,7 @@ function link(
   }
 
   function prefetch() {
-    router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+    router.prefetch(href, baseParams, { cacheFor: cacheForValue, tags })
   }
 
   function updateNodeAttributes() {

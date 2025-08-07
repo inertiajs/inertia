@@ -275,6 +275,16 @@ app.get('/prefetch/swr/:pageNumber', (req, res) => {
   }
 })
 
+app.get('/prefetch/tags/:pageNumber', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Tags',
+    props: {
+      pageNumber: req.params.pageNumber,
+      lastLoaded: Date.now(),
+    },
+  })
+})
+
 app.get('/history/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Page',

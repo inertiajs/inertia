@@ -217,3 +217,139 @@ test.skip('can do SWR when the link cacheFor prop has two values', async ({ page
   const lastLoaded2Fresh = await page.locator('#last-loaded').textContent()
   await expect(lastLoaded2).not.toBe(lastLoaded2Fresh)
 })
+
+test.describe('tags', () => {
+  const isTagsPage = async (page: Page, id: number) => {
+    await page.waitForURL(`prefetch/tags/${id}`)
+    await expect(page.getByText(`This is tags page ${id}`)).toBeVisible()
+  }
+
+  test('can flush prefetch cache by tags', async ({ page }) => {
+    await page.goto('prefetch/tags/1')
+
+    // Hover to prefetch User Page 2
+    const prefetch2 = page.waitForResponse('prefetch/tags/2')
+    await page.getByRole('link', { name: 'User Page 2' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch2
+
+    // Hover to prefetch Product Page 3
+    const prefetch3 = page.waitForResponse('prefetch/tags/3')
+    await page.getByRole('link', { name: 'Product Page 3' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch3
+
+    // Hover to prefetch Untagged Page 6
+    const prefetch6 = page.waitForResponse('prefetch/tags/6')
+    await page.getByRole('link', { name: 'Untagged Page 6' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch6
+
+    // Navigate to cached pages - should use cached responses (no new requests)
+    requests.listen(page)
+    await page.getByRole('link', { name: 'User Page 2' }).click()
+    await isTagsPage(page, 2)
+    await expect(requests.requests.length).toBe(0)
+
+    // Go to Product Page 3 - should be cached
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Product Page 3' }).click()
+    await isTagsPage(page, 3)
+    await expect(requests.requests.length).toBe(0)
+
+    // Flush 'user' tagged cache entries only
+    await page.getByRole('button', { name: 'Flush User Tags' }).click()
+
+    // Navigate to User Page 2 - should make a new request (cache was flushed)
+    requests.listen(page)
+    await page.getByRole('link', { name: 'User Page 2' }).click()
+    await isTagsPage(page, 2)
+    // Should have made a new request since user cache was flushed
+    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+
+    // Navigate to Product Page 3 - should still be cached (not flushed)
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Product Page 3' }).click()
+    await isTagsPage(page, 3)
+    await expect(requests.requests.length).toBe(0)
+
+    // Navigate to Untagged Page 6 - should still be cached (not flushed)
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Untagged Page 6' }).click()
+    await isTagsPage(page, 6)
+    await expect(requests.requests.length).toBe(0)
+  })
+
+  test('can flush multiple tags simultaneously', async ({ page }) => {
+    await page.goto('prefetch/tags/1')
+
+    // Hover to prefetch User Page 2
+    const prefetch2 = page.waitForResponse('prefetch/tags/2')
+    await page.getByRole('link', { name: 'User Page 2' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch2
+
+    // Hover to prefetch Product Page 3, Admin Page 5, and Untagged Page 6
+    const prefetch3 = page.waitForResponse('prefetch/tags/3')
+    await page.getByRole('link', { name: 'Product Page 3' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch3
+
+    const prefetch5 = page.waitForResponse('prefetch/tags/5')
+    await page.getByRole('link', { name: 'Admin Page 5' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch5
+
+    const prefetch6 = page.waitForResponse('prefetch/tags/6')
+    await page.getByRole('link', { name: 'Untagged Page 6' }).hover()
+    await page.waitForTimeout(75)
+    await prefetch6
+
+    // Navigate to verify pages are cached
+    requests.listen(page)
+    await page.getByRole('link', { name: 'User Page 2' }).click()
+    await isTagsPage(page, 2)
+    await expect(requests.requests.length).toBe(0)
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Product Page 3' }).click()
+    await isTagsPage(page, 3)
+    await expect(requests.requests.length).toBe(0)
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Admin Page 5' }).click()
+    await isTagsPage(page, 5)
+    await expect(requests.requests.length).toBe(0)
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Untagged Page 6' }).click()
+    await isTagsPage(page, 6)
+    await expect(requests.requests.length).toBe(0)
+
+    // Flush both 'user' and 'product' tagged cache entries at once
+    await page.getByRole('button', { name: 'Flush User + Product Tags' }).click()
+
+    // User and product pages should now make new requests
+    requests.listen(page)
+    await page.getByRole('link', { name: 'User Page 2' }).click()
+    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+    await isTagsPage(page, 2)
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Product Page 3' }).click()
+    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+    await isTagsPage(page, 3)
+
+    // Admin page should still be cached (not flushed)
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Admin Page 5' }).click()
+    await isTagsPage(page, 5)
+    await expect(requests.requests.length).toBe(0)
+
+    // Untagged page should still be cached (not flushed)
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Untagged Page 6' }).click()
+    await isTagsPage(page, 6)
+    await expect(requests.requests.length).toBe(0)
+  })
+})

@@ -207,11 +207,15 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
+  public flushByTags(tags: string[]): void {
+    prefetchedRequests.removeByTags(tags)
+  }
+
   public getPrefetching(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 
-  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor = 30_000 }: PrefetchOptions) {
+  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor = 30_000, tags = [] }: PrefetchOptions) {
     if (options.method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
     }
@@ -267,7 +271,7 @@ export class Router {
         (params) => {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
-        { cacheFor },
+        { cacheFor, tags },
       )
     })
   }
@@ -361,6 +365,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
+      invalidate: [],
       ...options,
     }
 
