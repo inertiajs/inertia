@@ -1,7 +1,11 @@
 <script>
-  import { inertia, router } from '@inertiajs/svelte'
+  import { inertia, router, useForm } from '@inertiajs/svelte'
   export let pageNumber
   export let lastLoaded
+
+  const form = useForm({
+    name: '',
+  })
 
   function flushUserTags() {
     router.flushByTags(['user'])
@@ -9,6 +13,30 @@
 
   function flushUserProductTags() {
     router.flushByTags(['user', 'product'])
+  }
+
+  function programmaticPrefetch() {
+    router.prefetch(
+      '/prefetch/tags/2',
+      { method: 'get' },
+      { cacheFor: '1m', tags: ['user'] }
+    )
+    router.prefetch(
+      '/prefetch/tags/3', 
+      { method: 'get' },
+      { cacheFor: '1m', tags: ['product'] }
+    )
+    router.prefetch(
+      '/prefetch/tags/6',
+      { method: 'get' },
+      { cacheFor: '1m' } // No tags (untagged)
+    )
+  }
+
+  function submitWithUserInvalidation() {
+    $form.post('/dump/post', {
+      invalidate: ['user'],
+    })
   }
 </script>
 
@@ -40,7 +68,26 @@
     <button id="flush-user-product" on:click={flushUserProductTags}>
       Flush User + Product Tags
     </button>
+    <button id="programmatic-prefetch" on:click={programmaticPrefetch}>
+      Programmatic Prefetch
+    </button>
   </div>
+  
+  <div id="form-section">
+    <h3>Form Test</h3>
+    <form on:submit|preventDefault>
+      <input
+        id="form-name"
+        bind:value={$form.name}
+        type="text"
+        placeholder="Enter name"
+      />
+      <button id="submit-invalidate-user" on:click={submitWithUserInvalidation}>
+        Submit (Invalidate User)
+      </button>
+    </form>
+  </div>
+  
   <div>
     <div>This is tags page {pageNumber}</div>
     <div>

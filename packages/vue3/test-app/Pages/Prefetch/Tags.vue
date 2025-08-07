@@ -1,9 +1,13 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 
 defineProps({
   pageNumber: String,
   lastLoaded: Number,
+})
+
+const form = useForm({
+  name: '',
 })
 
 const flushUserTags = () => {
@@ -12,6 +16,30 @@ const flushUserTags = () => {
 
 const flushUserProductTags = () => {
   router.flushByTags(['user', 'product'])
+}
+
+const programmaticPrefetch = () => {
+  router.prefetch(
+    '/prefetch/tags/2',
+    { method: 'get' },
+    { cacheFor: '1m', tags: ['user'] }
+  )
+  router.prefetch(
+    '/prefetch/tags/3', 
+    { method: 'get' },
+    { cacheFor: '1m', tags: ['product'] }
+  )
+  router.prefetch(
+    '/prefetch/tags/6',
+    { method: 'get' },
+    { cacheFor: '1m' } // No tags (untagged)
+  )
+}
+
+const submitWithUserInvalidation = () => {
+  form.post('/dump/post', {
+    invalidate: ['user'],
+  })
 }
 </script>
 
@@ -44,6 +72,24 @@ const flushUserProductTags = () => {
       <button id="flush-user-product" @click="flushUserProductTags">
         Flush User + Product Tags
       </button>
+      <button id="programmatic-prefetch" @click="programmaticPrefetch">
+        Programmatic Prefetch
+      </button>
+    </div>
+    
+    <div id="form-section">
+      <h3>Form Test</h3>
+      <form @submit.prevent>
+        <input
+          id="form-name"
+          v-model="form.name"
+          type="text"
+          placeholder="Enter name"
+        />
+        <button id="submit-invalidate-user" @click="submitWithUserInvalidation">
+          Submit (Invalidate User)
+        </button>
+      </form>
     </div>
     <div>
       <div>This is tags page {{ pageNumber }}</div>
