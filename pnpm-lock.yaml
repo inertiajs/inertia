@@ -222,6 +222,10 @@ importers:
       vue:
         specifier: ^3.0.0
         version: 3.5.13(typescript@4.9.5)
+    optionalDependencies:
+      '@provydon/vue-auto-save':
+        specifier: ^1.0.0
+        version: 1.0.0(vue@3.5.13(typescript@4.9.5))
 
   packages/vue3/test-app:
     dependencies:
@@ -891,6 +895,11 @@ packages:
 
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
+
+  '@provydon/vue-auto-save@1.0.0':
+    resolution: {integrity: sha512-qCGDkU4AgHFLhyy5b6hixcxhSmwvD/IJ6raGAHUNk1CbgA8Pv7XMlcr+dLDOsdsbsRZUCCcF+aWpdwefmsR3lg==}
+    peerDependencies:
+      vue: ^3.0.0
 
   '@rollup/rollup-android-arm-eabi@4.45.1':
     resolution: {integrity: sha512-NEySIFvMY0ZQO+utJkgoMiCAjMrGvnbDLHvcmlA33UXJpYBCvlBEbMMtV837uCkS+plG2umfhn0T5mMAxGrlRA==}
@@ -3499,6 +3508,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.28': {}
 
+  '@provydon/vue-auto-save@1.0.0(vue@3.5.13(typescript@4.9.5))':
+    dependencies:
+      vue: 3.5.13(typescript@4.9.5)
+    optional: true
+
   '@rollup/rollup-android-arm-eabi@4.45.1':
     optional: true
 
@@ -3703,6 +3717,7 @@ snapshots:
   '@types/node@24.0.14':
     dependencies:
       undici-types: 7.8.0
+    optional: true
 
   '@types/nprogress@0.2.3': {}
 
@@ -4748,7 +4763,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 24.0.14
+      '@types/node': 22.10.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -5624,7 +5639,8 @@ snapshots:
 
   undici-types@6.20.0: {}
 
-  undici-types@7.8.0: {}
+  undici-types@7.8.0:
+    optional: true
 
   unpipe@1.0.0: {}
 

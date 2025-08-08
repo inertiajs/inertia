@@ -149,10 +149,24 @@ app.post('/remember/form-helper/remember', (req, res) =>
   }),
 )
 
+app.get('/form-helper/data', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Data',
+    props: {},
+  }),
+)
+
 app.post('/form-helper/data', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Data',
     props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
+  }),
+)
+
+app.post('/form-helper/basic-auto-save/autosave', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/BasicAutoSave',
+    props: {},
   }),
 )
 
@@ -169,7 +183,70 @@ app.get('/form-helper/dirty', (req, res) =>
   }),
 )
 
+app.get('/form-helper/methods', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Methods',
+    props: {},
+  }),
+)
+
+app.get('/form-helper/transform', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Transform',
+    props: {},
+  }),
+)
+
+app.get('/form-helper/errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Errors',
+    props: {},
+  }),
+)
+
+app.get('/form-helper/events', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/Events',
+    props: {},
+  }),
+)
+
+app.get('/form-helper/basic-auto-save', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/BasicAutoSave',
+    props: {},
+  }),
+)
+
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+
+app.post('/form-helper/methods', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: { headers: req.headers, method: req.body._method || 'post', form: req.body, query: req.query, files: req.files },
+  }),
+)
+
+app.post('/form-helper/transform', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: { headers: req.headers, method: req.body._method || 'post', form: req.body, query: req.query, files: req.files },
+  }),
+)
+
+app.post('/form-helper/events', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: { headers: req.headers, method: req.body._method || 'post', form: req.body, query: req.query, files: req.files },
+  }),
+)
+
+app.post('/form-helper/basic-auto-save', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: { headers: req.headers, method: req.body._method || 'post', form: req.body, query: req.query, files: req.files },
+  }),
+)
 
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {

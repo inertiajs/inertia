@@ -280,7 +280,7 @@ export default function useForm<TForm extends FormDataType>(
             onSave: options.onSave || (() => {
               if (options.url) {
                 const method = options.method || 'post'
-                this[method](options.url, {
+                ;(this as any)[method](options.url, {
                   preserveState: true,
                   onSuccess: options.onSaveSuccess,
                   onError: options.onSaveError,
@@ -314,7 +314,8 @@ export default function useForm<TForm extends FormDataType>(
   })
 
   const triggerAutoSave = () => {
-    if (!form.autosave || !form.autosaveOptions || form.processing) {
+    const currentForm = form as any
+    if (!currentForm.autosave || !currentForm.autosaveOptions || currentForm.processing) {
       return
     }
 
@@ -322,35 +323,36 @@ export default function useForm<TForm extends FormDataType>(
       clearTimeout(autoSaveTimer)
     }
 
-    const debounce = form.autosaveOptions.debounce || 2000
+    const debounce = currentForm.autosaveOptions.debounce || 2000
     autoSaveTimer = setTimeout(() => {
-      if (form.autosaveOptions?.onSave) {
-        form.autosaveOptions.onSave()
-      } else if (form.autosaveOptions?.url) {
-        const method = form.autosaveOptions.method || 'post'
+      if (currentForm.autosaveOptions?.onSave) {
+        currentForm.autosaveOptions.onSave()
+      } else if (currentForm.autosaveOptions?.url) {
+        const method = currentForm.autosaveOptions.method || 'post'
         const options = {
           preserveState: true,
-          onSuccess: form.autosaveOptions.onSaveSuccess,
-          onError: form.autosaveOptions.onSaveError,
+          onSuccess: currentForm.autosaveOptions.onSaveSuccess,
+          onError: currentForm.autosaveOptions.onSaveError,
         }
-        form[method](form.autosaveOptions.url, options)
+        currentForm[method](currentForm.autosaveOptions.url, options)
       }
     }, debounce)
   }
 
-  watch(
+  ;(watch as any)(
     form,
-    (newValue) => {
-      form.isDirty = !isEqual(form.data(), defaults)
+    (newValue: any) => {
+      const currentForm = form as any
+      currentForm.isDirty = !isEqual(currentForm.data(), defaults)
       if (rememberKey) {
         router.remember(cloneDeep(newValue.__remember()), rememberKey)
       }
-      if (form.autosave && form.isDirty) {
+      if (currentForm.autosave && currentForm.isDirty) {
         triggerAutoSave()
       }
     },
     { immediate: true, deep: true },
   )
 
-  return form
+  return form as any
 }

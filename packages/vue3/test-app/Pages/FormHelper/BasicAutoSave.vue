@@ -12,7 +12,7 @@ const form = useForm({
 // Enable autosave on form creation
 form.autosave = true
 form.autosaveOptions = {
-  url: page.url + '/autosave',
+  url: '/form-helper/basic-auto-save/autosave',
   method: 'post',
   debounce: 2000,
   onSaveSuccess: () => {
@@ -28,16 +28,15 @@ const submit = () => {
 }
 
 const disableAutoSave = () => {
-  form.autosave = false
+  form.disableAutoSave()
 }
 
 const enableAutoSave = () => {
-  form.autosave = true
-  form.autosaveOptions = {
-    url: page.url + '/autosave',
+  form.enableAutoSave({
+    url: '/form-helper/basic-auto-save/autosave',
     method: 'post',
     debounce: 2000,
-  }
+  })
 }
 </script>
 
@@ -49,19 +48,19 @@ const enableAutoSave = () => {
     <form @submit.prevent="submit">
       <label>
         Name
-        <input type="text" v-model="form.name" placeholder="Enter your name" />
+        <input type="text" name="name" v-model="form.name" placeholder="Enter your name" />
       </label>
       <span class="error" v-if="form.errors.name">{{ form.errors.name }}</span>
       
       <label>
         Email
-        <input type="email" v-model="form.email" placeholder="Enter your email" />
+        <input type="email" name="email" v-model="form.email" placeholder="Enter your email" />
       </label>
       <span class="error" v-if="form.errors.email">{{ form.errors.email }}</span>
       
       <label>
         Message
-        <textarea v-model="form.message" rows="4" placeholder="Enter your message"></textarea>
+        <textarea name="message" v-model="form.message" rows="4" placeholder="Enter your message"></textarea>
       </label>
       <span class="error" v-if="form.errors.message">{{ form.errors.message }}</span>
 

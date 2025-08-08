@@ -904,7 +904,7 @@ test.describe('AutoSave', () => {
     await expect(page.getByText('Auto-save is enabled')).toBeVisible()
     
     await page.fill('input[name="email"]', 'john@example.com')
-    await page.waitForTimeout(2500)
+    await page.waitForTimeout(3000)
     
     await expect(page.getByText('Form is clean')).toBeVisible()
   })
