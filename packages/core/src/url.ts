@@ -1,7 +1,7 @@
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import { Method, RequestPayload, VisitOptions } from './types'
+import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
@@ -29,12 +29,15 @@ export const transformUrlAndData = (
   return [hrefToUrl(_href), _data]
 }
 
-export function mergeDataIntoQueryString(
+type MergeDataIntoQueryStringDataReturnType<T extends RequestPayload> =
+  T extends Record<string, FormDataConvertible> ? Record<string, FormDataConvertible> : RequestPayload
+
+export function mergeDataIntoQueryString<T extends RequestPayload>(
   method: Method,
   href: URL | string,
-  data: RequestPayload,
+  data: T,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
-): [string, RequestPayload] {
+): [string, MergeDataIntoQueryStringDataReturnType<T>] {
   const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
   const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/')
@@ -54,7 +57,6 @@ export function mergeDataIntoQueryString(
         arrayFormat: qsArrayFormat,
       },
     )
-    data = {}
   }
 
   return [
@@ -65,7 +67,7 @@ export function mergeDataIntoQueryString(
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
     ].join(''),
-    data,
+    (hasDataForQueryString ? {} : data) as MergeDataIntoQueryStringDataReturnType<T>,
   ]
 }
 

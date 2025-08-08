@@ -8,6 +8,7 @@
   export let method: Method
   export let form: Record<string, unknown>
   export let files: MulterFile[] | object = {}
+  export let url: string
   export let query: Record<string, unknown>
 
   const dump = {
@@ -16,18 +17,12 @@
     form,
     files,
     query,
+    url,
     $page: $page,
   }
 
   beforeUpdate(() => {
-    window._inertia_request_dump = {
-      headers,
-      method,
-      form,
-      files,
-      query,
-      $page: $page,
-    }
+    window._inertia_request_dump = dump
   })
 </script>
 
