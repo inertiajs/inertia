@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Form } from '@inertiajs/react'
 
 export default () => {
-  const [errorBag, setErrorBag] = useState(null)
+  const [errorBag, setErrorBag] = useState<string | null>(null)
 
   return (
     <Form

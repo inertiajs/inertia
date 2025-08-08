@@ -1,17 +1,18 @@
 import { useState, useMemo } from 'react'
 import { Form } from '@inertiajs/react'
+import type { Method } from '@inertiajs/core'
 import Article from './../Article'
 
 export default () => {
-  const [only, setOnlyValues] = useState([])
-  const [except, setExceptValues] = useState([])
-  const [reset, setResetValues] = useState([])
+  const [only, setOnlyValues] = useState<string[]>([])
+  const [except, setExceptValues] = useState<string[]>([])
+  const [reset, setResetValues] = useState<string[]>([])
   const [replace, setReplace] = useState(false)
   const [state, setState] = useState('Default State')
   const [preserveScroll, setPreserveScroll] = useState(false)
   const [preserveState, setPreserveState] = useState(false)
   const [preserveUrl, setPreserveUrl] = useState(false)
-  const [queryStringArrayFormat, setQueryStringArrayFormat] = useState(undefined)
+  const [queryStringArrayFormat, setQueryStringArrayFormat] = useState<'indices' | 'brackets' | undefined>(undefined)
 
   function setOnly() {
     setOnlyValues(['users'])
@@ -58,7 +59,7 @@ export default () => {
     return queryStringArrayFormat ? '/dump/get' : '/dump/post'
   }, [preserveScroll, preserveState, preserveUrl, queryStringArrayFormat])
 
-  const method = useMemo(() => {
+  const method = useMemo((): Method => {
     if (preserveScroll || preserveState || preserveUrl) {
       return 'get'
     }
@@ -81,29 +82,33 @@ export default () => {
       }}
       queryStringArrayFormat={queryStringArrayFormat}
     >
-      <h1>Form Options</h1>
+      {() => (
+        <>
+          <h1>Form Options</h1>
 
-      <input type="text" name="tags[]" value="alpha" readOnly />
-      <input type="text" name="tags[]" value="beta" readOnly />
+          <input type="text" name="tags[]" value="alpha" readOnly />
+          <input type="text" name="tags[]" value="beta" readOnly />
 
-      <div>
-        State: <span id="state">{state}</span>
-      </div>
+          <div>
+            State: <span id="state">{state}</span>
+          </div>
 
-      <div>
-        <button type="button" onClick={setOnly}>Set Only (users)</button>
-        <button type="button" onClick={setExcept}>Set Except (stats)</button>
-        <button type="button" onClick={setReset}>Set Reset (orders)</button>
-        <button type="button" onClick={() => setQueryStringArrayFormat('brackets')}>Use Brackets Format</button>
-        <button type="button" onClick={() => setQueryStringArrayFormat('indices')}>Use Indices Format</button>
-        <button type="button" onClick={enablePreserveScroll}>Enable Preserve Scroll</button>
-        <button type="button" onClick={enablePreserveState}>Enable Preserve State</button>
-        <button type="button" onClick={enablePreserveUrl}>Enable Preserve URL</button>
-        <button type="button" onClick={enableReplace}>Enable Replace</button>
-        <button type="submit">Submit</button>
-      </div>
+          <div>
+            <button type="button" onClick={setOnly}>Set Only (users)</button>
+            <button type="button" onClick={setExcept}>Set Except (stats)</button>
+            <button type="button" onClick={setReset}>Set Reset (orders)</button>
+            <button type="button" onClick={() => setQueryStringArrayFormat('brackets')}>Use Brackets Format</button>
+            <button type="button" onClick={() => setQueryStringArrayFormat('indices')}>Use Indices Format</button>
+            <button type="button" onClick={enablePreserveScroll}>Enable Preserve Scroll</button>
+            <button type="button" onClick={enablePreserveState}>Enable Preserve State</button>
+            <button type="button" onClick={enablePreserveUrl}>Enable Preserve URL</button>
+            <button type="button" onClick={enableReplace}>Enable Replace</button>
+            <button type="submit">Submit</button>
+          </div>
 
-      {preserveScroll && <Article />}
+          {preserveScroll && <Article />}
+        </>
+      )}
     </Form>
   )
 }

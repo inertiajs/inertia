@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Form } from '@inertiajs/react'
+import type { Method } from '@inertiajs/core'
 
 export default () => {
-  const [method, setMethod] = useState('get')
+  const [method, setMethod] = useState<Method>('get')
 
   return (
     <div>

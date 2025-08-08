@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Form } from '@inertiajs/react'
 
 export default () => {
-  const [headers, setHeaders] = useState({
+  const [headers, setHeaders] = useState<Record<string, string>>({
     'X-Foo': 'Bar',
   })
 

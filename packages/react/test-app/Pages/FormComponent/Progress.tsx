@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Form } from '@inertiajs/react'
 
 export default () => {
-  const [showProgress, setShowProgress] = useState(undefined)
+  const [showProgress, setShowProgress] = useState<boolean | undefined>(undefined)
   const [nprogressVisible, setNprogressVisible] = useState(false)
   const [nprogressAppearances, setNprogressAppearances] = useState(0)
 
-  const observerRef = useRef(null)
-
+  const observerRef = useRef<MutationObserver | null>(null)
 
   function disableProgress() {
     setShowProgress(false)
@@ -15,7 +14,7 @@ export default () => {
 
   useEffect(() => {
     observerRef.current = new MutationObserver(() => {
-      const nprogressElement = document.querySelector('#nprogress')
+      const nprogressElement = document.querySelector('#nprogress') as HTMLElement | null
       const nprogressIsCurrentlyVisible = nprogressElement && nprogressElement.style.display !== 'none'
 
       if (nprogressIsCurrentlyVisible) {
@@ -31,7 +30,7 @@ export default () => {
     observerRef.current.observe(document.body, { childList: true, subtree: true })
 
     return () => observerRef.current?.disconnect()
-  }, [])
+  }, [nprogressVisible])
 
   return (
     <Form action="/form-component/progress" method="post" showProgress={showProgress}>

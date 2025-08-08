@@ -81,7 +81,7 @@ export default () => {
 
           {/* Textarea */}
           <div>
-            <textarea name="bio" id="bio" rows="3" placeholder="Bio"></textarea>
+            <textarea name="bio" id="bio" rows={3} placeholder="Bio"></textarea>
           </div>
 
           {/* Hidden input */}

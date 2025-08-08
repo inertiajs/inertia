@@ -2,14 +2,14 @@ import { useCallback, useMemo, useState } from 'react'
 import { Form } from '@inertiajs/react'
 
 export default () => {
-  const [events, setEvents] = useState([])
+  const [events, setEvents] = useState<string[]>([])
   const [cancelInOnBefore, setCancelInOnBefore] = useState(false)
   const [shouldFail, setShouldFail] = useState(false)
   const [shouldDelay, setShouldDelay] = useState(false)
 
-  const [cancelToken, setCancelToken] = useState(null)
+  const [cancelToken, setCancelToken] = useState<{ cancel: () => void } | null>(null)
 
-  function log(eventName) {
+  function log(eventName: string) {
     setEvents((previousEvents) => [...previousEvents, eventName])
   }
 
@@ -40,7 +40,7 @@ export default () => {
     onCancel: () => log('onCancel'),
     onSuccess: () => log('onSuccess'),
     onError: () => log('onError'),
-    onCancelToken: (token) => {
+    onCancelToken: (token: { cancel: () => void }) => {
       log('onCancelToken')
       setCancelToken(token)
     },
