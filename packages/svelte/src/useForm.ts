@@ -19,6 +19,8 @@ import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { writable, type Writable } from 'svelte/store'
 
+type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
+
 type FormOptions = Omit<VisitOptions, 'data'>
 
 export interface InertiaFormProps<TForm extends object> {
@@ -52,15 +54,15 @@ export interface InertiaFormProps<TForm extends object> {
 
 export type InertiaForm<TForm extends object> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): Writable<InertiaForm<TForm>>
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
-): Writable<InertiaForm<TForm>>
+): InertiaFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
   maybeData?: TForm | (() => TForm),
-): Writable<InertiaForm<TForm>> {
+): InertiaFormStore<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const inputData = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
   const data: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)
