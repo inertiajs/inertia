@@ -124,8 +124,6 @@ export default function useForm<TForm extends FormDataType>(
         },
         onSuccess: (page) => {
           if (isMounted.current) {
-            setProcessing(false)
-            setProgress(null)
             setErrors({})
             setHasErrors(false)
             setWasSuccessful(true)
@@ -144,8 +142,6 @@ export default function useForm<TForm extends FormDataType>(
         },
         onError: (errors) => {
           if (isMounted.current) {
-            setProcessing(false)
-            setProgress(null)
             setErrors(errors)
             setHasErrors(true)
           }
@@ -155,11 +151,6 @@ export default function useForm<TForm extends FormDataType>(
           }
         },
         onCancel: () => {
-          if (isMounted.current) {
-            setProcessing(false)
-            setProgress(null)
-          }
-
           if (options.onCancel) {
             return options.onCancel()
           }
