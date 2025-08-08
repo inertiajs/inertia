@@ -1,16 +1,17 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
+  import type { Method } from '@inertiajs/core'
   import Article from '../Article.svelte'
 
-  let only = []
-  let except = []
-  let reset = []
+  let only: string[] = []
+  let except: string[] = []
+  let reset: string[] = []
   let replace = false
   let state = 'Default State'
   let preserveScroll = false
   let preserveState = false
   let preserveUrl = false
-  let queryStringArrayFormat = undefined
+  let queryStringArrayFormat: 'indices' | 'brackets' | undefined = undefined
 
   function setOnly() {
     only = ['users']
@@ -63,7 +64,7 @@
     }
 
     return queryStringArrayFormat ? 'get' : 'post'
-  })()
+  })() as Method
 
   $: options = {
     only,

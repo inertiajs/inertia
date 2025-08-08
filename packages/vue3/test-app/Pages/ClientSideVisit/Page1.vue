@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { Page } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-defineProps<{
+interface PageProps {
   foo: string
   bar: string
-}>()
+}
+
+const props = defineProps<PageProps>()
 
 const errors = ref(0)
 const finished = ref(0)
@@ -14,7 +17,7 @@ const success = ref(0)
 const bagErrors = () => {
   router.replace({
     preserveState: true,
-    props: (props) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
+    props: (props: Page['props']) => ({ ...props, errors: { bag: { foo: 'bar' } } }),
     errorBag: 'bag',
     onError: (err) => {
       errors.value = Object.keys(err).length
@@ -27,7 +30,7 @@ const bagErrors = () => {
 const defaultErrors = () => {
   router.replace({
     preserveState: true,
-    props: (props) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
+    props: (props: PageProps) => ({ ...props, errors: { foo: 'bar', baz: 'qux' } }),
     onError: (err) => {
       errors.value = Object.keys(err).length
     },

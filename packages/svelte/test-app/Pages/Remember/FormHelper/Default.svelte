@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { inertia, useForm } from '@inertiajs/svelte'
 
   let untracked = ''

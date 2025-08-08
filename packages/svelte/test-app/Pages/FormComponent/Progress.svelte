@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
   import { onMount, onDestroy } from 'svelte'
 
-  let showProgress = undefined
+  let showProgress: boolean | undefined = undefined
   let nprogressVisible = false
   let nprogressAppearances = 0
-  let observer = null
+  let observer: MutationObserver | null = null
 
   function disableProgress() {
     showProgress = false
@@ -13,7 +13,7 @@
 
   onMount(() => {
     observer = new MutationObserver(() => {
-      const nprogressElement = document.querySelector('#nprogress')
+      const nprogressElement = document.querySelector('#nprogress') as HTMLElement | null
       const nprogressIsCurrentlyVisible = nprogressElement && nprogressElement.style.display !== 'none'
 
       if (nprogressIsCurrentlyVisible) {

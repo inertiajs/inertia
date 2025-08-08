@@ -1,12 +1,13 @@
-<script>
+<script lang="ts">
+import type { Component } from 'vue'
 import Layout from '@/Layouts/SiteLayout.vue'
 
 export default {
-  layout: (h, page) => h(Layout, [page]),
+  layout: (h: Function, page: Component) => h(Layout, [page]),
 }
 </script>
 
-<script setup>
+<script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
 </script>
 

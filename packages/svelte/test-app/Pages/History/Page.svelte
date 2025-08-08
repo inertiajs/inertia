@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { inertia, router } from '@inertiajs/svelte'
 
   export let pageNumber

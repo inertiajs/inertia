@@ -1,10 +1,11 @@
-<script context="module">
+<script context="module" lang="ts">
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
+  import type { ComponentType } from 'svelte'
 
-  export const layout = (h, page) => h(SiteLayout, [page])
+  export const layout = (h: (component: ComponentType, children: ComponentType[]) => ComponentType, page: ComponentType) => h(SiteLayout, [page])
 </script>
 
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 </script>
 

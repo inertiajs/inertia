@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import { Deferred } from '@inertiajs/svelte'
 
-  export let baz
-  export let qux
+  export let baz: string | undefined
+  export let qux: string | undefined
 </script>
 
 <Deferred data="baz">

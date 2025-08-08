@@ -1,6 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
 import WithScrollRegion from '../../Layouts/WithScrollRegion.vue'
+import type { Page } from '@inertiajs/core'
 
 defineOptions({
   layout: WithScrollRegion,
@@ -13,13 +14,13 @@ defineProps({
   },
 })
 
-const preserveCallback = (page) => {
+const preserveCallback = (page: Page) => {
   console.log(JSON.stringify(page))
 
   return true
 }
 
-const preserveCallbackFalse = (page) => {
+const preserveCallbackFalse = (page: Page) => {
   console.log(JSON.stringify(page))
 
   return false

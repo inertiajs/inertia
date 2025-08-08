@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Form } from '@inertiajs/vue3'
 </script>
 
@@ -33,6 +33,5 @@ import { Form } from '@inertiajs/vue3'
       <input type="text" name="settings.ui.theme" placeholder="UI Theme" />
       <button type="submit">Submit Mixed</button>
     </Form>
-
   </div>
 </template>

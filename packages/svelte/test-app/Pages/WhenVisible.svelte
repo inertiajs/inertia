@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { WhenVisible } from '@inertiajs/svelte'
 
   export let count = 0

@@ -1,15 +1,17 @@
-<script setup>
+<script setup lang="ts">
+import { Method } from '@inertiajs/core'
 import { usePage } from '@inertiajs/vue3'
 import { onBeforeMount } from 'vue'
+import type { MulterFile } from '../types'
 
-const props = defineProps({
-  headers: Object,
-  method: String,
-  form: Object,
-  files: Array,
-  query: Object,
-  url: String,
-})
+const props = defineProps<{
+  headers: Record<string, string>
+  method: Method
+  form: Record<string, any> | undefined
+  files: MulterFile[] | object
+  query: Record<string, any>
+  url: string
+}>()
 
 const page = usePage()
 

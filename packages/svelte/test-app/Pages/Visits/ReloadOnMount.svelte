@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 import { router } from '@inertiajs/svelte'
 import { onMount } from 'svelte'
 
-export let name = undefined;
+export let name;
 
 onMount(() => {
     router.reload({only: ['name']})

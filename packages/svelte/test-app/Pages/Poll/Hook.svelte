@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { inertia, usePoll } from '@inertiajs/svelte'
 
   usePoll(500, {

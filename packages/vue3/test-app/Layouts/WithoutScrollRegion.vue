@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 
 const documentScrollTop = ref(0)
@@ -9,8 +9,8 @@ const slotScrollLeft = ref(0)
 const handleScrollEvent = () => {
   documentScrollTop.value = document.documentElement.scrollTop
   documentScrollLeft.value = document.documentElement.scrollLeft
-  slotScrollTop.value = document.getElementById('slot').scrollTop
-  slotScrollLeft.value = document.getElementById('slot').scrollLeft
+  slotScrollTop.value = document.getElementById('slot')?.scrollTop || 0
+  slotScrollLeft.value = document.getElementById('slot')?.scrollLeft || 0
 }
 
 onMounted(() => {
