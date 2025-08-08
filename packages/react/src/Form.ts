@@ -14,7 +14,7 @@ import useForm from './useForm'
 type ComponentProps = (FormComponentProps &
   Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
   Omit<React.AllHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'>) & {
-  children: (props: FormComponentSlotProps) => ReactNode
+  children: ReactNode | ((props: FormComponentSlotProps) => ReactNode)
 }
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
