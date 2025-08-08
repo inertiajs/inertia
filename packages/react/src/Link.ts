@@ -38,6 +38,7 @@ interface BaseInertiaLinkProps {
   async?: boolean
   cacheFor?: CacheForOption | CacheForOption[]
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+  tags?: string[]
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -71,6 +72,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onError = noop,
       prefetch = false,
       cacheFor = 0,
+      tags = [],
       ...props
     },
     ref,
@@ -142,7 +144,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     )
 
     const doPrefetch = () => {
-      router.prefetch(url, baseParams, { cacheFor: cacheForValue })
+      router.prefetch(url, baseParams, { cacheFor: cacheForValue, tags })
     }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
