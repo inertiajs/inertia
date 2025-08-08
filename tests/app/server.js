@@ -187,35 +187,22 @@ app.post('/form-helper/events/errors', (req, res) => {
   }, 250)
 })
 
-app.get('/dump/get', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.post('/dump/post', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.put('/dump/put', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'put', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.patch('/dump/patch', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.delete('/dump/delete', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files },
-  }),
+const methods = ['get', 'post', 'put', 'patch', 'delete']
+
+methods.forEach((method) =>
+  app[method](`/dump/${method}`, upload.any(), (req, res) =>
+    inertia.render(req, res, {
+      component: 'Dump',
+      props: {
+        headers: req.headers,
+        method,
+        form: req.body,
+        query: req.query,
+        files: req.files,
+        url: req.originalUrl,
+      },
+    }),
+  ),
 )
 
 app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
@@ -521,6 +508,47 @@ app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.json({ foo: 'bar' }))
+
+app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
+app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
+app.post('/form-component/errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Errors',
+    props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
+  }),
+)
+app.post('/form-component/errors/bag', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Errors',
+    props: { errors: { bag: { name: 'Some name error', handle: 'The Handle was invalid' } } },
+  }),
+)
+
+app.get('/form-component/events', (req, res) => inertia.render(req, res, { component: 'FormComponent/Events' }))
+app.post('/form-component/events/delay', upload.any(), async (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
+)
+app.post('/form-component/events/success', async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/Events' }),
+)
+app.post('/form-component/events/errors', async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Events',
+    props: { errors: { field: 'Something went wrong' } },
+  }),
+)
+
+app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
+app.get('/form-component/options', (req, res) =>
+  // TODO: see 'url' key in helpers.js, this should be req.originalUrl by default
+  inertia.render(req, res, { component: 'FormComponent/Options', url: req.originalUrl }),
+)
+app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
+app.post('/form-component/progress', async (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
+)
+app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
+app.get('/form-component/dotted-keys', (req, res) => inertia.render(req, res, { component: 'FormComponent/DottedKeys' }))
 
 app.all('*', (req, res) => inertia.render(req, res))
 
