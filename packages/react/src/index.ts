@@ -3,6 +3,7 @@ import { router as Router } from '@inertiajs/core'
 export const router = Router
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
+export { default as Form } from './Form'
 export { default as Head } from './Head'
 export { InertiaLinkProps, default as Link } from './Link'
 export { InertiaFormProps, SetDataByObject, SetDataByMethod, SetDataByKeyValuePair, SetDataAction, default as useForm } from './useForm'
