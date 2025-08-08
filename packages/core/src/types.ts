@@ -66,22 +66,12 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
               [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
             }[Extract<keyof T, string>]
 
-type FormDataErrorKeys<T> =
-  | Extract<keyof T, string>
-  | {
-      [K in Extract<keyof T, string>]: T[K] extends Record<string, any>
-        ? T[K] extends Function | Date
-          ? never
-          : T[K] extends Array<any>
-            ? `${K}.${number}` | `${K}.${number}.${string}`
-            : `${K}.${Extract<keyof T[K], string>}` | `${K}.${string}`
-        : never
-    }[Extract<keyof T, string>]
-  | `${string}.${string}`
-  | string
+type PartialFormDataErrors<T> = {
+  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
+}
 
-export type FormDataErrors<T extends object = Record<string, never>> = {
-  [K in FormDataErrorKeys<T>]?: ErrorValue
+export type FormDataErrors<T> = PartialFormDataErrors<T> & {
+  [K in keyof PartialFormDataErrors<T>]: NonNullable<PartialFormDataErrors<T>[K]>
 }
 
 export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
