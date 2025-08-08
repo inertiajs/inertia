@@ -1,13 +1,9 @@
 import {
-  FormComponentOptions,
   FormComponentProps,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
   mergeDataIntoQueryString,
-  Method,
-  PendingVisit,
-  Progress,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -17,23 +13,25 @@ import useForm from './useForm'
 type InertiaForm = DefineComponent<FormComponentProps>
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
+const noop = () => undefined
+
 const Form: InertiaForm = defineComponent({
   name: 'Form',
   props: {
     action: {
       type: [String, Object] as PropType<FormComponentProps['action']>,
-      required: true,
+      default: '',
     },
     method: {
-      type: String as PropType<Method>,
+      type: String as PropType<FormComponentProps['method']>,
       default: 'get',
     },
     headers: {
-      type: Object,
+      type: Object as PropType<FormComponentProps['headers']>,
       default: () => ({}),
     },
     queryStringArrayFormat: {
-      type: String as PropType<'brackets' | 'indices'>,
+      type: String as PropType<FormComponentProps['queryStringArrayFormat']>,
       default: 'brackets',
     },
     errorBag: {
@@ -45,51 +43,53 @@ const Form: InertiaForm = defineComponent({
       default: true,
     },
     transform: {
-      type: Function as PropType<(data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>>,
+      type: Function as PropType<FormComponentProps['transform']>,
       default: (data: Record<string, FormDataConvertible>) => data,
     },
     options: {
-      type: Object as PropType<FormComponentOptions>,
+      type: Object as PropType<FormComponentProps['options']>,
       default: () => ({}),
     },
     onCancelToken: {
       type: Function as PropType<FormComponentProps['onCancelToken']>,
-      default: () => {},
+      default: noop,
     },
     onBefore: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<FormComponentProps['onBefore']>,
+      default: noop,
     },
     onStart: {
-      type: Function as PropType<(visit: PendingVisit) => void>,
-      default: (_visit: PendingVisit) => {},
+      type: Function as PropType<FormComponentProps['onStart']>,
+      default: noop,
     },
     onProgress: {
-      type: Function as PropType<(progress: Progress) => void>,
-      default: () => {},
+      type: Function as PropType<FormComponentProps['onProgress']>,
+      default: noop,
     },
     onFinish: {
-      type: Function as PropType<(visit: PendingVisit) => void>,
-      default: () => {},
+      type: Function as PropType<FormComponentProps['onFinish']>,
+      default: noop,
     },
     onCancel: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<FormComponentProps['onCancel']>,
+      default: noop,
     },
     onSuccess: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<FormComponentProps['onSuccess']>,
+      default: noop,
     },
     onError: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<FormComponentProps['onError']>,
+      default: noop,
     },
   },
   setup(props, { slots, attrs }) {
     const form = useForm({} as Record<string, FormDataConvertible>)
     const formElement = ref()
     const method = computed(() =>
-      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
+      typeof props.action === 'object'
+        ? props.action.method
+        : (props.method.toLowerCase() as FormComponentProps['method']),
     )
 
     // Can't use computed because FormData is not reactive
@@ -124,7 +124,7 @@ const Form: InertiaForm = defineComponent({
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
         method.value,
-        typeof props.action === 'object' ? props.action.url : props.action || '',
+        typeof props.action === 'object' ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )

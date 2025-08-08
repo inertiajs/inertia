@@ -3,33 +3,31 @@
     formDataToObject,
     mergeDataIntoQueryString,
     type FormDataConvertible,
-    type FormComponentOptions,
-    type Method,
-    type PendingVisit,
-    type Progress,
+    type FormComponentProps,
     type VisitOptions,
   } from '@inertiajs/core'
   import { isEqual } from 'es-toolkit'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 
-  export let action: string | { url: string; method: Method }
-  export let method: Method = 'get'
-  export let headers: Record<string, string> = {}
-  export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
-  export let errorBag: string | null = null
-  export let showProgress: boolean = true
-  export let transform: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible> = (data) =>
-    data
-  export let options: FormComponentOptions = {}
-  export let onCancelToken: ({ cancel }: { cancel: () => void }) => void = () => {}
-  export let onBefore: () => boolean | void = () => {}
-  export let onStart: (visit: PendingVisit) => void = () => {}
-  export let onProgress: (progress: Progress | undefined) => void = () => {}
-  export let onFinish: (visit: PendingVisit) => void = () => {}
-  export let onCancel: () => void = () => {}
-  export let onSuccess: () => void = () => {}
-  export let onError: () => void = () => {}
+  const noop = () => undefined
+
+  export let action: FormComponentProps['action'] = ''
+  export let method: FormComponentProps['method'] = 'get'
+  export let headers: FormComponentProps['headers'] = {}
+  export let queryStringArrayFormat: FormComponentProps['queryStringArrayFormat'] = 'brackets'
+  export let errorBag: FormComponentProps['errorBag'] = null
+  export let showProgress: FormComponentProps['showProgress'] = true
+  export let transform: FormComponentProps['transform'] = (data) => data
+  export let options: FormComponentProps['options'] = {}
+  export let onCancelToken: FormComponentProps['onCancelToken'] = noop
+  export let onBefore: FormComponentProps['onBefore'] = noop
+  export let onStart: FormComponentProps['onStart'] = noop
+  export let onProgress: FormComponentProps['onProgress'] = noop
+  export let onFinish: FormComponentProps['onFinish'] = noop
+  export let onCancel: FormComponentProps['onCancel'] = noop
+  export let onSuccess: FormComponentProps['onSuccess'] = noop
+  export let onError: FormComponentProps['onError'] = noop
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -38,7 +36,7 @@
   let isDirty = false
   let defaultValues: Record<string, FormDataConvertible> = {}
 
-  $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as Method)
+  $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
 
   function getData(): Record<string, FormDataConvertible> {

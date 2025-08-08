@@ -19,8 +19,10 @@ type ComponentProps = (FormComponentProps &
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
+const noop = () => undefined
+
 const Form = ({
-  action,
+  action = '',
   method = 'get',
   headers = {},
   queryStringArrayFormat = 'brackets',
@@ -28,14 +30,14 @@ const Form = ({
   showProgress = true,
   transform = (data) => data,
   options = {},
-  onStart = () => {},
-  onProgress = () => {},
-  onFinish = () => {},
-  onBefore = () => {},
-  onCancel = () => {},
-  onSuccess = () => {},
-  onError = () => {},
-  onCancelToken = () => {},
+  onStart = noop,
+  onProgress = noop,
+  onFinish = noop,
+  onBefore = noop,
+  onCancel = noop,
+  onSuccess = noop,
+  onError = noop,
+  onCancelToken = noop,
   children,
   ...props
 }: ComponentProps) => {
