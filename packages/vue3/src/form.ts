@@ -1,7 +1,7 @@
 import {
+  FormComponentOptions,
   FormComponentProps,
   FormComponentSlotProps,
-  FormComponentOptions,
   FormDataConvertible,
   formDataToObject,
   mergeDataIntoQueryString,
@@ -53,7 +53,7 @@ const Form: InertiaForm = defineComponent({
       default: () => ({}),
     },
     onCancelToken: {
-      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
+      type: Function as PropType<FormComponentProps['onCancelToken']>,
       default: () => {},
     },
     onBefore: {
