@@ -61,5 +61,8 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "es-toolkit": "^1.33.0"
+  },
+  "optionalDependencies": {
+    "@provydon/vue-auto-save": "^1.0.0"
   }
 }

@@ -6,6 +6,16 @@ import { reactive, watch } from 'vue'
 type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
+export interface AutoSaveOptions {
+  url?: string
+  method?: Method
+  debounce?: number
+  skipInertiaFields?: boolean
+  onSave?: () => void
+  onSaveSuccess?: (page: any) => void
+  onSaveError?: (errors: any) => void
+}
+
 export interface InertiaFormProps<TForm extends FormDataType> {
   isDirty: boolean
   errors: Partial<Record<FormDataKeys<TForm>, string>>
@@ -14,6 +24,8 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
+  autosave: boolean
+  autosaveOptions: AutoSaveOptions | null
   data(): TForm
   transform(callback: (data: TForm) => object): this
   defaults(): this
@@ -31,6 +43,8 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   patch(url: string, options?: FormOptions): void
   delete(url: string, options?: FormOptions): void
   cancel(): void
+  enableAutoSave(options: AutoSaveOptions): void
+  disableAutoSave(): void
 }
 
 export type InertiaForm<TForm extends FormDataType> = TForm & InertiaFormProps<TForm>
@@ -45,7 +59,8 @@ export default function useForm<TForm extends FormDataType>(
   maybeData?: TForm | (() => TForm),
 ): InertiaForm<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const data = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
+  const data = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? ({} as TForm)
+  
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
     : null
@@ -53,6 +68,20 @@ export default function useForm<TForm extends FormDataType>(
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
+  let autoSaveTimer: ReturnType<typeof setTimeout> | null = null
+  let useAutoSaveFormHook: any = null
+  
+  const loadAutoSaveHook = async () => {
+    if (useAutoSaveFormHook === null) {
+      try {
+        const module = await import('@provydon/vue-auto-save')
+        useAutoSaveFormHook = module.useAutoSaveForm
+      } catch (error) {
+        useAutoSaveFormHook = false
+      }
+    }
+    return useAutoSaveFormHook
+  }
 
   const form = reactive({
     ...(restored ? restored.data : cloneDeep(defaults)),
@@ -63,6 +92,8 @@ export default function useForm<TForm extends FormDataType>(
     progress: null,
     wasSuccessful: false,
     recentlySuccessful: false,
+    autosave: false,
+    autosaveOptions: null,
     data() {
       return (Object.keys(defaults) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
         return set(carry, key, get(this, key))
@@ -239,6 +270,39 @@ export default function useForm<TForm extends FormDataType>(
         cancelToken.cancel()
       }
     },
+    enableAutoSave(options: AutoSaveOptions) {
+      this.autosave = true
+      this.autosaveOptions = options
+      
+      loadAutoSaveHook().then((hook) => {
+        if (hook) {
+          const autoSaveOptions = {
+            onSave: options.onSave || (() => {
+              if (options.url) {
+                const method = options.method || 'post'
+                this[method](options.url, {
+                  preserveState: true,
+                  onSuccess: options.onSaveSuccess,
+                  onError: options.onSaveError,
+                })
+              }
+            }),
+            debounce: options.debounce || 2000,
+            skipInertiaFields: true,
+            ...options
+          }
+          hook(this, autoSaveOptions)
+        }
+      })
+    },
+    disableAutoSave() {
+      this.autosave = false
+      this.autosaveOptions = null
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer)
+        autoSaveTimer = null
+      }
+    },
     __rememberable: rememberKey === null,
     __remember() {
       return { data: this.data(), errors: this.errors }
@@ -249,12 +313,40 @@ export default function useForm<TForm extends FormDataType>(
     },
   })
 
+  const triggerAutoSave = () => {
+    if (!form.autosave || !form.autosaveOptions || form.processing) {
+      return
+    }
+
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+
+    const debounce = form.autosaveOptions.debounce || 2000
+    autoSaveTimer = setTimeout(() => {
+      if (form.autosaveOptions?.onSave) {
+        form.autosaveOptions.onSave()
+      } else if (form.autosaveOptions?.url) {
+        const method = form.autosaveOptions.method || 'post'
+        const options = {
+          preserveState: true,
+          onSuccess: form.autosaveOptions.onSaveSuccess,
+          onError: form.autosaveOptions.onSaveError,
+        }
+        form[method](form.autosaveOptions.url, options)
+      }
+    }, debounce)
+  }
+
   watch(
     form,
     (newValue) => {
       form.isDirty = !isEqual(form.data(), defaults)
       if (rememberKey) {
         router.remember(cloneDeep(newValue.__remember()), rememberKey)
+      }
+      if (form.autosave && form.isDirty) {
+        triggerAutoSave()
       }
     },
     { immediate: true, deep: true },

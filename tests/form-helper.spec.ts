@@ -858,6 +858,69 @@ test.describe('Form Helper', () => {
   })
 })
 
+test.describe('AutoSave', () => {
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    page.goto('/form-helper/basic-auto-save')
+  })
+
+  test('enables autosave functionality when configured', async ({ page }) => {
+    await expect(page.getByText('Form is clean')).toBeVisible()
+    await expect(page.getByText('Auto-save is enabled')).toBeVisible()
+    
+    await page.fill('input[name="name"]', 'John Doe')
+    await expect(page.getByText('Form is dirty')).toBeVisible()
+    
+    await page.waitForTimeout(2500)
+    
+    await expect(page.getByText('Form is clean')).toBeVisible()
+  })
+
+  test('can disable autosave functionality', async ({ page }) => {
+    await expect(page.getByText('Auto-save is enabled')).toBeVisible()
+    
+    await page.fill('input[name="name"]', 'John Doe')
+    await expect(page.getByText('Form is dirty')).toBeVisible()
+    
+    await page.getByRole('button', { name: 'Disable Auto-Save' }).click()
+    await expect(page.getByText('Auto-save is disabled')).toBeVisible()
+    
+    await page.fill('input[name="email"]', 'john@example.com')
+    
+    await page.waitForTimeout(2500)
+    
+    await expect(page.getByText('Form is dirty')).toBeVisible()
+  })
+
+  test('can re-enable autosave functionality', async ({ page }) => {
+    await page.getByRole('button', { name: 'Disable Auto-Save' }).click()
+    await expect(page.getByText('Auto-save is disabled')).toBeVisible()
+    
+    await page.fill('input[name="name"]', 'John Doe')
+    await page.waitForTimeout(2500)
+    await expect(page.getByText('Form is dirty')).toBeVisible()
+    
+    await page.getByRole('button', { name: 'Enable Auto-Save' }).click()
+    await expect(page.getByText('Auto-save is enabled')).toBeVisible()
+    
+    await page.fill('input[name="email"]', 'john@example.com')
+    await page.waitForTimeout(2500)
+    
+    await expect(page.getByText('Form is clean')).toBeVisible()
+  })
+
+  test('respects custom debounce settings', async ({ page }) => {
+    await page.fill('input[name="name"]', 'John Doe')
+    await expect(page.getByText('Form is dirty')).toBeVisible()
+    
+    await page.waitForTimeout(1000)
+    await expect(page.getByText('Form is dirty')).toBeVisible()
+    
+    await page.waitForTimeout(1500)
+    await expect(page.getByText('Form is clean')).toBeVisible()
+  })
+})
+
 test.describe('Nested', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
