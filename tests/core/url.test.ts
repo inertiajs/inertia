@@ -11,6 +11,16 @@ test.describe('url.ts', () => {
         expect(data).toEqual({})
       })
 
+      test('returns the FormData instance when passed as data', () => {
+        const formData = new FormData()
+        formData.append('q', 'foo')
+
+        const [href, data] = mergeDataIntoQueryString('post', '/search', formData)
+
+        expect(href).toBe('/search')
+        expect(data).toEqual(formData)
+      })
+
       test('merges new data into an existing query string', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?lang=en', { q: 'bar' })
 

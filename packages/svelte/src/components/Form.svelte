@@ -3,6 +3,7 @@
     formDataToObject,
     mergeDataIntoQueryString,
     type FormDataConvertible,
+    type Errors,
     type FormComponentProps,
     type VisitOptions,
   } from '@inertiajs/core'
@@ -107,6 +108,7 @@
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+  $: slotErrors = $form.errors as Errors
 </script>
 
 <form
@@ -116,7 +118,7 @@
   on:submit={handleSubmit} {...$$restProps}
 >
   <slot
-    errors={$form.errors}
+    errors={slotErrors}
     hasErrors={$form.hasErrors}
     processing={$form.processing}
     progress={$form.progress}
