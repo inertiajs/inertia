@@ -371,6 +371,19 @@ export type FormComponentSlotProps = {
   submit: () => void
 }
 
+export type PreloadOptions = {
+  as?: string
+  crossorigin?: 'anonymous' | 'use-credentials'
+  type?: string
+  fetchpriority?: 'high' | 'low' | 'auto'
+}
+
+export type AssetOptions = {
+  secure?: boolean
+  fallbackUrl?: string
+  preload?: boolean | PreloadOptions
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>

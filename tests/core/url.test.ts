@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { mergeDataIntoQueryString } from '../../packages/core/src/url'
+import { mergeDataIntoQueryString, appURL, asset } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
   test.describe('mergeDataIntoQueryString', () => {
@@ -235,6 +235,142 @@ test.describe('url.ts', () => {
         expect(href).toBe('https://example.com/api?existing=value#section')
         expect(data).toEqual({ new: 'data' })
       })
+    })
+  })
+})
+
+test.describe('appURL and asset helpers', () => {
+  test.describe('appURL (SSR)', () => {
+    test('returns empty when no env and no fallback (SSR)', () => {
+      const g = globalThis as unknown as { process?: { env?: Record<string, string> } }
+      const oldAppUrl = g.process?.env?.APP_URL
+      const oldViteAppUrl = g.process?.env?.VITE_APP_URL
+      if (g.process?.env) {
+        delete g.process.env.APP_URL
+        delete g.process.env.VITE_APP_URL
+      }
+      ;(globalThis as any).window = undefined
+
+      expect(appURL()).toBe('')
+
+      if (g.process?.env) {
+        if (oldAppUrl !== undefined) g.process.env.APP_URL = oldAppUrl
+        if (oldViteAppUrl !== undefined) g.process.env.VITE_APP_URL = oldViteAppUrl
+      }
+    })
+
+    test('uses explicit fallback when provided (SSR)', () => {
+  ;(globalThis as any).window = undefined
+      expect(appURL('example.com')).toBe('example.com')
+      expect(appURL('http://example.com:8080')).toBe('example.com:8080')
+    })
+
+    test('parses APP_URL with protocol and default/non-default ports (SSR)', () => {
+  const g: any = globalThis as any
+  const oldAppUrl = g.process?.env?.APP_URL
+  ;(globalThis as any).window = undefined
+
+  if (!g.process) g.process = {}
+  if (!g.process.env) g.process.env = {}
+  g.process.env.APP_URL = 'https://example.com'
+      expect(appURL()).toBe('example.com')
+
+  g.process.env.APP_URL = 'http://example.com:8080'
+      expect(appURL()).toBe('example.com:8080')
+
+  g.process.env.APP_URL = 'example.com:443'
+      expect(appURL()).toBe('example.com')
+
+  // Restore
+  if (oldAppUrl !== undefined) g.process.env.APP_URL = oldAppUrl
+  else delete g.process.env.APP_URL
+    })
+  })
+
+  test.describe('asset (SSR)', () => {
+    test('returns site-relative path when no host is known (SSR)', () => {
+      const g: any = globalThis as any
+      const oldAppUrl = g.process?.env?.APP_URL
+      const oldViteAppUrl = g.process?.env?.VITE_APP_URL
+      if (g.process?.env) {
+        delete g.process.env.APP_URL
+        delete g.process.env.VITE_APP_URL
+      }
+      ;(globalThis as any).window = undefined
+
+      const url = asset('css/app.css')
+      expect(url).toBe('/css/app.css')
+
+      if (g.process?.env) {
+        if (oldAppUrl !== undefined) g.process.env.APP_URL = oldAppUrl
+        if (oldViteAppUrl !== undefined) g.process.env.VITE_APP_URL = oldViteAppUrl
+      }
+    })
+
+    test('uses fallbackUrl with https by default (SSR)', () => {
+  ;(globalThis as any).window = undefined
+      const url = asset('build/app.js', { fallbackUrl: 'example.com' })
+      expect(url).toBe('https://example.com/build/app.js')
+    })
+
+    test('respects secure=false (SSR)', () => {
+  ;(globalThis as any).window = undefined
+      const url = asset('build/app.js', { fallbackUrl: 'example.com', secure: false })
+      expect(url).toBe('http://example.com/build/app.js')
+    })
+
+    test('uses APP_URL protocol and host (SSR)', () => {
+  const g: any = globalThis as any
+  const oldAppUrl = g.process?.env?.APP_URL
+  if (!g.process) g.process = {}
+  if (!g.process.env) g.process.env = {}
+  g.process.env.APP_URL = 'http://foo.test:3000'
+  ;(globalThis as any).window = undefined
+      const url = asset('img/logo.png')
+      expect(url).toBe('http://foo.test:3000/img/logo.png')
+  if (oldAppUrl !== undefined) g.process.env.APP_URL = oldAppUrl
+  else delete g.process.env.APP_URL
+    })
+  })
+
+  test.describe('asset (Browser)', () => {
+    test('builds absolute URL based on window.location (default ports)', () => {
+      ;(globalThis as any).window = {
+        location: { protocol: 'https:', host: 'example.com', hostname: 'example.com', port: '' },
+      }
+      const url = asset('file.json')
+      expect(url).toBe('https://example.com/file.json')
+    })
+
+    test('builds absolute URL with non-default port', () => {
+  ;(globalThis as any).window = {
+        location: { protocol: 'https:', host: 'example.com:8080', hostname: 'example.com', port: '8080' },
+      }
+      const url = asset('file.json')
+      expect(url).toBe('https://example.com:8080/file.json')
+    })
+
+    test('injects preload link once and avoids duplicates', () => {
+  const appended: any[] = []
+  ;(globalThis as any).document = {
+        head: {
+          querySelectorAll: () => appended.filter((el) => el.rel === 'preload'),
+          appendChild: (el: any) => appended.push(el),
+        },
+        createElement: (_tag: string) => ({ rel: '', as: '', href: '', type: '', setAttribute(name: string, value: string){ (this as any)[name] = value } }),
+      }
+  ;(globalThis as any).window = { location: { protocol: 'https:', host: 'example.com', hostname: 'example.com', port: '' } }
+
+      const url1 = asset('styles/app.css', { preload: true })
+      expect(url1).toBe('https://example.com/styles/app.css')
+      expect(appended.length).toBe(1)
+      expect(appended[0].rel).toBe('preload')
+      expect(appended[0].as).toBe('style')
+      expect(appended[0].href).toBe(url1)
+
+      const url2 = asset('styles/app.css', { preload: true })
+      expect(url2).toBe(url1)
+      expect(appended.length).toBe(1)
     })
   })
 })
