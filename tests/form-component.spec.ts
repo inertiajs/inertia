@@ -109,6 +109,56 @@ test.describe('Form Component', () => {
     })
   })
 
+  test.describe('Dynamic Properties', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-helper/data') // Navigate to the FormHelper/Data page
+    })
+
+    test('initial data() output contains only initial properties', async ({ page }) => {
+      const formDataOutput = await page.locator('#form-data-output').innerText()
+      const data = JSON.parse(formDataOutput)
+
+      expect(data).toEqual({
+        name: 'foo',
+        handle: 'example',
+        remember: false,
+        custom: {},
+      })
+    })
+
+    test('data() output includes root-level dynamic property', async ({ page }) => {
+      await page.check('input[name="accept_tos"]')
+
+      const formDataOutput = await page.locator('#form-data-output').innerText()
+      const data = JSON.parse(formDataOutput)
+
+      expect(data).toEqual({
+        name: 'foo',
+        handle: 'example',
+        remember: false,
+        custom: {},
+        accept_tos: true,
+      })
+    })
+
+    test('data() output includes nested dynamic property', async ({ page }) => {
+      await page.getByRole('button', { name: 'Add custom.other_prop' }).click()
+
+      const formDataOutput = await page.locator('#form-data-output').innerText()
+      const data = JSON.parse(formDataOutput)
+
+      expect(data).toEqual({
+        name: 'foo',
+        handle: 'example',
+        remember: false,
+        custom: {
+          other_prop: 'dynamic_value',
+        },
+      })
+    })
+  })
+
   test.describe('Headers', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
@@ -653,6 +703,5 @@ test.describe('Form Component', () => {
         },
       })
     })
-
   })
 })

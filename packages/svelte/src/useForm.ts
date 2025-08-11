@@ -70,8 +70,10 @@ export default function useForm<TForm extends FormDataType>(
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
 
-  const store = writable<InertiaForm<TForm>>({
-    ...(restored ? restored.data : data),
+  const initialData = restored ? restored.data : cloneDeep(defaults)
+
+  const formObject: InertiaForm<TForm> = {
+    ...initialData,
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -85,7 +87,10 @@ export default function useForm<TForm extends FormDataType>(
       })
     },
     data() {
-      return Object.keys(data).reduce((carry, key) => {
+      return (Object.keys(this) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
+        if (RESERVED_KEYS.includes(key)) {
+          return carry
+        }
         return set(carry, key, get(this, key))
       }, {} as FormDataType) as TForm
     },
@@ -253,9 +258,13 @@ export default function useForm<TForm extends FormDataType>(
     cancel() {
       cancelToken?.cancel()
     },
-  } as InertiaForm<TForm>)
+  } as InertiaForm<TForm>
 
-  store.subscribe((form) => {
+  const store = writable<InertiaForm<TForm>>(formObject)
+
+  const RESERVED_KEYS = Object.keys(formObject).filter((key) => !(key in initialData))
+
+  store.subscribe((form: InertiaForm<TForm>) => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
       form.setStore('isDirty', !form.isDirty)
     }

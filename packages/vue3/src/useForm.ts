@@ -54,8 +54,10 @@ export default function useForm<TForm extends FormDataType>(
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
+  const initialData = restored ? restored.data : cloneDeep(defaults)
+
   const form = reactive({
-    ...(restored ? restored.data : cloneDeep(defaults)),
+    ...initialData,
     isDirty: false,
     errors: restored ? restored.errors : {},
     hasErrors: false,
@@ -64,7 +66,10 @@ export default function useForm<TForm extends FormDataType>(
     wasSuccessful: false,
     recentlySuccessful: false,
     data() {
-      return (Object.keys(defaults) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
+      return (Object.keys(this) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
+        if (RESERVED_KEYS.includes(key)) {
+          return carry
+        }
         return set(carry, key, get(this, key))
       }, {} as Partial<TForm>) as TForm
     },
@@ -248,6 +253,8 @@ export default function useForm<TForm extends FormDataType>(
       this.setError(restored.errors)
     },
   })
+
+  const RESERVED_KEYS = Object.keys(form).filter((key) => !(key in initialData))
 
   watch(
     form,
