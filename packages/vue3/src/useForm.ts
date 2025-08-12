@@ -1,4 +1,12 @@
-import { FormDataConvertible, FormDataKeys, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import {
+  FormDataConvertible,
+  FormDataKeys,
+  Method,
+  Progress,
+  router,
+  VisitOptions,
+  UrlMethodPair,
+} from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
@@ -24,7 +32,7 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   resetAndClearErrors(...fields: FormDataKeys<TForm>[]): this
   setError(field: FormDataKeys<TForm>, value: string): this
   setError(errors: Record<FormDataKeys<TForm>, string>): this
-  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
+  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void

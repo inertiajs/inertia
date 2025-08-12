@@ -26,6 +26,7 @@ import {
   ReloadOptions,
   RequestPayload,
   RouterInitParams,
+  UrlMethodPair,
   Visit,
   VisitCallbacks,
   VisitHelperOptions,
@@ -67,7 +68,7 @@ export class Router {
   }
 
   public get<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -75,7 +76,7 @@ export class Router {
   }
 
   public post<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -83,7 +84,7 @@ export class Router {
   }
 
   public put<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -91,7 +92,7 @@ export class Router {
   }
 
   public patch<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -99,7 +100,7 @@ export class Router {
   }
 
   public delete<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     options: Omit<VisitOptions<T>, 'method'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
@@ -157,7 +158,20 @@ export class Router {
     })
   }
 
-  public visit<T extends RequestPayload = RequestPayload>(href: string | URL, options: VisitOptions<T> = {}): void {
+  protected isUrlMethodPair(href: string | URL | UrlMethodPair): href is UrlMethodPair {
+    return href !== null && typeof href === 'object' && 'url' in href && 'method' in href
+  }
+
+  public visit<T extends RequestPayload = RequestPayload>(
+    href: string | URL | UrlMethodPair,
+    options: VisitOptions<T> = {},
+  ): void {
+    if (this.isUrlMethodPair(href)) {
+      const urlMethodPair = href
+      href = urlMethodPair.url
+      options.method = options.method ?? urlMethodPair.method
+    }
+
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,

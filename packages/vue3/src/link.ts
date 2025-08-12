@@ -9,13 +9,14 @@ import {
   Progress,
   router,
   shouldIntercept,
+  UrlMethodPair,
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
 export interface InertiaLinkProps {
   as?: string | Component
   data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
+  href: string | UrlMethodPair
   method?: Method
   headers?: Record<string, string>
   onClick?: (event: MouseEvent) => void

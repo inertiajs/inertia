@@ -9,6 +9,7 @@ import {
   Progress,
   router,
   shouldIntercept,
+  UrlMethodPair,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -17,7 +18,7 @@ const noop = () => undefined
 interface BaseInertiaLinkProps {
   as?: ElementType
   data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
+  href: string | UrlMethodPair
   method?: Method
   headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<Element>) => void

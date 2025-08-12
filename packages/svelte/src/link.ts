@@ -8,6 +8,7 @@ import {
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
+  type UrlMethodPair,
 } from '@inertiajs/core'
 import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
@@ -21,7 +22,7 @@ interface ActionElement extends HTMLElement {
 }
 
 type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
-  href?: string | { url: string; method: Method }
+  href?: string | UrlMethodPair
   data?: Record<string, FormDataConvertible>
   prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
   cacheFor?: CacheForOption | CacheForOption[]

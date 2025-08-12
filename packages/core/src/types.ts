@@ -341,6 +341,8 @@ export type ProgressSettings = {
   color: string
 }
 
+export type UrlMethodPair = { url: string; method: Method }
+
 export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
@@ -350,7 +352,7 @@ export type FormComponentProps = Partial<
   Pick<Visit, 'method' | 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
 > & {
-  action?: string | { url: string; method: Method }
+  action?: string | UrlMethodPair
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions
 }
