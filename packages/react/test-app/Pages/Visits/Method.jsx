@@ -36,6 +36,16 @@ export default (props) => {
     router.delete('/dump/delete')
   }
 
+  const wayfinderObjectVisit = (e) => {
+    e.preventDefault()
+    router.visit({ url: '/dump/post', method: 'post' })
+  }
+
+  const wayfinderObjectMethodOverride = (e) => {
+    e.preventDefault()
+    router.visit({ url: '/dump/patch', method: 'get' }, { method: 'patch' })
+  }
+
   return (
     <div>
       <span className="text">This is the page that demonstrates manual visit methods</span>
@@ -60,6 +70,12 @@ export default (props) => {
       </a>
       <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
+      </a>
+      <a href="#" onClick={wayfinderObjectVisit} className="wayfinder-visit">
+        Wayfinder object visit
+      </a>
+      <a href="#" onClick={wayfinderObjectMethodOverride} className="wayfinder-method-override">
+        Wayfinder object method override
       </a>
     </div>
   )

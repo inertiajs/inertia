@@ -908,6 +908,33 @@ test.describe('Error bags', () => {
   })
 })
 
+test.describe('Wayfinder object', () => {
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/visits/method')
+  })
+
+  test('can use UrlMethodPair object with visit method', async ({ page }) => {
+    await page.getByRole('link', { name: 'Wayfinder object visit' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toBe('post')
+    await expect(dump.query).toEqual({})
+    await expect(dump.form).toEqual({})
+  })
+
+  test('can override UrlMethodPair method with options parameter', async ({ page }) => {
+    await page.getByRole('link', { name: 'Wayfinder object method override' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'patch')
+
+    await expect(dump.method).toBe('patch')
+    await expect(dump.query).toEqual({})
+    await expect(dump.form).toEqual({})
+  })
+})
+
 test.describe('Redirects', () => {
   test('follows 303 redirects', async ({ page }) => {
     pageLoads.watch(page)
