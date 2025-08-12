@@ -1,6 +1,7 @@
 <script>
   import { Form } from '@inertiajs/svelte'
 
+  // Svelte Form component ref exposes only methods via bind:this
   let formRef
 
   function submitProgrammatically() {
@@ -47,7 +48,7 @@
     <span id="current-dirty-state" style="display: none;">{isDirty}</span>
     <span id="current-has-errors" style="display: none;">{hasErrors}</span>
     <span id="current-errors" style="display: none;">{JSON.stringify(errors)}</span>
-    
+
     <div>
       <input type="text" name="name" placeholder="Name" value="John Doe" />
     </div>

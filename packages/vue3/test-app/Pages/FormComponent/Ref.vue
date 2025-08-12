@@ -5,28 +5,28 @@ import { ref } from 'vue'
 const formRef = ref(null)
 
 const submitProgrammatically = () => {
-  formRef.value.submit()
+  formRef.value?.submit()
 }
 
 const resetForm = () => {
-  formRef.value.reset()
+  formRef.value?.reset()
 }
 
 const checkDirtyState = () => {
-  alert(`Form is dirty: ${formRef.value.isDirty}`)
+  alert(`Form is dirty: ${formRef.value?.isDirty}`)
 }
 
 const clearAllErrors = () => {
-  formRef.value.clearErrors()
+  formRef.value?.clearErrors()
 }
 
 const setTestError = () => {
-  formRef.value.setError('name', 'This is a test error')
+  formRef.value?.setError('name', 'This is a test error')
 }
 
 const checkErrors = () => {
-  const hasErrors = formRef.value.hasErrors
-  const errors = formRef.value.errors
+  const hasErrors = formRef.value?.hasErrors
+  const errors = formRef.value?.errors
   alert(`Has errors: ${hasErrors}, Errors: ${JSON.stringify(errors)}`)
 }
 </script>

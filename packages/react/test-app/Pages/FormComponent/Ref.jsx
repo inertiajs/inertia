@@ -5,28 +5,28 @@ export default function Ref() {
   const formRef = useRef(null)
 
   const submitProgrammatically = () => {
-    formRef.current.submit()
+    formRef.current?.submit()
   }
 
   const resetForm = () => {
-    formRef.current.reset()
+    formRef.current?.reset()
   }
 
   const checkDirtyState = () => {
-    alert(`Form is dirty: ${formRef.current.isDirty}`)
+    alert(`Form is dirty: ${formRef.current?.isDirty}`)
   }
 
   const clearAllErrors = () => {
-    formRef.current.clearErrors()
+    formRef.current?.clearErrors()
   }
 
   const setTestError = () => {
-    formRef.current.setError('name', 'This is a test error')
+    formRef.current?.setError('name', 'This is a test error')
   }
 
   const checkErrors = () => {
-    const hasErrors = formRef.current.hasErrors
-    const errors = formRef.current.errors
+    const hasErrors = formRef.current?.hasErrors
+    const errors = formRef.current?.errors
     alert(`Has errors: ${hasErrors}, Errors: ${JSON.stringify(errors)}`)
   }
 
