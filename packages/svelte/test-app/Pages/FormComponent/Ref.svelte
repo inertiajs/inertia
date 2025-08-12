@@ -1,23 +1,24 @@
-<script>
+<script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
 
   // Svelte Form component ref exposes only methods via bind:this
-  let formRef
+  let formRef: FormComponentMethods | null = null
 
   function submitProgrammatically() {
-    formRef.submit()
+    formRef?.submit()
   }
 
   function resetForm() {
-    formRef.reset()
+    formRef?.reset()
   }
 
   function clearAllErrors() {
-    formRef.clearErrors()
+    formRef?.clearErrors()
   }
 
   function setTestError() {
-    formRef.setError('name', 'This is a test error')
+    formRef?.setError('name', 'This is a test error')
   }
 
 </script>

@@ -1,8 +1,9 @@
-<script setup>
+<script setup lang="ts">
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const formRef = ref(null)
+const formRef = ref<FormComponentRef | null>(null)
 
 const submitProgrammatically = () => {
   formRef.value?.submit()

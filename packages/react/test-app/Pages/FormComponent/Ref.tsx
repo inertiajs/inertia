@@ -1,8 +1,9 @@
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
 import { useRef } from 'react'
 
 export default function Ref() {
-  const formRef = useRef(null)
+  const formRef = useRef<FormComponentRef>(null)
 
   const submitProgrammatically = () => {
     formRef.current?.submit()
