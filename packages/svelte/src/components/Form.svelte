@@ -36,7 +36,6 @@
   let isDirty = false
   let defaultValues: Record<string, FormDataConvertible> = {}
 
-
   $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
 
