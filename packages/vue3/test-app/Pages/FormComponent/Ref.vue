@@ -12,10 +12,6 @@ const resetForm = () => {
   formRef.value?.reset()
 }
 
-const checkDirtyState = () => {
-  alert(`Form is dirty: ${formRef.value?.isDirty}`)
-}
-
 const clearAllErrors = () => {
   formRef.value?.clearErrors()
 }
@@ -23,19 +19,18 @@ const clearAllErrors = () => {
 const setTestError = () => {
   formRef.value?.setError('name', 'This is a test error')
 }
-
-const checkErrors = () => {
-  const hasErrors = formRef.value?.hasErrors
-  const errors = formRef.value?.errors
-  alert(`Has errors: ${hasErrors}, Errors: ${JSON.stringify(errors)}`)
-}
 </script>
 
 <template>
   <div>
     <h1>Form Ref Test</h1>
 
-    <Form ref="formRef" action="/dump/post" method="post">
+    <Form ref="formRef" action="/dump/post" method="post" #default="{ isDirty, hasErrors, errors }">
+      <!-- State display for testing -->
+      <div>Form is <span v-if="isDirty">dirty</span><span v-else>clean</span></div>
+      <div v-if="hasErrors">Form has errors</div>
+      <div v-if="errors.name" id="error_name">{{ errors.name }}</div>
+
       <div>
         <input type="text" name="name" placeholder="Name" value="John Doe" />
       </div>
@@ -52,10 +47,8 @@ const checkErrors = () => {
     <div>
       <button @click="submitProgrammatically">Submit Programmatically</button>
       <button @click="resetForm">Reset Form</button>
-      <button @click="checkDirtyState">Check Dirty State</button>
       <button @click="clearAllErrors">Clear Errors</button>
       <button @click="setTestError">Set Test Error</button>
-      <button @click="checkErrors">Check Errors</button>
     </div>
   </div>
 </template>

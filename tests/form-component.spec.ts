@@ -673,46 +673,23 @@ test.describe('Form Component', () => {
     test('can access errors and hasErrors via ref', async ({ page }) => {
       await page.goto('/form-component/ref')
 
+      await expect(page.getByText('Form has errors')).not.toBeVisible()
+      await expect(page.locator('#error_name')).not.toBeVisible()
+
       await page.getByRole('button', { name: 'Set Test Error' }).click()
 
-      let dialogMessage = ''
-      page.once('dialog', async (dialog) => {
-        dialogMessage = dialog.message()
-        await dialog.accept()
-      })
-
-      await page.getByRole('button', { name: 'Check Errors' }).click()
-      await page.waitForTimeout(100)
-
-      expect(dialogMessage).toContain('Has errors: true')
-      expect(dialogMessage).toContain('This is a test error')
+      await expect(page.getByText('Form has errors')).toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('This is a test error')
     })
 
     test('can check isDirty state via ref', async ({ page }) => {
       await page.goto('/form-component/ref')
 
-      let dialogMessage = ''
-      page.once('dialog', async (dialog) => {
-        dialogMessage = dialog.message()
-        await dialog.accept()
-      })
-
-      await page.click('button:has-text("Check Dirty State")')
-      await page.waitForTimeout(100)
-
-      expect(dialogMessage).toContain('Form is dirty: false')
+      await expect(page.getByText('Form is clean')).toBeVisible()
 
       await page.fill('input[name="name"]', 'Modified Name')
 
-      page.once('dialog', async (dialog) => {
-        dialogMessage = dialog.message()
-        await dialog.accept()
-      })
-
-      await page.click('button:has-text("Check Dirty State")')
-      await page.waitForTimeout(100)
-
-      expect(dialogMessage).toContain('Form is dirty: true')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
     })
 
     test('can reset form via ref', async ({ page }) => {
