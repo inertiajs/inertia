@@ -83,7 +83,7 @@ const Form: InertiaForm = defineComponent({
       default: noop,
     },
   },
-  setup(props, { slots, attrs }) {
+  setup(props, { slots, attrs, expose }) {
     const form = useForm({} as Record<string, FormDataConvertible>)
     const formElement = ref()
     const method = computed(() =>
@@ -147,6 +147,36 @@ const Form: InertiaForm = defineComponent({
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
+
+    expose({
+      get errors() {
+        return form.errors
+      },
+      get hasErrors() {
+        return form.hasErrors
+      },
+      get processing() {
+        return form.processing
+      },
+      get progress() {
+        return form.progress
+      },
+      get wasSuccessful() {
+        return form.wasSuccessful
+      },
+      get recentlySuccessful() {
+        return form.recentlySuccessful
+      },
+      clearErrors: (...fields: string[]) => form.clearErrors(...fields),
+      resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
+      setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
+        form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
+      get isDirty() {
+        return isDirty.value
+      },
+      reset: () => formElement.value.reset(),
+      submit,
+    })
 
     return () => {
       return h(

@@ -653,6 +653,81 @@ test.describe('Form Component', () => {
         },
       })
     })
+  })
 
+  test.describe('Ref', () => {
+    test('can submit form programmatically using ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.getByRole('button', { name: 'Submit Programmatically' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.method).toEqual('post')
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+    })
+
+    test('can access errors and hasErrors via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.getByRole('button', { name: 'Set Test Error' }).click()
+
+      let dialogMessage = ''
+      page.once('dialog', async (dialog) => {
+        dialogMessage = dialog.message()
+        await dialog.accept()
+      })
+
+      await page.getByRole('button', { name: 'Check Errors' }).click()
+      await page.waitForTimeout(100)
+
+      expect(dialogMessage).toContain('Has errors: true')
+      expect(dialogMessage).toContain('This is a test error')
+    })
+
+    test('can check isDirty state via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      let dialogMessage = ''
+      page.once('dialog', async (dialog) => {
+        dialogMessage = dialog.message()
+        await dialog.accept()
+      })
+
+      await page.click('button:has-text("Check Dirty State")')
+      await page.waitForTimeout(100)
+
+      expect(dialogMessage).toContain('Form is dirty: false')
+
+      await page.fill('input[name="name"]', 'Modified Name')
+
+      page.once('dialog', async (dialog) => {
+        dialogMessage = dialog.message()
+        await dialog.accept()
+      })
+
+      await page.click('button:has-text("Check Dirty State")')
+      await page.waitForTimeout(100)
+
+      expect(dialogMessage).toContain('Form is dirty: true')
+    })
+
+    test('can reset form via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.fill('input[name="name"]', 'Modified Name')
+      await page.fill('input[name="email"]', 'modified@example.com')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('Modified Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+
+      await page.click('button:has-text("Reset Form")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
+      expect(await page.inputValue('input[name="email"]')).toBe('john@example.com')
+    })
   })
 })

@@ -371,6 +371,8 @@ export type FormComponentSlotProps = {
   submit: () => void
 }
 
+export type FormComponentRef = FormComponentSlotProps
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
