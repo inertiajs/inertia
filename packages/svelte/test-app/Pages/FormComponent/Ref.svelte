@@ -1,0 +1,65 @@
+<script>
+  import { Form } from '@inertiajs/svelte'
+
+  // Svelte Form component ref exposes only methods via bind:this
+  let formRef
+
+  function submitProgrammatically() {
+    formRef.submit()
+  }
+
+  function resetForm() {
+    formRef.reset()
+  }
+
+  function clearAllErrors() {
+    formRef.clearErrors()
+  }
+
+  function setTestError() {
+    formRef.setError('name', 'This is a test error')
+  }
+
+</script>
+
+<div>
+  <h1>Form Ref Test</h1>
+
+  <Form bind:this={formRef} action="/dump/post" method="post" let:isDirty let:errors let:hasErrors>
+    <!-- State display for testing -->
+    <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
+    {#if hasErrors}
+      <div>Form has errors</div>
+    {/if}
+    {#if errors.name}
+      <div id="error_name">{errors.name}</div>
+    {/if}
+
+    <div>
+      <input type="text" name="name" placeholder="Name" value="John Doe" />
+    </div>
+
+    <div>
+      <input type="email" name="email" placeholder="Email" value="john@example.com" />
+    </div>
+
+    <div>
+      <button type="submit">Submit via Form</button>
+    </div>
+  </Form>
+
+  <div>
+    <button on:click={submitProgrammatically}>
+      Submit Programmatically
+    </button>
+    <button on:click={resetForm}>
+      Reset Form
+    </button>
+    <button on:click={clearAllErrors}>
+      Clear Errors
+    </button>
+    <button on:click={setTestError}>
+      Set Test Error
+    </button>
+  </div>
+</div>

@@ -549,6 +549,7 @@ app.post('/form-component/progress', async (req, res) =>
 )
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 app.get('/form-component/dotted-keys', (req, res) => inertia.render(req, res, { component: 'FormComponent/DottedKeys' }))
+app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
 
 app.all('*', (req, res) => inertia.render(req, res))
 

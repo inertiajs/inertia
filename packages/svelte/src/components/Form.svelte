@@ -47,7 +47,7 @@
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), defaultValues)
   }
 
-  function submit() {
+  export function submit() {
     const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
     const submitOptions: FormSubmitOptions = {
@@ -73,21 +73,21 @@
     submit()
   }
 
-  function reset() {
+  export function reset() {
     formElement.reset()
   }
 
-  function clearErrors(...fields: string[]) {
+  export function clearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
   }
 
-  function resetAndClearErrors(...fields: string[]) {
+  export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.resetAndClearErrors(...fields)
   }
 
-  function setError(field: string | object, value?: string) {
+  export function setError(field: string | object, value?: string) {
     if (typeof field === 'string') {
       // @ts-expect-error
       $form.setError(field, value)

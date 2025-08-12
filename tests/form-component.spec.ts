@@ -653,6 +653,58 @@ test.describe('Form Component', () => {
         },
       })
     })
+  })
 
+  test.describe('Ref', () => {
+    test('can submit form programmatically using ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.getByRole('button', { name: 'Submit Programmatically' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.method).toEqual('post')
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+    })
+
+    test('can access errors and hasErrors via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await expect(page.getByText('Form has errors')).not.toBeVisible()
+      await expect(page.locator('#error_name')).not.toBeVisible()
+
+      await page.getByRole('button', { name: 'Set Test Error' }).click()
+
+      await expect(page.getByText('Form has errors')).toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('This is a test error')
+    })
+
+    test('can check isDirty state via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'Modified Name')
+
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+    })
+
+    test('can reset form via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.fill('input[name="name"]', 'Modified Name')
+      await page.fill('input[name="email"]', 'modified@example.com')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('Modified Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+
+      await page.click('button:has-text("Reset Form")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
+      expect(await page.inputValue('input[name="email"]')).toBe('john@example.com')
+    })
   })
 })
