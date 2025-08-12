@@ -52,8 +52,8 @@ const wayfinderObjectMethodOverride = () => {
     <a href="#" @click="patchMethod" class="patch">PATCH Link</a>
     <a href="#" @click="deleteMethod" class="delete">DELETE Link</a>
     <a href="#" @click="wayfinderObjectVisit" class="wayfinder-visit">Wayfinder object visit</a>
-    <a href="#" @click="wayfinderObjectMethodOverride" class="wayfinder-method-override"
-      >Wayfinder object method override</a
-    >
+    <a href="#" @click="wayfinderObjectMethodOverride" class="wayfinder-method-override">
+      Wayfinder object method override
+    </a>
   </div>
 </template>
