@@ -442,6 +442,24 @@ test.describe('Form Component', () => {
     await expect(page).toHaveURL('/article')
   })
 
+  test('submit without an action attribute uses the current URL', async ({ page }) => {
+    await page.goto('/form-component/url/with/segements')
+    await expect(page.locator('#error_name')).not.toBeVisible()
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Submit' }).click()
+    await expect(page.locator('#error_name')).toHaveText('Something went wrong')
+
+    await expect(requests.requests).toHaveLength(1)
+    const request = requests.requests[0]
+
+    expect(request.method()).toBe('POST')
+    expect(request.url().includes('/form-component/url/with/segements')).toBe(true)
+
+    await expect(page).toHaveURL('/form-component/url/with/segements')
+  })
+
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/form-component/methods')
