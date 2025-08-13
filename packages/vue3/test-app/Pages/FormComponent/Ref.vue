@@ -13,6 +13,10 @@ const resetForm = () => {
   formRef.value?.reset()
 }
 
+const resetNameField = () => {
+  formRef.value?.reset('name')
+}
+
 const clearAllErrors = () => {
   formRef.value?.clearErrors()
 }
@@ -48,6 +52,7 @@ const setTestError = () => {
     <div>
       <button @click="submitProgrammatically">Submit Programmatically</button>
       <button @click="resetForm">Reset Form</button>
+      <button @click="resetNameField">Reset Name Field</button>
       <button @click="clearAllErrors">Clear Errors</button>
       <button @click="setTestError">Set Test Error</button>
     </div>

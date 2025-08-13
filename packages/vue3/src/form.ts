@@ -3,6 +3,7 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  resetFormFields,
   mergeDataIntoQueryString,
   VisitOptions,
 } from '@inertiajs/core'
@@ -174,7 +175,7 @@ const Form: InertiaForm = defineComponent({
       get isDirty() {
         return isDirty.value
       },
-      reset: () => formElement.value.reset(),
+      reset: (...fields: string[]) => resetFormFields(formElement.value, fields),
       submit,
     })
 
@@ -204,7 +205,7 @@ const Form: InertiaForm = defineComponent({
               clearErrors: (...fields: string[]) => form.clearErrors(...fields),
               resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
               isDirty: isDirty.value,
-              reset: () => formElement.value.reset(),
+              reset: (...fields) => resetFormFields(formElement.value, fields),
               submit,
             })
           : [],

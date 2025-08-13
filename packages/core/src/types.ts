@@ -436,7 +436,7 @@ export type FormComponentMethods = {
   resetAndClearErrors: (...fields: string[]) => void
   setError(field: string, value: string): void
   setError(errors: Record<string, string>): void
-  reset: () => void
+  reset: (...fields: string[]) => void
   submit: () => void
 }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     formDataToObject,
+    resetFormFields,
     mergeDataIntoQueryString,
     type FormDataConvertible,
     type Errors,
@@ -74,8 +75,8 @@
     submit()
   }
 
-  export function reset() {
-    formElement.reset()
+  export function reset(...fields: string[]) {
+    resetFormFields(formElement, fields)
   }
 
   export function clearErrors(...fields: string[]) {

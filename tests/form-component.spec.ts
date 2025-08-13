@@ -706,5 +706,20 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
       expect(await page.inputValue('input[name="email"]')).toBe('john@example.com')
     })
+
+    test('can reset particular form fields via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.fill('input[name="name"]', 'Modified Name')
+      await page.fill('input[name="email"]', 'modified@example.com')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('Modified Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+
+      await page.click('button:has-text("Reset Name Field")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+    })
   })
 })
