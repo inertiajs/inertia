@@ -1,12 +1,12 @@
 import { router } from '@inertiajs/react'
 
 export default () => {
-  const visitDump = (e) => {
+  const visitDump = (e: React.MouseEvent) => {
     e.preventDefault()
     router.visit('/dump/get')
   }
 
-  const throwErrorOnSuccess = (e) => {
+  const throwErrorOnSuccess = (e: React.MouseEvent) => {
     e.preventDefault()
 
     router.visit('/visits/after-error/2', {
