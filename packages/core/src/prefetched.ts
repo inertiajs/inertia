@@ -73,10 +73,7 @@ class PrefetchedRequests {
       })
 
       this.scheduleForRemoval(params, expires)
-
-      this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-        return !this.paramsAreEqual(prefetching.params, params)
-      })
+      this.removeFromInFlight(params)
 
       response.handlePrefetch()
 
@@ -110,8 +107,8 @@ class PrefetchedRequests {
   }
 
   protected removeFromInFlight(params: ActiveVisit): void {
-    this.inFlightRequests = this.inFlightRequests.filter((prefetched) => {
-      return !this.paramsAreEqual(prefetched.params, params)
+    this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
+      return !this.paramsAreEqual(prefetching.params, params)
     })
   }
 
