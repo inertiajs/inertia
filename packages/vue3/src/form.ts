@@ -1,4 +1,5 @@
 import {
+  FormComponentChildProps,
   FormComponentProps,
   FormComponentSlotProps,
   FormDataConvertible,
@@ -83,6 +84,10 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
+    afterSubmit: {
+      type: Function as PropType<(props: FormComponentChildProps) => void>,
+      default: noop,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -138,7 +143,10 @@ const Form: InertiaForm = defineComponent({
         onBefore: props.onBefore,
         onStart: props.onStart,
         onProgress: props.onProgress,
-        onFinish: props.onFinish,
+        onFinish: (...args) => {
+          props.onFinish(...args)
+          props.afterSubmit(exposed)
+        },
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
@@ -149,7 +157,7 @@ const Form: InertiaForm = defineComponent({
       form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
 
-    expose({
+    const exposed = {
       get errors() {
         return form.errors
       },
@@ -169,15 +177,32 @@ const Form: InertiaForm = defineComponent({
         return form.recentlySuccessful
       },
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
-      resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
+      resetAndClearErrors: (...fields: string[]) => {
+        form.resetAndClearErrors(...fields)
+        exposed.reset(...fields)
+      },
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
         form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
       get isDirty() {
         return isDirty.value
       },
-      reset: () => formElement.value.reset(),
+      reset: (...fields: string[]) => {
+        if (fields.length === 0) {
+          formElement.value.reset()
+        } else {
+          fields.forEach((field) => {
+            const input = formElement.value.querySelector(`[name="${field}"]`)
+
+            if (input) {
+              input.value = defaults[field] || ''
+            }
+          })
+        }
+      },
       submit,
-    })
+    }
+
+    expose<FormComponentChildProps>(exposed)
 
     return () => {
       return h(

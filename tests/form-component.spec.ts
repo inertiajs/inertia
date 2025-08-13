@@ -460,6 +460,25 @@ test.describe('Form Component', () => {
     await expect(page).toHaveURL('/form-component/url/with/segements')
   })
 
+  test('reset a field after submit', async ({ page }) => {
+    await page.goto('/form-component/after-submit')
+
+    await expect(page.locator('#name')).toHaveValue('John Doe')
+    await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+
+    await page.fill('#name', 'John Who')
+    await page.fill('#email', 'john@who.biz')
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Submit' }).click()
+
+    await expect(requests.requests).toHaveLength(1)
+
+    await expect(page.locator('#name')).toHaveValue('John Doe')
+    await expect(page.locator('#email')).toHaveValue('john@who.biz')
+  })
+
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/form-component/methods')
