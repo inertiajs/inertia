@@ -430,6 +430,7 @@ export type FormComponentProps = Partial<
   action?: string | { url: string; method: Method }
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions
+  disableWhileProcessing?: boolean
 }
 
 export type FormComponentMethods = {
