@@ -2,9 +2,9 @@
   import {
     formDataToObject,
     mergeDataIntoQueryString,
-    type FormDataConvertible,
     type Errors,
     type FormComponentProps,
+    type FormDataConvertible,
     type VisitOptions,
   } from '@inertiajs/core'
   import { isEqual } from 'es-toolkit'
@@ -29,6 +29,7 @@
   export let onCancel: FormComponentProps['onCancel'] = noop
   export let onSuccess: FormComponentProps['onSuccess'] = noop
   export let onError: FormComponentProps['onError'] = noop
+  export let afterSubmit: FormComponentProps['afterSubmit'] = noop
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -59,7 +60,19 @@
       onBefore,
       onStart,
       onProgress,
-      onFinish,
+      onFinish: (visit) =>  {
+        if (onFinish) {
+            onFinish(visit)
+        }
+
+        if (afterSubmit) {
+            afterSubmit({
+                reset,
+                resetAndClearErrors,
+                clearErrors,
+            })
+        }
+      },
       onCancel,
       onSuccess,
       onError,
@@ -74,9 +87,20 @@
     submit()
   }
 
-  export function reset() {
-    formElement.reset()
+  export function reset(...fields: string[]) {
+    if (fields.length === 0) {
+        formElement.reset()
+    } else {
+        fields.forEach((field) => {
+            const input = formElement.querySelector(`[name="${field}"]`) as HtmlInputElement | null
+
+            if (input) {
+                input.value = defaultValues[field] || ''
+            }
+        })
+    }
   }
+
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
@@ -86,6 +110,7 @@
   export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.resetAndClearErrors(...fields)
+    reset(...fields)
   }
 
   export function setError(field: string | object, value?: string) {
@@ -93,7 +118,6 @@
       // @ts-expect-error
       $form.setError(field, value)
     } else {
-      // @ts-expect-error
       $form.setError(field)
     }
   }
