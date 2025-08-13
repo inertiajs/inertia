@@ -1,17 +1,22 @@
 <script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const props = defineProps<{
+interface ComponentProps {
   foo: {
     data: { id: number; name: string }[]
+    companies: { id: number; name: string }[]
+    teams: { id: number; name: string }[]
     page: number
     per_page: number
     meta: { label: string }
   }
   bar: number[]
   baz: number[]
-}>()
+}
+
+const props = defineProps<ComponentProps>()
 
 const page = ref(props.foo.page)
 
@@ -21,8 +26,10 @@ const reloadIt = () => {
       page: page.value,
     },
     only: ['foo', 'baz'],
-    onSuccess(visit) {
-      page.value = visit.props.foo.page
+    onSuccess(visit: Page) {
+      // TODO: Refactor 'unknown' and make Page<ComponentProps> work
+      const visitProps = visit.props as unknown as Pick<ComponentProps, 'foo' | 'baz'>
+      page.value = visitProps.foo.page
     },
   })
 }

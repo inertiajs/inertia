@@ -23,6 +23,12 @@ defineProps({
   page: Number,
 })
 
+declare global {
+  interface Window {
+    customComponentEvents: Array<{ eventName: string; data: any; timestamp: number }>
+  }
+}
+
 window.customComponentEvents = []
 
 const trackEvent = (eventName: string, data: any = null) => {

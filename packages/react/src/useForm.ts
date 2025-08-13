@@ -53,7 +53,9 @@ export interface InertiaFormProps<TForm extends object> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends FormDataType<TForm>>(initialValues?: TForm | (() => TForm)): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  initialValues?: TForm | (() => TForm),
+): InertiaFormProps<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   initialValues?: TForm | (() => TForm),
