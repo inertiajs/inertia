@@ -51,6 +51,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onSuccess = noop,
       onError = noop,
       onCancelToken = noop,
+      afterSubmit = noop,
       children,
       ...props
     },
@@ -86,6 +87,27 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
     }, [])
 
+    const reset = (...fields: string[]) => {
+      if (fields.length === 0) {
+        formElement.current?.reset()
+      } else {
+        fields.forEach((field) => {
+          const input = formElement.current?.querySelector(`[name="${field}"]`) as HTMLInputElement
+
+          if (input) {
+            // @ts-ignore
+            input.value = defaultValues.current[field] || ''
+          }
+        })
+      }
+    }
+
+    const resetAndClearErrors = (...fields: string[]) => {
+      // @ts-ignore
+      form.resetAndClearErrors(...fields)
+      reset(...fields)
+    }
+
     const submit = () => {
       const [url, _data] = mergeDataIntoQueryString(
         resolvedMethod,
@@ -102,7 +124,14 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         onBefore,
         onStart,
         onProgress,
-        onFinish,
+        onFinish: (...args) => {
+          onFinish(...args)
+          afterSubmit({
+            reset,
+            resetAndClearErrors,
+            clearErrors: form.clearErrors,
+          })
+        },
         onCancel,
         onSuccess,
         onError,
@@ -123,10 +152,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         wasSuccessful: form.wasSuccessful,
         recentlySuccessful: form.recentlySuccessful,
         clearErrors: form.clearErrors,
-        resetAndClearErrors: form.resetAndClearErrors,
+        resetAndClearErrors,
         setError: form.setError,
         isDirty,
-        reset: () => formElement.current?.reset(),
+        reset,
         submit,
       }),
       [form, isDirty, submit],
@@ -156,7 +185,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
             clearErrors: form.clearErrors,
             resetAndClearErrors: form.resetAndClearErrors,
             isDirty,
-            reset: () => formElement.current?.reset(),
+            reset,
             submit,
           })
         : children,
