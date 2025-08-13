@@ -97,7 +97,9 @@ export class RequestParams {
   }
 
   public onPrefetchError(error: Error) {
-    this.params.onPrefetchError(error)
+    if (this.params.onPrefetchError) {
+      this.params.onPrefetchError(error)
+    }
   }
 
   public all() {
