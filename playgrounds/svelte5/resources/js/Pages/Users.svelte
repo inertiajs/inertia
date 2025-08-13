@@ -12,7 +12,7 @@
 
 <h1 class="text-3xl">Users</h1>
 
-<div class="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
+<div class="shadow-xs mt-6 w-full max-w-2xl overflow-hidden rounded-sm border border-gray-200">
   <table class="w-full text-left">
     <thead>
       <tr>
@@ -23,7 +23,7 @@
     </thead>
     <tbody>
       {#each users as user (user.id)}
-        <tr class="border-t">
+        <tr class="border-t border-gray-200">
           <td class="px-4 py-2">{user.id}</td>
           <td class="px-4 py-2">{user.name}</td>
           <td class="px-4 py-2">{user.email}</td>
