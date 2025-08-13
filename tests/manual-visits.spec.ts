@@ -911,7 +911,7 @@ test.describe('Error bags', () => {
 test.describe('Wayfinder object', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
-    await page.goto('/visits/method')
+    await page.goto('/visits/wayfinder')
   })
 
   test('can use UrlMethodPair object with visit method', async ({ page }) => {
