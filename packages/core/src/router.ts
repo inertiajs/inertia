@@ -17,6 +17,7 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
+  Method,
   Page,
   PendingVisit,
   PendingVisitOptions,
@@ -226,16 +227,18 @@ export class Router {
     options: VisitOptions = {},
     { cacheFor = 30_000 }: PrefetchOptions,
   ) {
+    const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
+
+    if (method !== 'get') {
+      throw new Error('Prefetch requests must use the GET method')
+    }
+
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       async: true,
       showProgress: false,
       prefetch: true,
     })
-
-    if (visit.method !== 'get') {
-      throw new Error('Prefetch requests must use the GET method')
-    }
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
     const currentUrl = window.location.origin + window.location.pathname + window.location.search
