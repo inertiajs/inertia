@@ -707,4 +707,43 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="email"]')).toBe('john@example.com')
     })
   })
+
+  test.describe('Uppercase Methods', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/uppercase-method')
+    })
+
+    test('accepts uppercase POST method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit POST' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.method).toEqual('post')
+      await expect(dump.form).toEqual({
+        name: 'Test POST',
+      })
+    })
+
+    test('accepts uppercase GET method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit GET' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'get')
+
+      await expect(dump.method).toEqual('get')
+      await expect(dump.query).toEqual({
+        query: 'Test GET',
+      })
+    })
+
+    test('accepts uppercase PUT method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit PUT' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'put')
+
+      await expect(dump.method).toEqual('put')
+      await expect(dump.form).toEqual({
+        data: 'Test PUT',
+      })
+    })
+  })
 })
