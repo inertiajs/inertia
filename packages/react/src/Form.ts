@@ -95,7 +95,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           const input = formElement.current?.querySelector(`[name="${field}"]`) as HTMLInputElement
 
           if (input) {
-            // @ts-ignore
+            // @ts-expect-error
             input.value = defaultValues.current[field] || ''
           }
         })
@@ -103,7 +103,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      // @ts-ignore
+      // @ts-expect-error
       form.resetAndClearErrors(...fields)
       reset(...fields)
     }
