@@ -431,21 +431,28 @@ export type FormComponentProps = Partial<
   options?: FormComponentOptions
 }
 
-export type FormComponentSlotProps = {
+export type FormComponentMethods = {
+  clearErrors: (...fields: string[]) => void
+  resetAndClearErrors: (...fields: string[]) => void
+  setError(field: string, value: string): void
+  setError(errors: Record<string, string>): void
+  reset: () => void
+  submit: () => void
+}
+
+export type FormComponentState = {
   errors: Record<string, string>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
   isDirty: boolean
-  reset: () => void
-  submit: () => void
 }
+
+export type FormComponentSlotProps = FormComponentMethods & FormComponentState
+
+export type FormComponentRef = FormComponentSlotProps
 
 declare global {
   interface DocumentEventMap {
