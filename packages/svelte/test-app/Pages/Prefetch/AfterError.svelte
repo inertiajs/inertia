@@ -2,7 +2,7 @@
 import { router } from '@inertiajs/svelte'
 
 const prefetchPage = () => {
-  router.prefetch('/prefetch/swr/1', { method: 'get' }, { cacheFor: 1000 })
+  router.prefetch('/prefetch/swr/1', { method: 'get' }, { cacheFor: 5000 })
 }
 
 const visitPage = () => {

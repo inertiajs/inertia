@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react'
 
 export default function AfterError() {
   const prefetchPage = () => {
-    router.prefetch('/prefetch/swr/1', { method: 'get' }, { cacheFor: 1000 })
+    router.prefetch('/prefetch/swr/1', { method: 'get' }, { cacheFor: 5000 })
   }
 
   const visitPage = () => {
