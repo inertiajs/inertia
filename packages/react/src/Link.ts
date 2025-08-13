@@ -1,12 +1,10 @@
 import {
-  CacheForOption,
-  FormDataConvertible,
+  ActiveVisit,
+  LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
-  Progress,
   router,
   shouldIntercept,
 } from '@inertiajs/core'
@@ -14,30 +12,9 @@ import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, use
 
 const noop = () => undefined
 
-interface BaseInertiaLinkProps {
+interface BaseInertiaLinkProps extends LinkComponentBaseProps {
   as?: ElementType
-  data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
   onClick?: (event: React.MouseEvent<Element>) => void
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (event: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (event: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
-  queryStringArrayFormat?: 'indices' | 'brackets'
-  async?: boolean
-  cacheFor?: CacheForOption | CacheForOption[]
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -50,7 +27,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       children,
       as = 'a',
       data = {},
-      href,
+      href = '',
       method = 'get',
       preserveScroll = false,
       preserveState = null,
@@ -69,6 +46,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onCancel = noop,
       onSuccess = noop,
       onError = noop,
+      onPrefetching = noop,
+      onPrefetched = noop,
       prefetch = false,
       cacheFor = 0,
       ...props
@@ -92,13 +71,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [as, _method])
 
     const mergeDataArray = useMemo(
-      () =>
-        mergeDataIntoQueryString(
-          _method,
-          typeof href === 'object' ? href.url : href || '',
-          data,
-          queryStringArrayFormat,
-        ),
+      () => mergeDataIntoQueryString(_method, typeof href === 'object' ? href.url : href, data, queryStringArrayFormat),
       [href, _method, data, queryStringArrayFormat],
     )
 
@@ -125,14 +98,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         ...baseParams,
         onCancelToken,
         onBefore,
-        onStart(event) {
+        onStart(visit: PendingVisit) {
           setInFlightCount((count) => count + 1)
-          onStart(event)
+          onStart(visit)
         },
         onProgress,
-        onFinish(event) {
+        onFinish(visit: ActiveVisit) {
           setInFlightCount((count) => count - 1)
-          onFinish(event)
+          onFinish(visit)
         },
         onCancel,
         onSuccess,
@@ -140,10 +113,6 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       }),
       [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
     )
-
-    const doPrefetch = () => {
-      router.prefetch(url, baseParams, { cacheFor: cacheForValue })
-    }
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
       () => {
@@ -179,6 +148,20 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       // Otherwise, default to 30 seconds
       return 30_000
     }, [cacheFor, prefetchModes])
+
+    const doPrefetch = useMemo(() => {
+      return () => {
+        router.prefetch(
+          url,
+          {
+            ...baseParams,
+            onPrefetching,
+            onPrefetched,
+          },
+          { cacheFor: cacheForValue },
+        )
+      }
+    }, [url, baseParams, onPrefetching, onPrefetched, cacheForValue])
 
     useEffect(() => {
       return () => {

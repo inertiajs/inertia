@@ -84,7 +84,7 @@ const Form: InertiaForm = defineComponent({
     },
   },
   setup(props, { slots, attrs, expose }) {
-    const form = useForm({} as Record<string, FormDataConvertible>)
+    const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
       typeof props.action === 'object'
