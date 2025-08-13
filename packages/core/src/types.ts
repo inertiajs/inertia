@@ -82,7 +82,7 @@ export interface ClientSideVisitOptions {
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
-  errorBag: string | null
+  errorBag?: string | null
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions) => void
   onSuccess?: (page: Page) => void
@@ -340,6 +340,43 @@ export type ProgressSettings = {
   includeCSS: boolean
   color: string
 }
+
+export type FormComponentOptions = Pick<
+  VisitOptions,
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+>
+
+export type FormComponentProps = Partial<
+  Pick<Visit, 'method' | 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
+    Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
+> & {
+  action?: string | { url: string; method: Method }
+  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  options?: FormComponentOptions
+}
+
+export type FormComponentMethods = {
+  clearErrors: (...fields: string[]) => void
+  resetAndClearErrors: (...fields: string[]) => void
+  setError(field: string, value: string): void
+  setError(errors: Record<string, string>): void
+  reset: () => void
+  submit: () => void
+}
+
+export type FormComponentState = {
+  errors: Record<string, string>
+  hasErrors: boolean
+  processing: boolean
+  progress: Progress | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  isDirty: boolean
+}
+
+export type FormComponentSlotProps = FormComponentMethods & FormComponentState
+
+export type FormComponentRef = FormComponentSlotProps
 
 declare global {
   interface DocumentEventMap {

@@ -129,6 +129,34 @@ Route::get('/form', function () {
     return inertia('Form');
 });
 
+Route::get('/form-component', function () {
+    return inertia('FormComponent', [
+        'foo' => fn () => now()->getTimestampMs(),
+        'bar' => fn () => now()->getTimestampMs(),
+        'quux' => fn () => now()->getTimestampMs(),
+    ]);
+});
+
+Route::post('/form-component', function () {
+    $data = request()->validateWithBag('custom-bag', [
+        'name' => ['required', 'string', 'max:255'],
+        'avatar' => ['nullable', 'file', 'image', 'max:2048'],
+        'skills' => ['nullable', 'array', 'min:2'],
+        'skills.*' => ['string', 'in:vue,react,laravel,tailwind'],
+        'tags' => ['nullable', 'array'],
+        'tags.*' => ['string', 'max:50'],
+        'user.address.street' => ['nullable', 'string', 'max:255'],
+        'user.address.city' => ['nullable', 'string', 'max:255'],
+    ]);
+
+    // Simulate file upload progress
+    if (request()->hasFile('avatar')) {
+        sleep(1);
+    }
+
+    return back();
+});
+
 Route::post('/user', function () {
     return inertia('User', [
         'user' => request()->validate([
@@ -167,9 +195,9 @@ Route::get('/infinite-scroll', function () {
             function () use ($start, $end, $itemType) {
                 sleep(1);
 
-                return collect(range($start, $end))->map(fn($i) => [
+                return collect(range($start, $end))->map(fn ($i) => [
                     'id' => $i,
-                    'name' => ucwords($itemType) . ' ' . $i,
+                    'name' => ucwords($itemType).' '.$i,
                 ])->toArray();
             }
         )->merge(),
