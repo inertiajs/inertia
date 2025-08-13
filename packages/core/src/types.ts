@@ -10,6 +10,14 @@ declare module 'axios' {
 export type Errors = Record<string, string>
 export type ErrorBag = Record<string, Errors>
 
+// View Transition API types
+export type ViewTransitionOptions = {
+  enabled?: boolean
+  onViewTransitionStart?: (transition: any) => void
+  onViewTransitionEnd?: (transition: any) => void
+  onViewTransitionError?: (error: Error) => void
+}
+
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
@@ -126,6 +134,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  viewTransition?: ViewTransitionOptions
 }
 
 export type GlobalEventsMap = {
@@ -279,7 +288,9 @@ export type PendingVisitOptions = {
 
 export type PendingVisit = Visit & PendingVisitOptions
 
-export type ActiveVisit = PendingVisit & Required<VisitOptions>
+export type ActiveVisit = PendingVisit & Required<VisitOptions> & {
+  viewTransition: ViewTransitionOptions
+}
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
