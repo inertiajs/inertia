@@ -158,6 +158,20 @@ test('can cache links with single cache value', async ({ page }) => {
   await expect(lastLoaded2).not.toBe(lastLoaded2Fresh)
 })
 
+test('can visit the page when prefetching has failed due to network error', async ({ page, browser }) => {
+  await page.goto('prefetch/after-error')
+
+  page.context().setOffline(true)
+  await page.getByRole('button', { name: 'Prefetch Page' }).click()
+
+  page.context().setOffline(false)
+
+  requests.listen(page)
+  await page.getByRole('button', { name: 'Visit Page' }).click()
+
+  await isPrefetchSwrPage(page, 1)
+})
+
 test.skip('can do SWR when the link cacheFor prop has two values', async ({ page }) => {
   await page.goto('prefetch/swr/1')
 

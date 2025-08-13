@@ -283,6 +283,7 @@ export type ActiveVisit = PendingVisit & Required<VisitOptions>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
+  onPrefetchError?: (error: Error) => void
 }
 
 export type VisitId = unknown

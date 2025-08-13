@@ -55,6 +55,10 @@ class PrefetchedRequests {
         onPrefetchResponse(response) {
           resolve(response)
         },
+        onPrefetchError(error) {
+          prefetchedRequests.removeFromInFlight(params)
+          reject(error)
+        },
       })
     }).then((response) => {
       this.remove(params)
@@ -103,6 +107,12 @@ class PrefetchedRequests {
     })
 
     this.clearTimer(params)
+  }
+
+  protected removeFromInFlight(params: ActiveVisit): void {
+    this.inFlightRequests = this.inFlightRequests.filter((prefetched) => {
+      return !this.paramsAreEqual(prefetched.params, params)
+    })
   }
 
   protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [number, number] {

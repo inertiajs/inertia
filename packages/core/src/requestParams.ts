@@ -32,6 +32,7 @@ export class RequestParams {
         ...params,
         ...wrappedCallbacks,
         onPrefetchResponse: params.onPrefetchResponse || (() => {}),
+        onPrefetchError: params.onPrefetchError || (() => {}),
       }
     }
     //
@@ -93,6 +94,10 @@ export class RequestParams {
     if (this.params.onPrefetchResponse) {
       this.params.onPrefetchResponse(response)
     }
+  }
+
+  public onPrefetchError(error: Error) {
+    this.params.onPrefetchError(error)
   }
 
   public all() {
