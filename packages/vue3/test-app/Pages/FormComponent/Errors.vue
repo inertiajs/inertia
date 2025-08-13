@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const errorBag = ref(null)
+const errorBag = ref<string | null>(null)
 
-function setErrorBag(bag) {
+function setErrorBag(bag: string) {
   errorBag.value = bag
 }
 </script>

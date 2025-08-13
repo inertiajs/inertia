@@ -71,6 +71,8 @@
   on:cancel
   on:success
   on:error
+  on:prefetching
+  on:prefetched
 >
   <slot />
 </svelte:element>

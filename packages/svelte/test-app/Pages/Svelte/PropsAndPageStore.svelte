@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { inertia, page, useForm } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 

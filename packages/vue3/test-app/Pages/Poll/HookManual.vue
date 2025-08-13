@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { usePoll } from '@inertiajs/vue3'
 
 const { start, stop } = usePoll(

@@ -1,11 +1,16 @@
 {
   "scripts": {
     "build": "vite build .",
-    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../react/dist --ext js,jsx,html,json --ignore dist/ --exec 'vite build .'"
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../react/dist --ext js,tsx,html,json --ignore dist/ --exec 'vite build .'",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "vite": "^6.3.0",
-    "nodemon": "^3.0.0"
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "nodemon": "^3.0.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.0"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

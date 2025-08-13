@@ -1,15 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import { Form } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
-const events = ref([])
+const events = ref<string[]>([])
 const cancelInOnBefore = ref(false)
 const shouldFail = ref(false)
 const shouldDelay = ref(false)
 
-let cancelToken = null
+let cancelToken: { cancel: () => void } | null = null
 
-function log(eventName) {
+function log(eventName: string) {
   events.value.push(eventName)
 }
 
@@ -41,7 +41,7 @@ function formEvents() {
     onCancel: () => log('onCancel'),
     onSuccess: () => log('onSuccess'),
     onError: () => log('onError'),
-    onCancelToken: (token) => {
+    onCancelToken: (token: { cancel: () => void }) => {
       log('onCancelToken')
       cancelToken = token
     },
