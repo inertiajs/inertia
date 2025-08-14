@@ -4,6 +4,7 @@ import {
   FormDataConvertible,
   formDataToObject,
   mergeDataIntoQueryString,
+  Method,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -83,13 +84,13 @@ const Form: InertiaForm = defineComponent({
       default: noop,
     },
   },
-  setup(props, { slots, attrs }) {
-    const form = useForm({} as Record<string, FormDataConvertible>)
+  setup(props, { slots, attrs, expose }) {
+    const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
       typeof props.action === 'object'
         ? props.action.method
-        : (props.method.toLowerCase() as FormComponentProps['method']),
+        : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive
@@ -147,6 +148,36 @@ const Form: InertiaForm = defineComponent({
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
+
+    expose({
+      get errors() {
+        return form.errors
+      },
+      get hasErrors() {
+        return form.hasErrors
+      },
+      get processing() {
+        return form.processing
+      },
+      get progress() {
+        return form.progress
+      },
+      get wasSuccessful() {
+        return form.wasSuccessful
+      },
+      get recentlySuccessful() {
+        return form.recentlySuccessful
+      },
+      clearErrors: (...fields: string[]) => form.clearErrors(...fields),
+      resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
+      setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
+        form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
+      get isDirty() {
+        return isDirty.value
+      },
+      reset: () => formElement.value.reset(),
+      submit,
+    })
 
     return () => {
       return h(

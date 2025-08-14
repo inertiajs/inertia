@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Link } from '@inertiajs/svelte';
   import { onMount, onDestroy } from 'svelte';
 
@@ -6,7 +6,7 @@
     document.documentElement.style.scrollBehavior = 'smooth'
   }
 
-  export let scrollLog = [];
+  export let scrollLog: number[] = [];
 
   const handleScrollEvent = () => {
     scrollLog = [...scrollLog, document.documentElement.scrollTop];

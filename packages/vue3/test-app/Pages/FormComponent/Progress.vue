@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { Form } from '@inertiajs/vue3'
 import { onMounted, onUnmounted, ref } from 'vue'
 
-const showProgress = ref(undefined)
+const showProgress = ref<boolean | undefined>(undefined)
 
 const nprogressVisible = ref(false)
 const nprogressApperances = ref(0)
@@ -13,7 +13,7 @@ function disableProgress() {
 
 onMounted(() => {
   const observer = new MutationObserver(() => {
-    const nprogressElement = document.querySelector('#nprogress')
+    const nprogressElement = document.querySelector('#nprogress') as HTMLElement | null
     const nprogressIsVisible = nprogressElement && nprogressElement.style.display !== 'none'
 
     if (nprogressIsVisible) {

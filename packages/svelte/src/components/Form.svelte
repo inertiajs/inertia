@@ -3,6 +3,7 @@
     formDataToObject,
     mergeDataIntoQueryString,
     type FormDataConvertible,
+    type Errors,
     type FormComponentProps,
     type VisitOptions,
   } from '@inertiajs/core'
@@ -47,7 +48,7 @@
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), defaultValues)
   }
 
-  function submit() {
+  export function submit() {
     const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
     const submitOptions: FormSubmitOptions = {
@@ -73,21 +74,21 @@
     submit()
   }
 
-  function reset() {
+  export function reset() {
     formElement.reset()
   }
 
-  function clearErrors(...fields: string[]) {
+  export function clearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
   }
 
-  function resetAndClearErrors(...fields: string[]) {
+  export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.resetAndClearErrors(...fields)
   }
 
-  function setError(field: string | object, value?: string) {
+  export function setError(field: string | object, value?: string) {
     if (typeof field === 'string') {
       // @ts-expect-error
       $form.setError(field, value)
@@ -107,6 +108,7 @@
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+  $: slotErrors = $form.errors as Errors
 </script>
 
 <form
@@ -116,7 +118,7 @@
   on:submit={handleSubmit} {...$$restProps}
 >
   <slot
-    errors={$form.errors}
+    errors={slotErrors}
     hasErrors={$form.hasErrors}
     processing={$form.processing}
     progress={$form.progress}

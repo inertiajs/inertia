@@ -492,6 +492,24 @@ test.describe('Form Component', () => {
     await expect(page).toHaveURL('/article')
   })
 
+  test('submit without an action attribute uses the current URL', async ({ page }) => {
+    await page.goto('/form-component/url/with/segements')
+    await expect(page.locator('#error_name')).not.toBeVisible()
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Submit' }).click()
+    await expect(page.locator('#error_name')).toHaveText('Something went wrong')
+
+    await expect(requests.requests).toHaveLength(1)
+    const request = requests.requests[0]
+
+    expect(request.method()).toBe('POST')
+    expect(request.url().includes('/form-component/url/with/segements')).toBe(true)
+
+    await expect(page).toHaveURL('/form-component/url/with/segements')
+  })
+
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/form-component/methods')
@@ -701,6 +719,98 @@ test.describe('Form Component', () => {
             theme: 'light',
           },
         },
+      })
+    })
+  })
+
+  test.describe('Ref', () => {
+    test('can submit form programmatically using ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.getByRole('button', { name: 'Submit Programmatically' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.method).toEqual('post')
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+    })
+
+    test('can access errors and hasErrors via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await expect(page.getByText('Form has errors')).not.toBeVisible()
+      await expect(page.locator('#error_name')).not.toBeVisible()
+
+      await page.getByRole('button', { name: 'Set Test Error' }).click()
+
+      await expect(page.getByText('Form has errors')).toBeVisible()
+      await expect(page.locator('#error_name')).toHaveText('This is a test error')
+    })
+
+    test('can check isDirty state via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'Modified Name')
+
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+    })
+
+    test('can reset form via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.fill('input[name="name"]', 'Modified Name')
+      await page.fill('input[name="email"]', 'modified@example.com')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('Modified Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+
+      await page.click('button:has-text("Reset Form")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
+      expect(await page.inputValue('input[name="email"]')).toBe('john@example.com')
+    })
+  })
+
+  test.describe('Uppercase Methods', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/uppercase-method')
+    })
+
+    test('accepts uppercase POST method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit POST' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.method).toEqual('post')
+      await expect(dump.form).toEqual({
+        name: 'Test POST',
+      })
+    })
+
+    test('accepts uppercase GET method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit GET' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'get')
+
+      await expect(dump.method).toEqual('get')
+      await expect(dump.query).toEqual({
+        query: 'Test GET',
+      })
+    })
+
+    test('accepts uppercase PUT method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit PUT' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'put')
+
+      await expect(dump.method).toEqual('put')
+      await expect(dump.form).toEqual({
+        data: 'Test PUT',
       })
     })
   })

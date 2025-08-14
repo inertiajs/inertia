@@ -1,11 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3'
 import { reactive, watch } from 'vue'
 
 const form = useForm({
   name: 'foo',
   handle: 'example',
-  remember: false,
+  remember: false as boolean,
   custom: {},
 })
 

@@ -7,9 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.17...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.0...master)
 
 - Nothing yet
+
+## [v2.1.0](https://github.com/inertiajs/inertia/compare/v2.0.17...v2.1.0) - 2025-08-13
+
+### What's Changed
+
+* Support for passing custom component to `as` prop of `Link` component. by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2443
+* Use `nodemon` to trigger new files and deleted files in test apps by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2442
+* Use ReactNode type for children props by [@chack1172](https://github.com/chack1172) in https://github.com/inertiajs/inertia/pull/2385
+* Allow function as children component in react Deferred and WhenVisible by [@chack1172](https://github.com/chack1172) in https://github.com/inertiajs/inertia/pull/2386
+* Improve test that waits for scroll position restoration by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2473
+* Introduction of the `Form` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2474
+* Improve `children` prop of `<Form>` Component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2487
+* Add Form component ref support by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2496
+* Make Svelte's <Deferred> not crash in an SSR environment by [@dkulchenko](https://github.com/dkulchenko) in https://github.com/inertiajs/inertia/pull/2396
+* Fix core: Queue processing when an item fails by [@pintend](https://github.com/pintend) in https://github.com/inertiajs/inertia/pull/2467
+* Migrate playgrounds to Tailwind 4 by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2369
+
+### New Contributors
+
+* [@dkulchenko](https://github.com/dkulchenko) made their first contribution in https://github.com/inertiajs/inertia/pull/2396
+* [@pintend](https://github.com/pintend) made their first contribution in https://github.com/inertiajs/inertia/pull/2467
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.17...v2.1.0
 
 ## [v2.0.17](https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17) - 2025-07-18
 
