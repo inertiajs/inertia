@@ -214,23 +214,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default
-          ? slots.default(<FormComponentSlotProps>{
-              errors: form.errors,
-              hasErrors: form.hasErrors,
-              processing: form.processing,
-              progress: form.progress,
-              wasSuccessful: form.wasSuccessful,
-              recentlySuccessful: form.recentlySuccessful,
-              setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
-                form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
-              clearErrors: (...fields: string[]) => form.clearErrors(...fields),
-              resetAndClearErrors,
-              isDirty: isDirty.value,
-              reset,
-              submit,
-            })
-          : [],
+        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
       )
     }
   },
