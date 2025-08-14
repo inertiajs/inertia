@@ -772,6 +772,31 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
       expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
     })
+
+    test('can set current form data as defaults via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      // Modify form fields
+      await page.fill('input[name="name"]', 'New Name')
+      await page.fill('input[name="email"]', 'new@example.com')
+      
+      // Form should be dirty
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      // Set current values as defaults
+      await page.click('button:has-text("Set Current as Defaults")')
+
+      // Form should no longer be dirty
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      // Reset form should now use the new defaults
+      await page.fill('input[name="name"]', 'Modified Again')
+      await page.click('button:has-text("Reset Form")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('New Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('new@example.com')
+    })
+
   })
 
   test.describe('Uppercase Methods', () => {

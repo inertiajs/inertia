@@ -38,7 +38,7 @@
   const form = useForm({})
   let formElement: HTMLFormElement
   let isDirty = false
-  let defaults: FormData = new FormData()
+  let defaultData: FormData = new FormData()
 
   $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
@@ -55,7 +55,7 @@
   }
 
   function updateDirtyState(event: Event) {
-    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults))
+    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
   export function submit() {
@@ -97,7 +97,7 @@
   }
 
   export function reset(...fields: string[]) {
-    resetFormFields(formElement, defaults, fields)
+    resetFormFields(formElement, defaultData, fields)
   }
 
 
@@ -121,8 +121,13 @@
     }
   }
 
+  export function defaults() {
+    defaultData = getFormData()
+    isDirty = false
+  }
+
   onMount(() => {
-    defaults = getFormData()
+    defaultData = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
@@ -153,5 +158,6 @@
     {setError}
     {isDirty}
     {submit}
+    {defaults}
   />
 </form>

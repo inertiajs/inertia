@@ -442,6 +442,7 @@ export type FormComponentMethods = {
   setError(errors: Record<string, string>): void
   reset: (...fields: string[]) => void
   submit: () => void
+  defaults: () => void
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<
