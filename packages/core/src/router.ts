@@ -1,3 +1,4 @@
+import { mergeWith } from 'es-toolkit'
 import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -43,6 +44,12 @@ export class Router {
     maxConcurrent: Infinity,
     interruptible: false,
   })
+
+  protected defaultVisitOptionsCallback: ((href: string | URL, options: Visit) => Partial<Visit>) | null = null
+
+  public withDefaultVisitOptions(cb: (href: string | URL, options: Visit) => Partial<Visit>): void {
+    this.defaultVisitOptionsCallback = cb
+  }
 
   public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
     currentPage.init({
@@ -339,12 +346,8 @@ export class Router {
     }
   }
 
-  protected getPendingVisit(
-    href: string | URL,
-    options: VisitOptions,
-    pendingVisitOptions: Partial<PendingVisitOptions> = {},
-  ): PendingVisit {
-    const mergedOptions: Visit = {
+  protected mergeVisitOptions(href: string | URL, mergeOptions: Partial<Visit> = {}): Visit {
+    const defaultOptions: Visit = {
       method: 'get',
       data: {},
       replace: false,
@@ -362,8 +365,36 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
-      ...options,
     }
+
+    if (!this.defaultVisitOptionsCallback) {
+      return { ...defaultOptions, ...mergeOptions }
+    }
+
+    const options = {
+      ...defaultOptions,
+      ...this.defaultVisitOptionsCallback(href, defaultOptions),
+    }
+
+    return mergeWith(options, mergeOptions, (originalValue, mergeValue) => {
+      if (Array.isArray(mergeValue) && Array.isArray(originalValue)) {
+        return [...originalValue, ...mergeValue]
+      }
+
+      if (typeof mergeValue === 'object' && typeof originalValue === 'object') {
+        return { ...originalValue, ...mergeValue }
+      }
+
+      return mergeValue
+    })
+  }
+
+  protected getPendingVisit(
+    href: string | URL,
+    options: VisitOptions,
+    pendingVisitOptions: Partial<PendingVisitOptions> = {},
+  ): PendingVisit {
+    const mergedOptions: Visit = this.mergeVisitOptions(href, options)
 
     const [url, _data] = transformUrlAndData(
       href,
