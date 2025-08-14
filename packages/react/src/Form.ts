@@ -6,6 +6,7 @@ import {
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
+  resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -52,12 +53,13 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onError = noop,
       onCancelToken = noop,
       onSubmitComplete = noop,
+      disableWhileProcessing = false,
       children,
       ...props
     },
     ref,
   ) => {
-    const form = useForm({})
+    const form = useForm<Record<string, any>>({})
     const formElement = useRef<HTMLFormElement>(null)
 
     const resolvedMethod = useMemo(() => {
@@ -65,20 +67,20 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [action, method])
 
     const [isDirty, setIsDirty] = useState(false)
-    const defaultValues = useRef<Record<string, FormDataConvertible>>({})
+    const defaults = useRef<FormData>(new FormData())
 
-    const getData = (): Record<string, FormDataConvertible> => {
-      // Convert the FormData to an object because we can't compare two FormData
-      // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
-      // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-      return formDataToObject(new FormData(formElement.current))
-    }
+    const getFormData = (): FormData => new FormData(formElement.current)
+
+    // Convert the FormData to an object because we can't compare two FormData
+    // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+    // expects an object, and submitting a FormData instance directly causes problems with nested objects.
+    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const updateDirtyState = (event: Event) =>
-      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), defaultValues.current))
+      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults.current)))
 
     useEffect(() => {
-      defaultValues.current = getData()
+      defaults.current = getFormData()
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
@@ -88,23 +90,11 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [])
 
     const reset = (...fields: string[]) => {
-      if (fields.length === 0) {
-        formElement.current?.reset()
-      } else {
-        fields.forEach((field) => {
-          const input = formElement.current?.querySelector(`[name="${field}"]`) as HTMLInputElement
-
-          if (input) {
-            // @ts-expect-error
-            input.value = defaultValues.current[field] || ''
-          }
-        })
-      }
+      resetFormFields(formElement.current, defaults.current, fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      // @ts-expect-error
-      form.resetAndClearErrors(...fields)
+      form.clearErrors(...fields)
       reset(...fields)
     }
 
@@ -172,6 +162,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           event.preventDefault()
           submit()
         },
+        inert: disableWhileProcessing && form.processing,
       },
       typeof children === 'function'
         ? children({
@@ -183,7 +174,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
             recentlySuccessful: form.recentlySuccessful,
             setError: form.setError,
             clearErrors: form.clearErrors,
-            resetAndClearErrors: form.resetAndClearErrors,
+            resetAndClearErrors,
             isDirty,
             reset,
             submit,

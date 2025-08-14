@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     formDataToObject,
+    resetFormFields,
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
@@ -30,23 +31,31 @@
   export let onSuccess: FormComponentProps['onSuccess'] = noop
   export let onError: FormComponentProps['onError'] = noop
   export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
+  export let disableWhileProcessing: boolean = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
   const form = useForm({})
   let formElement: HTMLFormElement
   let isDirty = false
-  let defaultValues: Record<string, FormDataConvertible> = {}
+  let defaults: FormData = new FormData()
 
   $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
 
+  function getFormData(): FormData {
+    return new FormData(formElement)
+  }
+
+  // Convert the FormData to an object because we can't compare two FormData
+  // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+  // expects an object, and submitting a FormData instance directly causes problems with nested objects.
   function getData(): Record<string, FormDataConvertible> {
-    return formDataToObject(new FormData(formElement))
+    return formDataToObject(getFormData())
   }
 
   function updateDirtyState(event: Event) {
-    isDirty = event.type === 'reset' ? false : !isEqual(getData(), defaultValues)
+    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults))
   }
 
   export function submit() {
@@ -89,16 +98,12 @@
 
   export function reset(...fields: string[]) {
     if (fields.length === 0) {
-        formElement.reset()
-    } else {
-        fields.forEach((field) => {
-            const input = formElement.querySelector(`[name="${field}"]`) as HtmlInputElement | null
-
-            if (input) {
-                input.value = defaultValues[field] || ''
-            }
-        })
+      // Svelte doesn't set the default values correctly in the DOM
+      // See: https://github.com/sveltejs/svelte/issues/9230
+      fields = [...defaults.keys()]
     }
+
+    resetFormFields(formElement, defaults, fields)
   }
 
 
@@ -109,7 +114,7 @@
 
   export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
-    $form.resetAndClearErrors(...fields)
+    $form.clearErrors(...fields)
     reset(...fields)
   }
 
@@ -123,7 +128,7 @@
   }
 
   onMount(() => {
-    defaultValues = getData()
+    defaults = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
@@ -140,6 +145,7 @@
   action={_action}
   method={_method}
   on:submit={handleSubmit} {...$$restProps}
+  inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
   <slot
     errors={slotErrors}
@@ -152,7 +158,6 @@
     {resetAndClearErrors}
     {setError}
     {isDirty}
-    {reset}
     {submit}
   />
 </form>

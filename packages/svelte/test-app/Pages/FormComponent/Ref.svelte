@@ -9,6 +9,10 @@
     formRef?.submit()
   }
 
+  function resetNameField() {
+    formRef?.reset('name')
+  }
+
   function resetForm() {
     formRef?.reset()
   }
@@ -55,6 +59,9 @@
     </button>
     <button on:click={resetForm}>
       Reset Form
+    </button>
+    <button on:click={resetNameField}>
+      Reset Name Field
     </button>
     <button on:click={clearAllErrors}>
       Clear Errors

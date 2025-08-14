@@ -60,8 +60,9 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
               [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
             }[Extract<keyof T, `${number}`>]
     : string extends keyof T
-        ? string
-        : | Extract<keyof T, string>
+      ? string
+      :
+          | Extract<keyof T, string>
           | {
               [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
             }[Extract<keyof T, string>]
@@ -272,13 +273,25 @@ export type PageEvent = 'newComponent' | 'firstLoad'
 
 export type GlobalEventNames<T extends RequestPayload = RequestPayload> = keyof GlobalEventsMap<T>
 
-export type GlobalEvent<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = CustomEvent<GlobalEventDetails<TEventName, T>>
+export type GlobalEvent<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = CustomEvent<GlobalEventDetails<TEventName, T>>
 
-export type GlobalEventParameters<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['parameters']
+export type GlobalEventParameters<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['parameters']
 
-export type GlobalEventResult<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['result']
+export type GlobalEventResult<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['result']
 
-export type GlobalEventDetails<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['details']
+export type GlobalEventDetails<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['details']
 
 export type GlobalEventTrigger<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = (
   ...params: GlobalEventParameters<TEventName, T>
@@ -431,6 +444,7 @@ export type FormComponentProps = Partial<
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions
   onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
+  disableWhileProcessing?: boolean
 }
 
 export type FormComponentonSubmitCompleteArguments = {
@@ -458,7 +472,7 @@ export type FormComponentMethods = {
   resetAndClearErrors: (...fields: string[]) => void
   setError(field: string, value: string): void
   setError(errors: Record<string, string>): void
-  reset: () => void
+  reset: (...fields: string[]) => void
   submit: () => void
 }
 
