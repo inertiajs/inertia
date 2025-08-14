@@ -245,6 +245,13 @@ test.describe('url.ts', () => {
         expect(href).toBe('https://example.com/api?existing=value#section')
         expect(data).toEqual({ new: 'data' })
       })
+
+      test('handles a URL that is an empty string', () => {
+        const [href, data] = mergeDataIntoQueryString('post', '', { name: 'foo' })
+
+        expect(href).toBe('/')
+        expect(data).toEqual({ name: 'foo' })
+      })
     })
   })
 })

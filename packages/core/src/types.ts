@@ -423,9 +423,10 @@ export type FormComponentOptions = Pick<
 >
 
 export type FormComponentProps = Partial<
-  Pick<Visit, 'method' | 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
+  Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
 > & {
+  method?: Method | Uppercase<Method>
   action?: string | { url: string; method: Method }
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions

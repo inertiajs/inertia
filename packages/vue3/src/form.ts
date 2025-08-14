@@ -5,6 +5,7 @@ import {
   formDataToObject,
   resetFormFields,
   mergeDataIntoQueryString,
+  Method,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -90,7 +91,7 @@ const Form: InertiaForm = defineComponent({
     const method = computed(() =>
       typeof props.action === 'object'
         ? props.action.method
-        : (props.method.toLowerCase() as FormComponentProps['method']),
+        : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive

@@ -551,6 +551,15 @@ app.post('/form-component/progress', async (req, res) =>
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 app.get('/form-component/dotted-keys', (req, res) => inertia.render(req, res, { component: 'FormComponent/DottedKeys' }))
 app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
+app.get('/form-component/uppercase-method', (req, res) => inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }))
+
+app.get('/form-component/url/with/segements', (req, res) => inertia.render(req, res, { component: 'FormComponent/EmptyAction' }))
+app.post('/form-component/url/with/segements', async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/EmptyAction',
+    props: { errors: { name: 'Something went wrong' } },
+  }),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 
