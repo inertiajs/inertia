@@ -4,9 +4,9 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
-  resetFormFields,
   mergeDataIntoQueryString,
   Method,
+  resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -57,7 +57,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     },
     ref,
   ) => {
-    const form = useForm({})
+    const form = useForm<Record<string, any>>({})
     const formElement = useRef<HTMLFormElement>(null)
 
     const resolvedMethod = useMemo(() => {

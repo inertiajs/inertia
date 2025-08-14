@@ -1,13 +1,20 @@
-<script>
+<script context="module" lang="ts">
+  declare global {
+    interface Window {
+      resetForm: (...fields: string[]) => void
+    }
+  }
+</script>
+
+<script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
 
-  let formRef
+  let formRef: FormComponentMethods | null = null
 
   // Expose reset function to window for testing
-  window.resetForm = (...fields) => {
-    if (formRef) {
-      formRef.reset(...fields)
-    }
+  window.resetForm = (...fields: string[]) => {
+    formRef?.reset(...fields)
   }
 </script>
 

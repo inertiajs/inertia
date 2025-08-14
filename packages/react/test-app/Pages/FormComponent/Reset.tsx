@@ -1,14 +1,19 @@
 import { Form } from '@inertiajs/react'
 import { useRef } from 'react'
 
+declare global {
+  interface Window {
+    resetForm: (...fields: string[]) => void
+  }
+}
+
 export default function Reset() {
   const formRef = useRef(null)
 
   // Expose reset function to window for testing
-  window.resetForm = (...fields) => {
-    if (formRef.current) {
-      formRef.current.reset(...fields)
-    }
+  window.resetForm = (...fields: string[]) => {
+    // @ts-expect-error
+    formRef.value?.reset(...fields)
   }
 
   return (
@@ -111,8 +116,8 @@ export default function Reset() {
       <h2>File Inputs & Textareas</h2>
       <input type="file" name="avatar" id="avatar" />
       <input type="file" name="documents[]" id="documents" multiple />
-      <textarea name="bio" id="bio" rows="3" defaultValue="Default bio text here." />
-      <textarea name="notes" id="notes" rows="2" defaultValue="" />
+      <textarea name="bio" id="bio" rows={3} defaultValue="Default bio text here." />
+      <textarea name="notes" id="notes" rows={2} defaultValue="" />
 
       {/* HTML5 Input Types */}
       <h2>HTML5 Input Types</h2>

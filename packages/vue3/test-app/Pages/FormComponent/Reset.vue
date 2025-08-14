@@ -4,11 +4,16 @@ import { ref } from 'vue'
 
 const formRef = ref<InstanceType<typeof Form> | null>(null)
 
+declare global {
+  interface Window {
+    resetForm: (...fields: string[]) => void
+  }
+}
+
 // Expose reset function to window for testing
 window.resetForm = (...fields: string[]) => {
-  if (formRef.value) {
-    formRef.value.reset(...fields)
-  }
+  // @ts-expect-error
+  formRef.value?.reset(...fields)
 }
 </script>
 
