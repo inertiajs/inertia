@@ -112,7 +112,7 @@ test.describe('Form Component', () => {
   test.describe('Dynamic Properties', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      await page.goto('/form-helper/data') // Navigate to the FormHelper/Data page
+      await page.goto('/form-helper/data-dynamic')
     })
 
     test('initial data() output contains only initial properties', async ({ page }) => {

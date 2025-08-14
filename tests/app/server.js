@@ -157,6 +157,13 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.post('/form-helper/data-dynamic', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/DataDynamic',
+    props: {},
+  }),
+)
+
 app.get('/form-helper/nested', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Nested',
@@ -549,11 +556,17 @@ app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
 )
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
-app.get('/form-component/dotted-keys', (req, res) => inertia.render(req, res, { component: 'FormComponent/DottedKeys' }))
+app.get('/form-component/dotted-keys', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),
+)
 app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
-app.get('/form-component/uppercase-method', (req, res) => inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }))
+app.get('/form-component/uppercase-method', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
+)
 
-app.get('/form-component/url/with/segements', (req, res) => inertia.render(req, res, { component: 'FormComponent/EmptyAction' }))
+app.get('/form-component/url/with/segements', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/EmptyAction' }),
+)
 app.post('/form-component/url/with/segements', async (req, res) =>
   inertia.render(req, res, {
     component: 'FormComponent/EmptyAction',
