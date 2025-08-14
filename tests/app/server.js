@@ -529,6 +529,26 @@ app.get('/form-component/events', (req, res) => inertia.render(req, res, { compo
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
+app.get('/form-component/disable-while-processing/:disable', upload.any(), async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/DisableWhileProcessing',
+    props: {
+      disable: req.params.disable === 'yes',
+    },
+  }),
+)
+app.post('/form-component/disable-while-processing/:disable/submit', upload.any(), async (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'FormComponent/DisableWhileProcessing',
+        props: {
+          disable: req.params.disable === 'yes',
+        },
+      }),
+    500,
+  ),
+)
 app.post('/form-component/events/success', async (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/Events' }),
 )
@@ -549,12 +569,18 @@ app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
 )
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
-app.get('/form-component/dotted-keys', (req, res) => inertia.render(req, res, { component: 'FormComponent/DottedKeys' }))
+app.get('/form-component/dotted-keys', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),
+)
 app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
 app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
-app.get('/form-component/uppercase-method', (req, res) => inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }))
+app.get('/form-component/uppercase-method', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
+)
 
-app.get('/form-component/url/with/segements', (req, res) => inertia.render(req, res, { component: 'FormComponent/EmptyAction' }))
+app.get('/form-component/url/with/segements', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/EmptyAction' }),
+)
 app.post('/form-component/url/with/segements', async (req, res) =>
   inertia.render(req, res, {
     component: 'FormComponent/EmptyAction',

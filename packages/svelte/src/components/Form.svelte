@@ -3,9 +3,9 @@
     formDataToObject,
     resetFormFields,
     mergeDataIntoQueryString,
-    type FormDataConvertible,
     type Errors,
     type FormComponentProps,
+    type FormDataConvertible,
     type VisitOptions,
   } from '@inertiajs/core'
   import { isEqual } from 'es-toolkit'
@@ -30,6 +30,7 @@
   export let onCancel: FormComponentProps['onCancel'] = noop
   export let onSuccess: FormComponentProps['onSuccess'] = noop
   export let onError: FormComponentProps['onError'] = noop
+  export let disableWhileProcessing: boolean = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -131,6 +132,7 @@
   action={_action}
   method={_method}
   on:submit={handleSubmit} {...$$restProps}
+  inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
   <slot
     errors={slotErrors}
