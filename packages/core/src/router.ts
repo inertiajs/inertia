@@ -161,9 +161,9 @@ export class Router {
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,
-    })
+    } as VisitOptions)
 
-    const events = this.getVisitEvents(options)
+    const events = this.getVisitEvents(options as VisitOptions)
 
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
@@ -284,18 +284,19 @@ export class Router {
     return currentPage.resolve(component)
   }
 
-  public replace(params: ClientSideVisitOptions): void {
+  public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params, { replace: true })
   }
 
-  public push(params: ClientSideVisitOptions): void {
+  public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params)
   }
 
-  protected clientVisit(params: ClientSideVisitOptions, { replace = false }: { replace?: boolean } = {}): void {
+  protected clientVisit<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>, { replace = false }: { replace?: boolean } = {}): void {
     const current = currentPage.get()
 
-    const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
+    const props =
+      typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
     const { onError, onFinish, onSuccess, ...pageParams } = params
 
@@ -304,7 +305,7 @@ export class Router {
         {
           ...current,
           ...pageParams,
-          props,
+          props: props as Page['props'],
         },
         {
           replace,

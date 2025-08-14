@@ -55,7 +55,7 @@
 
 <h1 class="text-3xl">Deferred Props</h1>
 
-<div class="p-4 mt-6 bg-yellow-200 border border-yellow-500 rounded">
+<div class="p-4 mt-6 bg-yellow-200 border border-yellow-500 rounded-sm">
   <p>Page is loaded!</p>
 </div>
 

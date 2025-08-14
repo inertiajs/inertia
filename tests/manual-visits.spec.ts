@@ -108,7 +108,7 @@ test.describe('Data', () => {
     test('passes data as params by default when using the visit method', async ({ page }) => {
       await page.getByRole('link', { name: 'Visit Link' }).click()
 
-      // TODO: Should the url actually be /dump/get?foo=visit
+      // TODO: Should the url actually be /dump/get?foo=visit => See 'url' key in helpers.js
       const dump = await shouldBeDumpPage(page, 'get')
 
       await expect(dump.method).toBe('get')
@@ -144,7 +144,7 @@ test.describe('Data', () => {
 
           const dump = await shouldBeDumpPage(page, 'get')
 
-          // TODO: Should this be in the query string? It's not, but... should it be?
+          // TODO: Should this be in the query string? It's not, but... should it be? => See 'url' key in helpers.js
 
           await expect(dump.query).toEqual(expectedObject)
           await expect(dump.method).toBe('get')
@@ -925,4 +925,29 @@ test.describe('Redirects', () => {
     await expect(page).toHaveURL('/non-inertia')
     await expect(pageLoads.count).toBe(2)
   })
+})
+
+test('can do a subsequent visit after the previous visit has thrown an error in onSuccess', async ({ page }) => {
+  pageLoads.watch(page)
+  const consoleErrors = []
+
+  page.on('pageerror', (error: Error) => consoleErrors.push(error.message))
+
+  await expect(consoleMessages.messages).toHaveLength(0)
+
+  await page.goto('/visits/after-error/1')
+  const response = page.waitForResponse('/visits/after-error/2')
+
+  await page.getByRole('link', { name: 'Throw error on success' }).click()
+  await response
+
+  await expect(consoleErrors).toHaveLength(1)
+  await expect(consoleErrors[0]).toBe('Error after visit')
+
+  await page.getByRole('link', { name: 'Visit dump page' }).click()
+
+  const dump = await shouldBeDumpPage(page, 'get')
+
+  await expect(dump.method).toBe('get')
+  await expect(dump.form).toEqual({})
 })

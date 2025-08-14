@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import Layout from '@/Layouts/SiteLayout.vue'
 
 export default {
@@ -6,7 +6,7 @@ export default {
 }
 </script>
 
-<script setup>
+<script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3'
 
 window._inertia_page_props = usePage().props
