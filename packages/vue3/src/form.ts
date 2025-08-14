@@ -145,12 +145,12 @@ const Form: InertiaForm = defineComponent({
         onBefore: props.onBefore,
         onStart: props.onStart,
         onProgress: props.onProgress,
-        onFinish: (...args) => {
-          props.onFinish(...args)
+        onFinish: props.onFinish,
+        onCancel: props.onCancel,
+        onSuccess: (...args) => {
+          props.onSuccess(...args)
           props.onSubmitComplete(exposed)
         },
-        onCancel: props.onCancel,
-        onSuccess: props.onSuccess,
         onError: props.onError,
         ...props.options,
       }

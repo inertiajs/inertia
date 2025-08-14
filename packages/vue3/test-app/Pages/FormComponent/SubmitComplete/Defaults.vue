@@ -4,9 +4,13 @@ import { Form } from '@inertiajs/vue3'
 
 <template>
   <div>
-    <h1>After Submit Test</h1>
+    <h1>OnSubmitComplete Defaults Test</h1>
 
-    <Form method="post" #default="{ errors }" @submit-complete="(props) => props.reset('name')">
+    <Form method="post" #default="{ errors, isDirty }" @submit-complete="(props) => props.defaults()">
+      <div>
+        <p id="dirty-status">{{ isDirty ? 'Form is dirty' : 'Form is clean' }}</p>
+      </div>
+
       <div>
         <input type="text" name="name" id="name" placeholder="Name" value="John Doe" />
         <p v-if="errors.name" id="error_name">{{ errors.name }}</p>

@@ -69,9 +69,11 @@
       onBefore,
       onStart,
       onProgress,
-      onFinish: (visit) =>  {
-        if (onFinish) {
-            onFinish(visit)
+      onFinish,
+      onCancel,
+      onSuccess: (...args) =>  {
+        if (onSuccess) {
+            onSuccess(...args)
         }
 
         if (onSubmitComplete) {
@@ -83,8 +85,6 @@
             })
         }
       },
-      onCancel,
-      onSuccess,
       onError,
       ...options,
     }

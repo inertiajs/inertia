@@ -114,8 +114,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         onBefore,
         onStart,
         onProgress,
-        onFinish: (...args) => {
-          onFinish(...args)
+        onFinish,
+        onCancel,
+        onSuccess: (...args) => {
+          onSuccess(...args)
           onSubmitComplete({
             reset,
             resetAndClearErrors,
@@ -123,8 +125,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
             defaults,
           })
         },
-        onCancel,
-        onSuccess,
         onError,
         ...options,
       }
