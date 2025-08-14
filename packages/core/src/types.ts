@@ -336,6 +336,7 @@ export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisi
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
+  onPrefetchError?: (error: Error) => void
 }
 
 export type VisitId = unknown

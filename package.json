@@ -9,6 +9,7 @@
     "dev:test-app:react": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
     "dev:test-app:svelte": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
     "dev:test-app:vue": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
+    "type-check:test-app": "pnpm -r --filter './packages/*/test-app' type-check",
     "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
     "type-check:test-app:svelte": "cd packages/svelte/test-app && pnpm run type-check",
     "type-check:test-app:vue": "cd packages/vue3/test-app && pnpm run type-check",
