@@ -13,7 +13,7 @@ export default function Reset() {
   // Expose reset function to window for testing
   window.resetForm = (...fields: string[]) => {
     // @ts-expect-error
-    formRef.value?.reset(...fields)
+    formRef.current?.reset(...fields)
   }
 
   return (
