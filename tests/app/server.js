@@ -242,6 +242,10 @@ app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 
+app.get('/prefetch/after-error', (req, res) => {
+  inertia.render(req, res, { component: 'Prefetch/AfterError' })
+})
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
@@ -536,6 +540,26 @@ app.get('/form-component/events', (req, res) => inertia.render(req, res, { compo
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
+app.get('/form-component/disable-while-processing/:disable', upload.any(), async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/DisableWhileProcessing',
+    props: {
+      disable: req.params.disable === 'yes',
+    },
+  }),
+)
+app.post('/form-component/disable-while-processing/:disable/submit', upload.any(), async (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'FormComponent/DisableWhileProcessing',
+        props: {
+          disable: req.params.disable === 'yes',
+        },
+      }),
+    500,
+  ),
+)
 app.post('/form-component/events/success', async (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/Events' }),
 )
@@ -555,11 +579,15 @@ app.get('/form-component/progress', (req, res) => inertia.render(req, res, { com
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
 )
+app.get('/form-component/after-submit', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/AfterSubmit' }),
+)
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 app.get('/form-component/dotted-keys', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),
 )
 app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
+app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
 app.get('/form-component/uppercase-method', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
 )

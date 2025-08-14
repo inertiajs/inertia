@@ -492,6 +492,20 @@ test.describe('Form Component', () => {
     await expect(page).toHaveURL('/article')
   })
 
+  test('can disable the form while processing', async ({ page }) => {
+    await page.goto('/form-component/disable-while-processing/yes')
+    await page.getByRole('button', { name: 'Submit' }).click()
+    await expect(page.locator('form[inert]')).toBeVisible()
+    await expect(page.locator('form[inert]')).not.toBeVisible()
+  })
+
+  test('will not disable the form while processing by default', async ({ page }) => {
+    await page.goto('/form-component/disable-while-processing/no')
+    await page.getByRole('button', { name: 'Submit' }).click()
+    await page.waitForTimeout(250)
+    await expect(page.locator('form[inert]')).not.toBeVisible()
+  })
+
   test('submit without an action attribute uses the current URL', async ({ page }) => {
     await page.goto('/form-component/url/with/segements')
     await expect(page.locator('#error_name')).not.toBeVisible()
@@ -508,6 +522,25 @@ test.describe('Form Component', () => {
     expect(request.url().includes('/form-component/url/with/segements')).toBe(true)
 
     await expect(page).toHaveURL('/form-component/url/with/segements')
+  })
+
+  test('reset a field after submit', async ({ page }) => {
+    await page.goto('/form-component/after-submit')
+
+    await expect(page.locator('#name')).toHaveValue('John Doe')
+    await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+
+    await page.fill('#name', 'John Who')
+    await page.fill('#email', 'john@who.biz')
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Submit' }).click()
+
+    await expect(requests.requests).toHaveLength(1)
+
+    await expect(page.locator('#name')).toHaveValue('John Doe')
+    await expect(page.locator('#email')).toHaveValue('john@who.biz')
   })
 
   test.describe('Methods', () => {
@@ -774,6 +807,21 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
       expect(await page.inputValue('input[name="email"]')).toBe('john@example.com')
     })
+
+    test('can reset particular form fields via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      await page.fill('input[name="name"]', 'Modified Name')
+      await page.fill('input[name="email"]', 'modified@example.com')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('Modified Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+
+      await page.click('button:has-text("Reset Name Field")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
+      expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
+    })
   })
 
   test.describe('Uppercase Methods', () => {
@@ -812,6 +860,407 @@ test.describe('Form Component', () => {
       await expect(dump.form).toEqual({
         data: 'Test PUT',
       })
+    })
+  })
+
+  test.describe('Reset', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/reset')
+    })
+
+    const countFiles = async (page, selector: string) => {
+      return await page.evaluate((sel) => {
+        const input = document.querySelector(sel) as HTMLInputElement
+        return input.files?.length || 0
+      }, selector)
+    }
+
+    const getSelectedOptions = async (page, selector: string) => {
+      return await page.evaluate((sel) => {
+        const select = document.querySelector(sel) as HTMLSelectElement
+        return Array.from(select.selectedOptions).map((opt) => opt.value)
+      }, selector)
+    }
+
+    const resetForm = async (page, fields?: string[]) => {
+      // @ts-ignore
+      return await page.evaluate((fields) => (fields ? window.resetForm(...fields) : window.resetForm()), fields)
+    }
+
+    test('resets all fields to their default values', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
+      // Change all field values
+      await page.fill('#name', 'Jane Smith')
+      await page.fill('#email', 'jane@test.com')
+      await page.selectOption('#country', 'us')
+      await page.selectOption('#role', 'admin')
+      await page.check('#plan_free')
+      await page.check('#payment_card')
+      await page.uncheck('#subscribe')
+      await page.check('#terms')
+      await page.uncheck('#interests_sports')
+      await page.check('#interests_music')
+      await page.uncheck('#interests_tech')
+      await page.check('#interests_art')
+      await page.selectOption('#skills', ['react', 'svelte'])
+      await page.fill('#bio', 'New bio text')
+      await page.fill('#notes', 'Some notes')
+      await page.fill('#age', '30')
+      await page.fill('#quantity', '15')
+      await page.fill('#volume', '75')
+      await page.fill('#birthdate', '2000-12-31')
+      await page.fill('#appointment', '09:00')
+      await page.fill('#favorite_color', '#00ff00')
+      await page.fill('#website', 'https://newsite.com')
+      await page.fill('#phone', '+9876543210')
+      await page.fill('#password', 'newpass456')
+      await page.fill('#nested_street', '456 Oak Ave')
+      await page.fill('#nested_city', 'Los Angeles')
+      await page.fill('#item_0_name', 'Item C')
+      await page.fill('#item_0_quantity', '20')
+      await page.fill('#item_1_name', 'Item D')
+      await page.fill('#item_1_quantity', '30')
+
+      await resetForm(page)
+
+      // Verify all fields are reset to defaults
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@example.com')
+      await expect(page.locator('#country')).toHaveValue('uk')
+      await expect(page.locator('#role')).toHaveValue('')
+      await expect(page.locator('#plan_pro')).toBeChecked()
+      await expect(page.locator('#plan_free')).not.toBeChecked()
+      await expect(page.locator('#payment_card')).not.toBeChecked()
+      await expect(page.locator('#payment_bank')).not.toBeChecked()
+      await expect(page.locator('#payment_paypal')).not.toBeChecked()
+      await expect(page.locator('#subscribe')).toBeChecked()
+      await expect(page.locator('#terms')).not.toBeChecked()
+      await expect(page.locator('#interests_sports')).toBeChecked()
+      await expect(page.locator('#interests_music')).not.toBeChecked()
+      await expect(page.locator('#interests_tech')).toBeChecked()
+      await expect(page.locator('#interests_art')).not.toBeChecked()
+
+      // Check multi-select (need to get selected options)
+      const selectedSkills = await getSelectedOptions(page, '#skills')
+      expect(selectedSkills).toEqual(['vue', 'angular'])
+
+      await expect(page.locator('#bio')).toHaveValue('Default bio text here.')
+      await expect(page.locator('#notes')).toHaveValue('')
+      await expect(page.locator('#age')).toHaveValue('25')
+      await expect(page.locator('#quantity')).toHaveValue('')
+      await expect(page.locator('#volume')).toHaveValue('50')
+      await expect(page.locator('#birthdate')).toHaveValue('1990-01-01')
+      await expect(page.locator('#appointment')).toHaveValue('14:30')
+      await expect(page.locator('#favorite_color')).toHaveValue('#ff0000')
+      await expect(page.locator('#website')).toHaveValue('https://example.com')
+      await expect(page.locator('#phone')).toHaveValue('+1234567890')
+      await expect(page.locator('#password')).toHaveValue('secret123')
+      await expect(page.locator('#nested_street')).toHaveValue('123 Main St')
+      await expect(page.locator('#nested_city')).toHaveValue('New York')
+      await expect(page.locator('#item_0_name')).toHaveValue('Item A')
+      await expect(page.locator('#item_0_quantity')).toHaveValue('5')
+      await expect(page.locator('#item_1_name')).toHaveValue('Item B')
+      await expect(page.locator('#item_1_quantity')).toHaveValue('10')
+      await expect(page.locator('#token')).toHaveValue('abc123')
+
+      // Verify disabled field is not affected
+      await expect(page.locator('#disabled_field')).toHaveValue('Ignore me')
+    })
+
+    test('resets specific fields only', async ({ page }) => {
+      // Change multiple field values
+      await page.fill('#name', 'Jane Smith')
+      await page.fill('#email', 'jane@test.com')
+      await page.selectOption('#country', 'us')
+      await page.fill('#bio', 'New bio')
+      await page.fill('#age', '30')
+
+      // Reset only name and bio
+      await resetForm(page, ['name', 'bio'])
+
+      // Verify only specified fields are reset
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#bio')).toHaveValue('Default bio text here.')
+
+      // Verify other fields are not reset
+      await expect(page.locator('#email')).toHaveValue('jane@test.com')
+      await expect(page.locator('#country')).toHaveValue('us')
+      await expect(page.locator('#age')).toHaveValue('30')
+    })
+
+    test('resets file inputs to empty', async ({ page }) => {
+      // Add files to file inputs
+      await page.setInputFiles('#avatar', {
+        name: 'avatar.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      })
+
+      await page.setInputFiles('#documents', [
+        { name: 'doc1.pdf', mimeType: 'application/pdf', buffer: Buffer.from('fake pdf data 1') },
+        { name: 'doc2.pdf', mimeType: 'application/pdf', buffer: Buffer.from('fake pdf data 2') },
+      ])
+
+      // Verify files are set
+      expect(await countFiles(page, '#avatar')).toBe(1)
+      expect(await countFiles(page, '#documents')).toBe(2)
+
+      await resetForm(page)
+
+      // Verify file inputs are cleared
+      expect(await countFiles(page, '#avatar')).toBe(0)
+      expect(await countFiles(page, '#documents')).toBe(0)
+    })
+
+    test('does not affect button inputs', async ({ page }) => {
+      // Get initial button values
+      const buttonValue = await page.locator('input[name="button_input"]').inputValue()
+      const submitValue = await page.locator('input[name="submit_input"]').inputValue()
+      const resetValue = await page.locator('input[name="reset_input"]').inputValue()
+
+      await resetForm(page)
+
+      // Verify button values are unchanged
+      await expect(page.locator('input[name="button_input"]')).toHaveValue(buttonValue)
+      await expect(page.locator('input[name="submit_input"]')).toHaveValue(submitValue)
+      await expect(page.locator('input[name="reset_input"]')).toHaveValue(resetValue)
+    })
+
+    test('disabled fields reset behavior', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
+      // Get initial value of the disabled field
+      const initialValue = await page.locator('#disabled_field').inputValue()
+      expect(initialValue).toBe('Ignore me')
+
+      // Change the disabled field value using JavaScript
+      await page.evaluate(() => {
+        const input = document.querySelector('#disabled_field') as HTMLInputElement
+        input.value = 'Changed Value'
+      })
+
+      // Verify the disabled field value is changed
+      await expect(page.locator('#disabled_field')).toHaveValue('Changed Value')
+
+      await page.fill('#name', 'Test Name')
+      await page.fill('#email', 'test@test.com')
+
+      // Partial reset - disabled fields use their DOM defaultValue
+      await resetForm(page, ['disabled_field', 'name', 'email'])
+
+      // Disabled field is reset using its defaultValue
+      await expect(page.locator('#disabled_field')).toHaveValue('Ignore me')
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@example.com')
+
+      await page.fill('#name', 'Test Name Again')
+
+      // Change disabled field again to test full reset
+      await page.evaluate(() => {
+        const input = document.querySelector('#disabled_field') as HTMLInputElement
+        input.value = 'Changed Again'
+      })
+
+      // Full reset - uses browser's native reset() which resets all fields including disabled
+      await resetForm(page)
+
+      // Both partial and full reset now work consistently for disabled fields
+      await expect(page.locator('#disabled_field')).toHaveValue('Ignore me')
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+    })
+
+    test('resets fields with dotted notation names', async ({ page }) => {
+      await page.fill('#user_name', 'Changed User')
+      await page.fill('#user_email', 'changed@user.com')
+      await page.fill('#company_name', 'Changed Corp')
+
+      await resetForm(page)
+
+      await expect(page.locator('#user_name')).toHaveValue('Default User')
+      await expect(page.locator('#user_email')).toHaveValue('user@default.com')
+      await expect(page.locator('#company_name')).toHaveValue('Default Corp')
+    })
+
+    test('resets array fields with same name', async ({ page }) => {
+      await page.fill('#tag_0', 'php')
+      await page.fill('#tag_1', 'laravel')
+      await page.fill('#tag_2', 'symfony')
+
+      await resetForm(page)
+
+      await expect(page.locator('#tag_0')).toHaveValue('javascript')
+      await expect(page.locator('#tag_1')).toHaveValue('vue')
+      await expect(page.locator('#tag_2')).toHaveValue('inertia')
+    })
+
+    test('edge cases - non-existent fields and dynamic fields', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
+      // Scenario 1: Handles non-existent field names gracefully
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      // Reset with non-existent field names mixed with real ones
+      await resetForm(page, ['nonExistentField', 'name', 'anotherFakeField'])
+
+      // Verify real field was reset, others unchanged
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('changed@email.com')
+
+      // Scenario 2: Reset works with dynamically added fields
+      await page.evaluate(() => {
+        const form = document.querySelector('form')
+        const newInput = document.createElement('input')
+        newInput.type = 'text'
+        newInput.name = 'dynamic_field'
+        newInput.id = 'dynamic_field'
+        newInput.value = 'initial value'
+        form?.appendChild(newInput)
+      })
+
+      // Change the dynamic field
+      await page.fill('#dynamic_field', 'changed value')
+
+      // Reset should handle it (though it won't have a default in FormData)
+      await resetForm(page)
+
+      // Dynamic field should be empty (no default was captured)
+      await expect(page.locator('#dynamic_field')).toHaveValue('')
+
+      // Other fields should reset normally
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+    })
+
+    test('multi-select reset behavior comprehensive test', async ({ page }) => {
+      // Multi-select with no defaults resets to empty
+      await page.selectOption('#languages', ['javascript', 'python'])
+      const beforeLanguageReset = await getSelectedOptions(page, '#languages')
+      expect(beforeLanguageReset).toEqual(['javascript', 'python'])
+
+      await resetForm(page, ['languages[]'])
+      const afterLanguageReset = await getSelectedOptions(page, '#languages')
+      expect(afterLanguageReset).toEqual([])
+
+      // Multi-select with all options selected resets correctly
+      await page.selectOption('#tools', ['vscode']) // Select only one
+      const beforeToolsReset = await getSelectedOptions(page, '#tools')
+      expect(beforeToolsReset).toEqual(['vscode'])
+
+      await resetForm(page, ['tools[]'])
+      const afterToolsReset = await getSelectedOptions(page, '#tools')
+      expect(afterToolsReset.sort()).toEqual(['sublime', 'vscode', 'webstorm'])
+
+      // Single select vs multi-select behavior differs correctly
+      await page.selectOption('#editor', 'emacs')
+      await page.selectOption('#skills', ['react'])
+
+      await resetForm(page, ['editor', 'skills[]'])
+
+      await expect(page.locator('#editor')).toHaveValue('vim')
+      const skillsSelected = await getSelectedOptions(page, '#skills')
+      expect(skillsSelected.sort()).toEqual(['angular', 'vue'])
+
+      // Partial reset preserves other multi-selects
+      await page.selectOption('#skills', ['react', 'svelte'])
+      await page.selectOption('#languages', ['javascript', 'typescript'])
+      await page.selectOption('#tools', ['vscode'])
+
+      await resetForm(page, ['skills[]'])
+
+      const skillsAfterPartialReset = await getSelectedOptions(page, '#skills')
+      expect(skillsAfterPartialReset.sort()).toEqual(['angular', 'vue'])
+
+      const languagesAfterPartialReset = await getSelectedOptions(page, '#languages')
+      expect(languagesAfterPartialReset).toEqual(['javascript', 'typescript'])
+
+      const toolsAfterPartialReset = await getSelectedOptions(page, '#tools')
+      expect(toolsAfterPartialReset).toEqual(['vscode'])
+
+      // Edge cases with invalid selections
+      await page.evaluate(() => {
+        const select = document.querySelector('#skills') as HTMLSelectElement
+        Array.from(select.options).forEach((opt) => (opt.selected = false))
+        select.value = 'nonexistent'
+      })
+
+      await resetForm(page, ['skills[]'])
+      const skillsAfterEdgeCase = await getSelectedOptions(page, '#skills')
+      expect(skillsAfterEdgeCase.sort()).toEqual(['angular', 'vue'])
+
+      // Verify detailed option states (bug fix verification)
+      await page.selectOption('#skills', ['react', 'svelte'])
+      await resetForm(page, ['skills[]'])
+
+      const detailedOptions = await page.evaluate(() => {
+        const select = document.querySelector('#skills') as HTMLSelectElement
+        return {
+          selectedValues: Array.from(select.selectedOptions)
+            .map((opt) => opt.value)
+            .sort(),
+          allValues: Array.from(select.options).map((opt) => ({ value: opt.value, selected: opt.selected })),
+        }
+      })
+
+      expect(detailedOptions.selectedValues).toEqual(['angular', 'vue'])
+      expect(detailedOptions.allValues).toEqual([
+        { value: 'vue', selected: true },
+        { value: 'react', selected: false },
+        { value: 'angular', selected: true },
+        { value: 'svelte', selected: false },
+      ])
+    })
+
+    test('numeric field reset behavior - full and selective', async ({ page }) => {
+      // Scenario 1: Full reset of numeric fields
+      await page.check('#rating_3')
+      await page.uncheck('#years_2020')
+      await page.uncheck('#years_2022')
+      await page.check('#years_2021')
+      await page.selectOption('#version', '2')
+      await page.selectOption('#ports', ['8080'])
+
+      // Verify fields were changed
+      await expect(page.locator('#rating_3')).toBeChecked()
+      await expect(page.locator('#years_2021')).toBeChecked()
+      await expect(page.locator('#years_2020')).not.toBeChecked()
+      await expect(page.locator('#years_2022')).not.toBeChecked()
+      await expect(page.locator('#version')).toHaveValue('2')
+      const selectedPorts = await getSelectedOptions(page, '#ports')
+      expect(selectedPorts).toEqual(['8080'])
+
+      await resetForm(page)
+
+      // Verify numeric fields are reset to defaults
+      await expect(page.locator('#rating_1')).toBeChecked()
+      await expect(page.locator('#rating_2')).not.toBeChecked()
+      await expect(page.locator('#rating_3')).not.toBeChecked()
+      await expect(page.locator('#years_2020')).toBeChecked()
+      await expect(page.locator('#years_2021')).not.toBeChecked()
+      await expect(page.locator('#years_2022')).toBeChecked()
+      await expect(page.locator('#version')).toHaveValue('1')
+      const resetPorts = await getSelectedOptions(page, '#ports')
+      expect(resetPorts.sort()).toEqual(['443', '80'])
+
+      // Scenario 2: Selective reset of numeric fields
+      await page.check('#rating_2')
+      await page.uncheck('#years_2020')
+      await page.check('#years_2021')
+      await page.selectOption('#version', '3')
+      await page.selectOption('#ports', ['8080'])
+
+      // Reset only rating and version fields
+      await resetForm(page, ['rating', 'version'])
+
+      // Verify only specified numeric fields are reset
+      await expect(page.locator('#rating_1')).toBeChecked()
+      await expect(page.locator('#rating_2')).not.toBeChecked()
+      await expect(page.locator('#version')).toHaveValue('1')
+
+      // Other fields should maintain changed values
+      await expect(page.locator('#years_2020')).not.toBeChecked()
+      await expect(page.locator('#years_2021')).toBeChecked()
+      await expect(page.locator('#years_2022')).toBeChecked() // This stays as original default
+      const unchangedPorts = await getSelectedOptions(page, '#ports')
+      expect(unchangedPorts).toEqual(['8080'])
     })
   })
 })
