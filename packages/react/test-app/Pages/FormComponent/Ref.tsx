@@ -13,6 +13,10 @@ export default function Ref() {
     formRef.current?.reset()
   }
 
+  const resetNameField = () => {
+    formRef.current?.reset('name')
+  }
+
   const clearAllErrors = () => {
     formRef.current?.clearErrors()
   }
@@ -54,6 +58,9 @@ export default function Ref() {
         </button>
         <button onClick={resetForm}>
           Reset Form
+        </button>
+        <button onClick={resetNameField}>
+          Reset Name Field
         </button>
         <button onClick={clearAllErrors}>
           Clear Errors

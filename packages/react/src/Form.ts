@@ -6,6 +6,7 @@ import {
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
+  resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -57,7 +58,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     },
     ref,
   ) => {
-    const form = useForm({})
+    const form = useForm<Record<string, any>>({})
     const formElement = useRef<HTMLFormElement>(null)
 
     const resolvedMethod = useMemo(() => {
@@ -65,20 +66,20 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [action, method])
 
     const [isDirty, setIsDirty] = useState(false)
-    const defaultValues = useRef<Record<string, FormDataConvertible>>({})
+    const defaults = useRef<FormData>(new FormData())
 
-    const getData = (): Record<string, FormDataConvertible> => {
-      // Convert the FormData to an object because we can't compare two FormData
-      // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
-      // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-      return formDataToObject(new FormData(formElement.current))
-    }
+    const getFormData = (): FormData => new FormData(formElement.current)
+
+    // Convert the FormData to an object because we can't compare two FormData
+    // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+    // expects an object, and submitting a FormData instance directly causes problems with nested objects.
+    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const updateDirtyState = (event: Event) =>
-      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), defaultValues.current))
+      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults.current)))
 
     useEffect(() => {
-      defaultValues.current = getData()
+      defaults.current = getFormData()
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
@@ -124,10 +125,13 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         wasSuccessful: form.wasSuccessful,
         recentlySuccessful: form.recentlySuccessful,
         clearErrors: form.clearErrors,
-        resetAndClearErrors: form.resetAndClearErrors,
+        resetAndClearErrors: (...fields: string[]) => {
+          form.clearErrors(...fields)
+          resetFormFields(formElement.current, defaults.current, fields)
+        },
         setError: form.setError,
         isDirty,
-        reset: () => formElement.current?.reset(),
+        reset: (...fields) => resetFormFields(formElement.current, defaults.current, fields),
         submit,
       }),
       [form, isDirty, submit],
@@ -156,9 +160,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
             recentlySuccessful: form.recentlySuccessful,
             setError: form.setError,
             clearErrors: form.clearErrors,
-            resetAndClearErrors: form.resetAndClearErrors,
+            resetAndClearErrors: (...fields: string[]) => {
+              form.clearErrors(...fields)
+              resetFormFields(formElement.current, defaults.current, fields)
+            },
             isDirty,
-            reset: () => formElement.current?.reset(),
+            reset: (...fields) => resetFormFields(formElement.current, defaults.current, fields),
             submit,
           })
         : children,

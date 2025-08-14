@@ -5,6 +5,7 @@ import {
   formDataToObject,
   mergeDataIntoQueryString,
   Method,
+  resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'es-toolkit'
@@ -92,39 +93,36 @@ const Form: InertiaForm = defineComponent({
     const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
-      typeof props.action === 'object'
-        ? props.action.method
-        : (props.method.toLowerCase() as Method),
+      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive
     const isDirty = ref(false)
 
-    /// No const because we need to assign it in onMounted
-    let defaults = {}
+    const defaults = ref(new FormData())
 
     const onFormUpdate = (event: Event) => {
       // If the form is reset, we set isDirty to false as we already know it's back
       // to defaults. Also, the fields are updated after the reset event, so the
       // comparison will be incorrect unless we use nextTick/setTimeout.
-      isDirty.value = event.type === 'reset' ? false : !isEqual(getData(), defaults)
+      isDirty.value = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults.value))
     }
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
     onMounted(() => {
-      defaults = getData()
+      defaults.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
-    const getData = (): Record<string, FormDataConvertible> => {
-      // Convert the FormData to an object because we can't compare two FormData
-      // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
-      // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-      return formDataToObject(new FormData(formElement.value))
-    }
+    const getFormData = (): FormData => new FormData(formElement.value)
+
+    // Convert the FormData to an object because we can't compare two FormData
+    // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+    // expects an object, and submitting a FormData instance directly causes problems with nested objects.
+    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
@@ -173,13 +171,16 @@ const Form: InertiaForm = defineComponent({
         return form.recentlySuccessful
       },
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
-      resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
+      resetAndClearErrors: (...fields: string[]) => {
+        form.clearErrors(...fields)
+        resetFormFields(formElement.value, defaults.value, fields)
+      },
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
         form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
       get isDirty() {
         return isDirty.value
       },
-      reset: () => formElement.value.reset(),
+      reset: (...fields: string[]) => resetFormFields(formElement.value, defaults.value, fields),
       submit,
     })
 
@@ -210,7 +211,7 @@ const Form: InertiaForm = defineComponent({
               clearErrors: (...fields: string[]) => form.clearErrors(...fields),
               resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
               isDirty: isDirty.value,
-              reset: () => formElement.value.reset(),
+              reset: (...fields) => resetFormFields(formElement.value, defaults.value, fields),
               submit,
             })
           : [],
