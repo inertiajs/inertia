@@ -285,6 +285,17 @@ app.get('/history/version/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/temporary-props', (req, res) => {
+  inertia.render(req, res, {
+    component: 'TemporaryProps',
+    props: {
+      regular: 1,
+      tmp: 1,
+    },
+    temporaryProps: ['tmp']
+  })
+})
+
 app.get('/when-visible', (req, res) => {
   const page = () =>
     inertia.render(req, res, {

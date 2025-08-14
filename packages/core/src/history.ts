@@ -66,6 +66,9 @@ class History {
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
     return new Promise((resolve) => {
+      if (page.temporaryProps) {
+        page.temporaryProps.forEach((key) => { delete page.props[key] })
+      }
       return page.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
     })
   }

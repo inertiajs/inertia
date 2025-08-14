@@ -117,6 +117,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   mergeProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
+  temporaryProps?: string[]
 
   /** @internal */
   rememberedState: Record<string, unknown>
