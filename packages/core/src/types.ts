@@ -445,10 +445,7 @@ export type FormComponentMethods = {
   defaults: () => void
 }
 
-export type FormComponentonSubmitCompleteArguments = Pick<
-  FormComponentMethods,
-  'clearErrors' | 'resetAndClearErrors' | 'reset' | 'defaults'
->
+export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
   errors: Record<string, string>

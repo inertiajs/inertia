@@ -79,8 +79,6 @@
         if (onSubmitComplete) {
             onSubmitComplete({
                 reset,
-                resetAndClearErrors,
-                clearErrors,
                 defaults,
             })
         }
