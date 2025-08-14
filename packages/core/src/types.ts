@@ -430,6 +430,7 @@ export type FormComponentProps = Partial<
   action?: string | { url: string; method: Method }
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions
+  onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
   disableWhileProcessing?: boolean
 }
 
@@ -441,6 +442,11 @@ export type FormComponentMethods = {
   reset: (...fields: string[]) => void
   submit: () => void
 }
+
+export type FormComponentonSubmitCompleteArguments = Pick<
+  FormComponentMethods,
+  'clearErrors' | 'resetAndClearErrors' | 'reset'
+>
 
 export type FormComponentState = {
   errors: Record<string, string>

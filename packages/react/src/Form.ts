@@ -52,6 +52,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onSuccess = noop,
       onError = noop,
       onCancelToken = noop,
+      onSubmitComplete = noop,
       disableWhileProcessing = false,
       children,
       ...props
@@ -88,6 +89,15 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
     }, [])
 
+    const reset = (...fields: string[]) => {
+      resetFormFields(formElement.current, defaults.current, fields)
+    }
+
+    const resetAndClearErrors = (...fields: string[]) => {
+      form.clearErrors(...fields)
+      reset(...fields)
+    }
+
     const submit = () => {
       const [url, _data] = mergeDataIntoQueryString(
         resolvedMethod,
@@ -104,7 +114,14 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         onBefore,
         onStart,
         onProgress,
-        onFinish,
+        onFinish: (...args) => {
+          onFinish(...args)
+          onSubmitComplete({
+            reset,
+            resetAndClearErrors,
+            clearErrors: form.clearErrors,
+          })
+        },
         onCancel,
         onSuccess,
         onError,
@@ -115,27 +132,22 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       form.submit(resolvedMethod, url, submitOptions)
     }
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        errors: form.errors,
-        hasErrors: form.hasErrors,
-        processing: form.processing,
-        progress: form.progress,
-        wasSuccessful: form.wasSuccessful,
-        recentlySuccessful: form.recentlySuccessful,
-        clearErrors: form.clearErrors,
-        resetAndClearErrors: (...fields: string[]) => {
-          form.clearErrors(...fields)
-          resetFormFields(formElement.current, defaults.current, fields)
-        },
-        setError: form.setError,
-        isDirty,
-        reset: (...fields) => resetFormFields(formElement.current, defaults.current, fields),
-        submit,
-      }),
-      [form, isDirty, submit],
-    )
+    const exposed = () => ({
+      errors: form.errors,
+      hasErrors: form.hasErrors,
+      processing: form.processing,
+      progress: form.progress,
+      wasSuccessful: form.wasSuccessful,
+      recentlySuccessful: form.recentlySuccessful,
+      isDirty,
+      clearErrors: form.clearErrors,
+      resetAndClearErrors,
+      setError: form.setError,
+      reset,
+      submit,
+    })
+
+    useImperativeHandle(ref, exposed, [form, isDirty, submit])
 
     return createElement(
       'form',
@@ -150,25 +162,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         },
         inert: disableWhileProcessing && form.processing,
       },
-      typeof children === 'function'
-        ? children({
-            errors: form.errors,
-            hasErrors: form.hasErrors,
-            processing: form.processing,
-            progress: form.progress,
-            wasSuccessful: form.wasSuccessful,
-            recentlySuccessful: form.recentlySuccessful,
-            setError: form.setError,
-            clearErrors: form.clearErrors,
-            resetAndClearErrors: (...fields: string[]) => {
-              form.clearErrors(...fields)
-              resetFormFields(formElement.current, defaults.current, fields)
-            },
-            isDirty,
-            reset: (...fields) => resetFormFields(formElement.current, defaults.current, fields),
-            submit,
-          })
-        : children,
+      typeof children === 'function' ? children(exposed()) : children,
     )
   },
 )

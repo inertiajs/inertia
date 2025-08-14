@@ -1,5 +1,6 @@
 import {
   FormComponentProps,
+  FormComponentRef,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
@@ -84,6 +85,10 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
+    onSubmitComplete: {
+      type: Function as PropType<FormComponentProps['onSubmitComplete']>,
+      default: noop,
+    },
     disableWhileProcessing: {
       type: Boolean,
       default: false,
@@ -140,7 +145,10 @@ const Form: InertiaForm = defineComponent({
         onBefore: props.onBefore,
         onStart: props.onStart,
         onProgress: props.onProgress,
-        onFinish: props.onFinish,
+        onFinish: (...args) => {
+          props.onFinish(...args)
+          props.onSubmitComplete(exposed)
+        },
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
         onError: props.onError,
@@ -151,7 +159,16 @@ const Form: InertiaForm = defineComponent({
       form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
 
-    expose({
+    const reset = (...fields: string[]) => {
+      resetFormFields(formElement.value, defaults.value, fields)
+    }
+
+    const resetAndClearErrors = (...fields: string[]) => {
+      form.clearErrors(...fields)
+      reset(...fields)
+    }
+
+    const exposed = {
       get errors() {
         return form.errors
       },
@@ -171,18 +188,17 @@ const Form: InertiaForm = defineComponent({
         return form.recentlySuccessful
       },
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
-      resetAndClearErrors: (...fields: string[]) => {
-        form.clearErrors(...fields)
-        resetFormFields(formElement.value, defaults.value, fields)
-      },
+      resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
         form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
       get isDirty() {
         return isDirty.value
       },
-      reset: (...fields: string[]) => resetFormFields(formElement.value, defaults.value, fields),
+      reset,
       submit,
-    })
+    }
+
+    expose<FormComponentRef>(exposed)
 
     return () => {
       return h(
@@ -198,23 +214,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default
-          ? slots.default(<FormComponentSlotProps>{
-              errors: form.errors,
-              hasErrors: form.hasErrors,
-              processing: form.processing,
-              progress: form.progress,
-              wasSuccessful: form.wasSuccessful,
-              recentlySuccessful: form.recentlySuccessful,
-              setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
-                form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
-              clearErrors: (...fields: string[]) => form.clearErrors(...fields),
-              resetAndClearErrors: (...fields: string[]) => form.resetAndClearErrors(...fields),
-              isDirty: isDirty.value,
-              reset: (...fields) => resetFormFields(formElement.value, defaults.value, fields),
-              submit,
-            })
-          : [],
+        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
       )
     }
   },

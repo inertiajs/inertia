@@ -30,6 +30,7 @@
   export let onCancel: FormComponentProps['onCancel'] = noop
   export let onSuccess: FormComponentProps['onSuccess'] = noop
   export let onError: FormComponentProps['onError'] = noop
+  export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
   export let disableWhileProcessing: boolean = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
@@ -68,7 +69,19 @@
       onBefore,
       onStart,
       onProgress,
-      onFinish,
+      onFinish: (visit) =>  {
+        if (onFinish) {
+            onFinish(visit)
+        }
+
+        if (onSubmitComplete) {
+            onSubmitComplete({
+                reset,
+                resetAndClearErrors,
+                clearErrors,
+            })
+        }
+      },
       onCancel,
       onSuccess,
       onError,
@@ -93,6 +106,7 @@
     resetFormFields(formElement, defaults, fields)
   }
 
+
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
@@ -101,7 +115,7 @@
   export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
-    reset(fields)
+    reset(...fields)
   }
 
   export function setError(field: string | object, value?: string) {
@@ -109,7 +123,6 @@
       // @ts-expect-error
       $form.setError(field, value)
     } else {
-      // @ts-expect-error
       $form.setError(field)
     }
   }
