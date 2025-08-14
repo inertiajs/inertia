@@ -263,21 +263,50 @@ export class Response {
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
   }
 
+  // Determine if there's a specific key to match items.
+  // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
+  // Or: matchPropsOn = ['!posts.meta.links'] and currentKey = 'posts.meta.links' will match.
+  protected matchOnKey(matchPropsOn: string[], currentKey: string): null | {
+    needReplace: boolean
+    key?: string
+  } {
+    const matchResult = matchPropsOn.find((key) => {
+      // If starts with exclamation mark, not need to get key, need path only
+      if (key.substring(0, 1) === '!') {
+        return key.substring(1) === currentKey
+      }
+
+      // Key without last part
+      return key.split('.').slice(0, -1).join('.') === currentKey
+    });
+
+    if (!matchResult) {
+      return null
+    }
+
+    const needReplace = matchResult.substring(0, 1) === '!'
+
+    return {
+      needReplace,
+      key: needReplace ? undefined : matchResult.split('.').pop(),
+    }
+  }
+
   protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
-    // Determine if there's a specific key to match items.
-    // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
-    const matchOn = matchPropsOn.find((key) => {
-      const path = key.split('.').slice(0, -1).join('.')
-      return path === currentKey
-    })
+    const matchOn = this.matchOnKey(matchPropsOn, currentKey);
 
     if (!matchOn) {
       // No key found to match on, just concatenate the arrays
       return [...(Array.isArray(target) ? target : []), ...source]
     }
 
+    if(matchOn.needReplace) {
+      // Key for array replace
+      return [...source]
+    }
+
     // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
-    const uniqueProperty = matchOn.split('.').pop() || ''
+    const uniqueProperty = matchOn.key || ''
     const targetArray = Array.isArray(target) ? target : []
     const map = new Map<any, any>()
 
