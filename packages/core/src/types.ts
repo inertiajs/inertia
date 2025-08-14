@@ -447,7 +447,7 @@ export type FormComponentMethods = {
 
 export type FormComponentonSubmitCompleteArguments = Pick<
   FormComponentMethods,
-  'clearErrors' | 'resetAndClearErrors' | 'reset'
+  'clearErrors' | 'resetAndClearErrors' | 'reset' | 'defaults'
 >
 
 export type FormComponentState = {

@@ -120,6 +120,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
             reset,
             resetAndClearErrors,
             clearErrors: form.clearErrors,
+            defaults,
           })
         },
         onCancel,
