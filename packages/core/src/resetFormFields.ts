@@ -159,7 +159,10 @@ function resetFieldElements(
 export function resetFormFields(formElement: HTMLFormElement, defaults: FormData, fieldNames?: string[]): void {
   // If no specific fields provided, reset the entire form
   if (!fieldNames || fieldNames.length === 0) {
-    fieldNames = [...defaults.keys()]
+    // Get all field names from both defaults and form elements (including disabled ones)
+    const formData = new FormData(formElement)
+    const formElementNames = Array.from(formElement.elements).map(el => isFormElement(el) ? el.name : '').filter(Boolean)
+    fieldNames = [...new Set([...defaults.keys(), ...formData.keys(), ...formElementNames])]
   }
 
   let hasChanged = false
