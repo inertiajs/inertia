@@ -5,7 +5,7 @@ export default () => {
     <div>
       <h1>After Submit Test</h1>
 
-      <Form method="post" afterSubmit={(props) => props.reset('name')}>
+      <Form method="post" onSubmitComplete={(props) => props.reset('name')}>
         {({ errors }) => (
           <>
             <div>

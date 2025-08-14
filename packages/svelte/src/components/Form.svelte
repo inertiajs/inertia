@@ -29,7 +29,7 @@
   export let onCancel: FormComponentProps['onCancel'] = noop
   export let onSuccess: FormComponentProps['onSuccess'] = noop
   export let onError: FormComponentProps['onError'] = noop
-  export let afterSubmit: FormComponentProps['afterSubmit'] = noop
+  export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -65,8 +65,8 @@
             onFinish(visit)
         }
 
-        if (afterSubmit) {
-            afterSubmit({
+        if (onSubmitComplete) {
+            onSubmitComplete({
                 reset,
                 resetAndClearErrors,
                 clearErrors,

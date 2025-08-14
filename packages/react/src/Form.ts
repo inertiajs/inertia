@@ -51,7 +51,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onSuccess = noop,
       onError = noop,
       onCancelToken = noop,
-      afterSubmit = noop,
+      onSubmitComplete = noop,
       children,
       ...props
     },
@@ -126,7 +126,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         onProgress,
         onFinish: (...args) => {
           onFinish(...args)
-          afterSubmit({
+          onSubmitComplete({
             reset,
             resetAndClearErrors,
             clearErrors: form.clearErrors,

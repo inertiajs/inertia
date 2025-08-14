@@ -6,7 +6,7 @@ import { Form } from '@inertiajs/vue3'
   <div>
     <h1>After Submit Test</h1>
 
-    <Form method="post" #default="{ errors }" :after-submit="(props) => props.reset('name')">
+    <Form method="post" #default="{ errors }" @submit-complete="(props) => props.reset('name')">
       <div>
         <input type="text" name="name" id="name" placeholder="Name" value="John Doe" />
         <p v-if="errors.name" id="error_name">{{ errors.name }}</p>

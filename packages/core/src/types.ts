@@ -430,10 +430,10 @@ export type FormComponentProps = Partial<
   action?: string | { url: string; method: Method }
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions
-  afterSubmit?: (props: FormComponentAfterSubmitArguments) => void
+  onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
 }
 
-export type FormComponentAfterSubmitArguments = {
+export type FormComponentonSubmitCompleteArguments = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
   reset: (...fields: string[]) => void
@@ -451,7 +451,7 @@ export type FormComponentChildProps = {
   setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) => void
   isDirty: boolean
   submit: () => void
-} & FormComponentAfterSubmitArguments
+} & FormComponentonSubmitCompleteArguments
 
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void

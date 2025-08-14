@@ -5,7 +5,7 @@
 <div>
   <h1>After Submit Test</h1>
 
-  <Form method="post" let:errors afterSubmit={(props) => props.reset('name')}>
+  <Form method="post" let:errors onSubmitComplete={(props) => props.reset('name')}>
     <div>
       <input type="text" name="name" id="name" placeholder="Name" value="John Doe" />
       {#if errors.name}

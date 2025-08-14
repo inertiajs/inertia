@@ -84,7 +84,7 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
-    afterSubmit: {
+    onSubmitComplete: {
       type: Function as PropType<(props: FormComponentChildProps) => void>,
       default: noop,
     },
@@ -93,9 +93,7 @@ const Form: InertiaForm = defineComponent({
     const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
-      typeof props.action === 'object'
-        ? props.action.method
-        : (props.method.toLowerCase() as Method),
+      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive
@@ -145,7 +143,7 @@ const Form: InertiaForm = defineComponent({
         onProgress: props.onProgress,
         onFinish: (...args) => {
           props.onFinish(...args)
-          props.afterSubmit(exposed)
+          props.onSubmitComplete(exposed)
         },
         onCancel: props.onCancel,
         onSuccess: props.onSuccess,
