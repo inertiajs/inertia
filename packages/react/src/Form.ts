@@ -120,8 +120,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           onSuccess(...args)
           onSubmitComplete({
             reset,
-            resetAndClearErrors,
-            clearErrors: form.clearErrors,
             defaults,
           })
         },
