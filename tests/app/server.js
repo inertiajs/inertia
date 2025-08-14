@@ -606,6 +606,11 @@ app.post('/form-component/url/with/segements', async (req, res) =>
   }),
 )
 
+app.get('/form-component/submit-complete/redirect', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
+)
+app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+
 app.all('*', (req, res) => inertia.render(req, res))
 
 const adapterPorts = {
