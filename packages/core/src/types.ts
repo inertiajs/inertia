@@ -434,26 +434,6 @@ export type FormComponentProps = Partial<
   disableWhileProcessing?: boolean
 }
 
-export type FormComponentonSubmitCompleteArguments = {
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
-  reset: (...fields: string[]) => void
-}
-
-export type FormComponentChildProps = {
-  errors: Record<string, string>
-  hasErrors: boolean
-  processing: boolean
-  progress: {
-    percentage: number
-  } | null
-  wasSuccessful: boolean
-  recentlySuccessful: boolean
-  setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) => void
-  isDirty: boolean
-  submit: () => void
-} & FormComponentonSubmitCompleteArguments
-
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
@@ -462,6 +442,11 @@ export type FormComponentMethods = {
   reset: (...fields: string[]) => void
   submit: () => void
 }
+
+export type FormComponentonSubmitCompleteArguments = Pick<
+  FormComponentMethods,
+  'clearErrors' | 'resetAndClearErrors' | 'reset'
+>
 
 export type FormComponentState = {
   errors: Record<string, string>

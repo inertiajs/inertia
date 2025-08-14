@@ -1,6 +1,6 @@
 import {
-  FormComponentChildProps,
   FormComponentProps,
+  FormComponentRef,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
@@ -86,7 +86,7 @@ const Form: InertiaForm = defineComponent({
       default: noop,
     },
     onSubmitComplete: {
-      type: Function as PropType<(props: FormComponentChildProps) => void>,
+      type: Function as PropType<FormComponentProps['onSubmitComplete']>,
       default: noop,
     },
     disableWhileProcessing: {
@@ -198,7 +198,7 @@ const Form: InertiaForm = defineComponent({
       submit,
     }
 
-    expose<FormComponentChildProps>(exposed)
+    expose<FormComponentRef>(exposed)
 
     return () => {
       return h(
