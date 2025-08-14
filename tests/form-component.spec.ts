@@ -521,6 +521,21 @@ test.describe('Form Component', () => {
       // Most importantly: form should no longer be dirty after calling defaults()
       await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
     })
+
+    test('redirect and reset', async ({ page }) => {
+      page.on('pageerror', (msg) => {
+        throw new Error(msg.message)
+      })
+
+      await page.goto('/form-component/submit-complete/redirect')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await page.fill('#name', 'John Who')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).not.toBeVisible()
+    })
   })
 
   test.describe('Methods', () => {
