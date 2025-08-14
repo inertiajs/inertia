@@ -3,7 +3,7 @@ import { Form } from '@inertiajs/react'
 export default () => {
   return (
     <div>
-      <h1>After Submit Test</h1>
+      <h1>OnSubmitComplete Reset Test</h1>
 
       <Form method="post" onSubmitComplete={(props) => props.reset('name')}>
         {({ errors }) => (

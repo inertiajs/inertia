@@ -25,6 +25,10 @@
     formRef?.setError('name', 'This is a test error')
   }
 
+  function setCurrentAsDefaults() {
+    formRef?.defaults()
+  }
+
 </script>
 
 <div>
@@ -68,6 +72,9 @@
     </button>
     <button on:click={setTestError}>
       Set Test Error
+    </button>
+    <button on:click={setCurrentAsDefaults}>
+      Set Current as Defaults
     </button>
   </div>
 </div>

@@ -572,9 +572,20 @@ app.get('/form-component/progress', (req, res) => inertia.render(req, res, { com
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
 )
-app.get('/form-component/after-submit', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/AfterSubmit' }),
+
+app.get('/form-component/submit-complete/reset', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
 )
+app.get('/form-component/submit-complete/defaults', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
+)
+app.post('/form-component/submit-complete/reset', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
+)
+app.post('/form-component/submit-complete/defaults', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
+)
+
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
 app.get('/form-component/dotted-keys', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),

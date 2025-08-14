@@ -16,6 +16,11 @@
   window.resetForm = (...fields: string[]) => {
     formRef?.reset(...fields)
   }
+
+  // Action to set defaultValue for disabled fields
+  function setDefaultValue(node: HTMLInputElement) {
+    node.defaultValue = node.value
+  }
 </script>
 
 <Form action="/dump/post" method="post" bind:this={formRef}>
@@ -144,7 +149,7 @@
 
   <!-- Special Cases -->
   <h2>Special Cases</h2>
-  <input type="text" name="disabled_field" id="disabled_field" value="Ignore me" disabled />
+  <input type="text" name="disabled_field" id="disabled_field" value="Ignore me" disabled use:setDefaultValue />
   <input type="button" name="button_input" value="Click me" />
   <input type="submit" name="submit_input" value="Submit Form" />
   <input type="reset" name="reset_input" value="Reset Form" />

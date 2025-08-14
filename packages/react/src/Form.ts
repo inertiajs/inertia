@@ -67,7 +67,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [action, method])
 
     const [isDirty, setIsDirty] = useState(false)
-    const defaults = useRef<FormData>(new FormData())
+    const defaultData = useRef<FormData>(new FormData())
 
     const getFormData = (): FormData => new FormData(formElement.current)
 
@@ -77,10 +77,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const updateDirtyState = (event: Event) =>
-      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults.current)))
+      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current)))
 
     useEffect(() => {
-      defaults.current = getFormData()
+      defaultData.current = getFormData()
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
@@ -90,7 +90,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [])
 
     const reset = (...fields: string[]) => {
-      resetFormFields(formElement.current, defaults.current, fields)
+      resetFormFields(formElement.current, defaultData.current, fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -114,22 +114,28 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         onBefore,
         onStart,
         onProgress,
-        onFinish: (...args) => {
-          onFinish(...args)
+        onFinish,
+        onCancel,
+        onSuccess: (...args) => {
+          onSuccess(...args)
           onSubmitComplete({
             reset,
             resetAndClearErrors,
             clearErrors: form.clearErrors,
+            defaults,
           })
         },
-        onCancel,
-        onSuccess,
         onError,
         ...options,
       }
 
       form.transform(() => transform(_data))
       form.submit(resolvedMethod, url, submitOptions)
+    }
+
+    const defaults = () => {
+      defaultData.current = getFormData()
+      setIsDirty(false)
     }
 
     const exposed = () => ({
@@ -145,6 +151,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setError: form.setError,
       reset,
       submit,
+      defaults,
     })
 
     useImperativeHandle(ref, exposed, [form, isDirty, submit])

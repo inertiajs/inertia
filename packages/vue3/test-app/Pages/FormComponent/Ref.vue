@@ -24,6 +24,10 @@ const clearAllErrors = () => {
 const setTestError = () => {
   formRef.value?.setError('name', 'This is a test error')
 }
+
+const setCurrentAsDefaults = () => {
+  formRef.value?.defaults()
+}
 </script>
 
 <template>
@@ -55,6 +59,7 @@ const setTestError = () => {
       <button @click="resetNameField">Reset Name Field</button>
       <button @click="clearAllErrors">Clear Errors</button>
       <button @click="setTestError">Set Test Error</button>
+      <button @click="setCurrentAsDefaults">Set Current as Defaults</button>
     </div>
   </div>
 </template>

@@ -104,19 +104,19 @@ const Form: InertiaForm = defineComponent({
     // Can't use computed because FormData is not reactive
     const isDirty = ref(false)
 
-    const defaults = ref(new FormData())
+    const defaultData = ref(new FormData())
 
     const onFormUpdate = (event: Event) => {
       // If the form is reset, we set isDirty to false as we already know it's back
       // to defaults. Also, the fields are updated after the reset event, so the
       // comparison will be incorrect unless we use nextTick/setTimeout.
-      isDirty.value = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults.value))
+      isDirty.value = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.value))
     }
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
     onMounted(() => {
-      defaults.value = getFormData()
+      defaultData.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
 
@@ -145,12 +145,12 @@ const Form: InertiaForm = defineComponent({
         onBefore: props.onBefore,
         onStart: props.onStart,
         onProgress: props.onProgress,
-        onFinish: (...args) => {
-          props.onFinish(...args)
+        onFinish: props.onFinish,
+        onCancel: props.onCancel,
+        onSuccess: (...args) => {
+          props.onSuccess(...args)
           props.onSubmitComplete(exposed)
         },
-        onCancel: props.onCancel,
-        onSuccess: props.onSuccess,
         onError: props.onError,
         ...props.options,
       }
@@ -160,12 +160,17 @@ const Form: InertiaForm = defineComponent({
     }
 
     const reset = (...fields: string[]) => {
-      resetFormFields(formElement.value, defaults.value, fields)
+      resetFormFields(formElement.value, defaultData.value, fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
       form.clearErrors(...fields)
       reset(...fields)
+    }
+
+    const defaults = () => {
+      defaultData.value = getFormData()
+      isDirty.value = false
     }
 
     const exposed = {
@@ -196,6 +201,7 @@ const Form: InertiaForm = defineComponent({
       },
       reset,
       submit,
+      defaults,
     }
 
     expose<FormComponentRef>(exposed)

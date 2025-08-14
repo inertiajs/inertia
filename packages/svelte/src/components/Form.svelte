@@ -38,7 +38,7 @@
   const form = useForm({})
   let formElement: HTMLFormElement
   let isDirty = false
-  let defaults: FormData = new FormData()
+  let defaultData: FormData = new FormData()
 
   $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
@@ -55,7 +55,7 @@
   }
 
   function updateDirtyState(event: Event) {
-    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults))
+    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
   export function submit() {
@@ -69,9 +69,11 @@
       onBefore,
       onStart,
       onProgress,
-      onFinish: (visit) =>  {
-        if (onFinish) {
-            onFinish(visit)
+      onFinish,
+      onCancel,
+      onSuccess: (...args) =>  {
+        if (onSuccess) {
+            onSuccess(...args)
         }
 
         if (onSubmitComplete) {
@@ -79,11 +81,10 @@
                 reset,
                 resetAndClearErrors,
                 clearErrors,
+                defaults,
             })
         }
       },
-      onCancel,
-      onSuccess,
       onError,
       ...options,
     }
@@ -97,13 +98,7 @@
   }
 
   export function reset(...fields: string[]) {
-    if (fields.length === 0) {
-      // Svelte doesn't set the default values correctly in the DOM
-      // See: https://github.com/sveltejs/svelte/issues/9230
-      fields = [...defaults.keys()]
-    }
-
-    resetFormFields(formElement, defaults, fields)
+    resetFormFields(formElement, defaultData, fields)
   }
 
 
@@ -127,8 +122,13 @@
     }
   }
 
+  export function defaults() {
+    defaultData = getFormData()
+    isDirty = false
+  }
+
   onMount(() => {
-    defaults = getFormData()
+    defaultData = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
@@ -159,5 +159,6 @@
     {setError}
     {isDirty}
     {submit}
+    {defaults}
   />
 </form>

@@ -25,6 +25,10 @@ export default function Ref() {
     formRef.current?.setError('name', 'This is a test error')
   }
 
+  const setCurrentAsDefaults = () => {
+    formRef.current?.defaults()
+  }
+
   return (
     <div>
       <h1>Form Ref Test</h1>
@@ -67,6 +71,9 @@ export default function Ref() {
         </button>
         <button onClick={setTestError}>
           Set Test Error
+        </button>
+        <button onClick={setCurrentAsDefaults}>
+          Set Current as Defaults
         </button>
       </div>
     </div>

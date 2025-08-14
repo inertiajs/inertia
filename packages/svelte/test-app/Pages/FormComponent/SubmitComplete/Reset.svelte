@@ -3,7 +3,7 @@
 </script>
 
 <div>
-  <h1>After Submit Test</h1>
+  <h1>OnSubmitComplete Reset Test</h1>
 
   <Form method="post" let:errors onSubmitComplete={(props) => props.reset('name')}>
     <div>

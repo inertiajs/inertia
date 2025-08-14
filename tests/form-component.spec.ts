@@ -474,23 +474,53 @@ test.describe('Form Component', () => {
     await expect(page).toHaveURL('/form-component/url/with/segements')
   })
 
-  test('reset a field after submit', async ({ page }) => {
-    await page.goto('/form-component/after-submit')
+  test.describe('OnSubmitComplete callbacks', () => {
+    test('reset', async ({ page }) => {
+      await page.goto('/form-component/submit-complete/reset')
 
-    await expect(page.locator('#name')).toHaveValue('John Doe')
-    await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@doe.biz')
 
-    await page.fill('#name', 'John Who')
-    await page.fill('#email', 'john@who.biz')
+      await page.fill('#name', 'John Who')
+      await page.fill('#email', 'john@who.biz')
 
-    requests.listen(page)
+      requests.listen(page)
 
-    await page.getByRole('button', { name: 'Submit' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
 
-    await expect(requests.requests).toHaveLength(1)
+      await expect(requests.requests).toHaveLength(1)
 
-    await expect(page.locator('#name')).toHaveValue('John Doe')
-    await expect(page.locator('#email')).toHaveValue('john@who.biz')
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@who.biz')
+    })
+
+    test('defaults', async ({ page }) => {
+      await page.goto('/form-component/submit-complete/defaults')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+
+      await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
+
+      await page.fill('#name', 'Jane Smith')
+      await page.fill('#email', 'jane@smith.com')
+
+      await expect(page.locator('#dirty-status')).toHaveText('Form is dirty')
+
+      requests.listen(page)
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(requests.requests).toHaveLength(1)
+
+      // After submit with defaults(), the current values should become the new defaults
+      // Values should remain changed (not reset)
+      await expect(page.locator('#name')).toHaveValue('Jane Smith')
+      await expect(page.locator('#email')).toHaveValue('jane@smith.com')
+
+      // Most importantly: form should no longer be dirty after calling defaults()
+      await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
+    })
   })
 
   test.describe('Methods', () => {
@@ -772,6 +802,30 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="name"]')).toBe('John Doe')
       expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
     })
+
+    test('can set current form data as defaults via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+
+      // Modify form fields
+      await page.fill('input[name="name"]', 'New Name')
+      await page.fill('input[name="email"]', 'new@example.com')
+
+      // Form should be dirty
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      // Set current values as defaults
+      await page.click('button:has-text("Set Current as Defaults")')
+
+      // Form should no longer be dirty
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      // Reset form should now use the new defaults
+      await page.fill('input[name="name"]', 'Modified Again')
+      await page.click('button:has-text("Reset Form")')
+
+      expect(await page.inputValue('input[name="name"]')).toBe('New Name')
+      expect(await page.inputValue('input[name="email"]')).toBe('new@example.com')
+    })
   })
 
   test.describe('Uppercase Methods', () => {
@@ -839,7 +893,6 @@ test.describe('Form Component', () => {
     }
 
     test('resets all fields to their default values', async ({ page }) => {
-      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
       // Change all field values
       await page.fill('#name', 'Jane Smith')
       await page.fill('#email', 'jane@test.com')
@@ -978,7 +1031,6 @@ test.describe('Form Component', () => {
     })
 
     test('disabled fields reset behavior', async ({ page }) => {
-      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
       // Get initial value of the disabled field
       const initialValue = await page.locator('#disabled_field').inputValue()
       expect(initialValue).toBe('Ignore me')
@@ -1044,7 +1096,6 @@ test.describe('Form Component', () => {
     })
 
     test('edge cases - non-existent fields and dynamic fields', async ({ page }) => {
-      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
       // Scenario 1: Handles non-existent field names gracefully
       await page.fill('#name', 'Changed Name')
       await page.fill('#email', 'changed@email.com')
