@@ -36,17 +36,24 @@
   const form = useForm({})
   let formElement: HTMLFormElement
   let isDirty = false
-  let defaultValues: Record<string, FormDataConvertible> = {}
+  let defaults: FormData = new FormData()
 
   $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
 
+  function getFormData(): FormData {
+    return new FormData(formElement)
+  }
+
+  // Convert the FormData to an object because we can't compare two FormData
+  // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+  // expects an object, and submitting a FormData instance directly causes problems with nested objects.
   function getData(): Record<string, FormDataConvertible> {
-    return formDataToObject(new FormData(formElement))
+    return formDataToObject(getFormData())
   }
 
   function updateDirtyState(event: Event) {
-    isDirty = event.type === 'reset' ? false : !isEqual(getData(), defaultValues)
+    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaults))
   }
 
   export function submit() {
@@ -76,7 +83,7 @@
   }
 
   export function reset(...fields: string[]) {
-    resetFormFields(formElement, fields)
+    resetFormFields(formElement, defaults, fields)
   }
 
   export function clearErrors(...fields: string[]) {
@@ -86,7 +93,8 @@
 
   export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
-    $form.resetAndClearErrors(...fields)
+    $form.clearErrors(...fields)
+    resetFormFields(formElement, defaults, fields)
   }
 
   export function setError(field: string | object, value?: string) {
@@ -100,7 +108,7 @@
   }
 
   onMount(() => {
-    defaultValues = getData()
+    defaults = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
