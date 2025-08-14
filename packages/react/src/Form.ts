@@ -51,6 +51,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onSuccess = noop,
       onError = noop,
       onCancelToken = noop,
+      disableWhileProcessing = false,
       children,
       ...props
     },
@@ -143,6 +144,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           event.preventDefault()
           submit()
         },
+        inert: disableWhileProcessing && form.processing,
       },
       typeof children === 'function'
         ? children({

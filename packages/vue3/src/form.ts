@@ -83,6 +83,10 @@ const Form: InertiaForm = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
+    disableWhileProcessing: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -191,6 +195,7 @@ const Form: InertiaForm = defineComponent({
             event.preventDefault()
             submit()
           },
+          inert: props.disableWhileProcessing && form.processing,
         },
         slots.default
           ? slots.default(<FormComponentSlotProps>{
