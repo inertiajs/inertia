@@ -97,12 +97,6 @@
   }
 
   export function reset(...fields: string[]) {
-    if (fields.length === 0) {
-      // Svelte doesn't set the default values correctly in the DOM
-      // See: https://github.com/sveltejs/svelte/issues/9230
-      fields = [...defaults.keys()]
-    }
-
     resetFormFields(formElement, defaults, fields)
   }
 
