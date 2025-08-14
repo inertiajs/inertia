@@ -781,9 +781,6 @@ test.describe('Form Component', () => {
   })
 
   test.describe('Reset', () => {
-    // See: https://github.com/sveltejs/svelte/issues/9230
-    test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
-
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
       await page.goto('/form-component/reset')
@@ -809,6 +806,7 @@ test.describe('Form Component', () => {
     }
 
     test('resets all fields to their default values', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
       // Change all field values
       await page.fill('#name', 'Jane Smith')
       await page.fill('#email', 'jane@test.com')
@@ -947,6 +945,7 @@ test.describe('Form Component', () => {
     })
 
     test('disabled fields reset behavior', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
       // Get initial value of the disabled field
       const initialValue = await page.locator('#disabled_field').inputValue()
       expect(initialValue).toBe('Ignore me')
@@ -1012,6 +1011,7 @@ test.describe('Form Component', () => {
     })
 
     test('edge cases - non-existent fields and dynamic fields', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
       // Scenario 1: Handles non-existent field names gracefully
       await page.fill('#name', 'Changed Name')
       await page.fill('#email', 'changed@email.com')
