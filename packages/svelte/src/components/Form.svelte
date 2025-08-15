@@ -1,9 +1,11 @@
 <script lang="ts">
   import {
     formDataToObject,
+    resetFormFields,
     mergeDataIntoQueryString,
-    type FormDataConvertible,
+    type Errors,
     type FormComponentProps,
+    type FormDataConvertible,
     type VisitOptions,
   } from '@inertiajs/core'
   import { isEqual } from 'es-toolkit'
@@ -28,23 +30,32 @@
   export let onCancel: FormComponentProps['onCancel'] = noop
   export let onSuccess: FormComponentProps['onSuccess'] = noop
   export let onError: FormComponentProps['onError'] = noop
+  export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
+  export let disableWhileProcessing: boolean = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
   const form = useForm({})
   let formElement: HTMLFormElement
   let isDirty = false
-  let defaultValues: Record<string, FormDataConvertible> = {}
+  let defaultData: FormData = new FormData()
 
   $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = typeof action === 'object' ? action.url : action
 
+  function getFormData(): FormData {
+    return new FormData(formElement)
+  }
+
+  // Convert the FormData to an object because we can't compare two FormData
+  // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+  // expects an object, and submitting a FormData instance directly causes problems with nested objects.
   function getData(): Record<string, FormDataConvertible> {
-    return formDataToObject(new FormData(formElement))
+    return formDataToObject(getFormData())
   }
 
   function updateDirtyState(event: Event) {
-    isDirty = event.type === 'reset' ? false : !isEqual(getData(), defaultValues)
+    isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
   export function submit() {
@@ -60,7 +71,18 @@
       onProgress,
       onFinish,
       onCancel,
-      onSuccess,
+      onSuccess: (...args) =>  {
+        if (onSuccess) {
+            onSuccess(...args)
+        }
+
+        if (onSubmitComplete) {
+            onSubmitComplete({
+                reset,
+                defaults,
+            })
+        }
+      },
       onError,
       ...options,
     }
@@ -73,9 +95,10 @@
     submit()
   }
 
-  export function reset() {
-    formElement.reset()
+  export function reset(...fields: string[]) {
+    resetFormFields(formElement, defaultData, fields)
   }
+
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
@@ -84,7 +107,8 @@
 
   export function resetAndClearErrors(...fields: string[]) {
     // @ts-expect-error
-    $form.resetAndClearErrors(...fields)
+    $form.clearErrors(...fields)
+    reset(...fields)
   }
 
   export function setError(field: string | object, value?: string) {
@@ -92,13 +116,17 @@
       // @ts-expect-error
       $form.setError(field, value)
     } else {
-      // @ts-expect-error
       $form.setError(field)
     }
   }
 
+  export function defaults() {
+    defaultData = getFormData()
+    isDirty = false
+  }
+
   onMount(() => {
-    defaultValues = getData()
+    defaultData = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
@@ -107,6 +135,7 @@
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+  $: slotErrors = $form.errors as Errors
 </script>
 
 <form
@@ -114,9 +143,10 @@
   action={_action}
   method={_method}
   on:submit={handleSubmit} {...$$restProps}
+  inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
   <slot
-    errors={$form.errors}
+    errors={slotErrors}
     hasErrors={$form.hasErrors}
     processing={$form.processing}
     progress={$form.progress}
@@ -126,7 +156,7 @@
     {resetAndClearErrors}
     {setError}
     {isDirty}
-    {reset}
     {submit}
+    {defaults}
   />
 </form>

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import NestedLayout from '@/Layouts/NestedLayout.vue'
 import SiteLayout from '@/Layouts/SiteLayout.vue'
 
@@ -7,7 +7,7 @@ export default {
 }
 </script>
 
-<script setup>
+<script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3'
 window._inertia_page_props = usePage().props
 </script>

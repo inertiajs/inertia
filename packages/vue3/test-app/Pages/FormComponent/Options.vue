@@ -1,17 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { Form } from '@inertiajs/vue3'
+import type { Method } from '@inertiajs/core'
 import { computed, ref } from 'vue'
 import Article from './../Article.vue'
 
-const only = ref([])
-const except = ref([])
-const reset = ref([])
+const only = ref<string[]>([])
+const except = ref<string[]>([])
+const reset = ref<string[]>([])
 const replace = ref(false)
 const state = ref('Default State')
 const preserveScroll = ref(false)
 const preserveState = ref(false)
 const preserveUrl = ref(false)
-const queryStringArrayFormat = ref(undefined)
+const queryStringArrayFormat = ref<'indices' | 'brackets' | undefined>(undefined)
 
 function setOnly() {
   only.value = ['users']
@@ -58,7 +59,7 @@ const action = computed(() => {
   return queryStringArrayFormat.value ? '/dump/get' : '/dump/post'
 })
 
-const method = computed(() => {
+const method = computed((): Method => {
   if (preserveScroll.value || preserveState.value || preserveUrl.value) {
     return 'get'
   }

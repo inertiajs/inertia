@@ -1,47 +1,26 @@
 import {
+  ActiveVisit,
   CacheForOption,
-  FormDataConvertible,
+  GlobalEventCallback,
+  LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
-  Progress,
   router,
   shouldIntercept,
-  UrlMethodPair,
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
-export interface InertiaLinkProps {
+const noop = () => {}
+
+export interface InertiaLinkProps extends LinkComponentBaseProps {
   as?: string | Component
-  data?: Record<string, FormDataConvertible>
-  href: string | UrlMethodPair
-  method?: Method
-  headers?: Record<string, string>
   onClick?: (event: MouseEvent) => void
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (visit: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (visit: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  async?: boolean
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
 
-// @ts-ignore
 const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
@@ -55,7 +34,7 @@ const Link: InertiaLink = defineComponent({
     },
     href: {
       type: [String, Object] as PropType<InertiaLinkProps['href']>,
-      required: true,
+      default: '',
     },
     method: {
       type: String as PropType<Method>,
@@ -102,36 +81,44 @@ const Link: InertiaLink = defineComponent({
       default: 0,
     },
     onStart: {
-      type: Function as PropType<(visit: PendingVisit) => void>,
-      default: (_visit: PendingVisit) => {},
+      type: Function as PropType<GlobalEventCallback<'start'>>,
+      default: noop,
     },
     onProgress: {
-      type: Function as PropType<(progress: Progress) => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'progress'>>,
+      default: noop,
     },
     onFinish: {
-      type: Function as PropType<(visit: PendingVisit) => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'finish'>>,
+      default: noop,
     },
     onBefore: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'before'>>,
+      default: noop,
     },
     onCancel: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'cancel'>>,
+      default: noop,
     },
     onSuccess: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'success'>>,
+      default: noop,
     },
     onError: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'error'>>,
+      default: noop,
     },
     onCancelToken: {
       type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
-      default: () => {},
+      default: noop,
+    },
+    onPrefetching: {
+      type: Function as PropType<GlobalEventCallback<'prefetching'>>,
+      default: noop,
+    },
+    onPrefetched: {
+      type: Function as PropType<GlobalEventCallback<'prefetched'>>,
+      default: noop,
     },
   },
   setup(props, { slots, attrs }) {
@@ -194,7 +181,7 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        typeof props.href === 'object' ? props.href.url : props.href || '',
+        typeof props.href === 'object' ? props.href.url : props.href,
         props.data,
         props.queryStringArrayFormat,
       ),
@@ -230,14 +217,14 @@ const Link: InertiaLink = defineComponent({
       ...baseParams.value,
       onCancelToken: props.onCancelToken,
       onBefore: props.onBefore,
-      onStart: (event) => {
+      onStart: (visit: PendingVisit) => {
         inFlightCount.value++
-        props.onStart(event)
+        props.onStart(visit)
       },
       onProgress: props.onProgress,
-      onFinish: (event) => {
+      onFinish: (visit: ActiveVisit) => {
         inFlightCount.value--
-        props.onFinish(event)
+        props.onFinish(visit)
       },
       onCancel: props.onCancel,
       onSuccess: props.onSuccess,
@@ -245,7 +232,17 @@ const Link: InertiaLink = defineComponent({
     }))
 
     const prefetch = () => {
-      router.prefetch(href.value, baseParams.value, { cacheFor: cacheForValue.value })
+      router.prefetch(
+        href.value,
+        {
+          ...baseParams.value,
+          onPrefetching: props.onPrefetching,
+          onPrefetched: props.onPrefetched,
+        },
+        {
+          cacheFor: cacheForValue.value,
+        },
+      )
     }
 
     const regularEvents = {

@@ -1,23 +1,32 @@
-<script>
+<script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
 
   // Svelte Form component ref exposes only methods via bind:this
-  let formRef
+  let formRef: FormComponentMethods | null = null
 
   function submitProgrammatically() {
-    formRef.submit()
+    formRef?.submit()
+  }
+
+  function resetNameField() {
+    formRef?.reset('name')
   }
 
   function resetForm() {
-    formRef.reset()
+    formRef?.reset()
   }
 
   function clearAllErrors() {
-    formRef.clearErrors()
+    formRef?.clearErrors()
   }
 
   function setTestError() {
-    formRef.setError('name', 'This is a test error')
+    formRef?.setError('name', 'This is a test error')
+  }
+
+  function setCurrentAsDefaults() {
+    formRef?.defaults()
   }
 
 </script>
@@ -55,11 +64,17 @@
     <button on:click={resetForm}>
       Reset Form
     </button>
+    <button on:click={resetNameField}>
+      Reset Name Field
+    </button>
     <button on:click={clearAllErrors}>
       Clear Errors
     </button>
     <button on:click={setTestError}>
       Set Test Error
+    </button>
+    <button on:click={setCurrentAsDefaults}>
+      Set Current as Defaults
     </button>
   </div>
 </div>

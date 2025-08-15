@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
 
-  let errorBag = null
+  let errorBag: string | null = null
 </script>
 
 <Form

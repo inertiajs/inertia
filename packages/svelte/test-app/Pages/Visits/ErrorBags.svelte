@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
 
   const defaultVisit = () => {
@@ -28,7 +28,7 @@
 
 <div>
   <span class="text">This is the page that demonstrates error bags using manual visits</span>
-  <a href="#" on:click={defaultVisit} class="default">Default visit</a>
-  <a href="#" on:click={basicVisit} class="visit">Basic visit</a>
-  <a href="#" on:click={postVisit} class="get">POST visit</a>
+  <a href={'#'} on:click={defaultVisit} class="default">Default visit</a>
+  <a href={'#'} on:click={basicVisit} class="visit">Basic visit</a>
+  <a href={'#'} on:click={postVisit} class="get">POST visit</a>
 </div>

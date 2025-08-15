@@ -1,8 +1,9 @@
-<script setup>
+<script setup lang="ts">
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const formRef = ref(null)
+const formRef = ref<FormComponentRef | null>(null)
 
 const submitProgrammatically = () => {
   formRef.value?.submit()
@@ -12,12 +13,20 @@ const resetForm = () => {
   formRef.value?.reset()
 }
 
+const resetNameField = () => {
+  formRef.value?.reset('name')
+}
+
 const clearAllErrors = () => {
   formRef.value?.clearErrors()
 }
 
 const setTestError = () => {
   formRef.value?.setError('name', 'This is a test error')
+}
+
+const setCurrentAsDefaults = () => {
+  formRef.value?.defaults()
 }
 </script>
 
@@ -47,8 +56,10 @@ const setTestError = () => {
     <div>
       <button @click="submitProgrammatically">Submit Programmatically</button>
       <button @click="resetForm">Reset Form</button>
+      <button @click="resetNameField">Reset Name Field</button>
       <button @click="clearAllErrors">Clear Errors</button>
       <button @click="setTestError">Set Test Error</button>
+      <button @click="setCurrentAsDefaults">Set Current as Defaults</button>
     </div>
   </div>
 </template>

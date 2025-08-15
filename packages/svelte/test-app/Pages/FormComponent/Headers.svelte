@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
 
-  let headers = {
+  let headers: Record<string, string> = {
     'X-Foo': 'Bar',
   }
 

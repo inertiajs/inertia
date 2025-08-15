@@ -29,22 +29,26 @@ export const transformUrlAndData = (
   return [hrefToUrl(_href), _data]
 }
 
-export function mergeDataIntoQueryString(
+type MergeDataIntoQueryStringDataReturnType<T extends RequestPayload> =
+  T extends Record<string, FormDataConvertible> ? Record<string, FormDataConvertible> : RequestPayload
+
+export function mergeDataIntoQueryString<T extends RequestPayload>(
   method: Method,
   href: URL | string,
-  data: Record<string, FormDataConvertible>,
+  data: T,
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
-): [string, Record<string, FormDataConvertible>] {
+): [string, MergeDataIntoQueryStringDataReturnType<T>] {
+  const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
   const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
-  const hasAbsolutePath = hasHost || href.toString().startsWith('/')
+  const hasAbsolutePath = hasHost || href.toString().startsWith('/') || href.toString() === ''
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
-  const hasSearch = href.toString().includes('?') || (method === 'get' && Object.keys(data).length)
+  const hasSearch = href.toString().includes('?') || hasDataForQueryString
   const hasHash = href.toString().includes('#')
 
   const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
-  if (method === 'get' && Object.keys(data).length) {
+  if (hasDataForQueryString) {
     const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
     url.search = qs.stringify(
       { ...qs.parse(url.search, parseOptions), ...data },
@@ -53,7 +57,6 @@ export function mergeDataIntoQueryString(
         arrayFormat: qsArrayFormat,
       },
     )
-    data = {}
   }
 
   return [
@@ -64,7 +67,7 @@ export function mergeDataIntoQueryString(
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
     ].join(''),
-    data,
+    (hasDataForQueryString ? {} : data) as MergeDataIntoQueryStringDataReturnType<T>,
   ]
 }
 
