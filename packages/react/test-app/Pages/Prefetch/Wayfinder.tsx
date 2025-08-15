@@ -5,16 +5,22 @@ export default function Wayfinder() {
   const [isPrefetched, setIsPrefetched] = useState(false)
   const [isPrefetching, setIsPrefetching] = useState(false)
 
-  const wayfinderUrl = { url: '/prefetch/swr/4', method: 'get' }
+  const wayfinderUrl = (): {
+    url: string
+    method: 'get'
+  } => ({
+    url: '/prefetch/swr/4',
+    method: 'get',
+  })
 
   const checkStatus = () => {
-    setIsPrefetched(!!router.getCached(wayfinderUrl))
-    setIsPrefetching(!!router.getPrefetching(wayfinderUrl))
+    setIsPrefetched(!!router.getCached(wayfinderUrl()))
+    setIsPrefetching(!!router.getPrefetching(wayfinderUrl()))
   }
 
   const testPrefetch = () => {
     router.prefetch(
-      wayfinderUrl,
+      wayfinderUrl(),
       {
         onPrefetching: () => {
           setIsPrefetching(true)
@@ -29,7 +35,7 @@ export default function Wayfinder() {
   }
 
   const testFlush = () => {
-    router.flush(wayfinderUrl)
+    router.flush(wayfinderUrl())
     checkStatus()
   }
 

@@ -1,20 +1,26 @@
-<script setup>
+<script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import { onMounted, ref } from 'vue'
 
 const isPrefetched = ref(false)
 const isPrefetching = ref(false)
 
-const wayfinderUrl = { url: '/prefetch/swr/4', method: 'get' }
+const wayfinderUrl = (): {
+  url: string
+  method: 'get'
+} => ({
+  url: '/prefetch/swr/4',
+  method: 'get',
+})
 
 const checkStatus = () => {
-  isPrefetched.value = !!router.getCached(wayfinderUrl)
-  isPrefetching.value = !!router.getPrefetching(wayfinderUrl)
+  isPrefetched.value = !!router.getCached(wayfinderUrl())
+  isPrefetching.value = !!router.getPrefetching(wayfinderUrl())
 }
 
 const testPrefetch = () => {
   router.prefetch(
-    wayfinderUrl,
+    wayfinderUrl(),
     {
       onPrefetching: () => {
         isPrefetching.value = true
@@ -29,7 +35,7 @@ const testPrefetch = () => {
 }
 
 const testFlush = () => {
-  router.flush(wayfinderUrl)
+  router.flush(wayfinderUrl())
   checkStatus()
 }
 

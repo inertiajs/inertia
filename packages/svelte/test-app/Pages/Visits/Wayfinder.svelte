@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
 
   const wayfinderObjectVisit = () => {

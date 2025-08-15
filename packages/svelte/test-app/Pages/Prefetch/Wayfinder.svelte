@@ -1,20 +1,26 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 
   let isPrefetched = false
   let isPrefetching = false
 
-  const wayfinderUrl = { url: '/prefetch/swr/4', method: 'get' }
+  const wayfinderUrl = (): {
+    url: string
+    method: 'get'
+  } => ({
+    url: '/prefetch/swr/4',
+    method: 'get',
+  })
 
   const checkStatus = () => {
-    isPrefetched = !!router.getCached(wayfinderUrl)
-    isPrefetching = !!router.getPrefetching(wayfinderUrl)
+    isPrefetched = !!router.getCached(wayfinderUrl())
+    isPrefetching = !!router.getPrefetching(wayfinderUrl())
   }
 
   const testPrefetch = () => {
     router.prefetch(
-      wayfinderUrl,
+      wayfinderUrl(),
       {
         onPrefetching: () => {
           isPrefetching = true
@@ -29,7 +35,7 @@
   }
 
   const testFlush = () => {
-    router.flush(wayfinderUrl)
+    router.flush(wayfinderUrl())
     checkStatus()
   }
 
