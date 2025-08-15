@@ -215,8 +215,8 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
-  public flushByCacheTags(tags: string[]): void {
-    prefetchedRequests.removeByTags(tags)
+  public flushByCacheTags(tags: string | string[]): void {
+    prefetchedRequests.removeByTags(Array.isArray(tags) ? tags : [tags])
   }
 
   public getPrefetching(

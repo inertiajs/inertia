@@ -94,7 +94,7 @@ const Form: InertiaForm = defineComponent({
       default: false,
     },
     invalidateCacheTags: {
-      type: Array as PropType<FormComponentProps['invalidateCacheTags']>,
+      type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
   },

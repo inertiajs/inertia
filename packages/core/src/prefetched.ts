@@ -74,7 +74,7 @@ class PrefetchedRequests {
         singleUse: expires === 0,
         timestamp: Date.now(),
         inFlight: false,
-        tags: cacheTags,
+        tags: Array.isArray(cacheTags) ? cacheTags : [cacheTags],
       })
 
       this.scheduleForRemoval(params, expires)

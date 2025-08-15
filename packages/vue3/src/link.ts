@@ -121,7 +121,7 @@ const Link: InertiaLink = defineComponent({
       default: noop,
     },
     cacheTags: {
-      type: Array as PropType<string[]>,
+      type: [String, Array] as PropType<string | string[]>,
       default: () => [],
     },
   },
