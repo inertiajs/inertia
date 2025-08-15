@@ -19,10 +19,10 @@
     router.prefetch(
       '/prefetch/tags/2',
       { method: 'get' },
-      { cacheFor: '1m', tags: ['user'] }
+      { tags: ['user'] }
     )
     router.prefetch(
-      '/prefetch/tags/3', 
+      '/prefetch/tags/3',
       { method: 'get' },
       { cacheFor: '1m', tags: ['product'] }
     )
@@ -72,7 +72,7 @@
       Programmatic Prefetch
     </button>
   </div>
-  
+
   <div id="form-section">
     <h3>Form Test</h3>
     <form on:submit|preventDefault>
@@ -87,7 +87,7 @@
       </button>
     </form>
   </div>
-  
+
   <div>
     <div>This is tags page {pageNumber}</div>
     <div>

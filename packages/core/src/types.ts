@@ -351,7 +351,7 @@ export type CacheForOption = number | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
-  tags?: string[]
+  tags: string[]
 }
 
 export interface LinkComponentBaseProps

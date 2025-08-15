@@ -17,7 +17,7 @@ export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: nu
     router.prefetch(
       '/prefetch/tags/2',
       { method: 'get' },
-      { cacheFor: '1m', tags: ['user'] }
+      { tags: ['user'] }
     )
     router.prefetch(
       '/prefetch/tags/3',

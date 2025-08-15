@@ -21,7 +21,7 @@ class PrefetchedRequests {
   public add(
     params: ActiveVisit,
     sendFunc: (params: InternalActiveVisit) => void,
-    { cacheFor, tags = [] }: PrefetchOptions,
+    { cacheFor, tags }: PrefetchOptions,
   ) {
     const inFlight = this.findInFlight(params)
 

@@ -229,7 +229,7 @@ export class Router {
   public prefetch(
     href: string | URL | UrlMethodPair,
     options: VisitOptions = {},
-    { cacheFor = 30_000, tags = [] }: PrefetchOptions,
+    prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
     const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
 
@@ -288,7 +288,11 @@ export class Router {
         (params) => {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
-        { cacheFor, tags },
+        {
+          cacheFor: 30_000,
+          tags: [],
+          ...prefetchOptions,
+        },
       )
     })
   }
