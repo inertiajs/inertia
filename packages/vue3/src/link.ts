@@ -120,6 +120,10 @@ const Link: InertiaLink = defineComponent({
       type: Function as PropType<GlobalEventCallback<'prefetched'>>,
       default: noop,
     },
+    cacheTags: {
+      type: [String, Array] as PropType<string | string[]>,
+      default: () => [],
+    },
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
@@ -241,6 +245,7 @@ const Link: InertiaLink = defineComponent({
         },
         {
           cacheFor: cacheForValue.value,
+          cacheTags: props.cacheTags,
         },
       )
     }

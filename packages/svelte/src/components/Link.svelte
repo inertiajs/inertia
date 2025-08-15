@@ -23,6 +23,7 @@
   export let async: boolean = false
   export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
   export let cacheFor: CacheForOption | CacheForOption[] = 0
+  export let cacheTags: string | string[] = []
 
   $: _method = typeof href === 'object' ? href.method : method
   $: _href = typeof href === 'object' ? href.url : href
@@ -52,6 +53,7 @@
     async,
     prefetch,
     cacheFor,
+    cacheTags,
   }}
   {...$$restProps}
   {...elProps}

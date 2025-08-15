@@ -30,7 +30,6 @@
           setTimeout(checkStatus)
         },
       },
-      { cacheFor: 5000 },
     )
   }
 

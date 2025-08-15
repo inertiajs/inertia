@@ -1,5 +1,7 @@
-node_modules
 .DS_Store
-/test-results
 .idea
+/packages/*/test-app/test-results/.last-run.json
+/packages/svelte/test-app/vite.config.js.timestamp-*.mjs
 /playwright-report
+/test-results
+node_modules

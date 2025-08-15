@@ -32,6 +32,7 @@
   export let onError: FormComponentProps['onError'] = noop
   export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
   export let disableWhileProcessing: boolean = false
+  export let invalidateCacheTags: FormComponentProps['invalidateCacheTags'] = []
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -65,6 +66,7 @@
       headers,
       errorBag,
       showProgress,
+      invalidateCacheTags,
       onCancelToken,
       onBefore,
       onStart,

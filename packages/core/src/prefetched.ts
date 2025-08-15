@@ -18,7 +18,11 @@ class PrefetchedRequests {
   protected removalTimers: PrefetchRemovalTimer[] = []
   protected currentUseId: string | null = null
 
-  public add(params: ActiveVisit, sendFunc: (params: InternalActiveVisit) => void, { cacheFor }: PrefetchOptions) {
+  public add(
+    params: ActiveVisit,
+    sendFunc: (params: InternalActiveVisit) => void,
+    { cacheFor, cacheTags }: PrefetchOptions,
+  ) {
     const inFlight = this.findInFlight(params)
 
     if (inFlight) {
@@ -70,6 +74,7 @@ class PrefetchedRequests {
         singleUse: expires === 0,
         timestamp: Date.now(),
         inFlight: false,
+        tags: Array.isArray(cacheTags) ? cacheTags : [cacheTags],
       })
 
       this.scheduleForRemoval(params, expires)
@@ -96,6 +101,12 @@ class PrefetchedRequests {
       clearTimeout(removalTimer.timer)
     })
     this.removalTimers = []
+  }
+
+  public removeByTags(tags: string[]): void {
+    this.cached = this.cached.filter((prefetched) => {
+      return !prefetched.tags.some((tag) => tags.includes(tag))
+    })
   }
 
   public remove(params: ActiveVisit): void {

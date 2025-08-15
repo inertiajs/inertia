@@ -93,6 +93,10 @@ const Form: InertiaForm = defineComponent({
       type: Boolean,
       default: false,
     },
+    invalidateCacheTags: {
+      type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
+      default: () => [],
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -141,6 +145,7 @@ const Form: InertiaForm = defineComponent({
         headers: props.headers,
         errorBag: props.errorBag,
         showProgress: props.showProgress,
+        invalidateCacheTags: props.invalidateCacheTags,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,
         onStart: props.onStart,

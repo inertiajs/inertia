@@ -215,6 +215,10 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
+  public flushByCacheTags(tags: string | string[]): void {
+    prefetchedRequests.removeByTags(Array.isArray(tags) ? tags : [tags])
+  }
+
   public getPrefetching(
     href: string | URL | UrlMethodPair,
     options: VisitOptions = {},
@@ -225,7 +229,7 @@ export class Router {
   public prefetch(
     href: string | URL | UrlMethodPair,
     options: VisitOptions = {},
-    { cacheFor = 30_000 }: PrefetchOptions,
+    prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
     const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
 
@@ -284,7 +288,11 @@ export class Router {
         (params) => {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
-        { cacheFor },
+        {
+          cacheFor: 30_000,
+          cacheTags: [],
+          ...prefetchOptions,
+        },
       )
     })
   }
@@ -309,7 +317,10 @@ export class Router {
     this.clientVisit(params)
   }
 
-  protected clientVisit<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>, { replace = false }: { replace?: boolean } = {}): void {
+  protected clientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
+    { replace = false }: { replace?: boolean } = {},
+  ): void {
     const current = currentPage.get()
 
     const props =
@@ -385,6 +396,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
+      invalidateCacheTags: [],
       ...options,
     }
 

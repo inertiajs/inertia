@@ -273,6 +273,17 @@ app.get('/prefetch/swr/:pageNumber', (req, res) => {
   }
 })
 
+app.get('/prefetch/tags/:pageNumber/:propType?', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Tags',
+    props: {
+      pageNumber: req.params.pageNumber,
+      lastLoaded: Date.now(),
+      propType: req.params.propType || 'array',
+    },
+  })
+})
+
 app.get('/history/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Page',
@@ -619,6 +630,12 @@ app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect(
 app.post('/form-component/wayfinder', (req, res) => {
   inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
 })
+app.get('/form-component/invalidate-tags/:propType', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/InvalidateTags',
+    props: { lastLoaded: Date.now(), propType: req.params.propType },
+  }),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 

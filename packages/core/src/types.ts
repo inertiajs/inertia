@@ -179,6 +179,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  invalidateCacheTags: string | string[]
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -350,6 +351,7 @@ export type CacheForOption = number | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
+  cacheTags: string | string[]
 }
 
 export interface LinkComponentBaseProps
@@ -372,6 +374,7 @@ export interface LinkComponentBaseProps
         onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
+        cacheTags: string | string[]
       }
   > {}
 
@@ -395,6 +398,7 @@ export type PrefetchedResponse = PrefetchObject & {
   timestamp: number
   singleUse: boolean
   inFlight: false
+  tags: string[]
 }
 
 export type PrefetchRemovalTimer = {
@@ -426,7 +430,7 @@ export type FormComponentOptions = Pick<
 >
 
 export type FormComponentProps = Partial<
-  Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
+  Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress' | 'invalidateCacheTags'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
 > & {
   method?: Method | Uppercase<Method>
