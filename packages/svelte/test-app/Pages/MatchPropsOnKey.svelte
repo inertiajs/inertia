@@ -1,7 +1,14 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo: { page: number; data: Array<{ name: string }>; companies: Array<{ name: string }>; teams: Array<{ name: string }>; per_page: number; meta: { label: string } }
+  export let foo: {
+    page: number
+    data: Array<{ name: string }>
+    companies: Array<{ name: string }>
+    teams: Array<{ name: string }>
+    per_page: number
+    meta: { label: string }
+  }
   export let bar: number[]
   export let baz: number[]
 
@@ -21,7 +28,7 @@
   }
 
   const getFresh = () => {
-    page = 0;
+    page = 0
     router.reload({
       reset: ['foo', 'baz'],
     })

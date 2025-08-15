@@ -57,24 +57,12 @@ export default function Ref() {
       </Form>
 
       <div>
-        <button onClick={submitProgrammatically}>
-          Submit Programmatically
-        </button>
-        <button onClick={resetForm}>
-          Reset Form
-        </button>
-        <button onClick={resetNameField}>
-          Reset Name Field
-        </button>
-        <button onClick={clearAllErrors}>
-          Clear Errors
-        </button>
-        <button onClick={setTestError}>
-          Set Test Error
-        </button>
-        <button onClick={setCurrentAsDefaults}>
-          Set Current as Defaults
-        </button>
+        <button onClick={submitProgrammatically}>Submit Programmatically</button>
+        <button onClick={resetForm}>Reset Form</button>
+        <button onClick={resetNameField}>Reset Name Field</button>
+        <button onClick={clearAllErrors}>Clear Errors</button>
+        <button onClick={setTestError}>Set Test Error</button>
+        <button onClick={setCurrentAsDefaults}>Set Current as Defaults</button>
       </div>
     </div>
   )

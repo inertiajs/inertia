@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react'
 import type { Method } from '@inertiajs/core'
+import { Link } from '@inertiajs/react'
 
 export default ({ method }: { method: Method }) => {
   return (

@@ -20,7 +20,7 @@
   }
 
   const getFresh = () => {
-    page = 0;
+    page = 0
     router.reload({
       reset: ['foo', 'baz'],
     })

@@ -467,7 +467,7 @@
   }
 
   const handleCancelToken = (event: CustomEvent) => {
-    (event.detail as {token: {cancel: () => void}}).token.cancel()
+    ;(event.detail as { token: { cancel: () => void } }).token.cancel()
   }
 
   const handleCancel = (event: Event | CustomEvent) => {
@@ -475,13 +475,13 @@
     internalAlert('linkOnCancel', customEvent.detail || undefined)
   }
 
-  const handleProgress = (event: Event | CustomEvent<{progress: unknown}>) => {
-    const customEvent = event as CustomEvent<{progress: unknown}>
+  const handleProgress = (event: Event | CustomEvent<{ progress: unknown }>) => {
+    const customEvent = event as CustomEvent<{ progress: unknown }>
     internalAlert('linkOnProgress', customEvent.detail.progress)
   }
 
-  const handleError = (event: Event | CustomEvent<{errors: unknown}>) => {
-    const customEvent = event as CustomEvent<{errors: unknown}>
+  const handleError = (event: Event | CustomEvent<{ errors: unknown }>) => {
+    const customEvent = event as CustomEvent<{ errors: unknown }>
     internalAlert('linkOnError', customEvent.detail.errors)
   }
 </script>
@@ -489,12 +489,14 @@
 <div>
   <!-- Listeners -->
   <a href={'#'} on:click|preventDefault={withoutEventListeners} class="without-listeners">Basic Visit</a>
-  <a href={'#'} on:click|preventDefault={removeInertiaListener} class="remove-inertia-listener">Remove Inertia Listener</a
+  <a href={'#'} on:click|preventDefault={removeInertiaListener} class="remove-inertia-listener"
+    >Remove Inertia Listener</a
   >
 
   <!-- Events: Before -->
   <a href={'#'} on:click|preventDefault={beforeVisit} class="before">Before Event</a>
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a>
+  <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a
+  >
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:before={(event) => internalAlert('linkOnBefore', event.detail.visit)}

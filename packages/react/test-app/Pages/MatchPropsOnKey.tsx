@@ -2,18 +2,18 @@ import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
 interface FooItem {
-  name: string;
+  name: string
 }
 
 interface FooProps {
-  page: number;
-  data: FooItem[];
-  companies: FooItem[];
-  teams: FooItem[];
-  per_page: number;
+  page: number
+  data: FooItem[]
+  companies: FooItem[]
+  teams: FooItem[]
+  per_page: number
   meta: {
-    label: string;
-  };
+    label: string
+  }
 }
 
 export default ({ bar, foo, baz }: { bar: number[]; foo: FooProps; baz: number[] }) => {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3'
 import type { FormDataConvertible } from '@inertiajs/core'
+import { Form } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
 const transformType = ref('none')

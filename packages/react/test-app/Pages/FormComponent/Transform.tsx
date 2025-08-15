@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Form } from '@inertiajs/react'
 import type { FormDataConvertible } from '@inertiajs/core'
+import { Form } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default () => {
   const [transformType, setTransformType] = useState('none')
@@ -10,12 +10,12 @@ export default () => {
       case 'uppercase':
         return (data: Record<string, FormDataConvertible>) => ({
           ...data,
-          name: typeof data.name === 'string' ? data.name.toUpperCase() : data.name
+          name: typeof data.name === 'string' ? data.name.toUpperCase() : data.name,
         })
       case 'format':
         return (data: Record<string, FormDataConvertible>) => ({
           ...data,
-          fullName: `${data.firstName} ${data.lastName}`
+          fullName: `${data.firstName} ${data.lastName}`,
         })
       default:
         return (data: Record<string, FormDataConvertible>) => data
@@ -48,9 +48,7 @@ export default () => {
         </div>
 
         <div>
-          <button type="submit">
-            Submit with Transform
-          </button>
+          <button type="submit">Submit with Transform</button>
         </div>
       </Form>
     </div>

@@ -88,16 +88,16 @@
       onProgress,
       onFinish,
       onCancel,
-      onSuccess: (...args) =>  {
+      onSuccess: (...args) => {
         if (onSuccess) {
-            onSuccess(...args)
+          onSuccess(...args)
         }
 
         if (onSubmitComplete) {
-            onSubmitComplete({
-                reset,
-                defaults,
-            })
+          onSubmitComplete({
+            reset,
+            defaults,
+          })
         }
 
         maybeReset(resetOnSuccess)
@@ -127,7 +127,6 @@
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
   }
-
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
@@ -171,7 +170,8 @@
   bind:this={formElement}
   action={_action}
   method={_method}
-  on:submit={handleSubmit} {...$$restProps}
+  on:submit={handleSubmit}
+  {...$$restProps}
   inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
   <slot

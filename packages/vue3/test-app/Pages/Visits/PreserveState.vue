@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
 import { getCurrentInstance, onMounted } from 'vue'
-import type { Page } from '@inertiajs/core'
 
 defineProps({
   foo: {

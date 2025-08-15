@@ -5,7 +5,7 @@
     LinkPrefetchOption,
     Method,
     PreserveStateOption,
-    UrlMethodPair
+    UrlMethodPair,
   } from '@inertiajs/core'
   import { inertia } from '../index'
 

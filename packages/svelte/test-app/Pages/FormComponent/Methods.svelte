@@ -9,11 +9,11 @@
   <h1>HTTP Methods</h1>
 
   <div>
-    <button on:click={() => method = 'get'}>GET</button>
-    <button on:click={() => method = 'post'}>POST</button>
-    <button on:click={() => method = 'put'}>PUT</button>
-    <button on:click={() => method = 'patch'}>PATCH</button>
-    <button on:click={() => method = 'delete'}>DELETE</button>
+    <button on:click={() => (method = 'get')}>GET</button>
+    <button on:click={() => (method = 'post')}>POST</button>
+    <button on:click={() => (method = 'put')}>PUT</button>
+    <button on:click={() => (method = 'patch')}>PATCH</button>
+    <button on:click={() => (method = 'delete')}>DELETE</button>
   </div>
 
   <div>Current method: {method}</div>

@@ -14,18 +14,8 @@ export default ({ lastLoaded, propType }: { lastLoaded: number; propType: string
 
       <div id="form-section">
         <h3>Form Component with invalidateCacheTags</h3>
-        <Form
-          action="/dump/post"
-          method="post"
-          invalidateCacheTags={propType === 'string' ? 'user' : ['user']}
-        >
-          <input
-            id="form-name"
-            name="name"
-            type="text"
-            placeholder="Enter name"
-            defaultValue=""
-          />
+        <Form action="/dump/post" method="post" invalidateCacheTags={propType === 'string' ? 'user' : ['user']}>
+          <input id="form-name" name="name" type="text" placeholder="Enter name" defaultValue="" />
           <button id="submit-invalidate-user" type="submit">
             Submit (Invalidate User Tags)
           </button>

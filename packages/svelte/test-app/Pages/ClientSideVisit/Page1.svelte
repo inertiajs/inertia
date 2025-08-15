@@ -7,12 +7,12 @@
     bar: string
   }
 
-  export let foo: string;
-  export let bar: string;
+  export let foo: string
+  export let bar: string
 
-  let errors = 0;
-  let finished = 0;
-  let success = 0;
+  let errors = 0
+  let finished = 0
+  let success = 0
 
   const bagErrors = () => {
     router.replace({
@@ -45,16 +45,16 @@
       props: (props) => ({ ...props, foo: 'foo from client' }),
       onFinish: () => finished++,
       onSuccess: () => success++,
-    });
-  };
+    })
+  }
 
   const push = () => {
     router.push({
       url: '/client-side-visit-2',
       component: 'ClientSideVisit/Page2',
       props: { baz: 'baz from client' },
-    });
-  };
+    })
+  }
 </script>
 
 <div>
@@ -62,8 +62,8 @@
   <div>{bar}</div>
   <button on:click={replace}>Replace</button>
   <button on:click={push}>Push</button>
-  <button on:click="{defaultErrors}">Errors (default)</button>
-  <button on:click="{bagErrors}">Errors (bag)</button>
+  <button on:click={defaultErrors}>Errors (default)</button>
+  <button on:click={bagErrors}>Errors (bag)</button>
   <div>Errors: {errors}</div>
   <div>Finished: {finished}</div>
   <div>Success: {success}</div>

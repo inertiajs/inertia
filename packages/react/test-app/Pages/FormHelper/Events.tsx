@@ -1,7 +1,7 @@
+import type { Errors, Page, PendingVisit } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/react'
-import { useEffect } from 'react'
-import type { PendingVisit, Page, Errors } from '@inertiajs/core'
 import type { CancelTokenSource } from 'axios'
+import { useEffect } from 'react'
 
 declare global {
   interface Window {
@@ -269,7 +269,6 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
         onSuccess resets value
       </button>
 
-
       <button onClick={onErrorVisit} className="error">
         onError
       </button>
@@ -293,8 +292,18 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
       <span className="success-status">Form was {form.wasSuccessful ? '' : 'not '}successful</span>
       <span className="recently-status">Form was {form.recentlySuccessful ? '' : 'not '}recently successful</span>
 
-      <input type="text" className="name-input" value={form.data.name} onChange={e => form.setData('name', e.target.value)} />
-      <input type="checkbox" className="remember-input" checked={form.data.remember} onChange={e => form.setData('remember', e.target.checked)} />
+      <input
+        type="text"
+        className="name-input"
+        value={form.data.name}
+        onChange={(e) => form.setData('name', e.target.value)}
+      />
+      <input
+        type="checkbox"
+        className="remember-input"
+        checked={form.data.remember}
+        onChange={(e) => form.setData('remember', e.target.checked)}
+      />
     </div>
   )
 }
