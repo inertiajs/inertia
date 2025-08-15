@@ -613,6 +613,47 @@ app.get('/form-component/uppercase-method', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
 )
 
+app.get('/form-component/reset-on-error', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnError' }),
+)
+app.post('/form-component/reset-on-error', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/ResetAttributes/ResetOnError',
+    props: { errors: { name: 'Some name error' } },
+  }),
+)
+
+app.get('/form-component/reset-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccess' }),
+)
+app.post('/form-component/reset-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccess' }),
+)
+
+app.get('/form-component/reset-on-error-fields', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnErrorFields' }),
+)
+app.post('/form-component/reset-on-error-fields', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/ResetAttributes/ResetOnErrorFields',
+    props: { errors: { name: 'Some name error' } },
+  }),
+)
+
+app.get('/form-component/reset-on-success-fields', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccessFields' }),
+)
+app.post('/form-component/reset-on-success-fields', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccessFields' }),
+)
+
+app.get('/form-component/set-defaults-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SetDefaultsOnSuccess' }),
+)
+app.post('/form-component/set-defaults-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SetDefaultsOnSuccess' }),
+)
+
 app.get('/form-component/url/with/segements', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/EmptyAction' }),
 )

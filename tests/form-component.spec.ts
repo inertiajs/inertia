@@ -204,6 +204,77 @@ test.describe('Form Component', () => {
     })
   })
 
+  test.describe('Reset Attributes', () => {
+    test('resetOnError resets fields after error', async ({ page }) => {
+      await page.goto('/form-component/reset-on-error')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('Some name error')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+    })
+
+    test('resetOnError with specific fields only resets those fields', async ({ page }) => {
+      await page.goto('/form-component/reset-on-error-fields')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('Some name error')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('changed@email.com')
+    })
+
+    test('resetOnSuccess resets fields after success', async ({ page }) => {
+      await page.goto('/form-component/reset-on-success')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+    })
+
+    test('resetOnSuccess with specific fields only resets those fields', async ({ page }) => {
+      await page.goto('/form-component/reset-on-success-fields')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('changed@email.com')
+    })
+  })
+
+  test.describe('Set Defaults Attributes', () => {
+    test('setDefaultsOnSuccess updates defaults and clears dirty state', async ({ page }) => {
+      await page.goto('/form-component/set-defaults-on-success')
+
+      await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
+      await page.fill('#name', 'Jane Smith')
+      await page.fill('#email', 'jane@smith.com')
+      await expect(page.locator('#dirty-status')).toHaveText('Form is dirty')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('Jane Smith')
+      await expect(page.locator('#email')).toHaveValue('jane@smith.com')
+      await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
+    })
+  })
+
   test.describe('Events and State', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
