@@ -1296,7 +1296,7 @@ test.describe('Form Component', () => {
   const cacheTagsPropTypes = ['string', 'array']
 
   cacheTagsPropTypes.forEach((propType) => {
-    test(`can use Form component with invalidateCacheTags prop ${propType}`, async ({ page }) => {
+    test(`invalidate prefetch cache using tags (using ${propType})`, async ({ page }) => {
       await page.goto('/form-component/invalidate-tags/' + propType)
 
       // Prefetch both pages
