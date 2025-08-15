@@ -16,7 +16,7 @@
         loaded = keys.every((key) => typeof props[key] !== 'undefined')
       })
     })
-  
+
     onDestroy(() => {
       unsubscribe()
     })

@@ -107,12 +107,10 @@ class History {
           return
         }
 
-        this.doReplaceState(
-          {
-            page: window.history.state.page,
-            scrollRegions,
-          }
-        )
+        this.doReplaceState({
+          page: window.history.state.page,
+          scrollRegions,
+        })
       })
     })
   }
@@ -124,12 +122,10 @@ class History {
           return
         }
 
-        this.doReplaceState(
-          {
-            page: window.history.state.page,
-            documentScrollPosition: scrollRegion,
-          }
-        )
+        this.doReplaceState({
+          page: window.history.state.page,
+          documentScrollPosition: scrollRegion,
+        })
       })
     })
   }

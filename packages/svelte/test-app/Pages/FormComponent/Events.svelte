@@ -114,9 +114,9 @@
   </div>
 
   <div>
-    <button type="button" on:click={() => cancelInOnBefore = true}>Cancel in onBefore</button>
-    <button type="button" on:click={() => shouldFail = true}>Fail Request</button>
-    <button type="button" on:click={() => shouldDelay = true}>Should Delay</button>
+    <button type="button" on:click={() => (cancelInOnBefore = true)}>Cancel in onBefore</button>
+    <button type="button" on:click={() => (shouldFail = true)}>Fail Request</button>
+    <button type="button" on:click={() => (shouldDelay = true)}>Should Delay</button>
     <button type="button" on:click={cancelVisit}>Cancel Visit</button>
     <button type="submit">Submit</button>
   </div>

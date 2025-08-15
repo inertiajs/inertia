@@ -1,7 +1,7 @@
 import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion.jsx'
+import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/react'
 import { useId } from 'react'
-import type { Page } from '@inertiajs/core'
 
 const PreserveState = ({ foo = 'default' }: { foo?: string }) => {
   const preserveCallback = (page: Page) => {

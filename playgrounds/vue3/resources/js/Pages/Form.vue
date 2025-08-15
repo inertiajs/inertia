@@ -26,7 +26,7 @@ const form = useForm('NewUser', {
         type="text"
         v-model="form.name"
         id="name"
-        class="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
+        class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
       />
       <div v-if="form.errors.name" class="mt-2 text-sm text-red-600">{{ form.errors.name }}</div>
     </div>
@@ -36,13 +36,17 @@ const form = useForm('NewUser', {
         type="text"
         v-model="form.company"
         id="company"
-        class="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
+        class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
       />
       <div v-if="form.errors.company" class="mt-2 text-sm text-red-600">{{ form.errors.company }}</div>
     </div>
     <div>
       <label class="block" for="role">Role:</label>
-      <select v-model="form.role" id="role" class="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs">
+      <select
+        v-model="form.role"
+        id="role"
+        class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+      >
         <option></option>
         <option>User</option>
         <option>Admin</option>

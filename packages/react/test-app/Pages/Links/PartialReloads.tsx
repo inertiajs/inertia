@@ -1,5 +1,15 @@
 import { Link } from '@inertiajs/react'
-export default ({ foo = 0, bar, baz, headers }: { foo?: number; bar: number; baz: number; headers: Record<string, string> }) => {
+export default ({
+  foo = 0,
+  bar,
+  baz,
+  headers,
+}: {
+  foo?: number
+  bar: number
+  baz: number
+  headers: Record<string, string>
+}) => {
   window._inertia_props = { foo, bar, baz, headers }
 
   return (

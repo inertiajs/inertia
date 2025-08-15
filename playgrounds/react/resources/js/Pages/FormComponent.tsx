@@ -1,6 +1,6 @@
+import { Form, Head } from '@inertiajs/react'
 import { useState } from 'react'
 import Layout from '../Components/Layout'
-import { Form, Head } from '@inertiajs/react'
 
 const FormComponent = () => {
   const [customHeaders, setCustomHeaders] = useState({ 'X-Custom-Header': 'Demo-Value' })
@@ -42,19 +42,34 @@ const FormComponent = () => {
               <h3 className="mb-3 text-lg font-medium">Form Status (slot props)</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  isDirty: <span className={`font-mono ${isDirty ? 'text-orange-600' : 'text-gray-500'}`}>{String(isDirty)}</span>
+                  isDirty:{' '}
+                  <span className={`font-mono ${isDirty ? 'text-orange-600' : 'text-gray-500'}`}>
+                    {String(isDirty)}
+                  </span>
                 </div>
                 <div>
-                  hasErrors: <span className={`font-mono ${hasErrors ? 'text-red-600' : 'text-gray-500'}`}>{String(hasErrors)}</span>
+                  hasErrors:{' '}
+                  <span className={`font-mono ${hasErrors ? 'text-red-600' : 'text-gray-500'}`}>
+                    {String(hasErrors)}
+                  </span>
                 </div>
                 <div>
-                  processing: <span className={`font-mono ${processing ? 'text-blue-600' : 'text-gray-500'}`}>{String(processing)}</span>
+                  processing:{' '}
+                  <span className={`font-mono ${processing ? 'text-blue-600' : 'text-gray-500'}`}>
+                    {String(processing)}
+                  </span>
                 </div>
                 <div>
-                  wasSuccessful: <span className={`font-mono ${wasSuccessful ? 'text-green-600' : 'text-gray-500'}`}>{String(wasSuccessful)}</span>
+                  wasSuccessful:{' '}
+                  <span className={`font-mono ${wasSuccessful ? 'text-green-600' : 'text-gray-500'}`}>
+                    {String(wasSuccessful)}
+                  </span>
                 </div>
                 <div>
-                  recentlySuccessful: <span className={`font-mono ${recentlySuccessful ? 'text-green-600' : 'text-gray-500'}`}>{String(recentlySuccessful)}</span>
+                  recentlySuccessful:{' '}
+                  <span className={`font-mono ${recentlySuccessful ? 'text-green-600' : 'text-gray-500'}`}>
+                    {String(recentlySuccessful)}
+                  </span>
                 </div>
                 {progress && (
                   <div>
@@ -72,7 +87,9 @@ const FormComponent = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block font-medium" htmlFor="name">Name</label>
+                <label className="block font-medium" htmlFor="name">
+                  Name
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -84,7 +101,9 @@ const FormComponent = () => {
               </div>
 
               <div>
-                <label className="block font-medium" htmlFor="avatar">Avatar</label>
+                <label className="block font-medium" htmlFor="avatar">
+                  Avatar
+                </label>
                 <input
                   type="file"
                   name="avatar"
@@ -95,7 +114,9 @@ const FormComponent = () => {
               </div>
 
               <div>
-                <label className="block font-medium" htmlFor="skills">Skills (Multiple)</label>
+                <label className="block font-medium" htmlFor="skills">
+                  Skills (Multiple)
+                </label>
                 <select
                   name="skills[]"
                   id="skills"
@@ -114,9 +135,19 @@ const FormComponent = () => {
               <div>
                 <label className="block font-medium">Tags</label>
                 <div className="mt-1 space-y-2">
-                  <input type="text" name="tags[]" placeholder="Tag 1" className="w-full appearance-none rounded border px-2 py-1 shadow-sm" />
+                  <input
+                    type="text"
+                    name="tags[]"
+                    placeholder="Tag 1"
+                    className="w-full appearance-none rounded border px-2 py-1 shadow-sm"
+                  />
                   {errors['tags.0'] && <div className="text-sm text-red-600">{errors['tags.0']}</div>}
-                  <input type="text" name="tags[]" placeholder="Tag 2" className="w-full appearance-none rounded border px-2 py-1 shadow-sm" />
+                  <input
+                    type="text"
+                    name="tags[]"
+                    placeholder="Tag 2"
+                    className="w-full appearance-none rounded border px-2 py-1 shadow-sm"
+                  />
                   {errors['tags.1'] && <div className="text-sm text-red-600">{errors['tags.1']}</div>}
                 </div>
               </div>
@@ -149,11 +180,7 @@ const FormComponent = () => {
                 Submit
               </button>
 
-              <button
-                type="button"
-                onClick={reset}
-                className="rounded bg-gray-500 px-4 py-2 text-white"
-              >
+              <button type="button" onClick={reset} className="rounded bg-gray-500 px-4 py-2 text-white">
                 Reset
               </button>
 
@@ -165,11 +192,7 @@ const FormComponent = () => {
                 Set Errors
               </button>
 
-              <button
-                type="button"
-                onClick={() => clearErrors()}
-                className="rounded bg-green-500 px-4 py-2 text-white"
-              >
+              <button type="button" onClick={() => clearErrors()} className="rounded bg-green-500 px-4 py-2 text-white">
                 Clear Errors
               </button>
             </div>
@@ -181,16 +204,22 @@ const FormComponent = () => {
         <h2 className="text-2xl">Form Configuration</h2>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded border border-gray-200 bg-gray-50 p-4 space-y-1 text-sm">
+          <div className="space-y-1 rounded border border-gray-200 bg-gray-50 p-4 text-sm">
             <div>
               <strong>Headers:</strong> <code className="text-xs">{JSON.stringify(customHeaders)}</code>
             </div>
             <div>
               <strong>Error Bag:</strong> <code>{errorBag}</code>
             </div>
-            <div><strong>Only:</strong> <code>['foo']</code></div>
-            <div><strong>Reset:</strong> <code>['bar']</code></div>
-            <div><strong>Method:</strong> <code>POST</code></div>
+            <div>
+              <strong>Only:</strong> <code>['foo']</code>
+            </div>
+            <div>
+              <strong>Reset:</strong> <code>['bar']</code>
+            </div>
+            <div>
+              <strong>Method:</strong> <code>POST</code>
+            </div>
           </div>
 
           <div className="space-y-3">

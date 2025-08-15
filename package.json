@@ -19,7 +19,8 @@
     "playground:react": "cd playgrounds/react && composer run dev",
     "playground:svelte4": "cd playgrounds/svelte4 && composer run dev",
     "playground:svelte5": "cd playgrounds/svelte5 && composer run dev",
-    "playground:vue": "cd playgrounds/vue3 && composer run dev"
+    "playground:vue": "cd playgrounds/vue3 && composer run dev",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@playwright/test": ">=1.51.0 <1.53.0",

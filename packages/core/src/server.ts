@@ -1,8 +1,8 @@
 import { createServer, IncomingMessage } from 'http'
+import cluster from 'node:cluster'
+import { availableParallelism } from 'node:os'
 import * as process from 'process'
 import { InertiaAppResponse, Page } from './types'
-import cluster from 'node:cluster';
-import { availableParallelism } from 'node:os';
 
 type AppCallback = (page: Page) => InertiaAppResponse
 type RouteHandler = (request: IncomingMessage) => Promise<unknown>
@@ -21,11 +21,15 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
   })
 
 export default (render: AppCallback, options?: Port | ServerOptions): void => {
-  const _port = typeof options === 'number' ? options : options?.port ?? 13714;
-  const _useCluster = typeof options === 'object' && options?.cluster !== undefined ? options.cluster : false;
+  const _port = typeof options === 'number' ? options : (options?.port ?? 13714)
+  const _useCluster = typeof options === 'object' && options?.cluster !== undefined ? options.cluster : false
 
   const log = (message: string) => {
-    console.log(_useCluster && !cluster.isPrimary ? `[${cluster.worker?.id ?? 'N/A'} / ${cluster.worker?.process?.pid ?? 'N/A'}] ${message}` : message)
+    console.log(
+      _useCluster && !cluster.isPrimary
+        ? `[${cluster.worker?.id ?? 'N/A'} / ${cluster.worker?.process?.pid ?? 'N/A'}] ${message}`
+        : message,
+    )
   }
 
   if (_useCluster && cluster.isPrimary) {

@@ -1,9 +1,31 @@
-.github/
-pnpm-lock.yaml
+# Dependencies
+node_modules/
+**/vendor/
+
+# Build outputs
+**/dist/
 **/.svelte-kit
 **/bootstrap/ssr
-**/composer.json
-**/composer.lock
-**/dist
-**/public/build
-**/vendor
+
+# Generated files
+*.d.ts
+**/types/
+*.timestamp-*.mjs
+
+# Files we don't want to format
+*.lock
+*.yaml
+*.json
+*.md
+
+# Vue files with parsing issues (dual script blocks)
+packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Nested/PageA.vue
+packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Nested/PageB.vue
+packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Simple/PageA.vue
+packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Simple/PageB.vue
+packages/vue3/test-app/Pages/PersistentLayouts/Shorthand/Nested/PageA.vue
+packages/vue3/test-app/Pages/PersistentLayouts/Shorthand/Nested/PageB.vue
+
+# Directories we don't want to format
+.github/
+**/test-results/

@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Form } from '@inertiajs/react'
 import type { Method } from '@inertiajs/core'
+import { Form } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default () => {
   const [method, setMethod] = useState<Method>('get')
@@ -30,9 +30,7 @@ export default () => {
         </div>
 
         <div>
-          <button type="submit">
-            Submit {method.toUpperCase()}
-          </button>
+          <button type="submit">Submit {method.toUpperCase()}</button>
         </div>
       </Form>
     </div>

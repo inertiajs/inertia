@@ -446,8 +446,6 @@ export default () => {
     })
   }
 
-
-
   const lifecycleCancelAfterFinish = () => {
     type CancelToken = {
       cancel: () => void

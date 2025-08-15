@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
 import { Form } from '@inertiajs/react'
+import { useCallback, useMemo, useState } from 'react'
 
 export default () => {
   const [events, setEvents] = useState<string[]>([])
@@ -25,26 +25,29 @@ export default () => {
     return '/form-component/events/success'
   }, [shouldFail, shouldDelay])
 
-  const formEvents = useMemo(() => ({
-    onBefore: () => {
-      log('onBefore')
+  const formEvents = useMemo(
+    () => ({
+      onBefore: () => {
+        log('onBefore')
 
-      if (cancelInOnBefore) {
-        log('onCancel')
-        return false
-      }
-    },
-    onStart: () => log('onStart'),
-    onProgress: () => log('onProgress'),
-    onFinish: () => log('onFinish'),
-    onCancel: () => log('onCancel'),
-    onSuccess: () => log('onSuccess'),
-    onError: () => log('onError'),
-    onCancelToken: (token: { cancel: () => void }) => {
-      log('onCancelToken')
-      setCancelToken(token)
-    },
-  }), [cancelInOnBefore])
+        if (cancelInOnBefore) {
+          log('onCancel')
+          return false
+        }
+      },
+      onStart: () => log('onStart'),
+      onProgress: () => log('onProgress'),
+      onFinish: () => log('onFinish'),
+      onCancel: () => log('onCancel'),
+      onSuccess: () => log('onSuccess'),
+      onError: () => log('onError'),
+      onCancelToken: (token: { cancel: () => void }) => {
+        log('onCancelToken')
+        setCancelToken(token)
+      },
+    }),
+    [cancelInOnBefore],
+  )
 
   const cancelVisit = useCallback(() => {
     if (cancelToken) {
@@ -54,11 +57,7 @@ export default () => {
   }, [cancelToken])
 
   return (
-    <Form
-      action={action}
-      method="post"
-      {...formEvents}
-    >
+    <Form action={action} method="post" {...formEvents}>
       {({ processing, progress, wasSuccessful, recentlySuccessful }) => (
         <>
           <h1>Form Events & State</h1>
@@ -72,7 +71,8 @@ export default () => {
           </div>
 
           <div>
-            Progress: <span id="progress" className={progress?.percentage ? 'uploading' : undefined}>
+            Progress:{' '}
+            <span id="progress" className={progress?.percentage ? 'uploading' : undefined}>
               {progress?.percentage || 0}
             </span>
           </div>
@@ -90,10 +90,18 @@ export default () => {
           </div>
 
           <div>
-            <button type="button" onClick={() => setCancelInOnBefore(true)}>Cancel in onBefore</button>
-            <button type="button" onClick={() => setShouldFail(true)}>Fail Request</button>
-            <button type="button" onClick={() => setShouldDelay(true)}>Should Delay</button>
-            <button type="button" onClick={cancelVisit}>Cancel Visit</button>
+            <button type="button" onClick={() => setCancelInOnBefore(true)}>
+              Cancel in onBefore
+            </button>
+            <button type="button" onClick={() => setShouldFail(true)}>
+              Fail Request
+            </button>
+            <button type="button" onClick={() => setShouldDelay(true)}>
+              Should Delay
+            </button>
+            <button type="button" onClick={cancelVisit}>
+              Cancel Visit
+            </button>
             <button type="submit">Submit</button>
           </div>
         </>

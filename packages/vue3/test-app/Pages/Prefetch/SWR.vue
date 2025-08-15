@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { Component } from 'vue'
 import Layout from '@/Layouts/SWR.vue'
+import type { Component } from 'vue'
 
 export default {
   layout: (h: Function, page: Component) => h(Layout, [page]),

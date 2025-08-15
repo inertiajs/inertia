@@ -6,7 +6,14 @@ export { default as Deferred } from './Deferred'
 export { default as Form } from './Form'
 export { default as Head } from './Head'
 export { InertiaLinkProps, default as Link } from './Link'
-export { InertiaFormProps, SetDataByObject, SetDataByMethod, SetDataByKeyValuePair, SetDataAction, default as useForm } from './useForm'
+export {
+  InertiaFormProps,
+  SetDataAction,
+  SetDataByKeyValuePair,
+  SetDataByMethod,
+  SetDataByObject,
+  default as useForm,
+} from './useForm'
 export { default as usePage } from './usePage'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'

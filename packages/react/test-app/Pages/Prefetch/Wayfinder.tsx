@@ -19,18 +19,15 @@ export default function Wayfinder() {
   }
 
   const testPrefetch = () => {
-    router.prefetch(
-      wayfinderUrl(),
-      {
-        onPrefetching: () => {
-          setIsPrefetching(true)
-        },
-        onPrefetched: () => {
-          setIsPrefetching(false)
-          setTimeout(checkStatus)
-        },
+    router.prefetch(wayfinderUrl(), {
+      onPrefetching: () => {
+        setIsPrefetching(true)
       },
-    )
+      onPrefetched: () => {
+        setIsPrefetching(false)
+        setTimeout(checkStatus)
+      },
+    })
   }
 
   const testFlush = () => {
@@ -56,9 +53,15 @@ export default function Wayfinder() {
         Is Prefetching: <span id="is-prefetching">{isPrefetching.toString()}</span>
       </p>
 
-      <button onClick={testPrefetch} id="test-prefetch">Test prefetch</button>
-      <button onClick={testFlush} id="test-flush">Test flush</button>
-      <button onClick={flushAll} id="flush-all">Flush all</button>
+      <button onClick={testPrefetch} id="test-prefetch">
+        Test prefetch
+      </button>
+      <button onClick={testFlush} id="test-flush">
+        Test flush
+      </button>
+      <button onClick={flushAll} id="flush-all">
+        Flush all
+      </button>
     </div>
   )
 }

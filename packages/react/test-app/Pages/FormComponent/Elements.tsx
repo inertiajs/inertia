@@ -2,10 +2,7 @@ import { Form } from '@inertiajs/react'
 
 export default () => {
   return (
-    <Form
-      action="/dump/post"
-      method="post"
-    >
+    <Form action="/dump/post" method="post">
       {({ isDirty }) => (
         <>
           <h1>Form Elements</h1>
@@ -31,7 +28,9 @@ export default () => {
           {/* Select with default disabled option */}
           <div>
             <select name="role" id="role" defaultValue="">
-              <option value="" disabled>Role</option>
+              <option value="" disabled>
+                Role
+              </option>
               <option value="User">User</option>
               <option value="Admin">Admin</option>
               <option value="Super">Super</option>
@@ -40,9 +39,15 @@ export default () => {
 
           {/* Radio buttons */}
           <div>
-            <label><input type="radio" name="plan" value="free" /> Free</label>
-            <label><input type="radio" name="plan" value="pro" /> Pro</label>
-            <label><input type="radio" name="plan" value="enterprise" /> Enterprise</label>
+            <label>
+              <input type="radio" name="plan" value="free" /> Free
+            </label>
+            <label>
+              <input type="radio" name="plan" value="pro" /> Pro
+            </label>
+            <label>
+              <input type="radio" name="plan" value="enterprise" /> Enterprise
+            </label>
           </div>
 
           {/* Checkbox (single) */}
@@ -53,15 +58,23 @@ export default () => {
 
           {/* Checkbox (multiple) */}
           <div>
-            <label><input type="checkbox" name="interests[]" value="sports" /> Sports</label>
-            <label><input type="checkbox" name="interests[]" value="music" /> Music</label>
-            <label><input type="checkbox" name="interests[]" value="tech" /> Tech</label>
+            <label>
+              <input type="checkbox" name="interests[]" value="sports" /> Sports
+            </label>
+            <label>
+              <input type="checkbox" name="interests[]" value="music" /> Music
+            </label>
+            <label>
+              <input type="checkbox" name="interests[]" value="tech" /> Tech
+            </label>
           </div>
 
           {/* Multiple select */}
           <div>
             <select name="skills[]" id="skills" multiple defaultValue="">
-              <option disabled value="">Skills</option>
+              <option disabled value="">
+                Skills
+              </option>
               <option value="vue">Vue</option>
               <option value="react">React</option>
               <option value="angular">Angular</option>
