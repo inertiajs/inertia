@@ -31,7 +31,7 @@ export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: nu
     )
   }
 
-  const submitWithUserInvalidation = (e) => {
+  const submitWithUserInvalidation = (e: React.MouseEvent) => {
     e.preventDefault()
     form.post('/dump/post', {
       invalidate: ['user'],
