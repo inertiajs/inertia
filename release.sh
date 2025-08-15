@@ -52,6 +52,7 @@ pnpm install
 git add .
 git commit -m "$TAG"
 git tag -a "$TAG" -m "$TAG"
+git push --tags
 
 # Install and publish
 pnpm publish -r
