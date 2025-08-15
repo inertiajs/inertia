@@ -30,11 +30,11 @@ inertia/
 
 ### Key Components
 
-* **Core Library:** The framework-agnostic engine powering all adapters (`packages/core`).
-* **Adapters:** Framework-specific integrations for React, Svelte, and Vue.
-* **Test Applications:** Minimal frontend apps used for automated testing (`packages/*/test-app/`).
-* **Playwright Tests:** Framework-agnostic end-to-end tests that verify behavior across adapters (`tests/*.spec.ts`).
-* **Playgrounds:** Full Laravel applications for manual testing (`playgrounds/`). These are optional and may eventually be removed.
+- **Core Library:** The framework-agnostic engine powering all adapters (`packages/core`).
+- **Adapters:** Framework-specific integrations for React, Svelte, and Vue.
+- **Test Applications:** Minimal frontend apps used for automated testing (`packages/*/test-app/`).
+- **Playwright Tests:** Framework-agnostic end-to-end tests that verify behavior across adapters (`tests/*.spec.ts`).
+- **Playgrounds:** Full Laravel applications for manual testing (`playgrounds/`). These are optional and may eventually be removed.
 
 ## Getting Started
 
@@ -146,8 +146,8 @@ pnpm dev:test-app:vue
 
 Each test app runs two servers:
 
-* A Node.js backend that automatically restarts when changed
-* A Vite development server for the frontend
+- A Node.js backend that automatically restarts when changed
+- A Vite development server for the frontend
 
 If you are developing a new feature or fixing a bug, you can use these test apps to develop and test your changes.
 
@@ -190,8 +190,8 @@ Add a new Playwright test to verify your change. Playwright allows us to test fe
 import { test, expect } from '@playwright/test'
 
 test('your feature works', async ({ page }) => {
-    await page.goto('/your-feature')
-    // Your assertions here
+  await page.goto('/your-feature')
+  // Your assertions here
 })
 ```
 
@@ -249,9 +249,7 @@ When preparing a release:
 
 2. Run `pnpm install` to update the lockfile.
 
-3. Update the `CHANGELOG.md` with a summary of changes.
-
-4. Publish the packages:
+3. Publish the packages:
 
    ```sh
    pnpm publish -r
@@ -263,4 +261,4 @@ When preparing a release:
    pnpm publish -r --tag=beta
    ```
 
-5. Tag a new release on [GitHub Releases](https://github.com/inertiajs/inertia/releases).
+4. Tag a new release on [GitHub Releases](https://github.com/inertiajs/inertia/releases).

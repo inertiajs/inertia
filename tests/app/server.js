@@ -135,6 +135,7 @@ app.post('/visits/events-errors', (req, res) =>
 app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
+app.get('/visits/after-error/:page', (req, res) => inertia.render(req, res, { component: 'Visits/AfterError' }))
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
@@ -187,35 +188,22 @@ app.post('/form-helper/events/errors', (req, res) => {
   }, 250)
 })
 
-app.get('/dump/get', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'get', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.post('/dump/post', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'post', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.put('/dump/put', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'put', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.patch('/dump/patch', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'patch', form: req.body, query: req.query, files: req.files },
-  }),
-)
-app.delete('/dump/delete', upload.any(), (req, res) =>
-  inertia.render(req, res, {
-    component: 'Dump',
-    props: { headers: req.headers, method: 'delete', form: req.body, query: req.query, files: req.files },
-  }),
+const methods = ['get', 'post', 'put', 'patch', 'delete']
+
+methods.forEach((method) =>
+  app[method](`/dump/${method}`, upload.any(), (req, res) =>
+    inertia.render(req, res, {
+      component: 'Dump',
+      props: {
+        headers: req.headers,
+        method,
+        form: req.body,
+        query: req.query,
+        files: req.files,
+        url: req.originalUrl,
+      },
+    }),
+  ),
 )
 
 app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
@@ -246,6 +234,16 @@ app.post('/events/errors', (req, res) =>
 app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/Hook', props: {} }))
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
+
+app.get('/prefetch/after-error', (req, res) => {
+  inertia.render(req, res, { component: 'Prefetch/AfterError' })
+})
+
+app.get('/prefetch/wayfinder', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Wayfinder',
+  })
+})
 
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
@@ -531,6 +529,106 @@ app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.json({ foo: 'bar' }))
+
+app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
+app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
+app.post('/form-component/errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Errors',
+    props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
+  }),
+)
+app.post('/form-component/errors/bag', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Errors',
+    props: { errors: { bag: { name: 'Some name error', handle: 'The Handle was invalid' } } },
+  }),
+)
+
+app.get('/form-component/events', (req, res) => inertia.render(req, res, { component: 'FormComponent/Events' }))
+app.post('/form-component/events/delay', upload.any(), async (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
+)
+app.get('/form-component/disable-while-processing/:disable', upload.any(), async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/DisableWhileProcessing',
+    props: {
+      disable: req.params.disable === 'yes',
+    },
+  }),
+)
+app.post('/form-component/disable-while-processing/:disable/submit', upload.any(), async (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'FormComponent/DisableWhileProcessing',
+        props: {
+          disable: req.params.disable === 'yes',
+        },
+      }),
+    500,
+  ),
+)
+app.post('/form-component/events/success', async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/Events' }),
+)
+app.post('/form-component/events/errors', async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Events',
+    props: { errors: { field: 'Something went wrong' } },
+  }),
+)
+
+app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
+app.get('/form-component/options', (req, res) =>
+  // TODO: see 'url' key in helpers.js, this should be req.originalUrl by default
+  inertia.render(req, res, { component: 'FormComponent/Options', url: req.originalUrl }),
+)
+app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
+app.post('/form-component/progress', async (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
+)
+
+app.get('/form-component/submit-complete/reset', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
+)
+app.get('/form-component/submit-complete/defaults', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
+)
+app.post('/form-component/submit-complete/reset', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
+)
+app.post('/form-component/submit-complete/defaults', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
+)
+
+app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
+app.get('/form-component/dotted-keys', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),
+)
+app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
+app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
+app.get('/form-component/uppercase-method', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
+)
+
+app.get('/form-component/url/with/segements', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/EmptyAction' }),
+)
+app.post('/form-component/url/with/segements', async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/EmptyAction',
+    props: { errors: { name: 'Something went wrong' } },
+  }),
+)
+
+app.get('/form-component/submit-complete/redirect', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
+)
+app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+app.post('/form-component/wayfinder', (req, res) => {
+  inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
+})
 
 app.all('*', (req, res) => inertia.render(req, res))
 

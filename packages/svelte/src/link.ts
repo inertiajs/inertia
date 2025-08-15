@@ -3,8 +3,8 @@ import {
   router,
   shouldIntercept,
   type CacheForOption,
-  type FormDataConvertible,
   type GlobalEventsMap,
+  type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
@@ -20,15 +20,18 @@ interface ActionElement extends HTMLElement {
   href?: string
 }
 
-type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
-  href?: string | { url: string; method: Method }
-  data?: Record<string, FormDataConvertible>
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
-  tags?: string[]
-}
+type ActionParameters = Omit<LinkComponentBaseProps, 'onCancelToken'> & Omit<VisitOptions, keyof LinkComponentBaseProps>
 
-type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
+type SelectedEventKeys =
+  | 'start'
+  | 'progress'
+  | 'finish'
+  | 'before'
+  | 'cancel'
+  | 'success'
+  | 'error'
+  | 'prefetching'
+  | 'prefetched'
 type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
 type ActionAttributes = {
   [K in keyof SelectedGlobalEventsMap as `on:${K}` | `on${K}`]?: (
@@ -158,6 +161,8 @@ function link(
       onSuccess: (page) => dispatchEvent('success', { detail: { page } }),
       onError: (errors) => dispatchEvent('error', { detail: { errors } }),
       onCancelToken: (token) => dispatchEvent('cancel-token', { detail: { token } }),
+      onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+      onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
     }
 
     updateEventListeners()
@@ -177,7 +182,15 @@ function link(
   }
 
   function prefetch() {
-    router.prefetch(href, baseParams, { cacheFor: cacheForValue, tags })
+    router.prefetch(
+      href,
+      {
+        ...baseParams,
+        onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+        onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
+      },
+      { cacheFor: cacheForValue, tags },
+    )
   }
 
   function updateNodeAttributes() {

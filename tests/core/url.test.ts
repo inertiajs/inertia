@@ -11,6 +11,16 @@ test.describe('url.ts', () => {
         expect(data).toEqual({})
       })
 
+      test('returns the FormData instance when passed as data', () => {
+        const formData = new FormData()
+        formData.append('q', 'foo')
+
+        const [href, data] = mergeDataIntoQueryString('post', '/search', formData)
+
+        expect(href).toBe('/search')
+        expect(data).toEqual(formData)
+      })
+
       test('merges new data into an existing query string', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?lang=en', { q: 'bar' })
 
@@ -234,6 +244,13 @@ test.describe('url.ts', () => {
 
         expect(href).toBe('https://example.com/api?existing=value#section')
         expect(data).toEqual({ new: 'data' })
+      })
+
+      test('handles a URL that is an empty string', () => {
+        const [href, data] = mergeDataIntoQueryString('post', '', { name: 'foo' })
+
+        expect(href).toBe('/')
+        expect(data).toEqual({ name: 'foo' })
       })
     })
   })

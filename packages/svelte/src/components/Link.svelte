@@ -5,10 +5,11 @@
     LinkPrefetchOption,
     Method,
     PreserveStateOption,
+    UrlMethodPair
   } from '@inertiajs/core'
   import { inertia } from '../index'
 
-  export let href: string | { url: string; method: Method } = ''
+  export let href: string | UrlMethodPair = ''
   export let as: keyof HTMLElementTagNameMap = 'a'
   export let data: Record<string, FormDataConvertible> = {}
   export let method: Method = 'get'
@@ -73,6 +74,8 @@
   on:cancel
   on:success
   on:error
+  on:prefetching
+  on:prefetched
 >
   <slot />
 </svelte:element>
