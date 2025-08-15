@@ -616,6 +616,9 @@ app.get('/form-component/submit-complete/redirect', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
 )
 app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+app.post('/form-component/wayfinder', (req, res) => {
+  inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
+})
 
 app.all('*', (req, res) => inertia.render(req, res))
 
