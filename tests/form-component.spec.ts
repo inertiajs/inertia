@@ -1298,13 +1298,12 @@ test.describe('Form Component', () => {
 
     // Prefetch both pages
     const prefetchUser = page.waitForResponse('/prefetch/tags/1')
-    const prefetchProduct = page.waitForResponse('/prefetch/tags/2')
-
     await page.getByRole('link', { name: 'User Tagged Page' }).hover()
-    await page.getByRole('link', { name: 'Product Tagged Page' }).hover()
-
-    await prefetchProduct
     await prefetchUser
+
+    const prefetchProduct = page.waitForResponse('/prefetch/tags/2')
+    await page.getByRole('link', { name: 'Product Tagged Page' }).hover()
+    await prefetchProduct
 
     // Submit form that invalidates 'user' tag
     await page.fill('#form-name', 'Test User')
