@@ -30,7 +30,6 @@ export default function Wayfinder() {
           setTimeout(checkStatus)
         },
       },
-      { cacheFor: 5000 },
     )
   }
 

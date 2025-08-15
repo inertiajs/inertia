@@ -225,7 +225,7 @@ export class Router {
   public prefetch(
     href: string | URL | UrlMethodPair,
     options: VisitOptions = {},
-    { cacheFor = 30_000 }: PrefetchOptions,
+    { cacheFor = 30_000 }: PrefetchOptions = { cacheFor: 30_000 },
   ) {
     const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
 
