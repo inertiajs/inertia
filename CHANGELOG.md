@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.1...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.2...master)
 
 - Nothing yet
+
+## [v2.1.2](https://github.com/inertiajs/inertia/compare/v2.1.1...v2.1.2) - 2025-08-15
+
+### What's Changed
+
+* Fix for manipulating form after redirect in `onSubmitComplete` by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2510
+* Support for passing Wayfinder objects to router methods by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2497
+* Tag-based cache invalidation for prefetch requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2484
+* Add `resetOnError`, `resetOnSuccess`, `setDefaultsOnSuccess` to Form component by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2514
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.1...v2.1.2
 
 ## [v2.1.1](https://github.com/inertiajs/inertia/compare/v2.1.0...v2.1.1) - 2025-08-14
 
