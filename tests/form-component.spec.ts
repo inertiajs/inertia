@@ -1292,4 +1292,36 @@ test.describe('Form Component', () => {
       active: 'true',
     })
   })
+
+  test('can use Form component with invalidateCacheTags prop', async ({ page }) => {
+    await page.goto('/form-component/invalidate-tags')
+
+    // Prefetch both pages
+    const prefetchUser = page.waitForResponse('/prefetch/tags/1')
+    const prefetchProduct = page.waitForResponse('/prefetch/tags/2')
+
+    await page.getByRole('link', { name: 'User Tagged Page' }).hover()
+    await page.getByRole('link', { name: 'Product Tagged Page' }).hover()
+
+    await prefetchProduct
+    await prefetchUser
+
+    // Submit form that invalidates 'user' tag
+    await page.fill('#form-name', 'Test User')
+    await page.click('#submit-invalidate-user')
+    await page.waitForURL('/dump/post')
+
+    await page.goBack()
+
+    // User-tagged page should be invalidated and refetched
+    requests.listen(page)
+    await page.getByRole('link', { name: 'User Tagged Page' }).click()
+    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+
+    // Go back and check product page is still cached
+    await page.goBack()
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Product Tagged Page' }).click()
+    await expect(requests.requests.length).toBe(0)
+  })
 })

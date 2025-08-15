@@ -430,7 +430,7 @@ export type FormComponentOptions = Pick<
 >
 
 export type FormComponentProps = Partial<
-  Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
+  Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress' | 'invalidateCacheTags'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
 > & {
   method?: Method | Uppercase<Method>

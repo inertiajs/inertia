@@ -629,6 +629,12 @@ app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect(
 app.post('/form-component/wayfinder', (req, res) => {
   inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
 })
+app.get('/form-component/invalidate-tags', (req, res) =>
+  inertia.render(req, res, { 
+    component: 'FormComponent/InvalidateTags',
+    props: { lastLoaded: Date.now() }
+  }),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 

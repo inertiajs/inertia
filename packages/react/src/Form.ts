@@ -54,6 +54,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onCancelToken = noop,
       onSubmitComplete = noop,
       disableWhileProcessing = false,
+      invalidateCacheTags = [],
       children,
       ...props
     },
@@ -110,6 +111,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         headers,
         errorBag,
         showProgress,
+        invalidateCacheTags,
         onCancelToken,
         onBefore,
         onStart,
