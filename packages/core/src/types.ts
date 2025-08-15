@@ -439,6 +439,9 @@ export type FormComponentProps = Partial<
   options?: FormComponentOptions
   onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
   disableWhileProcessing?: boolean
+  resetOnSuccess?: boolean | string[]
+  resetOnError?: boolean | string[]
+  setDefaultsOnSuccess?: boolean
 }
 
 export type FormComponentMethods = {

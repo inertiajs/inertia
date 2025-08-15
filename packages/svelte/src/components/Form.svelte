@@ -33,6 +33,9 @@
   export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
   export let disableWhileProcessing: boolean = false
   export let invalidateCacheTags: FormComponentProps['invalidateCacheTags'] = []
+  export let resetOnError: FormComponentProps['resetOnError'] = false
+  export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
+  export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -62,6 +65,18 @@
   export function submit() {
     const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
+    const maybeReset = (resetOption: boolean | string[] | undefined) => {
+      if (!resetOption) {
+        return
+      }
+
+      if (resetOption === true) {
+        reset()
+      } else if (resetOption.length > 0) {
+        reset(...resetOption)
+      }
+    }
+
     const submitOptions: FormSubmitOptions = {
       headers,
       errorBag,
@@ -84,8 +99,20 @@
                 defaults,
             })
         }
+
+        maybeReset(resetOnSuccess)
+
+        if (setDefaultsOnSuccess === true) {
+          defaults()
+        }
       },
-      onError,
+      onError: (...args) => {
+        if (onError) {
+          onError(...args)
+        }
+
+        maybeReset(resetOnError)
+      },
       ...options,
     }
 

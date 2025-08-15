@@ -53,6 +53,18 @@ const Form: InertiaForm = defineComponent({
       type: Object as PropType<FormComponentProps['options']>,
       default: () => ({}),
     },
+    resetOnError: {
+      type: [Boolean, Array] as PropType<FormComponentProps['resetOnError']>,
+      default: false,
+    },
+    resetOnSuccess: {
+      type: [Boolean, Array] as PropType<FormComponentProps['resetOnSuccess']>,
+      default: false,
+    },
+    setDefaultsOnSuccess: {
+      type: Boolean as PropType<FormComponentProps['setDefaultsOnSuccess']>,
+      default: false,
+    },
     onCancelToken: {
       type: Function as PropType<FormComponentProps['onCancelToken']>,
       default: noop,
@@ -141,6 +153,18 @@ const Form: InertiaForm = defineComponent({
         props.queryStringArrayFormat,
       )
 
+      const maybeReset = (resetOption: boolean | string[]) => {
+        if (!resetOption) {
+          return
+        }
+
+        if (resetOption === true) {
+          reset()
+        } else if (resetOption.length > 0) {
+          reset(...resetOption)
+        }
+      }
+
       const submitOptions: FormSubmitOptions = {
         headers: props.headers,
         errorBag: props.errorBag,
@@ -155,8 +179,16 @@ const Form: InertiaForm = defineComponent({
         onSuccess: (...args) => {
           props.onSuccess(...args)
           props.onSubmitComplete(exposed)
+          maybeReset(props.resetOnSuccess)
+
+          if (props.setDefaultsOnSuccess === true) {
+            defaults()
+          }
         },
-        onError: props.onError,
+        onError: (...args) => {
+          props.onError(...args)
+          maybeReset(props.resetOnError)
+        },
         ...props.options,
       }
 

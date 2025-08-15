@@ -54,6 +54,9 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       onCancelToken = noop,
       onSubmitComplete = noop,
       disableWhileProcessing = false,
+      resetOnError = false,
+      resetOnSuccess = false,
+      setDefaultsOnSuccess = false,
       invalidateCacheTags = [],
       children,
       ...props
@@ -99,6 +102,18 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       reset(...fields)
     }
 
+    const maybeReset = (resetOption: boolean | string[]) => {
+      if (!resetOption) {
+        return
+      }
+
+      if (resetOption === true) {
+        reset()
+      } else if (resetOption.length > 0) {
+        reset(...resetOption)
+      }
+    }
+
     const submit = () => {
       const [url, _data] = mergeDataIntoQueryString(
         resolvedMethod,
@@ -124,8 +139,16 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
             reset,
             defaults,
           })
+          maybeReset(resetOnSuccess)
+
+          if (setDefaultsOnSuccess === true) {
+            defaults()
+          }
         },
-        onError,
+        onError(...args) {
+          onError(...args)
+          maybeReset(resetOnError)
+        },
         ...options,
       }
 
