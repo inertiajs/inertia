@@ -1293,34 +1293,38 @@ test.describe('Form Component', () => {
     })
   })
 
-  test('can use Form component with invalidateCacheTags prop', async ({ page }) => {
-    await page.goto('/form-component/invalidate-tags')
+  const cacheTagsPropTypes = ['string', 'array']
 
-    // Prefetch both pages
-    const prefetchUser = page.waitForResponse('/prefetch/tags/1')
-    await page.getByRole('link', { name: 'User Tagged Page' }).hover()
-    await prefetchUser
+  cacheTagsPropTypes.forEach((propType) => {
+    test(`can use Form component with invalidateCacheTags prop ${propType}`, async ({ page }) => {
+      await page.goto('/form-component/invalidate-tags/' + propType)
 
-    const prefetchProduct = page.waitForResponse('/prefetch/tags/2')
-    await page.getByRole('link', { name: 'Product Tagged Page' }).hover()
-    await prefetchProduct
+      // Prefetch both pages
+      const prefetchUser = page.waitForResponse('/prefetch/tags/1')
+      await page.getByRole('link', { name: 'User Tagged Page' }).hover()
+      await prefetchUser
 
-    // Submit form that invalidates 'user' tag
-    await page.fill('#form-name', 'Test User')
-    await page.click('#submit-invalidate-user')
-    await page.waitForURL('/dump/post')
+      const prefetchProduct = page.waitForResponse('/prefetch/tags/2')
+      await page.getByRole('link', { name: 'Product Tagged Page' }).hover()
+      await prefetchProduct
 
-    await page.goBack()
+      // Submit form that invalidates 'user' tag
+      await page.fill('#form-name', 'Test User')
+      await page.click('#submit-invalidate-user')
+      await page.waitForURL('/dump/post')
 
-    // User-tagged page should be invalidated and refetched
-    requests.listen(page)
-    await page.getByRole('link', { name: 'User Tagged Page' }).click()
-    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+      await page.goBack()
 
-    // Go back and check product page is still cached
-    await page.goBack()
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Product Tagged Page' }).click()
-    await expect(requests.requests.length).toBe(0)
+      // User-tagged page should be invalidated and refetched
+      requests.listen(page)
+      await page.getByRole('link', { name: 'User Tagged Page' }).click()
+      await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+
+      // Go back and check product page is still cached
+      await page.goBack()
+      requests.listen(page)
+      await page.getByRole('link', { name: 'Product Tagged Page' }).click()
+      await expect(requests.requests.length).toBe(0)
+    })
   })
 })

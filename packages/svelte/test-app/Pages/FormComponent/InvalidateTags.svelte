@@ -2,14 +2,15 @@
   import { Link, Form } from '@inertiajs/svelte'
 
   export let lastLoaded
+  export let propType
 </script>
 
 <div>
   <div id="links">
-    <Link href="/prefetch/tags/1" prefetch="hover" cacheTags={['user']}>
+    <Link href="/prefetch/tags/1" prefetch="hover" cacheTags={propType === 'string' ? 'user' : ['user']}>
       User Tagged Page
     </Link>
-    <Link href="/prefetch/tags/2" prefetch="hover" cacheTags={['product']}>
+    <Link href="/prefetch/tags/2" prefetch="hover" cacheTags={propType === 'string' ? 'product' : ['product']}>
       Product Tagged Page
     </Link>
   </div>
@@ -19,7 +20,7 @@
     <Form
       action="/dump/post"
       method="post"
-      invalidateCacheTags={['user']}
+      invalidateCacheTags={propType === 'string' ? 'user' : ['user']}
     >
       <input
         id="form-name"

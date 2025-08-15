@@ -1,12 +1,12 @@
 import { Link, router, useForm } from '@inertiajs/react'
 
-export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: number }) => {
+export default ({ pageNumber, lastLoaded, propType }: { pageNumber: number; lastLoaded: number; propType: string }) => {
   const form = useForm({
     name: '',
   })
 
   const flushUserTags = () => {
-    router.flushByCacheTags(['user'])
+    router.flushByCacheTags(propType === 'string' ? 'user' : ['user'])
   }
 
   const flushUserProductTags = () => {
@@ -14,27 +14,23 @@ export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: nu
   }
 
   const programmaticPrefetch = () => {
-    router.prefetch(
-      '/prefetch/tags/2',
-      { method: 'get' },
-      { cacheTags: ['user'] }
-    )
+    router.prefetch('/prefetch/tags/2', { method: 'get' }, { cacheTags: propType === 'string' ? 'user' : ['user'] })
     router.prefetch(
       '/prefetch/tags/3',
       { method: 'get' },
-      { cacheFor: '1m', cacheTags: ['product'] }
+      { cacheFor: '1m', cacheTags: propType === 'string' ? 'product' : ['product'] },
     )
     router.prefetch(
       '/prefetch/tags/6',
       { method: 'get' },
-      { cacheFor: '1m' } // No tags (untagged)
+      { cacheFor: '1m' }, // No tags (untagged)
     )
   }
 
   const submitWithUserInvalidation = (e: React.MouseEvent) => {
     e.preventDefault()
     form.post('/dump/post', {
-      invalidateCacheTags: ['user'],
+      invalidateCacheTags: propType === 'string' ? 'user' : ['user'],
     })
   }
 
@@ -53,7 +49,7 @@ export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: nu
         <Link href="/prefetch/tags/4" prefetch="hover" cacheTags={['product', 'details']}>
           Product Page 4
         </Link>
-        <Link href="/prefetch/tags/5" prefetch="hover" cacheTags={['admin']}>
+        <Link href="/prefetch/tags/5" prefetch="hover" cacheTags={propType === 'string' ? 'admin' : ['admin']}>
           Admin Page 5
         </Link>
         <Link href="/prefetch/tags/6" prefetch="hover">

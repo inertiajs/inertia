@@ -389,94 +389,100 @@ test.describe('tags', () => {
     await expect(requests.requests.length).toBe(0)
   })
 
-  test('can use programmatic router.prefetch with tags', async ({ page }) => {
-    await page.goto('prefetch/tags/1')
+  const cacheTagPropTypes = ['string', 'array']
 
-    const prefetch2 = page.waitForResponse('/prefetch/tags/2')
-    const prefetch3 = page.waitForResponse('/prefetch/tags/3')
-    const prefetch6 = page.waitForResponse('/prefetch/tags/6')
+  cacheTagPropTypes.forEach((propType) => {
+    test.describe(`(using ${propType})`, () => {
+      test('can use programmatic router.prefetch with tags', async ({ page }) => {
+        await page.goto(`prefetch/tags/1/${propType}`)
 
-    await page.getByRole('button', { name: 'Programmatic Prefetch' }).click()
+        const prefetch2 = page.waitForResponse('/prefetch/tags/2')
+        const prefetch3 = page.waitForResponse('/prefetch/tags/3')
+        const prefetch6 = page.waitForResponse('/prefetch/tags/6')
 
-    await prefetch2
-    await prefetch3
-    await prefetch6
+        await page.getByRole('button', { name: 'Programmatic Prefetch' }).click()
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'User Page 2' }).click()
-    await isTagsPage(page, 2)
-    await expect(requests.requests.length).toBe(0)
+        await prefetch2
+        await prefetch3
+        await prefetch6
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Product Page 3' }).click()
-    await isTagsPage(page, 3)
-    await expect(requests.requests.length).toBe(0)
+        requests.listen(page)
+        await page.getByRole('link', { name: 'User Page 2' }).click()
+        await isTagsPage(page, 2)
+        await expect(requests.requests.length).toBe(0)
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Untagged Page 6' }).click()
-    await isTagsPage(page, 6)
-    await expect(requests.requests.length).toBe(0)
+        requests.listen(page)
+        await page.getByRole('link', { name: 'Product Page 3' }).click()
+        await isTagsPage(page, 3)
+        await expect(requests.requests.length).toBe(0)
 
-    await page.getByRole('button', { name: 'Flush User Tags' }).click()
+        requests.listen(page)
+        await page.getByRole('link', { name: 'Untagged Page 6' }).click()
+        await isTagsPage(page, 6)
+        await expect(requests.requests.length).toBe(0)
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'User Page 2' }).click()
-    await isTagsPage(page, 2)
-    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+        await page.getByRole('button', { name: 'Flush User Tags' }).click()
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Product Page 3' }).click()
-    await isTagsPage(page, 3)
-    await expect(requests.requests.length).toBe(0)
+        requests.listen(page)
+        await page.getByRole('link', { name: 'User Page 2' }).click()
+        await isTagsPage(page, 2)
+        await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Untagged Page 6' }).click()
-    await isTagsPage(page, 6)
-    await expect(requests.requests.length).toBe(0)
-  })
+        requests.listen(page)
+        await page.getByRole('link', { name: 'Product Page 3' }).click()
+        await isTagsPage(page, 3)
+        await expect(requests.requests.length).toBe(0)
 
-  test('can use useForm with invalidate option', async ({ page }) => {
-    await page.goto('prefetch/tags/1')
+        requests.listen(page)
+        await page.getByRole('link', { name: 'Untagged Page 6' }).click()
+        await isTagsPage(page, 6)
+        await expect(requests.requests.length).toBe(0)
+      })
 
-    const prefetchUser = page.waitForResponse('/prefetch/tags/2')
-    await page.getByRole('link', { name: 'User Page 2' }).hover()
-    await page.waitForTimeout(100)
-    await prefetchUser
+      test('can use useForm with invalidate option', async ({ page }) => {
+        await page.goto(`prefetch/tags/1/${propType}`)
 
-    const prefetchProduct = page.waitForResponse('/prefetch/tags/3')
-    await page.getByRole('link', { name: 'Product Page 3' }).hover()
-    await page.waitForTimeout(100)
-    await prefetchProduct
+        const prefetchUser = page.waitForResponse('/prefetch/tags/2')
+        await page.getByRole('link', { name: 'User Page 2' }).hover()
+        await page.waitForTimeout(100)
+        await prefetchUser
 
-    const prefetchUntagged = page.waitForResponse('/prefetch/tags/6')
-    await page.getByRole('link', { name: 'Untagged Page 6' }).hover()
-    await page.waitForTimeout(100)
-    await prefetchUntagged
+        const prefetchProduct = page.waitForResponse('/prefetch/tags/3')
+        await page.getByRole('link', { name: 'Product Page 3' }).hover()
+        await page.waitForTimeout(100)
+        await prefetchProduct
 
-    await page.fill('#form-name', 'Test User')
-    await page.click('#submit-invalidate-user')
+        const prefetchUntagged = page.waitForResponse('/prefetch/tags/6')
+        await page.getByRole('link', { name: 'Untagged Page 6' }).hover()
+        await page.waitForTimeout(100)
+        await prefetchUntagged
 
-    await page.waitForURL('/dump/post')
+        await page.fill('#form-name', 'Test User')
+        await page.click('#submit-invalidate-user')
 
-    await page.goBack()
+        await page.waitForURL('/dump/post')
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'User Page 2' }).click()
-    await isTagsPage(page, 2)
-    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+        await page.goBack()
 
-    await page.goBack()
+        requests.listen(page)
+        await page.getByRole('link', { name: 'User Page 2' }).click()
+        await isTagsPage(page, 2)
+        await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Product Page 3' }).click()
-    await isTagsPage(page, 3)
-    await expect(requests.requests.length).toBe(0)
+        await page.goBack()
 
-    await page.goBack()
+        requests.listen(page)
+        await page.getByRole('link', { name: 'Product Page 3' }).click()
+        await isTagsPage(page, 3)
+        await expect(requests.requests.length).toBe(0)
 
-    requests.listen(page)
-    await page.getByRole('link', { name: 'Untagged Page 6' }).click()
-    await isTagsPage(page, 6)
-    await expect(requests.requests.length).toBe(0)
+        await page.goBack()
+
+        requests.listen(page)
+        await page.getByRole('link', { name: 'Untagged Page 6' }).click()
+        await isTagsPage(page, 6)
+        await expect(requests.requests.length).toBe(0)
+      })
+    })
   })
 })

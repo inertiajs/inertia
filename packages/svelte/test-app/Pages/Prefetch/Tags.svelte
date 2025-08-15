@@ -2,13 +2,14 @@
   import { inertia, router, useForm } from '@inertiajs/svelte'
   export let pageNumber
   export let lastLoaded
+  export let propType
 
   const form = useForm({
     name: '',
   })
 
   function flushUserTags() {
-    router.flushByCacheTags(['user'])
+    router.flushByCacheTags(propType === 'string' ? 'user' : ['user'])
   }
 
   function flushUserProductTags() {
@@ -16,26 +17,22 @@
   }
 
   function programmaticPrefetch() {
-    router.prefetch(
-      '/prefetch/tags/2',
-      { method: 'get' },
-      { cacheTags: ['user'] }
-    )
+    router.prefetch('/prefetch/tags/2', { method: 'get' }, { cacheTags: propType === 'string' ? 'user' : ['user'] })
     router.prefetch(
       '/prefetch/tags/3',
       { method: 'get' },
-      { cacheFor: '1m', cacheTags: ['product'] }
+      { cacheFor: '1m', cacheTags: propType === 'string' ? 'product' : ['product'] },
     )
     router.prefetch(
       '/prefetch/tags/6',
       { method: 'get' },
-      { cacheFor: '1m' } // No tags (untagged)
+      { cacheFor: '1m' }, // No tags (untagged)
     )
   }
 
   function submitWithUserInvalidation() {
     $form.post('/dump/post', {
-      invalidateCacheTags: ['user'],
+      invalidateCacheTags: propType === 'string' ? 'user' : ['user'],
     })
   }
 </script>
@@ -54,7 +51,7 @@
     <a href="/prefetch/tags/4" use:inertia={{ prefetch: 'hover', cacheTags: ['product', 'details'] }}>
       Product Page 4
     </a>
-    <a href="/prefetch/tags/5" use:inertia={{ prefetch: 'hover', cacheTags: ['admin'] }}>
+    <a href="/prefetch/tags/5" use:inertia={{ prefetch: 'hover', cacheTags: propType === 'string' ? 'admin' : ['admin'] }}>
       Admin Page 5
     </a>
     <a href="/prefetch/tags/6" use:inertia={{ prefetch: 'hover' }}>

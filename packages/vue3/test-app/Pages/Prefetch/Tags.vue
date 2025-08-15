@@ -1,9 +1,10 @@
 <script setup>
 import { Link, router, useForm } from '@inertiajs/vue3'
 
-defineProps({
+const props = defineProps({
   pageNumber: String,
   lastLoaded: Number,
+  propType: String,
 })
 
 const form = useForm({
@@ -11,7 +12,7 @@ const form = useForm({
 })
 
 const flushUserTags = () => {
-  router.flushByCacheTags(['user'])
+  router.flushByCacheTags(props.propType === 'string' ? 'user' : ['user'])
 }
 
 const flushUserProductTags = () => {
@@ -19,8 +20,12 @@ const flushUserProductTags = () => {
 }
 
 const programmaticPrefetch = () => {
-  router.prefetch('/prefetch/tags/2', { method: 'get' }, { cacheTags: ['user'] })
-  router.prefetch('/prefetch/tags/3', { method: 'get' }, { cacheFor: '1m', cacheTags: ['product'] })
+  router.prefetch('/prefetch/tags/2', { method: 'get' }, { cacheTags: props.propType === 'string' ? 'user' : ['user'] })
+  router.prefetch(
+    '/prefetch/tags/3',
+    { method: 'get' },
+    { cacheFor: '1m', cacheTags: props.propType === 'string' ? 'product' : ['product'] },
+  )
   router.prefetch(
     '/prefetch/tags/6',
     { method: 'get' },
@@ -30,7 +35,7 @@ const programmaticPrefetch = () => {
 
 const submitWithUserInvalidation = () => {
   form.post('/dump/post', {
-    invalidateCacheTags: ['user'],
+    invalidateCacheTags: props.propType === 'string' ? 'user' : ['user'],
   })
 }
 </script>
@@ -42,7 +47,9 @@ const submitWithUserInvalidation = () => {
       <Link href="/prefetch/tags/2" prefetch="hover" :cache-tags="['user', 'settings']"> User Page 2 </Link>
       <Link href="/prefetch/tags/3" prefetch="hover" :cache-tags="['product', 'catalog']"> Product Page 3 </Link>
       <Link href="/prefetch/tags/4" prefetch="hover" :cache-tags="['product', 'details']"> Product Page 4 </Link>
-      <Link href="/prefetch/tags/5" prefetch="hover" :cache-tags="['admin']"> Admin Page 5 </Link>
+      <Link href="/prefetch/tags/5" prefetch="hover" :cache-tags="props.propType === 'string' ? 'admin' : ['admin']">
+        Admin Page 5
+      </Link>
       <Link href="/prefetch/tags/6" prefetch="hover"> Untagged Page 6 </Link>
     </div>
     <div id="controls">

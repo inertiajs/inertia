@@ -1,13 +1,13 @@
 import { Form, Link } from '@inertiajs/react'
 
-export default ({ lastLoaded }: { lastLoaded: number }) => {
+export default ({ lastLoaded, propType }: { lastLoaded: number; propType: string }) => {
   return (
     <div>
       <div id="links">
-        <Link href="/prefetch/tags/1" prefetch="hover" cacheTags={['user']}>
+        <Link href="/prefetch/tags/1" prefetch="hover" cacheTags={propType === 'string' ? 'user' : ['user']}>
           User Tagged Page
         </Link>
-        <Link href="/prefetch/tags/2" prefetch="hover" cacheTags={['product']}>
+        <Link href="/prefetch/tags/2" prefetch="hover" cacheTags={propType === 'string' ? 'product' : ['product']}>
           Product Tagged Page
         </Link>
       </div>
@@ -17,7 +17,7 @@ export default ({ lastLoaded }: { lastLoaded: number }) => {
         <Form
           action="/dump/post"
           method="post"
-          invalidateCacheTags={['user']}
+          invalidateCacheTags={propType === 'string' ? 'user' : ['user']}
         >
           <input
             id="form-name"
