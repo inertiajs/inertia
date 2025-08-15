@@ -20,7 +20,7 @@
 
     <div>
       <input type="checkbox" name="active" value="true" checked />
-      <label>Active</label>
+      <label for="active">Active</label>
     </div>
 
     <div>

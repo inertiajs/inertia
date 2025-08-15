@@ -1,12 +1,12 @@
 import { router } from '@inertiajs/react'
 
 export default function Wayfinder() {
-  const wayfinderObjectVisit = (e) => {
+  const wayfinderObjectVisit = (e: React.MouseEvent) => {
     e.preventDefault()
     router.visit({ url: '/dump/post', method: 'post' })
   }
 
-  const wayfinderObjectMethodOverride = (e) => {
+  const wayfinderObjectMethodOverride = (e: React.MouseEvent) => {
     e.preventDefault()
     router.visit({ url: '/dump/patch', method: 'get' }, { method: 'patch' })
   }
