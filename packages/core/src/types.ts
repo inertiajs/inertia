@@ -368,7 +368,7 @@ export interface LinkComponentBaseProps
       | 'async'
     > &
       Omit<VisitCallbacks, 'onCancelToken'> & {
-        href: string | { url: string; method: Method }
+        href: string | UrlMethodPair
         onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
@@ -429,8 +429,8 @@ export type FormComponentProps = Partial<
   Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
 > & {
-  action?: string | UrlMethodPair
   method?: Method | Uppercase<Method>
+  action?: string | UrlMethodPair
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   options?: FormComponentOptions
   onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
