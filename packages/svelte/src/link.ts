@@ -52,7 +52,7 @@ function link(
   // Variables initialized and controlled by the "update" function
   let prefetchModes: LinkPrefetchOption[] = []
   let cacheForValue: CacheForOption | CacheForOption[]
-  let tags: string[] = []
+  let cacheTags: string[] = []
   let method: Method
   let href: string
   let data
@@ -93,7 +93,7 @@ function link(
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, tags: tagValues = [], ...params }: ActionParameters) {
+  function update({ cacheFor = 0, prefetch = false, cacheTags: cacheTagValues = [], ...params }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -122,7 +122,7 @@ function link(
       return 30_000
     })()
 
-    tags = tagValues
+    cacheTags = cacheTagValues
 
     method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
     ;[href, data] = hrefAndData(method, params)
@@ -189,7 +189,7 @@ function link(
         onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
         onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
       },
-      { cacheFor: cacheForValue, tags },
+      { cacheFor: cacheForValue, cacheTags },
     )
   }
 

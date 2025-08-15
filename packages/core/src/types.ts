@@ -179,7 +179,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
-  invalidate: string[]
+  invalidateCacheTags: string[]
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -351,7 +351,7 @@ export type CacheForOption = number | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
-  tags: string[]
+  cacheTags: string[]
 }
 
 export interface LinkComponentBaseProps
@@ -374,7 +374,7 @@ export interface LinkComponentBaseProps
         onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
-        tags: string[]
+        cacheTags: string[]
       }
   > {}
 

@@ -65,7 +65,7 @@ export class Response {
       return this.requestParams.all().onError(scopedErrors)
     }
 
-    router.flushByTags(this.requestParams.all().invalidate || [])
+    router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
 
     fireSuccessEvent(currentPage.get())
 

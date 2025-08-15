@@ -8,23 +8,23 @@
   })
 
   function flushUserTags() {
-    router.flushByTags(['user'])
+    router.flushByCacheTags(['user'])
   }
 
   function flushUserProductTags() {
-    router.flushByTags(['user', 'product'])
+    router.flushByCacheTags(['user', 'product'])
   }
 
   function programmaticPrefetch() {
     router.prefetch(
       '/prefetch/tags/2',
       { method: 'get' },
-      { tags: ['user'] }
+      { cacheTags: ['user'] }
     )
     router.prefetch(
       '/prefetch/tags/3',
       { method: 'get' },
-      { cacheFor: '1m', tags: ['product'] }
+      { cacheFor: '1m', cacheTags: ['product'] }
     )
     router.prefetch(
       '/prefetch/tags/6',
@@ -35,26 +35,26 @@
 
   function submitWithUserInvalidation() {
     $form.post('/dump/post', {
-      invalidate: ['user'],
+      invalidateCacheTags: ['user'],
     })
   }
 </script>
 
 <div>
   <div id="links">
-    <a href="/prefetch/tags/1" use:inertia={{ prefetch: 'hover', tags: ['user', 'profile'] }}>
+    <a href="/prefetch/tags/1" use:inertia={{ prefetch: 'hover', cacheTags: ['user', 'profile'] }}>
       User Page 1
     </a>
-    <a href="/prefetch/tags/2" use:inertia={{ prefetch: 'hover', tags: ['user', 'settings'] }}>
+    <a href="/prefetch/tags/2" use:inertia={{ prefetch: 'hover', cacheTags: ['user', 'settings'] }}>
       User Page 2
     </a>
-    <a href="/prefetch/tags/3" use:inertia={{ prefetch: 'hover', tags: ['product', 'catalog'] }}>
+    <a href="/prefetch/tags/3" use:inertia={{ prefetch: 'hover', cacheTags: ['product', 'catalog'] }}>
       Product Page 3
     </a>
-    <a href="/prefetch/tags/4" use:inertia={{ prefetch: 'hover', tags: ['product', 'details'] }}>
+    <a href="/prefetch/tags/4" use:inertia={{ prefetch: 'hover', cacheTags: ['product', 'details'] }}>
       Product Page 4
     </a>
-    <a href="/prefetch/tags/5" use:inertia={{ prefetch: 'hover', tags: ['admin'] }}>
+    <a href="/prefetch/tags/5" use:inertia={{ prefetch: 'hover', cacheTags: ['admin'] }}>
       Admin Page 5
     </a>
     <a href="/prefetch/tags/6" use:inertia={{ prefetch: 'hover' }}>

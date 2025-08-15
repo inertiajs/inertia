@@ -50,7 +50,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onPrefetched = noop,
       prefetch = false,
       cacheFor = 0,
-      tags = [],
+      cacheTags = [],
       ...props
     },
     ref,
@@ -159,10 +159,10 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
             onPrefetching,
             onPrefetched,
           },
-          { cacheFor: cacheForValue, tags },
+          { cacheFor: cacheForValue, cacheTags },
         )
       }
-    }, [url, baseParams, onPrefetching, onPrefetched, cacheForValue, tags])
+    }, [url, baseParams, onPrefetching, onPrefetched, cacheForValue, cacheTags])
 
     useEffect(() => {
       return () => {

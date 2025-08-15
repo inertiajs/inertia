@@ -21,7 +21,7 @@ class PrefetchedRequests {
   public add(
     params: ActiveVisit,
     sendFunc: (params: InternalActiveVisit) => void,
-    { cacheFor, tags }: PrefetchOptions,
+    { cacheFor, cacheTags }: PrefetchOptions,
   ) {
     const inFlight = this.findInFlight(params)
 
@@ -74,7 +74,7 @@ class PrefetchedRequests {
         singleUse: expires === 0,
         timestamp: Date.now(),
         inFlight: false,
-        tags: tags,
+        tags: cacheTags,
       })
 
       this.scheduleForRemoval(params, expires)

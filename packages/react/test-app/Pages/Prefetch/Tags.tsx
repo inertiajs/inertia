@@ -6,23 +6,23 @@ export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: nu
   })
 
   const flushUserTags = () => {
-    router.flushByTags(['user'])
+    router.flushByCacheTags(['user'])
   }
 
   const flushUserProductTags = () => {
-    router.flushByTags(['user', 'product'])
+    router.flushByCacheTags(['user', 'product'])
   }
 
   const programmaticPrefetch = () => {
     router.prefetch(
       '/prefetch/tags/2',
       { method: 'get' },
-      { tags: ['user'] }
+      { cacheTags: ['user'] }
     )
     router.prefetch(
       '/prefetch/tags/3',
       { method: 'get' },
-      { cacheFor: '1m', tags: ['product'] }
+      { cacheFor: '1m', cacheTags: ['product'] }
     )
     router.prefetch(
       '/prefetch/tags/6',
@@ -34,26 +34,26 @@ export default ({ pageNumber, lastLoaded }: { pageNumber: number, lastLoaded: nu
   const submitWithUserInvalidation = (e: React.MouseEvent) => {
     e.preventDefault()
     form.post('/dump/post', {
-      invalidate: ['user'],
+      invalidateCacheTags: ['user'],
     })
   }
 
   return (
     <div>
       <div id="links">
-        <Link href="/prefetch/tags/1" prefetch="hover" tags={['user', 'profile']}>
+        <Link href="/prefetch/tags/1" prefetch="hover" cacheTags={['user', 'profile']}>
           User Page 1
         </Link>
-        <Link href="/prefetch/tags/2" prefetch="hover" tags={['user', 'settings']}>
+        <Link href="/prefetch/tags/2" prefetch="hover" cacheTags={['user', 'settings']}>
           User Page 2
         </Link>
-        <Link href="/prefetch/tags/3" prefetch="hover" tags={['product', 'catalog']}>
+        <Link href="/prefetch/tags/3" prefetch="hover" cacheTags={['product', 'catalog']}>
           Product Page 3
         </Link>
-        <Link href="/prefetch/tags/4" prefetch="hover" tags={['product', 'details']}>
+        <Link href="/prefetch/tags/4" prefetch="hover" cacheTags={['product', 'details']}>
           Product Page 4
         </Link>
-        <Link href="/prefetch/tags/5" prefetch="hover" tags={['admin']}>
+        <Link href="/prefetch/tags/5" prefetch="hover" cacheTags={['admin']}>
           Admin Page 5
         </Link>
         <Link href="/prefetch/tags/6" prefetch="hover">

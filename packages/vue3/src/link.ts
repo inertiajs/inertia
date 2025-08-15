@@ -120,7 +120,7 @@ const Link: InertiaLink = defineComponent({
       type: Function as PropType<GlobalEventCallback<'prefetched'>>,
       default: noop,
     },
-    tags: {
+    cacheTags: {
       type: Array as PropType<string[]>,
       default: () => [],
     },
@@ -245,7 +245,7 @@ const Link: InertiaLink = defineComponent({
         },
         {
           cacheFor: cacheForValue.value,
-          tags: props.tags,
+          cacheTags: props.cacheTags,
         },
       )
     }

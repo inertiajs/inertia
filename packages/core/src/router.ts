@@ -215,7 +215,7 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
-  public flushByTags(tags: string[]): void {
+  public flushByCacheTags(tags: string[]): void {
     prefetchedRequests.removeByTags(tags)
   }
 
@@ -290,7 +290,7 @@ export class Router {
         },
         {
           cacheFor: 30_000,
-          tags: [],
+          cacheTags: [],
           ...prefetchOptions,
         },
       )
@@ -396,7 +396,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
-      invalidate: [],
+      invalidateCacheTags: [],
       ...options,
     }
 
