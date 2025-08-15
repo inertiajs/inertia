@@ -374,6 +374,7 @@ export interface LinkComponentBaseProps
         onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
+        tags: string[]
       }
   > {}
 
