@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Link, Form } from '@inertiajs/svelte'
 
   export let lastLoaded

@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import { inertia, router, useForm } from '@inertiajs/svelte'
   export let pageNumber
   export let lastLoaded
-  export let propType
+  export let propType: string
 
   const form = useForm({
     name: '',
