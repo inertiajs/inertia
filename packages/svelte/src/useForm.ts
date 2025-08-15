@@ -11,6 +11,7 @@ import type {
   PendingVisit,
   Progress,
   RequestPayload,
+  UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
@@ -43,7 +44,7 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
-  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
+  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void

@@ -1279,4 +1279,17 @@ test.describe('Form Component', () => {
       expect(unchangedPorts).toEqual(['8080'])
     })
   })
+
+  test('it accepts wayfinder shaped objects as action', async ({ page }) => {
+    await page.goto('/form-component/wayfinder')
+
+    await page.getByRole('button', { name: 'Submit' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    expect(dump.method).toEqual('post')
+    expect(dump.form).toEqual({
+      name: 'John Doe',
+      active: 'true',
+    })
+  })
 })

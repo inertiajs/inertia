@@ -239,6 +239,12 @@ app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
 })
 
+app.get('/prefetch/wayfinder', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Wayfinder',
+  })
+})
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
@@ -610,6 +616,9 @@ app.get('/form-component/submit-complete/redirect', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
 )
 app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+app.post('/form-component/wayfinder', (req, res) => {
+  inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
+})
 
 app.all('*', (req, res) => inertia.render(req, res))
 

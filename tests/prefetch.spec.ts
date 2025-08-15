@@ -158,6 +158,45 @@ test('can cache links with single cache value', async ({ page }) => {
   await expect(lastLoaded2).not.toBe(lastLoaded2Fresh)
 })
 
+test.describe('UrlMethodPair prefetch support', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear any existing cache before each test
+    await page.goto('prefetch/wayfinder')
+    await page.locator('#flush-all').click()
+    await page.waitForTimeout(100)
+
+    // Verify the cache is actually cleared
+    await expect(page.locator('#is-prefetched')).toHaveText('false')
+    await expect(page.locator('#is-prefetching')).toHaveText('false')
+  })
+
+  test('can prefetch with UrlMethodPair', async ({ page }) => {
+    await expect(page.locator('#is-prefetched')).toHaveText('false')
+    await expect(page.locator('#is-prefetching')).toHaveText('false')
+
+    const prefetchPromise = page.waitForResponse((response) => response.url().includes('prefetch/swr/4'))
+    await page.locator('#test-prefetch').click()
+
+    await expect(page.locator('#is-prefetching')).toHaveText('true')
+    await expect(page.locator('#is-prefetched')).toHaveText('false')
+
+    await prefetchPromise
+
+    await expect(page.locator('#is-prefetched')).toHaveText('true')
+    await expect(page.locator('#is-prefetching')).toHaveText('false')
+  })
+
+  test('can use flush with UrlMethodPair', async ({ page }) => {
+    await page.locator('#test-prefetch').click()
+    await page.waitForResponse((response) => response.url().includes('prefetch/swr/4'))
+
+    await expect(page.locator('#is-prefetched')).toHaveText('true')
+
+    await page.locator('#test-flush').click()
+    await expect(page.locator('#is-prefetched')).toHaveText('false')
+  })
+})
+
 test('can visit the page when prefetching has failed due to network error', async ({ page, browser }) => {
   await page.goto('prefetch/after-error')
 

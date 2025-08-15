@@ -7,6 +7,7 @@ import {
   Method,
   Progress,
   router,
+  UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
@@ -45,7 +46,7 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
   setError(errors: FormDataErrors<TForm>): void
-  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
+  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
   post: (url: string, options?: FormOptions) => void

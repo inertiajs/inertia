@@ -1,7 +1,7 @@
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
+import { FormDataConvertible, Method, RequestPayload, UrlMethodPair, VisitOptions } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
@@ -85,4 +85,8 @@ export const setHashIfSameUrl = (originUrl: URL | Location, destinationUrl: URL 
 
 export const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boolean => {
   return urlWithoutHash(url1).href === urlWithoutHash(url2).href
+}
+
+export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
+  return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
 }
