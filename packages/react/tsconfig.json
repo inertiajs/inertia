@@ -9,6 +9,7 @@
 
     "declaration": true,
     "declarationDir": "types",
+    "emitDeclarationOnly": true,
 
     "module": "ES2020",
     "moduleResolution": "Node",
