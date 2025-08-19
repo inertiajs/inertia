@@ -8,7 +8,7 @@
     type FormDataConvertible,
     type VisitOptions,
   } from '@inertiajs/core'
-  import { isEqual } from 'es-toolkit'
+  import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 

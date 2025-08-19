@@ -10,8 +10,8 @@ import {
   UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
-import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
+import { cloneDeep, isEqual } from 'lodash-es'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
