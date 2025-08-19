@@ -44,8 +44,9 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "es-toolkit": "^1.33.0",
-    "html-escape": "^2.0.0"
+    "@types/lodash-es": "^4.17.12",
+    "html-escape": "^2.0.0",
+    "lodash-es": "^4.17.21"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
