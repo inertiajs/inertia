@@ -166,12 +166,6 @@ importers:
       axios:
         specifier: ^1.8.2
         version: 1.8.2
-      es-check:
-        specifier: ^9.3.1
-        version: 9.3.1
-      esbuild:
-        specifier: ^0.25.0
-        version: 0.25.0
       publint:
         specifier: ^0.2.10
         version: 0.2.12
