@@ -34,10 +34,10 @@ const builds = [
 ].filter((build) => !canary || (build.platform === 'browser' && build.format === 'esm'))
 
 builds.forEach(async (build) => {
-  const context = await esbuild.context({ 
-    ...config, 
-    ...build, 
-    ...(canary ? { outfile: build.outfile.replace(/dist\/([^.]+)/, 'dist/canary.$1') } : {})
+  const context = await esbuild.context({
+    ...config,
+    ...build,
+    ...(canary ? { outfile: build.outfile.replace(/dist\/([^.]+)/, 'dist/canary.$1') } : {}),
   })
 
   if (watch) {
