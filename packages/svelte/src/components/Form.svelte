@@ -124,6 +124,14 @@
     submit()
   }
 
+  function handleReset(event: Event) {
+    // Only intercept native reset events (from reset buttons/inputs)
+    if (event.isTrusted) {
+      event.preventDefault()
+      reset()
+    }
+  }
+
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
   }
@@ -171,6 +179,7 @@
   action={_action}
   method={_method}
   on:submit={handleSubmit}
+  on:reset={handleReset}
   {...$$restProps}
   inert={disableWhileProcessing && $form.processing ? true : undefined}
 >

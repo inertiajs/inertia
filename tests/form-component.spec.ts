@@ -1217,6 +1217,32 @@ test.describe('Form Component', () => {
       await expect(page.locator('#name')).toHaveValue('John Doe')
     })
 
+    test('can reset form using reset-type input element', async ({ page }) => {
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@example.com')
+
+      await expect(page.locator('#name')).toHaveValue('Changed Name')
+      await expect(page.locator('#email')).toHaveValue('changed@example.com')
+
+      await page.click('input[name="reset_input"]')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@example.com')
+    })
+
+    test('can reset form using reset-type button element', async ({ page }) => {
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@example.com')
+
+      await expect(page.locator('#name')).toHaveValue('Changed Name')
+      await expect(page.locator('#email')).toHaveValue('changed@example.com')
+
+      await page.click('button[name="reset_button"]')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@example.com')
+    })
+
     test('multi-select reset behavior comprehensive test', async ({ page }) => {
       // Multi-select with no defaults resets to empty
       await page.selectOption('#languages', ['javascript', 'python'])
