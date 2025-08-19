@@ -1,5 +1,11 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { readFileSync } from 'fs'
 import { defineConfig } from 'vite'
+
+// Only externalize peer dependencies and bundle everything else so we
+// can validate ES2020 compatibility without checking framework code.
+const pkg = JSON.parse(readFileSync('./package.json', 'utf8'))
+const externalDependencies = Object.keys(pkg.peerDependencies || {})
 
 export default defineConfig({
   build: {
@@ -12,8 +18,7 @@ export default defineConfig({
     },
     outDir: 'dist',
     rollupOptions: {
-      // Bundle all dependencies for canary build (unlike regular build)
-      external: [],
+      external: externalDependencies,
       output: {
         format: 'es',
       },
