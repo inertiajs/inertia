@@ -25,14 +25,14 @@ defineProps({
 
 declare global {
   interface Window {
-    customComponentEvents: Array<{ eventName: string; data: any; timestamp: number }>
+    componentEvents: Array<{ eventName: string; data: any; timestamp: number }>
   }
 }
 
-window.customComponentEvents = []
+window.componentEvents = []
 
 const trackEvent = (eventName: string, data: any = null) => {
-  window.customComponentEvents.push({ eventName, data, timestamp: Date.now() })
+  window.componentEvents.push({ eventName, data, timestamp: Date.now() })
 }
 
 const state = ref(crypto.randomUUID())
@@ -50,10 +50,10 @@ const state = ref(crypto.randomUUID())
     <Link :as="CustomButton" href="/dump/get" :headers="{ 'X-Test': 'header' }" class="headers">
       Custom Component with Headers
     </Link>
-    <Link :as="CustomButton" href="/links/custom-component/2" :preserve-state="true" class="preserve">
+    <Link :as="CustomButton" href="/links/as-component/2" :preserve-state="true" class="preserve">
       Custom Component with Preserve State
     </Link>
-    <Link :as="CustomButton" href="/links/custom-component/3" :replace="true" class="replace"
+    <Link :as="CustomButton" href="/links/as-component/3" :replace="true" class="replace"
       >Custom Component with Replace</Link
     >
     <Link
