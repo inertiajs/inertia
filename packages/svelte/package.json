@@ -22,7 +22,10 @@
     "package": "svelte-kit sync && svelte-package --input src",
     "prepublishOnly": "pnpm build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "canary:build": "vite build --config vite.canary.config.ts",
+    "canary:check": "es-check es2020 \"dist/canary.*.js\" --checkFeatures --module",
+    "canary": "pnpm canary:build && pnpm canary:check"
   },
   "exports": {
     ".": {
@@ -54,6 +57,7 @@
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/html-escape": "^2.0.2",
     "axios": "^1.8.2",
+    "es-check": "^9.3.1",
     "publint": "^0.2.10",
     "svelte": "^4.2.19",
     "svelte-check": "^4.0.0",
