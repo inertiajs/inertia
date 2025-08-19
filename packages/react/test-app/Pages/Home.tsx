@@ -37,8 +37,12 @@ export default (props: { example: string }) => {
         'Replace' Links
       </Link>
 
-      <Link href="/links/custom-component" className="links-custom-component">
-        Custom Component
+      <Link href="/links/as-component" className="links-as-component">
+        As Component
+      </Link>
+
+      <Link href="/links/as-element" className="links-as-component">
+        As Element
       </Link>
 
       <a href="#" onClick={visitsMethod} className="visits-method">

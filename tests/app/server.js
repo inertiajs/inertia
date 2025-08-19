@@ -91,8 +91,11 @@ app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component
 app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/reactivity', (req, res) => inertia.render(req, res, { component: 'Links/Reactivity' }))
-app.get('/links/custom-component/:page', (req, res) =>
-  inertia.render(req, res, { component: 'Links/CustomComponent', props: { page: req.params.page } }),
+app.get('/links/as-component/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/AsComponent', props: { page: req.params.page } }),
+)
+app.get('/links/as-element/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/AsElement', props: { page: req.params.page } }),
 )
 app.get('/links/cancel-sync-request/:page', (req, res) => {
   const page = req.params.page
