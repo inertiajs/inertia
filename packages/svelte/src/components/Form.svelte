@@ -125,8 +125,11 @@
   }
 
   function handleReset(event: Event) {
-    event.preventDefault()
-    reset()
+    // Only intercept native reset events (from reset buttons/inputs)
+    if (event.isTrusted) {
+      event.preventDefault()
+      reset()
+    }
   }
 
   export function reset(...fields: string[]) {
