@@ -23,9 +23,8 @@
     "prepublishOnly": "pnpm build",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "canary:build": "vite build --config vite.canary.config.ts",
-    "canary:check": "es-check es2020 \"dist/canary.*.js\" --checkFeatures --module",
-    "canary": "pnpm canary:build && pnpm canary:check"
+    "build:with-deps": "vite build --config vite.with-deps.config.ts",
+    "check:es2020-compat": "pnpm build:with-deps && es-check es2020 \"dist/with-deps.*.js\" --checkFeatures --module"
   },
   "exports": {
     ".": {

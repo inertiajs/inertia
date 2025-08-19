@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build:all": "pnpm -r --filter './packages/*' build",
+    "check:es2020-compat": "pnpm -r --filter './packages/*' check:es2020-compat",
     "dev": "pnpm -r --parallel --filter './packages/*' dev",
     "dev:test-app": "pnpx concurrently -c \"#93c5fd,#c4b5fd,#fb7185\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
     "dev:test-app:react": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",

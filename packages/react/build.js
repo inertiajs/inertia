@@ -4,14 +4,14 @@ import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import { readFileSync } from 'fs'
 
 const watch = process.argv.slice(1).includes('--watch')
-const canary = process.argv.slice(1).includes('--canary')
+const withDeps = process.argv.slice(1).includes('--with-deps')
 
 // For regular builds, externalize all dependencies to keep the bundle size small.
-// For canary builds, only externalize peer dependencies and bundle everything
+// For builds with dependencies, only externalize peer dependencies and bundle everything
 // else so we can check ES2020 compatibility without checking framework code.
 let externalDependencies = undefined
 
-if (canary) {
+if (withDeps) {
   const pkg = JSON.parse(readFileSync('./package.json', 'utf8'))
   externalDependencies = Object.keys(pkg.peerDependencies || {})
 }
@@ -23,7 +23,7 @@ const config = {
   target: 'es2020',
   external: externalDependencies,
   plugins: [
-    ...(canary ? [] : [nodeExternalsPlugin()]),
+    ...(withDeps ? [] : [nodeExternalsPlugin()]),
     {
       name: 'inertia',
       setup(build) {
@@ -43,13 +43,16 @@ const builds = [
   { entryPoints: ['src/index.ts'], format: 'cjs', outfile: 'dist/index.js', platform: 'browser' },
   { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.esm.js', platform: 'node' },
   { entryPoints: ['src/server.ts'], format: 'cjs', outfile: 'dist/server.js', platform: 'node' },
-].filter((build) => !canary || (build.platform === 'browser' && build.format === 'esm'))
+].filter((build) => {
+  // For ES2020 checks, we only need browser/esm build
+  return !withDeps || (build.platform === 'browser' && build.format === 'esm')
+})
 
 builds.forEach(async (build) => {
   const context = await esbuild.context({
     ...config,
     ...build,
-    ...(canary ? { outfile: build.outfile.replace(/dist\/([^.]+)/, 'dist/canary.$1') } : {}),
+    ...(withDeps ? { outfile: build.outfile.replace(/dist\/([^.]+)/, 'dist/with-deps.$1') } : {}),
   })
 
   if (watch) {
@@ -58,6 +61,6 @@ builds.forEach(async (build) => {
   } else {
     await context.rebuild()
     context.dispose()
-    console.log(`Built ${build.entryPoints} (${build.format}) ${canary ? '(canary)' : ''}…`)
+    console.log(`Built ${build.entryPoints} (${build.format}) ${withDeps ? '(with-deps)' : ''}…`)
   }
 })

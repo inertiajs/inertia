@@ -14,7 +14,7 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       formats: ['es'],
-      fileName: 'canary.index',
+      fileName: 'with-deps.index',
     },
     outDir: 'dist',
     rollupOptions: {

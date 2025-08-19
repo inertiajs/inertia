@@ -48,9 +48,8 @@
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly",
     "clean": "rm -rf types && rm -rf dist",
     "prepublishOnly": "pnpm build",
-    "canary:build": "./build.js --canary",
-    "canary:check": "es-check es2020 \"dist/canary.*.js\" --checkFeatures --module",
-    "canary": "pnpm canary:build && pnpm canary:check"
+    "build:with-deps": "./build.js --with-deps",
+    "check:es2020-compat": "pnpm build:with-deps && es-check es2020 \"dist/with-deps.*.js\" --checkFeatures --module"
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.12",

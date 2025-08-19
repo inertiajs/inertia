@@ -1,19 +1,26 @@
 name: ES2020 Compatibility
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
+
 jobs:
-  es2020-guardrail:
+  es2020-compatibility:
+    name: ES2020 Compatibility (${{ matrix.package }})
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    timeout-minutes: 15
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
     strategy:
       fail-fast: false
       matrix:
         package: ['core', 'react', 'vue3', 'svelte']
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 10
@@ -27,13 +34,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build package (as published)
+      - name: Build packages
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.package }} build
 
-      # CI-only build that inlines deps, so we can scan their syntax too
-      - name: Create canary build
-        run: pnpm -r --filter ./packages/${{ matrix.package }} canary:build
-
-      # Fail if any file uses syntax/features beyond ES2020
-      - name: Check ES2020 compatibility (includes dependencies)
-        run: pnpm -r --filter ./packages/${{ matrix.package }} canary:check
+      - name: Validate ES2020 compatibility
+        run: pnpm -r --filter ./packages/${{ matrix.package }} check:es2020-compat
