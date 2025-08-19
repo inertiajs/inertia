@@ -1,15 +1,15 @@
 name: Bug Report - Svelte
-description: "Submit a Svelte related issue."
+description: 'Submit a Svelte related issue.'
 labels: [svelte]
 assignees:
   - pedroborges
 body:
   - type: markdown
     attributes:
-      value: "Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports."
+      value: 'Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.'
   - type: input
     attributes:
-      label: "@inertiajs/svelte Version"
+      label: '@inertiajs/svelte Version'
       description: Provide the version of `@inertiajs/svelte` you are using.
       placeholder: 2.0.0
     validations:

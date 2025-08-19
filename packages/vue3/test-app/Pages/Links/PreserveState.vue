@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 import { getCurrentInstance, onMounted } from 'vue'
 import WithoutScrollRegion from '../../Layouts/WithoutScrollRegion.vue'
@@ -14,20 +15,20 @@ defineProps({
   },
 })
 
-const preserveCallback = (page) => {
+const preserveCallback = (page: Page) => {
   alert(page)
 
   return true
 }
 
-const preserveCallbackFalse = (page) => {
+const preserveCallbackFalse = (page: Page) => {
   alert(page)
 
   return false
 }
 
 onMounted(() => {
-  window._inertia_page_key = getCurrentInstance().uid
+  window._inertia_page_key = getCurrentInstance()?.uid
 })
 </script>
 

@@ -1,33 +1,34 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
-  
+  import type { FormDataConvertible } from '@inertiajs/core'
+
   let transformType = 'none'
-  
+
   $: getTransform = () => {
     switch (transformType) {
       case 'uppercase':
-        return (data) => ({
+        return (data: Record<string, FormDataConvertible>) => ({
           ...data,
-          name: data.name?.toUpperCase()
+          name: typeof data.name === 'string' ? data.name.toUpperCase() : data.name,
         })
       case 'format':
-        return (data) => ({
+        return (data: Record<string, FormDataConvertible>) => ({
           ...data,
-          fullName: `${data.firstName} ${data.lastName}`
+          fullName: `${data.firstName} ${data.lastName}`,
         })
       default:
-        return (data) => data
+        return (data: Record<string, FormDataConvertible>) => data
     }
   }
 </script>
 
 <div>
   <h1>Transform Function</h1>
-  
+
   <div>
-    <button on:click={() => transformType = 'none'}>None</button>
-    <button on:click={() => transformType = 'uppercase'}>Uppercase</button>
-    <button on:click={() => transformType = 'format'}>Format</button>
+    <button on:click={() => (transformType = 'none')}>None</button>
+    <button on:click={() => (transformType = 'uppercase')}>Uppercase</button>
+    <button on:click={() => (transformType = 'format')}>Format</button>
   </div>
 
   <div>Current transform: {transformType}</div>
@@ -46,9 +47,7 @@
     </div>
 
     <div>
-      <button type="submit">
-        Submit with Transform
-      </button>
+      <button type="submit"> Submit with Transform </button>
     </div>
   </Form>
 </div>

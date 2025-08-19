@@ -91,8 +91,11 @@ app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component
 app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/reactivity', (req, res) => inertia.render(req, res, { component: 'Links/Reactivity' }))
-app.get('/links/custom-component/:page', (req, res) =>
-  inertia.render(req, res, { component: 'Links/CustomComponent', props: { page: req.params.page } }),
+app.get('/links/as-component/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/AsComponent', props: { page: req.params.page } }),
+)
+app.get('/links/as-element/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/AsElement', props: { page: req.params.page } }),
 )
 app.get('/links/cancel-sync-request/:page', (req, res) => {
   const page = req.params.page
@@ -135,6 +138,7 @@ app.post('/visits/events-errors', (req, res) =>
 app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
+app.get('/visits/after-error/:page', (req, res) => inertia.render(req, res, { component: 'Visits/AfterError' }))
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
@@ -234,6 +238,16 @@ app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 
+app.get('/prefetch/after-error', (req, res) => {
+  inertia.render(req, res, { component: 'Prefetch/AfterError' })
+})
+
+app.get('/prefetch/wayfinder', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Wayfinder',
+  })
+})
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
@@ -260,6 +274,17 @@ app.get('/prefetch/swr/:pageNumber', (req, res) => {
   } else {
     page()
   }
+})
+
+app.get('/prefetch/tags/:pageNumber/:propType?', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/Tags',
+    props: {
+      pageNumber: req.params.pageNumber,
+      lastLoaded: Date.now(),
+      propType: req.params.propType || 'array',
+    },
+  })
 })
 
 app.get('/history/:pageNumber', (req, res) => {
@@ -528,6 +553,26 @@ app.get('/form-component/events', (req, res) => inertia.render(req, res, { compo
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
+app.get('/form-component/disable-while-processing/:disable', upload.any(), async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/DisableWhileProcessing',
+    props: {
+      disable: req.params.disable === 'yes',
+    },
+  }),
+)
+app.post('/form-component/disable-while-processing/:disable/submit', upload.any(), async (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'FormComponent/DisableWhileProcessing',
+        props: {
+          disable: req.params.disable === 'yes',
+        },
+      }),
+    500,
+  ),
+)
 app.post('/form-component/events/success', async (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/Events' }),
 )
@@ -547,8 +592,94 @@ app.get('/form-component/progress', (req, res) => inertia.render(req, res, { com
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
 )
+
+app.get('/form-component/submit-complete/reset', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
+)
+app.get('/form-component/submit-complete/defaults', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
+)
+app.post('/form-component/submit-complete/reset', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
+)
+app.post('/form-component/submit-complete/defaults', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
+)
+
 app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
-app.get('/form-component/dotted-keys', (req, res) => inertia.render(req, res, { component: 'FormComponent/DottedKeys' }))
+app.get('/form-component/dotted-keys', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),
+)
+app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
+app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
+app.get('/form-component/uppercase-method', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
+)
+
+app.get('/form-component/reset-on-error', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnError' }),
+)
+app.post('/form-component/reset-on-error', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/ResetAttributes/ResetOnError',
+    props: { errors: { name: 'Some name error' } },
+  }),
+)
+
+app.get('/form-component/reset-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccess' }),
+)
+app.post('/form-component/reset-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccess' }),
+)
+
+app.get('/form-component/reset-on-error-fields', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnErrorFields' }),
+)
+app.post('/form-component/reset-on-error-fields', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/ResetAttributes/ResetOnErrorFields',
+    props: { errors: { name: 'Some name error' } },
+  }),
+)
+
+app.get('/form-component/reset-on-success-fields', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccessFields' }),
+)
+app.post('/form-component/reset-on-success-fields', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccessFields' }),
+)
+
+app.get('/form-component/set-defaults-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SetDefaultsOnSuccess' }),
+)
+app.post('/form-component/set-defaults-on-success', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SetDefaultsOnSuccess' }),
+)
+
+app.get('/form-component/url/with/segements', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/EmptyAction' }),
+)
+app.post('/form-component/url/with/segements', async (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/EmptyAction',
+    props: { errors: { name: 'Something went wrong' } },
+  }),
+)
+
+app.get('/form-component/submit-complete/redirect', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
+)
+app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+app.post('/form-component/wayfinder', (req, res) => {
+  inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
+})
+app.get('/form-component/invalidate-tags/:propType', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/InvalidateTags',
+    props: { lastLoaded: Date.now(), propType: req.params.propType },
+  }),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 

@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 import WithoutScrollRegion from '../../Layouts/WithoutScrollRegion.vue'
 
@@ -13,13 +14,13 @@ defineProps({
   },
 })
 
-const preserveCallback = (page) => {
+const preserveCallback = (page: Page) => {
   console.log(JSON.stringify(page))
 
   return true
 }
 
-const preserveCallbackFalse = (page) => {
+const preserveCallbackFalse = (page: Page) => {
   console.log(JSON.stringify(page))
 
   return false

@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
 
-  let events = []
+  let events: string[] = []
   let cancelInOnBefore = false
   let shouldFail = false
   let shouldDelay = false
-  let cancelToken = null
+  let cancelToken: { cancel: () => void } | null = null
 
-  function log(eventName) {
+  function log(eventName: string) {
     events = [...events, eventName]
   }
 
@@ -56,7 +56,7 @@
     log('onError')
   }
 
-  function onCancelToken(token) {
+  function onCancelToken(token: { cancel: () => void }) {
     log('onCancelToken')
     cancelToken = token
   }
@@ -114,9 +114,9 @@
   </div>
 
   <div>
-    <button type="button" on:click={() => cancelInOnBefore = true}>Cancel in onBefore</button>
-    <button type="button" on:click={() => shouldFail = true}>Fail Request</button>
-    <button type="button" on:click={() => shouldDelay = true}>Should Delay</button>
+    <button type="button" on:click={() => (cancelInOnBefore = true)}>Cancel in onBefore</button>
+    <button type="button" on:click={() => (shouldFail = true)}>Fail Request</button>
+    <button type="button" on:click={() => (shouldDelay = true)}>Should Delay</button>
     <button type="button" on:click={cancelVisit}>Cancel Visit</button>
     <button type="submit">Submit</button>
   </div>

@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { FormDataConvertible } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
@@ -7,17 +8,17 @@ const transformType = ref('none')
 const transformFunction = computed(() => {
   switch (transformType.value) {
     case 'uppercase':
-      return (data) => ({
+      return (data: Record<string, FormDataConvertible>) => ({
         ...data,
-        name: data.name?.toUpperCase(),
+        name: typeof data.name === 'string' ? data.name.toUpperCase() : data.name,
       })
     case 'format':
-      return (data) => ({
+      return (data: Record<string, FormDataConvertible>) => ({
         ...data,
         fullName: `${data.firstName} ${data.lastName}`,
       })
     default:
-      return (data) => data
+      return (data: Record<string, FormDataConvertible>) => data
   }
 })
 </script>

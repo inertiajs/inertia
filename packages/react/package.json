@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "2.0.17",
+  "version": "2.1.1",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -62,6 +62,7 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "es-toolkit": "^1.33.0"
+    "@types/lodash-es": "^4.17.12",
+    "lodash-es": "^4.17.21"
   }
 }

@@ -908,6 +908,33 @@ test.describe('Error bags', () => {
   })
 })
 
+test.describe('Wayfinder object', () => {
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/visits/wayfinder')
+  })
+
+  test('can use UrlMethodPair object with visit method', async ({ page }) => {
+    await page.getByRole('link', { name: 'Wayfinder object visit' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toBe('post')
+    await expect(dump.query).toEqual({})
+    await expect(dump.form).toEqual({})
+  })
+
+  test('can override UrlMethodPair method with options parameter', async ({ page }) => {
+    await page.getByRole('link', { name: 'Wayfinder object method override' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'patch')
+
+    await expect(dump.method).toBe('patch')
+    await expect(dump.query).toEqual({})
+    await expect(dump.form).toEqual({})
+  })
+})
+
 test.describe('Redirects', () => {
   test('follows 303 redirects', async ({ page }) => {
     pageLoads.watch(page)
@@ -925,4 +952,29 @@ test.describe('Redirects', () => {
     await expect(page).toHaveURL('/non-inertia')
     await expect(pageLoads.count).toBe(2)
   })
+})
+
+test('can do a subsequent visit after the previous visit has thrown an error in onSuccess', async ({ page }) => {
+  pageLoads.watch(page)
+  const consoleErrors = []
+
+  page.on('pageerror', (error: Error) => consoleErrors.push(error.message))
+
+  await expect(consoleMessages.messages).toHaveLength(0)
+
+  await page.goto('/visits/after-error/1')
+  const response = page.waitForResponse('/visits/after-error/2')
+
+  await page.getByRole('link', { name: 'Throw error on success' }).click()
+  await response
+
+  await expect(consoleErrors).toHaveLength(1)
+  await expect(consoleErrors[0]).toBe('Error after visit')
+
+  await page.getByRole('link', { name: 'Visit dump page' }).click()
+
+  const dump = await shouldBeDumpPage(page, 'get')
+
+  await expect(dump.method).toBe('get')
+  await expect(dump.form).toEqual({})
 })

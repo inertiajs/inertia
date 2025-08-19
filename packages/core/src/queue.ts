@@ -8,7 +8,7 @@ export default class Queue<T> {
   }
 
   public process() {
-    this.processingPromise ??= this.processNext().then(() => {
+    this.processingPromise ??= this.processNext().finally(() => {
       this.processingPromise = null
     })
 

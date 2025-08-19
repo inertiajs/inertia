@@ -1,18 +1,19 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
-  
-  let method = 'get'
+  import type { Method } from '@inertiajs/core'
+
+  let method: Method = 'get'
 </script>
 
 <div>
   <h1>HTTP Methods</h1>
-  
+
   <div>
-    <button on:click={() => method = 'get'}>GET</button>
-    <button on:click={() => method = 'post'}>POST</button>
-    <button on:click={() => method = 'put'}>PUT</button>
-    <button on:click={() => method = 'patch'}>PATCH</button>
-    <button on:click={() => method = 'delete'}>DELETE</button>
+    <button on:click={() => (method = 'get')}>GET</button>
+    <button on:click={() => (method = 'post')}>POST</button>
+    <button on:click={() => (method = 'put')}>PUT</button>
+    <button on:click={() => (method = 'patch')}>PATCH</button>
+    <button on:click={() => (method = 'delete')}>DELETE</button>
   </div>
 
   <div>Current method: {method}</div>
@@ -23,8 +24,8 @@
     </div>
 
     <div>
-      <input type="checkbox" name="active" value="true" checked />
-      <label>Active</label>
+      <label for="active">Active</label>
+      <input type="checkbox" name="active" id="active" value="true" checked />
     </div>
 
     <div>

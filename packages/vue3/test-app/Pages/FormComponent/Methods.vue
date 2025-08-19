@@ -1,8 +1,9 @@
-<script setup>
+<script setup lang="ts">
+import type { Method } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const method = ref('get')
+const method = ref<Method>('get')
 </script>
 
 <template>

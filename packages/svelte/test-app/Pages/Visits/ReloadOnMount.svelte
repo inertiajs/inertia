@@ -1,14 +1,12 @@
-<script>
-import { router } from '@inertiajs/svelte'
-import { onMount } from 'svelte'
+<script lang="ts">
+  import { router } from '@inertiajs/svelte'
+  import { onMount } from 'svelte'
 
-export let name = undefined;
+  export let name
 
-onMount(() => {
-    router.reload({only: ['name']})
-})
-
+  onMount(() => {
+    router.reload({ only: ['name'] })
+  })
 </script>
-
 
 <div>Name is {name}</div>

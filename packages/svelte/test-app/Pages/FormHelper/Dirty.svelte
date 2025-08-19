@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
   const form = useForm({
     name: 'foo',
-    foo: [],
+    foo: [] as string[],
   })
 
   const submit = () => {
@@ -25,7 +25,9 @@
 </script>
 
 <div>
-    <div>Form is {#if $form.isDirty}dirty{:else}clean{/if}</div>
+  <div>
+    Form is {#if $form.isDirty}dirty{:else}clean{/if}
+  </div>
   <label>
     Full Name
     <input type="text" id="name" name="name" bind:value={$form.name} />
@@ -35,5 +37,4 @@
   <button on:click={defaults} class="defaults">Defaults</button>
   <button on:click={dataAndDefaults} class="data-and-defaults">Data and Defaults</button>
   <button on:click={pushValue} class="push">Push value</button>
-
 </div>
