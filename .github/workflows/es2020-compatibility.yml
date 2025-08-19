@@ -27,7 +27,7 @@ jobs:
         run: pnpm install
 
       - name: Build package (as published)
-        run: pnpm -r --filter ./packages/${{ matrix.package }} build
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.package }} build
 
       # CI-only build that inlines deps, so we can scan their syntax too
       - name: Create canary build
