@@ -124,6 +124,11 @@
     submit()
   }
 
+  function handleReset(event: Event) {
+    event.preventDefault()
+    reset()
+  }
+
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
   }
@@ -171,6 +176,7 @@
   action={_action}
   method={_method}
   on:submit={handleSubmit}
+  on:reset={handleReset}
   {...$$restProps}
   inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
