@@ -173,6 +173,9 @@ export default function Reset() {
       <input type="button" name="button_input" value="Click me" />
       <input type="submit" name="submit_input" value="Submit Form" />
       <input type="reset" name="reset_input" value="Reset Form" />
+      <button type="reset" name="reset_button">
+        Reset Form
+      </button>
 
       {/* Dotted & Array Notation */}
       <h2>Dotted & Array Notation</h2>

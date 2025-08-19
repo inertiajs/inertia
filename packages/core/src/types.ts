@@ -40,13 +40,15 @@ export type FormDataConvertible =
   | FormDataConvertibleValue
 
 export type FormDataType<T extends object> = {
-  [K in keyof T]: T[K] extends FormDataConvertibleValue
-    ? T[K]
-    : T[K] extends (...args: unknown[]) => unknown
-      ? never
-      : T[K] extends object | Array<unknown>
-        ? FormDataType<T[K]>
-        : never
+  [K in keyof T]: T[K] extends infer U
+    ? U extends FormDataConvertibleValue
+      ? U
+      : U extends (...args: unknown[]) => unknown
+        ? never
+        : U extends object | Array<unknown>
+          ? FormDataType<U>
+          : never
+    : never
 }
 
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue

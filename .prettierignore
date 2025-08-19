@@ -6,17 +6,14 @@ node_modules/
 **/dist/
 **/.svelte-kit
 **/bootstrap/ssr
-
-# Generated files
-*.d.ts
-**/types/
-*.timestamp-*.mjs
+**/public/build
 
 # Files we don't want to format
+pnpm-lock.yaml
 *.lock
-*.yaml
 *.json
 *.md
+*.timestamp-*.mjs
 
 # Vue files with parsing issues (dual script blocks)
 packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Nested/PageA.vue
@@ -27,5 +24,4 @@ packages/vue3/test-app/Pages/PersistentLayouts/Shorthand/Nested/PageA.vue
 packages/vue3/test-app/Pages/PersistentLayouts/Shorthand/Nested/PageB.vue
 
 # Directories we don't want to format
-.github/
 **/test-results/
