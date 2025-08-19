@@ -3,6 +3,7 @@ import esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 
 const watch = process.argv.slice(1).includes('--watch')
+const canary = process.argv.slice(1).includes('--canary')
 
 const config = {
   bundle: true,
@@ -10,7 +11,7 @@ const config = {
   sourcemap: true,
   target: 'es2020',
   plugins: [
-    nodeExternalsPlugin(),
+    ...(canary ? [] : [nodeExternalsPlugin()]),
     {
       name: 'inertia',
       setup(build) {
@@ -30,7 +31,7 @@ const builds = [
   { entryPoints: ['src/index.ts'], format: 'cjs', outfile: 'dist/index.js', platform: 'browser' },
   { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.esm.js', platform: 'node' },
   { entryPoints: ['src/server.ts'], format: 'cjs', outfile: 'dist/server.js', platform: 'node' },
-]
+].filter((build) => !canary || (build.platform === 'browser' && build.format === 'esm'))
 
 builds.forEach(async (build) => {
   const context = await esbuild.context({ ...config, ...build })
@@ -41,6 +42,6 @@ builds.forEach(async (build) => {
   } else {
     await context.rebuild()
     context.dispose()
-    console.log(`Built ${build.entryPoints} (${build.format})…`)
+    console.log(`Built ${build.entryPoints} (${build.format}) ${canary ? '(canary)' : ''}…`)
   }
 })

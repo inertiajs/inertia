@@ -1,0 +1,38 @@
+name: ES2020 Compatibility
+on: [push, pull_request]
+jobs:
+  es2020-guardrail:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: ['core', 'react', 'vue3']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build package (as published)
+        run: pnpm -r --filter ./packages/${{ matrix.package }} build
+
+      # CI-only build that inlines deps, so we can scan their syntax too
+      - name: Create canary build
+        run: pnpm -r --filter ./packages/${{ matrix.package }} canary:build
+
+      # Fail if any file uses syntax/features beyond ES2020
+      - name: Check ES2020 compatibility (includes dependencies)
+        run: pnpm -r --filter ./packages/${{ matrix.package }} canary:check

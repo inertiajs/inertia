@@ -45,11 +45,15 @@
     "dev": "./build.js --watch",
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
     "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "canary:build": "./build.js --canary",
+    "canary:check": "es-check es2020 \"dist/canary.*.js\" --checkFeatures --module",
+    "canary": "pnpm canary:build && pnpm canary:check"
   },
   "devDependencies": {
     "@types/node": "^22.5.3",
     "axios": "^1.8.2",
+    "es-check": "^9.3.1",
     "esbuild": "^0.25.0",
     "esbuild-node-externals": "^1.6.0",
     "typescript": "^4.9.4",
