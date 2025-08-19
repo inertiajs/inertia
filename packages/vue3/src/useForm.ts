@@ -10,8 +10,7 @@ import {
   UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
-import { get, has, set } from 'es-toolkit/compat'
-import { cloneDeep, isEqual } from 'lodash-es'
+import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { reactive, watch } from 'vue'
 
 type FormOptions = Omit<VisitOptions, 'data'>

@@ -16,8 +16,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import { get, has, set } from 'es-toolkit/compat'
-import { cloneDeep, isEqual } from 'lodash-es'
+import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { writable, type Writable } from 'svelte/store'
 
 type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
