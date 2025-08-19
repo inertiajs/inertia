@@ -7,15 +7,7 @@ export { hide as hideProgress, reveal as revealProgress, default as setupProgres
 export { resetFormFields } from './resetFormFields'
 export { default as shouldIntercept } from './shouldIntercept'
 export * from './types'
-export {
-	hrefToUrl,
-	isUrlMethodPair,
-	mergeDataIntoQueryString,
-	urlWithoutHash,
-	isBrowser,
-	appURL,
-	asset,
-} from './url'
+export { appURL, asset, hrefToUrl, isBrowser, isUrlMethodPair, mergeDataIntoQueryString, urlWithoutHash } from './url'
 export { type Router }
 
 export const router = new Router()

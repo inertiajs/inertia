@@ -1,7 +1,15 @@
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import { AssetOptions, FormDataConvertible, Method, PreloadOptions, RequestPayload, UrlMethodPair, VisitOptions } from './types'
+import {
+  AssetOptions,
+  FormDataConvertible,
+  Method,
+  PreloadOptions,
+  RequestPayload,
+  UrlMethodPair,
+  VisitOptions,
+} from './types'
 
 export function isBrowser(): boolean {
   return typeof window !== 'undefined'
@@ -99,7 +107,10 @@ function toHost(input: string): string | null {
     const defaultPorts = new Set(['', '80', '443'])
     return defaultPorts.has(url.port) ? url.hostname : url.host
   } catch {
-    const cleaned = input.replace(/^https?:\/\//i, '').replace(/\/.*/, '').trim()
+    const cleaned = input
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/.*/, '')
+      .trim()
     return cleaned || null
   }
 }
@@ -108,7 +119,7 @@ function envAppHost(): { host: string; protocol?: string } | null {
   const env = typeof process !== 'undefined' ? process.env : undefined
   if (!env) return null
 
-  const candidate = env.APP_URL  || env.VITE_APP_URL
+  const candidate = env.APP_URL || env.VITE_APP_URL
 
   if (!candidate) return null
 
@@ -131,25 +142,21 @@ export function appURL(fallbackUrl?: string): string {
     if (fromFallback) return fromFallback
 
     const fromEnv = envAppHost()
-    
+
     if (fromEnv?.host) return fromEnv.host
-    
+
     return ''
   }
 
   const { host, port, hostname } = window.location
   const defaultPorts = new Set(['', '80', '443'])
-  
+
   return defaultPorts.has(port) ? hostname : host
 }
 
 export function asset(path: string, options?: AssetOptions): string
 export function asset(path: string, secureOrOptions?: boolean | AssetOptions, fallbackUrl?: string): string
-export function asset(
-  path: string,
-  secureOrOptions?: boolean | AssetOptions,
-  fallbackUrl?: string,
-): string {
+export function asset(path: string, secureOrOptions?: boolean | AssetOptions, fallbackUrl?: string): string {
   return _assetInternal(path, secureOrOptions as any, fallbackUrl)
 }
 
@@ -164,7 +171,7 @@ function _assetInternal(path: string, secureOrOptions?: boolean | AssetOptions, 
         preload: secureOrOptions.preload,
       }
     }
-  return { secure: secureOrOptions as boolean | undefined, fallback: fallbackUrl, preload: undefined }
+    return { secure: secureOrOptions as boolean | undefined, fallback: fallbackUrl, preload: undefined }
   })()
 
   const host = appURL(fallback)
@@ -221,8 +228,7 @@ function injectPreloadLink(href: string, opts: Required<Pick<PreloadOptions, 'as
     if (opts.type) link.type = opts.type
     if (opts.fetchpriority) link.setAttribute('fetchpriority', opts.fetchpriority)
     document.head.appendChild(link)
-  } catch {
-  }
+  } catch {}
 }
 
 export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
