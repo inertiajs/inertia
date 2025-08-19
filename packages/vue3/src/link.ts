@@ -175,8 +175,8 @@ const Link: InertiaLink = defineComponent({
       typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method),
     )
     const as = computed(() => {
-      if (typeof props.as !== 'string') {
-        // Custom component
+      if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
+        // Custom component or element
         return props.as
       }
 
