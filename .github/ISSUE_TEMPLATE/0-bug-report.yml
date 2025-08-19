@@ -1,9 +1,9 @@
 name: Bug Report
-description: "Submit an issue."
+description: 'Submit an issue.'
 body:
   - type: markdown
     attributes:
-      value: "Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports."
+      value: 'Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.'
   - type: checkboxes
     attributes:
       label: Inertia adapter(s) affected
@@ -15,7 +15,7 @@ body:
         - label: Not Applicable
   - type: input
     attributes:
-      label: "JS package version"
+      label: 'JS package version'
       description: Provide the version of `@inertiajs/{adapter}` you are using.
       placeholder: 2.0.0
     validations:
