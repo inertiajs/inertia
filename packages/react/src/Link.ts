@@ -63,8 +63,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [href, method])
 
     const _as = useMemo(() => {
-      if (typeof as !== 'string') {
-        // Custom component
+      if (typeof as !== 'string' || as.toLowerCase() !== 'a') {
+        // Custom component or element
         return as
       }
 
