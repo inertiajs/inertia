@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "pnpm package && publint",
-    "build:with-deps": "vite build --config vite-with-deps.config.js",
+    "build:with-deps": "svelte-kit sync && vite build --config vite-with-deps.config.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "dev": "pnpm package --watch",
