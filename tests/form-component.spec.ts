@@ -1380,6 +1380,10 @@ test.describe('Form Component', () => {
   test('it accepts wayfinder shaped objects as action', async ({ page }) => {
     await page.goto('/form-component/wayfinder')
 
+    const form = page.locator('form')
+    await expect(form).toHaveAttribute('action', '/dump/post')
+    await expect(form).toHaveAttribute('method', 'post')
+
     await page.getByRole('button', { name: 'Submit' }).click()
 
     const dump = await shouldBeDumpPage(page, 'post')

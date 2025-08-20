@@ -249,7 +249,7 @@ const Form: InertiaForm = defineComponent({
         {
           ...attrs,
           ref: formElement,
-          action: props.action,
+          action: typeof props.action === 'object' ? props.action.url : props.action,
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
