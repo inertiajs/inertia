@@ -17,12 +17,14 @@
     "url": "https://github.com/inertiajs/inertia/issues"
   },
   "scripts": {
-    "dev": "pnpm package --watch",
     "build": "pnpm package && publint",
-    "package": "svelte-kit sync && svelte-package --input src",
-    "prepublishOnly": "pnpm build",
+    "build:with-deps": "svelte-kit sync && vite build --config vite-with-deps.config.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "dev": "pnpm package --watch",
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
+    "package": "svelte-kit sync && svelte-package --input src",
+    "prepublishOnly": "pnpm build"
   },
   "exports": {
     ".": {
@@ -46,7 +48,8 @@
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
     "html-escape": "^2.0.0",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.21",
+    "vite": "^5.4.19"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.2.0",
@@ -55,12 +58,12 @@
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/html-escape": "^2.0.2",
     "axios": "^1.8.2",
+    "es-check": "^9.3.1",
     "publint": "^0.2.10",
     "svelte": "^4.2.19",
     "svelte-check": "^4.0.0",
     "tslib": "^2.7.0",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.19"
+    "typescript": "^5.5.4"
   },
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
