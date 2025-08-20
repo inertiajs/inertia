@@ -72,6 +72,10 @@ export class Request {
         }
 
         if (fireExceptionEvent(error)) {
+          if (originallyPrefetch) {
+            this.requestParams.onPrefetchError(error)
+          }
+
           return Promise.reject(error)
         }
       })

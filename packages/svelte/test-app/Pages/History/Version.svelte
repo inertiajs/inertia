@@ -1,6 +1,5 @@
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
-
 </script>
 
 <a href="/history/version/1" use:inertia>Page 1</a>

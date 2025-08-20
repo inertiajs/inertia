@@ -8,17 +8,16 @@
   "type": "module",
   "devDependencies": {
     "@inertiajs/react": "workspace:*",
+    "@tailwindcss/vite": "^4.1.8",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.2",
-    "autoprefixer": "^10.4.13",
     "axios": "^1.8.2",
     "laravel-vite-plugin": "^1.2.0",
     "lodash": "^4.17.19",
-    "postcss": "^8.4.31",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss": "^3.2.4",
+    "tailwindcss": "^4.1.8",
     "typescript": "^4.9.5",
     "vite": "^6.3.0"
   }

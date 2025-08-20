@@ -1,4 +1,4 @@
-import { cloneDeep } from 'es-toolkit'
+import { cloneDeep } from 'lodash-es'
 import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'
@@ -18,7 +18,11 @@ class PrefetchedRequests {
   protected removalTimers: PrefetchRemovalTimer[] = []
   protected currentUseId: string | null = null
 
-  public add(params: ActiveVisit, sendFunc: (params: InternalActiveVisit) => void, { cacheFor }: PrefetchOptions) {
+  public add(
+    params: ActiveVisit,
+    sendFunc: (params: InternalActiveVisit) => void,
+    { cacheFor, cacheTags }: PrefetchOptions,
+  ) {
     const inFlight = this.findInFlight(params)
 
     if (inFlight) {
@@ -55,6 +59,10 @@ class PrefetchedRequests {
         onPrefetchResponse(response) {
           resolve(response)
         },
+        onPrefetchError(error) {
+          prefetchedRequests.removeFromInFlight(params)
+          reject(error)
+        },
       })
     }).then((response) => {
       this.remove(params)
@@ -66,13 +74,11 @@ class PrefetchedRequests {
         singleUse: expires === 0,
         timestamp: Date.now(),
         inFlight: false,
+        tags: Array.isArray(cacheTags) ? cacheTags : [cacheTags],
       })
 
       this.scheduleForRemoval(params, expires)
-
-      this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-        return !this.paramsAreEqual(prefetching.params, params)
-      })
+      this.removeFromInFlight(params)
 
       response.handlePrefetch()
 
@@ -97,12 +103,24 @@ class PrefetchedRequests {
     this.removalTimers = []
   }
 
+  public removeByTags(tags: string[]): void {
+    this.cached = this.cached.filter((prefetched) => {
+      return !prefetched.tags.some((tag) => tags.includes(tag))
+    })
+  }
+
   public remove(params: ActiveVisit): void {
     this.cached = this.cached.filter((prefetched) => {
       return !this.paramsAreEqual(prefetched.params, params)
     })
 
     this.clearTimer(params)
+  }
+
+  protected removeFromInFlight(params: ActiveVisit): void {
+    this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
+      return !this.paramsAreEqual(prefetching.params, params)
+    })
   }
 
   protected extractStaleValues(cacheFor: PrefetchOptions['cacheFor']): [number, number] {

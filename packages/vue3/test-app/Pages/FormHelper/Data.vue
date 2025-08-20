@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3'
 
 const form = useForm({
   name: 'foo',
   handle: 'example',
-  remember: false,
+  remember: false as boolean,
 })
 
 const page = usePage()

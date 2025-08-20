@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "2.0.17",
+  "version": "2.1.1",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -42,14 +42,17 @@
     }
   },
   "scripts": {
-    "dev": "./build.js --watch",
     "build": "pnpm clean && ./build.js && tsc",
+    "build:with-deps": "./build.js --with-deps",
     "clean": "rm -rf types && rm -rf dist",
+    "dev": "./build.js --watch",
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose",
     "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^22.5.3",
     "axios": "^1.8.2",
+    "es-check": "^9.3.1",
     "esbuild": "^0.25.0",
     "esbuild-node-externals": "^1.6.0",
     "typescript": "^4.9.4",
@@ -60,6 +63,7 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "es-toolkit": "^1.33.0"
+    "@types/lodash-es": "^4.17.12",
+    "lodash-es": "^4.17.21"
   }
 }

@@ -105,7 +105,7 @@ test.describe('data', () => {
 
         const dump = await shouldBeDumpPage(page, 'get')
 
-        // TODO: Should this be in the query string? It's not, but... should it be?
+        // TODO: Should this be in the query string? It's not, but... should it be? => See 'url' key in helpers.js
 
         await expect(dump.query).toEqual({ a: ['b', 'c'] })
         await expect(dump.method).toBe('get')
@@ -127,7 +127,7 @@ test.describe('data', () => {
 
       const dump = await shouldBeDumpPage(page, 'get')
 
-      // TODO: Should this be in the query string? It's not, but... should it be?
+      // TODO: Should this be in the query string? It's not, but... should it be? => See 'url' key in helpers.js
       // const params = await page.evaluate(() => window.location.search)
       // await expect(params).toBe('?foo=get')
 
@@ -611,8 +611,11 @@ test.describe('enabled', () => {
     await expect(page).toHaveURL('/article')
     await expect(page.getByText('Article Header')).toBeVisible()
 
-    const restoredScrollPosition = await page.evaluate(() => document.documentElement.scrollTop)
-    expect(restoredScrollPosition).toBe(bottomScrollPosition)
+    await page.waitForFunction(
+      (expectedPosition) => document.documentElement.scrollTop === expectedPosition,
+      bottomScrollPosition,
+      { timeout: 1000 },
+    )
   })
 
   test.skip('restores all tracked scroll regions when pressing the back button from another website', async ({
@@ -814,14 +817,14 @@ test.describe('"as" attribute', () => {
   })
 })
 
-test.describe('custom component', () => {
+test.describe('as component', () => {
   test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/links/custom-component/1')
+    await page.goto('/links/as-component/1')
   })
 
-  test('can render custom components', async ({ page }) => {
+  test('can render', async ({ page }) => {
     const button = await page.getByRole('button', { name: 'GET Custom Component' }).first()
     await expect(button).toHaveCSS('background-color', 'rgb(0, 0, 255)')
     await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
@@ -833,57 +836,137 @@ test.describe('custom component', () => {
     await expect(dump.method).toBe('get')
   })
 
-  test('can render custom components with different methods', async ({ page }) => {
+  test('can render with different methods', async ({ page }) => {
     await page.getByText('POST Custom Component').click()
 
     const dump = await shouldBeDumpPage(page, 'post')
     await expect(dump.method).toBe('post')
   })
 
-  test('can render custom components with data', async ({ page }) => {
+  test('can render with data', async ({ page }) => {
     await page.getByText('Custom Component with Data').click()
 
     const dump = await shouldBeDumpPage(page, 'post')
     await expect(dump.form).toEqual({ test: 'data' })
   })
 
-  test('can render custom components with headers', async ({ page }) => {
+  test('can render with headers', async ({ page }) => {
     await page.getByText('Custom Component with Headers').click()
 
     const dump = await shouldBeDumpPage(page, 'get')
     await expect(dump.headers['x-test']).toBe('header')
   })
 
-  test('can render custom components with event handlers', async ({ page }) => {
+  test('can render with event handlers', async ({ page }) => {
     await page.getByText('Custom Component with Events').click()
 
     const dump = await shouldBeDumpPage(page, 'get')
     await expect(dump.method).toBe('get')
 
     // Check that events were tracked
-    const events = await page.evaluate(() => window.customComponentEvents)
+    const events = await page.evaluate(() => window.componentEvents)
     await expect(events.length).toBe(3)
 
     await expect(events.map((e) => e.eventName)).toEqual(['onStart', 'onSuccess', 'onFinish'])
   })
 
-  test('can render custom components with "replace" prop', async ({ page }) => {
-    await page.goto('/links/custom-component/2')
+  test('can render with "replace" prop', async ({ page }) => {
+    await page.goto('/links/as-component/2')
 
     await page.getByRole('button', { name: 'Custom Component with Replace' }).click()
-    await expect(page).toHaveURL('/links/custom-component/3')
+    await expect(page).toHaveURL('/links/as-component/3')
 
     await page.goBack()
-    await expect(page).toHaveURL('/links/custom-component/1')
+    await expect(page).toHaveURL('/links/as-component/1')
   })
 
-  test('can render custom components with "preserveState" prop', async ({ page }) => {
-    await page.goto('/links/custom-component/1')
+  test('can render with "preserveState" prop', async ({ page }) => {
+    await page.goto('/links/as-component/1')
 
     const componentState = await page.locator('#state').textContent()
 
     await page.getByRole('button', { name: 'Custom Component with Preserve State' }).click()
-    await expect(page).toHaveURL('/links/custom-component/2')
+    await expect(page).toHaveURL('/links/as-component/2')
+
+    const newComponentState = await page.locator('#state').textContent()
+
+    await expect(newComponentState).toBe(componentState)
+  })
+})
+
+test.describe('as element', () => {
+  test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/links/as-element/1')
+  })
+
+  test('can render', async ({ page }) => {
+    const button = await page.getByText('GET Custom Element').first()
+    // Assert that it's a <div>
+    await expect(button.evaluate((node) => node.tagName)).resolves.toBe('DIV')
+
+    await expect(button).toHaveCSS('background-color', 'rgb(0, 0, 255)')
+    await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await expect(button).toHaveCSS('padding', '10px')
+
+    await button.click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.method).toBe('get')
+  })
+
+  test('can render with different methods', async ({ page }) => {
+    await page.getByText('POST Custom Element').click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    await expect(dump.method).toBe('post')
+  })
+
+  test('can render with data', async ({ page }) => {
+    await page.getByText('Custom Element with Data').click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    await expect(dump.form).toEqual({ test: 'data' })
+  })
+
+  test('can render with headers', async ({ page }) => {
+    await page.getByText('Custom Element with Headers').click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.headers['x-test']).toBe('header')
+  })
+
+  test('can render with event handlers', async ({ page }) => {
+    await page.getByText('Custom Element with Events').click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.method).toBe('get')
+
+    // Check that events were tracked
+    const events = await page.evaluate(() => window.componentEvents)
+    await expect(events.length).toBe(3)
+
+    await expect(events.map((e) => e.eventName)).toEqual(['onStart', 'onSuccess', 'onFinish'])
+  })
+
+  test('can render with "replace" prop', async ({ page }) => {
+    await page.goto('/links/as-element/2')
+
+    await page.getByText('Custom Element with Replace').click()
+    await expect(page).toHaveURL('/links/as-element/3')
+
+    await page.goBack()
+    await expect(page).toHaveURL('/links/as-element/1')
+  })
+
+  test('can render with "preserveState" prop', async ({ page }) => {
+    await page.goto('/links/as-element/1')
+
+    const componentState = await page.locator('#state').textContent()
+
+    await page.getByText('Custom Element with Preserve State').click()
+    await expect(page).toHaveURL('/links/as-element/2')
 
     const newComponentState = await page.locator('#state').textContent()
 

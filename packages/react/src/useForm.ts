@@ -1,29 +1,35 @@
 import {
-  FormDataConvertible,
+  ErrorValue,
+  FormDataErrors,
   FormDataKeys,
+  FormDataType,
   FormDataValues,
   Method,
   Progress,
   router,
+  UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
-import { cloneDeep, isEqual } from 'es-toolkit'
-import { get, has, set } from 'es-toolkit/compat'
+import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import useRemember from './useRemember'
 
-export type SetDataByObject<TForm> = (data: TForm) => void
+export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
 export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
-export type SetDataByKeyValuePair<TForm extends Record<any, any>> = <K extends FormDataKeys<TForm>>(key: K, value: FormDataValues<TForm, K>) => void
-export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> & SetDataByMethod<TForm> & SetDataByKeyValuePair<TForm>
+export type SetDataByKeyValuePair<TForm> = <K extends FormDataKeys<TForm>>(
+  key: K,
+  value: FormDataValues<TForm, K>,
+) => void
+export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TForm> &
+  SetDataByMethod<TForm> &
+  SetDataByKeyValuePair<TForm>
 
-type FormDataType = Record<string, FormDataConvertible>
 type FormOptions = Omit<VisitOptions, 'data'>
 
-export interface InertiaFormProps<TForm extends FormDataType> {
+export interface InertiaFormProps<TForm extends object> {
   data: TForm
   isDirty: boolean
-  errors: Partial<Record<FormDataKeys<TForm>, string>>
+  errors: FormDataErrors<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -32,14 +38,14 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   setData: SetDataAction<TForm>
   transform: (callback: (data: TForm) => object) => void
   setDefaults(): void
-  setDefaults(field: FormDataKeys<TForm>, value: FormDataConvertible): void
+  setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
-  reset: (...fields: FormDataKeys<TForm>[]) => void
-  clearErrors: (...fields: FormDataKeys<TForm>[]) => void
-  resetAndClearErrors: (...fields: FormDataKeys<TForm>[]) => void
-  setError(field: FormDataKeys<TForm>, value: string): void
-  setError(errors: Record<FormDataKeys<TForm>, string>): void
-  submit: (...args: [Method, string, FormOptions?] | [{ url: string; method: Method }, FormOptions?]) => void
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): void
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
+  setError(errors: FormDataErrors<TForm>): void
+  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
   post: (url: string, options?: FormOptions) => void
@@ -47,14 +53,16 @@ export interface InertiaFormProps<TForm extends FormDataType> {
   delete: (url: string, options?: FormOptions) => void
   cancel: () => void
 }
-export default function useForm<TForm extends FormDataType>(initialValues?: TForm): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType>(
-  rememberKey: string,
-  initialValues?: TForm,
+export default function useForm<TForm extends FormDataType<TForm>>(
+  initialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm>
-export default function useForm<TForm extends FormDataType>(
-  rememberKeyOrInitialValues?: string | TForm,
-  maybeInitialValues?: TForm,
+export default function useForm<TForm extends FormDataType<TForm>>(
+  rememberKey: string,
+  initialValues?: TForm | (() => TForm),
+): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  rememberKeyOrInitialValues?: string | TForm | (() => TForm),
+  maybeInitialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm> {
   const isMounted = useRef(null)
   const rememberKey = typeof rememberKeyOrInitialValues === 'string' ? rememberKeyOrInitialValues : null
@@ -65,8 +73,8 @@ export default function useForm<TForm extends FormDataType>(
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
-    ? useRemember({} as Partial<Record<FormDataKeys<TForm>, string>>, `${rememberKey}:errors`)
-    : useState({} as Partial<Record<FormDataKeys<TForm>, string>>)
+    ? useRemember({} as FormDataErrors<TForm>, `${rememberKey}:errors`)
+    : useState({} as FormDataErrors<TForm>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -126,7 +134,7 @@ export default function useForm<TForm extends FormDataType>(
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
-            setErrors({})
+            setErrors({} as FormDataErrors<TForm>)
             setHasErrors(false)
             setWasSuccessful(true)
             setRecentlySuccessful(true)
@@ -188,7 +196,7 @@ export default function useForm<TForm extends FormDataType>(
   )
 
   const setDataFunction = useCallback(
-    (keyOrData: FormDataKeys<TForm> | Function | TForm, maybeValue?: any) => {
+    (keyOrData: FormDataKeys<TForm> | Function | Partial<TForm>, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
         setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
@@ -203,7 +211,7 @@ export default function useForm<TForm extends FormDataType>(
   const [dataAsDefaults, setDataAsDefaults] = useState(false)
 
   const setDefaultsFunction = useCallback(
-    (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: FormDataConvertible) => {
+    (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(data)
         // If setData was called right before setDefaults, data was not
@@ -256,13 +264,11 @@ export default function useForm<TForm extends FormDataType>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeys<TForm> | Record<FormDataKeys<TForm>, string>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: string) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,
-          ...(typeof fieldOrFields === 'string'
-            ? { [fieldOrFields]: maybeValue }
-            : (fieldOrFields as Record<FormDataKeys<TForm>, string>)),
+          ...(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
         return newErrors
@@ -274,7 +280,7 @@ export default function useForm<TForm extends FormDataType>(
   const clearErrors = useCallback(
     (...fields) => {
       setErrors((errors) => {
-        const newErrors = (Object.keys(errors) as Array<FormDataKeys<TForm>>).reduce(
+        const newErrors = Object.keys(errors).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
@@ -282,7 +288,7 @@ export default function useForm<TForm extends FormDataType>(
           {},
         )
         setHasErrors(Object.keys(newErrors).length > 0)
-        return newErrors
+        return newErrors as FormDataErrors<TForm>
       })
     },
     [setErrors, setHasErrors],

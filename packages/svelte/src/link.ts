@@ -3,8 +3,8 @@ import {
   router,
   shouldIntercept,
   type CacheForOption,
-  type FormDataConvertible,
   type GlobalEventsMap,
+  type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
@@ -20,14 +20,18 @@ interface ActionElement extends HTMLElement {
   href?: string
 }
 
-type ActionParameters = Omit<VisitOptions, 'data' | 'prefetch'> & {
-  href?: string | { url: string; method: Method }
-  data?: Record<string, FormDataConvertible>
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
-}
+type ActionParameters = Omit<LinkComponentBaseProps, 'onCancelToken'> & Omit<VisitOptions, keyof LinkComponentBaseProps>
 
-type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error'
+type SelectedEventKeys =
+  | 'start'
+  | 'progress'
+  | 'finish'
+  | 'before'
+  | 'cancel'
+  | 'success'
+  | 'error'
+  | 'prefetching'
+  | 'prefetched'
 type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
 type ActionAttributes = {
   [K in keyof SelectedGlobalEventsMap as `on:${K}` | `on${K}`]?: (
@@ -48,6 +52,7 @@ function link(
   // Variables initialized and controlled by the "update" function
   let prefetchModes: LinkPrefetchOption[] = []
   let cacheForValue: CacheForOption | CacheForOption[]
+  let cacheTags: string[] = []
   let method: Method
   let href: string
   let data
@@ -88,7 +93,7 @@ function link(
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, ...params }: ActionParameters) {
+  function update({ cacheFor = 0, prefetch = false, cacheTags: cacheTagValues = [], ...params }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -116,6 +121,8 @@ function link(
       // Otherwise, default to 30 seconds
       return 30_000
     })()
+
+    cacheTags = cacheTagValues
 
     method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
     ;[href, data] = hrefAndData(method, params)
@@ -154,6 +161,8 @@ function link(
       onSuccess: (page) => dispatchEvent('success', { detail: { page } }),
       onError: (errors) => dispatchEvent('error', { detail: { errors } }),
       onCancelToken: (token) => dispatchEvent('cancel-token', { detail: { token } }),
+      onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+      onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
     }
 
     updateEventListeners()
@@ -173,7 +182,15 @@ function link(
   }
 
   function prefetch() {
-    router.prefetch(href, baseParams, { cacheFor: cacheForValue })
+    router.prefetch(
+      href,
+      {
+        ...baseParams,
+        onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+        onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
+      },
+      { cacheFor: cacheForValue, cacheTags },
+    )
   }
 
   function updateNodeAttributes() {

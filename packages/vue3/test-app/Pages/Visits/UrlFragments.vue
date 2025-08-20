@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
