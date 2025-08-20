@@ -32,7 +32,7 @@ jobs:
 
       - name: Build core package
         if: matrix.adapter != 'core'
-        run: pnpm -r --filter ./packages/core
+        run: pnpm -r --filter ./packages/core build
 
       - name: Validate ES2020 compatibility
         run: pnpm -r --filter ./packages/${{ matrix.adapter }}* es2020-check
