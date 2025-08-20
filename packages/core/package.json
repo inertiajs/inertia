@@ -44,7 +44,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly",
+    "build": "pnpm clean && ./build.js && tsc",
     "build:with-deps": "./build.js --with-deps",
     "clean": "rm -rf types && rm -rf dist",
     "dev": "./build.js --watch",
