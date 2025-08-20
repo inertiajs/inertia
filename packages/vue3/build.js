@@ -19,7 +19,7 @@ if (withDeps) {
 const config = {
   bundle: true,
   minify: false,
-  sourcemap: true,
+  sourcemap: withDeps ? false : true,
   target: 'es2020',
   external: externalDependencies,
   plugins: [
@@ -39,20 +39,16 @@ const config = {
 }
 
 const builds = [
-  { entryPoints: ['src/index.ts'], format: 'esm', outfile: 'dist/index.esm.js', platform: 'browser' },
-  { entryPoints: ['src/index.ts'], format: 'cjs', outfile: 'dist/index.js', platform: 'browser' },
-  { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.esm.js', platform: 'node' },
-  { entryPoints: ['src/server.ts'], format: 'cjs', outfile: 'dist/server.js', platform: 'node' },
-].filter((build) => {
-  // For ES2020 checks, we only need browser/esm build
-  return !withDeps || (build.platform === 'browser' && build.format === 'esm')
-})
+  { entryPoints: ['src/index.ts'], format: 'esm', outfile: `dist/index.esm.js`, platform: 'browser' },
+  { entryPoints: ['src/index.ts'], format: 'cjs', outfile: `dist/index.js`, platform: 'browser' },
+  { entryPoints: ['src/server.ts'], format: 'esm', outfile: `dist/server.esm.js`, platform: 'node' },
+  { entryPoints: ['src/server.ts'], format: 'cjs', outfile: `dist/server.js`, platform: 'node' },
+]
 
 builds.forEach(async (build) => {
   const context = await esbuild.context({
     ...config,
     ...build,
-    ...(withDeps ? { outfile: build.outfile.replace(/dist\/([^.]+)/, 'dist/with-deps.$1') } : {}),
   })
 
   if (watch) {

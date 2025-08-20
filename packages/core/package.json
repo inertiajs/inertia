@@ -44,12 +44,12 @@
     }
   },
   "scripts": {
-    "dev": "./build.js --watch",
+    "build:with-deps": "./build.js --with-deps",
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly",
     "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "pnpm build",
-    "build:with-deps": "./build.js --with-deps",
-    "check:es2020-compat": "pnpm build:with-deps && es-check es2020 \"dist/with-deps.*.js\" --checkFeatures --module"
+    "dev": "./build.js --watch",
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.12",

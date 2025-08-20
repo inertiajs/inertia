@@ -42,12 +42,12 @@
     }
   },
   "scripts": {
-    "dev": "./build.js --watch",
     "build": "pnpm clean && ./build.js && tsc --emitDeclarationOnly --skipLibCheck",
-    "clean": "rm -rf types && rm -rf dist",
-    "prepublishOnly": "pnpm build",
     "build:with-deps": "./build.js --with-deps",
-    "check:es2020-compat": "pnpm build:with-deps && es-check es2020 \"dist/with-deps.*.js\" --checkFeatures --module"
+    "clean": "rm -rf types && rm -rf dist",
+    "dev": "./build.js --watch",
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose",
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^22.5.3",
