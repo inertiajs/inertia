@@ -1,4 +1,4 @@
-import { cloneDeep } from 'es-toolkit'
+import { cloneDeep } from 'lodash-es'
 import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'

@@ -9,7 +9,7 @@ import {
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
-import { isEqual } from 'es-toolkit'
+import { isEqual } from 'lodash-es'
 import {
   createElement,
   FormEvent,

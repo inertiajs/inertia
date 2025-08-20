@@ -9,7 +9,7 @@ import {
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
-import { isEqual } from 'es-toolkit'
+import { isEqual } from 'lodash-es'
 import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
 import useForm from './useForm'
 
@@ -249,7 +249,7 @@ const Form: InertiaForm = defineComponent({
         {
           ...attrs,
           ref: formElement,
-          action: props.action,
+          action: typeof props.action === 'object' ? props.action.url : props.action,
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
