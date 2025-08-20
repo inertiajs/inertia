@@ -24,6 +24,5 @@
     "typeRoots": ["./node_modules/@types"],
     "strict": true,
     "skipLibCheck": true
-  },
-  "exclude": ["tests","types"]
+  }
 }
