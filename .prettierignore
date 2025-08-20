@@ -11,7 +11,6 @@ node_modules/
 # Files we don't want to format
 pnpm-lock.yaml
 *.lock
-*.json
 *.md
 *.timestamp-*.mjs
 
