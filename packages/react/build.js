@@ -6,7 +6,7 @@ import { readFileSync } from 'fs'
 const watch = process.argv.slice(1).includes('--watch')
 const withDeps = process.argv.slice(1).includes('--with-deps')
 
-// For regular builds, externalize all dependencies to keep the bundle size small.
+// For regular builds, externalize all dependencies to keep the bundle size small (using nodeExternalsPlugin).
 // For builds with dependencies, only externalize peer dependencies and bundle everything
 // else so we can check ES2020 compatibility without checking framework code.
 let externalDependencies = undefined
@@ -46,10 +46,7 @@ const builds = [
 ]
 
 builds.forEach(async (build) => {
-  const context = await esbuild.context({
-    ...config,
-    ...build,
-  })
+  const context = await esbuild.context({ ...config, ...build })
 
   if (watch) {
     console.log(`Watching ${build.entryPoints} (${build.format})…`)

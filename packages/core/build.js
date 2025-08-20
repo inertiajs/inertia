@@ -34,10 +34,7 @@ const builds = [
 ]
 
 builds.forEach(async (build) => {
-  const context = await esbuild.context({
-    ...config,
-    ...build,
-  })
+  const context = await esbuild.context({ ...config, ...build })
 
   if (watch) {
     console.log(`Watching ${build.entryPoints} (${build.format})…`)
