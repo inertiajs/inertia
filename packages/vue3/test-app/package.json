@@ -1,19 +1,19 @@
 {
-    "scripts": {
-        "build": "vite build .",
-        "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'",
-        "type-check": "vue-tsc --noEmit"
-    },
-    "devDependencies": {
-        "@vitejs/plugin-vue": "^5.0.5",
-        "nodemon": "^3.0.0",
-        "typescript": "^5.2.2",
-        "vite": "^6.3.0",
-        "vue-tsc": "^2.2.4",
-        "vue": "^3.4.33"
-    },
-    "dependencies": {
-        "@inertiajs/core": "workspace:*",
-        "@inertiajs/vue3": "workspace:*"
-    }
+  "scripts": {
+    "build": "vite build .",
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "nodemon": "^3.0.0",
+    "typescript": "^5.2.2",
+    "vite": "^6.3.0",
+    "vue-tsc": "^2.2.4",
+    "vue": "^3.4.33"
+  },
+  "dependencies": {
+    "@inertiajs/core": "workspace:*",
+    "@inertiajs/vue3": "workspace:*"
+  }
 }

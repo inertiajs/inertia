@@ -13,5 +13,11 @@ export default {
         parser: 'svelte',
       },
     },
+    {
+      files: 'composer.json',
+      options: {
+        tabWidth: 4,
+      },
+    },
   ],
 }
