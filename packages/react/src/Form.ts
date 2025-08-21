@@ -190,7 +190,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           event.preventDefault()
           submit()
         },
-        inert: disableWhileProcessing && form.processing ? '' : undefined,
+        inert: disableWhileProcessing && form.processing && 'true',
       },
       typeof children === 'function' ? children(exposed()) : children,
     )

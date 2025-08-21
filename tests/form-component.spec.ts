@@ -516,25 +516,15 @@ test.describe('Form Component', () => {
   test('can disable the form while processing', async ({ page }) => {
     await page.goto('/form-component/disable-while-processing/yes')
     await page.getByRole('button', { name: 'Submit' }).click()
-
-    const hasInert = () => page.evaluate(() => document.querySelector('form').hasAttribute('inert'))
-
-    await page.waitForTimeout(100) // Wait to ensure inert attribute is added
-    expect(await hasInert()).toBe(true)
-
-    await page.waitForFunction(() => !document.querySelector('form').hasAttribute('inert'))
-    expect(await hasInert()).toBe(false)
+    await expect(page.locator('form[inert]')).toBeVisible()
+    await expect(page.locator('form[inert]')).not.toBeVisible()
   })
 
   test('will not disable the form while processing by default', async ({ page }) => {
     await page.goto('/form-component/disable-while-processing/no')
     await page.getByRole('button', { name: 'Submit' }).click()
-
-    const hasInert = () => page.evaluate(() => document.querySelector('form').hasAttribute('inert'))
-
-    expect(await hasInert()).toBe(false)
-    await page.waitForTimeout(100) // Wait to ensure no inert attribute is added
-    expect(await hasInert()).toBe(false)
+    await page.waitForTimeout(250)
+    await expect(page.locator('form[inert]')).not.toBeVisible()
   })
 
   test('submit without an action attribute uses the current URL', async ({ page }) => {
