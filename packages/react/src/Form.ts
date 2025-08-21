@@ -190,9 +190,9 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           event.preventDefault()
           submit()
         },
-        // React 19 supports passing a boolean to the `inert` attribute.
-        // For compatibility with earlier versions, we use the 'true'.
-        // Unfortunately, React 19 does not support an empty string.
+        // Only React 19 supports passing a boolean to the `inert` attribute.
+        // To support earlier versions as well, we use the string 'true'.
+        // Unfortunately, React 19 treats an empty string as `false`.
         // See: https://github.com/inertiajs/inertia/pull/2536
         inert: disableWhileProcessing && form.processing && 'true',
       },
