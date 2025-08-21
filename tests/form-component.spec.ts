@@ -519,7 +519,9 @@ test.describe('Form Component', () => {
 
     const hasInert = () => page.evaluate(() => document.querySelector('form').hasAttribute('inert'))
 
+    await page.waitForTimeout(100) // Wait to ensure inert attribute is added
     expect(await hasInert()).toBe(true)
+
     await page.waitForFunction(() => !document.querySelector('form').hasAttribute('inert'))
     expect(await hasInert()).toBe(false)
   })
