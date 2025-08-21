@@ -181,7 +181,7 @@
   on:submit={handleSubmit}
   on:reset={handleReset}
   {...$$restProps}
-  inert={disableWhileProcessing && $form.processing ? true : undefined}
+  inert={disableWhileProcessing && $form.processing ? '' : undefined}
 >
   <slot
     errors={slotErrors}
