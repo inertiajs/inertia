@@ -62,6 +62,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let cancelToken = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
+
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
   let defaultsCalledInOnSuccess = false
