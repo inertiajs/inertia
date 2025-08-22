@@ -145,7 +145,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             }, 2000)
           }
 
-          const onSuccess = options.onSuccess ? await options.onSuccess(page) : undefined
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 
           if (isMounted.current) {
             setData((data) => {
