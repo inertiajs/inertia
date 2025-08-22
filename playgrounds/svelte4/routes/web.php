@@ -365,3 +365,31 @@ Route::post('/sleepy/{duration}', function ($duration) {
 Route::post('/logout', function () {
     return redirect('/login');
 });
+
+Route::get('/form-component', function () {
+    return inertia('FormComponent', [
+        'foo' => fn () => now()->getTimestampMs(),
+        'bar' => fn () => now()->getTimestampMs(),
+        'quux' => fn () => now()->getTimestampMs(),
+    ]);
+});
+
+Route::post('/form-component', function () {
+    $data = request()->validateWithBag('custom-bag', [
+        'name' => ['required', 'string', 'max:255'],
+        'avatar' => ['nullable', 'file', 'image', 'max:2048'],
+        'skills' => ['nullable', 'array', 'min:2'],
+        'skills.*' => ['string', 'in:vue,react,laravel,tailwind'],
+        'tags' => ['nullable', 'array'],
+        'tags.*' => ['string', 'max:50'],
+        'user.address.street' => ['nullable', 'string', 'max:255'],
+        'user.address.city' => ['nullable', 'string', 'max:255'],
+    ]);
+
+    // Simulate file upload progress
+    if (request()->hasFile('avatar')) {
+        sleep(1);
+    }
+
+    return back();
+});

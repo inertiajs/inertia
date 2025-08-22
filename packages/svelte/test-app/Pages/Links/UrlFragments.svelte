@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 
   let documentScrollTop = 0

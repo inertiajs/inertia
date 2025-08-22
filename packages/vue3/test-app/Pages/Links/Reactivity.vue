@@ -7,7 +7,7 @@ const method = ref<Method>('get')
 const href = ref('/dump/get')
 const data = ref({ foo: 'bar' })
 const headers = ref({ 'X-Custom-Header': 'value' })
-const prefetch = ref<LinkPrefetchOption>(false)
+const prefetch = ref<boolean | LinkPrefetchOption>(false)
 const cacheFor = ref<CacheForOption>(0)
 
 const change = () => {

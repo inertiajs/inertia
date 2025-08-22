@@ -17,6 +17,7 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
+  Method,
   Page,
   PendingVisit,
   PendingVisitOptions,
@@ -26,12 +27,13 @@ import {
   ReloadOptions,
   RequestPayload,
   RouterInitParams,
+  UrlMethodPair,
   Visit,
   VisitCallbacks,
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { transformUrlAndData } from './url'
+import { isUrlMethodPair, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -67,7 +69,7 @@ export class Router {
   }
 
   public get<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -75,7 +77,7 @@ export class Router {
   }
 
   public post<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -83,7 +85,7 @@ export class Router {
   }
 
   public put<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -91,7 +93,7 @@ export class Router {
   }
 
   public patch<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     data: T = {} as T,
     options: VisitHelperOptions<T> = {},
   ): void {
@@ -99,7 +101,7 @@ export class Router {
   }
 
   public delete<T extends RequestPayload = RequestPayload>(
-    url: URL | string,
+    url: URL | string | UrlMethodPair,
     options: Omit<VisitOptions<T>, 'method'> = {},
   ): void {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
@@ -157,13 +159,16 @@ export class Router {
     })
   }
 
-  public visit<T extends RequestPayload = RequestPayload>(href: string | URL, options: VisitOptions<T> = {}): void {
+  public visit<T extends RequestPayload = RequestPayload>(
+    href: string | URL | UrlMethodPair,
+    options: VisitOptions<T> = {},
+  ): void {
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,
-    })
+    } as VisitOptions)
 
-    const events = this.getVisitEvents(options)
+    const events = this.getVisitEvents(options as VisitOptions)
 
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
@@ -195,11 +200,14 @@ export class Router {
     }
   }
 
-  public getCached(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
+  public getCached(
+    href: string | URL | UrlMethodPair,
+    options: VisitOptions = {},
+  ): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findCached(this.getPrefetchParams(href, options))
   }
 
-  public flush(href: string | URL, options: VisitOptions = {}): void {
+  public flush(href: string | URL | UrlMethodPair, options: VisitOptions = {}): void {
     prefetchedRequests.remove(this.getPrefetchParams(href, options))
   }
 
@@ -207,12 +215,25 @@ export class Router {
     prefetchedRequests.removeAll()
   }
 
-  public getPrefetching(href: string | URL, options: VisitOptions = {}): InFlightPrefetch | PrefetchedResponse | null {
+  public flushByCacheTags(tags: string | string[]): void {
+    prefetchedRequests.removeByTags(Array.isArray(tags) ? tags : [tags])
+  }
+
+  public getPrefetching(
+    href: string | URL | UrlMethodPair,
+    options: VisitOptions = {},
+  ): InFlightPrefetch | PrefetchedResponse | null {
     return prefetchedRequests.findInFlight(this.getPrefetchParams(href, options))
   }
 
-  public prefetch(href: string | URL, options: VisitOptions = {}, { cacheFor = 30_000 }: PrefetchOptions) {
-    if (options.method !== 'get') {
+  public prefetch(
+    href: string | URL | UrlMethodPair,
+    options: VisitOptions = {},
+    prefetchOptions: Partial<PrefetchOptions> = {},
+  ) {
+    const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
+
+    if (method !== 'get') {
       throw new Error('Prefetch requests must use the GET method')
     }
 
@@ -267,7 +288,11 @@ export class Router {
         (params) => {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
-        { cacheFor },
+        {
+          cacheFor: 30_000,
+          cacheTags: [],
+          ...prefetchOptions,
+        },
       )
     })
   }
@@ -284,18 +309,22 @@ export class Router {
     return currentPage.resolve(component, currentPage.get())
   }
 
-  public replace(params: ClientSideVisitOptions): void {
+  public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params, { replace: true })
   }
 
-  public push(params: ClientSideVisitOptions): void {
+  public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params)
   }
 
-  protected clientVisit(params: ClientSideVisitOptions, { replace = false }: { replace?: boolean } = {}): void {
+  protected clientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
+    { replace = false }: { replace?: boolean } = {},
+  ): void {
     const current = currentPage.get()
 
-    const props = typeof params.props === 'function' ? params.props(current.props) : (params.props ?? current.props)
+    const props =
+      typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
     const { onError, onFinish, onSuccess, ...pageParams } = params
 
@@ -304,7 +333,7 @@ export class Router {
         {
           ...current,
           ...pageParams,
-          props,
+          props: props as Page['props'],
         },
         {
           replace,
@@ -326,7 +355,7 @@ export class Router {
       .finally(() => onFinish?.(params))
   }
 
-  protected getPrefetchParams(href: string | URL, options: VisitOptions): ActiveVisit {
+  protected getPrefetchParams(href: string | URL | UrlMethodPair, options: VisitOptions): ActiveVisit {
     return {
       ...this.getPendingVisit(href, {
         ...options,
@@ -339,10 +368,16 @@ export class Router {
   }
 
   protected getPendingVisit(
-    href: string | URL,
+    href: string | URL | UrlMethodPair,
     options: VisitOptions,
     pendingVisitOptions: Partial<PendingVisitOptions> = {},
   ): PendingVisit {
+    if (isUrlMethodPair(href)) {
+      const urlMethodPair = href
+      href = urlMethodPair.url
+      options.method = options.method ?? urlMethodPair.method
+    }
+
     const mergedOptions: Visit = {
       method: 'get',
       data: {},
@@ -361,6 +396,7 @@ export class Router {
       reset: [],
       preserveUrl: false,
       prefetch: false,
+      invalidateCacheTags: [],
       ...options,
     }
 

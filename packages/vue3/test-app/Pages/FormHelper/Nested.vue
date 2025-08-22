@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
 
 const form = useForm({
@@ -17,10 +17,6 @@ const form = useForm({
   checked: ['foo', 'bar'],
 })
 
-const updateData = (key, value) => {
-  form.setData(key, value)
-}
-
 const submit = () => {
   form.submit('post', '/dump/post')
 }
@@ -30,7 +26,7 @@ const submit = () => {
   <div>
     <label>
       Full Name
-      <input type="text" id="name" v-model="form.name" @input="updateData('name', form.data.name)" />
+      <input type="text" id="name" v-model="form.name" />
     </label>
     <label>
       Street

@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios'
+import { router } from '.'
 import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
 import { history } from './history'
 import modal from './modal'
@@ -63,6 +64,8 @@ export class Response {
 
       return this.requestParams.all().onError(scopedErrors)
     }
+
+    router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
 
     fireSuccessEvent(currentPage.get())
 

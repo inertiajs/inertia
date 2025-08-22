@@ -1,4 +1,4 @@
-import { escape } from 'es-toolkit'
+import { escape } from 'lodash-es'
 import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 

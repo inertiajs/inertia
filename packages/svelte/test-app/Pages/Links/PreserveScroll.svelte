@@ -1,19 +1,20 @@
-<script context="module">
+<script context="module" lang="ts">
   export { default as layout } from '@/Layouts/WithScrollRegion.svelte'
 </script>
 
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
+  import type { Page } from '@inertiajs/core'
 
-  export let foo = 'default'
+  export let foo: string = 'default'
 
-  const preserveCallback = (page) => {
+  const preserveCallback = (page: Page) => {
     console.log(JSON.stringify(page))
 
     return true
   }
 
-  const preserveCallbackFalse = (page) => {
+  const preserveCallbackFalse = (page: Page) => {
     console.log(JSON.stringify(page))
 
     return false
@@ -55,12 +56,5 @@
 
   <a href="/non-inertia" class="off-site" style="display: block">Off-site link</a>
 
-  <a
-    href="/article"
-    use:inertia={{ }}
-    class="article"
-    data-testid="article"
-  >
-    Article
-  </a>
+  <a href="/article" use:inertia={{}} class="article" data-testid="article"> Article </a>
 </div>
