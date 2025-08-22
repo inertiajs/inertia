@@ -21,16 +21,16 @@ const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
 test('will not prefetch current page', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
-  const prefetch4 = page.waitForResponse('prefetch/4')
+  const prefetch6 = page.waitForResponse('prefetch/6')
 
   await page.goto('prefetch/1')
 
   // These two prefetch requests should be made on mount
   const request2 = await prefetch2
-  const request4 = await prefetch4
+  const request6 = await prefetch6
 
   expect(request2.request().headers().purpose).toBe('prefetch')
-  expect(request4.request().headers().purpose).toBe('prefetch')
+  expect(request6.request().headers().purpose).toBe('prefetch')
 
   requests.listen(page)
   await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
@@ -40,14 +40,14 @@ test('will not prefetch current page', async ({ page }) => {
 })
 
 test('removes single-use prefetch from cache when cacheFor is 0', async ({ page }) => {
-  const prefetch5 = page.waitForResponse('prefetch/5')
+  const prefetch7 = page.waitForResponse('prefetch/7')
 
   await page.goto('prefetch/1')
-  await prefetch5
+  await prefetch7
 
   requests.listen(page)
   await page.getByRole('link', { name: 'On Mount (Once)' }).click()
-  await isPrefetchPage(page, 5)
+  await isPrefetchPage(page, 7)
   await expect(requests.requests.length).toBe(0)
 
   // Now that we've used it, it should be removed from the cache
@@ -58,13 +58,13 @@ test('removes single-use prefetch from cache when cacheFor is 0', async ({ page 
 test('can prefetch using link props', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
-  const prefetch4 = page.waitForResponse('prefetch/4')
+  const prefetch6 = page.waitForResponse('prefetch/6')
 
   await page.goto('prefetch/1')
 
   // These two prefetch requests should be made on mount
   await prefetch2
-  await prefetch4
+  await prefetch6
 
   requests.listen(page)
 
@@ -73,16 +73,45 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 
   await page.getByRole('link', { name: 'On Hover + Mount' }).click()
-  await isPrefetchPage(page, 4)
+  await isPrefetchPage(page, 6)
   await expect(requests.requests.length).toBe(0)
 
+  // Mouse click
   await page.getByRole('link', { name: 'On Click' }).hover()
   await page.mouse.down()
   await page.waitForResponse('prefetch/3')
-  await expect(page).toHaveURL('prefetch/4')
+  await expect(page).toHaveURL('prefetch/6')
   requests.listen(page)
   await page.mouse.up()
   await isPrefetchPage(page, 3)
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Enter
+  await page.getByRole('link', { name: 'On Enter' }).focus()
+  await page.keyboard.down('Enter')
+  await page.waitForResponse('prefetch/4')
+  await expect(page).toHaveURL('prefetch/3')
+  requests.listen(page)
+  await page.keyboard.up('Enter')
+  await isPrefetchPage(page, 4)
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Spacebar on link
+  await page.getByRole('link', { name: 'On Click' }).focus()
+  await page.keyboard.down(' ')
+  await expect(page).toHaveURL('prefetch/4')
+  requests.listen(page)
+  await page.keyboard.up(' ')
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Spacebar on button
+  await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  await page.keyboard.down(' ')
+  await page.waitForResponse('prefetch/5')
+  await expect(page).toHaveURL('prefetch/4')
+  requests.listen(page)
+  await page.keyboard.up(' ')
+  await isPrefetchPage(page, 5)
   await expect(requests.requests.length).toBe(0)
 
   requests.listen(page)
@@ -93,7 +122,7 @@ test('can prefetch using link props', async ({ page }) => {
 
   await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
   await page.waitForResponse('prefetch/1')
-  await expect(page).toHaveURL('prefetch/3')
+  await expect(page).toHaveURL('prefetch/5')
 
   requests.listen(page)
   await page.getByRole('link', { name: 'On Hover (Default)' }).click()
@@ -104,12 +133,12 @@ test('can prefetch using link props', async ({ page }) => {
   await page.waitForTimeout(1200)
 
   await page.getByRole('link', { name: 'On Hover + Mount' }).hover()
-  await page.waitForResponse('prefetch/4')
+  await page.waitForResponse('prefetch/6')
   await expect(page).toHaveURL('prefetch/1')
 
   requests.listen(page)
   await page.getByRole('link', { name: 'On Hover + Mount' }).click()
-  await isPrefetchPage(page, 4)
+  await isPrefetchPage(page, 6)
   await expect(requests.requests.length).toBe(0)
 })
 
