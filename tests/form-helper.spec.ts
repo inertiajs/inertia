@@ -338,8 +338,6 @@ test.describe('Form Helper', () => {
     })
 
     test('manual setDefaults(custom) in onSuccess should set custom defaults', async ({ page }) => {
-      test.skip(process.env.PACKAGE !== 'react', 'Should only work in React for legacy reasons')
-
       await expect(page.getByText('Form is clean')).toBeVisible()
       await page.fill('#name', 'changed')
       await expect(page.getByText('Form is dirty')).toBeVisible()

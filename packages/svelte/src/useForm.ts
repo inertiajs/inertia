@@ -73,6 +73,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let cancelToken: { cancel: () => void } | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
+  let defaultsCalledInOnSuccess = false
 
   const store = writable<InertiaForm<TForm>>({
     ...(restored ? restored.data : data),
@@ -98,6 +99,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
+      // Mark that defaults was called manually
+      defaultsCalledInOnSuccess = true
+
       if (typeof fieldOrFields === 'undefined') {
         defaults = cloneDeep(this.data())
       } else {
@@ -157,6 +161,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
       const options = (objectPassed ? args[1] : args[2]) ?? {}
+      
+      // Reset the flag for each submission
+      defaultsCalledInOnSuccess = false
+      
       const data = transform(this.data()) as RequestPayload
 
       const _options: Omit<VisitOptions, 'method'> = {
@@ -202,7 +210,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          this.defaults(cloneDeep(this.data()))
+          
+          // Only set defaults automatically if user didn't call defaults manually
+          if (!defaultsCalledInOnSuccess) {
+            this.defaults(cloneDeep(this.data()))
+          }
+          
           return onSuccess
         },
         onError: (errors: Errors) => {
