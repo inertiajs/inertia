@@ -378,6 +378,7 @@ export interface LinkComponentBaseProps
       | 'replace'
       | 'preserveScroll'
       | 'preserveState'
+      | 'preserveUrl'
       | 'only'
       | 'except'
       | 'headers'

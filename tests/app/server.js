@@ -77,6 +77,32 @@ app.all('/links/preserve-scroll-page-two', (req, res) =>
 app.all('/links/preserve-scroll-false-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveScrollFalse', props: { foo: req.query.foo } }),
 )
+app.get('/links/preserve-url', (req, res) => {
+  const page = parseInt(req.query.page || '1')
+  const itemsPerPage = 3
+  
+  const allItems = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`)
+  const startIndex = (page - 1) * itemsPerPage
+  const data = allItems.slice(startIndex, startIndex + itemsPerPage)
+  
+  const hasNextPage = startIndex + itemsPerPage < allItems.length
+  const nextPageUrl = hasNextPage ? `/links/preserve-url?page=${page + 1}` : null
+  
+  return inertia.render(req, res, {
+    component: 'Links/PreserveUrl',
+    props: {
+      foo: req.query.foo || 'default',
+      items: {
+        data,
+        next_page_url: nextPageUrl,
+      },
+    },
+    deepMergeProps: ['items'],
+  })
+})
+app.all('/links/preserve-url-page-two', (req, res) =>
+  inertia.render(req, res, { component: 'Links/PreserveUrl', props: { foo: req.query.foo } }),
+)
 app.get('/links/as-warning/:method', (req, res) =>
   inertia.render(req, res, { component: 'Links/AsWarning', props: { method: req.params.method } }),
 )
