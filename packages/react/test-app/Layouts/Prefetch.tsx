@@ -18,6 +18,12 @@ export default ({ children }: { children: React.ReactNode }) => {
       <Link href="/prefetch/5" prefetch="mount" cacheFor="0">
         On Mount (Once)
       </Link>
+      <Link href="/prefetch/6" prefetch="click">
+        On Enter
+      </Link>
+      <Link href="/prefetch/7" prefetch="click" as="button">
+        On Spacebar
+      </Link>
       <div>{children}</div>
     </div>
   )
