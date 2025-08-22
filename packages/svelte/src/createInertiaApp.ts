@@ -36,10 +36,10 @@ export default async function createInertiaApp({
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name))
+  const resolveComponent = (name: string, page: Page) => Promise.resolve(resolve(name, page))
 
   const [initialComponent] = await Promise.all([
-    resolveComponent(initialPage.component),
+    resolveComponent(initialPage.component, initialPage),
     router.decryptHistory().catch(() => {}),
   ])
 
