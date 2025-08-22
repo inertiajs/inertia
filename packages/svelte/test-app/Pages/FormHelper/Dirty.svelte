@@ -22,6 +22,18 @@
     pushValue()
     defaults()
   }
+
+  const submitAndSetDefaults = () => {
+    $form.post('/form-helper/dirty/redirect-back', {
+      onSuccess: () => $form.defaults(),
+    })
+  }
+
+  const submitAndSetCustomDefaults = () => {
+    $form.post('/form-helper/dirty/redirect-back', {
+      onSuccess: () => $form.defaults({ name: 'Custom Default', foo: [] }),
+    })
+  }
 </script>
 
 <div>
@@ -37,4 +49,10 @@
   <button on:click={defaults} class="defaults">Defaults</button>
   <button on:click={dataAndDefaults} class="data-and-defaults">Data and Defaults</button>
   <button on:click={pushValue} class="push">Push value</button>
+
+  <button on:click={submitAndSetDefaults} class="submit-and-set-defaults"> Submit and setDefaults </button>
+
+  <button on:click={submitAndSetCustomDefaults} class="submit-and-set-custom-defaults">
+    Submit and setDefaults custom
+  </button>
 </div>

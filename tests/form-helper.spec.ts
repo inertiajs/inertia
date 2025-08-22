@@ -326,6 +326,31 @@ test.describe('Form Helper', () => {
       await page.getByRole('button', { name: 'Push value' }).click()
       await expect(page.getByText('Form is dirty')).toBeVisible()
     })
+
+    test('manual setDefaults() in onSuccess should work', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'changed')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit and setDefaults', exact: true }).click()
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await expect(page.locator('#name')).toHaveValue('changed')
+    })
+
+    test('manual setDefaults(custom) in onSuccess should set custom defaults', async ({ page }) => {
+      test.skip(process.env.PACKAGE !== 'react', 'Should only work in React for legacy reasons')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'changed')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit and setDefaults custom' }).click()
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+      await expect(page.locator('#name')).toHaveValue('changed')
+
+      await page.fill('#name', 'Custom Default')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
   })
 
   test.describe('Data', () => {

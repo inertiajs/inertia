@@ -90,6 +90,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   }, [])
 
+  const setDefaultsCalledInOnSuccess = useRef(false)
+
   const submit = useCallback(
     (...args) => {
       const objectPassed = typeof args[0] === 'object'
@@ -97,6 +99,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
       const options = (objectPassed ? args[1] : args[2]) ?? {}
+
+      // Reset the flag for each submission
+      setDefaultsCalledInOnSuccess.current = false
 
       const _options = {
         ...options,
@@ -147,7 +152,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 
-          if (isMounted.current) {
+          // Only set defaults automatically if user didn't call setDefaults manually
+          if (isMounted.current && !setDefaultsCalledInOnSuccess.current) {
             setData((data) => {
               setDefaults(cloneDeep(data))
               return data
@@ -218,6 +224,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
+      // Mark that setDefaults was called
+      setDefaultsCalledInOnSuccess.current = true
+
       if (typeof fieldOrFields === 'undefined') {
         setDefaults(data)
         // If setData was called right before setDefaults, data was not

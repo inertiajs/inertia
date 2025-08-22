@@ -18,6 +18,18 @@ const dataAndDefaults = () => {
 const pushValue = () => {
   form.foo.push('bar')
 }
+
+const submitAndSetDefaults = () => {
+  form.post('/form-helper/dirty/redirect-back', {
+    onSuccess: () => form.defaults(),
+  })
+}
+
+const submitAndSetCustomDefaults = () => {
+  form.post('/form-helper/dirty/redirect-back', {
+    onSuccess: () => form.defaults({ name: 'Custom Default', foo: [] }),
+  })
+}
 </script>
 
 <template>
@@ -35,5 +47,11 @@ const pushValue = () => {
     <button @click="dataAndDefaults" class="data-and-defaults">Data and Defaults</button>
 
     <button @click="pushValue" class="push">Push value</button>
+
+    <button @click="submitAndSetDefaults" class="submit-and-set-defaults">Submit and setDefaults</button>
+
+    <button @click="submitAndSetCustomDefaults" class="submit-and-set-custom-defaults">
+      Submit and setDefaults custom
+    </button>
   </div>
 </template>
