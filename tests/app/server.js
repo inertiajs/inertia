@@ -80,14 +80,14 @@ app.all('/links/preserve-scroll-false-page-two', (req, res) =>
 app.get('/links/preserve-url', (req, res) => {
   const page = parseInt(req.query.page || '1')
   const itemsPerPage = 3
-  
+
   const allItems = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`)
   const startIndex = (page - 1) * itemsPerPage
   const data = allItems.slice(startIndex, startIndex + itemsPerPage)
-  
+
   const hasNextPage = startIndex + itemsPerPage < allItems.length
   const nextPageUrl = hasNextPage ? `/links/preserve-url?page=${page + 1}` : null
-  
+
   return inertia.render(req, res, {
     component: 'Links/PreserveUrl',
     props: {
