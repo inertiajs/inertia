@@ -16,6 +16,7 @@
   export let replace: boolean = false
   export let preserveScroll: PreserveStateOption = false
   export let preserveState: PreserveStateOption | null = null
+  export let preserveUrl: boolean = false
   export let only: string[] = []
   export let except: string[] = []
   export let headers: Record<string, string> = {}
@@ -46,6 +47,7 @@
     replace,
     preserveScroll,
     preserveState: preserveState ?? _method !== 'get',
+    preserveUrl,
     only,
     except,
     headers,
