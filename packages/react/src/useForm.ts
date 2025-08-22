@@ -130,7 +130,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onProgress(event)
           }
         },
-        onSuccess: (page) => {
+        onSuccess: async (page) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -138,7 +138,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             setHasErrors(false)
             setWasSuccessful(true)
             setRecentlySuccessful(true)
-            setDefaults(cloneDeep(data))
             recentlySuccessfulTimeoutId.current = setTimeout(() => {
               if (isMounted.current) {
                 setRecentlySuccessful(false)
@@ -146,9 +145,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             }, 2000)
           }
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : undefined
+
+          if (isMounted.current) {
+            setData((data) => {
+              setDefaults(cloneDeep(data))
+              return data
+            })
           }
+
+          return onSuccess
         },
         onError: (errors) => {
           if (isMounted.current) {
