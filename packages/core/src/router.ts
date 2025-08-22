@@ -1,4 +1,4 @@
-import { hideProgress, PageProps, revealProgress } from '.'
+import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { history } from './history'
@@ -280,8 +280,8 @@ export class Router {
     return history.decrypt()
   }
 
-  public resolveComponent(component: string, props: PageProps = {}): Promise<Component> {
-    return currentPage.resolve(component, props)
+  public resolveComponent(component: string): Promise<Component> {
+    return currentPage.resolve(component, currentPage.get())
   }
 
   public replace(params: ClientSideVisitOptions): void {

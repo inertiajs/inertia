@@ -7,7 +7,6 @@ import {
   Page,
   PageEvent,
   PageHandler,
-  PageProps,
   PageResolver,
   PreserveStateOption,
   RouterInitParams,
@@ -51,7 +50,7 @@ class CurrentPage {
       history.clear()
     }
 
-    return this.resolve(page.component, page.props).then((component) => {
+    return this.resolve(page.component, page).then((component) => {
       if (componentId !== this.componentId) {
         // Component has changed since we started resolving this component, bail
         return
@@ -103,7 +102,7 @@ class CurrentPage {
       preserveState?: PreserveStateOption
     } = {},
   ) {
-    return this.resolve(page.component, page.props).then((component) => {
+    return this.resolve(page.component, page).then((component) => {
       this.page = page
       this.cleared = false
       history.setCurrent(page)
@@ -149,8 +148,8 @@ class CurrentPage {
     return this.swapComponent({ component, page, preserveState })
   }
 
-  public resolve(component: string, props: PageProps): Promise<Component> {
-    return Promise.resolve(this.resolveComponent(component, props))
+  public resolve(component: string, page: Page): Promise<Component> {
+    return Promise.resolve(this.resolveComponent(component, page))
   }
 
   public isTheSame(page: Page): boolean {
