@@ -8,8 +8,8 @@ import {
   Method,
   PendingVisit,
   router,
-  shouldActivateOnKey,
   shouldIntercept,
+  shouldNavigate,
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
@@ -280,7 +280,7 @@ const Link: InertiaLink = defineComponent({
         }
       },
       onKeydown: (event) => {
-        if (shouldIntercept(event) && shouldActivateOnKey(event)) {
+        if (shouldIntercept(event) && shouldNavigate(event)) {
           event.preventDefault()
           prefetch()
         }
@@ -290,7 +290,7 @@ const Link: InertiaLink = defineComponent({
         router.visit(href.value, visitParams.value)
       },
       onKeyup: (event) => {
-        if (shouldActivateOnKey(event)) {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
         }

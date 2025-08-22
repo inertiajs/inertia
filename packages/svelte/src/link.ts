@@ -1,8 +1,8 @@
 import {
   mergeDataIntoQueryString,
   router,
-  shouldActivateOnKey,
   shouldIntercept,
+  shouldNavigate,
   type CacheForOption,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
@@ -83,7 +83,7 @@ function link(
       }
     },
     keydown: (event) => {
-      if (shouldIntercept(event) && shouldActivateOnKey(event)) {
+      if (shouldIntercept(event) && shouldNavigate(event)) {
         event.preventDefault()
         prefetch()
       }
@@ -93,7 +93,7 @@ function link(
       router.visit(href, visitParams)
     },
     keyup: (event) => {
-      if (shouldActivateOnKey(event)) {
+      if (shouldNavigate(event)) {
         event.preventDefault()
         router.visit(href, visitParams)
       }

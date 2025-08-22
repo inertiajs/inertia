@@ -6,8 +6,8 @@ import {
   Method,
   PendingVisit,
   router,
-  shouldActivateOnKey,
   shouldIntercept,
+  shouldNavigate,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -209,7 +209,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         }
       },
       onKeyDown: (event) => {
-        if (shouldIntercept(event) && shouldActivateOnKey(event)) {
+        if (shouldIntercept(event) && shouldNavigate(event)) {
           event.preventDefault()
           doPrefetch()
         }
@@ -219,7 +219,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         router.visit(url, visitParams)
       },
       onKeyUp: (event) => {
-        if (shouldActivateOnKey(event)) {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(url, visitParams)
         }
