@@ -160,6 +160,8 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.post('/form-helper/data/redirect-back', (req, res) => res.redirect(303, '/form-helper/data'))
+
 app.get('/form-helper/nested', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Nested',

@@ -431,6 +431,16 @@ test.describe('Form Helper', () => {
       await expect(page.locator('.remember_error')).not.toBeVisible()
     })
 
+    test('can reset all fields to their initial values multiple times', async ({ page }) => {
+      await page.fill('#name', 'A')
+      await page.getByRole('button', { name: 'Submit form and reset' }).click()
+      await expect(page.locator('#name')).toHaveValue('foo')
+
+      await page.fill('#name', 'B')
+      await page.getByRole('button', { name: 'Submit form and reset' }).click()
+      await expect(page.locator('#name')).toHaveValue('foo')
+    })
+
     test.describe('Update "reset" defaults', () => {
       test.beforeEach(async ({ page }) => {
         await expect(page.locator('#name')).toHaveValue('foo')
