@@ -342,7 +342,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#handle')).toHaveValue('example')
       await expect(page.locator('#remember')).toBeChecked()
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -362,7 +362,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#handle')).toHaveValue('B')
       await expect(page.locator('#remember')).toBeChecked()
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -378,7 +378,7 @@ test.describe('Form Helper', () => {
       await page.fill('#handle', 'B')
       await page.check('#remember')
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -407,7 +407,7 @@ test.describe('Form Helper', () => {
       await page.fill('#handle', 'B')
       await page.check('#remember')
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
