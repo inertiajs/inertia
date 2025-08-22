@@ -197,13 +197,13 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          
+
           // Only set defaults automatically if user didn't call defaults manually
           if (!defaultsCalledInOnSuccess) {
             defaults = cloneDeep(this.data())
             this.isDirty = false
           }
-          
+
           return onSuccess
         },
         onError: (errors) => {
