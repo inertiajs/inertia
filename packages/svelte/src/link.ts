@@ -1,6 +1,7 @@
 import {
   mergeDataIntoQueryString,
   router,
+  shouldActivateOnKey,
   shouldIntercept,
   type CacheForOption,
   type GlobalEventsMap,
@@ -81,13 +82,25 @@ function link(
         prefetch()
       }
     },
+    keydown: (event) => {
+      if (shouldIntercept(event) && shouldActivateOnKey(event)) {
+        event.preventDefault()
+        prefetch()
+      }
+    },
     mouseup: (event) => {
       event.preventDefault()
       router.visit(href, visitParams)
     },
+    keyup: (event) => {
+      if (shouldActivateOnKey(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
+    },
     click: (event) => {
       if (shouldIntercept(event)) {
-        // Let the mouseup event handle the visit
+        // Let the mouseup/keyup event handle the visit
         event.preventDefault()
       }
     },
