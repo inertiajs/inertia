@@ -327,7 +327,7 @@ test.describe('Form Helper', () => {
       await expect(page.getByText('Form is dirty')).toBeVisible()
     })
 
-    test('manual setDefaults() in onSuccess should work', async ({ page }) => {
+    test('does not override manual setDefaults() calls in onSuccess', async ({ page }) => {
       await expect(page.getByText('Form is clean')).toBeVisible()
       await page.fill('#name', 'changed')
       await expect(page.getByText('Form is dirty')).toBeVisible()
@@ -337,7 +337,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#name')).toHaveValue('changed')
     })
 
-    test('manual setDefaults(custom) in onSuccess should set custom defaults', async ({ page }) => {
+    test('respects custom defaults set in onSuccess callback', async ({ page }) => {
       await expect(page.getByText('Form is clean')).toBeVisible()
       await page.fill('#name', 'changed')
       await expect(page.getByText('Form is dirty')).toBeVisible()
@@ -454,7 +454,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('.remember_error')).not.toBeVisible()
     })
 
-    test('can reset all fields to their initial values multiple times', async ({ page }) => {
+    test('preserves original defaults after reset in onSuccess callback', async ({ page }) => {
       await page.fill('#name', 'A')
       await page.getByRole('button', { name: 'Submit form and reset' }).click()
       await expect(page.locator('#name')).toHaveValue('foo')
