@@ -115,7 +115,7 @@ const Form: InertiaForm = defineComponent({
     },
   },
   setup(props, { slots, attrs, expose }) {
-    const form = useForm<Record<string, any>>({})
+    const form = useForm<Record<string, any>>(props.defaultValues)
     const formElement = ref()
     const method = computed(() =>
       typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),

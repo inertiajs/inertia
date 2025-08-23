@@ -40,7 +40,7 @@
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
-  const form = useForm({})
+  const form = useForm(defaultValues)
   let formElement: HTMLFormElement
   let isDirty = false
   let defaultData: FormData = new FormData()
