@@ -684,6 +684,13 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
   }),
 )
 
+app.get('/default-values', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/DefaultValues',
+    props: {},
+  }),
+)
+
 app.all('*', (req, res) => inertia.render(req, res))
 
 const adapterPorts = {

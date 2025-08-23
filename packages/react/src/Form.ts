@@ -58,12 +58,13 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       resetOnSuccess = false,
       setDefaultsOnSuccess = false,
       invalidateCacheTags = [],
+      defaultValues = {},
       children,
       ...props
     },
     ref,
   ) => {
-    const form = useForm<Record<string, any>>({})
+    const form = useForm<Record<string, any>>(defaultValues)
     const formElement = useRef<HTMLFormElement>(null)
 
     const resolvedMethod = useMemo(() => {
@@ -80,15 +81,32 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
+    const initializeDefaultData = () => {
+      if (formElement.current) {
+        defaultData.current = getFormData()
+        Object.keys(defaultValues).forEach((key) => applyDefaultValue(key, defaultValues[key]))
+        // Reset the form to ensure default values are applied to the actual form fields
+        reset()
+      }
+    }
+
+    const applyDefaultValue = (key: string, value: any) => {
+      if (typeof value === 'boolean') {
+        defaultData.current.set(key, value ? 'on' : '')
+        return
+      }
+
+      defaultData.current.set(key, value)
+    }
+
     const updateDirtyState = (event: Event) =>
       setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current)))
 
     useEffect(() => {
-      defaultData.current = getFormData()
-
+      initializeDefaultData()
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
-      formEvents.forEach((e) => formElement.current.addEventListener(e, updateDirtyState))
+      formEvents.forEach((e) => formElement.current?.addEventListener(e, updateDirtyState))
 
       return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
     }, [])
