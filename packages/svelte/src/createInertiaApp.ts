@@ -55,7 +55,7 @@ export default async function createInertiaApp({
     const { html, head, css } = svelteApp as SvelteRenderResult
 
     return {
-      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage), true)}">${html}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
