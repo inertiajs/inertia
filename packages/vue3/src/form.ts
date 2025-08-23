@@ -109,6 +109,10 @@ const Form: InertiaForm = defineComponent({
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
+    defaultValues: {
+      type: Object as PropType<FormComponentProps['defaultValues']>,
+      default: () => ({}),
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -122,6 +126,28 @@ const Form: InertiaForm = defineComponent({
 
     const defaultData = ref(new FormData())
 
+    const initializeDefaultData = () => {
+      if (formElement.value) {
+        defaultData.value = getFormData()
+        Object.keys(props.defaultValues).forEach((key) => applyDefaultValue(key, props.defaultValues[key]))
+        // Reset the form to ensure default values are applied to the actual form fields
+        reset()
+      }
+    }
+
+    const applyDefaultValue = (key: string, value: any) => {
+      if (typeof value === 'boolean') {
+        if (value === true) {
+          defaultData.value.set(key, 'on')
+        } else {
+          defaultData.value.delete(key)
+        }
+        return
+      }
+
+      defaultData.value.set(key, value)
+    }
+
     const onFormUpdate = (event: Event) => {
       // If the form is reset, we set isDirty to false as we already know it's back
       // to defaults. Also, the fields are updated after the reset event, so the
@@ -132,8 +158,8 @@ const Form: InertiaForm = defineComponent({
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
     onMounted(() => {
-      defaultData.value = getFormData()
-      formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
+      initializeDefaultData()
+      formEvents.forEach((e) => formElement.value?.addEventListener(e, onFormUpdate))
     })
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))

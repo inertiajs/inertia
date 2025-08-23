@@ -36,6 +36,7 @@
   export let resetOnError: FormComponentProps['resetOnError'] = false
   export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
+  export let defaultValues: FormComponentProps['defaultValues'] = {}
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -56,6 +57,28 @@
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
   function getData(): Record<string, FormDataConvertible> {
     return formDataToObject(getFormData())
+  }
+
+  function initializeDefaultData() {
+    if (formElement) {
+      defaultData = getFormData()
+      Object.keys(defaultValues).forEach((key) => applyDefaultValue(key, defaultValues[key]))
+      // Reset the form to ensure default values are applied to the actual form fields
+      reset()
+    }
+  }
+
+  function applyDefaultValue(key: string, value: any) {
+    if (typeof value === 'boolean') {
+      if (value === true) {
+        defaultData.set(key, 'on')
+      } else {
+        defaultData.delete(key)
+      }
+      return
+    }
+
+    defaultData.set(key, value)
   }
 
   function updateDirtyState(event: Event) {
@@ -162,8 +185,7 @@
   }
 
   onMount(() => {
-    defaultData = getFormData()
-
+    initializeDefaultData()
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
