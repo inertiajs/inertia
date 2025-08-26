@@ -1,6 +1,6 @@
+import { type Page } from '@inertiajs/core'
 import type { ComponentType } from 'svelte'
 import type { RenderFunction, RenderProps } from './components/Render.svelte'
-import { type Page } from '@inertiajs/core'
 
 export type ComponentResolver = (name: string, page: Page) => ResolvedComponent | Promise<ResolvedComponent>
 
