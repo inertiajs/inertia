@@ -50,7 +50,7 @@
     "@sveltejs/package": "^2.3.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@types/html-escape": "^2.0.2",
-    "axios": "^1.8.2",
+    "axios": "^1.11.0",
     "es-check": "^9.3.1",
     "publint": "^0.2.10",
     "svelte": "^4.2.19",
