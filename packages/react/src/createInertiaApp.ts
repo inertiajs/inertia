@@ -80,7 +80,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   // @ts-expect-error
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
-  let head = []
+   let head = []
 
   const reactApp = await Promise.all([
     resolveComponent(initialPage.component),
