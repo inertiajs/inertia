@@ -26,7 +26,7 @@ importers:
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu':
         specifier: ^4.28.1
-        version: 4.45.1
+        version: 4.45.0
 
   packages/core:
     dependencies:
@@ -87,8 +87,8 @@ importers:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
         version: 19.0.2(@types/react@19.0.1)
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       es-check:
         specifier: ^9.3.1
         version: 9.3.1
@@ -173,8 +173,8 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       es-check:
         specifier: ^9.3.1
         version: 9.3.1
@@ -244,8 +244,8 @@ importers:
         specifier: ^22.5.3
         version: 22.10.2
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       es-check:
         specifier: ^9.3.1
         version: 9.3.1
@@ -308,8 +308,8 @@ importers:
         specifier: ^4.3.2
         version: 4.3.4(vite@6.3.5(@types/node@24.1.0)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.6.1))
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       laravel-vite-plugin:
         specifier: ^1.2.0
         version: 1.2.0(vite@6.3.5(@types/node@24.1.0)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.6.1))
@@ -347,8 +347,8 @@ importers:
         specifier: ^5.0.4
         version: 5.0.4
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       laravel-vite-plugin:
         specifier: ^1.2.0
         version: 1.2.0(vite@5.4.19(@types/node@24.1.0)(lightningcss@1.30.1)(terser@5.43.1))
@@ -386,8 +386,8 @@ importers:
         specifier: ^5.0.4
         version: 5.0.4
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       laravel-vite-plugin:
         specifier: ^1.2.0
         version: 1.2.0(vite@6.3.5(@types/node@24.1.0)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.6.1))
@@ -425,8 +425,8 @@ importers:
         specifier: ^3.3.4
         version: 3.5.13(vue@3.5.13(typescript@5.7.2))
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.11.0
+        version: 1.11.0
       laravel-vite-plugin:
         specifier: ^1.2.0
         version: 1.2.0(vite@6.3.5(@types/node@24.1.0)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.6.1))
@@ -999,6 +999,11 @@ packages:
     cpu: [s390x]
     os: [linux]
 
+  '@rollup/rollup-linux-x64-gnu@4.45.0':
+    resolution: {integrity: sha512-XZdD3fEEQcwG2KrJDdEQu7NrHonPxxaV0/w2HpvINBdcqebz1aL+0vM2WFJq4DeiAVT6F5SUQas65HY5JDqoPw==}
+    cpu: [x64]
+    os: [linux]
+
   '@rollup/rollup-linux-x64-gnu@4.45.1':
     resolution: {integrity: sha512-+E/lYl6qu1zqgPEnTrs4WysQtvc/Sh4fC2nByfFExqgYrqkKWp1tWIbe+ELhixnenSpBbLXNi6vbEEJ8M7fiHw==}
     cpu: [x64]
@@ -1473,9 +1478,6 @@ packages:
 
   axios@1.11.0:
     resolution: {integrity: sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==}
-
-  axios@1.8.2:
-    resolution: {integrity: sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -1973,10 +1975,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-
-  form-data@4.0.1:
-    resolution: {integrity: sha512-tzN8e4TX8+kkxGPK8D5u0FNmjPUjw3lwC9lSLxxoB/+GtsJG91CO8bSWy73APlgAZzZbXEYZJuxjkHH2w+Ezhw==}
-    engines: {node: '>= 6'}
 
   form-data@4.0.4:
     resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
@@ -3685,6 +3683,9 @@ snapshots:
   '@rollup/rollup-linux-s390x-gnu@4.45.1':
     optional: true
 
+  '@rollup/rollup-linux-x64-gnu@4.45.0':
+    optional: true
+
   '@rollup/rollup-linux-x64-gnu@4.45.1':
     optional: true
 
@@ -4239,14 +4240,6 @@ snapshots:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.4
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-
-  axios@1.8.2:
-    dependencies:
-      follow-redirects: 1.15.9
-      form-data: 4.0.1
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -4834,12 +4827,6 @@ snapshots:
   fn.name@1.1.0: {}
 
   follow-redirects@1.15.9: {}
-
-  form-data@4.0.1:
-    dependencies:
-      asynckit: 0.4.0
-      combined-stream: 1.0.8
-      mime-types: 2.1.35
 
   form-data@4.0.4:
     dependencies:
