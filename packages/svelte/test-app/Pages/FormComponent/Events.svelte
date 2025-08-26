@@ -85,6 +85,8 @@
   let:wasSuccessful
   let:recentlySuccessful
 >
+  {@const percentage = progress && progress.total ? Math.round((progress.loaded * 100) / progress.total) : 0}
+
   <h1>Form Events & State</h1>
 
   <div>
@@ -96,8 +98,8 @@
   </div>
 
   <div>
-    Progress: <span id="progress" class={progress?.percentage ? 'uploading' : ''}>
-      {progress?.percentage || 0}
+    Progress: <span id="progress" class={percentage > 0 ? 'uploading' : ''}>
+      {percentage}
     </span>
   </div>
 
