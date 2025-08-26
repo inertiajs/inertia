@@ -77,7 +77,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
-  // @ts-expect-error
+  // @ts-ignore
   const resolveComponent = (name, page) => Promise.resolve(resolve(name, page)).then((module) => module.default || module)
 
   let head = []
