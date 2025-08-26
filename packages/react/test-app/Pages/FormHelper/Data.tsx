@@ -13,6 +13,12 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
     form.post(page.url)
   }
 
+  const submitAndReset = () => {
+    form.post('/form-helper/data/redirect-back', {
+      onSuccess: () => form.reset(),
+    })
+  }
+
   const resetAll = () => {
     form.reset()
   }
@@ -71,6 +77,10 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
 
       <button onClick={submit} className="submit">
         Submit form
+      </button>
+
+      <button onClick={submitAndReset} className="submit">
+        Submit form and reset
       </button>
 
       <button onClick={resetAll} className="reset">

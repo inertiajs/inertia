@@ -326,6 +326,29 @@ test.describe('Form Helper', () => {
       await page.getByRole('button', { name: 'Push value' }).click()
       await expect(page.getByText('Form is dirty')).toBeVisible()
     })
+
+    test('does not override manual setDefaults() calls in onSuccess', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'changed')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit and setDefaults', exact: true }).click()
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await expect(page.locator('#name')).toHaveValue('changed')
+    })
+
+    test('respects custom defaults set in onSuccess callback', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'changed')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit and setDefaults custom' }).click()
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+      await expect(page.locator('#name')).toHaveValue('changed')
+
+      await page.fill('#name', 'Custom Default')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
   })
 
   test.describe('Data', () => {
@@ -342,7 +365,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#handle')).toHaveValue('example')
       await expect(page.locator('#remember')).toBeChecked()
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -362,7 +385,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#handle')).toHaveValue('B')
       await expect(page.locator('#remember')).toBeChecked()
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -378,7 +401,7 @@ test.describe('Form Helper', () => {
       await page.fill('#handle', 'B')
       await page.check('#remember')
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -407,7 +430,7 @@ test.describe('Form Helper', () => {
       await page.fill('#handle', 'B')
       await page.check('#remember')
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -429,6 +452,16 @@ test.describe('Form Helper', () => {
       await expect(page.locator('.name_error')).toHaveText('Some name error')
       await expect(page.locator('.handle_error')).toHaveText('The Handle was invalid')
       await expect(page.locator('.remember_error')).not.toBeVisible()
+    })
+
+    test('preserves original defaults after reset in onSuccess callback', async ({ page }) => {
+      await page.fill('#name', 'A')
+      await page.getByRole('button', { name: 'Submit form and reset' }).click()
+      await expect(page.locator('#name')).toHaveValue('foo')
+
+      await page.fill('#name', 'B')
+      await page.getByRole('button', { name: 'Submit form and reset' }).click()
+      await expect(page.locator('#name')).toHaveValue('foo')
     })
 
     test.describe('Update "reset" defaults', () => {
