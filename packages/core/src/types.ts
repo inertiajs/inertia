@@ -371,6 +371,12 @@ export interface InertiaAppProgressOptions {
 export type InertiaAppSSRContent = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
 
+export type BaseInertiaAppOptions = {
+  id?: string
+  progress?: InertiaAppProgressOptions | false
+  resolve: PageResolver
+}
+
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
 export type CacheForOption = number | string

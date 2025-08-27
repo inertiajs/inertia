@@ -1,6 +1,6 @@
 import {
+  BaseInertiaAppOptions,
   HeadTitleCallback,
-  InertiaAppProgressOptions,
   InertiaAppResponse,
   Page,
   router,
@@ -9,12 +9,10 @@ import {
 import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
-interface CreateInertiaAppProps {
-  id?: string
+interface CreateInertiaAppProps extends BaseInertiaAppOptions {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
   setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: HeadTitleCallback
-  progress?: InertiaAppProgressOptions | false
   page?: Page
   render?: (app: VueApp) => Promise<string>
 }

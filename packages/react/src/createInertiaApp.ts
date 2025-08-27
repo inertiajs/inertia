@@ -1,7 +1,7 @@
 import {
+  BaseInertiaAppOptions,
   HeadOnUpdateCallback,
   HeadTitleCallback,
-  InertiaAppProgressOptions,
   InertiaAppSSRContent,
   Page,
   PageProps,
@@ -31,21 +31,16 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   }
 }
 
-type BaseInertiaAppOptions = {
-  id?: string
-  title?: HeadTitleCallback
-  progress?: InertiaAppProgressOptions | false
-  resolve: PageResolver
-}
-
 type CreateInertiaAppSetupReturnType = ReactElement | void
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
+  title?: HeadTitleCallback
   page?: Page
   render?: undefined
   setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
+  title?: HeadTitleCallback
   page: Page
   render: typeof renderToString
   setup(options: SetupOptions<null, SharedProps>): ReactElement

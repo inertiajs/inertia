@@ -1,10 +1,4 @@
-import {
-  router,
-  setupProgress,
-  type InertiaAppProgressOptions,
-  type InertiaAppResponse,
-  type Page,
-} from '@inertiajs/core'
+import { router, setupProgress, type BaseInertiaAppOptions, type InertiaAppResponse, type Page } from '@inertiajs/core'
 import escape from 'html-escape'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -13,15 +7,13 @@ import type { ComponentResolver } from './types'
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
 
-interface CreateInertiaAppProps {
-  id?: string
+interface CreateInertiaAppProps extends BaseInertiaAppOptions {
   resolve: ComponentResolver
   setup: (props: {
     el: HTMLElement | null
     App: AppComponent
     props: InertiaAppProps
   }) => void | App | SvelteRenderResult
-  progress?: InertiaAppProgressOptions | false
   page?: Page
 }
 
