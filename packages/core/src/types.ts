@@ -368,7 +368,8 @@ export interface InertiaAppProgressOptions {
   showSpinner?: boolean
 }
 
-export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+export type InertiaAppSSRContent = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 

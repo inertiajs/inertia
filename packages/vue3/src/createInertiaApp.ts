@@ -1,4 +1,11 @@
-import { HeadTitleCallback, InertiaAppProgressOptions, Page, router, setupProgress } from '@inertiajs/core'
+import {
+  HeadTitleCallback,
+  InertiaAppProgressOptions,
+  InertiaAppResponse,
+  Page,
+  router,
+  setupProgress,
+} from '@inertiajs/core'
 import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
@@ -20,7 +27,7 @@ export default async function createInertiaApp({
   progress = {},
   page,
   render,
-}: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
+}: CreateInertiaAppProps): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)

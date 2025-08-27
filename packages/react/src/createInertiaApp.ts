@@ -2,6 +2,7 @@ import {
   HeadOnUpdateCallback,
   HeadTitleCallback,
   InertiaAppProgressOptions,
+  InertiaAppSSRContent,
   Page,
   PageProps,
   PageResolver,
@@ -11,9 +12,6 @@ import {
 import { ComponentType, FunctionComponent, Key, ReactElement, ReactNode, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App'
-
-type ReactInstance = ReactElement
-type ReactComponent = ReactNode
 
 type AppType<SharedProps extends PageProps = PageProps> = FunctionComponent<
   {
@@ -26,7 +24,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   App: AppType
   props: {
     initialPage: Page<SharedProps>
-    initialComponent: ReactComponent
+    initialComponent: ReactNode
     resolveComponent: PageResolver
     titleCallback?: HeadTitleCallback
     onHeadUpdate?: HeadOnUpdateCallback
@@ -38,7 +36,7 @@ type BaseInertiaAppOptions = {
   resolve: PageResolver
 }
 
-type CreateInertiaAppSetupReturnType = ReactInstance | void
+type CreateInertiaAppSetupReturnType = ReactElement | void
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: string
   page?: Page | string
@@ -47,21 +45,18 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOpti
   setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
 
-type CreateInertiaAppSSRContent = { head: string[]; body: string }
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: undefined
   page: Page | string
   render: typeof renderToString
   progress?: undefined
-  setup(options: SetupOptions<null, SharedProps>): ReactInstance
+  setup(options: SetupOptions<null, SharedProps>): ReactElement
 }
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
-  options: InertiaAppOptionsForCSR<SharedProps>,
-): Promise<CreateInertiaAppSetupReturnType>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
-  options: InertiaAppOptionsForSSR<SharedProps>,
-): Promise<CreateInertiaAppSSRContent>
+type InertiaAppOptions<SharedProps extends PageProps> =
+  | InertiaAppOptionsForCSR<SharedProps>
+  | InertiaAppOptionsForSSR<SharedProps>
+
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
@@ -70,9 +65,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): Promise<
-  CreateInertiaAppSetupReturnType | CreateInertiaAppSSRContent
-> {
+}: InertiaAppOptions<SharedProps>): Promise<CreateInertiaAppSetupReturnType | InertiaAppSSRContent> {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
@@ -103,7 +96,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     setupProgress(progress)
   }
 
-  if (isServer) {
+  if (isServer && reactApp) {
     const body = await render(
       createElement(
         'div',
@@ -111,7 +104,6 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           id,
           'data-page': JSON.stringify(initialPage),
         },
-        // @ts-expect-error
         reactApp,
       ),
     )
