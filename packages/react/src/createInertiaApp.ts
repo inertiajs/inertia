@@ -32,24 +32,22 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
 }
 
 type BaseInertiaAppOptions = {
+  id?: string
   title?: HeadTitleCallback
+  progress?: InertiaAppProgressOptions | false
   resolve: PageResolver
 }
 
 type CreateInertiaAppSetupReturnType = ReactElement | void
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
-  id?: string
-  page?: Page | string
+  page?: Page
   render?: undefined
-  progress?: InertiaAppProgressOptions | false
   setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
-  id?: undefined
-  page: Page | string
+  page: Page
   render: typeof renderToString
-  progress?: undefined
   setup(options: SetupOptions<null, SharedProps>): ReactElement
 }
 
