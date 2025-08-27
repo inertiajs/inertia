@@ -358,6 +358,9 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
+export type HeadTitleCallback = (title: string) => string
+export type HeadOnUpdateCallback = (elements: string[]) => void
+
 export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'

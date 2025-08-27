@@ -1,4 +1,5 @@
 import debounce from './debounce'
+import { HeadOnUpdateCallback, HeadTitleCallback } from './types'
 
 const Renderer = {
   buildDOMElement(tag: string): ChildNode {
@@ -57,12 +58,12 @@ const Renderer = {
 
 export default function createHeadManager(
   isServer: boolean,
-  titleCallback: (title: string) => string,
-  onUpdate: (elements: string[]) => void,
+  titleCallback: HeadTitleCallback,
+  onUpdate: HeadOnUpdateCallback,
 ): {
   forceUpdate: () => void
   createProvider: () => {
-    update: (elements: string[]) => void
+    update: HeadOnUpdateCallback
     disconnect: () => void
   }
 } {
