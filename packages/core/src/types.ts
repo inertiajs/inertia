@@ -371,7 +371,7 @@ export interface InertiaAppProgressOptions {
 export type InertiaAppSSRContent = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
 
-export type BaseInertiaAppOptions = {
+export type CreateInertiaAppOptions = {
   id?: string
   progress?: InertiaAppProgressOptions | false
   resolve: PageResolver

@@ -1,5 +1,5 @@
 import {
-  BaseInertiaAppOptions,
+  CreateInertiaAppOptions,
   HeadOnUpdateCallback,
   HeadTitleCallback,
   InertiaAppResponse,
@@ -31,14 +31,14 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   }
 }
 
-type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptions & {
   title?: HeadTitleCallback
   page?: Page
   render?: undefined
   setup(options: SetupOptions<HTMLElement, SharedProps>): void
 }
 
-type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptions & {
   title?: HeadTitleCallback
   page: Page
   render: typeof renderToString
