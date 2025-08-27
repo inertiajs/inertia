@@ -361,6 +361,13 @@ export type Component = unknown
 export type HeadTitleCallback = (title: string) => string
 export type HeadOnUpdateCallback = (elements: string[]) => void
 
+export interface InertiaAppProgressOptions {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
 export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'

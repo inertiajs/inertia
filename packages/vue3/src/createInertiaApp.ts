@@ -1,4 +1,4 @@
-import { HeadTitleCallback, Page, router, setupProgress } from '@inertiajs/core'
+import { HeadTitleCallback, InertiaAppProgressOptions, Page, router, setupProgress } from '@inertiajs/core'
 import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
@@ -7,14 +7,7 @@ interface CreateInertiaAppProps {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
   setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
   title?: HeadTitleCallback
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
+  progress?: InertiaAppProgressOptions | false
   page?: Page
   render?: (app: VueApp) => Promise<string>
 }

@@ -1,6 +1,7 @@
 import {
   HeadOnUpdateCallback,
   HeadTitleCallback,
+  InertiaAppProgressOptions,
   Page,
   PageProps,
   PageResolver,
@@ -42,14 +43,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOpti
   id?: string
   page?: Page | string
   render?: undefined
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
+  progress?: InertiaAppProgressOptions | false
   setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
 }
 
