@@ -91,8 +91,11 @@ app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component
 app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/reactivity', (req, res) => inertia.render(req, res, { component: 'Links/Reactivity' }))
-app.get('/links/custom-component/:page', (req, res) =>
-  inertia.render(req, res, { component: 'Links/CustomComponent', props: { page: req.params.page } }),
+app.get('/links/as-component/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/AsComponent', props: { page: req.params.page } }),
+)
+app.get('/links/as-element/:page', (req, res) =>
+  inertia.render(req, res, { component: 'Links/AsElement', props: { page: req.params.page } }),
 )
 app.get('/links/cancel-sync-request/:page', (req, res) => {
   const page = req.params.page
@@ -157,6 +160,8 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.post('/form-helper/data/redirect-back', (req, res) => res.redirect(303, '/form-helper/data'))
+
 app.get('/form-helper/nested', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Nested',
@@ -171,6 +176,7 @@ app.get('/form-helper/dirty', (req, res) =>
 )
 
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+app.post('/form-helper/dirty/redirect-back', (req, res) => res.redirect(303, '/form-helper/dirty'))
 
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {

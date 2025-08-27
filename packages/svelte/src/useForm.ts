@@ -16,8 +16,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import { cloneDeep, isEqual } from 'es-toolkit'
-import { get, has, set } from 'es-toolkit/compat'
+import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { writable, type Writable } from 'svelte/store'
 
 type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
@@ -74,6 +73,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let cancelToken: { cancel: () => void } | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
+  // Track if defaults was called manually during onSuccess to avoid
+  // overriding user's custom defaults with automatic behavior.
+  let defaultsCalledInOnSuccess = false
 
   const store = writable<InertiaForm<TForm>>({
     ...(restored ? restored.data : data),
@@ -99,6 +101,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
+      defaultsCalledInOnSuccess = true
+
       if (typeof fieldOrFields === 'undefined') {
         defaults = cloneDeep(this.data())
       } else {
@@ -158,6 +162,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
       const options = (objectPassed ? args[1] : args[2]) ?? {}
+
+      defaultsCalledInOnSuccess = false
+
       const data = transform(this.data()) as RequestPayload
 
       const _options: Omit<VisitOptions, 'method'> = {
@@ -203,7 +210,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          this.defaults(cloneDeep(this.data()))
+
+          if (!defaultsCalledInOnSuccess) {
+            this.defaults(cloneDeep(this.data()))
+          }
+
           return onSuccess
         },
         onError: (errors: Errors) => {

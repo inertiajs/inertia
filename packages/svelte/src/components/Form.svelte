@@ -8,7 +8,7 @@
     type FormDataConvertible,
     type VisitOptions,
   } from '@inertiajs/core'
-  import { isEqual } from 'es-toolkit'
+  import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 
@@ -88,16 +88,16 @@
       onProgress,
       onFinish,
       onCancel,
-      onSuccess: (...args) =>  {
+      onSuccess: (...args) => {
         if (onSuccess) {
-            onSuccess(...args)
+          onSuccess(...args)
         }
 
         if (onSubmitComplete) {
-            onSubmitComplete({
-                reset,
-                defaults,
-            })
+          onSubmitComplete({
+            reset,
+            defaults,
+          })
         }
 
         maybeReset(resetOnSuccess)
@@ -124,10 +124,17 @@
     submit()
   }
 
+  function handleReset(event: Event) {
+    // Only intercept native reset events (from reset buttons/inputs)
+    if (event.isTrusted) {
+      event.preventDefault()
+      reset()
+    }
+  }
+
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
   }
-
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
@@ -171,7 +178,9 @@
   bind:this={formElement}
   action={_action}
   method={_method}
-  on:submit={handleSubmit} {...$$restProps}
+  on:submit={handleSubmit}
+  on:reset={handleReset}
+  {...$$restProps}
   inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
   <slot

@@ -1,7 +1,15 @@
 import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
-export default ({ bar, foo, baz }: { bar: number[]; foo: { page: number; data: number[]; per_page: number; meta: { label: string } }; baz: number[] }) => {
+export default ({
+  bar,
+  foo,
+  baz,
+}: {
+  bar: number[]
+  foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
+  baz: number[]
+}) => {
   const [page, setPage] = useState(foo.page)
 
   const reloadIt = () => {

@@ -1,15 +1,11 @@
-import { useState } from 'react'
 import { Form } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default () => {
   const [errorBag, setErrorBag] = useState<string | null>(null)
 
   return (
-    <Form
-      action={errorBag ? '/form-component/errors/bag' : '/form-component/errors'}
-      method="post"
-      errorBag={errorBag}
-    >
+    <Form action={errorBag ? '/form-component/errors/bag' : '/form-component/errors'} method="post" errorBag={errorBag}>
       {({ errors, hasErrors, setError, clearErrors }) => (
         <>
           <h1>Form Errors</h1>
@@ -40,9 +36,15 @@ export default () => {
             >
               Set Errors
             </button>
-            <button type="button" onClick={() => clearErrors()}>Clear Errors</button>
-            <button type="button" onClick={() => clearErrors('name')}>Clear Name Error</button>
-            <button type="button" onClick={() => setErrorBag('bag')}>Use Error Bag</button>
+            <button type="button" onClick={() => clearErrors()}>
+              Clear Errors
+            </button>
+            <button type="button" onClick={() => clearErrors('name')}>
+              Clear Name Error
+            </button>
+            <button type="button" onClick={() => setErrorBag('bag')}>
+              Use Error Bag
+            </button>
           </div>
 
           <button type="submit">Submit</button>

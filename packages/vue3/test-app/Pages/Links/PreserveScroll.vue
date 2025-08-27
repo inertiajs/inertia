@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 import WithScrollRegion from '../../Layouts/WithScrollRegion.vue'
-import type { Page } from '@inertiajs/core'
 
 defineOptions({
   layout: WithScrollRegion,
@@ -63,11 +63,6 @@ const preserveCallbackFalse = (page: Page) => {
 
     <a href="/non-inertia" class="off-site" style="display: block">Off-site link</a>
 
-    <Link
-      href="/article"
-      class="article"
-      data-testid="article"
-      >Article</Link
-    >
+    <Link href="/article" class="article" data-testid="article">Article</Link>
   </div>
 </template>

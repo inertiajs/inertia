@@ -22,7 +22,7 @@
   action="/form-component"
   method="post"
   headers={customHeaders}
-  errorBag={errorBag}
+  {errorBag}
   options={{
     only: ['foo'],
     reset: ['bar'],
@@ -48,19 +48,33 @@
       <h3 class="mb-3 text-lg font-medium">Form Status</h3>
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
-          isDirty: <span class="font-mono" class:text-orange-600={isDirty} class:text-gray-500={!isDirty}>{isDirty}</span>
+          isDirty: <span class="font-mono" class:text-orange-600={isDirty} class:text-gray-500={!isDirty}
+            >{isDirty}</span
+          >
         </div>
         <div>
-          hasErrors: <span class="font-mono" class:text-red-600={hasErrors} class:text-gray-500={!hasErrors}>{hasErrors}</span>
+          hasErrors: <span class="font-mono" class:text-red-600={hasErrors} class:text-gray-500={!hasErrors}
+            >{hasErrors}</span
+          >
         </div>
         <div>
-          processing: <span class="font-mono" class:text-blue-600={processing} class:text-gray-500={!processing}>{processing}</span>
+          processing: <span class="font-mono" class:text-blue-600={processing} class:text-gray-500={!processing}
+            >{processing}</span
+          >
         </div>
         <div>
-          wasSuccessful: <span class="font-mono" class:text-green-600={wasSuccessful} class:text-gray-500={!wasSuccessful}>{wasSuccessful}</span>
+          wasSuccessful: <span
+            class="font-mono"
+            class:text-green-600={wasSuccessful}
+            class:text-gray-500={!wasSuccessful}>{wasSuccessful}</span
+          >
         </div>
         <div>
-          recentlySuccessful: <span class="font-mono" class:text-green-600={recentlySuccessful} class:text-gray-500={!recentlySuccessful}>{recentlySuccessful}</span>
+          recentlySuccessful: <span
+            class="font-mono"
+            class:text-green-600={recentlySuccessful}
+            class:text-gray-500={!recentlySuccessful}>{recentlySuccessful}</span
+          >
         </div>
         {#if progress}
           <div>
@@ -71,9 +85,7 @@
     </div>
 
     {#if isDirty}
-      <div class="rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">
-        There are unsaved changes!
-      </div>
+      <div class="rounded border border-amber-100 bg-amber-50 p-3 text-amber-800">There are unsaved changes!</div>
     {/if}
 
     <!-- Form Fields -->
@@ -174,21 +186,11 @@
 
     <!-- Action Buttons -->
     <div class="flex flex-wrap gap-2">
-      <button
-        type="submit"
-        disabled={processing}
-        class="rounded bg-slate-800 px-4 py-2 text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={processing} class="rounded bg-slate-800 px-4 py-2 text-white disabled:opacity-50">
         Submit
       </button>
 
-      <button
-        type="button"
-        onclick={reset}
-        class="rounded bg-gray-500 px-4 py-2 text-white"
-      >
-        Reset
-      </button>
+      <button type="button" onclick={reset} class="rounded bg-gray-500 px-4 py-2 text-white"> Reset </button>
 
       <button
         type="button"
@@ -198,11 +200,7 @@
         Set Errors
       </button>
 
-      <button
-        type="button"
-        onclick={() => clearErrors()}
-        class="rounded bg-green-500 px-4 py-2 text-white"
-      >
+      <button type="button" onclick={() => clearErrors()} class="rounded bg-green-500 px-4 py-2 text-white">
         Clear Errors
       </button>
     </div>

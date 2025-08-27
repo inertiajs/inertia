@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3'
 import type { Method } from '@inertiajs/core'
+import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const method = ref<Method>('get')

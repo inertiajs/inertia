@@ -113,6 +113,57 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
+test('can prefetch using link props with keyboard events', async ({ page }) => {
+  // These two prefetch requests should be made on mount
+  const prefetch2 = page.waitForResponse('prefetch/2')
+  const prefetch4 = page.waitForResponse('prefetch/4')
+
+  await page.goto('prefetch/1')
+
+  // These two prefetch requests should be made on mount
+  await prefetch2
+  await prefetch4
+
+  // Keyboard activation with Enter
+  await page.getByRole('link', { name: 'On Enter' }).focus()
+  await page.keyboard.down('Enter')
+  await page.waitForResponse('prefetch/6')
+  await expect(page).toHaveURL('prefetch/1')
+  requests.listen(page)
+  await page.keyboard.up('Enter')
+  await isPrefetchPage(page, 6)
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Spacebar on link (nothing happens)
+  await page.getByRole('link', { name: 'On Click' }).focus()
+  await page.keyboard.down(' ')
+  await expect(page).toHaveURL('prefetch/6')
+  requests.listen(page)
+  await page.keyboard.up(' ')
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Spacebar on button
+  await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  await page.keyboard.down(' ')
+  await page.waitForResponse('prefetch/7')
+  await expect(page).toHaveURL('prefetch/6')
+  requests.listen(page)
+  await page.keyboard.up(' ')
+  await isPrefetchPage(page, 7)
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Enter on button
+  await page.goto('prefetch/1')
+  await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  await page.keyboard.down('Enter')
+  await page.waitForResponse('prefetch/7')
+  await expect(page).toHaveURL('prefetch/1')
+  requests.listen(page)
+  await page.keyboard.up('Enter')
+  await isPrefetchPage(page, 7)
+  await expect(requests.requests.length).toBe(0)
+})
+
 test('can cache links with single cache value', async ({ page }) => {
   await page.goto('prefetch/swr/1')
 

@@ -19,18 +19,15 @@
   }
 
   const testPrefetch = () => {
-    router.prefetch(
-      wayfinderUrl(),
-      {
-        onPrefetching: () => {
-          isPrefetching = true
-        },
-        onPrefetched: () => {
-          isPrefetching = false
-          setTimeout(checkStatus)
-        },
+    router.prefetch(wayfinderUrl(), {
+      onPrefetching: () => {
+        isPrefetching = true
       },
-    )
+      onPrefetched: () => {
+        isPrefetching = false
+        setTimeout(checkStatus)
+      },
+    })
   }
 
   const testFlush = () => {

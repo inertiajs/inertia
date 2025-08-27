@@ -2,7 +2,7 @@
   import { Form } from '@inertiajs/svelte'
 </script>
 
-<Form method="post" action="/form-component/reset-on-success-fields" resetOnSuccess={["name"]} let:errors>
+<Form method="post" action="/form-component/reset-on-success-fields" resetOnSuccess={['name']} let:errors>
   <div>
     <label for="name">Name</label>
     <input type="text" name="name" id="name" value="John Doe" />

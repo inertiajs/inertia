@@ -40,13 +40,15 @@ export type FormDataConvertible =
   | FormDataConvertibleValue
 
 export type FormDataType<T extends object> = {
-  [K in keyof T]: T[K] extends FormDataConvertibleValue
-    ? T[K]
-    : T[K] extends (...args: unknown[]) => unknown
-      ? never
-      : T[K] extends object | Array<unknown>
-        ? FormDataType<T[K]>
-        : never
+  [K in keyof T]: T[K] extends infer U
+    ? U extends FormDataConvertibleValue
+      ? U
+      : U extends (...args: unknown[]) => unknown
+        ? never
+        : U extends object | Array<unknown>
+          ? FormDataType<U>
+          : never
+    : never
 }
 
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
@@ -60,8 +62,9 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
               [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
             }[Extract<keyof T, `${number}`>]
     : string extends keyof T
-        ? string
-        : | Extract<keyof T, string>
+      ? string
+      :
+          | Extract<keyof T, string>
           | {
               [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
             }[Extract<keyof T, string>]
@@ -273,13 +276,25 @@ export type PageEvent = 'newComponent' | 'firstLoad'
 
 export type GlobalEventNames<T extends RequestPayload = RequestPayload> = keyof GlobalEventsMap<T>
 
-export type GlobalEvent<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = CustomEvent<GlobalEventDetails<TEventName, T>>
+export type GlobalEvent<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = CustomEvent<GlobalEventDetails<TEventName, T>>
 
-export type GlobalEventParameters<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['parameters']
+export type GlobalEventParameters<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['parameters']
 
-export type GlobalEventResult<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['result']
+export type GlobalEventResult<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['result']
 
-export type GlobalEventDetails<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = GlobalEventsMap<T>[TEventName]['details']
+export type GlobalEventDetails<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['details']
 
 export type GlobalEventTrigger<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = (
   ...params: GlobalEventParameters<TEventName, T>

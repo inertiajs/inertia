@@ -54,7 +54,11 @@
   </div>
   <div>
     <label class="block" for="role">Role:</label>
-    <select bind:value={$form.role} id="role" class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1">
+    <select
+      bind:value={$form.role}
+      id="role"
+      class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+    >
       <option />
       <option>User</option>
       <option>Admin</option>

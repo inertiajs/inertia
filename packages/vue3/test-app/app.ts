@@ -1,6 +1,6 @@
 import { createInertiaApp, router } from '@inertiajs/vue3'
-import { createApp, h } from 'vue'
 import type { DefineComponent } from 'vue'
+import { createApp, h } from 'vue'
 
 window.testing = { Inertia: router }
 

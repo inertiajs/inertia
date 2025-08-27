@@ -28,7 +28,6 @@
   function setCurrentAsDefaults() {
     formRef?.defaults()
   }
-
 </script>
 
 <div>
@@ -58,23 +57,11 @@
   </Form>
 
   <div>
-    <button on:click={submitProgrammatically}>
-      Submit Programmatically
-    </button>
-    <button on:click={resetForm}>
-      Reset Form
-    </button>
-    <button on:click={resetNameField}>
-      Reset Name Field
-    </button>
-    <button on:click={clearAllErrors}>
-      Clear Errors
-    </button>
-    <button on:click={setTestError}>
-      Set Test Error
-    </button>
-    <button on:click={setCurrentAsDefaults}>
-      Set Current as Defaults
-    </button>
+    <button on:click={submitProgrammatically}> Submit Programmatically </button>
+    <button on:click={resetForm}> Reset Form </button>
+    <button on:click={resetNameField}> Reset Name Field </button>
+    <button on:click={clearAllErrors}> Clear Errors </button>
+    <button on:click={setTestError}> Set Test Error </button>
+    <button on:click={setCurrentAsDefaults}> Set Current as Defaults </button>
   </div>
 </div>

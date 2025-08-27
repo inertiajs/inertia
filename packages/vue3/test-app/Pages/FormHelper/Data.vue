@@ -13,6 +13,12 @@ const submit = () => {
   form.post(page.url)
 }
 
+const submitAndReset = () => {
+  form.post('/form-helper/data/redirect-back', {
+    onSuccess: () => form.reset(),
+  })
+}
+
 const resetAll = () => {
   form.reset()
 }
@@ -56,6 +62,7 @@ const reassignSingle = () => {
     <span class="remember_error" v-if="form.errors.remember">{{ form.errors.remember }}</span>
 
     <button @click="submit" class="submit">Submit form</button>
+    <button @click="submitAndReset" class="submit">Submit form and reset</button>
 
     <button @click="resetAll" class="reset">Reset all data</button>
     <button @click="resetOne" class="reset-one">Reset one field</button>

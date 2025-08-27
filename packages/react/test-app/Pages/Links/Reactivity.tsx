@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link } from '@inertiajs/react'
 import type { CacheForOption, LinkPrefetchOption, Method } from '@inertiajs/core'
+import { Link } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default () => {
   const [method, setMethod] = useState<Method>('get')

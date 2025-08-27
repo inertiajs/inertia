@@ -1,10 +1,10 @@
-import { Page } from '@inertiajs/core';
+import { Page } from '@inertiajs/core'
 import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
 interface PageProps {
-  foo: string;
-  bar: string;
+  foo: string
+  bar: string
 }
 
 export default ({ foo, bar }: PageProps) => {

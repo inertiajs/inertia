@@ -12,5 +12,7 @@
 
 <div>
   <a href={'#'} on:click={wayfinderObjectVisit} class="wayfinder-visit">Wayfinder object visit</a>
-  <a href={'#'} on:click={wayfinderObjectMethodOverride} class="wayfinder-method-override">Wayfinder object method override</a>
+  <a href={'#'} on:click={wayfinderObjectMethodOverride} class="wayfinder-method-override"
+    >Wayfinder object method override</a
+  >
 </div>

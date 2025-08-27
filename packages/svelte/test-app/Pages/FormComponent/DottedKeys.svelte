@@ -32,5 +32,4 @@
     <input type="text" name="settings.ui.theme" placeholder="UI Theme" />
     <button type="submit">Submit Mixed</button>
   </Form>
-
 </div>

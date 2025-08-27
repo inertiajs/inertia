@@ -12,7 +12,7 @@ export default () => {
     router.visit('/visits/after-error/2', {
       onSuccess: () => {
         throw new Error('Error after visit')
-      }
+      },
     })
   }
 

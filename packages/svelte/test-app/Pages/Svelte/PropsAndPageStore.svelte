@@ -16,26 +16,23 @@
     console.log('[onMount] foo prop is', foo)
     console.log('[onMount] $page.props.foo is', $page.props.foo)
   })
+
+  type PageProps = {
+    foo: string
+  }
+
+  const pageProps: PageProps = {
+    foo: $page.props.foo,
+  }
 </script>
 
 <div>
-  <input id="input" type="text" bind:value={$form.foo}>
+  <input id="input" type="text" bind:value={$form.foo} />
   <p>foo prop is {foo}</p>
   <p>$page.props.foo is {$page.props.foo}</p>
+  <p>pageProps.foo is {pageProps.foo}</p>
 
-  <a
-    href="/svelte/props-and-page-store"
-    use:inertia={{ data: { foo: 'bar' } }}
-  >
-    Bar
-  </a>
-  <a
-    href="/svelte/props-and-page-store"
-    use:inertia={{ data: { foo: 'baz' } }}
-  >
-    Baz
-  </a>
-  <a href="/" use:inertia>
-    Home
-  </a>
+  <a href="/svelte/props-and-page-store" use:inertia={{ data: { foo: 'bar' } }}> Bar </a>
+  <a href="/svelte/props-and-page-store" use:inertia={{ data: { foo: 'baz' } }}> Baz </a>
+  <a href="/" use:inertia> Home </a>
 </div>

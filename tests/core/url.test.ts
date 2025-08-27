@@ -111,16 +111,18 @@ test.describe('url.ts', () => {
 
       test('handles nested arrays within objects', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/filter', {
-          filters: { tags: ['red', 'blue'], categories: ['A', 'B'] }
+          filters: { tags: ['red', 'blue'], categories: ['A', 'B'] },
         })
 
-        expect(href).toBe('/filter?filters[tags][]=red&filters[tags][]=blue&filters[categories][]=A&filters[categories][]=B')
+        expect(href).toBe(
+          '/filter?filters[tags][]=red&filters[tags][]=blue&filters[categories][]=A&filters[categories][]=B',
+        )
         expect(data).toEqual({})
       })
 
       test('handles deep nesting of objects', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/api', {
-          user: { profile: { settings: { theme: 'dark' } } }
+          user: { profile: { settings: { theme: 'dark' } } },
         })
 
         expect(href).toBe('/api?user[profile][settings][theme]=dark')
@@ -164,7 +166,7 @@ test.describe('url.ts', () => {
 
       test('handles arrays with mixed data types', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/filter', {
-          mixed: [1, 'string', true, null]
+          mixed: [1, 'string', true, null],
         })
 
         expect(href).toBe('/filter?mixed[]=1&mixed[]=string&mixed[]=true&mixed[]=')
@@ -173,7 +175,7 @@ test.describe('url.ts', () => {
 
       test('handles objects with numeric keys', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/api', {
-          items: { 0: 'first', 1: 'second', 10: 'tenth' }
+          items: { 0: 'first', 1: 'second', 10: 'tenth' },
         })
 
         expect(href).toBe('/api?items[0]=first&items[1]=second&items[10]=tenth')
@@ -230,7 +232,7 @@ test.describe('url.ts', () => {
           user: { profile: { settings: { theme: 'dark' } } },
           tags: ['red', 'blue'],
           active: true,
-          count: 42
+          count: 42,
         }
         const [href, data] = mergeDataIntoQueryString('post', '/api/update', complexData)
 

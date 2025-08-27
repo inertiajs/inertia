@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
 import type { Method } from '@inertiajs/core'
+import { Link } from '@inertiajs/vue3'
 
 defineProps<{
   method: Method

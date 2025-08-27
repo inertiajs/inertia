@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
 import { Form } from '@inertiajs/react'
+import { useEffect, useRef, useState } from 'react'
 
 export default () => {
   const [showProgress, setShowProgress] = useState<boolean | undefined>(undefined)
@@ -41,7 +41,9 @@ export default () => {
       </div>
 
       <div>
-        <button type="button" onClick={disableProgress}>Disable Progress</button>
+        <button type="button" onClick={disableProgress}>
+          Disable Progress
+        </button>
         <button type="submit">Submit</button>
       </div>
     </Form>

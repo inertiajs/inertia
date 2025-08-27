@@ -2,6 +2,7 @@ import {
   mergeDataIntoQueryString,
   router,
   shouldIntercept,
+  shouldNavigate,
   type CacheForOption,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
@@ -81,13 +82,25 @@ function link(
         prefetch()
       }
     },
+    keydown: (event) => {
+      if (shouldIntercept(event) && shouldNavigate(event)) {
+        event.preventDefault()
+        prefetch()
+      }
+    },
     mouseup: (event) => {
       event.preventDefault()
       router.visit(href, visitParams)
     },
+    keyup: (event) => {
+      if (shouldNavigate(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
+    },
     click: (event) => {
       if (shouldIntercept(event)) {
-        // Let the mouseup event handle the visit
+        // Let the mouseup/keyup event handle the visit
         event.preventDefault()
       }
     },

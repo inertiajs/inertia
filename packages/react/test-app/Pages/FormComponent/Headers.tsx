@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { Form } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default () => {
   const [headers, setHeaders] = useState<Record<string, string>>({
@@ -18,7 +18,9 @@ export default () => {
       <h1>Form Headers</h1>
 
       <div>
-        <button type="button" onClick={addCustomHeader}>Add Custom Header</button>
+        <button type="button" onClick={addCustomHeader}>
+          Add Custom Header
+        </button>
       </div>
 
       <button type="submit">Submit</button>

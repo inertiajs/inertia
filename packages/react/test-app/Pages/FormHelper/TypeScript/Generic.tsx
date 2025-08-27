@@ -7,11 +7,7 @@ interface GenericProps<TFormData extends Record<string, FormDataConvertible>> {
 }
 
 export default function Generic<TFormData extends Record<string, FormDataConvertible>>({
-  form
+  form,
 }: GenericProps<TFormData>) {
-  return (
-    <div>
-      {/* Generic form component */}
-    </div>
-  )
+  return <div>{/* Generic form component */}</div>
 }
