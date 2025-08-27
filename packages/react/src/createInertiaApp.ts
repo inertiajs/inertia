@@ -2,7 +2,7 @@ import {
   BaseInertiaAppOptions,
   HeadOnUpdateCallback,
   HeadTitleCallback,
-  InertiaAppSSRContent,
+  InertiaAppResponse,
   Page,
   PageProps,
   PageResolver,
@@ -31,12 +31,11 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   }
 }
 
-type CreateInertiaAppSetupReturnType = ReactElement | void
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   title?: HeadTitleCallback
   page?: Page
   render?: undefined
-  setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
+  setup(options: SetupOptions<HTMLElement, SharedProps>): void
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
@@ -58,7 +57,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-}: InertiaAppOptions<SharedProps>): Promise<CreateInertiaAppSetupReturnType | InertiaAppSSRContent> {
+}: InertiaAppOptions<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el.dataset.page)
