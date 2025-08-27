@@ -59,4 +59,4 @@ git push --tags
 pnpm publish -r
 
 echo "\n✅ Release $TAG completed successfully."
-echo "🔗 https://github.com/inertiajs/inertia/releases/tag/$TAG"
+echo "🔗 https://github.com/inertiajs/inertia/releases/new?tag=$TAG"
