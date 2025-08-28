@@ -139,5 +139,6 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     matchPropsOn: computed(() => page.value?.matchPropsOn),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
+    paginateProps: computed(() => page.value?.paginateProps),
   })
 }

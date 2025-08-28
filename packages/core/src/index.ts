@@ -1,8 +1,11 @@
 import { Router } from './router'
 
+export { default as debounce } from './debounce'
+export { getElementsInViewportFromCollection } from './domUtils'
 export { objectToFormData } from './formData'
 export { formDataToObject } from './formObject'
 export { default as createHeadManager } from './head'
+export { useIntersectionObservers } from './intersectionObservers'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { hide as hideProgress, reveal as revealProgress, default as setupProgress } from './progress'
 export { resetFormFields } from './resetFormFields'

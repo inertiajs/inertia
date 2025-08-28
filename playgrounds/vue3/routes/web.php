@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -179,6 +180,21 @@ Route::get('/async', function () {
         'jonathan' => Cache::get('jonathan', false),
         'taylor' => Cache::get('taylor', false),
         'joe' => Cache::get('joe', false),
+    ]);
+});
+
+Route::get('/infinite-scrolling', function () {
+    if (request()->inertia()) {
+        sleep(1);
+    }
+
+    $buffer = request()->integer('buffer');
+    $container = request()->boolean('container');
+
+    return inertia('InfiniteScrolling', [
+        'buffer' => $buffer,
+        'container' => $container,
+        'users' => Inertia::paginate(User::query()->simplePaginate(90)->withQueryString()),
     ]);
 });
 

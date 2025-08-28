@@ -120,6 +120,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   mergeProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
+  paginateProps?: Record<string, PaginatePropData>
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -219,6 +220,13 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     details: {}
     result: void
   }
+  beforeUpdate: {
+    parameters: [Page]
+    details: {
+      page: Page
+    }
+    result: void
+  }
   navigate: {
     parameters: [Page]
     details: {
@@ -309,6 +317,7 @@ export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
   onBefore: GlobalEventCallback<'before', T>
+  onBeforeUpdate: GlobalEventCallback<'beforeUpdate', T>
   onStart: GlobalEventCallback<'start', T>
   onProgress: GlobalEventCallback<'progress', T>
   onFinish: GlobalEventCallback<'finish', T>
@@ -495,6 +504,18 @@ declare global {
     'inertia:invalid': GlobalEvent<'invalid'>
     'inertia:exception': GlobalEvent<'exception'>
     'inertia:finish': GlobalEvent<'finish'>
+    'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
   }
+}
+
+export type PaginatePropData = {
+  name: string
+  dataWrapper: string
+  mergeStrategy: string
+  previous: string | number | null
+  next: string | number | null
+  current: string | number | null
+  hasPreviousPage: boolean
+  hasNextPage: boolean
 }

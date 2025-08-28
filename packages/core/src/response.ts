@@ -1,13 +1,19 @@
 import { AxiosResponse } from 'axios'
 import { router } from '.'
-import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
+import {
+  fireBeforeUpdateEvent,
+  fireErrorEvent,
+  fireInvalidEvent,
+  firePrefetchedEvent,
+  fireSuccessEvent,
+} from './events'
 import { history } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, Page, PaginatePropData } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
@@ -154,6 +160,9 @@ export class Response {
 
     pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
+    this.requestParams.all().onBeforeUpdate(pageResponse)
+    fireBeforeUpdateEvent(pageResponse)
+
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
       preserveScroll: this.requestParams.all().preserveScroll,
@@ -215,6 +224,7 @@ export class Response {
     const propsToMerge = pageResponse.mergeProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
     const matchPropsOn = pageResponse.matchPropsOn || []
+    const paginateProps = Object.keys(pageResponse.paginateProps || {})
 
     propsToMerge.forEach((prop) => {
       const incomingProp = pageResponse.props[prop]
@@ -261,6 +271,27 @@ export class Response {
 
       // Apply the deep merge and update the page response
       pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
+    })
+
+    type PaginatedResource = {
+      [dataWrapper: string]: object[]
+    }
+
+    paginateProps.forEach((prop) => {
+      const paginateMeta = pageResponse.paginateProps![prop] as PaginatePropData
+      const dataWrapper = paginateMeta.dataWrapper || 'data'
+      const mergeStrategy = paginateMeta.mergeStrategy || 'append'
+
+      const incomingProp = pageResponse.props[prop] as PaginatedResource
+      const currentProp = currentPage.get().props[prop] as PaginatedResource
+
+      pageResponse.props[prop] = {
+        ...incomingProp,
+        [dataWrapper]:
+          mergeStrategy === 'append'
+            ? [...currentProp[dataWrapper], ...incomingProp[dataWrapper]]
+            : [...incomingProp[dataWrapper], ...currentProp[dataWrapper]],
+      }
     })
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }

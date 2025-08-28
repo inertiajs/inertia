@@ -684,6 +684,56 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
   }),
 )
 
+app.get('/infinite-scroll/default', (req, res) => {
+  const perPage = 20
+  const page = parseInt(req.query.page ?? 1, 10)
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: (page - 1) * perPage + index + 1,
+    name: `User ${(page - 1) * perPage + index + 1}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'InfiniteScroll/Default',
+    props: {
+      users: {
+        data: users,
+        page: page,
+      },
+      timestamp: Date.now(),
+    },
+    deepMergeProps: ['users'],
+    matchPropsOn: ['users.data.id'],
+  })
+})
+
+app.get('/infinite-scroll/eloquent', (req, res) => {
+  const perPage = 20
+  const page = parseInt(req.query.page ?? 1, 10)
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: (page - 1) * perPage + index + 1,
+    name: `User ${(page - 1) * perPage + index + 1}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'InfiniteScroll/Eloquent',
+    props: {
+      users: {
+        data: users,
+        current_page: page,
+        total: 5000,
+        last_page: 250,
+        next_page_url: `/infinite-scroll/eloquent?page=${page + 1}`,
+        prev_page_url: page > 1 ? `/infinite-scroll/eloquent?page=${page - 1}` : null,
+      },
+      timestamp: Date.now(),
+    },
+    deepMergeProps: ['users'],
+    matchPropsOn: ['users.data.id'],
+  })
+})
+
 app.all('*', (req, res) => inertia.render(req, res))
 
 const adapterPorts = {

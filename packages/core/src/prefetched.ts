@@ -241,6 +241,7 @@ class PrefetchedRequests {
         'replace',
         'prefetch',
         'onBefore',
+        'onBeforeUpdate',
         'onStart',
         'onProgress',
         'onFinish',

@@ -429,6 +429,7 @@ export class Router {
     return {
       onCancelToken: options.onCancelToken || (() => {}),
       onBefore: options.onBefore || (() => {}),
+      onBeforeUpdate: options.onBeforeUpdate || (() => {}),
       onStart: options.onStart || (() => {}),
       onProgress: options.onProgress || (() => {}),
       onFinish: options.onFinish || (() => {}),
