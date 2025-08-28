@@ -60,7 +60,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const hoverTimeout = useRef<number>(null)
 
     const _method = useMemo(() => {
-      return typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
+      return href && typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
     }, [href, method])
 
     const _as = useMemo(() => {

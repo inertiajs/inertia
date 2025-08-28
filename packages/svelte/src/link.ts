@@ -137,7 +137,10 @@ function link(
 
     cacheTags = cacheTagValues
 
-    method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
+    method =
+      params.href && typeof params.href === 'object'
+        ? params.href.method
+        : ((params.method?.toLowerCase() || 'get') as Method)
     ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
