@@ -38,6 +38,10 @@ const InfiniteScroll = defineComponent({
       type: Number,
       default: 0,
     },
+    preserveUrl: {
+      type: Boolean,
+      default: false,
+    },
     dataWrapper: {
       type: String,
       default: null,
@@ -45,6 +49,18 @@ const InfiniteScroll = defineComponent({
     queryParam: {
       type: String,
       default: null,
+    },
+    autoScroll: {
+      type: Boolean,
+      default: true,
+    },
+    scrollBehavior: {
+      type: String as PropType<ScrollBehavior>,
+      default: 'smooth',
+    },
+    reverse: {
+      type: Boolean,
+      default: false,
     },
   },
   inheritAttrs: false,
@@ -69,6 +85,7 @@ const InfiniteScroll = defineComponent({
     const slotElement = ref<HTMLElement | null>(null)
     const endElement = ref<HTMLElement | null>(null)
 
+    let slotObserver: MutationObserver
     let startElementObserver: IntersectionObserver
     let itemsObserver: IntersectionObserver
     let endElementObserver: IntersectionObserver
@@ -91,15 +108,30 @@ const InfiniteScroll = defineComponent({
       return null
     }
 
+    const scrollToBottom = () => {
+      const scrollableContainer = getScrollableContainer(slotElement.value)
+      if (scrollableContainer) {
+        scrollableContainer.scrollTo({
+          top: scrollableContainer.scrollHeight,
+          behavior: props.scrollBehavior,
+        })
+      } else {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: props.scrollBehavior,
+        })
+      }
+    }
+
     const fetchPrevious = () => {
       const scrollableContainer = getScrollableContainer(slotElement.value)
       let currentScrollTop: number
       let referenceElement: Element | null = null
       let referenceElementTop: number = 0
 
-      load(pagination.value.previous, {
+      load(props.reverse ? pagination.value.next : pagination.value.previous, {
         headers: {
-          'X-Inertia-Scroll-Direction': 'up',
+          'X-Inertia-Scroll-Direction': props.reverse ? 'down' : 'up',
         },
         onBeforeUpdate: () => {
           currentScrollTop = scrollableContainer?.scrollTop || window.scrollY
@@ -119,8 +151,13 @@ const InfiniteScroll = defineComponent({
           }
         },
         onSuccess: (page: Page) => {
-          pagination.value.previous = page.paginateProps[props.data].previous
-          pagination.value.hasPreviousPage = page.paginateProps[props.data].hasPreviousPage
+          if (props.reverse) {
+            pagination.value.next = page.paginateProps[props.data].next
+            pagination.value.hasNextPage = page.paginateProps[props.data].hasNextPage
+          } else {
+            pagination.value.previous = page.paginateProps[props.data].previous
+            pagination.value.hasPreviousPage = page.paginateProps[props.data].hasPreviousPage
+          }
         },
         onFinish: () => {
           if (!referenceElement) {
@@ -148,18 +185,28 @@ const InfiniteScroll = defineComponent({
     }
 
     const fetchNext = () => {
-      load(pagination.value.next, {
+      console.log(pagination.value.previous)
+      load(props.reverse ? pagination.value.previous : pagination.value.next, {
         headers: {
-          'X-Inertia-Scroll-Direction': 'down',
+          'X-Inertia-Scroll-Direction': props.reverse ? 'up' : 'down',
         },
         onSuccess: () => {
-          pagination.value.next = page.paginateProps[props.data].next
-          pagination.value.hasNextPage = page.paginateProps[props.data].hasNextPage
+          if (props.reverse) {
+            pagination.value.previous = page.paginateProps[props.data].previous
+            pagination.value.hasPreviousPage = page.paginateProps[props.data].hasPreviousPage
+          } else {
+            pagination.value.next = page.paginateProps[props.data].next
+            pagination.value.hasNextPage = page.paginateProps[props.data].hasNextPage
+          }
         },
       })
     }
 
     const replaceUrl = (target) => {
+      if (props.preserveUrl) {
+        return
+      }
+
       // Create a map of items per page
       const pageMap = new Map<string, number>()
 
@@ -202,7 +249,13 @@ const InfiniteScroll = defineComponent({
     }, 250)
 
     const load = (value: string | number | null, options: ReloadOptions = {}) => {
-      if (loading.value || value === null) {
+      if (loading.value) {
+        console.log('InfiniteScroll: already fetching, skipping...')
+        return
+      }
+
+      if (value === null) {
+        console.log('InfiniteScroll: no more pages to load')
         return
       }
 
@@ -222,7 +275,6 @@ const InfiniteScroll = defineComponent({
         },
         onFinish: (visit: ActiveVisit) => {
           requestCount.value += 1
-          processSlotChildren(pagination.value.current)
           options.onFinish?.(visit)
         },
       })
@@ -256,6 +308,23 @@ const InfiniteScroll = defineComponent({
     const intersectionObservers = useIntersectionObservers()
 
     onMounted(() => {
+      slotObserver = new MutationObserver((mutations) => {
+        // Check if any child nodes were added
+        const itemsAdded = mutations.some((mutation) => mutation.addedNodes.length > 0)
+
+        if (!itemsAdded) {
+          return
+        }
+
+        processSlotChildren(pagination.value.current)
+
+        if (props.autoScroll) {
+          scrollToBottom()
+        }
+      })
+
+      slotObserver.observe(slotElement.value!, { childList: true })
+
       itemsObserver = intersectionObservers.new(onIntersectingItem)
       processSlotChildren(pagination.value.current)
 

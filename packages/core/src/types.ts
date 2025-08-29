@@ -512,7 +512,7 @@ declare global {
 export type PaginatePropData = {
   name: string
   dataWrapper: string
-  mergeStrategy: string
+  mergeStrategy?: 'append' | 'prepend'
   previous: string | number | null
   next: string | number | null
   current: string | number | null

@@ -273,8 +273,8 @@ export class Response {
       pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
     })
 
-    type PaginatedResource = {
-      [dataWrapper: string]: object[]
+    type PaginatedResource<TDataWrapper extends string = string> = {
+      [K in TDataWrapper]: unknown[]
     }
 
     paginateProps.forEach((prop) => {
@@ -282,8 +282,8 @@ export class Response {
       const dataWrapper = paginateMeta.dataWrapper || 'data'
       const mergeStrategy = paginateMeta.mergeStrategy || 'append'
 
-      const incomingProp = pageResponse.props[prop] as PaginatedResource
-      const currentProp = currentPage.get().props[prop] as PaginatedResource
+      const incomingProp = pageResponse.props[prop] as PaginatedResource<typeof dataWrapper>
+      const currentProp = currentPage.get().props[prop] as PaginatedResource<typeof dataWrapper>
 
       pageResponse.props[prop] = {
         ...incomingProp,
