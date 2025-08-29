@@ -4,6 +4,7 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
@@ -67,7 +68,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const formElement = useRef<HTMLFormElement>(null)
 
     const resolvedMethod = useMemo(() => {
-      return typeof action === 'object' ? action.method : (method.toLowerCase() as Method)
+      return isUrlMethodPair(action) ? action.method : (method.toLowerCase() as Method)
     }, [action, method])
 
     const [isDirty, setIsDirty] = useState(false)
@@ -117,7 +118,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const submit = () => {
       const [url, _data] = mergeDataIntoQueryString(
         resolvedMethod,
-        typeof action === 'object' ? action.url : action,
+        isUrlMethodPair(action) ? action.url : action,
         getData(),
         queryStringArrayFormat,
       )
@@ -184,7 +185,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       {
         ...props,
         ref: formElement,
-        action: typeof action === 'object' ? action.url : action,
+        action: isUrlMethodPair(action) ? action.url : action,
         method: resolvedMethod,
         onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault()

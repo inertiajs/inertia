@@ -1,4 +1,5 @@
 import {
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   router,
   shouldIntercept,
@@ -137,10 +138,7 @@ function link(
 
     cacheTags = cacheTagValues
 
-    method =
-      params.href && typeof params.href === 'object'
-        ? params.href.method
-        : ((params.method?.toLowerCase() || 'get') as Method)
+    method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
@@ -191,7 +189,7 @@ function link(
   function hrefAndData(method: Method, params: ActionParameters) {
     return mergeDataIntoQueryString(
       method,
-      typeof params.href === 'object' ? params.href.url : node.href || params.href || '',
+      isUrlMethodPair(params.href) ? params.href.url : node.href || params.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
     )

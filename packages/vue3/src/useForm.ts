@@ -148,7 +148,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     submit(...args) {
-      const objectPassed = typeof args[0] === 'object'
+      const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]

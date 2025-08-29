@@ -4,6 +4,7 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
@@ -114,7 +115,7 @@ const Form: InertiaForm = defineComponent({
     const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
-      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.action) ? props.action.method : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive
@@ -148,7 +149,7 @@ const Form: InertiaForm = defineComponent({
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
         method.value,
-        typeof props.action === 'object' ? props.action.url : props.action,
+        isUrlMethodPair(props.action) ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )
@@ -249,7 +250,7 @@ const Form: InertiaForm = defineComponent({
         {
           ...attrs,
           ref: formElement,
-          action: typeof props.action === 'object' ? props.action.url : props.action,
+          action: isUrlMethodPair(props.action) ? props.action.url : props.action,
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
