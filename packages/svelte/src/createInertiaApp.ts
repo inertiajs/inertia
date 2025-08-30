@@ -1,7 +1,7 @@
 import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
+import { escape } from 'lodash-es'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
-import { escape } from './escape'
 import type { ComponentResolver } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
