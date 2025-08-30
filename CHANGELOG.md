@@ -7,9 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.2...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.3...master)
 
 - Nothing yet
+
+## [v2.1.3](https://github.com/inertiajs/inertia/compare/v2.1.2...v2.1.3) - 2025-08-27
+
+### What's Changed
+
+* Code formatting with Prettier by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2515
+* Add EditorConfig and fix some whitespace issues by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2516
+* Fix for nullable object types in `useForm` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2528
+* Fix for Form Component in Svelte when resetting use input/button by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2525
+* Improve Link component `as` prop by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2524
+* [v2.x] fix: type error by changing page props type to `any` by [@peaklabs-dev](https://github.com/peaklabs-dev) in https://github.com/inertiajs/inertia/pull/2520
+* Revert to back to Lodash to retain ES2020 compatibility by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2527
+* Verify ES2020 compatibility in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2530
+* [Vue] Fixing action attribute on Form Component when using Wayfinder by [@nicolagianelli](https://github.com/nicolagianelli) in https://github.com/inertiajs/inertia/pull/2532
+* Make package.json structure in Svelte package Consistent as Vue and React by [@kresnasatya](https://github.com/kresnasatya) in https://github.com/inertiajs/inertia/pull/2529
+* Remove Svelte 5-next version constraint by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2533
+* improve typescript configuration by [@sudo-barun](https://github.com/sudo-barun) in https://github.com/inertiajs/inertia/pull/2470
+* Format JSON files with Prettier by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2534
+* Fix warning about `inert` attribute in React < 19 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2536
+* Fix keyboard activation when using `prefetch: 'click'` by [@pedroborges](https://github.com/pedroborges) in https://github.com/inertiajs/inertia/pull/2538
+* Fix `useForm` to respect manual `setDefaults()` calls in `onSuccess` and unify timing across adapters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2539
+* Run Playwright in parallel in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2540
+* Fix Coding Standards workflow by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2547
+* bumpup axios to fix CVE-2025-7783 by [@vallerydelexy](https://github.com/vallerydelexy) in https://github.com/inertiajs/inertia/pull/2546
+* Bump `@sveltejs/kit` version by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2548
+
+### New Contributors
+
+* [@peaklabs-dev](https://github.com/peaklabs-dev) made their first contribution in https://github.com/inertiajs/inertia/pull/2520
+* [@nicolagianelli](https://github.com/nicolagianelli) made their first contribution in https://github.com/inertiajs/inertia/pull/2532
+* [@kresnasatya](https://github.com/kresnasatya) made their first contribution in https://github.com/inertiajs/inertia/pull/2529
+* [@vallerydelexy](https://github.com/vallerydelexy) made their first contribution in https://github.com/inertiajs/inertia/pull/2546
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.2...v2.1.3
 
 ## [v2.1.2](https://github.com/inertiajs/inertia/compare/v2.1.1...v2.1.2) - 2025-08-15
 
