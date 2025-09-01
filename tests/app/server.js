@@ -591,6 +591,12 @@ app.get('/form-component/options', (req, res) =>
   // TODO: see 'url' key in helpers.js, this should be req.originalUrl by default
   inertia.render(req, res, { component: 'FormComponent/Options', url: req.originalUrl }),
 )
+app.get('/form-component/live-validation', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/LiveValidation' }),
+)
+app.get('/form-component/live-validation-no-provider', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/LiveValidationNoProvider' }),
+)
 app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
