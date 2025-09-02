@@ -15,6 +15,7 @@ import {
   FormEvent,
   forwardRef,
   ReactNode,
+  startTransition,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -81,7 +82,9 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const updateDirtyState = (event: Event) =>
-      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current)))
+      startTransition(() =>
+        setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
+      )
 
     useEffect(() => {
       defaultData.current = getFormData()

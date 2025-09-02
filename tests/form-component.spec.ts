@@ -1428,4 +1428,22 @@ test.describe('Form Component', () => {
       await expect(requests.requests.length).toBe(0)
     })
   })
+
+  test.describe('React', () => {
+    test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
+
+    test('it preserves the internal state of child components', async ({ page }) => {
+      await page.goto('/form-component/child-component')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await page.fill('#child', 'a')
+      await expect(page.locator('#child')).toHaveValue('A')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      const dump = await shouldBeDumpPage(page, 'post')
+      expect(dump.form).toEqual({ child: 'A' })
+    })
+  })
 })
