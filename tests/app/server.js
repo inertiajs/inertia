@@ -175,6 +175,12 @@ app.get('/form-helper/dirty', (req, res) =>
   }),
 )
 
+app.post('/form-helper/effect-count', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/EffectCount',
+  }),
+)
+
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
 app.post('/form-helper/dirty/redirect-back', (req, res) => res.redirect(303, '/form-helper/dirty'))
 
@@ -537,6 +543,9 @@ app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 
+app.get('/form-component/child-component', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
+)
 app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
 app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>

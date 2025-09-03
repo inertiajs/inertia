@@ -7,6 +7,7 @@
     type FormComponentProps,
     type FormDataConvertible,
     type VisitOptions,
+    isUrlMethodPair,
   } from '@inertiajs/core'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
@@ -44,8 +45,8 @@
   let isDirty = false
   let defaultData: FormData = new FormData()
 
-  $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
-  $: _action = typeof action === 'object' ? action.url : action
+  $: _method = isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method'])
+  $: _action = isUrlMethodPair(action) ? action.url : action
 
   function getFormData(): FormData {
     return new FormData(formElement)
