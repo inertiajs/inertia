@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios'
+import { get, set } from 'lodash-es'
 import { router } from '.'
 import {
   fireBeforeUpdateEvent,
@@ -221,31 +222,41 @@ export class Response {
       return
     }
 
-    const propsToMerge = pageResponse.mergeProps || []
+    const propsToAppend = pageResponse.mergeProps || []
+    const propsToPrepend = pageResponse.prependProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
     const matchPropsOn = pageResponse.matchPropsOn || []
 
-    propsToMerge.forEach((prop) => {
-      const incomingProp = pageResponse.props[prop]
+    const mergeProp = (prop: string, shouldAppend: boolean) => {
+      const currentProp = get(currentPage.get().props, prop)
+      const incomingProp = get(pageResponse.props, prop)
 
       if (Array.isArray(incomingProp)) {
-        pageResponse.props[prop] = this.mergeOrMatchItems(
-          (currentPage.get().props[prop] || []) as any[],
+        const newArray = this.mergeOrMatchItems(
+          (currentProp || []) as any[],
           incomingProp,
           prop,
           matchPropsOn,
+          shouldAppend,
         )
+
+        set(pageResponse.props, prop, newArray)
       } else if (typeof incomingProp === 'object' && incomingProp !== null) {
-        pageResponse.props[prop] = {
-          ...((currentPage.get().props[prop] || []) as Record<string, any>),
+        const newObject = {
+          ...(currentProp || {}),
           ...incomingProp,
         }
+
+        set(pageResponse.props, prop, newObject)
       }
-    })
+    }
+
+    propsToAppend.forEach((prop) => mergeProp(prop, true))
+    propsToPrepend.forEach((prop) => mergeProp(prop, false))
 
     propsToDeepMerge.forEach((prop) => {
-      const incomingProp = pageResponse.props[prop]
       const currentProp = currentPage.get().props[prop]
+      const incomingProp = pageResponse.props[prop]
 
       // Function to recursively merge objects and arrays
       const deepMerge = (target: any, source: any, currentKey: string) => {
@@ -264,7 +275,7 @@ export class Response {
           )
         }
 
-        // f the source is neither an array nor an object, simply return the it
+        // If the source is neither an array nor an object, simply return the it
         return source
       }
 
@@ -279,7 +290,13 @@ export class Response {
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
   }
 
-  protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
+  protected mergeOrMatchItems(
+    target: any[],
+    source: any[],
+    currentKey: string,
+    matchPropsOn: string[],
+    shouldAppend = true,
+  ) {
     // Determine if there's a specific key to match items.
     // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
     const matchOn = matchPropsOn.find((key) => {
@@ -287,14 +304,15 @@ export class Response {
       return path === currentKey
     })
 
+    const targetArray = Array.isArray(target) ? target : []
+
     if (!matchOn) {
       // No key found to match on, just concatenate the arrays
-      return [...(Array.isArray(target) ? target : []), ...source]
+      return shouldAppend ? [...targetArray, ...source] : [...source, ...targetArray]
     }
 
     // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
     const uniqueProperty = matchOn.split('.').pop() || ''
-    const targetArray = Array.isArray(target) ? target : []
     const map = new Map<any, any>()
 
     // Populate the map with items from the target array, using the unique property as the key.

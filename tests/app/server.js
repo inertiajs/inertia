@@ -175,6 +175,12 @@ app.get('/form-helper/dirty', (req, res) =>
   }),
 )
 
+app.post('/form-helper/effect-count', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/EffectCount',
+  }),
+)
+
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
 app.post('/form-helper/dirty/redirect-back', (req, res) => res.redirect(303, '/form-helper/dirty'))
 
@@ -345,6 +351,35 @@ app.get('/merge-props', (req, res) => {
       foo: new Array(5).fill(1),
     },
     ...(req.headers['x-inertia-reset'] ? {} : { mergeProps: ['foo'] }),
+  })
+})
+
+app.get('/merge-nested-props/:strategy', (req, res) => {
+  const perPage = 3
+  const page = parseInt(req.query.page ?? 1)
+  const shouldAppend = req.params.strategy === 'append'
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: index + 1 + (page - 1) * perPage,
+    name: `User ${index + 1 + (page - 1) * perPage}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'MergeNestedProps',
+    props: {
+      users: {
+        data: shouldAppend ? users : users.slice().reverse(),
+        meta: {
+          perPage,
+          page,
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : shouldAppend
+        ? { mergeProps: ['users.data'] }
+        : { prependProps: ['users.data'] }),
   })
 })
 
@@ -537,6 +572,9 @@ app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 
+app.get('/form-component/child-component', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
+)
 app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
 app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>
