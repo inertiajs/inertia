@@ -3,7 +3,7 @@
 
   export let users: { data: { id: number; name: string }[]; meta: { page: number; perPage: number } } = {
     data: [],
-    meta: { page: 1, perPage: 10 }
+    meta: { page: 1, perPage: 10 },
   }
 
   const loadMore = () => {
