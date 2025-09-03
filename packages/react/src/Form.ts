@@ -10,12 +10,11 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import {
+import React, {
   createElement,
   FormEvent,
   forwardRef,
   ReactNode,
-  startTransition,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -23,6 +22,11 @@ import {
   useState,
 } from 'react'
 import useForm from './useForm'
+
+// Polyfill for startTransition to support React 16.9+
+const deferStateUpdate = (callback: () => void) => {
+  typeof React.startTransition === 'function' ? React.startTransition(callback) : setTimeout(callback, 0)
+}
 
 type ComponentProps = (FormComponentProps &
   Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
@@ -82,7 +86,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const updateDirtyState = (event: Event) =>
-      startTransition(() =>
+      deferStateUpdate(() =>
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
       )
 
