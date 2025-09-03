@@ -945,3 +945,21 @@ test.describe('Nested', () => {
     await expect(dump.form.organization.repo.tags).toEqual(['v0.2', 'v0.3'])
   })
 })
+
+test.describe('React', () => {
+  test.skip(process.env.PACKAGE !== 'react', 'Only for React')
+
+  test('setDefaults callback in useEffect executes once per change', async ({ page }) => {
+    page.goto('/form-helper/effect-count')
+
+    await expect(page.locator('#data-count')).toHaveText('Count: 0')
+    await expect(page.locator('#form-data')).toHaveText('Form data: {"count":0,"foo":"bar"}')
+    await expect(page.locator('#effect-count')).toHaveText('Effect count: 1')
+
+    await page.getByRole('button', { name: 'Increment' }).click()
+
+    await expect(page.locator('#data-count')).toHaveText('Count: 1')
+    await expect(page.locator('#form-data')).toHaveText('Form data: {"count":1,"foo":"bar"}')
+    await expect(page.locator('#effect-count')).toHaveText('Effect count: 2')
+  })
+})
