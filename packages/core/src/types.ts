@@ -120,7 +120,6 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   mergeProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
-  paginateProps?: Record<string, PaginatePropData>
 
   /** @internal */
   rememberedState: Record<string, unknown>

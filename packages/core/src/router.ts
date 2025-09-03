@@ -1,3 +1,4 @@
+import { get } from 'lodash-es'
 import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -311,6 +312,54 @@ export class Router {
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params, { replace: true })
+  }
+
+  public replaceProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | ((oldValue: unknown, props: TProps) => unknown),
+  ): void {
+    this.replace({
+      props(currentProps) {
+        const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
+        return { ...currentProps, [name]: newValue }
+      },
+    })
+  }
+
+  protected mergeArrays(a: unknown, b: unknown): unknown[] {
+    if (Array.isArray(a) && Array.isArray(b)) {
+      return [...a, ...b]
+    }
+
+    if (Array.isArray(a)) {
+      return typeof b === 'undefined' ? a : [...a, b]
+    }
+
+    if (Array.isArray(b)) {
+      return typeof a === 'undefined' ? b : [a, ...b]
+    }
+
+    return [...(typeof a === 'undefined' ? [] : [a]), ...(typeof b === 'undefined' ? [] : [b])]
+  }
+
+  public appendToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+  ): void {
+    this.replaceProp(name, (currentValue: unknown, currentProps: TProps) => {
+      const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+      return this.mergeArrays(currentValue, newValue)
+    })
+  }
+
+  public prependToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+  ): void {
+    this.replaceProp(name, (currentValue: unknown, currentProps: TProps) => {
+      const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+      return this.mergeArrays(newValue, currentValue)
+    })
   }
 
   public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {

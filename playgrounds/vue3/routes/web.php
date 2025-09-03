@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ChatMessage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -189,6 +190,14 @@ Route::post('/messages', function () {
     ]);
 });
 
+Route::post('/messages', function (Request $request) {
+    $data = $request->validate([
+        'message' => ['required', 'string', 'min:5', 'max:255'],
+    ]);
+
+    return ChatMessage::create($data);
+});
+
 Route::get('/infinite-scrolling', function () {
     if (request()->inertia()) {
         sleep(1);
@@ -200,7 +209,7 @@ Route::get('/infinite-scrolling', function () {
     return inertia('InfiniteScrolling', [
         'buffer' => $buffer,
         'container' => $container,
-        'messages' => Inertia::paginate(ChatMessage::orderByDesc('id')->cursorPaginate(20)),
+        'messages' => Inertia::scroll(ChatMessage::orderByDesc('id')->cursorPaginate(20)),
     ]);
 });
 

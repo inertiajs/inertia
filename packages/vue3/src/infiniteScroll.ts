@@ -66,7 +66,7 @@ const InfiniteScroll = defineComponent({
   inheritAttrs: false,
   setup(props, { slots, attrs }) {
     const page = usePage()
-    const pagination = ref(page.paginateProps[props.data])
+    const pagination = ref(page.scrollProps[props.data])
     const requestCount = ref(0)
 
     const autoLoad = computed<boolean>(() => {
@@ -152,11 +152,11 @@ const InfiniteScroll = defineComponent({
         },
         onSuccess: (page: Page) => {
           if (props.reverse) {
-            pagination.value.next = page.paginateProps[props.data].next
-            pagination.value.hasNextPage = page.paginateProps[props.data].hasNextPage
+            pagination.value.next = page.scrollProps[props.data].next
+            pagination.value.hasNextPage = page.scrollProps[props.data].hasNextPage
           } else {
-            pagination.value.previous = page.paginateProps[props.data].previous
-            pagination.value.hasPreviousPage = page.paginateProps[props.data].hasPreviousPage
+            pagination.value.previous = page.scrollProps[props.data].previous
+            pagination.value.hasPreviousPage = page.scrollProps[props.data].hasPreviousPage
           }
         },
         onFinish: () => {
@@ -192,11 +192,11 @@ const InfiniteScroll = defineComponent({
         },
         onSuccess: () => {
           if (props.reverse) {
-            pagination.value.previous = page.paginateProps[props.data].previous
-            pagination.value.hasPreviousPage = page.paginateProps[props.data].hasPreviousPage
+            pagination.value.previous = page.scrollProps[props.data].previous
+            pagination.value.hasPreviousPage = page.scrollProps[props.data].hasPreviousPage
           } else {
-            pagination.value.next = page.paginateProps[props.data].next
-            pagination.value.hasNextPage = page.paginateProps[props.data].hasNextPage
+            pagination.value.next = page.scrollProps[props.data].next
+            pagination.value.hasNextPage = page.scrollProps[props.data].hasNextPage
           }
         },
       })
@@ -270,7 +270,7 @@ const InfiniteScroll = defineComponent({
         preserveUrl: true, // we handle URL updates manually via replaceUrl
         onSuccess: (page: Page) => {
           loading.value = false
-          pagination.value.current = page.paginateProps[props.data].current
+          pagination.value.current = page.scrollProps[props.data].current
           options.onSuccess?.(page)
         },
         onFinish: (visit: ActiveVisit) => {

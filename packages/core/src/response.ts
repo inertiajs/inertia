@@ -13,7 +13,7 @@ import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, Page, PaginatePropData } from './types'
+import { ActiveVisit, ErrorBag, Errors, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
@@ -224,7 +224,6 @@ export class Response {
     const propsToMerge = pageResponse.mergeProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
     const matchPropsOn = pageResponse.matchPropsOn || []
-    const paginateProps = Object.keys(pageResponse.paginateProps || {})
 
     propsToMerge.forEach((prop) => {
       const incomingProp = pageResponse.props[prop]
@@ -276,23 +275,6 @@ export class Response {
     type PaginatedResource<TDataWrapper extends string = string> = {
       [K in TDataWrapper]: unknown[]
     }
-
-    paginateProps.forEach((prop) => {
-      const paginateMeta = pageResponse.paginateProps![prop] as PaginatePropData
-      const dataWrapper = paginateMeta.dataWrapper || 'data'
-      const mergeStrategy = paginateMeta.mergeStrategy || 'append'
-
-      const incomingProp = pageResponse.props[prop] as PaginatedResource<typeof dataWrapper>
-      const currentProp = currentPage.get().props[prop] as PaginatedResource<typeof dataWrapper>
-
-      pageResponse.props[prop] = {
-        ...incomingProp,
-        [dataWrapper]:
-          mergeStrategy === 'append'
-            ? [...currentProp[dataWrapper], ...incomingProp[dataWrapper]]
-            : [...incomingProp[dataWrapper], ...currentProp[dataWrapper]],
-      }
-    })
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
   }

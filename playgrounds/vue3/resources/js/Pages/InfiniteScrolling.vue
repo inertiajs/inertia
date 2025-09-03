@@ -28,19 +28,8 @@ const postMessage = () => {
     })
     .then((response) => {
       newMessage.value = ''
-      router.replace({
-        props: (currentProps) => {
-          return {
-            ...currentProps,
-            messages: {
-              ...currentProps.messages,
-              data: [response.data, ...currentProps.messages.data],
-            },
-          }
-        },
-        preserveState: true,
-        preserveScroll: true,
-      })
+
+      router.appendToProp('messages.data', response.data)
     })
 }
 
