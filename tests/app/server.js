@@ -175,6 +175,12 @@ app.get('/form-helper/dirty', (req, res) =>
   }),
 )
 
+app.post('/form-helper/effect-count', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/EffectCount',
+  }),
+)
+
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
 app.post('/form-helper/dirty/redirect-back', (req, res) => res.redirect(303, '/form-helper/dirty'))
 
