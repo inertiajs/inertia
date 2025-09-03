@@ -8,14 +8,14 @@ export default () => {
         <meta name="description" content='This is an "escape" example' />
         {/* @ts-expect-error - The content attribute must be a string, we support passing other types for backwards compatibility */}
         <meta name="number" content={0} />
-        {/* @ts-expect-error */}
+        {/* @ts-expect-error - same as above */}
         <meta name="boolean" content={true} />
-        {/* @ts-expect-error */}
+        {/* @ts-expect-error - same as above */}
         <meta name="false" content={false} />
-        {/* @ts-expect-error */}
+        {/* @ts-expect-error - same as above */}
         <meta name="null" content={null} />
         <meta name="undefined" content={undefined} />
-        {/* @ts-expect-error */}
+        {/* @ts-expect-error - same as above */}
         <meta name="float" content={3.14} />
       </Head>
 
