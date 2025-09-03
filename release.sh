@@ -58,5 +58,7 @@ git push --tags
 # Install and publish
 pnpm publish -r
 
+gh release create "$TAG" --generate-notes
+
 echo "\n✅ Release $TAG completed successfully."
-echo "🔗 https://github.com/inertiajs/inertia/releases/new?tag=$TAG"
+echo "🔗 https://github.com/inertiajs/inertia/releases/tag/$TAG"
