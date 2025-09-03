@@ -1,110 +1,149 @@
 <script lang="ts">
 import Layout from '../Components/Layout.vue'
-export default { layout: Layout }
+export default { layout: (h, page) => h(Layout, { padding: false }, () => page) }
 </script>
 
 <script setup lang="ts">
 import { Head, InfiniteScroll, router } from '@inertiajs/vue3'
-import { default as axios } from 'axios'
+import { useStream } from '@laravel/stream-vue'
 import { computed, ref } from 'vue'
+import ChatMessage from '../Components/ChatMessage.vue'
+import PaperAirplaneIcon from '../Components/PaperAirplaneIcon.vue'
+import Spinner from '../Components/Spinner.vue'
+import StreamingIndicator from '../Components/StreamingIndicator.vue'
+import Textarea from '../Components/Textarea.vue'
+
+type Message = {
+  id: number | 'pending'
+  type: 'prompt' | 'response'
+  content: string
+}
 
 const props = defineProps<{
-  buffer: number
-  container: boolean
   messages: {
-    data: {
-      id: number
-      message: string
-    }[]
+    data: Message[]
   }
 }>()
 
-const newMessage = ref('')
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string
 
-const postMessage = () => {
-  axios
-    .post('/messages', {
-      message: newMessage.value,
-    })
-    .then((response) => {
-      newMessage.value = ''
+const scrollContainer = ref(null)
 
-      router.appendToProp('messages.data', response.data)
+const requestCount = ref(0)
+const newPrompt = ref('')
+const pendingResponse = ref('')
+
+const { isFetching, isStreaming, send } = useStream('messages', {
+  csrfToken,
+  onData: (data) => {
+    pendingResponse.value += data
+  },
+  onFinish: () => {
+    router.prependToProp('messages.data', {
+      id: 0,
+      content: pendingResponse.value,
+      type: 'response',
     })
+
+    pendingResponse.value = ''
+  },
+})
+
+const canSendPrompt = computed(() => !!newPrompt.value.trim() && !isFetching.value && !isStreaming.value)
+
+const sendMessage = () => {
+  if (!canSendPrompt.value) {
+    return
+  }
+
+  requestCount.value += 1
+
+  router.prependToProp(
+    'messages.data',
+    {
+      id: Date.now(),
+      content: newPrompt.value,
+      type: 'prompt',
+    },
+    {
+      onSuccess: () => {
+        scrollContainer.value?.scrollTo({ top: scrollContainer.value.scrollHeight, behavior: 'smooth' })
+
+        send({ message: newPrompt.value })
+
+        newPrompt.value = ''
+      },
+    },
+  )
 }
 
 const reversedMessages = computed(() => {
-  return [...props.messages.data].reverse()
+  const messages = [...props.messages.data].reverse()
+
+  if (pendingResponse.value) {
+    // Append the pending response to the end of the reversed messages
+    // until the stream is finished and the message is added properly
+    messages.push({
+      id: 'pending',
+      content: pendingResponse.value,
+      type: 'response',
+    })
+  }
+
+  return messages
 })
+
+const isLastMessage = (message: Message) => {
+  return message === reversedMessages.value[reversedMessages.value.length - 1]
+}
 </script>
 
 <template>
-  <Head title="Infinite Scrolling" />
+  <Head title="AI Chat" />
 
-  <div :class="container ? 'h-128 relative overflow-y-auto border-gray-300 p-4' : ''">
-    <div class="bg-from-white bg-to-transparent absolute left-0 right-0 top-0 z-50 h-32 p-4"></div>
-    <InfiniteScroll
-      preserve-url
-      reverse
-      data="messages"
-      class="grid grid-cols-1 gap-4"
-      trigger="start"
-      :buffer="buffer"
-      scroll-behavior="smooth"
-    >
-      <div
-        v-for="message in reversedMessages"
-        :key="message.id"
-        class="rounded-lg border border-gray-200 bg-gray-50 p-4"
+  <div class="relative flex h-[calc(100vh-88px)] flex-col bg-gray-50">
+    <div ref="scrollContainer" class="h-full flex-1 overflow-y-auto">
+      <InfiniteScroll reverse bottom data="messages" class="mx-auto grid max-w-3xl gap-6 px-8 py-16" trigger="both">
+        <div
+          v-for="message in reversedMessages"
+          :key="message.id"
+          :class="{
+            'min-h-[calc(100vh-88px-131px-64px)]': isLastMessage(message) && requestCount > 0,
+          }"
+        >
+          <ChatMessage :message />
+          <StreamingIndicator class="mt-6" v-if="isLastMessage(message) && isFetching" />
+        </div>
+
+        <template #loading="{ loadingBefore }">
+          <div class="flex justify-center" :class="loadingBefore ? 'pt-16' : 'pb-16'">
+            <Spinner class="size-6 text-gray-400" />
+          </div>
+        </template>
+      </InfiniteScroll>
+    </div>
+
+    <div class="sticky bottom-0 border-t border-gray-200 bg-white px-8 py-6">
+      <form
+        @submit.prevent="sendMessage"
+        class="relative mx-auto flex max-w-3xl items-end rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm transition-colors focus-within:border-gray-400"
       >
-        <p class="text-sm text-gray-700">
-          Message ID <b>{{ message.id }}</b>
-        </p>
-        <p class="mt-1 whitespace-pre-line">{{ message.message }}</p>
-      </div>
+        <Textarea
+          v-model="newPrompt"
+          placeholder="Type your message..."
+          @keydown.enter.exact.prevent="sendMessage"
+          @keydown.enter.shift.exact.prevent="newPrompt += '\n'"
+        />
 
-      <template #header="{ fetch, loading, pagination, autoMode }">
-        <div v-if="autoMode && loading" class="col-span-3 py-4 text-center text-gray-500">Loading...</div>
-
-        <!-- <button
-          @click="fetch"
-          class="col-span-3 rounded-lg bg-gray-200 px-4 py-2 hover:bg-gray-300"
-          :disabled="loading"
-          :class="{ 'cursor-not-allowed opacity-50': loading }"
-          v-if="!autoMode && pagination.hasPreviousPage"
-        >
-          Load previous items
-        </button> -->
-      </template>
-      <!--
-      <template #footer="{ fetch, loading, pagination }">
         <button
-          @click="fetch"
-          class="col-span-3 rounded-lg bg-gray-200 px-4 py-2 hover:bg-gray-300"
-          :disabled="loading"
-          :class="{ 'cursor-not-allowed opacity-50': loading }"
-          v-if="pagination.hasNextPage"
+          type="submit"
+          :disabled="!canSendPrompt"
+          class="ml-3 flex size-8 items-center justify-center rounded-lg bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Load more items
+          <Spinner v-if="isFetching || isStreaming" class="size-4 text-white" />
+          <PaperAirplaneIcon class="rotate-270 size-4 text-white" v-else />
         </button>
-      </template> -->
-
-      <!-- <template #loading>
-        <div class="col-span-3 mb-4 text-center text-gray-500">Loading...</div>
-      </template> -->
-    </InfiniteScroll>
+      </form>
+    </div>
   </div>
-
-  <form @submit.prevent="postMessage()">
-    <textarea
-      v-model="newMessage"
-      name="message"
-      class="mt-4 w-full rounded-lg border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
-      rows="3"
-      placeholder="Type a message..."
-      required
-    ></textarea>
-
-    <button type="submit" class="mt-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Send</button>
-  </form>
 </template>

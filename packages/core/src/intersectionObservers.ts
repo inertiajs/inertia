@@ -2,7 +2,7 @@ type IntersectionObserverCallback = (entry: IntersectionObserverEntry) => void
 
 interface IntersectionObserverManager {
   new: (callback: IntersectionObserverCallback, options?: IntersectionObserverInit) => IntersectionObserver
-  flush: () => void
+  flushAll: () => void
 }
 
 export const useIntersectionObservers = (): IntersectionObserverManager => {
@@ -13,8 +13,10 @@ export const useIntersectionObservers = (): IntersectionObserverManager => {
     options: IntersectionObserverInit = {},
   ): IntersectionObserver => {
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        callback(entries[0])
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          callback(entry)
+        }
       }
     }, options)
 
@@ -23,13 +25,13 @@ export const useIntersectionObservers = (): IntersectionObserverManager => {
     return observer
   }
 
-  const flush = () => {
+  const flushAll = () => {
     intersectionObservers.forEach((observer) => observer.disconnect())
     intersectionObservers.length = 0
   }
 
   return {
     new: newIntersectionObserver,
-    flush,
+    flushAll,
   }
 }

@@ -3,35 +3,50 @@ const elementInViewport = (el: HTMLElement) => {
   return rect.top < window.innerHeight && rect.bottom >= 0
 }
 
+export const getScrollableParent = (element: HTMLElement | null): HTMLElement | null => {
+  let parent = element?.parentElement
+
+  while (parent) {
+    const overflowY = window.getComputedStyle(parent).overflowY
+
+    if (overflowY === 'auto' || overflowY === 'scroll') {
+      return parent
+    }
+
+    parent = parent.parentElement
+  }
+
+  return null
+}
+
 export const getElementsInViewportFromCollection = (
   referenceElement: HTMLElement,
-  elementCollection: HTMLCollection,
+  elements: HTMLElement[],
 ): HTMLElement[] => {
-  const children = [...elementCollection] as HTMLElement[]
-  const referenceIndex = children.indexOf(referenceElement)
-  const visibleItems: HTMLElement[] = []
+  const referenceIndex = elements.indexOf(referenceElement)
+  const visibleElements: HTMLElement[] = []
 
-  // Traverse upwards until an item is not visible
+  // Traverse upwards until an element is not visible
   for (let i = referenceIndex; i >= 0; i--) {
-    const child = children[i]
+    const element = elements[i]
 
-    if (elementInViewport(child)) {
-      visibleItems.push(child)
+    if (elementInViewport(element)) {
+      visibleElements.push(element)
     } else {
       break
     }
   }
 
-  // Traverse downwards until an item is not visible
-  for (let i = referenceIndex + 1; i < children.length; i++) {
-    const child = children[i]
+  // Traverse downwards until an element is not visible
+  for (let i = referenceIndex + 1; i < elements.length; i++) {
+    const element = elements[i]
 
-    if (elementInViewport(child)) {
-      visibleItems.push(child)
+    if (elementInViewport(element)) {
+      visibleElements.push(element)
     } else {
       break
     }
   }
 
-  return visibleItems
+  return visibleElements
 }

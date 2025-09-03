@@ -4,6 +4,7 @@ const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const { showServerStatus } = require('./server-status')
+const { paginateUsers } = require('./eloquent')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -722,55 +723,42 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
   }),
 )
 
-app.get('/infinite-scroll/default', (req, res) => {
-  const perPage = 20
-  const page = parseInt(req.query.page ?? 1, 10)
+function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false) {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, total, orderByDesc)
 
-  const users = new Array(perPage).fill(1).map((_, index) => ({
-    id: (page - 1) * perPage + index + 1,
-    name: `User ${(page - 1) * perPage + index + 1}`,
-  }))
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component,
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+}
 
-  inertia.render(req, res, {
-    component: 'InfiniteScroll/Default',
-    props: {
-      users: {
-        data: users,
-        page: page,
-      },
-      timestamp: Date.now(),
-    },
-    deepMergeProps: ['users'],
-    matchPropsOn: ['users.data.id'],
-  })
-})
-
-app.get('/infinite-scroll/eloquent', (req, res) => {
-  const perPage = 20
-  const page = parseInt(req.query.page ?? 1, 10)
-
-  const users = new Array(perPage).fill(1).map((_, index) => ({
-    id: (page - 1) * perPage + index + 1,
-    name: `User ${(page - 1) * perPage + index + 1}`,
-  }))
-
-  inertia.render(req, res, {
-    component: 'InfiniteScroll/Eloquent',
-    props: {
-      users: {
-        data: users,
-        current_page: page,
-        total: 5000,
-        last_page: 250,
-        next_page_url: `/infinite-scroll/eloquent?page=${page + 1}`,
-        prev_page_url: page > 1 ? `/infinite-scroll/eloquent?page=${page - 1}` : null,
-      },
-      timestamp: Date.now(),
-    },
-    deepMergeProps: ['users'],
-    matchPropsOn: ['users.data.id'],
-  })
-})
+app.get('/infinite-scroll/manual', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Manual'))
+app.get('/infinite-scroll/manual-after', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/ManualAfter', 60))
+app.get('/infinite-scroll/trigger-both', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerBoth'))
+app.get('/infinite-scroll/trigger-end-buffer', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerEndBuffer'),
+)
+app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerStartBuffer'),
+)
+app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
+app.get('/infinite-scroll/update-query-string', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/UpdateQueryString'),
+)
+app.get('/infinite-scroll/custom-element', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/CustomElement'))
+app.get('/infinite-scroll/preserve-url', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/PreserveUrl'))
+app.get('/infinite-scroll/scroll-container', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ScrollContainer'),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 

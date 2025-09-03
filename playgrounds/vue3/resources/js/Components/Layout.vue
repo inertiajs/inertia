@@ -2,6 +2,12 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
+const props = withDefaults(defineProps<{
+  padding?: boolean
+}>(), {
+  padding: true
+})
+
 const page = usePage()
 
 const appName = computed(() => page.props.appName)
@@ -22,7 +28,7 @@ const appName = computed(() => page.props.appName)
     <Link href="/poll" class="hover:underline">Poll</Link>
     <Link href="/infinite-scroll" class="hover:underline">To Infinity</Link>
   </nav>
-  <main class="px-10 py-8">
+  <main :class="padding ? 'px-10 py-8' : ''">
     <slot />
   </main>
 </template>

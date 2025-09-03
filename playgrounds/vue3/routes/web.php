@@ -5,6 +5,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Prism\Prism\Enums\Provider;
+use Prism\Prism\Prism;
+use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 /*
 |--------------------------------------------------------------------------
@@ -184,32 +188,68 @@ Route::get('/async', function () {
     ]);
 });
 
-Route::post('/messages', function () {
-    return ChatMessage::create([
-        'message' => request('message'),
-    ]);
-});
-
 Route::post('/messages', function (Request $request) {
     $data = $request->validate([
-        'message' => ['required', 'string', 'min:5', 'max:255'],
+        'message' => ['required', 'string'],
     ]);
 
-    return ChatMessage::create($data);
+    // Store the new user message
+    $prompt = ChatMessage::create([
+        'type' => 'prompt',
+        'content' => $data['message'],
+    ]);
+
+    $messages = ChatMessage::latest('id')
+        ->limit(10)
+        ->get()
+        ->reverse()
+        ->map(function (ChatMessage $message) use ($prompt) {
+            $content = $message->content;
+
+            if ($message->is($prompt)) {
+                // Tell LLM not to answer too long and don't halucinate
+                // $content = "Max half a page!.\n\n".$content;
+            }
+
+            return $message->type === 'prompt'
+                ? new UserMessage($content)
+                : new AssistantMessage($content);
+        })
+        ->all();
+
+    // Create a streaming response from the LLM
+    $stream = Prism::text()
+        ->using(Provider::Ollama, 'gemma3:1b')
+        ->using(Provider::Ollama, 'gemma3:4b')
+        ->withMessages($messages)
+        ->asStream();
+
+    return response()->stream(function () use ($stream) {
+        $response = '';
+
+        foreach ($stream as $chunk) {
+            $response .= $chunk->text;
+            echo $chunk->text;
+            ob_flush();
+            flush();
+        }
+
+        if (! blank($response)) {
+            ChatMessage::create([
+                'type' => 'response',
+                'content' => $response,
+            ]);
+        }
+    }, 200, ['X-Accel-Buffering' => 'no']);
 });
 
 Route::get('/infinite-scrolling', function () {
     if (request()->inertia()) {
-        sleep(1);
+        usleep(500_000);
     }
 
-    $buffer = request()->integer('buffer');
-    $container = request()->boolean('container');
-
     return inertia('InfiniteScrolling', [
-        'buffer' => $buffer,
-        'container' => $container,
-        'messages' => Inertia::scroll(ChatMessage::orderByDesc('id')->cursorPaginate(20)),
+        'messages' => Inertia::scroll(ChatMessage::latest('id')->cursorPaginate(10)),
     ]);
 });
 

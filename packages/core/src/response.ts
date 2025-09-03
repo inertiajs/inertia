@@ -283,10 +283,6 @@ export class Response {
       pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
     })
 
-    type PaginatedResource<TDataWrapper extends string = string> = {
-      [K in TDataWrapper]: unknown[]
-    }
-
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
   }
 

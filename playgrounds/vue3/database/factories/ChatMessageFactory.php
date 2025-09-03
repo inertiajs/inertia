@@ -17,7 +17,8 @@ class ChatMessageFactory extends Factory
     public function definition(): array
     {
         return [
-            'message' => $this->faker->sentence,
+            'type' => $this->faker->randomElement(['prompt', 'response']),
+            'content' => $this->faker->sentence,
         ];
     }
 }

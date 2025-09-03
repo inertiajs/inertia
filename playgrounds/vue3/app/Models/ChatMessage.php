@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ChatMessage extends Model
 {
-    protected $fillable = ['message'];
+    protected $guarded = [];
 
     use HasFactory;
 }

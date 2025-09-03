@@ -1,16 +1,5 @@
-import {
-  ActiveVisit,
-  debounce,
-  getElementsInViewportFromCollection,
-  Page,
-  ReloadOptions,
-  router,
-  useIntersectionObservers,
-} from '@inertiajs/core'
+import { getScrollableParent, useInfiniteScroll } from '@inertiajs/core'
 import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, watch } from 'vue'
-import { usePage } from './app'
-
-const datasetKey = 'infiniteScrollPage'
 
 const InfiniteScroll = defineComponent({
   name: 'InfiniteScroll',
@@ -23,8 +12,8 @@ const InfiniteScroll = defineComponent({
       default: 0,
     },
     trigger: {
-      type: String as PropType<'start' | 'end' | 'both'>,
-      default: 'end',
+      type: String as PropType<'top' | 'bottom' | 'both'>,
+      default: 'both',
     },
     as: {
       type: String,
@@ -42,21 +31,13 @@ const InfiniteScroll = defineComponent({
       type: Boolean,
       default: false,
     },
-    dataWrapper: {
+    pageName: {
       type: String,
       default: null,
     },
-    queryParam: {
-      type: String,
-      default: null,
-    },
-    autoScroll: {
+    bottom: {
       type: Boolean,
-      default: true,
-    },
-    scrollBehavior: {
-      type: String as PropType<ScrollBehavior>,
-      default: 'smooth',
+      default: false,
     },
     reverse: {
       type: Boolean,
@@ -64,311 +45,143 @@ const InfiniteScroll = defineComponent({
     },
   },
   inheritAttrs: false,
-  setup(props, { slots, attrs }) {
-    const page = usePage()
-    const pagination = ref(page.scrollProps[props.data])
+  setup(props, { slots, attrs, expose }) {
+    const pageName = computed(() => dataManager.getPageName() || props.pageName || 'page')
+
+    const topElement = ref<HTMLElement | null>(null)
+    const slotElement = ref<HTMLElement | null>(null)
+    const bottomElement = ref<HTMLElement | null>(null)
+    const scrollableParent = computed(() => getScrollableParent(slotElement.value))
+
+    const loadingBefore = ref(false)
+    const loadingAfter = ref(false)
     const requestCount = ref(0)
 
-    const autoLoad = computed<boolean>(() => {
-      if (props.manual) {
-        return false
-      }
+    const autoLoad = computed<boolean>(() => !manualMode.value)
+    const manualMode = computed<boolean>(
+      () => props.manual || (props.manualAfter > 0 && requestCount.value >= props.manualAfter),
+    )
 
-      if (props.manualAfter > 0 && requestCount.value >= props.manualAfter) {
-        return false
-      }
+    const { dataManager, elementManager } = useInfiniteScroll({
+      // Data
+      getPropName: () => props.data,
+      inReverseMode: () => props.reverse,
+      getPageName: () => pageName.value,
+      shouldPreserveUrl: () => props.preserveUrl,
 
-      return true
+      // Elements
+      getTrigger: () => props.trigger,
+      getTriggerMargin: () => props.buffer,
+      getTopElement: () => topElement.value!,
+      getBottomElement: () => bottomElement.value!,
+      getSlotElement: () => slotElement.value!,
+      getScrollableParent: () => scrollableParent.value,
+
+      // Request callbacks
+      onRequestStart: (side) => {
+        if (side === 'before') {
+          loadingBefore.value = true
+        } else {
+          loadingAfter.value = true
+        }
+      },
+      onRequestComplete: (side) => {
+        requestCount.value += 1
+
+        if (side === 'before') {
+          loadingBefore.value = false
+        } else {
+          loadingAfter.value = false
+        }
+      },
     })
 
-    const startElement = ref<HTMLElement | null>(null)
-    const slotElement = ref<HTMLElement | null>(null)
-    const endElement = ref<HTMLElement | null>(null)
-
-    let slotObserver: MutationObserver
-    let startElementObserver: IntersectionObserver
-    let itemsObserver: IntersectionObserver
-    let endElementObserver: IntersectionObserver
-
-    const loading = ref(false)
-
-    const getScrollableContainer = (element: HTMLElement | null): HTMLElement | null => {
-      let parent = element?.parentElement
-
-      while (parent) {
-        const overflowY = window.getComputedStyle(parent).overflowY
-
-        if (overflowY === 'auto' || overflowY === 'scroll') {
-          return parent
-        }
-
-        parent = parent.parentElement
-      }
-
-      return null
-    }
-
-    const scrollToBottom = () => {
-      const scrollableContainer = getScrollableContainer(slotElement.value)
-      if (scrollableContainer) {
-        scrollableContainer.scrollTo({
-          top: scrollableContainer.scrollHeight,
-          behavior: props.scrollBehavior,
+    const scrollToBottom = (behavior: ScrollBehavior = 'instant' as ScrollBehavior) => {
+      if (scrollableParent.value) {
+        scrollableParent.value.scrollTo({
+          top: scrollableParent.value.scrollHeight,
+          behavior,
         })
       } else {
         window.scrollTo({
           top: document.body.scrollHeight,
-          behavior: props.scrollBehavior,
+          behavior,
         })
       }
     }
 
-    const fetchPrevious = () => {
-      const scrollableContainer = getScrollableContainer(slotElement.value)
-      let currentScrollTop: number
-      let referenceElement: Element | null = null
-      let referenceElementTop: number = 0
-
-      load(props.reverse ? pagination.value.next : pagination.value.previous, {
-        headers: {
-          'X-Inertia-Scroll-Direction': props.reverse ? 'down' : 'up',
-        },
-        onBeforeUpdate: () => {
-          currentScrollTop = scrollableContainer?.scrollTop || window.scrollY
-
-          // Start from the first element in the slot and find the first visible element
-          const visibleElements = getElementsInViewportFromCollection(
-            slotElement.value.firstElementChild as HTMLElement,
-            slotElement.value.children,
-          )
-
-          if (visibleElements.length > 0) {
-            referenceElement = visibleElements[0]
-            const containerRect = scrollableContainer?.getBoundingClientRect() || { top: 0 }
-            const containerTop = scrollableContainer ? containerRect.top : 0
-            const rect = referenceElement.getBoundingClientRect()
-            referenceElementTop = rect.top - containerTop
-          }
-        },
-        onSuccess: (page: Page) => {
-          if (props.reverse) {
-            pagination.value.next = page.scrollProps[props.data].next
-            pagination.value.hasNextPage = page.scrollProps[props.data].hasNextPage
-          } else {
-            pagination.value.previous = page.scrollProps[props.data].previous
-            pagination.value.hasPreviousPage = page.scrollProps[props.data].hasPreviousPage
-          }
-        },
-        onFinish: () => {
-          if (!referenceElement) {
-            return
-          }
-
-          window.queueMicrotask(() => {
-            // Find where our reference element is now and adjust scroll to maintain its position
-            const containerRect = scrollableContainer?.getBoundingClientRect() || { top: 0 }
-            const containerTop = scrollableContainer ? containerRect.top : 0
-            const newRect = referenceElement.getBoundingClientRect()
-            const newElementTop = newRect.top - containerTop
-
-            // Calculate how much to adjust scroll to keep the reference element in the same visual position
-            const adjustment = newElementTop - referenceElementTop
-
-            if (scrollableContainer) {
-              scrollableContainer.scrollTop = currentScrollTop + adjustment
-            } else {
-              window.scrollTo(0, window.scrollY + adjustment)
-            }
-          })
-        },
-      })
-    }
-
-    const fetchNext = () => {
-      console.log(pagination.value.previous)
-      load(props.reverse ? pagination.value.previous : pagination.value.next, {
-        headers: {
-          'X-Inertia-Scroll-Direction': props.reverse ? 'up' : 'down',
-        },
-        onSuccess: () => {
-          if (props.reverse) {
-            pagination.value.previous = page.scrollProps[props.data].previous
-            pagination.value.hasPreviousPage = page.scrollProps[props.data].hasPreviousPage
-          } else {
-            pagination.value.next = page.scrollProps[props.data].next
-            pagination.value.hasNextPage = page.scrollProps[props.data].hasNextPage
-          }
-        },
-      })
-    }
-
-    const replaceUrl = (target) => {
-      if (props.preserveUrl) {
-        return
-      }
-
-      // Create a map of items per page
-      const pageMap = new Map<string, number>()
-
-      getElementsInViewportFromCollection(target, slotElement.value.children).forEach((element) => {
-        const nullPlaceholder = '__NULL__'
-        const page = element.dataset[datasetKey] ?? nullPlaceholder
-
-        if (pageMap.has(page)) {
-          pageMap.set(page, pageMap.get(page)! + 1)
-        } else {
-          pageMap.set(page, 1)
-        }
-      })
-
-      const sortedPages = Array.from(pageMap.entries()).sort((a, b) => b[1] - a[1])
-      const mostVisiblePage = sortedPages[0]?.[0]
-
-      if (mostVisiblePage === undefined) {
-        return
-      }
-
-      const url = new URL(window.location.href)
-      const queryParam = pagination.value.name || props.queryParam || 'page'
-
-      if (mostVisiblePage === '1' || mostVisiblePage === '__NULL__') {
-        url.searchParams.delete(queryParam)
-      } else {
-        url.searchParams.set(queryParam, mostVisiblePage.toString())
-      }
-
-      router.replace({
-        url: url.toString(),
-        preserveScroll: true,
-        preserveState: true,
-      })
-    }
-
-    const onIntersectingItem = debounce((entry: IntersectionObserverEntry) => {
-      replaceUrl(entry.target)
-    }, 250)
-
-    const load = (value: string | number | null, options: ReloadOptions = {}) => {
-      if (loading.value) {
-        console.log('InfiniteScroll: already fetching, skipping...')
-        return
-      }
-
-      if (value === null) {
-        console.log('InfiniteScroll: no more pages to load')
-        return
-      }
-
-      loading.value = true
-
-      router.reload({
-        ...options,
-        data: {
-          [pagination.value.name]: value,
-        },
-        only: [props.data],
-        preserveUrl: true, // we handle URL updates manually via replaceUrl
-        onSuccess: (page: Page) => {
-          loading.value = false
-          pagination.value.current = page.scrollProps[props.data].current
-          options.onSuccess?.(page)
-        },
-        onFinish: (visit: ActiveVisit) => {
-          requestCount.value += 1
-          options.onFinish?.(visit)
-        },
-      })
-    }
-
-    const processSlotChildren = (identifier: string | number | null) => {
-      if (typeof identifier === 'undefined' || identifier === null) {
-        return
-      }
-
-      const newChildren = Array.from(slotElement.value?.children || []).filter(
-        (child: HTMLElement) => !(datasetKey in child.dataset),
-      )
-
-      newChildren.forEach((child: HTMLElement) => {
-        child.dataset[datasetKey] = identifier.toString()
-        itemsObserver.observe(child)
-      })
-    }
-
-    const toggleStartAndEndTriggers = (enabled: boolean) => {
-      if (enabled) {
-        props.trigger !== 'end' && startElementObserver.observe(startElement.value!)
-        props.trigger !== 'start' && endElementObserver.observe(endElement.value!)
-      } else {
-        startElementObserver.disconnect()
-        endElementObserver.disconnect()
-      }
-    }
-
-    const intersectionObservers = useIntersectionObservers()
-
     onMounted(() => {
-      slotObserver = new MutationObserver((mutations) => {
-        // Check if any child nodes were added
-        const itemsAdded = mutations.some((mutation) => mutation.addedNodes.length > 0)
+      elementManager.setupObservers()
+      elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
 
-        if (!itemsAdded) {
-          return
-        }
+      if (props.bottom) {
+        scrollToBottom()
+      }
 
-        processSlotChildren(pagination.value.current)
-
-        if (props.autoScroll) {
-          scrollToBottom()
-        }
-      })
-
-      slotObserver.observe(slotElement.value!, { childList: true })
-
-      itemsObserver = intersectionObservers.new(onIntersectingItem)
-      processSlotChildren(pagination.value.current)
-
-      const observerOptions = { root: getScrollableContainer(slotElement.value), rootMargin: `${props.buffer}px` }
-      startElementObserver = intersectionObservers.new(fetchPrevious, observerOptions)
-      endElementObserver = intersectionObservers.new(fetchNext, observerOptions)
-
-      toggleStartAndEndTriggers(autoLoad.value)
+      if (autoLoad.value) {
+        elementManager.enableTriggers()
+      }
     })
 
-    onUnmounted(intersectionObservers.flush)
+    onUnmounted(elementManager.flushAll())
 
-    watch(autoLoad, toggleStartAndEndTriggers)
+    watch(autoLoad, (enabled) => {
+      enabled ? elementManager.enableTriggers() : elementManager.disableTriggers()
+    })
+
+    expose({
+      loadAfter: dataManager.loadAfter,
+      loadBefore: dataManager.loadBefore,
+      hasMoreBefore: dataManager.hasMoreBefore,
+      hasMoreAfter: dataManager.hasMoreAfter,
+    })
 
     return () => {
-      const exposed = {
-        loading: loading.value,
-        pagination: pagination.value,
+      const headerAutoMode = autoLoad.value && props.trigger !== 'bottom'
+      const footerAutoMode = autoLoad.value && props.trigger !== 'top'
+
+      const exposedBefore = {
+        loading: loadingBefore.value,
+        loadingBefore: loadingBefore.value,
+        loadingAfter: loadingAfter.value,
+        fetch: dataManager.loadBefore,
+        autoMode: headerAutoMode,
+        manualMode: !headerAutoMode,
+        hasMore: dataManager.hasMoreBefore(),
       }
 
-      const exposedHeader = {
-        ...exposed,
-        fetch: fetchPrevious,
-        autoMode: autoLoad.value && props.trigger !== 'end',
-      }
-
-      const exposedFooter = {
-        ...exposed,
-        fetch: fetchNext,
-        autoMode: autoLoad.value && props.trigger !== 'start',
+      const exposedAfter = {
+        loading: loadingAfter.value,
+        loadingBefore: loadingBefore.value,
+        loadingAfter: loadingAfter.value,
+        fetch: dataManager.loadAfter,
+        autoMode: footerAutoMode,
+        manualMode: !footerAutoMode,
+        hasMore: dataManager.hasMoreAfter(),
       }
 
       return h(Fragment, {}, [
+        props.trigger !== 'bottom'
+          ? h(
+              'div',
+              { ref: topElement },
+              slots.before ? slots.before(exposedBefore) : loadingBefore.value ? slots.loading?.(exposedBefore) : null,
+            )
+          : null,
         h(
-          'div',
-          { ref: startElement, style: { minHeight: '1px' } },
-          slots.header ? slots.header(exposedHeader) : loading.value ? slots.loading?.(exposed) : null,
+          props.as,
+          { ...attrs, ref: slotElement },
+          slots.default?.({
+            loading: loadingBefore.value || loadingAfter.value,
+          }),
         ),
-        h(props.as, { ...attrs, ref: slotElement }, slots.default?.(exposed)),
-        h(
-          'div',
-          { ref: endElement, style: { minHeight: '1px' } },
-          slots.footer ? slots.footer(exposedFooter) : loading.value ? slots.loading?.(exposed) : null,
-        ),
+        props.trigger !== 'top'
+          ? h(
+              'div',
+              { ref: bottomElement },
+              slots.after ? slots.after(exposedAfter) : loadingAfter.value ? slots.loading?.(exposedAfter) : null,
+            )
+          : null,
       ])
     }
   },

@@ -105,6 +105,13 @@ export interface PageProps {
   [key: string]: unknown
 }
 
+export type ScrollProp = {
+  pageName: string
+  previousPage?: number | string
+  nextPage?: number | string
+  currentPage?: number | string
+}
+
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
@@ -121,17 +128,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
-  scrollProps?: Record<
-    string,
-    {
-      queryParam: string
-      previousPage?: number
-      nextPage?: number
-      currentPage?: number
-      hasPreviousPage: boolean
-      hasNextPage: boolean
-    }
-  >
+  scrollProps?: Record<keyof PageProps, ScrollProp>
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -505,6 +502,28 @@ export type FormComponentSlotProps = FormComponentMethods & FormComponentState
 
 export type FormComponentRef = FormComponentSlotProps
 
+export type InfiniteScrollSide = 'before' | 'after'
+
+export interface UseInfiniteScrollOptions {
+  // Core data
+  getPropName: () => string
+  inReverseMode: () => boolean
+  getPageName: () => string
+  shouldPreserveUrl: () => boolean
+
+  // Elements
+  getTrigger: () => 'top' | 'bottom' | 'both'
+  getTriggerMargin: () => number
+  getTopElement: () => HTMLElement
+  getBottomElement: () => HTMLElement
+  getSlotElement: () => HTMLElement
+  getScrollableParent: () => HTMLElement | null
+
+  // Callbacks
+  onRequestStart: (side: InfiniteScrollSide) => void
+  onRequestComplete: (side: InfiniteScrollSide) => void
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
@@ -518,15 +537,4 @@ declare global {
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
   }
-}
-
-export type PaginatePropData = {
-  name: string
-  dataWrapper: string
-  mergeStrategy?: 'append' | 'prepend'
-  previous: string | number | null
-  next: string | number | null
-  current: string | number | null
-  hasPreviousPage: boolean
-  hasNextPage: boolean
 }
