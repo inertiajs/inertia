@@ -7,9 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.3...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.4...master)
 
 - Nothing yet
+
+## [v2.1.4](https://github.com/inertiajs/inertia/compare/v2.1.3...v2.1.4) - 2025-09-03
+
+### What's Changed
+
+* Replace html-escape with built-in function on Svelte package by [@kresnasatya](https://github.com/kresnasatya) in https://github.com/inertiajs/inertia/pull/2535
+* Update dirty state after DOM changes (React only) by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2558
+* Prevent errors caused by null href value by [@fritz-c](https://github.com/fritz-c) in https://github.com/inertiajs/inertia/pull/2550
+* Remove data from the dependency array of setDefaults by [@jasonlbeggs](https://github.com/jasonlbeggs) in https://github.com/inertiajs/inertia/pull/2554
+
+### New Contributors
+
+* [@fritz-c](https://github.com/fritz-c) made their first contribution in https://github.com/inertiajs/inertia/pull/2550
+* [@jasonlbeggs](https://github.com/jasonlbeggs) made their first contribution in https://github.com/inertiajs/inertia/pull/2554
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.3...v2.1.4
 
 ## [v2.1.3](https://github.com/inertiajs/inertia/compare/v2.1.2...v2.1.3) - 2025-08-27
 
