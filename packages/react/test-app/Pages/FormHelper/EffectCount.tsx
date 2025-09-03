@@ -10,7 +10,7 @@ export default () => {
     setData('count', count)
     setDefaults()
     setEffectCount(effectCount + 1)
-  }, [count, setData, setDefaults, effectCount, setEffectCount])
+  }, [count, setData, setDefaults])
 
   return (
     <div>
