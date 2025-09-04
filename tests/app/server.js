@@ -532,6 +532,27 @@ app.get('/deferred-props/page-2', (req, res) => {
   }
 })
 
+app.get('/deferred-props/many-groups', (req, res) => {
+  const props = ['foo', 'bar', 'baz', 'qux', 'quux']
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const delay = requestedProps ? (props.indexOf(requestedProps) + 1) * 100 : 0
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/ManyGroups',
+        props: requestedProps ? { [requestedProps]: { text: `${requestedProps} value` } } : {},
+        deferredProps: requestedProps
+          ? {}
+          : props.reduce((groups, prop) => {
+              groups[prop] = [prop]
+              return groups
+            }, {}),
+      }),
+    delay,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
