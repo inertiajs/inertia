@@ -25,6 +25,7 @@ class CurrentPage {
   }[] = []
   protected isFirstPageLoad = true
   protected cleared = false
+  protected deferredPropsQueue: Pick<Page, 'deferredProps' | 'url' | 'component'>[] = []
 
   public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
     this.page = initialPage
@@ -42,6 +43,14 @@ class CurrentPage {
       preserveState = false,
     }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
   ): Promise<void> {
+    if (Object.keys(page.deferredProps || {}).length) {
+      this.deferredPropsQueue.push({
+        deferredProps: page.deferredProps,
+        component: page.component,
+        url: page.url
+      })
+    }
+
     this.componentId = {}
 
     const componentId = this.componentId
@@ -84,7 +93,13 @@ class CurrentPage {
             Scroll.reset()
           }
 
-          eventHandler.fireInternalEvent('loadDeferredProps')
+          if (this.deferredPropsQueue.length > 0) {
+            const nextDeferred = this.deferredPropsQueue.shift()
+
+            if (nextDeferred && nextDeferred.component === page.component && nextDeferred.url === page.url) {
+              eventHandler.fireInternalEvent('loadDeferredProps', nextDeferred.deferredProps)
+            }
+          }
 
           if (!replace) {
             fireNavigateEvent(page)
@@ -112,6 +127,7 @@ class CurrentPage {
 
   public clear(): void {
     this.cleared = true
+    this.deferredPropsQueue = []
   }
 
   public isCleared(): boolean {

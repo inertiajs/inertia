@@ -15,16 +15,16 @@ export default () => {
         {foo?.text}
       </Deferred>
 
-      <Deferred data="bar" fallback={() => <div>Loading bar...</div>}>
-        {() => bar?.text}
+      <Deferred data="bar" fallback={<div>Loading bar...</div>}>
+        {bar?.text}
       </Deferred>
 
       <Deferred data="baz" fallback={<div>Loading baz...</div>}>
         {baz?.text}
       </Deferred>
 
-      <Deferred data="qux" fallback={() => <div>Loading qux...</div>}>
-        {() => qux?.text}
+      <Deferred data="qux" fallback={<div>Loading qux...</div>}>
+        {qux?.text}
       </Deferred>
 
       <Deferred data="quux" fallback={<div>Loading quux...</div>}>

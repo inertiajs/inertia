@@ -10,7 +10,7 @@ import { hrefToUrl } from './url'
 class EventHandler {
   protected internalListeners: {
     event: InternalEvent
-    listener: VoidFunction
+    listener: (...args: any[]) => void
   }[] = []
 
   public init() {
@@ -39,7 +39,7 @@ class EventHandler {
     return this.registerListener(`inertia:${type}`, listener)
   }
 
-  public on(event: InternalEvent, callback: VoidFunction): VoidFunction {
+  public on(event: InternalEvent, callback: (...args: any[]) => void): VoidFunction {
     this.internalListeners.push({ event, listener: callback })
 
     return () => {
@@ -55,8 +55,10 @@ class EventHandler {
     this.fireInternalEvent('missingHistoryItem')
   }
 
-  public fireInternalEvent(event: InternalEvent): void {
-    this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
+  public fireInternalEvent(event: InternalEvent, ...args: any[]): void {
+    this.internalListeners
+      .filter((listener) => listener.event === event)
+      .forEach((listener) => listener.listener(...args))
   }
 
   protected registerListener(type: string, listener: EventListener): VoidFunction {
