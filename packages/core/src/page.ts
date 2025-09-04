@@ -93,12 +93,10 @@ class CurrentPage {
             Scroll.reset()
           }
 
-          if (this.deferredPropsQueue.length > 0) {
-            const nextDeferred = this.deferredPropsQueue.shift()
+          const nextDeferred = this.deferredPropsQueue.shift()
 
-            if (nextDeferred && nextDeferred.component === page.component && nextDeferred.url === page.url) {
-              eventHandler.fireInternalEvent('loadDeferredProps', nextDeferred.deferredProps)
-            }
+          if (nextDeferred && nextDeferred.component === page.component && nextDeferred.url === page.url) {
+            eventHandler.fireInternalEvent('loadDeferredProps', nextDeferred.deferredProps)
           }
 
           if (!replace) {
