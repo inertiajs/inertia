@@ -29,3 +29,13 @@ declare module 'vue' {
         }
   }
 }
+
+// Live validation shared types for the Vue adapter
+export type ValidationEvent = 'input' | 'change' | 'blur'
+
+export interface LiveValidationProps {
+  precognitive?: boolean | Record<string, any>
+  validateOn?: ValidationEvent | ValidationEvent[]
+  validationTimeout?: number
+  provider?: string
+}

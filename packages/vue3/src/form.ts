@@ -12,9 +12,13 @@ import {
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
 import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import type { LiveValidationProps, ValidationEvent } from './types'
 import useForm from './useForm'
+import useValidate from './useValidate'
 
-type InertiaForm = DefineComponent<FormComponentProps>
+type InertiaFormComponentProps = FormComponentProps & LiveValidationProps
+type InertiaForm = DefineComponent<InertiaFormComponentProps>
+
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const noop = () => undefined
@@ -110,6 +114,23 @@ const Form: InertiaForm = defineComponent({
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
+    // Precognition integration (optional, only used when enabled)
+    precognitive: {
+      type: [Boolean, Object] as PropType<boolean | Record<string, any>>, // ValidationConfig-like
+      default: false,
+    },
+    validateOn: {
+      type: [String, Array] as PropType<ValidationEvent | ValidationEvent[]>,
+      default: 'input',
+    },
+    validationTimeout: {
+      type: Number,
+      default: undefined,
+    },
+    provider: {
+      type: String as PropType<string>,
+      default: undefined,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -123,6 +144,13 @@ const Form: InertiaForm = defineComponent({
 
     const defaultData = ref(new FormData())
 
+    const getFormData = (): FormData => new FormData(formElement.value)
+
+    // Convert the FormData to an object because we can't compare two FormData
+    // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
+    // expects an object, and submitting a FormData instance directly causes problems with nested objects.
+    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
+
     const onFormUpdate = (event: Event) => {
       // If the form is reset, we set isDirty to false as we already know it's back
       // to defaults. Also, the fields are updated after the reset event, so the
@@ -131,20 +159,48 @@ const Form: InertiaForm = defineComponent({
     }
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
+    const validationEvents: ValidationEvent[] = ['input', 'change', 'blur']
+
+    // ========= Optional live validation via composable =========
+    const {
+      validating,
+      maybeValidate,
+      validate: runValidate,
+      reset: resetValidation,
+    } = useValidate({
+      getData: () => getData(),
+      method: () => method.value,
+      action: () => (typeof props.action === 'object' ? props.action.url : props.action),
+      props: {
+        precognitive: props.precognitive as any,
+        validateOn: props.validateOn as any,
+        validationTimeout: props.validationTimeout,
+        provider: props.provider,
+      },
+      setErrors: (simple) => {
+        form.clearErrors()
+        form.setError(simple as Record<string, string>)
+      },
+    })
 
     onMounted(() => {
       defaultData.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
+      // Attach validation listeners (includes blur if configured)
+      ;(validationEvents as Array<keyof HTMLElementEventMap>).forEach((e) =>
+        formElement.value.addEventListener(e, maybeValidate),
+      )
     })
 
-    onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
-
-    const getFormData = (): FormData => new FormData(formElement.value)
-
-    // Convert the FormData to an object because we can't compare two FormData
-    // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
-    // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
+    onBeforeUnmount(() => {
+      formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate))
+      ;(validationEvents as Array<keyof HTMLElementEventMap>).forEach((e) =>
+        formElement.value?.removeEventListener(e, maybeValidate),
+      )
+      try {
+        resetValidation()
+      } catch {}
+    })
 
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
@@ -199,6 +255,9 @@ const Form: InertiaForm = defineComponent({
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
+      try {
+        resetValidation(...fields)
+      } catch {}
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -236,6 +295,12 @@ const Form: InertiaForm = defineComponent({
         form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
       get isDirty() {
         return isDirty.value
+      },
+      get validating() {
+        return validating.value
+      },
+      validate: (name?: string) => {
+        runValidate(name)
       },
       reset,
       submit,
