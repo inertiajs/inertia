@@ -535,7 +535,7 @@ app.get('/deferred-props/page-2', (req, res) => {
 app.get('/deferred-props/many-groups', (req, res) => {
   const props = ['foo', 'bar', 'baz', 'qux', 'quux']
   const requestedProps = req.headers['x-inertia-partial-data']
-  const delay = requestedProps ? (props.indexOf(requestedProps) + 1) * 100 : 0
+  const delay = requestedProps ? props.indexOf(requestedProps) * 100 : 500
 
   setTimeout(
     () =>
@@ -551,6 +551,22 @@ app.get('/deferred-props/many-groups', (req, res) => {
       }),
     delay,
   )
+})
+
+app.get('/deferred-props/instant-reload', (req, res) => {
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  inertia.render(req, res, {
+    component: 'DeferredProps/InstantReload',
+    props: requestedProps
+      ? {
+          [requestedProps]: {
+            text: `${requestedProps} value`,
+          },
+        }
+      : {},
+    deferredProps: requestedProps ? {} : { default: ['bar'] },
+  })
 })
 
 app.get('/svelte/props-and-page-store', (req, res) =>
