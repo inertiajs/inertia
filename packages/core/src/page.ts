@@ -47,7 +47,7 @@ class CurrentPage {
       this.deferredPropsQueue.push({
         deferredProps: page.deferredProps,
         component: page.component,
-        url: page.url
+        url: page.url,
       })
     }
 
@@ -99,6 +99,8 @@ class CurrentPage {
             eventHandler.fireInternalEvent('loadDeferredProps', nextDeferred.deferredProps)
           }
 
+          this.deferredPropsQueue = []
+
           if (!replace) {
             fireNavigateEvent(page)
           }
@@ -125,7 +127,6 @@ class CurrentPage {
 
   public clear(): void {
     this.cleared = true
-    this.deferredPropsQueue = []
   }
 
   public isCleared(): boolean {
