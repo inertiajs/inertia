@@ -16,7 +16,7 @@ export default ({
 
   useEffect(() => {
     window._inertia_props = page.props
-  }, [])
+  }, [page.props])
 
   const partialReloadVisit = (e: React.MouseEvent) => {
     e.preventDefault()
