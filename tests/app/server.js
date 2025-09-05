@@ -354,6 +354,35 @@ app.get('/merge-props', (req, res) => {
   })
 })
 
+app.get('/merge-nested-props/:strategy', (req, res) => {
+  const perPage = 3
+  const page = parseInt(req.query.page ?? 1)
+  const shouldAppend = req.params.strategy === 'append'
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: index + 1 + (page - 1) * perPage,
+    name: `User ${index + 1 + (page - 1) * perPage}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'MergeNestedProps',
+    props: {
+      users: {
+        data: shouldAppend ? users : users.slice().reverse(),
+        meta: {
+          perPage,
+          page,
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : shouldAppend
+        ? { mergeProps: ['users.data'] }
+        : { prependProps: ['users.data'] }),
+  })
+})
+
 app.get('/deep-merge-props', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
