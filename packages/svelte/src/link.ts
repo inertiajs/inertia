@@ -151,6 +151,7 @@ function link(
       replace: params.replace || false,
       preserveScroll: params.preserveScroll || false,
       preserveState: params.preserveState ?? method !== 'get',
+      preserveUrl: params.preserveUrl || false,
       only: params.only || [],
       except: params.except || [],
       headers: params.headers || {},

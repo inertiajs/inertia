@@ -33,6 +33,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       method = 'get',
       preserveScroll = false,
       preserveState = null,
+      preserveUrl = false,
       replace = false,
       only = [],
       except = [],
@@ -87,13 +88,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         method: _method,
         preserveScroll,
         preserveState: preserveState ?? _method !== 'get',
+        preserveUrl,
         replace,
         only,
         except,
         headers,
         async,
       }),
-      [_data, _method, preserveScroll, preserveState, replace, only, except, headers, async],
+      [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async],
     )
 
     const visitParams = useMemo(
