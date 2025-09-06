@@ -457,6 +457,7 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  defaultValues?: Record<string, FormDataConvertible>
 }
 
 export type FormComponentMethods = {
