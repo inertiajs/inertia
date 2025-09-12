@@ -13,6 +13,8 @@ import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
+  protected wasPrefetched = false
+
   constructor(
     protected requestParams: RequestParams,
     protected response: AxiosResponse,
@@ -35,6 +37,7 @@ export class Response {
 
   public async process() {
     if (this.requestParams.all().prefetch) {
+      this.wasPrefetched = true
       this.requestParams.all().prefetch = false
 
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
@@ -66,6 +69,12 @@ export class Response {
     }
 
     router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
+
+    if (!this.wasPrefetched) {
+      // We end up here other than from the prefetch cache, so we assume this response is
+      // never than the cached one and therefore flush the cache.
+      router.flush(currentPage.get().url)
+    }
 
     fireSuccessEvent(currentPage.get())
 
