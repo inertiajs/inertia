@@ -3,7 +3,7 @@ import { useForm } from '@inertiajs/react'
 
 interface ClientForm {
   name: string
-  [key: string]: any
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export default function DynamicInputName() {
