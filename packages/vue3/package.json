@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.5.3",
-    "axios": "^1.11.0",
+    "axios": "^1.12.0",
     "es-check": "^9.3.1",
     "esbuild": "^0.25.0",
     "esbuild-node-externals": "^1.6.0",
