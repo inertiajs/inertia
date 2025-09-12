@@ -10,7 +10,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/server-renderer": "^3.3.4",
-    "axios": "^1.11.0",
+    "axios": "^1.12.0",
     "laravel-vite-plugin": "^1.2.0",
     "lodash": "^4.17.19",
     "tailwindcss": "^4.1.8",
