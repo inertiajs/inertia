@@ -266,6 +266,7 @@ app.get('/prefetch/form', (req, res) =>
   }),
 )
 
+app.post('/prefetch/form', (req, res) => res.redirect(303, '/prefetch/form'))
 app.post('/prefetch/redirect-back', (req, res) => res.redirect(303, '/prefetch/form'))
 
 app.get('/prefetch/wayfinder', (req, res) => {

@@ -9,7 +9,11 @@ defineProps<Props>()
 
 const form = useForm({})
 
-const submit = () => {
+const submitToSame = () => {
+  form.post('/prefetch/form')
+}
+
+const submitToOther = () => {
   form.post('/prefetch/redirect-back')
 }
 </script>
@@ -19,7 +23,8 @@ const submit = () => {
     <p>
       Random Value: <span class="random-value">{{ randomValue }}</span>
     </p>
-    <button @click="submit">Submit Form</button>
+    <button @click="submitToSame">Submit to Same URL</button>
+    <button @click="submitToOther">Submit to Other URL</button>
     <Link href="/prefetch/test-page">Back to Test Page</Link>
   </div>
 </template>

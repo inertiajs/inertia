@@ -3,7 +3,11 @@ import { Link, useForm } from '@inertiajs/react'
 export default ({ randomValue }: { randomValue: number }) => {
   const { post } = useForm({})
 
-  const submit = () => {
+  const submitToSame = () => {
+    post('/prefetch/form')
+  }
+
+  const submitToOther = () => {
     post('/prefetch/redirect-back')
   }
 
@@ -12,7 +16,8 @@ export default ({ randomValue }: { randomValue: number }) => {
       <p>
         Random Value: <span className="random-value">{randomValue}</span>
       </p>
-      <button onClick={submit}>Submit Form</button>
+      <button onClick={submitToSame}>Submit to Same URL</button>
+      <button onClick={submitToOther}>Submit to Other URL</button>
       <Link href="/prefetch/test-page">Back to Test Page</Link>
     </div>
   )

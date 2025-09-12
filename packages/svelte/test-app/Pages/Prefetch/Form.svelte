@@ -1,19 +1,22 @@
 <script lang="ts">
-  import { Link, useForm } from '@inertiajs/svelte'
-
-  export let randomValue: number
+  import { Link, page, useForm } from '@inertiajs/svelte'
 
   const form = useForm({})
 
-  const submit = () => {
-    form.post('/prefetch/redirect-back')
+  const submitToSame = () => {
+    $form.post('/prefetch/form')
+  }
+
+  const submitToOther = () => {
+    $form.post('/prefetch/redirect-back')
   }
 </script>
 
 <div>
   <p>
-    Random Value: <span class="random-value">{randomValue}</span>
+    Random Value: <span class="random-value">{$page.props.randomValue}</span>
   </p>
-  <button on:click={submit}>Submit Form</button>
+  <button on:click={submitToSame}>Submit to Same URL</button>
+  <button on:click={submitToOther}>Submit to Other URL</button>
   <Link href="/prefetch/test-page">Back to Test Page</Link>
 </div>

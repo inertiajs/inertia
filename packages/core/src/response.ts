@@ -69,7 +69,11 @@ export class Response {
 
     const currentUrl = currentPage.get().url
 
-    if (!isSameUrlWithoutHash(this.requestParams.all().url, hrefToUrl(currentUrl))) {
+    const likelyRedirect =
+      !isSameUrlWithoutHash(this.requestParams.all().url, hrefToUrl(currentUrl)) ||
+      this.requestParams.all().method.toLowerCase() !== 'get'
+
+    if (!this.requestParams.all().prefetch && likelyRedirect) {
       // When we navigated to a different URL than we requested, it's likely due to a redirect.
       // In that case, it's highly likely the target page contains new data, so we clear the cache.
       router.flush(currentUrl)
