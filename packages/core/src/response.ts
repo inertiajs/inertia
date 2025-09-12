@@ -67,6 +67,14 @@ export class Response {
 
     router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
 
+    const currentUrl = currentPage.get().url
+
+    if (!isSameUrlWithoutHash(this.requestParams.all().url, hrefToUrl(currentUrl))) {
+      // When we navigated to a different URL than we requested, it's likely due to a redirect.
+      // In that case, it's highly likely the target page contains new data, so we clear the cache.
+      router.flush(currentUrl)
+    }
+
     fireSuccessEvent(currentPage.get())
 
     await this.requestParams.all().onSuccess(currentPage.get())
