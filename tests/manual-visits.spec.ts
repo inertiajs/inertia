@@ -956,20 +956,22 @@ test.describe('Redirects', () => {
 
 test('can do a subsequent visit after the previous visit has thrown an error in onSuccess', async ({ page }) => {
   pageLoads.watch(page)
-  const consoleErrors = []
 
-  page.on('pageerror', (error: Error) => consoleErrors.push(error.message))
-
-  await expect(consoleMessages.messages).toHaveLength(0)
+  consoleMessages.listen(page)
 
   await page.goto('/visits/after-error/1')
+
+  await expect(consoleMessages.messages).toHaveLength(0)
+  await expect(consoleMessages.errors).toHaveLength(0)
+
   const response = page.waitForResponse('/visits/after-error/2')
 
   await page.getByRole('link', { name: 'Throw error on success' }).click()
   await response
 
-  await expect(consoleErrors).toHaveLength(1)
-  await expect(consoleErrors[0]).toBe('Error after visit')
+  await expect(consoleMessages.messages).toHaveLength(0)
+  await expect(consoleMessages.errors).toHaveLength(1)
+  await expect(consoleMessages.errors[0]).toBe('Error after visit')
 
   await page.getByRole('link', { name: 'Visit dump page' }).click()
 
