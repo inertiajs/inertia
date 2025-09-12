@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.5...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.6...master)
 
 - Nothing yet
+
+## [v2.1.6](https://github.com/inertiajs/inertia/compare/v2.1.5...v2.1.6) - 2025-09-12
+
+### What's Changed
+
+* Invalidate prefetch cache when page is received from a network request by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2567
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.5...v2.1.6
 
 ## [v2.1.5](https://github.com/inertiajs/inertia/compare/v2.1.4...v2.1.5) - 2025-09-05
 
