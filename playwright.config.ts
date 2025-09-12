@@ -42,6 +42,10 @@ export default defineConfig({
 
     /* Collect screenshots on failure */
     screenshot: 'only-on-failure',
+
+    launchOptions: {
+      args: ['--disable-features=DeferRendererTasksAfterInput'],
+    },
   },
 
   timeout: 5 * 1000,

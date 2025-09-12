@@ -24,7 +24,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@playwright/test": ">=1.51.0 <1.53.0",
+    "@playwright/test": "^1.55.0",
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-svelte": "^3.2.3",
