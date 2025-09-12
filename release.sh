@@ -76,5 +76,6 @@ pnpm publish -r
 
 gh release create "$TAG" --generate-notes
 
-echo "\n✅ Release $TAG completed successfully."
+echo ""
+echo "✅ Release $TAG completed successfully."
 echo "🔗 https://github.com/inertiajs/inertia/releases/tag/$TAG"
