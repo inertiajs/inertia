@@ -251,6 +251,23 @@ app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
 })
 
+app.get('/prefetch/test-page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Prefetch/TestPage',
+  }),
+)
+
+app.get('/prefetch/form', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Prefetch/Form',
+    props: {
+      randomValue: Math.floor(Math.random() * 1000000),
+    },
+  }),
+)
+
+app.post('/prefetch/redirect-back', (req, res) => res.redirect(303, '/prefetch/form'))
+
 app.get('/prefetch/wayfinder', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Wayfinder',
