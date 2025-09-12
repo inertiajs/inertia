@@ -13,6 +13,8 @@ import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
+  protected wasPrefetched = false
+
   constructor(
     protected requestParams: RequestParams,
     protected response: AxiosResponse,
@@ -35,6 +37,7 @@ export class Response {
 
   public async process() {
     if (this.requestParams.all().prefetch) {
+      this.wasPrefetched = true
       this.requestParams.all().prefetch = false
 
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
@@ -67,16 +70,10 @@ export class Response {
 
     router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
 
-    const currentUrl = currentPage.get().url
-
-    const likelyRedirect =
-      !isSameUrlWithoutHash(this.requestParams.all().url, hrefToUrl(currentUrl)) ||
-      this.requestParams.all().method.toLowerCase() !== 'get'
-
-    if (!this.requestParams.all().prefetch && likelyRedirect) {
-      // When we navigated to a different URL than we requested, it's likely due to a redirect.
-      // In that case, it's highly likely the target page contains new data, so we clear the cache.
-      router.flush(currentUrl)
+    if (!this.wasPrefetched) {
+      // We end up here other than from the prefetch cache, so we assume this response is
+      // never than the cached one and therefore flush the cache.
+      router.flush(currentPage.get().url)
     }
 
     fireSuccessEvent(currentPage.get())
