@@ -1,7 +1,9 @@
 import {
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   router,
   shouldIntercept,
+  shouldNavigate,
   type CacheForOption,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
@@ -81,13 +83,25 @@ function link(
         prefetch()
       }
     },
+    keydown: (event) => {
+      if (shouldIntercept(event) && shouldNavigate(event)) {
+        event.preventDefault()
+        prefetch()
+      }
+    },
     mouseup: (event) => {
       event.preventDefault()
       router.visit(href, visitParams)
     },
+    keyup: (event) => {
+      if (shouldNavigate(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
+    },
     click: (event) => {
       if (shouldIntercept(event)) {
-        // Let the mouseup event handle the visit
+        // Let the mouseup/keyup event handle the visit
         event.preventDefault()
       }
     },
@@ -124,7 +138,7 @@ function link(
 
     cacheTags = cacheTagValues
 
-    method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
+    method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
@@ -175,7 +189,7 @@ function link(
   function hrefAndData(method: Method, params: ActionParameters) {
     return mergeDataIntoQueryString(
       method,
-      typeof params.href === 'object' ? params.href.url : node.href || params.href || '',
+      isUrlMethodPair(params.href) ? params.href.url : node.href || params.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
     )

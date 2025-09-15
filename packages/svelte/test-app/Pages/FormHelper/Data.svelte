@@ -11,6 +11,12 @@
     $form.post($page.url)
   }
 
+  const submitAndReset = () => {
+    $form.post('/form-helper/data/redirect-back', {
+      onSuccess: () => $form.reset(),
+    })
+  }
+
   const resetAll = () => {
     $form.reset()
   }
@@ -59,6 +65,7 @@
   {/if}
 
   <button on:click={submit} class="submit">Submit form</button>
+  <button on:click={submitAndReset} class="submit">Submit form and reset</button>
 
   <button on:click={resetAll} class="reset">Reset all data</button>
   <button on:click={resetOne} class="reset-one">Reset one field</button>

@@ -160,6 +160,8 @@ app.post('/form-helper/data', (req, res) =>
   }),
 )
 
+app.post('/form-helper/data/redirect-back', (req, res) => res.redirect(303, '/form-helper/data'))
+
 app.get('/form-helper/nested', (req, res) =>
   inertia.render(req, res, {
     component: 'FormHelper/Nested',
@@ -173,7 +175,14 @@ app.get('/form-helper/dirty', (req, res) =>
   }),
 )
 
+app.post('/form-helper/effect-count', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormHelper/EffectCount',
+  }),
+)
+
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
+app.post('/form-helper/dirty/redirect-back', (req, res) => res.redirect(303, '/form-helper/dirty'))
 
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {
@@ -241,6 +250,24 @@ app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { componen
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
 })
+
+app.get('/prefetch/test-page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Prefetch/TestPage',
+  }),
+)
+
+app.get('/prefetch/form', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Prefetch/Form',
+    props: {
+      randomValue: Math.floor(Math.random() * 1000000),
+    },
+  }),
+)
+
+app.post('/prefetch/form', (req, res) => res.redirect(303, '/prefetch/form'))
+app.post('/prefetch/redirect-back', (req, res) => res.redirect(303, '/prefetch/form'))
 
 app.get('/prefetch/wayfinder', (req, res) => {
   inertia.render(req, res, {
@@ -523,6 +550,48 @@ app.get('/deferred-props/page-2', (req, res) => {
   }
 })
 
+app.get('/deferred-props/many-groups', (req, res) => {
+  const props = ['foo', 'bar', 'baz', 'qux', 'quux']
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const delay = requestedProps ? (props.indexOf(requestedProps) + 3) * 100 : 500
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/ManyGroups',
+        props: requestedProps ? { [requestedProps]: { text: `${requestedProps} value` } } : {},
+        deferredProps: requestedProps
+          ? {}
+          : props.reduce((groups, prop) => {
+              groups[prop] = [prop]
+              return groups
+            }, {}),
+      }),
+    delay,
+  )
+})
+
+app.get('/deferred-props/instant-reload', (req, res) => {
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const delay = requestedProps === 'bar' ? 300 : 0
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/InstantReload',
+        props: requestedProps
+          ? {
+              [requestedProps]: {
+                text: `${requestedProps} value`,
+              },
+            }
+          : {},
+        deferredProps: requestedProps ? {} : { default: ['bar'] },
+      }),
+    delay,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
@@ -534,6 +603,9 @@ app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 
+app.get('/form-component/child-component', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
+)
 app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
 app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>

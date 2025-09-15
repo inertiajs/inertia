@@ -2,6 +2,7 @@ import {
   ActiveVisit,
   CacheForOption,
   GlobalEventCallback,
+  isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -9,6 +10,7 @@ import {
   PendingVisit,
   router,
   shouldIntercept,
+  shouldNavigate,
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 
@@ -172,7 +174,7 @@ const Link: InertiaLink = defineComponent({
     })
 
     const method = computed(() =>
-      typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.href) ? props.href.method : (props.method.toLowerCase() as Method),
     )
     const as = computed(() => {
       if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
@@ -185,7 +187,7 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        typeof props.href === 'object' ? props.href.url : props.href,
+        isUrlMethodPair(props.href) ? props.href.url : props.href,
         props.data,
         props.queryStringArrayFormat,
       ),
@@ -278,13 +280,25 @@ const Link: InertiaLink = defineComponent({
           prefetch()
         }
       },
+      onKeydown: (event) => {
+        if (shouldIntercept(event) && shouldNavigate(event)) {
+          event.preventDefault()
+          prefetch()
+        }
+      },
       onMouseup: (event) => {
         event.preventDefault()
         router.visit(href.value, visitParams.value)
       },
+      onKeyup: (event) => {
+        if (shouldNavigate(event)) {
+          event.preventDefault()
+          router.visit(href.value, visitParams.value)
+        }
+      },
       onClick: (event) => {
         if (shouldIntercept(event)) {
-          // Let the mouseup event handle the visit
+          // Let the mouseup/keyup event handle the visit
           event.preventDefault()
         }
       },

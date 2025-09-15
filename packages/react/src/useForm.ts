@@ -90,13 +90,19 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   }, [])
 
+  // Track if setDefaults was called manually during onSuccess to avoid
+  // overriding user's custom defaults with automatic behavior.
+  const setDefaultsCalledInOnSuccess = useRef(false)
+
   const submit = useCallback(
     (...args) => {
-      const objectPassed = typeof args[0] === 'object'
+      const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
       const options = (objectPassed ? args[1] : args[2]) ?? {}
+
+      setDefaultsCalledInOnSuccess.current = false
 
       const _options = {
         ...options,
@@ -130,7 +136,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onProgress(event)
           }
         },
-        onSuccess: (page) => {
+        onSuccess: async (page) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -138,7 +144,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             setHasErrors(false)
             setWasSuccessful(true)
             setRecentlySuccessful(true)
-            setDefaults(cloneDeep(data))
             recentlySuccessfulTimeoutId.current = setTimeout(() => {
               if (isMounted.current) {
                 setRecentlySuccessful(false)
@@ -146,9 +151,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             }, 2000)
           }
 
-          if (options.onSuccess) {
-            return options.onSuccess(page)
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
+
+          if (isMounted.current && !setDefaultsCalledInOnSuccess.current) {
+            setData((data) => {
+              setDefaults(cloneDeep(data))
+              return data
+            })
           }
+
+          return onSuccess
         },
         onError: (errors) => {
           if (isMounted.current) {
@@ -210,10 +222,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   const [dataAsDefaults, setDataAsDefaults] = useState(false)
 
+  const dataRef = useRef(data)
+
+  useEffect(() => {
+    dataRef.current = data
+  })
+
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
+      setDefaultsCalledInOnSuccess.current = true
+
       if (typeof fieldOrFields === 'undefined') {
-        setDefaults(data)
+        setDefaults(dataRef.current)
         // If setData was called right before setDefaults, data was not
         // updated in that render yet, so we set a flag to update
         // defaults right after the next render.
@@ -226,7 +246,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         })
       }
     },
-    [data, setDefaults],
+    [setDefaults],
   )
 
   useLayoutEffect(() => {

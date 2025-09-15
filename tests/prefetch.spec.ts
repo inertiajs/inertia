@@ -113,6 +113,57 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
+test('can prefetch using link props with keyboard events', async ({ page }) => {
+  // These two prefetch requests should be made on mount
+  const prefetch2 = page.waitForResponse('prefetch/2')
+  const prefetch4 = page.waitForResponse('prefetch/4')
+
+  await page.goto('prefetch/1')
+
+  // These two prefetch requests should be made on mount
+  await prefetch2
+  await prefetch4
+
+  // Keyboard activation with Enter
+  await page.getByRole('link', { name: 'On Enter' }).focus()
+  await page.keyboard.down('Enter')
+  await page.waitForResponse('prefetch/6')
+  await expect(page).toHaveURL('prefetch/1')
+  requests.listen(page)
+  await page.keyboard.up('Enter')
+  await isPrefetchPage(page, 6)
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Spacebar on link (nothing happens)
+  await page.getByRole('link', { name: 'On Click' }).focus()
+  await page.keyboard.down(' ')
+  await expect(page).toHaveURL('prefetch/6')
+  requests.listen(page)
+  await page.keyboard.up(' ')
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Spacebar on button
+  await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  await page.keyboard.down(' ')
+  await page.waitForResponse('prefetch/7')
+  await expect(page).toHaveURL('prefetch/6')
+  requests.listen(page)
+  await page.keyboard.up(' ')
+  await isPrefetchPage(page, 7)
+  await expect(requests.requests.length).toBe(0)
+
+  // Keyboard activation with Enter on button
+  await page.goto('prefetch/1')
+  await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  await page.keyboard.down('Enter')
+  await page.waitForResponse('prefetch/7')
+  await expect(page).toHaveURL('prefetch/1')
+  requests.listen(page)
+  await page.keyboard.up('Enter')
+  await isPrefetchPage(page, 7)
+  await expect(requests.requests.length).toBe(0)
+})
+
 test('can cache links with single cache value', async ({ page }) => {
   await page.goto('prefetch/swr/1')
 
@@ -209,6 +260,44 @@ test('can visit the page when prefetching has failed due to network error', asyn
   await page.getByRole('button', { name: 'Visit Page' }).click()
 
   await isPrefetchSwrPage(page, 1)
+})
+
+const submitButtonTexts = ['Submit to Same URL', 'Submit to Other URL']
+
+submitButtonTexts.forEach((buttonText) => {
+  test.describe('prefetch cache is invalidated after form submission redirect', () => {
+    test(buttonText, async ({ page }) => {
+      await page.goto('prefetch/test-page')
+
+      const prefetchPromise = page.waitForResponse('/prefetch/form')
+      await page.getByRole('link', { name: 'Go to Prefetch Form' }).hover()
+      await prefetchPromise
+
+      requests.listen(page)
+      await page.getByRole('link', { name: 'Go to Prefetch Form' }).click()
+      await page.waitForURL('/prefetch/form')
+      await expect(requests.requests.length).toBe(0)
+
+      const firstRandomValue = await page.locator('.random-value').textContent()
+      expect(firstRandomValue).toBeTruthy()
+
+      await page.getByRole('button', { name: buttonText }).click()
+      await page.waitForURL('/prefetch/form')
+
+      const secondRandomValue = await page.locator('.random-value').textContent()
+      expect(secondRandomValue).not.toBe(firstRandomValue)
+
+      await page.getByRole('link', { name: 'Back to Test Page' }).click()
+      await page.waitForURL('/prefetch/test-page')
+
+      requests.listen(page)
+      await page.getByRole('link', { name: 'Go to Prefetch Form' }).click()
+      await page.waitForURL('/prefetch/form')
+
+      const thirdRandomValue = await page.locator('.random-value').textContent()
+      expect(thirdRandomValue).not.toBe(firstRandomValue)
+    })
+  })
 })
 
 test.skip('can do SWR when the link cacheFor prop has two values', async ({ page }) => {

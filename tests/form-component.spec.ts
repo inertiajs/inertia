@@ -1380,6 +1380,10 @@ test.describe('Form Component', () => {
   test('it accepts wayfinder shaped objects as action', async ({ page }) => {
     await page.goto('/form-component/wayfinder')
 
+    const form = page.locator('form')
+    await expect(form).toHaveAttribute('action', '/dump/post')
+    await expect(form).toHaveAttribute('method', 'post')
+
     await page.getByRole('button', { name: 'Submit' }).click()
 
     const dump = await shouldBeDumpPage(page, 'post')
@@ -1422,6 +1426,24 @@ test.describe('Form Component', () => {
       requests.listen(page)
       await page.getByRole('link', { name: 'Product Tagged Page' }).click()
       await expect(requests.requests.length).toBe(0)
+    })
+  })
+
+  test.describe('React', () => {
+    test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
+
+    test('it preserves the internal state of child components', async ({ page }) => {
+      await page.goto('/form-component/child-component')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await page.fill('#child', 'a')
+      await expect(page.locator('#child')).toHaveValue('A')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      const dump = await shouldBeDumpPage(page, 'post')
+      expect(dump.form).toEqual({ child: 'A' })
     })
   })
 })

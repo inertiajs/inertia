@@ -63,6 +63,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
+  // Track if defaults was called manually during onSuccess to avoid
+  // overriding user's custom defaults with automatic behavior.
+  let defaultsCalledInOnSuccess = false
+
   const form = reactive({
     ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
@@ -86,6 +90,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       if (typeof data === 'function') {
         throw new Error('You cannot call `defaults()` when using a function to define your form data.')
       }
+
+      defaultsCalledInOnSuccess = true
 
       if (typeof fieldOrFields === 'undefined') {
         defaults = cloneDeep(this.data())
@@ -142,11 +148,13 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     submit(...args) {
-      const objectPassed = typeof args[0] === 'object'
+      const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
       const options = (objectPassed ? args[1] : args[2]) ?? {}
+
+      defaultsCalledInOnSuccess = false
 
       const data = transform(this.data())
       const _options = {
@@ -190,8 +198,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
-          defaults = cloneDeep(this.data())
-          this.isDirty = false
+
+          if (!defaultsCalledInOnSuccess) {
+            defaults = cloneDeep(this.data())
+            this.isDirty = false
+          }
+
           return onSuccess
         },
         onError: (errors) => {

@@ -1,5 +1,6 @@
 import {
   ActiveVisit,
+  isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -7,6 +8,7 @@ import {
   PendingVisit,
   router,
   shouldIntercept,
+  shouldNavigate,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -59,7 +61,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const hoverTimeout = useRef<number>(null)
 
     const _method = useMemo(() => {
-      return typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
+      return isUrlMethodPair(href) ? href.method : (method.toLowerCase() as Method)
     }, [href, method])
 
     const _as = useMemo(() => {
@@ -72,7 +74,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [as, _method])
 
     const mergeDataArray = useMemo(
-      () => mergeDataIntoQueryString(_method, typeof href === 'object' ? href.url : href, data, queryStringArrayFormat),
+      () => mergeDataIntoQueryString(_method, isUrlMethodPair(href) ? href.url : href, data, queryStringArrayFormat),
       [href, _method, data, queryStringArrayFormat],
     )
 
@@ -207,15 +209,27 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
           doPrefetch()
         }
       },
+      onKeyDown: (event) => {
+        if (shouldIntercept(event) && shouldNavigate(event)) {
+          event.preventDefault()
+          doPrefetch()
+        }
+      },
       onMouseUp: (event) => {
         event.preventDefault()
         router.visit(url, visitParams)
+      },
+      onKeyUp: (event) => {
+        if (shouldNavigate(event)) {
+          event.preventDefault()
+          router.visit(url, visitParams)
+        }
       },
       onClick: (event) => {
         onClick(event)
 
         if (shouldIntercept(event)) {
-          // Let the mouseup event handle the visit
+          // Let the mouseup/keyup event handle the visit
           event.preventDefault()
         }
       },
