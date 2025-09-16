@@ -64,8 +64,8 @@ export class Router {
       }
     })
 
-    eventHandler.on('loadDeferredProps', () => {
-      this.loadDeferredProps()
+    eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
+      this.loadDeferredProps(deferredProps)
     })
   }
 
@@ -505,9 +505,7 @@ export class Router {
     }
   }
 
-  protected loadDeferredProps(): void {
-    const deferred = currentPage.get()?.deferredProps
-
+  protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
         this.reload({ only: group })

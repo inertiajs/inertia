@@ -252,6 +252,24 @@ app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
 })
 
+app.get('/prefetch/test-page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Prefetch/TestPage',
+  }),
+)
+
+app.get('/prefetch/form', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Prefetch/Form',
+    props: {
+      randomValue: Math.floor(Math.random() * 1000000),
+    },
+  }),
+)
+
+app.post('/prefetch/form', (req, res) => res.redirect(303, '/prefetch/form'))
+app.post('/prefetch/redirect-back', (req, res) => res.redirect(303, '/prefetch/form'))
+
 app.get('/prefetch/wayfinder', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Wayfinder',
@@ -560,6 +578,48 @@ app.get('/deferred-props/page-2', (req, res) => {
       750,
     )
   }
+})
+
+app.get('/deferred-props/many-groups', (req, res) => {
+  const props = ['foo', 'bar', 'baz', 'qux', 'quux']
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const delay = requestedProps ? (props.indexOf(requestedProps) + 3) * 100 : 500
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/ManyGroups',
+        props: requestedProps ? { [requestedProps]: { text: `${requestedProps} value` } } : {},
+        deferredProps: requestedProps
+          ? {}
+          : props.reduce((groups, prop) => {
+              groups[prop] = [prop]
+              return groups
+            }, {}),
+      }),
+    delay,
+  )
+})
+
+app.get('/deferred-props/instant-reload', (req, res) => {
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const delay = requestedProps === 'bar' ? 300 : 0
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/InstantReload',
+        props: requestedProps
+          ? {
+              [requestedProps]: {
+                text: `${requestedProps} value`,
+              },
+            }
+          : {},
+        deferredProps: requestedProps ? {} : { default: ['bar'] },
+      }),
+    delay,
+  )
 })
 
 app.get('/svelte/props-and-page-store', (req, res) =>
