@@ -508,20 +508,77 @@ export interface UseInfiniteScrollOptions {
   // Core data
   getPropName: () => string
   inReverseMode: () => boolean
-  getPageName: () => string
   shouldPreserveUrl: () => boolean
 
   // Elements
-  getTrigger: () => 'top' | 'bottom' | 'both'
+  getTrigger: () => 'start' | 'end' | 'both'
   getTriggerMargin: () => number
-  getTopElement: () => HTMLElement
-  getBottomElement: () => HTMLElement
+  getBeforeElement: () => HTMLElement
+  getAfterElement: () => HTMLElement
   getSlotElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
 
   // Callbacks
   onRequestStart: (side: InfiniteScrollSide) => void
   onRequestComplete: (side: InfiniteScrollSide) => void
+}
+
+export interface UseInfiniteScrollDataManager {
+  getLastLoadedPage: () => number | string | undefined
+  getPageName: () => string
+  hasMoreBefore: () => boolean
+  hasMoreAfter: () => boolean
+  loadAfter: (reloadOptions?: ReloadOptions) => void
+  loadBefore: (reloadOptions?: ReloadOptions) => void
+}
+
+export interface UseInfiniteScrollElementManager {
+  setupObservers: () => void
+  enableTriggers: () => void
+  disableTriggers: () => void
+  flushAll: () => void
+  processManuallyAddedElements: () => void
+  processServerLoadedElements: (lastLoadedPage?: string | number | undefined) => void
+}
+
+export interface UseInfiniteScrollProps {
+  dataManager: UseInfiniteScrollDataManager
+  elementManager: UseInfiniteScrollElementManager
+}
+
+export interface InfiniteScrollSlotProps {
+  loading: boolean
+  loadingBefore: boolean
+  loadingAfter: boolean
+}
+
+export interface InfiniteScrollActionSlotProps {
+  loading: boolean
+  loadingBefore: boolean
+  loadingAfter: boolean
+  fetch: () => void
+  autoMode: boolean
+  manualMode: boolean
+  hasMore: boolean
+}
+
+export interface InfiniteScrollRef {
+  loadAfter: (reloadOptions?: ReloadOptions) => void
+  loadBefore: (reloadOptions?: ReloadOptions) => void
+  hasMoreBefore: () => boolean
+  hasMoreAfter: () => boolean
+}
+
+export interface InfiniteScrollComponentBaseProps {
+  data?: string
+  buffer?: number
+  trigger?: 'start' | 'end' | 'both'
+  as?: string
+  manual?: boolean
+  manualAfter?: number
+  preserveUrl?: boolean
+  reverse?: boolean
+  autoScroll?: boolean
 }
 
 declare global {

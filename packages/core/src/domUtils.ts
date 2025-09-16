@@ -1,6 +1,11 @@
 const elementInViewport = (el: HTMLElement) => {
   const rect = el.getBoundingClientRect()
-  return rect.top < window.innerHeight && rect.bottom >= 0
+
+  // We check both vertically and horizontally for containers that scroll in either direction
+  const verticallyVisible = rect.top < window.innerHeight && rect.bottom >= 0
+  const horizontallyVisible = rect.left < window.innerWidth && rect.right >= 0
+
+  return verticallyVisible && horizontallyVisible
 }
 
 export const getScrollableParent = (element: HTMLElement | null): HTMLElement | null => {

@@ -1,4 +1,5 @@
 import { useIntersectionObservers } from '../intersectionObservers'
+import { UseInfiniteScrollElementManager } from '../types'
 
 const INFINITE_SCROLL_PAGE_KEY = 'infiniteScrollPage'
 const INFINITE_SCROLL_IGNORE_KEY = 'infiniteScrollIgnore'
@@ -7,16 +8,16 @@ export const getPageFromElement = (element: HTMLElement): string | undefined =>
   element.dataset[INFINITE_SCROLL_PAGE_KEY]
 
 export const useInfiniteScrollElementManager = (options: {
-  getTrigger: () => 'top' | 'bottom' | 'both'
+  getTrigger: () => 'start' | 'end' | 'both'
   getTriggerMargin: () => number
-  getTopElement: () => HTMLElement
-  getBottomElement: () => HTMLElement
+  getBeforeElement: () => HTMLElement
+  getAfterElement: () => HTMLElement
   getSlotElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
   onTopTriggered: () => void
   onBottomTriggered: () => void
   onItemIntersected: (element: HTMLElement) => void
-}) => {
+}): UseInfiniteScrollElementManager => {
   const intersectionObservers = useIntersectionObservers()
 
   let itemsObserver: IntersectionObserver
@@ -59,14 +60,19 @@ export const useInfiniteScrollElementManager = (options: {
   }
 
   const enableTriggers = () => {
-    const topElement = options.getTopElement()
-    const bottomElement = options.getBottomElement()
+    disableTriggers()
+
+    const topElement = options.getBeforeElement()
+    const bottomElement = options.getAfterElement()
     const trigger = options.getTrigger()
 
-    if (trigger !== 'bottom') {
+    console.log('Enabling triggers:', { trigger, topElement, bottomElement })
+
+    if (topElement && trigger !== 'end') {
       topElementObserver.observe(topElement)
     }
-    if (trigger !== 'top') {
+
+    if (bottomElement && trigger !== 'start') {
       bottomElementObserver.observe(bottomElement)
     }
   }

@@ -18,7 +18,7 @@ export const useInfiniteScrollPreservation = (options: {
     let referenceElement: Element | null = null
     let referenceElementTop: number = 0
 
-    const onBeforeUpdate = () => {
+    const captureScrollPosition = () => {
       const scrollableContainer = options.getScrollableParent()
       const slotElement = options.getSlotElement()
 
@@ -42,7 +42,7 @@ export const useInfiniteScrollPreservation = (options: {
       }
     }
 
-    const onSuccess = () => {
+    const restoreScrollPosition = () => {
       if (!referenceElement) {
         return
       }
@@ -70,8 +70,8 @@ export const useInfiniteScrollPreservation = (options: {
     }
 
     return {
-      onBeforeUpdate,
-      onSuccess,
+      captureScrollPosition,
+      restoreScrollPosition,
     }
   }
 

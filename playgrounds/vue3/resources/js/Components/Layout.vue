@@ -2,11 +2,14 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
-const props = withDefaults(defineProps<{
-  padding?: boolean
-}>(), {
-  padding: true
-})
+const props = withDefaults(
+  defineProps<{
+    padding?: boolean
+  }>(),
+  {
+    padding: true,
+  },
+)
 
 const page = usePage()
 

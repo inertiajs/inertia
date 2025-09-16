@@ -1,6 +1,13 @@
-import { PendingVisit, ReloadOptions, router } from '../index'
+import { router } from '../index'
 import { page as currentPage } from '../page'
-import { InfiniteScrollSide, Page, ScrollProp } from '../types'
+import {
+  InfiniteScrollSide,
+  Page,
+  PendingVisit,
+  ReloadOptions,
+  ScrollProp,
+  UseInfiniteScrollDataManager,
+} from '../types'
 
 const MERGE_INTENT_HEADER = 'X-Inertia-Infinite-Scroll-Merge-Intent'
 
@@ -13,7 +20,7 @@ export const useInfiniteScrollData = (options: {
   onBeforeUpdate: () => void
   onRequestStart: (side: InfiniteScrollSide) => void
   onRequestComplete: (side: InfiniteScrollSide, lastLoadedPage?: string | number) => void
-}) => {
+}): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
     const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
 
@@ -71,7 +78,7 @@ export const useInfiniteScrollData = (options: {
     state[paginationProp] = scrollProp[paginationProp]
   }
 
-  const loadPage = (side: InfiniteScrollSide, reloadOptions: ReloadOptions = {}) => {
+  const loadPage = (side: InfiniteScrollSide, reloadOptions: ReloadOptions = {}): void => {
     const page = findPageToLoad(side)
 
     if (state.loading || page === null) {
@@ -115,8 +122,8 @@ export const useInfiniteScrollData = (options: {
   const hasMoreBefore = () => !!(options.inReverseMode() ? state.nextPage : state.previousPage)
   const hasMoreAfter = () => !!(options.inReverseMode() ? state.previousPage : state.nextPage)
 
-  const loadBefore = (reloadOptions?: ReloadOptions) => loadPage('before', reloadOptions)
-  const loadAfter = (reloadOptions?: ReloadOptions) => loadPage('after', reloadOptions)
+  const loadBefore = (reloadOptions?: ReloadOptions): void => loadPage('before', reloadOptions)
+  const loadAfter = (reloadOptions?: ReloadOptions): void => loadPage('after', reloadOptions)
 
   return {
     getLastLoadedPage,

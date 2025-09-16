@@ -8,11 +8,11 @@ defineProps<{
 </script>
 
 <template>
-  <InfiniteScroll data="users" :buffer="200" trigger="start" style="display: grid; gap: 20px">
+  <InfiniteScroll data="users" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px">
     <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
     <template #loading>
-      <div style="text-align: center; padding: 20px">Loading...</div>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 20px">Loading more users...</div>
     </template>
   </InfiniteScroll>
 </template>

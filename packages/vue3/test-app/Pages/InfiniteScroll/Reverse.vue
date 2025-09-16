@@ -11,7 +11,7 @@ const reversedUsers = computed(() => [...props.users.data].reverse())
 </script>
 
 <template>
-  <InfiniteScroll data="users" style="display: grid; gap: 20px" reverse>
+  <InfiniteScroll data="users" style="display: grid; gap: 20px" reverse :auto-scroll="false">
     <UserCard v-for="user in reversedUsers" :key="user.id" :user="user" />
 
     <template #loading>
