@@ -37,7 +37,7 @@
   $: headerAutoMode = autoLoad && trigger !== 'end'
   $: footerAutoMode = autoLoad && trigger !== 'start'
 
-  $: exposedBefore: InfiniteScrollActionSlotProps = {
+  $: exposedBefore = {
     loading: loadingBefore,
     loadingBefore,
     loadingAfter,
@@ -45,9 +45,9 @@
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
     hasMore: infiniteScrollInstance?.dataManager.hasMoreBefore() || false,
-  }
+  } satisfies InfiniteScrollActionSlotProps
 
-  $: exposedAfter: InfiniteScrollActionSlotProps = {
+  $: exposedAfter = {
     loading: loadingAfter,
     loadingBefore,
     loadingAfter,
@@ -55,13 +55,13 @@
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
     hasMore: infiniteScrollInstance?.dataManager.hasMoreAfter() || false,
-  }
+  } satisfies InfiniteScrollActionSlotProps
 
-  $: exposedSlot: InfiniteScrollSlotProps = {
+  $: exposedSlot = {
     loading: loadingBefore || loadingAfter,
     loadingBefore,
     loadingAfter,
-  }
+  } satisfies InfiniteScrollSlotProps
 
   let infiniteScrollInstance: UseInfiniteScrollProps | null = null
 
@@ -169,14 +169,14 @@
     }
   }
 
-$: {
-  // Make this block run whenever these change
-  [autoLoad, trigger, reverse];
+  $: {
+    // Make this block run whenever these change
+    ;[autoLoad, trigger, reverse]
 
-  autoLoad
-    ? infiniteScrollInstance?.elementManager.enableTriggers();
-    : infiniteScrollInstance?.elementManager.disableTriggers();
-}
+    autoLoad
+      ? infiniteScrollInstance?.elementManager.enableTriggers()
+      : infiniteScrollInstance?.elementManager.disableTriggers()
+  }
 
   onDestroy(() => infiniteScrollInstance?.elementManager.flushAll())
 </script>
