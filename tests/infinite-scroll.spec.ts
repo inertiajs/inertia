@@ -1134,7 +1134,7 @@ test.describe('Scrollable container support', () => {
     })
 
     const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '16')
-    const beforeScreenshot = await screenshotter(page)
+    const beforeScreenshot = await screenshotter(page, 'test-results/debug-screenshots/scroll-position-previous-before.png')
 
     // Trigger load by scrolling to top
     await scrollContainer.evaluate((container) => {
@@ -1144,7 +1144,7 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterScreenshot = await screenshotter(page, 'test-results/debug-screenshots/scroll-position-previous-after.png')
 
     expect(afterScreenshot).toEqual(beforeScreenshot)
   })
@@ -1164,7 +1164,7 @@ test.describe('Scrollable container support', () => {
     })
 
     const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforeScreenshot = await screenshotter(page, 'test-results/debug-screenshots/scroll-position-before.png')
 
     // Scroll container to bottom to trigger loading page 2
     await scrollContainer.evaluate((container) => {
@@ -1176,7 +1176,7 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterScreenshot = await screenshotter(page, 'test-results/debug-screenshots/scroll-position-after.png')
 
     expect(afterScreenshot).toEqual(beforeScreenshot)
   })
