@@ -14,16 +14,32 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-# Prompt for release type
-echo -n "Select release type (patch|minor|major): "
-read -r RELEASE_TYPE
-case "$RELEASE_TYPE" in
-  patch|minor|major)
-    ;;
-  *)
-    echo "Invalid release type: $RELEASE_TYPE" >&2
-    exit 1
-    ;;
+echo
+echo "Current version: $(node -p "require('./package.json').version")"
+echo
+
+echo "Select version bump type:"
+echo "1) patch (bug fixes)"
+echo "2) minor (new features)"
+echo "3) major (breaking changes)"
+echo
+
+read -p "Enter your choice (1-3): " choice
+
+case $choice in
+    1)
+        RELEASE_TYPE="patch"
+        ;;
+    2)
+        RELEASE_TYPE="minor"
+        ;;
+    3)
+        RELEASE_TYPE="major"
+        ;;
+    *)
+        echo "❌ Invalid choice. Exiting."
+        exit 1
+        ;;
 esac
 
 # Bump version in each package without creating git tags
@@ -58,5 +74,8 @@ git push --tags
 # Install and publish
 pnpm publish -r
 
-echo "\n✅ Release $TAG completed successfully."
+gh release create "$TAG" --generate-notes
+
+echo ""
+echo "✅ Release $TAG completed successfully."
 echo "🔗 https://github.com/inertiajs/inertia/releases/tag/$TAG"
