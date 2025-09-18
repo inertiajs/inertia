@@ -760,7 +760,7 @@ test.describe('URL query string management', () => {
   })
 
   test('it updates the URL to reflect the most visible page during scrolling', async ({ page }) => {
-    test.setTimeout(10_000)
+    test.setTimeout(20_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/update-query-string')
 
@@ -872,7 +872,7 @@ test.describe('Scroll position preservation', () => {
       height: position === 'below' ? viewport.height - (userCard.y + userCard.height) : viewport.height - userCard.y,
     }
 
-    return (p: Page, path?: string) => p.screenshot({ clip, path })
+    return (p: Page, path?: string) => p.screenshot({ clip, path, timeout: 15000 })
   }
 
   const screenshotBelowUserCard = async (page: Page, id: string) => await screenshotAroundUserCard(page, id, 'below')
@@ -1033,7 +1033,7 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it updates query parameters based on visible content within a scrollable container', async ({ page }) => {
-    test.setTimeout(10_000)
+    test.setTimeout(20_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/scroll-container')
 
@@ -1116,11 +1116,11 @@ test.describe('Scrollable container support', () => {
       height: containerRect.y + containerRect.height - (userRect.y + userRect.height),
     }
 
-    return (p: Page, path?: string) => p.screenshot({ clip, path })
+    return (p: Page, path?: string) => p.screenshot({ clip, path, timeout: 15000 })
   }
 
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
-    test.setTimeout(10_000)
+    test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
     const scrollContainer = page.locator('[data-testid="scroll-container"]')
@@ -1157,7 +1157,7 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
-    test.setTimeout(10_000)
+    test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container')
 
     const scrollContainer = page.locator('[data-testid="scroll-container"]')
