@@ -1120,6 +1120,7 @@ test.describe('Scrollable container support', () => {
   }
 
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
+    test.setTimeout(10_000)
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
     const scrollContainer = page.locator('[data-testid="scroll-container"]')
@@ -1134,7 +1135,10 @@ test.describe('Scrollable container support', () => {
     })
 
     const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '16')
-    const beforeScreenshot = await screenshotter(page, 'test-results/debug-screenshots/scroll-position-previous-before.png')
+    const beforeScreenshot = await screenshotter(
+      page,
+      'test-results/debug-screenshots/scroll-position-previous-before.png',
+    )
 
     // Trigger load by scrolling to top
     await scrollContainer.evaluate((container) => {
@@ -1144,12 +1148,16 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page, 'test-results/debug-screenshots/scroll-position-previous-after.png')
+    const afterScreenshot = await screenshotter(
+      page,
+      'test-results/debug-screenshots/scroll-position-previous-after.png',
+    )
 
     expect(afterScreenshot).toEqual(beforeScreenshot)
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
+    test.setTimeout(10_000)
     await page.goto('/infinite-scroll/scroll-container')
 
     const scrollContainer = page.locator('[data-testid="scroll-container"]')
