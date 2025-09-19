@@ -128,8 +128,8 @@ export class Router {
     history.remember(data, key)
   }
 
-  public restore(key = 'default'): unknown {
-    return history.restore(key)
+  public restore<T = unknown>(key = 'default'): T | undefined {
+    return history.restore(key) as T | undefined
   }
 
   public on<TEventName extends GlobalEventNames>(
