@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.7...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.8...master)
 
 - Nothing yet
+
+## [v2.1.8](https://github.com/inertiajs/inertia/compare/v2.1.7...v2.1.8) - 2025-09-22
+
+### What's Changed
+
+* Publish packages in CI by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2575
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.7...v2.1.8
 
 ## [v2.1.7](https://github.com/inertiajs/inertia/compare/v2.1.6...v2.1.7) - 2025-09-18
 
