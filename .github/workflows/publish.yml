@@ -40,4 +40,4 @@ jobs:
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }} build
 
       - name: 'Publish ${{ matrix.adapter }} to npm'
-        run: cd ./packages/${{ matrix.adapter }} && npm publish
+        run: cd ./packages/${{ matrix.adapter }} && pnpm publish
