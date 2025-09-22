@@ -1,6 +1,37 @@
 import ProgressComponent from './progress-component'
 import { GlobalEvent } from './types'
 
+export class Progress {
+  public start(): void {
+    ProgressComponent.start()
+  }
+
+  public hide(): void {
+    ProgressComponent.hide()
+  }
+
+  public set(value: number): void {
+    ProgressComponent.set(Math.max(0, Math.min(1, value)))
+  }
+
+  public finish(): void {
+    ProgressComponent.done()
+  }
+
+  public cancel(): void {
+    ProgressComponent.set(0)
+  }
+
+  public remove(): void {
+    ProgressComponent.done()
+    ProgressComponent.remove()
+  }
+
+  public isStarted(): boolean {
+    return ProgressComponent.isStarted()
+  }
+}
+
 let hideCount = 0
 
 export const reveal = (force = false) => {
