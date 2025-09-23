@@ -7,16 +7,16 @@
 <div>
   <h1>Form Disable While Processing Test</h1>
 
-  <Form method="post" let:errors bind:action={url} disableWhileProcessing={disable}>
-    <div>
-      <input type="text" name="name" placeholder="Name" value="John Doe" />
-      {#if errors.name}
-        <p id="error_name">{errors.name}</p>
-      {/if}
-    </div>
+  <Form method="post" action={url} disableWhileProcessing={disable}>
+    {#snippet children({ errors })}
+      <div>
+        <input type="text" name="name" placeholder="Name" value="John Doe" />
+        {#if errors.name}
+          <div>{errors.name}</div>
+        {/if}
+      </div>
 
-    <div>
       <button type="submit">Submit</button>
-    </div>
+    {/snippet}
   </Form>
 </div>
