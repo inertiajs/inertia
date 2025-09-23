@@ -71,7 +71,7 @@
 
   const form = useForm({})
   let formElement: HTMLFormElement
-  let isDirty = false
+  let isDirty = $state(false)
   let defaultData: FormData = new FormData()
 
   const _method = $derived(isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method']))
@@ -220,7 +220,9 @@
     progress: $form.progress,
     wasSuccessful: $form.wasSuccessful,
     recentlySuccessful: $form.recentlySuccessful,
+    isDirty,
     clearErrors,
+    setError,
     reset,
     defaults,
     submit,
