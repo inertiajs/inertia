@@ -402,6 +402,37 @@ app.get('/merge-nested-props/:strategy', (req, res) => {
   })
 })
 
+app.get('/merge-nested-props-with-match/:strategy', (req, res) => {
+  const page = parseInt(req.query.page ?? 1)
+  const shouldAppend = req.params.strategy === 'append'
+
+  let users
+
+  if (page === 1) {
+    users = (shouldAppend ? [1, 2, 3, 4, 5] : [4, 5, 6, 7, 8]).map((id) => ({ id, name: `User ${id} - initial` }))
+  } else {
+    users = (shouldAppend ? [4, 5, 6, 7, 8] : [1, 2, 3, 4, 5]).map((id) => ({ id, name: `User ${id} - subsequent` }))
+  }
+
+  inertia.render(req, res, {
+    component: 'MergeNestedProps',
+    props: {
+      users: {
+        data: users,
+        meta: {
+          perPage: 5,
+          page,
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : shouldAppend
+        ? { mergeProps: ['users.data'], matchPropsOn: ['users.data.id'] }
+        : { prependProps: ['users.data'], matchPropsOn: ['users.data.id'] }),
+  })
+})
+
 app.get('/deep-merge-props', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
