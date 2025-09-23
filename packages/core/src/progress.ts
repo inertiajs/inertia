@@ -1,17 +1,29 @@
 import ProgressComponent from './progress-component'
 import { GlobalEvent } from './types'
 
+let hideCount = 0
+
 export class Progress {
   public start(): void {
     ProgressComponent.start()
   }
 
+  public reveal(force: boolean = false): void {
+    hideCount = Math.max(0, hideCount - 1)
+
+    if (force || hideCount === 0) {
+      ProgressComponent.show()
+    }
+  }
+
   public hide(): void {
+    hideCount++
+
     ProgressComponent.hide()
   }
 
-  public set(value: number): void {
-    ProgressComponent.set(Math.max(0, Math.min(1, value)))
+  public set(status: number): void {
+    ProgressComponent.set(Math.max(0, Math.min(1, status)))
   }
 
   public finish(): void {
@@ -30,23 +42,16 @@ export class Progress {
   public isStarted(): boolean {
     return ProgressComponent.isStarted()
   }
-}
 
-let hideCount = 0
-
-export const reveal = (force = false) => {
-  hideCount = Math.max(0, hideCount - 1)
-
-  if (force || hideCount === 0) {
-    ProgressComponent.show()
+  public getStatus(): number | null {
+    return ProgressComponent.status
   }
 }
 
-export const hide = () => {
-  hideCount++
+const progressInstance = new Progress()
 
-  ProgressComponent.hide()
-}
+export const reveal = progressInstance.reveal
+export const hide = progressInstance.hide
 
 function addEventListeners(delay: number): void {
   document.addEventListener('inertia:start', (e) => start(e, delay))
@@ -55,33 +60,32 @@ function addEventListeners(delay: number): void {
 
 function start(event: GlobalEvent<'start'>, delay: number): void {
   if (!event.detail.visit.showProgress) {
-    hide()
+    progressInstance.hide()
   }
 
-  const timeout = setTimeout(() => ProgressComponent.start(), delay)
+  const timeout = setTimeout(() => progressInstance.start(), delay)
   document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
 }
 
 function progress(event: GlobalEvent<'progress'>): void {
-  if (ProgressComponent.isStarted() && event.detail.progress?.percentage) {
-    ProgressComponent.set(Math.max(ProgressComponent.status!, (event.detail.progress.percentage / 100) * 0.9))
+  if (progressInstance.isStarted() && event.detail.progress?.percentage) {
+    progressInstance.set(Math.max(progressInstance.getStatus()!, (event.detail.progress.percentage / 100) * 0.9))
   }
 }
 
 function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
   clearTimeout(timeout!)
 
-  if (!ProgressComponent.isStarted()) {
+  if (!progressInstance.isStarted()) {
     return
   }
 
   if (event.detail.visit.completed) {
-    ProgressComponent.done()
+    progressInstance.finish()
   } else if (event.detail.visit.interrupted) {
-    ProgressComponent.set(0)
+    progressInstance.set(0)
   } else if (event.detail.visit.cancelled) {
-    ProgressComponent.done()
-    ProgressComponent.remove()
+    progressInstance.remove()
   }
 }
 
