@@ -7,7 +7,7 @@
     <h1>Form Elements</h1>
 
     <div>
-      Form is <span>{isDirty ? 'dirty' : 'clean'}</span>
+      {#if isDirty}Form is dirty{:else}Form is clean{/if}
     </div>
 
     <!-- Text input -->

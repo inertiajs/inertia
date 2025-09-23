@@ -11,7 +11,7 @@
   } from '@inertiajs/core'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
-  import useForm from '../useForm'
+  import useForm from '../useForm.svelte'
 
   const noop = () => undefined
 
@@ -146,7 +146,7 @@
       ...options,
     }
 
-    $form.transform(() => transform(_data)).submit(_method, url, submitOptions)
+    form.transform(() => transform(_data)).submit(_method, url, submitOptions)
   }
 
   function handleSubmit(event: Event) {
@@ -167,22 +167,19 @@
   }
 
   export function clearErrors(...fields: string[]) {
-    // @ts-expect-error
-    $form.clearErrors(...fields)
+    form.clearErrors(...fields)
   }
 
   export function resetAndClearErrors(...fields: string[]) {
-    // @ts-expect-error
-    $form.clearErrors(...fields)
+    form.clearErrors(...fields)
     reset(...fields)
   }
 
   export function setError(field: string | object, value?: string) {
     if (typeof field === 'string') {
-      // @ts-expect-error
-      $form.setError(field, value)
+      form.setError(field, value)
     } else {
-      $form.setError(field)
+      form.setError(field)
     }
   }
 
@@ -201,7 +198,7 @@
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
-  const slotErrors = $derived($form.errors as Errors)
+  const slotErrors = $derived(form.errors as Errors)
 </script>
 
 <form
@@ -211,21 +208,21 @@
   onsubmit={handleSubmit}
   onreset={handleReset}
   {...restProps}
-  inert={disableWhileProcessing && $form.processing ? true : undefined}
+  inert={disableWhileProcessing && form.processing ? true : undefined}
 >
   {@render children?.({
     errors: slotErrors,
-    hasErrors: $form.hasErrors,
-    processing: $form.processing,
-    progress: $form.progress,
-    wasSuccessful: $form.wasSuccessful,
-    recentlySuccessful: $form.recentlySuccessful,
+    hasErrors: form.hasErrors,
+    processing: form.processing,
+    progress: form.progress,
+    wasSuccessful: form.wasSuccessful,
+    recentlySuccessful: form.recentlySuccessful,
     isDirty,
     clearErrors,
     setError,
     reset,
     defaults,
     submit,
-    data: $form
+    data: form
   })}
 </form>

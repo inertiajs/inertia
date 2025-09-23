@@ -8,7 +8,7 @@
   })
 
   const submit = () => {
-    form.post(page.url)
+    form.post($page.url)
   }
 
   const submitAndReset = () => {
