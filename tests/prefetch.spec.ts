@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { clickAndWaitForResponse, requests } from './support'
+import { requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -12,9 +12,10 @@ const isPrefetchSwrPage = async (page: Page, id: number) => {
 }
 
 const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
+  const prefetchPromise = page.waitForResponse(`prefetch/swr/${id}`)
   await page.getByRole('link', { name: buttonText, exact: true }).hover()
-  await page.waitForTimeout(75)
-  await clickAndWaitForResponse(page, buttonText, `prefetch/swr/${id}`)
+  await prefetchPromise
+  await page.getByRole('link', { name: buttonText, exact: true }).click()
   await isPrefetchSwrPage(page, id)
 }
 
