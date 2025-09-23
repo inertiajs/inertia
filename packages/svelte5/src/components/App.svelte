@@ -20,9 +20,12 @@
   let component = $state(initialComponent)
   let key = $state<number | null>(null)
   let page = $state(initialPage)
-  let renderProps = $state(resolveRenderProps(component, page, key))
+  let renderProps = $derived(resolveRenderProps(component, page, key))
 
-  setPage(page)
+  // Reactively update the global page state when local page state changes
+  $effect(() => {
+    setPage(page)
+  })
 
   const isServer = typeof window === 'undefined'
 
@@ -34,9 +37,6 @@
         component = args.component as ResolvedComponent
         page = args.page
         key = args.preserveState ? key : Date.now()
-
-        renderProps = resolveRenderProps(component, page, key)
-        setPage(page)
       },
     })
   }
