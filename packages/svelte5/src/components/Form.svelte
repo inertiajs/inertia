@@ -208,8 +208,8 @@
   bind:this={formElement}
   action={_action}
   method={_method}
-  on:submit={handleSubmit}
-  on:reset={handleReset}
+  onsubmit={handleSubmit}
+  onreset={handleReset}
   {...restProps}
   inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
