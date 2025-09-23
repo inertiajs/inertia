@@ -80,11 +80,8 @@
   {onSuccess}
   {onError}
   {onCancelToken}
-  let:processing
-  let:progress
-  let:wasSuccessful
-  let:recentlySuccessful
 >
+  {#snippet children({ processing, progress, wasSuccessful, recentlySuccessful })}
   <h1>Form Events & State</h1>
 
   <div>
@@ -120,4 +117,5 @@
     <button type="button" on:click={cancelVisit}>Cancel Visit</button>
     <button type="submit">Submit</button>
   </div>
+  {/snippet}
 </Form>
