@@ -1,0 +1,21 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "vite build .",
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../svelte/dist --ext js,ts,svelte,html,json --ignore dist/ --exec 'vite build .'",
+    "type-check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^3.2.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "nodemon": "^3.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.1.0",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.0"
+  },
+  "dependencies": {
+    "@inertiajs/core": "workspace:*",
+    "@inertiajs/svelte": "workspace:*"
+  }
+}

@@ -16,6 +16,8 @@ inertia/
 │   │   └── test-app/  React test application
 │   ├── svelte/        Svelte adapter
 │   │   └── test-app/  Svelte test application
+│   ├── svelte5/       Svelte 5 adapter
+│   │   └── test-app/  Svelte 5 test application
 │   └── vue3/          Vue 3 adapter
 │       └── test-app/  Vue 3 test application
 ├── playgrounds/       Full Laravel applications for manual testing
@@ -72,6 +74,7 @@ Run the test suite for a specific adapter:
 ```sh
 pnpm test:react
 pnpm test:svelte
+pnpm test:svelte5
 pnpm test:vue
 ```
 
@@ -109,6 +112,7 @@ All adapters use the same Node.js backend and Playwright test suite. The only di
 tests/app/server.js         Shared Node.js backend
 ├── serves: react test app  (when PACKAGE=react)
 ├── serves: svelte test app (when PACKAGE=svelte)
+├── serves: svelte5 test app (when PACKAGE=svelte5)
 └── serves: vue test app    (when PACKAGE=vue3)
 
 tests/*.spec.ts             Shared Playwright test suite
@@ -120,6 +124,7 @@ When running a test command, the correct adapter is selected automatically:
 | ------- | --------------- | ---------------- | -------------------------------------------------- |
 | React   | `react`         | 13716            | [http://localhost:13716/](http://localhost:13716/) |
 | Svelte  | `svelte`        | 13717            | [http://localhost:13717/](http://localhost:13717/) |
+| Svelte5 | `svelte5`       | 13718            | [http://localhost:13718/](http://localhost:13718/) |
 | Vue 3   | `vue3`          | 13715            | [http://localhost:13715/](http://localhost:13715/) |
 
 ### Automatic Test Server Boot
@@ -141,6 +146,7 @@ Or start an individual one:
 ```sh
 pnpm dev:test-app:react
 pnpm dev:test-app:svelte
+pnpm dev:test-app:svelte5
 pnpm dev:test-app:vue
 ```
 

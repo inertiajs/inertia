@@ -1,0 +1,60 @@
+<script context="module" lang="ts">
+  export { default as layout } from '@/Layouts/WithScrollRegion.svelte'
+</script>
+
+<script lang="ts">
+  import { inertia } from '@inertiajs/svelte'
+  import type { Page } from '@inertiajs/core'
+
+  export let foo: string = 'default'
+
+  const preserveCallback = (page: Page) => {
+    console.log(JSON.stringify(page))
+
+    return true
+  }
+
+  const preserveCallbackFalse = (page: Page) => {
+    console.log(JSON.stringify(page))
+
+    return false
+  }
+</script>
+
+<div style="height: 800px; width: 600px">
+  <span class="text">This is the links page that demonstrates scroll preservation with scroll regions</span>
+  <span class="foo">Foo is now {foo}</span>
+
+  <a
+    href="/links/preserve-scroll-page-two"
+    use:inertia={{ preserveScroll: true, data: { foo: 'baz' } }}
+    class="preserve"
+    data-testid="preserve"
+  >
+    Preserve Scroll
+  </a>
+  <a href="/links/preserve-scroll-page-two" use:inertia={{ data: { foo: 'bar' } }} class="reset" data-testid="reset">
+    Reset Scroll
+  </a>
+
+  <a
+    href="/links/preserve-scroll-page-two"
+    use:inertia={{ preserveScroll: preserveCallback, data: { foo: 'baz' } }}
+    class="preserve-callback"
+    data-testid="preserve-callback"
+  >
+    Preserve Scroll (Callback)
+  </a>
+  <a
+    href="/links/preserve-scroll-page-two"
+    use:inertia={{ preserveScroll: preserveCallbackFalse, data: { foo: 'foo' } }}
+    class="reset-callback"
+    data-testid="reset-callback"
+  >
+    Reset Scroll (Callback)
+  </a>
+
+  <a href="/non-inertia" class="off-site" style="display: block">Off-site link</a>
+
+  <a href="/article" use:inertia={{}} class="article" data-testid="article"> Article </a>
+</div>

@@ -1,0 +1,28 @@
+<script lang="ts">
+  import { router } from '@inertiajs/svelte'
+
+  const invalidVisit = () => {
+    router.post('/non-inertia')
+  }
+
+  const invalidVisitJson = () => {
+    router.post('/json')
+  }
+</script>
+
+<div>
+  <span
+    on:click={invalidVisit}
+    on:keydown={(e) => e.key === 'Enter' && invalidVisit()}
+    role="button"
+    tabindex="0"
+    class="invalid-visit">Invalid Visit</span
+  >
+  <span
+    on:click={invalidVisitJson}
+    on:keydown={(e) => e.key === 'Enter' && invalidVisitJson()}
+    role="button"
+    tabindex="0"
+    class="invalid-visit-json">Invalid Visit (JSON response)</span
+  >
+</div>
