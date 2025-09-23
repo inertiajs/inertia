@@ -105,6 +105,13 @@ export interface PageProps {
   [key: string]: unknown
 }
 
+export type ScrollProp = {
+  pageName: string
+  previousPage?: number | string
+  nextPage?: number | string
+  currentPage?: number | string
+}
+
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
@@ -121,17 +128,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
-  scrollProps?: Record<
-    string,
-    {
-      queryParam: string
-      previousPage?: number
-      nextPage?: number
-      currentPage?: number
-      hasPreviousPage: boolean
-      hasNextPage: boolean
-    }
-  >
+  scrollProps?: Record<keyof PageProps, ScrollProp>
 
   /** @internal */
   rememberedState: Record<string, unknown>
