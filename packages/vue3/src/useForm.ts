@@ -190,8 +190,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onSuccess: async (page) => {
-          this.processing = false
-          this.progress = null
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
@@ -207,8 +205,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return onSuccess
         },
         onError: (errors) => {
-          this.processing = false
-          this.progress = null
           this.clearErrors().setError(errors)
 
           if (options.onError) {
@@ -216,9 +212,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onCancel: () => {
-          this.processing = false
-          this.progress = null
-
           if (options.onCancel) {
             return options.onCancel()
           }

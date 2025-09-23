@@ -202,8 +202,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onSuccess: async (page: Page) => {
-          this.setStore('processing', false)
-          this.setStore('progress', null)
           this.clearErrors()
           this.setStore('wasSuccessful', true)
           this.setStore('recentlySuccessful', true)
@@ -218,8 +216,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return onSuccess
         },
         onError: (errors: Errors) => {
-          this.setStore('processing', false)
-          this.setStore('progress', null)
           this.clearErrors().setError(errors)
 
           if (options.onError) {
@@ -227,9 +223,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onCancel: () => {
-          this.setStore('processing', false)
-          this.setStore('progress', null)
-
           if (options.onCancel) {
             return options.onCancel()
           }
