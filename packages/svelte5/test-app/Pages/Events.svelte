@@ -20,7 +20,7 @@
   }
 
   const withoutEventListeners = () => {
-    router.post(page.url, {})
+    router.post($page.url, {})
   }
 
   const removeInertiaListener = () => {
@@ -30,7 +30,7 @@
     removeEventListener()
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onBefore: () => internalAlert('onBefore'),
@@ -51,7 +51,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onBefore: (event) => {
@@ -68,7 +68,7 @@
     router.on('before', () => internalAlert('Inertia.on(before)'))
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onBefore: () => {
@@ -88,7 +88,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onBefore: () => internalAlert('onBefore'),
@@ -105,7 +105,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onBefore: () => internalAlert('onBefore'),
@@ -120,7 +120,7 @@
     document.addEventListener('inertia:cancelToken', () => internalAlert('This listener should not have been called.'))
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onCancelToken: (event) => {
@@ -143,7 +143,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onStart: (event) => {
@@ -165,7 +165,7 @@
       internalAlert(event)
     })
 
-    router.post(page.url, payloadWithFile, {
+    router.post($page.url, payloadWithFile, {
       onProgress: (event) => {
         internalAlert('onProgress')
         internalAlert(event)
@@ -185,7 +185,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onBefore: () => internalAlert('progressNoFilesOnBefore'),
@@ -209,7 +209,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onCancelToken: (token) => {
@@ -271,7 +271,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onError: () => internalAlert('This listener should not have been called'),
@@ -285,7 +285,7 @@
 
   const successPromiseVisit = () => {
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onSuccess: () => callbackSuccessErrorPromise('onSuccess'),
@@ -307,7 +307,7 @@
     })
 
     router.post(
-      page.url,
+      $page.url,
       {},
       {
         onFinish: (event) => {
@@ -422,7 +422,7 @@
   }
 
   const lifecycleSuccess = () => {
-    router.post(page.url, payloadWithFile, registerAllListeners())
+    router.post($page.url, payloadWithFile, registerAllListeners())
   }
 
   const lifecycleError = () => {
@@ -446,7 +446,7 @@
   const lifecycleCancelAfterFinish = () => {
     let cancelToken: { cancel: () => void } | null = null
 
-    router.post(page.url, payloadWithFile, {
+    router.post($page.url, payloadWithFile, {
       ...registerAllListeners(),
       onCancelToken: (token) => {
         internalAlert('onCancelToken')
@@ -498,13 +498,13 @@
   <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a
   >
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:before={(event) => internalAlert('linkOnBefore', event.detail.visit)}
     on:start={() => internalAlert('linkOnStart')}
     class="link-before">Before Event Link</button
   >
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:before={(event) => {
       event.preventDefault()
       internalAlert('linkOnBefore')
@@ -524,7 +524,7 @@
   <!-- Events: CancelToken -->
   <a href={'#'} on:click|preventDefault={cancelTokenVisit} class="canceltoken">Cancel Token Event</a>
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:cancel-token={(event) => internalAlert('linkOnCancelToken', event.detail)}
     class="link-canceltoken">Cancel Token Event Link</button
   >
@@ -532,7 +532,7 @@
   <!-- Events: Cancel -->
   <a href={'#'} on:click|preventDefault={cancelVisit} class="cancel">Cancel Event</a>
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:cancel-token={handleCancelToken}
     on:cancel={handleCancel}
     class="link-cancel">Cancel Event Link</button
@@ -541,7 +541,7 @@
   <!-- Events: Start -->
   <a href={'#'} on:click|preventDefault={startVisit} class="start">Start Event</a>
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:start={(event) => internalAlert('linkOnStart', event.detail.visit)}
     class="link-start">Start Event Link</button
   >
@@ -552,12 +552,12 @@
     >Missing Progress Event (no files)</a
   >
   <button
-    use:inertia={{ href: page.url, method: 'post', data: payloadWithFile }}
+    use:inertia={{ href: $page.url, method: 'post', data: payloadWithFile }}
     on:progress={handleProgress}
     class="link-progress">Progress Event Link</button
   >
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:before={() => internalAlert('linkProgressNoFilesOnBefore')}
     on:progress={handleProgress}
     class="link-progress-no-files">Progress Event Link (no files)</button
@@ -588,13 +588,13 @@
     >Success Event (delaying onFinish w/ Promise)</a
   >
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:error={() => internalAlert('This listener should not have been called')}
     on:success={(event) => internalAlert('linkOnSuccess', event.detail.page)}
     class="link-success">Success Event Link</button
   >
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:error={() => internalAlert('This listener should not have been called')}
     on:success={() => callbackSuccessErrorPromise('linkOnSuccess')}
     on:finish={() => internalAlert('linkOnFinish')}
@@ -610,7 +610,7 @@
   <!-- Events: Finish -->
   <a href={'#'} on:click|preventDefault={finishVisit} class="finish">Finish Event</a>
   <button
-    use:inertia={{ href: page.url, method: 'post' }}
+    use:inertia={{ href: $page.url, method: 'post' }}
     on:finish={(event) => internalAlert('linkOnFinish', event.detail.visit)}
     class="link-finish">Finish Event Link</button
   >
