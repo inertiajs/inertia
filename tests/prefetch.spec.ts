@@ -285,6 +285,7 @@ submitButtonTexts.forEach((buttonText) => {
       await page.getByRole('button', { name: buttonText }).click()
       await page.waitForURL('/prefetch/form')
 
+      await page.waitForTimeout(100)
       const secondRandomValue = await page.locator('.random-value').textContent()
       expect(secondRandomValue).not.toBe(firstRandomValue)
 
