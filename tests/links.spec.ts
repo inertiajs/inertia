@@ -821,7 +821,7 @@ test.describe('"as" attribute', () => {
 })
 
 test.describe('as component', () => {
-  test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
+  test.skip(process.env.PACKAGE === 'svelte' || process.env.PACKAGE === 'svelte5', 'Feature not supported by the Svelte adapter')
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/links/as-component/1')
@@ -898,7 +898,7 @@ test.describe('as component', () => {
 })
 
 test.describe('as element', () => {
-  test.skip(process.env.PACKAGE === 'svelte', 'Feature not supported by the Svelte adapter')
+  test.skip(process.env.PACKAGE === 'svelte' || process.env.PACKAGE === 'svelte5', 'Feature not supported by the Svelte adapter')
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/links/as-element/1')
