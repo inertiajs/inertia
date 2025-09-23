@@ -63,9 +63,9 @@ test.describe('Form Helper', () => {
   test.describe('Errors', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/errors')
-      const errorsStatus = await page.locator('.errors-status')
 
+      await page.goto('/form-helper/errors')
+      const errorsStatus = await page.locator('.errors-status')
       await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
 
       await page.fill('#name', 'A')
