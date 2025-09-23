@@ -26,6 +26,7 @@
     prefetch = false,
     cacheFor = 0,
     cacheTags = [],
+    children,
     ...restProps
   }: {
     href?: string | UrlMethodPair
@@ -43,6 +44,7 @@
     prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
     cacheFor?: CacheForOption | CacheForOption[]
     cacheTags?: string | string[]
+    children?: any
     [key: string]: any
   } = $props()
 
@@ -99,5 +101,5 @@
   on:prefetching
   on:prefetched
 >
-  <slot />
+  {@render children?.()}
 </svelte:element>

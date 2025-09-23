@@ -7,13 +7,17 @@
     params = {},
     buffer = 0,
     as = 'div',
-    always = false
+    always = false,
+    children,
+    fallback
   }: {
     data?: string | string[]
     params?: ReloadOptions
     buffer?: number
     as?: keyof HTMLElementTagNameMap
     always?: boolean
+    children?: any
+    fallback?: any
   } = $props()
 
   let loaded = $state(false)
@@ -89,7 +93,7 @@
 {/if}
 
 {#if loaded}
-  <slot />
-{:else if $$slots.fallback}
-  <slot name="fallback" />
+  {@render children?.()}
+{:else if fallback}
+  {@render fallback?.()}
 {/if}

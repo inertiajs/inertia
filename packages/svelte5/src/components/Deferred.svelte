@@ -1,7 +1,11 @@
 <script lang="ts">
-  import { page } from '../index'
+  import { pageState } from '../page.svelte'
 
-  const { data }: { data: string | string[] } = $props()
+  const { data, children, fallback }: { 
+    data: string | string[]
+    children?: any
+    fallback?: any
+  } = $props()
 
   const keys = Array.isArray(data) ? data : [data]
   let loaded = $state(false)
@@ -9,22 +13,22 @@
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
-    // Use $effect to watch for changes in page.props
+    // Use $effect to watch for changes in pageState.props
     $effect(() => {
-      // Ensures the slot isn't loaded before the deferred props are available
+      // Ensures the content isn't loaded before the deferred props are available
       window.queueMicrotask(() => {
-        loaded = keys.every((key) => typeof page.props[key] !== 'undefined')
+        loaded = keys.every((key) => typeof pageState.props[key] !== 'undefined')
       })
     })
   }
 
-  if (!$$slots.fallback) {
-    throw new Error('`<Deferred>` requires a `<svelte:fragment slot="fallback">` slot')
+  if (!fallback) {
+    throw new Error('`<Deferred>` requires a `fallback` snippet')
   }
 </script>
 
 {#if loaded}
-  <slot />
+  {@render children?.()}
 {:else}
-  <slot name="fallback" />
+  {@render fallback?.()}
 {/if}
