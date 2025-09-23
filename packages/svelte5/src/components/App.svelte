@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import type { ComponentResolver, ResolvedComponent } from '../types'
   import { type Page } from '@inertiajs/core'
 
@@ -15,14 +15,12 @@
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page'
 
-  export let initialComponent: InertiaAppProps['initialComponent']
-  export let initialPage: InertiaAppProps['initialPage']
-  export let resolveComponent: InertiaAppProps['resolveComponent']
+  const { initialComponent, initialPage, resolveComponent }: InertiaAppProps = $props()
 
-  let component = initialComponent
-  let key: number | null = null
-  let page = initialPage
-  let renderProps = resolveRenderProps(component, page, key)
+  let component = $state(initialComponent)
+  let key = $state<number | null>(null)
+  let page = $state(initialPage)
+  let renderProps = $state(resolveRenderProps(component, page, key))
 
   setPage(page)
 

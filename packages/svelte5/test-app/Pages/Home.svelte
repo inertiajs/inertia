@@ -20,7 +20,7 @@
 
   onMount(() => {
     window._inertia_page_key = crypto.randomUUID()
-    window._inertia_props = page.props
+    window._inertia_props = $page.props
     window._plugin_global_props = {}
   })
 </script>

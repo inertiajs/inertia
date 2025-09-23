@@ -2,16 +2,24 @@
   import { router, type ReloadOptions } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
 
-  export let data: string | string[] = ''
-  export let params: ReloadOptions = {}
-  export let buffer: number = 0
-  export let as: keyof HTMLElementTagNameMap = 'div'
-  export let always: boolean = false
+  const {
+    data = '',
+    params = {},
+    buffer = 0,
+    as = 'div',
+    always = false
+  }: {
+    data?: string | string[]
+    params?: ReloadOptions
+    buffer?: number
+    as?: keyof HTMLElementTagNameMap
+    always?: boolean
+  } = $props()
 
-  let loaded = false
-  let fetching = false
-  let el: HTMLElement
-  let observer: IntersectionObserver | null = null
+  let loaded = $state(false)
+  let fetching = $state(false)
+  let el = $state<HTMLElement>()
+  let observer = $state<IntersectionObserver | null>(null)
 
   onMount(() => {
     if (!el) {

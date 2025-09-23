@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let baz: string
+  const { baz }: { baz: string } = $props()
 </script>
 
 <div>{baz}</div>

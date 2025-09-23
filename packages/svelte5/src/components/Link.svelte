@@ -10,31 +10,52 @@
   } from '@inertiajs/core'
   import { inertia } from '../index'
 
-  export let href: string | UrlMethodPair = ''
-  export let as: keyof HTMLElementTagNameMap = 'a'
-  export let data: Record<string, FormDataConvertible> = {}
-  export let method: Method = 'get'
-  export let replace: boolean = false
-  export let preserveScroll: PreserveStateOption = false
-  export let preserveState: PreserveStateOption | null = null
-  export let only: string[] = []
-  export let except: string[] = []
-  export let headers: Record<string, string> = {}
-  export let queryStringArrayFormat: 'brackets' | 'indices' = 'brackets'
-  export let async: boolean = false
-  export let prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[] = false
-  export let cacheFor: CacheForOption | CacheForOption[] = 0
-  export let cacheTags: string | string[] = []
+  const {
+    href = '',
+    as = 'a',
+    data = {},
+    method = 'get',
+    replace = false,
+    preserveScroll = false,
+    preserveState = null,
+    only = [],
+    except = [],
+    headers = {},
+    queryStringArrayFormat = 'brackets',
+    async = false,
+    prefetch = false,
+    cacheFor = 0,
+    cacheTags = [],
+    ...restProps
+  }: {
+    href?: string | UrlMethodPair
+    as?: keyof HTMLElementTagNameMap
+    data?: Record<string, FormDataConvertible>
+    method?: Method
+    replace?: boolean
+    preserveScroll?: PreserveStateOption
+    preserveState?: PreserveStateOption | null
+    only?: string[]
+    except?: string[]
+    headers?: Record<string, string>
+    queryStringArrayFormat?: 'brackets' | 'indices'
+    async?: boolean
+    prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+    cacheFor?: CacheForOption | CacheForOption[]
+    cacheTags?: string | string[]
+    [key: string]: any
+  } = $props()
 
-  $: _method = isUrlMethodPair(href) ? href.method : method
-  $: _href = isUrlMethodPair(href) ? href.url : href
+  const _method = $derived(isUrlMethodPair(href) ? href.method : method)
+  const _href = $derived(isUrlMethodPair(href) ? href.url : href)
 
-  $: asProp = _method !== 'get' ? 'button' : as.toLowerCase()
-  $: elProps =
+  const asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())
+  const elProps = $derived(
     {
       a: { href: _href },
       button: { type: 'button' },
     }[asProp] || {}
+  )
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -56,7 +77,7 @@
     cacheFor,
     cacheTags,
   }}
-  {...$$restProps}
+  {...restProps}
   {...elProps}
   on:focus
   on:blur

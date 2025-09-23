@@ -1,24 +1,20 @@
 <script lang="ts">
   import { page } from '../index'
-  import { onDestroy } from 'svelte'
 
-  export let data: string | string[]
+  const { data }: { data: string | string[] } = $props()
 
   const keys = Array.isArray(data) ? data : [data]
-  let loaded = false
+  let loaded = $state(false)
 
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
-    const unsubscribe = page.subscribe(({ props }) => {
+    // Use $effect to watch for changes in page.props
+    $effect(() => {
       // Ensures the slot isn't loaded before the deferred props are available
       window.queueMicrotask(() => {
-        loaded = keys.every((key) => typeof props[key] !== 'undefined')
+        loaded = keys.every((key) => typeof page.props[key] !== 'undefined')
       })
-    })
-
-    onDestroy(() => {
-      unsubscribe()
     })
   }
 

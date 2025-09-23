@@ -1,4 +1,5 @@
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte5'
+import { mount } from 'svelte'
 
 window.testing = { Inertia: router }
 
@@ -16,6 +17,6 @@ createInertiaApp({
     return pages[`./Pages/${name}.svelte`]
   },
   setup({ el, App, props }) {
-    new App({ target: el!, props })
+    return mount(App as any, { target: el!, props })
   },
 })
