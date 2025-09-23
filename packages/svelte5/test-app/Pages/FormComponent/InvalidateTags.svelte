@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Link, Form } from '@inertiajs/svelte'
+  import { Link, Form } from '@inertiajs/svelte5'
 
   export let lastLoaded
   export let propType

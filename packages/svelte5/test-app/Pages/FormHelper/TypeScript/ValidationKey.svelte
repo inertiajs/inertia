@@ -1,7 +1,7 @@
 <script lang="ts">
   // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
   import type { FormDataConvertible } from '@inertiajs/core'
-  import type { InertiaFormProps } from '@inertiajs/svelte'
+  import type { InertiaFormProps } from '@inertiajs/svelte5'
 
   const validation = <T extends Record<string, FormDataConvertible>>(errors: () => InertiaFormProps<T>['errors']) => {
     type Key = keyof ReturnType<typeof errors>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia, useForm } from '@inertiajs/svelte'
+  import { inertia, useForm } from '@inertiajs/svelte5'
 
   let untracked = ''
 

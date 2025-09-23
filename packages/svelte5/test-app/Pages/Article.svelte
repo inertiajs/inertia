@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Link } from '@inertiajs/svelte'
+  import { Link } from '@inertiajs/svelte5'
   import { onMount, onDestroy } from 'svelte'
 
   const enableSmoothScroll = () => {

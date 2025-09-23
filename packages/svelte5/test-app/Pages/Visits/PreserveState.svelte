@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
+  import { router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
   export let foo = 'default'

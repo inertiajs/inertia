@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia, router } from '@inertiajs/svelte'
+  import { inertia, router } from '@inertiajs/svelte5'
 
   export let pageNumber
   export let multiByte

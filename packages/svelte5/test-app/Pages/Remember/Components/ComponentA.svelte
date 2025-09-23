@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useRemember } from '@inertiajs/svelte'
+  import { useRemember } from '@inertiajs/svelte5'
 
   let untracked = ''
 

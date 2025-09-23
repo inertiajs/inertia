@@ -1,5 +1,5 @@
 <script>
-  import { Form } from '@inertiajs/svelte'
+  import { Form } from '@inertiajs/svelte5'
 </script>
 
 <div>

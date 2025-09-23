@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Form } from '@inertiajs/svelte'
+  import { Form } from '@inertiajs/svelte5'
   export let disable: boolean = false
   let url = `/form-component/disable-while-processing/${disable ? 'yes' : 'no'}/submit`
 </script>

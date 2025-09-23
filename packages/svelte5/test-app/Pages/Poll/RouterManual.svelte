@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
+  import { router } from '@inertiajs/svelte5'
 
   const { start, stop } = router.poll(
     500,

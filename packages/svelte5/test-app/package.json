@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "@inertiajs/svelte": "workspace:*"
+    "@inertiajs/svelte5": "workspace:*"
   }
 }

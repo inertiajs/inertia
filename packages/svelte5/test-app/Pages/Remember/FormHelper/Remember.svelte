@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia, useForm } from '@inertiajs/svelte'
+  import { inertia, useForm } from '@inertiajs/svelte5'
 
   const form = useForm('form', {
     name: 'foo',

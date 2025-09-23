@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
+  import { router } from '@inertiajs/svelte5'
 
   export let foo: number[] = []
   export let bar: number[] = []

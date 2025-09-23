@@ -8,7 +8,7 @@
 
 <script lang="ts">
   import type { FormComponentMethods } from '@inertiajs/core'
-  import { Form } from '@inertiajs/svelte'
+  import { Form } from '@inertiajs/svelte5'
 
   let formRef: FormComponentMethods | null = null
 

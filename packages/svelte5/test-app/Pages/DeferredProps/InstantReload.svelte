@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Deferred, router } from '@inertiajs/svelte'
+  import { Deferred, router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
   export let foo: { text: string } | undefined

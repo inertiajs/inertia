@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from '@inertiajs/svelte5'
 
   const linkData = {
     file: new File([], 'example.jpg'),

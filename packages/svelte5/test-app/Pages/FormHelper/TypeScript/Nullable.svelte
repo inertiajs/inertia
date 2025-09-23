@@ -1,6 +1,6 @@
 <script lang="ts">
   // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
-  import { useForm } from '@inertiajs/svelte'
+  import { useForm } from '@inertiajs/svelte5'
 
   useForm<{ object: { x: number } | null }>({
     object: null,

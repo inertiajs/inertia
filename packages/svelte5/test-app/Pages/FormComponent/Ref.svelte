@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FormComponentMethods } from '@inertiajs/core'
-  import { Form } from '@inertiajs/svelte'
+  import { Form } from '@inertiajs/svelte5'
 
   // Svelte Form component ref exposes only methods via bind:this
   let formRef: FormComponentMethods | null = null

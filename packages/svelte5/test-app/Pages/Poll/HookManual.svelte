@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { usePoll } from '@inertiajs/svelte'
+  import { usePoll } from '@inertiajs/svelte5'
 
   const { start, stop } = usePoll(
     500,

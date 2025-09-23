@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from '@inertiajs/svelte5'
 
   export let foo = 0
   export let bar

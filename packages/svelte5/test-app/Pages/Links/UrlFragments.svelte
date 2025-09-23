@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from '@inertiajs/svelte5'
 
   let documentScrollTop = 0
   let documentScrollLeft = 0

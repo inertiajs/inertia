@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { WhenVisible } from '@inertiajs/svelte'
+  import { WhenVisible } from '@inertiajs/svelte5'
 
   export let count = 0
 </script>

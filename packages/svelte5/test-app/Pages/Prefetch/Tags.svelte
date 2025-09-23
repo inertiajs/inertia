@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia, router, useForm } from '@inertiajs/svelte'
+  import { inertia, router, useForm } from '@inertiajs/svelte5'
   export let pageNumber
   export let lastLoaded
   export let propType: string

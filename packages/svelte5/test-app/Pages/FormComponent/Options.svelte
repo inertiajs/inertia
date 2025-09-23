@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Form } from '@inertiajs/svelte'
+  import { Form } from '@inertiajs/svelte5'
   import type { Method } from '@inertiajs/core'
   import Article from '../Article.svelte'
 

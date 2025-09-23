@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Deferred } from '@inertiajs/svelte'
+  import { Deferred } from '@inertiajs/svelte5'
 
   export let baz: string | undefined
   export let qux: string | undefined

@@ -4,7 +4,7 @@
 
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia } from '@inertiajs/svelte5'
   import type { Page } from '@inertiajs/core'
 
   export let foo: string = 'default'

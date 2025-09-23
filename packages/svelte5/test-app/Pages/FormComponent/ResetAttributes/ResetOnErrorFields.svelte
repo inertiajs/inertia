@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Form } from '@inertiajs/svelte'
+  import { Form } from '@inertiajs/svelte5'
 </script>
 
 <Form method="post" action="/form-component/reset-on-error-fields" resetOnError={['name']} let:errors>
