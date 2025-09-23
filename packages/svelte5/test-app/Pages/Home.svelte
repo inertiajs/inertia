@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia, page, router } from '@inertiajs/svelte'
+  import { inertia, page, router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
   const visitsMethod = () => {
@@ -20,7 +20,7 @@
 
   onMount(() => {
     window._inertia_page_key = crypto.randomUUID()
-    window._inertia_props = $page.props
+    window._inertia_props = page.props
     window._plugin_global_props = {}
   })
 </script>

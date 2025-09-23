@@ -6,7 +6,7 @@
 
   onMount(() => {
     window._inertia_layout_id = crypto.randomUUID()
-    window._inertia_site_layout_props = $page.props
+    window._inertia_site_layout_props = page.props
     createdAt = Date.now()
   })
 </script>

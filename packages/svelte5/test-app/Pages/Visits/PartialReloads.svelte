@@ -8,7 +8,7 @@
   export let headers
 
   onMount(() => {
-    window._inertia_props = $page.props
+    window._inertia_props = page.props
   })
 
   const partialReloadVisit = () => {

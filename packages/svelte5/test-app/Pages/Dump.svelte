@@ -1,6 +1,6 @@
 <script lang="ts">
   import { beforeUpdate } from 'svelte'
-  import { page } from '@inertiajs/svelte'
+  import { page } from '@inertiajs/svelte5'
   import type { Method } from '@inertiajs/core'
   import type { MulterFile } from '../types'
 
@@ -18,7 +18,7 @@
     files,
     query,
     url,
-    $page: $page,
+    $page: page,
   }
 
   beforeUpdate(() => {

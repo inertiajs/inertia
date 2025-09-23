@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-  import { page, useForm } from '@inertiajs/svelte'
+  import { page, useForm } from '@inertiajs/svelte5'
   import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
   import type { CancelTokenSource } from 'axios'
 
@@ -32,9 +32,9 @@
     })
   }
 
-  pushData(null, 'processing', $form.processing)
-  pushData(null, 'progress', $form.progress)
-  pushData(null, 'errors', $form.errors)
+  pushData(null, 'processing', form.processing)
+  pushData(null, 'progress', form.progress)
+  pushData(null, 'errors', form.errors)
 
   const callbacks = (overrides = {}) => {
     const defaults = {
@@ -55,33 +55,33 @@
   }
 
   const submit = () => {
-    $form.post($page.url)
+    form.post(page.url)
   }
 
   const successfulRequest = () => {
-    $form.post($page.url, {
+    form.post(page.url, {
       ...callbacks(),
     })
   }
 
   const onSuccessResetErrors = () => {
-    $form.post('/form-helper/events/errors', {
+    form.post('/form-helper/events/errors', {
       onError: () => {
         pushEvent('onError')
 
-        $form.post('/form-helper/events', {
+        form.post('/form-helper/events', {
           ...callbacks({
             onStart: () => {
               pushEvent('onStart')
-              pushData('onStart', 'errors', $form.errors)
+              pushData('onStart', 'errors', form.errors)
             },
             onSuccess: () => {
               pushEvent('onSuccess')
-              pushData('onSuccess', 'errors', $form.errors)
+              pushData('onSuccess', 'errors', form.errors)
             },
             onFinish: () => {
               pushEvent('onFinish')
-              pushData('onFinish', 'errors', $form.errors)
+              pushData('onFinish', 'errors', form.errors)
             },
           }),
         })
@@ -90,26 +90,26 @@
   }
 
   const errorsSetOnError = () => {
-    $form.post('/form-helper/events/errors', {
+    form.post('/form-helper/events/errors', {
       ...callbacks({
         onStart: () => {
           pushEvent('onStart')
-          pushData('onStart', 'errors', $form.errors)
+          pushData('onStart', 'errors', form.errors)
         },
         onError: () => {
           pushEvent('onError')
-          pushData('onError', 'errors', $form.errors)
+          pushData('onError', 'errors', form.errors)
         },
         onFinish: () => {
           pushEvent('onFinish')
-          pushData('onFinish', 'errors', $form.errors)
+          pushData('onFinish', 'errors', form.errors)
         },
       }),
     })
   }
 
   const onBeforeVisit = () => {
-    $form.post('/sleep', {
+    form.post('/sleep', {
       ...callbacks({
         onBefore: (visit: ActiveVisit) => {
           pushEvent('onBefore')
@@ -120,7 +120,7 @@
   }
 
   const onBeforeVisitCancelled = () => {
-    $form.post('/sleep', {
+    form.post('/sleep', {
       ...callbacks({
         onBefore: (visit: ActiveVisit) => {
           pushEvent('onBefore')
@@ -131,7 +131,7 @@
   }
 
   const onStartVisit = () => {
-    $form.post('/form-helper/events', {
+    form.post('/form-helper/events', {
       ...callbacks({
         onStart: (visit: ActiveVisit) => {
           pushEvent('onStart')
@@ -142,7 +142,7 @@
   }
 
   const onProgressVisit = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         file: new File(['foobar'], 'example.bin'),
@@ -158,7 +158,7 @@
   }
 
   const cancelledVisit = () => {
-    $form.post('/sleep', {
+    form.post('/sleep', {
       ...callbacks({
         onCancelToken: (token: CancelTokenSource) => {
           pushEvent('onCancelToken')
@@ -173,7 +173,7 @@
   }
 
   const onSuccessVisit = () => {
-    $form.post('/dump/post', {
+    form.post('/dump/post', {
       ...callbacks({
         onSuccess: (page: Page) => {
           pushEvent('onSuccess')
@@ -184,7 +184,7 @@
   }
 
   const onSuccessPromiseVisit = () => {
-    $form.post('/dump/post', {
+    form.post('/dump/post', {
       ...callbacks({
         onSuccess: (page: Page) => {
           pushEvent('onSuccess')
@@ -197,17 +197,17 @@
   }
 
   const onSuccessResetValue = () => {
-    $form.post($page.url, {
+    form.post(page.url, {
       ...callbacks({
         onSuccess: (page: Page) => {
-          $form.reset()
+          form.reset()
         },
       }),
     })
   }
 
   const onErrorVisit = () => {
-    $form.post('/form-helper/events/errors', {
+    form.post('/form-helper/events/errors', {
       ...callbacks({
         onError: (errors: Errors) => {
           pushEvent('onError')
@@ -218,7 +218,7 @@
   }
 
   const onErrorPromiseVisit = () => {
-    $form.post('/form-helper/events/errors', {
+    form.post('/form-helper/events/errors', {
       ...callbacks({
         onError: (errors: Errors) => {
           pushEvent('onError')
@@ -231,61 +231,61 @@
   }
 
   const onSuccessProcessing = () => {
-    $form.post($page.url, {
+    form.post(page.url, {
       ...callbacks({
         onBefore: () => {
           pushEvent('onBefore')
-          pushData('onBefore', 'processing', $form.processing)
+          pushData('onBefore', 'processing', form.processing)
         },
         onCancelToken: () => {
           pushEvent('onCancelToken')
-          pushData('onCancelToken', 'processing', $form.processing)
+          pushData('onCancelToken', 'processing', form.processing)
         },
         onStart: () => {
           pushEvent('onStart')
-          pushData('onStart', 'processing', $form.processing)
+          pushData('onStart', 'processing', form.processing)
         },
         onSuccess: () => {
           pushEvent('onSuccess')
-          pushData('onSuccess', 'processing', $form.processing)
+          pushData('onSuccess', 'processing', form.processing)
         },
         onFinish: () => {
           pushEvent('onFinish')
-          pushData('onFinish', 'processing', $form.processing)
+          pushData('onFinish', 'processing', form.processing)
         },
       }),
     })
   }
 
   const onErrorProcessing = () => {
-    $form.post('/form-helper/events/errors', {
+    form.post('/form-helper/events/errors', {
       ...callbacks({
         onBefore: () => {
           pushEvent('onBefore')
-          pushData('onBefore', 'processing', $form.processing)
+          pushData('onBefore', 'processing', form.processing)
         },
         onCancelToken: () => {
           pushEvent('onCancelToken')
-          pushData('onCancelToken', 'processing', $form.processing)
+          pushData('onCancelToken', 'processing', form.processing)
         },
         onStart: () => {
           pushEvent('onStart')
-          pushData('onStart', 'processing', $form.processing)
+          pushData('onStart', 'processing', form.processing)
         },
         onError: () => {
           pushEvent('onError')
-          pushData('onError', 'processing', $form.processing)
+          pushData('onError', 'processing', form.processing)
         },
         onFinish: () => {
           pushEvent('onFinish')
-          pushData('onFinish', 'processing', $form.processing)
+          pushData('onFinish', 'processing', form.processing)
         },
       }),
     })
   }
 
   const onSuccessProgress = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         file: new File(['foobar'], 'example.bin'),
@@ -294,34 +294,34 @@
         ...callbacks({
           onBefore: () => {
             pushEvent('onBefore')
-            pushData('onBefore', 'progress', $form.progress)
+            pushData('onBefore', 'progress', form.progress)
           },
           onCancelToken: () => {
             pushEvent('onCancelToken')
-            pushData('onCancelToken', 'progress', $form.progress)
+            pushData('onCancelToken', 'progress', form.progress)
           },
           onStart: () => {
             pushEvent('onStart')
-            pushData('onStart', 'progress', $form.progress)
+            pushData('onStart', 'progress', form.progress)
           },
           onProgress: () => {
             pushEvent('onProgress')
-            pushData('onProgress', 'progress', $form.progress)
+            pushData('onProgress', 'progress', form.progress)
           },
           onSuccess: () => {
             pushEvent('onSuccess')
-            pushData('onSuccess', 'progress', $form.progress)
+            pushData('onSuccess', 'progress', form.progress)
           },
           onFinish: () => {
             pushEvent('onFinish')
-            pushData('onFinish', 'progress', $form.progress)
+            pushData('onFinish', 'progress', form.progress)
           },
         }),
       })
   }
 
   const onErrorProgress = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         file: new File(['foobar'], 'example.bin'),
@@ -330,58 +330,58 @@
         ...callbacks({
           onBefore: () => {
             pushEvent('onBefore')
-            pushData('onBefore', 'progress', $form.progress)
+            pushData('onBefore', 'progress', form.progress)
           },
           onCancelToken: () => {
             pushEvent('onCancelToken')
-            pushData('onCancelToken', 'progress', $form.progress)
+            pushData('onCancelToken', 'progress', form.progress)
           },
           onStart: () => {
             pushEvent('onStart')
-            pushData('onStart', 'progress', $form.progress)
+            pushData('onStart', 'progress', form.progress)
           },
           onProgress: () => {
             pushEvent('onProgress')
-            pushData('onProgress', 'progress', $form.progress)
+            pushData('onProgress', 'progress', form.progress)
           },
           onError: () => {
             pushEvent('onError')
-            pushData('onError', 'progress', $form.progress)
+            pushData('onError', 'progress', form.progress)
           },
           onFinish: () => {
             pushEvent('onFinish')
-            pushData('onFinish', 'progress', $form.progress)
+            pushData('onFinish', 'progress', form.progress)
           },
         }),
       })
   }
 
   const progressNoFiles = () => {
-    $form.post($page.url, {
+    form.post(page.url, {
       ...callbacks({
         onBefore: () => {
           pushEvent('onBefore')
-          pushData('onBefore', 'progress', $form.progress)
+          pushData('onBefore', 'progress', form.progress)
         },
         onCancelToken: () => {
           pushEvent('onCancelToken')
-          pushData('onCancelToken', 'progress', $form.progress)
+          pushData('onCancelToken', 'progress', form.progress)
         },
         onStart: () => {
           pushEvent('onStart')
-          pushData('onStart', 'progress', $form.progress)
+          pushData('onStart', 'progress', form.progress)
         },
         onProgress: () => {
           pushEvent('onProgress')
-          pushData('onProgress', 'progress', $form.progress)
+          pushData('onProgress', 'progress', form.progress)
         },
         onSuccess: () => {
           pushEvent('onSuccess')
-          pushData('onSuccess', 'progress', $form.progress)
+          pushData('onSuccess', 'progress', form.progress)
         },
         onFinish: () => {
           pushEvent('onFinish')
-          pushData('onFinish', 'progress', $form.progress)
+          pushData('onFinish', 'progress', form.progress)
         },
       }),
     })
@@ -414,9 +414,9 @@
 
   <button on:click|preventDefault={progressNoFiles} class="no-progress">progress no files</button>
 
-  <span class="success-status">Form was {$form.wasSuccessful ? '' : 'not '}successful</span>
-  <span class="recently-status">Form was {$form.recentlySuccessful ? '' : 'not '}recently successful</span>
+  <span class="success-status">Form was {form.wasSuccessful ? '' : 'not '}successful</span>
+  <span class="recently-status">Form was {form.recentlySuccessful ? '' : 'not '}recently successful</span>
 
-  <input type="text" class="name-input" bind:value={$form.name} />
-  <input type="checkbox" class="remember-input" bind:checked={$form.remember} />
+  <input type="text" class="name-input" bind:value={form.name} />
+  <input type="checkbox" class="remember-input" bind:checked={form.remember} />
 </div>
