@@ -965,7 +965,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
   await expect(consoleMessages.errors).toHaveLength(0)
 
   const response = page.waitForResponse('/visits/after-error/2')
-  
+
   // Set up error promise before triggering the action that will cause the error
   const errorPromise = page.waitForEvent('pageerror')
 
