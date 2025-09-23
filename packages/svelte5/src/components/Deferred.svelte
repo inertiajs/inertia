@@ -15,9 +15,13 @@
   if (!isServer) {
     // Use $effect to watch for changes in pageState.props
     $effect(() => {
+      // Access pageState.props to make this effect reactive
+      const props = pageState.props
+      
       // Ensures the content isn't loaded before the deferred props are available
       window.queueMicrotask(() => {
-        loaded = keys.every((key) => typeof pageState.props[key] !== 'undefined')
+        const newLoaded = keys.every((key) => typeof props[key] !== 'undefined')
+        loaded = newLoaded
       })
     })
   }
