@@ -3,7 +3,7 @@ import { GlobalEvent } from './types'
 
 let hideCount = 0
 
-export class Progress {
+class Progress {
   public start(): void {
     ProgressComponent.start()
   }
@@ -48,44 +48,43 @@ export class Progress {
   }
 }
 
-const progressInstance = new Progress()
-
-export const reveal = progressInstance.reveal
-export const hide = progressInstance.hide
+export const progress = new Progress()
+export const reveal = progress.reveal
+export const hide = progress.hide
 
 function addEventListeners(delay: number): void {
-  document.addEventListener('inertia:start', (e) => start(e, delay))
-  document.addEventListener('inertia:progress', progress)
+  document.addEventListener('inertia:start', (e) => handleStartEvent(e, delay))
+  document.addEventListener('inertia:progress', handleProgressEvent)
 }
 
-function start(event: GlobalEvent<'start'>, delay: number): void {
+function handleStartEvent(event: GlobalEvent<'start'>, delay: number): void {
   if (!event.detail.visit.showProgress) {
-    progressInstance.hide()
+    progress.hide()
   }
 
-  const timeout = setTimeout(() => progressInstance.start(), delay)
+  const timeout = setTimeout(() => progress.start(), delay)
   document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
 }
 
-function progress(event: GlobalEvent<'progress'>): void {
-  if (progressInstance.isStarted() && event.detail.progress?.percentage) {
-    progressInstance.set(Math.max(progressInstance.getStatus()!, (event.detail.progress.percentage / 100) * 0.9))
+function handleProgressEvent(event: GlobalEvent<'progress'>): void {
+  if (progress.isStarted() && event.detail.progress?.percentage) {
+    progress.set(Math.max(progress.getStatus()!, (event.detail.progress.percentage / 100) * 0.9))
   }
 }
 
 function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
   clearTimeout(timeout!)
 
-  if (!progressInstance.isStarted()) {
+  if (!progress.isStarted()) {
     return
   }
 
   if (event.detail.visit.completed) {
-    progressInstance.finish()
+    progress.finish()
   } else if (event.detail.visit.interrupted) {
-    progressInstance.reset()
+    progress.reset()
   } else if (event.detail.visit.cancelled) {
-    progressInstance.remove()
+    progress.remove()
   }
 }
 
