@@ -5,7 +5,7 @@ test.describe('Form Component', () => {
   test.describe('Elements', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-component/elements')
+      await page.goto('/form-component/elements')
     })
 
     test('can submit the form with the default values', async ({ page }) => {

@@ -5,7 +5,7 @@ test.describe('Form Helper', () => {
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/methods')
+      await page.goto('/form-helper/methods')
       await page.check('#remember')
     })
 
@@ -35,7 +35,7 @@ test.describe('Form Helper', () => {
   test.describe('Transform', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/transform')
+      await page.goto('/form-helper/transform')
       await page.check('#remember')
     })
 
@@ -295,7 +295,7 @@ test.describe('Form Helper', () => {
   test.describe('Dirty', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/dirty')
+      await page.goto('/form-helper/dirty')
     })
 
     test('can check if the form is dirty', async ({ page }) => {
@@ -354,7 +354,7 @@ test.describe('Form Helper', () => {
   test.describe('Data', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/data')
+      await page.goto('/form-helper/data')
     })
 
     test('can reset all fields to their initial values', async ({ page }) => {
@@ -894,7 +894,7 @@ test.describe('Form Helper', () => {
 test.describe('Nested', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
-    page.goto('/form-helper/nested')
+    await page.goto('/form-helper/nested')
   })
 
   test('can handle nested data', async ({ page }) => {
@@ -950,7 +950,7 @@ test.describe('React', () => {
   test.skip(process.env.PACKAGE !== 'react', 'Only for React')
 
   test('setDefaults callback in useEffect executes once per change', async ({ page }) => {
-    page.goto('/form-helper/effect-count')
+    await page.goto('/form-helper/effect-count')
 
     await expect(page.locator('#data-count')).toHaveText('Count: 0')
     await expect(page.locator('#form-data')).toHaveText('Form data: {"count":0,"foo":"bar"}')
