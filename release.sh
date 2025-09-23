@@ -71,11 +71,8 @@ git tag -a "$TAG" -m "$TAG"
 git push
 git push --tags
 
-# Install and publish
-pnpm publish -r
-
 gh release create "$TAG" --generate-notes
 
 echo ""
-echo "✅ Release $TAG completed successfully."
+echo "✅ Release $TAG completed successfully, publishing kicked off in CI."
 echo "🔗 https://github.com/inertiajs/inertia/releases/tag/$TAG"
