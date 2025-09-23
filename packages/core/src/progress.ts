@@ -1,23 +1,23 @@
 import ProgressComponent from './progress-component'
 import { GlobalEvent } from './types'
 
-let hideCount = 0
-
 class Progress {
+  private hideCount = 0
+
   public start(): void {
     ProgressComponent.start()
   }
 
   public reveal(force: boolean = false): void {
-    hideCount = Math.max(0, hideCount - 1)
+    this.hideCount = Math.max(0, this.hideCount - 1)
 
-    if (force || hideCount === 0) {
+    if (force || this.hideCount === 0) {
       ProgressComponent.show()
     }
   }
 
   public hide(): void {
-    hideCount++
+    this.hideCount++
 
     ProgressComponent.hide()
   }
