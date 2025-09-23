@@ -13,15 +13,15 @@
 </script>
 
 <Deferred data="foo">
-  <svelte:fragment slot="fallback">
-    <div>Loading foo...</div>
-  </svelte:fragment>
   <div>{foo?.text}</div>
+  {#snippet fallback()}
+    <div>Loading foo...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="bar">
-  <svelte:fragment slot="fallback">
-    <div>Loading bar...</div>
-  </svelte:fragment>
   <div>{bar?.text}</div>
+  {#snippet fallback()}
+    <div>Loading bar...</div>
+  {/snippet}
 </Deferred>

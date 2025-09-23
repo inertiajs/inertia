@@ -6,17 +6,17 @@
 </script>
 
 <Deferred data="foo">
-  <svelte:fragment slot="fallback">
-    <div>Loading foo...</div>
-  </svelte:fragment>
   {foo?.text}
+  {#snippet fallback()}
+    <div>Loading foo...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="bar">
-  <svelte:fragment slot="fallback">
-    <div>Loading bar...</div>
-  </svelte:fragment>
   {bar?.text}
+  {#snippet fallback()}
+    <div>Loading bar...</div>
+  {/snippet}
 </Deferred>
 
 <a href="/deferred-props/page-1" use:inertia>Page 1</a>

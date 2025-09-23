@@ -9,38 +9,38 @@
 </script>
 
 <Deferred data="foo">
-  <svelte:fragment slot="fallback">
-    <div>Loading foo...</div>
-  </svelte:fragment>
   {foo?.text}
+  {#snippet fallback()}
+    <div>Loading foo...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="bar">
-  <svelte:fragment slot="fallback">
-    <div>Loading bar...</div>
-  </svelte:fragment>
   {bar?.text}
+  {#snippet fallback()}
+    <div>Loading bar...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="baz">
-  <svelte:fragment slot="fallback">
-    <div>Loading baz...</div>
-  </svelte:fragment>
   {baz?.text}
+  {#snippet fallback()}
+    <div>Loading baz...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="qux">
-  <svelte:fragment slot="fallback">
-    <div>Loading qux...</div>
-  </svelte:fragment>
   {qux?.text}
+  {#snippet fallback()}
+    <div>Loading qux...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="quux">
-  <svelte:fragment slot="fallback">
-    <div>Loading quux...</div>
-  </svelte:fragment>
   {quux?.text}
+  {#snippet fallback()}
+    <div>Loading quux...</div>
+  {/snippet}
 </Deferred>
 
 <a href="/deferred-props/page-1" use:inertia>Page 1</a>

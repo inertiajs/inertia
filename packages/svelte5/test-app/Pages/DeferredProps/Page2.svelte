@@ -6,16 +6,22 @@
 </script>
 
 <Deferred data="baz">
-  <div slot="fallback">Loading baz...</div>
   {baz}
+  {#snippet fallback()}
+    <div>Loading baz...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data="qux">
-  <div slot="fallback">Loading qux...</div>
   {qux}
+  {#snippet fallback()}
+    <div>Loading qux...</div>
+  {/snippet}
 </Deferred>
 
 <Deferred data={['baz', 'qux']}>
-  <div slot="fallback">Loading baz and qux...</div>
   both {baz} and {qux}
+  {#snippet fallback()}
+    <div>Loading baz and qux...</div>
+  {/snippet}
 </Deferred>
