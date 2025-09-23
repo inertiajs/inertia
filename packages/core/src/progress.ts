@@ -2,7 +2,7 @@ import ProgressComponent from './progress-component'
 import { GlobalEvent } from './types'
 
 class Progress {
-  private hideCount = 0
+  public hideCount = 0
 
   public start(): void {
     ProgressComponent.start()
