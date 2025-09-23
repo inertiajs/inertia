@@ -872,10 +872,7 @@ test.describe('Scroll position preservation', () => {
       height: position === 'below' ? viewport.height - (userCard.y + userCard.height) : viewport.height - userCard.y,
     }
 
-    return async (p: Page, path?: string) => {
-      await Promise.race([p.waitForLoadState('networkidle', { timeout: 1000 }).catch(() => {}), p.waitForTimeout(300)])
-      await p.screenshot({ clip, path, animations: 'disabled', timeout: 10000 })
-    }
+    return (p: Page, path?: string) => p.screenshot({ clip, path, timeout: 15000 })
   }
 
   const screenshotBelowUserCard = async (page: Page, id: string) => await screenshotAroundUserCard(page, id, 'below')
@@ -917,6 +914,7 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('Loading...')).toBeVisible()
     const screenshotter = await screenshotAboveUserCard(page, '15')
     const beforeScreenshot = await screenshotter(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
 
     // Wait for any initial loading to complete
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -980,6 +978,7 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('Loading...')).toBeVisible()
     const screenshotter = await screenshotAboveUserCard(page, '15')
     const beforeScreenshot = await screenshotter(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
 
     // Wait for loading to complete
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -1117,10 +1116,7 @@ test.describe('Scrollable container support', () => {
       height: containerRect.y + containerRect.height - (userRect.y + userRect.height),
     }
 
-    return async (p: Page, path?: string) => {
-      await Promise.race([p.waitForLoadState('networkidle', { timeout: 1000 }).catch(() => {}), p.waitForTimeout(300)])
-      await p.screenshot({ clip, path, animations: 'disabled', timeout: 10000 })
-    }
+    return (p: Page, path?: string) => p.screenshot({ clip, path, timeout: 15000 })
   }
 
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
