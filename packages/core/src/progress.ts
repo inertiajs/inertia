@@ -30,7 +30,7 @@ export class Progress {
     ProgressComponent.done()
   }
 
-  public cancel(): void {
+  public reset(): void {
     ProgressComponent.set(0)
   }
 
@@ -83,7 +83,7 @@ function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
   if (event.detail.visit.completed) {
     progressInstance.finish()
   } else if (event.detail.visit.interrupted) {
-    progressInstance.set(0)
+    progressInstance.reset()
   } else if (event.detail.visit.cancelled) {
     progressInstance.remove()
   }
