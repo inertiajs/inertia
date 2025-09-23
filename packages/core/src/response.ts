@@ -259,16 +259,16 @@ export class Response {
       const incomingProp = pageResponse.props[prop]
 
       // Function to recursively merge objects and arrays
-      const deepMerge = (target: any, source: any, currentKey: string) => {
+      const deepMerge = (target: any, source: any, matchProp: string) => {
         if (Array.isArray(source)) {
-          return this.mergeOrMatchItems(target, source, currentKey, matchPropsOn)
+          return this.mergeOrMatchItems(target, source, matchProp, matchPropsOn)
         }
 
         if (typeof source === 'object' && source !== null) {
           // Merge objects by iterating over keys
           return Object.keys(source).reduce(
             (acc, key) => {
-              acc[key] = deepMerge(target ? target[key] : undefined, source[key], `${currentKey}.${key}`)
+              acc[key] = deepMerge(target ? target[key] : undefined, source[key], `${matchProp}.${key}`)
               return acc
             },
             { ...target },
@@ -287,51 +287,93 @@ export class Response {
   }
 
   protected mergeOrMatchItems(
-    target: any[],
-    source: any[],
-    currentKey: string,
+    existingItems: any[],
+    newItems: any[],
+    matchProp: string,
     matchPropsOn: string[],
     shouldAppend = true,
   ) {
-    // Determine if there's a specific key to match items.
-    // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
-    const matchOn = matchPropsOn.find((key) => {
-      const path = key.split('.').slice(0, -1).join('.')
-      return path === currentKey
+    const items = Array.isArray(existingItems) ? existingItems : []
+
+    // Find the matching key for this specific property path
+    const matchingKey = matchPropsOn.find((key) => {
+      const keyPath = key.split('.').slice(0, -1).join('.')
+
+      return keyPath === matchProp
     })
 
-    const targetArray = Array.isArray(target) ? target : []
-
-    if (!matchOn) {
-      // No key found to match on, just concatenate the arrays
-      return shouldAppend ? [...targetArray, ...source] : [...source, ...targetArray]
+    // If no matching key is configured, simply concatenate the arrays
+    if (!matchingKey) {
+      return shouldAppend ? [...items, ...newItems] : [...newItems, ...items]
     }
 
-    // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
-    const uniqueProperty = matchOn.split('.').pop() || ''
-    const map = new Map<any, any>()
+    // Extract the property name we'll use to match items (e.g., 'id' from 'users.data.id')
+    const uniqueProperty = matchingKey.split('.').pop() || ''
 
-    // Populate the map with items from the target array, using the unique property as the key.
-    // If an item doesn't have the unique property or isn't an object, a unique Symbol is used as the key.
-    targetArray.forEach((item) => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
+    // Create a map of new items by their unique property lookups
+    const newItemsMap = new Map()
+
+    newItems.forEach((item) => {
+      if (this.hasUniqueProperty(item, uniqueProperty)) {
+        newItemsMap.set(item[uniqueProperty], item)
       }
     })
 
-    // Iterate through the source array. If an item's unique property matches an existing key in the map,
-    // update the item. Otherwise, add the new item to the map.
-    source.forEach((item) => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
+    return shouldAppend
+      ? this.appendWithMatching(items, newItems, newItemsMap, uniqueProperty)
+      : this.prependWithMatching(items, newItems, newItemsMap, uniqueProperty)
+  }
+
+  protected appendWithMatching(
+    existingItems: any[],
+    newItems: any[],
+    newItemsMap: Map<any, any>,
+    uniqueProperty: string,
+  ): any[] {
+    // Update existing items with new values, keep non-matching items
+    const updatedExisting = existingItems.map((item) => {
+      if (this.hasUniqueProperty(item, uniqueProperty) && newItemsMap.has(item[uniqueProperty])) {
+        return newItemsMap.get(item[uniqueProperty])
       }
+
+      return item
     })
 
-    return Array.from(map.values())
+    // Filter new items to only include those not already in existing items
+    const newItemsToAdd = newItems.filter((item) => {
+      if (!this.hasUniqueProperty(item, uniqueProperty)) {
+        return true // Always add items without unique property
+      }
+
+      return !existingItems.some(
+        (existing) =>
+          this.hasUniqueProperty(existing, uniqueProperty) && existing[uniqueProperty] === item[uniqueProperty],
+      )
+    })
+
+    return [...updatedExisting, ...newItemsToAdd]
+  }
+
+  protected prependWithMatching(
+    existingItems: any[],
+    newItems: any[],
+    newItemsMap: Map<any, any>,
+    uniqueProperty: string,
+  ): any[] {
+    // Filter existing items, keeping only those not being updated
+    const untouchedExisting = existingItems.filter((item) => {
+      if (this.hasUniqueProperty(item, uniqueProperty)) {
+        return !newItemsMap.has(item[uniqueProperty])
+      }
+
+      return true
+    })
+
+    return [...newItems, ...untouchedExisting]
+  }
+
+  protected hasUniqueProperty(item: any, property: string): boolean {
+    return item && typeof item === 'object' && property in item
   }
 
   protected async setRememberedState(pageResponse: Page): Promise<void> {

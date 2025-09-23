@@ -61,3 +61,39 @@ test('can prepend to nested props', async ({ page }) => {
   await expect(page.getByText('User 9, User 8, User 7, User 6, User 5, User 4, User 3, User 2, User 1')).toBeVisible()
   await expect(page.getByText('Page: 3, Per Page: 3')).toBeVisible()
 })
+
+test('can append to nested props with matchOn', async ({ page }) => {
+  await page.goto('/merge-nested-props-with-match/append')
+
+  await expect(
+    page.getByText('User 1 - initial, User 2 - initial, User 3 - initial, User 4 - initial, User 5 - initial'),
+  ).toBeVisible()
+  await expect(page.getByText('Page: 1, Per Page: 5')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Load More', page.url() + '?page=2', 'button')
+
+  await expect(
+    page.getByText(
+      'User 1 - initial, User 2 - initial, User 3 - initial, User 4 - subsequent, User 5 - subsequent, User 6 - subsequent, User 7 - subsequent, User 8 - subsequent',
+    ),
+  ).toBeVisible()
+  await expect(page.getByText('Page: 2, Per Page: 5')).toBeVisible()
+})
+
+test('can prepend to nested props with matchOn', async ({ page }) => {
+  await page.goto('/merge-nested-props-with-match/prepend')
+
+  await expect(
+    page.getByText('User 4 - initial, User 5 - initial, User 6 - initial, User 7 - initial, User 8 - initial'),
+  ).toBeVisible()
+  await expect(page.getByText('Page: 1, Per Page: 5')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Load More', page.url() + '?page=2', 'button')
+
+  await expect(
+    page.getByText(
+      'User 1 - subsequent, User 2 - subsequent, User 3 - subsequent, User 4 - subsequent, User 5 - subsequent, User 6 - initial, User 7 - initial, User 8 - initial',
+    ),
+  ).toBeVisible()
+  await expect(page.getByText('Page: 2, Per Page: 5')).toBeVisible()
+})
