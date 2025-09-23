@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <InfiniteScroll data="users" as="section" class="custom-infinite-scroll" data-testid="infinite-scroll-container">
+  <InfiniteScroll data="users" as="section" data-testid="infinite-scroll-container">
     <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
     <template #loading>

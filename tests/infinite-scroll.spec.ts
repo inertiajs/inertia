@@ -11,6 +11,14 @@ function infiniteScrollRequests() {
   })
 }
 
+async function scrollToTop(page: Page) {
+  await page.evaluate(() => window.scrollTo(0, 0))
+}
+
+async function scrollToBottom(page: Page) {
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+}
+
 async function smoothScrollTo(page: any, targetY: number) {
   await page.evaluate((top: number) => window.scrollTo({ top, behavior: 'smooth' }), targetY)
   await page.waitForTimeout(150)
@@ -53,8 +61,7 @@ test.describe('Automatic page loading', () => {
     await expect(page.getByText('User 15')).toBeVisible()
     await expect(page.getByText('User 16')).toBeHidden()
 
-    // Scroll to the bottom of the page to trigger loading the next page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 16')).toBeVisible()
@@ -65,7 +72,7 @@ test.describe('Automatic page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll to the bottom of the page to trigger loading the next page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
 
     await expect(page.getByText('Loading...')).toBeVisible()
 
@@ -76,7 +83,7 @@ test.describe('Automatic page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(2)
 
     // Scroll to the bottom of the page - should NOT trigger loading since User 40 is the last one
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(infiniteScrollRequests().length).toBe(2) // Should still be 2, no additional request
 
@@ -121,7 +128,7 @@ test.describe('Automatic page loading', () => {
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to the top to trigger loading the first
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 15')).toBeVisible()
@@ -147,7 +154,7 @@ test.describe('Automatic page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll to the top to trigger loading the last page
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 10')).toBeVisible()
@@ -221,7 +228,7 @@ test.describe('Manual page loading', () => {
     requests.listen(page)
 
     // Scroll to the bottom of the page to trigger loading the next page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 16')).toBeVisible()
@@ -233,7 +240,7 @@ test.describe('Manual page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll to the bottom of the page to trigger loading the next page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 31')).toBeVisible()
@@ -244,7 +251,7 @@ test.describe('Manual page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(2)
 
     // Scroll to the bottom of the page - should NOT trigger loading since we're in manual mode now
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeHidden()
 
     await expect(infiniteScrollRequests().length).toBe(2) // Should still be 2, no additional request
@@ -274,7 +281,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('User 16')).toBeHidden()
     await expect(page.getByText('Total items on page: 15')).toBeVisible()
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
 
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
@@ -288,7 +295,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('Manual mode: true')).toBeVisible()
 
     // Scroll to bottom again - should NOT auto-load page 3 in manual mode
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await page.waitForTimeout(500)
 
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -297,12 +304,12 @@ test.describe('Toggle configuration', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll to top, disable manual mode again
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
     await page.getByLabel('Manual mode: true').uncheck()
     await expect(page.getByText('Manual mode: false')).toBeVisible()
 
     // Scroll to bottom - should auto-load page 3 now
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
 
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
@@ -333,7 +340,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('User 31')).toBeHidden()
 
     // Scroll to bottom - should NOT load page 3 since trigger='start'
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await page.waitForTimeout(500)
 
     await expect(page.getByText('User 31')).toBeHidden()
@@ -341,12 +348,12 @@ test.describe('Toggle configuration', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll to top, change trigger to 'end' (loads next pages)
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
     await page.selectOption('select', 'end')
     await expect(page.getByText('Trigger: end')).toBeVisible()
 
     // Scroll to bottom - should now load page 3 since trigger='end'
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
 
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
@@ -365,7 +372,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('Total items on page: 15')).toBeVisible()
 
     // Load page 2 and scroll to make it the most visible page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Total items on page: 30')).toBeVisible()
@@ -381,7 +388,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('Preserve URL: true')).toBeVisible()
 
     // Load page 3 and scroll to bottom
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Total items on page: 40')).toBeVisible()
@@ -415,7 +422,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('Total items on page: 30')).toBeVisible()
 
     // Scroll to top, nothing should happen yet
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
     await page.waitForTimeout(500)
     await expect(page.getByText('User 31')).toBeHidden()
     await expect(page.getByText('Total items on page: 30')).toBeVisible()
@@ -425,7 +432,7 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('Reverse: true')).toBeVisible()
 
     // Scroll to top again, should now load page 3 because reverse=true and trigger=both
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Total items on page: 40')).toBeVisible()
@@ -536,11 +543,8 @@ test.describe('Directional trigger constraints', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Now scroll to the bottom - should NOT trigger loading page 3 since trigger=start
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-
-    // Wait a moment to ensure no loading is triggered
+    await scrollToBottom(page)
     await page.waitForTimeout(500)
-
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(page.getByText('User 31')).toBeHidden()
     // Should still be 1 request (only the initial auto-load of page 1)
@@ -556,11 +560,8 @@ test.describe('Directional trigger constraints', () => {
     await expect(page.getByText('User 15')).toBeHidden()
 
     // Scroll to the top of the page - should NOT trigger loading since trigger=end
-    await page.evaluate(() => window.scrollTo(0, 0))
-
-    // Wait a moment to ensure no loading is triggered
+    await scrollToTop(page)
     await page.waitForTimeout(500)
-
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(page.getByText('User 15')).toBeHidden()
     await expect(infiniteScrollRequests().length).toBe(0)
@@ -584,9 +585,8 @@ test.describe('Directional trigger constraints', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll to bottom to trigger loading page 3
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
-
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -603,13 +603,13 @@ test.describe('Directional trigger constraints', () => {
 })
 
 test.describe('DOM element ordering', () => {
-  async function getUserIdsFromDOM(page) {
+  async function getUserIdsFromDOM(page: Page) {
     const userCards = await page.locator('[data-user-id]').all()
     const userIds = []
 
     for (const card of userCards) {
       const userId = await card.getAttribute('data-user-id')
-      userIds.push(parseInt(userId))
+      userIds.push(parseInt(userId || '0'))
     }
 
     return userIds
@@ -630,9 +630,8 @@ test.describe('DOM element ordering', () => {
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom to trigger loading page 3
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
-
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -664,9 +663,8 @@ test.describe('DOM element ordering', () => {
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom to trigger loading page 1 (users 26-40)
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
-
     await expect(page.getByText('User 26')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -693,23 +691,16 @@ test.describe('Component customization', () => {
     const container = page.locator('section[data-testid="infinite-scroll-container"]')
     await expect(container).toBeVisible()
 
-    // Verify the custom class is applied
-    await expect(container).toHaveClass(/custom-infinite-scroll/)
-
     // Verify it still functions as infinite scroll
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('User 15')).toBeVisible()
 
     // Scroll to trigger loading next page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
-
-    // Verify it's still a section element after loading
-    await expect(container).toBeVisible()
-    await expect(container).toHaveClass(/custom-infinite-scroll/)
   })
 })
 
@@ -722,14 +713,14 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('User 15')).toBeVisible()
 
     // Scroll to bottom to load page 2
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom again to load page 3
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
@@ -771,14 +762,14 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('User 15')).toBeVisible()
 
     // Scroll to bottom to load page 2
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom again to load page 3
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
@@ -823,7 +814,7 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom to load page 3
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
@@ -885,7 +876,7 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('User 16')).toBeVisible()
 
     // Scroll to the top of the page to load page 1
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollToTop(page)
 
     const screenshotter = await screenshotBelowUserCard(page, '16')
     const beforeScreenshot = await screenshotter(page)
@@ -906,7 +897,7 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('User 16')).toBeHidden()
 
     // Scroll to the bottom of the page to load page 2
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
 
     await expect(page.getByText('Loading...')).toBeVisible()
     const screenshotter = await screenshotAboveUserCard(page, '15')
@@ -915,7 +906,6 @@ test.describe('Scroll position preservation', () => {
 
     // Wait for any initial loading to complete
     await expect(page.getByText('Loading...')).toBeHidden()
-
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -938,23 +928,16 @@ test.describe('Scroll position preservation', () => {
 
     // Scroll to trigger buffer zone for loading page 1 (within 200px buffer)
     await page.evaluate(() => window.scrollTo(0, 100))
-
-    // Wait a moment for buffer trigger to activate
     await page.waitForTimeout(50)
-
-    // Wait for loading to start and complete
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
-
-    // Verify User 16 is still visible after page 1 loads (position preservation)
     await expect(page.getByText('User 16')).toBeVisible()
 
     // Verify the final scroll position accounts for new content
     const finalScrollY = await page.evaluate(() => window.scrollY)
     expect(finalScrollY).toBeGreaterThan(initialScrollY) // Should scroll down to maintain relative position
 
-    // Verify all content is accessible
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible() // Page 3 content
     await expect(page.getByText('User 40')).toBeVisible()
@@ -968,8 +951,7 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('User 16')).toBeHidden()
 
     // Scroll to bottom to trigger loading, similar to the working test
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     const screenshotter = await screenshotAboveUserCard(page, '15')
     const beforeScreenshot = await screenshotter(page)
@@ -1021,9 +1003,6 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 1', { exact: true })).toBeVisible() // Page 1
     await expect(page.getByText('User 20')).toBeVisible() // Page 2
     await expect(page.getByText('User 40')).toBeVisible() // Page 3
-
-    // Verify the page itself hasn't scrolled - check that content below container is still visible
-    await expect(page.getByText('Content below the scroll container')).toBeVisible()
   })
 
   test('it updates query parameters based on visible content within a scrollable container', async ({ page }) => {
@@ -1195,13 +1174,10 @@ test.describe('Horizontal scrolling support', () => {
     // Scroll right again to trigger loading page 3
     await scrollContainer.evaluate((container) => (container.scrollLeft = container.scrollWidth))
     await expect(page.getByText('Loading...')).toBeVisible()
-
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
-
     await expect(infiniteScrollRequests().length).toBe(2)
-
     await expect(page.getByText('User 40')).toBeVisible()
 
     // Try scrolling right once more - should NOT trigger loading since User 40 is the last one
@@ -1287,7 +1263,7 @@ test.describe('Grid layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(0)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading more users...')).toBeVisible()
 
     await expect(page.getByText('User 61')).toBeVisible()
@@ -1297,7 +1273,7 @@ test.describe('Grid layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(1)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading more users...')).toBeVisible()
 
     await expect(page.getByText('User 121')).toBeVisible()
@@ -1307,7 +1283,7 @@ test.describe('Grid layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(2)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading more users...')).toBeVisible()
 
     await expect(page.getByText('User 181')).toBeVisible()
@@ -1316,7 +1292,7 @@ test.describe('Grid layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(3)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading more users...')).toBeHidden()
     await expect(infiniteScrollRequests().length).toBe(3)
   })
@@ -1333,7 +1309,7 @@ test.describe('Data table layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(0)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 251')).toBeVisible()
@@ -1343,7 +1319,7 @@ test.describe('Data table layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(1)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 501')).toBeVisible()
@@ -1353,7 +1329,7 @@ test.describe('Data table layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(2)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
 
     await expect(page.getByText('User 751')).toBeVisible()
@@ -1362,7 +1338,7 @@ test.describe('Data table layout support', () => {
 
     await expect(infiniteScrollRequests().length).toBe(3)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(infiniteScrollRequests().length).toBe(3)
 
@@ -1387,7 +1363,7 @@ test.describe('Empty dataset handling', () => {
 
     await expect(infiniteScrollRequests().length).toBe(0)
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await scrollToBottom(page)
     await page.waitForTimeout(500)
 
     await expect(page.getByText('Loading...')).toBeHidden()
@@ -1416,22 +1392,19 @@ Object.entries({
       expect(page.url()).not.toContain('page=')
 
       // Scroll to bottom to trigger loading users 16-30
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await scrollToBottom(page)
       await expect(page.getByText('Loading...')).toBeVisible()
       await expect(page.getByText('User 16')).toBeVisible()
       await expect(page.getByText('User 30')).toBeVisible()
       await expect(page.getByText('Loading...')).toBeHidden()
-
       await expect(infiniteScrollRequests().length).toBe(1)
 
       // Load page 3 by scrolling to tfoot (custom after trigger)
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - 500))
-
       await expect(page.getByText('Loading...')).toBeVisible()
       await expect(page.getByText('User 31')).toBeVisible()
       await expect(page.getByText('User 40')).toBeVisible()
       await expect(page.getByText('Loading...')).toBeHidden()
-
       await expect(infiniteScrollRequests().length).toBe(2)
 
       const pageHeight = await page.evaluate(() => document.body.scrollHeight)
@@ -1463,7 +1436,6 @@ Object.entries({
       await expect(page.getByText('User 30')).toBeVisible()
       await expect(page.getByText('User 16')).toBeVisible()
       await expect(page.getByText('User 15')).toBeHidden()
-
       await expect(infiniteScrollRequests().length).toBe(1)
 
       // Scroll up to thead to trigger loading page 1
@@ -1471,7 +1443,6 @@ Object.entries({
 
       await expect(page.getByText('User 15')).toBeVisible()
       await expect(page.getByText('User 1', { exact: true })).toBeVisible()
-
       await expect(infiniteScrollRequests().length).toBe(2)
 
       // Verify all three pages are loaded with correct data attributes

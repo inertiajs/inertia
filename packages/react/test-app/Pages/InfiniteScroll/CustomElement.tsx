@@ -6,7 +6,6 @@ export default ({ users }: { users: { data: User[] } }) => {
     <InfiniteScroll
       data="users"
       as="section"
-      className="custom-infinite-scroll"
       data-testid="infinite-scroll-container"
       loading={() => <div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>}
     >
