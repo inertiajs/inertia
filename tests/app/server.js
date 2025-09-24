@@ -361,6 +361,8 @@ app.get('/progress/:pageNumber', (req, res) => {
   )
 })
 
+app.get('/progress-component', (req, res) => inertia.render(req, res, { component: 'ProgressComponent' }))
+
 app.get('/merge-props', (req, res) => {
   inertia.render(req, res, {
     component: 'MergeProps',
