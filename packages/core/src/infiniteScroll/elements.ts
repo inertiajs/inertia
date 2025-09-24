@@ -52,7 +52,7 @@ export const useInfiniteScrollElementManager = (options: {
     // The rootMargin creates a buffer zone so loading starts before user reaches the edge
     const observerOptions: IntersectionObserverInit = {
       root: options.getScrollableParent(),
-      rootMargin: `${options.getTriggerMargin()}px`,
+      rootMargin: `${Math.max(1, options.getTriggerMargin())}px`,
     }
 
     topElementObserver = intersectionObservers.new(options.onTopTriggered, observerOptions)
