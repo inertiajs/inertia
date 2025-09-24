@@ -1,45 +1,48 @@
 <script lang="ts">
   import { WhenVisible } from '@inertiajs/svelte5'
 
-  let { count = 0 } = $props()
-  let countState = $state(count)
+  let { count: initialCount = 0 } = $props()
+  let count = $state(initialCount)
 </script>
 
 <div style="margin-top: 5000px">
   <WhenVisible data="foo">
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading first one...</div>
-    </svelte:fragment>
-
-    <div>First one is visible!</div>
+    {/snippet}
+    {#snippet children()}
+      <div>First one is visible!</div>
+    {/snippet}
   </WhenVisible>
 </div>
 
 <div style="margin-top: 5000px">
   <WhenVisible buffer={1000} data="foo">
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading second one...</div>
-    </svelte:fragment>
-
-    <div>Second one is visible!</div>
+    {/snippet}
+    {#snippet children()}
+      <div>Second one is visible!</div>
+    {/snippet}
   </WhenVisible>
 </div>
 
 <div style="margin-top: 5000px">
   <WhenVisible data="foo" always>
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading third one...</div>
-    </svelte:fragment>
-
-    <div>Third one is visible!</div>
+    {/snippet}
+    {#snippet children()}
+      <div>Third one is visible!</div>
+    {/snippet}
   </WhenVisible>
 </div>
 
 <div style="margin-top: 5000px">
   <WhenVisible data="foo">
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading fourth one...</div>
-    </svelte:fragment>
+    {/snippet}
   </WhenVisible>
 </div>
 
@@ -55,10 +58,11 @@
       },
     }}
   >
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading fifth one...</div>
-    </svelte:fragment>
-
-    <div>Count is now {count}</div>
+    {/snippet}
+    {#snippet children()}
+      <div>Count is now {count}</div>
+    {/snippet}
   </WhenVisible>
 </div>
