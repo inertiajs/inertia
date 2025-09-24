@@ -5,7 +5,8 @@
 <div>
   <h1>OnSubmitComplete Reset Test</h1>
 
-  <Form method="post" let:errors onSubmitComplete={(props) => props.reset('name')}>
+  <Form method="post" onSubmitComplete={(props) => props.reset('name')}>
+    {#snippet children({ errors })}
     <div>
       <input type="text" name="name" id="name" placeholder="Name" value="John Doe" />
       {#if errors.name}
@@ -23,5 +24,6 @@
     <div>
       <button type="submit">Submit</button>
     </div>
+    {/snippet}
   </Form>
 </div>
