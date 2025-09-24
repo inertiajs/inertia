@@ -2,6 +2,7 @@
 
 use App\Models\ChatMessage;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -244,12 +245,70 @@ Route::post('/messages', function (Request $request) {
 });
 
 Route::get('/chat', function () {
-    if (request()->inertia()) {
+    if (request()->header('X-Inertia-Partial-Component')) {
         usleep(500_000);
     }
 
     return inertia('Chat', [
         'messages' => Inertia::scroll(ChatMessage::latest('id')->cursorPaginate(10)),
+    ]);
+});
+
+Route::get('/photo-grid/{horizontal?}', function ($horizontal =null) {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        usleep(500_000);
+    }
+
+    $perPage = 24;
+    $pages = 30;
+    $total =$perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $photos = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'url' => "https://picsum.photos/id/{$i}/300/300",
+        ])
+        ->pipe(fn($photos) => new LengthAwarePaginator(
+            $photos,
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia($horizontal?'PhotoHorizontal':'PhotoGrid', [
+        'photos' => Inertia::scroll($photos),
+    ]);
+});
+
+Route::get('/data-table', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        usleep(500_000);
+    }
+
+    $perPage = 500;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $users = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'name' => "User {$i}",
+        ])
+        ->pipe(fn($photos) => new LengthAwarePaginator(
+            $photos,
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia('DataTable', [
+        'users' => Inertia::scroll($users),
     ]);
 });
 

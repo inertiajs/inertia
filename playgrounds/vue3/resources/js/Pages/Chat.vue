@@ -88,16 +88,16 @@ const isLastMessage = (message: Message) => {
 </script>
 
 <template>
-  <Head title="AI Chat" />
+  <Head title="Chat" />
 
-  <div class="relative flex h-[calc(100vh-88px)] flex-col bg-gray-50">
+  <div class="relative flex h-[calc(100vh-80px)] flex-col bg-gray-50">
     <div ref="scrollContainer" class="h-full flex-1 overflow-y-auto">
       <InfiniteScroll reverse data="messages" class="mx-auto grid max-w-3xl gap-6 px-8 py-16">
         <div
           v-for="message in reversedMessages"
           :key="message.id"
           :class="{
-            'min-h-[calc(100vh-88px-131px-64px)]': isLastMessage(message) && requestCount > 0,
+            'min-h-[calc(100vh-80px-131px-64px)]': isLastMessage(message) && requestCount > 0,
           }"
         >
           <MessageComponent :message />
