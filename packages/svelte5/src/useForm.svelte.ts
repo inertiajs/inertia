@@ -1,11 +1,12 @@
 import type {
-  Errors,
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
   FormDataType,
+  FormDataValues,
   Method,
   Progress,
+  UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
@@ -21,16 +22,20 @@ export interface InertiaFormProps<TForm extends object> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   processing: boolean
+  setStore(data: TForm): void
+  setStore<T extends FormDataKeys<TForm>>(key: T, value: FormDataValues<TForm, T>): void
+  setStore(key: keyof InertiaFormProps<TForm>, value: any): void
   data(): TForm
-  transform(callback: (data: TForm) => object): InertiaFormRunes<TForm>
-  defaults(field?: FormDataKeys<TForm>, value?: unknown): InertiaFormRunes<TForm>
-  defaults(fields?: Partial<TForm>): InertiaFormRunes<TForm>
-  defaults(): InertiaFormRunes<TForm>
-  reset(...fields: FormDataKeys<TForm>[]): InertiaFormRunes<TForm>
-  setError(field: FormDataKeys<TForm>, value: ErrorValue): InertiaFormRunes<TForm>
-  setError(errors: FormDataErrors<TForm>): InertiaFormRunes<TForm>
-  clearErrors(...fields: FormDataKeys<TForm>[]): InertiaFormRunes<TForm>
-  submit(method: Method, url: string, options?: FormOptions): void
+  transform(callback: (data: TForm) => object): this
+  defaults(): this
+  defaults(fields: Partial<TForm>): this
+  defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
+  setError(errors: FormDataErrors<TForm>): this
+  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void
@@ -41,158 +46,187 @@ export interface InertiaFormProps<TForm extends object> {
 
 export type InertiaFormRunes<TForm extends object> = InertiaFormProps<TForm> & TForm
 
-export default function useForm<TForm extends FormDataType<TForm>>(
-  data: TForm | (() => TForm)
-): InertiaFormRunes<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaFormRunes<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
-  data: TForm | (() => TForm)
+  data: TForm | (() => TForm),
 ): InertiaFormRunes<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrData: string | TForm | (() => TForm),
-  maybeData?: TForm | (() => TForm)
+  maybeData?: TForm | (() => TForm),
 ): InertiaFormRunes<TForm> {
   const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
   const inputData = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
   const initialData: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)
-  
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
     : null
 
+  // Separate reactive variables for better Svelte 5 runes compatibility - based on successful memory approach
   let defaults = $state(cloneDeep(initialData))
-  let cancelToken: { cancel: () => void } | null = null
-  let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
-  let transform = (data: TForm) => data as object
-  let defaultsCalledInOnSuccess = false
-
-  // Create reactive state using $state runes
-  let formData = $state<TForm>(restored ? restored.data : initialData)
+  let formData = $state({...(restored ? restored.data : initialData)})
+  let errors = $state((restored ? restored.errors : {}) as FormDataErrors<TForm>)
   let isDirty = $state(false)
-  let errors = $state<FormDataErrors<TForm>>((restored ? restored.errors : {}) as FormDataErrors<TForm>)
   let hasErrors = $state(false)
-  let progress = $state<Progress | null>(null)
+  let progress = $state(null as Progress | null)
   let wasSuccessful = $state(false)
   let recentlySuccessful = $state(false)
   let processing = $state(false)
+  
+  let cancelToken: { cancel: () => void } | null = null
+  let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
+  let transform = (data: TForm) => data as object
+  // Track if defaults was called manually during onSuccess to avoid
+  // overriding user's custom defaults with automatic behavior.
+  let defaultsCalledInOnSuccess = false
 
-  // Derived state for hasErrors
-  $effect(() => {
-    hasErrors = Object.keys(errors).length > 0
+  // Create the form object with reactive properties using runes
+  const form = {} as any
+  
+  // Add reactive getters for state properties
+  Object.defineProperty(form, 'isDirty', { get: () => isDirty })
+  Object.defineProperty(form, 'errors', { get: () => errors })
+  Object.defineProperty(form, 'hasErrors', { get: () => hasErrors })
+  Object.defineProperty(form, 'progress', { get: () => progress })
+  Object.defineProperty(form, 'wasSuccessful', { get: () => wasSuccessful })
+  Object.defineProperty(form, 'recentlySuccessful', { get: () => recentlySuccessful })
+  Object.defineProperty(form, 'processing', { get: () => processing })
+  
+  // Add reactive getters/setters for form data properties
+  Object.keys(initialData).forEach(key => {
+    Object.defineProperty(form, key, {
+      get: () => formData[key as keyof TForm],
+      set: (value) => { formData[key as keyof TForm] = value },
+      enumerable: true,
+      configurable: true
+    })
   })
 
-  // Derived state for isDirty
-  $effect(() => {
-    isDirty = !isEqual(getData(), defaults)
-  })
-
-  function getData(): TForm {
-    return Object.keys(initialData).reduce((carry, key) => {
-      return set(carry, key, get(formData, key))
-    }, {} as TForm)
-  }
-
-  function setFormData(keyOrData: keyof TForm | TForm, maybeValue?: unknown) {
-    if (typeof keyOrData === 'string') {
-      set(formData, keyOrData, maybeValue)
-    } else {
-      // For runes, we need to update each property individually to trigger reactivity
-      Object.keys(keyOrData).forEach(key => {
-        set(formData, key, get(keyOrData, key))
-      })
-    }
-  }
-
-  // Create reactive getters for all form data properties
-  const formDataGetters = Object.keys(initialData).reduce((carry, key) => {
-    return {
-      ...carry,
-      get [key]() { return get(formData, key) }
-    }
-  }, {} as TForm)
-
-  const form: InertiaFormRunes<TForm> = {
-    ...formDataGetters,
-    get isDirty() { return isDirty },
-    get errors() { return errors },
-    get hasErrors() { return hasErrors },
-    get progress() { return progress },
-    get wasSuccessful() { return wasSuccessful },
-    get recentlySuccessful() { return recentlySuccessful },
-    get processing() { return processing },
-
+  // Add methods to form object
+  Object.assign(form, {
+    
+    // setStore method to update reactive variables
+    setStore(keyOrData: any, maybeValue?: any) {
+      if (typeof keyOrData === 'string') {
+        // Update specific reactive variables
+        switch (keyOrData) {
+          case 'isDirty':
+            isDirty = maybeValue
+            break
+          case 'errors':
+            errors = maybeValue
+            break
+          case 'hasErrors':
+            hasErrors = maybeValue
+            break
+          case 'progress':
+            progress = maybeValue
+            break
+          case 'wasSuccessful':
+            wasSuccessful = maybeValue
+            break
+          case 'recentlySuccessful':
+            recentlySuccessful = maybeValue
+            break
+          case 'processing':
+            processing = maybeValue
+            break
+          default:
+            // Update form data
+            set(formData, keyOrData, maybeValue)
+            break
+        }
+      } else {
+        // Update form data with object
+        Object.assign(formData, keyOrData)
+      }
+    },
+    
     data() {
-      return getData()
+      return Object.keys(initialData).reduce((carry, key) => {
+        return set(carry, key, get(formData, key))
+      }, {} as TForm)
     },
-
-    transform(callback) {
+    
+    transform(callback: (data: TForm) => object) {
       transform = callback
-      return form
+      return this
     },
-
+    
     defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
       defaultsCalledInOnSuccess = true
 
       if (typeof fieldOrFields === 'undefined') {
-        defaults = cloneDeep(getData())
-      } else if (typeof fieldOrFields === 'string') {
-        // Update single field
-        const newDefaults = cloneDeep(defaults)
-        set(newDefaults, fieldOrFields, maybeValue)
-        defaults = newDefaults
+        defaults = cloneDeep(this.data())
       } else {
-        // Update multiple fields
-        const newDefaults = cloneDeep(defaults)
-        Object.keys(fieldOrFields).forEach(key => {
-          set(newDefaults, key, get(fieldOrFields, key))
-        })
-        defaults = newDefaults
+        defaults =
+          typeof fieldOrFields === 'string'
+            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
+            : Object.assign(cloneDeep(defaults), fieldOrFields)
       }
 
-      return form
+      return this
     },
-
+    
     reset(...fields: FormDataKeys<TForm>[]) {
+      const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
-        // Reset all fields
-        const clonedData = cloneDeep(defaults)
-        setFormData(clonedData)
+        this.setStore(clonedData)
       } else {
-        // Reset specific fields
-        fields.forEach(field => {
-          if (has(defaults, field)) {
-            const defaultValue = get(defaults, field)
-            setFormData(field as keyof TForm, defaultValue)
-          }
-        })
+        this.setStore(
+          fields
+            .filter((key) => has(clonedData, key))
+            .reduce((carry, key) => {
+              return set(carry, key, get(clonedData, key))
+            }, {} as TForm),
+        )
       }
 
-      return form
+      return this
     },
-
+    
     setError(fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
-      errors = {
-        ...errors,
+      this.setStore('errors', {
+        ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as FormDataErrors<TForm>),
-      }
+      })
 
-      return form
+      return this
     },
-
+    
     clearErrors(...fields: FormDataKeys<TForm>[]) {
-      errors = Object.keys(errors).reduce(
-        (carry, field) => ({
-          ...carry,
-          ...(fields.length > 0 && !fields.includes(field as FormDataKeys<TForm>) ? { [field]: errors[field as keyof FormDataErrors<TForm>] } : {}),
-        }),
-        {} as FormDataErrors<TForm>
+      this.setStore(
+        'errors',
+        Object.keys(this.errors).reduce(
+          (carry, field) => ({
+            ...carry,
+            ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
+          }),
+          {},
+        ) as FormDataErrors<TForm>,
       )
-
-      return form
+      return this
     },
+    
+    resetAndClearErrors(...fields: FormDataKeys<TForm>[]) {
+      this.reset(...fields)
+      this.clearErrors(...fields)
+      return this
+    },
+    
+    submit(...args: any[]) {
+      const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
-    submit(method: Method, url: string, options: FormOptions = {}) {
-      const data = transform(getData())
+      const method = objectPassed ? args[0].method : args[0]
+      const url = objectPassed ? args[0].url : args[1]
+      const options = (objectPassed ? args[1] : args[2]) ?? {}
+
+      defaultsCalledInOnSuccess = false
+
+      const data = transform(Object.keys(initialData).reduce((carry, key) => {
+        return set(carry, key, get(formData, key))
+      }, {} as TForm)) as any
+
       const _options = {
         ...options,
         onCancelToken: (token: { cancel: () => void }) => {
@@ -202,11 +236,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onCancelToken(token)
           }
         },
-        onBefore: (visit) => {
-          wasSuccessful = false
-          recentlySuccessful = false
-          defaultsCalledInOnSuccess = false
-
+        onBefore: (visit: any) => {
+          this.setStore('wasSuccessful', false)
+          this.setStore('recentlySuccessful', false)
           if (recentlySuccessfulTimeoutId) {
             clearTimeout(recentlySuccessfulTimeoutId)
           }
@@ -215,59 +247,56 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onBefore(visit)
           }
         },
-        onStart: (visit) => {
-          processing = true
+        onStart: (visit: any) => {
+          this.setStore('processing', true)
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
-        onProgress: (event) => {
-          progress = event
+        onProgress: (event?: any) => {
+          this.setStore('progress', event as any)
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
-        onSuccess: async (page) => {
-          processing = false
-          progress = null
-          errors = {} as FormDataErrors<TForm>
-          wasSuccessful = true
-          recentlySuccessful = true
+        onSuccess: async (page: any) => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
+          this.clearErrors()
+          this.setStore('wasSuccessful', true)
+          this.setStore('recentlySuccessful', true)
+          recentlySuccessfulTimeoutId = setTimeout(() => this.setStore('recentlySuccessful', false), 2000)
 
-          recentlySuccessfulTimeoutId = setTimeout(() => {
-            recentlySuccessful = false
-          }, 2000)
-
-          const result = options.onSuccess ? await options.onSuccess(page) : null
+          const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 
           if (!defaultsCalledInOnSuccess) {
-            form.defaults()
+            this.defaults(cloneDeep(this.data()))
           }
 
-          return result
+          return onSuccess
         },
-        onError: async (errorResponse) => {
-          processing = false
-          progress = null
-          errors = errorResponse as FormDataErrors<TForm>
+        onError: (errors: any) => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
+          this.clearErrors().setError(errors)
 
           if (options.onError) {
-            return await options.onError(errorResponse)
+            return options.onError(errors)
           }
         },
         onCancel: () => {
-          processing = false
-          progress = null
+          this.setStore('processing', false)
+          this.setStore('progress', null)
 
           if (options.onCancel) {
             return options.onCancel()
           }
         },
-        onFinish: (visit) => {
-          processing = false
-          progress = null
+        onFinish: (visit: any) => {
+          this.setStore('processing', false)
+          this.setStore('progress', null)
           cancelToken = null
 
           if (options.onFinish) {
@@ -278,58 +307,60 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       if (method === 'delete') {
         router.delete(url, { ..._options, data })
-      } else {
-        router[method](url, data, _options)
+      } else if (method === 'get') {
+        router.get(url, data, _options)
+      } else if (method === 'post') {
+        router.post(url, data, _options)
+      } else if (method === 'put') {
+        router.put(url, data, _options)
+      } else if (method === 'patch') {
+        router.patch(url, data, _options)
       }
     },
-
-    get(url: string, options: FormOptions = {}) {
-      form.submit('get', url, options)
+    
+    get(url: string, options?: FormOptions) {
+      this.submit('get', url, options)
     },
-
-    post(url: string, options: FormOptions = {}) {
-      form.submit('post', url, options)
+    
+    post(url: string, options?: FormOptions) {
+      this.submit('post', url, options)
     },
-
-    put(url: string, options: FormOptions = {}) {
-      form.submit('put', url, options)
+    
+    put(url: string, options?: FormOptions) {
+      this.submit('put', url, options)
     },
-
-    patch(url: string, options: FormOptions = {}) {
-      form.submit('patch', url, options)
+    
+    patch(url: string, options?: FormOptions) {
+      this.submit('patch', url, options)
     },
-
-    delete(url: string, options: FormOptions = {}) {
-      form.submit('delete', url, options)
+    
+    delete(url: string, options?: FormOptions) {
+      this.submit('delete', url, options)
     },
-
+    
     cancel() {
       cancelToken?.cancel()
-    },
-  } as InertiaFormRunes<TForm>
-
-  // Set up reactive updates for form data properties
-  $effect(() => {
-    Object.keys(initialData).forEach(key => {
-      Object.defineProperty(form, key, {
-        get() {
-          return get(formData, key)
-        },
-        set(value) {
-          set(formData, key, value)
-        },
-        enumerable: true,
-        configurable: true
-      })
-    })
-  })
-
-  // Set up remember functionality
-  $effect(() => {
-    if (rememberKey) {
-      router.remember({ data: formData, errors }, rememberKey)
     }
   })
 
-  return form
+  // Update isDirty and hasErrors reactively using $effect
+  $effect(() => {
+    isDirty = !isEqual(formData, defaults)
+  })
+  
+  $effect(() => {
+    hasErrors = Object.keys(errors).length > 0
+  })
+
+  // Handle remember functionality
+  $effect(() => {
+    if (rememberKey) {
+      const currentData = Object.keys(initialData).reduce((carry, key) => {
+        return set(carry, key, get(formData, key))
+      }, {} as TForm)
+      router.remember({ data: currentData, errors }, rememberKey)
+    }
+  })
+
+  return form as InertiaFormRunes<TForm>
 }
