@@ -2,8 +2,7 @@
   import { Deferred, router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
-  export let foo: { text: string } | undefined
-  export let bar: { text: string } | undefined
+  const { foo, bar }: { foo?: { text: string }; bar?: { text: string } } = $props()
 
   onMount(() => {
     router.reload({
