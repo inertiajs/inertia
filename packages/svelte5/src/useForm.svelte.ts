@@ -103,8 +103,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   }
 
+  // Create reactive getters for all form data properties
+  const formDataGetters = Object.keys(initialData).reduce((carry, key) => {
+    return {
+      ...carry,
+      get [key]() { return get(formData, key) }
+    }
+  }, {} as TForm)
+
   const form: InertiaFormRunes<TForm> = {
-    ...formData,
+    ...formDataGetters,
     get isDirty() { return isDirty },
     get errors() { return errors },
     get hasErrors() { return hasErrors },
