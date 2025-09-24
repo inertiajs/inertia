@@ -8,58 +8,60 @@
   })
 
   const submit = () => {
-    $form.post('/form-helper/errors')
+    form.post('/form-helper/errors')
   }
 
   const clearErrors = () => {
-    $form.clearErrors()
+    form.clearErrors()
   }
 
   const clearError = () => {
-    $form.clearErrors('handle')
+    form.clearErrors('handle')
   }
 
   const setErrors = () => {
-    $form.setError({
+    form.setError({
       name: 'Manually set Name error',
       handle: 'Manually set Handle error',
     })
   }
 
   const setError = () => {
-    $form.setError('handle', 'Manually set Handle error')
+    form.setError('handle', 'Manually set Handle error')
   }
 
   const resetAndClearErrors = () => {
-    $form.resetAndClearErrors()
+    form.reset()
+    form.clearErrors()
   }
 
   const resetHandle = () => {
-    $form.resetAndClearErrors('handle')
+    form.reset('handle')
+    form.clearErrors('handle')
   }
 </script>
 
 <div>
   <label>
     Full Name
-    <input type="text" id="name" name="name" bind:value={$form.name} />
+    <input type="text" id="name" name="name" bind:value={form.name} />
   </label>
-  {#if $form.errors.name}
-    <span class="name_error">{$form.errors.name}</span>
+  {#if form.errors.name}
+    <span class="name_error">{form.errors.name}</span>
   {/if}
   <label>
     Handle
-    <input type="text" id="handle" name="handle" bind:value={$form.handle} />
+    <input type="text" id="handle" name="handle" bind:value={form.handle} />
   </label>
-  {#if $form.errors.handle}
-    <span class="handle_error">{$form.errors.handle}</span>
+  {#if form.errors.handle}
+    <span class="handle_error">{form.errors.handle}</span>
   {/if}
   <label>
     Remember Me
-    <input type="checkbox" id="remember" name="remember" bind:checked={$form.remember} />
+    <input type="checkbox" id="remember" name="remember" bind:checked={form.remember} />
   </label>
-  {#if $form.errors.remember}
-    <span class="remember_error">{$form.errors.remember}</span>
+  {#if form.errors.remember}
+    <span class="remember_error">{form.errors.remember}</span>
   {/if}
 
   <button on:click={submit} class="submit">Submit form</button>
@@ -71,5 +73,5 @@
   <button on:click={resetAndClearErrors} class="reset-all">Reset all</button>
   <button on:click={resetHandle} class="reset-handle">Reset handle</button>
 
-  <span class="errors-status">Form has {$form.hasErrors ? '' : 'no '}errors</span>
+  <span class="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
 </div>
