@@ -8,7 +8,12 @@
 <script lang="ts">
   import { inertia, page } from '@inertiajs/svelte5'
 
-  window._inertia_page_props = page.props
+  // Update props reactively when page changes
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      window._inertia_page_props = $page.props
+    }
+  })
 </script>
 
 <div>

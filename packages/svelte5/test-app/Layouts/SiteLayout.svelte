@@ -6,8 +6,14 @@
 
   onMount(() => {
     window._inertia_layout_id = crypto.randomUUID()
-    window._inertia_site_layout_props = page.props
     createdAt = Date.now()
+  })
+
+  // Update props reactively when page changes
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      window._inertia_site_layout_props = $page.props
+    }
   })
 </script>
 

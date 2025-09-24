@@ -2,13 +2,17 @@
   import { page, router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
-  export let foo
-  export let bar
-  export let baz
-  export let headers
+  const { foo, bar, baz, headers } = $props()
 
   onMount(() => {
-    window._inertia_props = page.props
+    // Other initialization if needed
+  })
+
+  // Update props reactively when page changes
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      window._inertia_props = $page.props
+    }
   })
 
   const partialReloadVisit = () => {

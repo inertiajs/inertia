@@ -20,8 +20,14 @@
 
   onMount(() => {
     window._inertia_page_key = crypto.randomUUID()
-    window._inertia_props = $page.props
     window._plugin_global_props = {}
+  })
+
+  // Update props reactively when page changes
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      window._inertia_props = $page.props
+    }
   })
 </script>
 
