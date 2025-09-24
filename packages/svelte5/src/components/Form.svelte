@@ -74,7 +74,9 @@
   let isDirty = $state(false)
   let defaultData: FormData = new FormData()
 
-  const _method = $derived(isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method']))
+  const _method = $derived(
+    isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method']),
+  )
   const _action = $derived(isUrlMethodPair(action) ? action.url : action)
 
   function getFormData(): FormData {
@@ -223,6 +225,6 @@
     reset,
     defaults,
     submit,
-    data: form
+    data: form,
   })}
 </form>

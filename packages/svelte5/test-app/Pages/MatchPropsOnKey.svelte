@@ -1,17 +1,21 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  const { foo, bar, baz }: {
+  const {
+    foo,
+    bar,
+    baz,
+  }: {
     foo: {
-      page: number;
-      data: Array<{ name: string }>;
-      companies: Array<{ name: string }>;
-      teams: Array<{ name: string }>;
-      per_page: number;
-      meta: { label: string };
-    };
-    bar: number[];
-    baz: number[];
+      page: number
+      data: Array<{ name: string }>
+      companies: Array<{ name: string }>
+      teams: Array<{ name: string }>
+      per_page: number
+      meta: { label: string }
+    }
+    bar: number[]
+    baz: number[]
   } = $props()
 
   let page = $state(foo.page)

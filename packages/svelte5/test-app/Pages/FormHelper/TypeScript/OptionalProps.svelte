@@ -8,10 +8,12 @@
     remember: boolean
   }
 
-  const { user = null }: {
+  const {
+    user = null,
+  }: {
     user?: {
-      username?: string | null;
-    } | null;
+      username?: string | null
+    } | null
   } = $props()
 
   useForm<LoginData>({

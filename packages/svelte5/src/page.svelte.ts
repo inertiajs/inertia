@@ -12,7 +12,7 @@ export const pageState = $state<SveltePage>({
   component: '',
   props: {},
   url: '',
-  version: ''
+  version: '',
 } as SveltePage)
 
 // Create a Svelte store for backward compatibility with $page syntax
@@ -24,14 +24,14 @@ export const setPage = (newPage: SveltePage) => {
   pageState.props = newPage.props
   pageState.url = newPage.url
   pageState.version = newPage.version
-  
+
   // Copy any additional properties
-  Object.keys(newPage).forEach(key => {
+  Object.keys(newPage).forEach((key) => {
     if (key !== 'component' && key !== 'props' && key !== 'url' && key !== 'version') {
       ;(pageState as any)[key] = (newPage as any)[key]
     }
   })
-  
+
   // Also update the store for backward compatibility
   setPageStore(pageState)
 }

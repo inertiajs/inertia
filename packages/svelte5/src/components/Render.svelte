@@ -38,8 +38,13 @@
 
 <script lang="ts">
   import Render from './Render.svelte'
-  
-  const { component, props = {}, children = [], key = null }: {
+
+  const {
+    component,
+    props = {},
+    children = [],
+    key = null,
+  }: {
     component: ComponentType
     props?: PageProps
     children?: RenderProps[]

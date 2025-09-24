@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test'
 
 test('renders the title tag and children', async ({ page }) => {
-  test.skip(process.env.PACKAGE === 'svelte' || process.env.PACKAGE === 'svelte5', 'Svelte adapter has no Head component')
+  test.skip(
+    process.env.PACKAGE === 'svelte' || process.env.PACKAGE === 'svelte5',
+    'Svelte adapter has no Head component',
+  )
 
   await page.goto('/head')
 

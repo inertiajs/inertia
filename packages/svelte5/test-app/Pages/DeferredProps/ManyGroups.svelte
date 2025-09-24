@@ -1,12 +1,18 @@
 <script lang="ts">
   import { Deferred, inertia } from '@inertiajs/svelte5'
 
-  const { foo, bar, baz, qux, quux }: {
-    foo?: { text: string };
-    bar?: { text: string };
-    baz?: { text: string };
-    qux?: { text: string };
-    quux?: { text: string };
+  const {
+    foo,
+    bar,
+    baz,
+    qux,
+    quux,
+  }: {
+    foo?: { text: string }
+    bar?: { text: string }
+    baz?: { text: string }
+    qux?: { text: string }
+    quux?: { text: string }
   } = $props()
 </script>
 

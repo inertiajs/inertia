@@ -4,11 +4,7 @@
   let errorBag: string | null = null
 </script>
 
-<Form
-  action={errorBag ? '/form-component/errors/bag' : '/form-component/errors'}
-  method="post"
-  {errorBag}
->
+<Form action={errorBag ? '/form-component/errors/bag' : '/form-component/errors'} method="post" {errorBag}>
   {#snippet children({ errors, hasErrors, setError, clearErrors })}
     <h1>Form Errors</h1>
 

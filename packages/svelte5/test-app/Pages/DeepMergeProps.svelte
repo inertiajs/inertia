@@ -1,10 +1,14 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  const { foo, bar, baz }: {
-    foo: { page: number; data: number[]; per_page: number; meta: { label: string } };
-    bar: number[];
-    baz: number[];
+  const {
+    foo,
+    bar,
+    baz,
+  }: {
+    foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
+    bar: number[]
+    baz: number[]
   } = $props()
 
   let page = $state(foo.page)

@@ -3,13 +3,20 @@
   import type { Method } from '@inertiajs/core'
   import type { MulterFile } from '../types'
 
-  const { headers, method, form, files = {}, url, query }: {
-    headers: Record<string, string>;
-    method: Method;
-    form: Record<string, unknown>;
-    files?: MulterFile[] | object;
-    url: string;
-    query: Record<string, unknown>;
+  const {
+    headers,
+    method,
+    form,
+    files = {},
+    url,
+    query,
+  }: {
+    headers: Record<string, string>
+    method: Method
+    form: Record<string, unknown>
+    files?: MulterFile[] | object
+    url: string
+    query: Record<string, unknown>
   } = $props()
 
   const dump = {

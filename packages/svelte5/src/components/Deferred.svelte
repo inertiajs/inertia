@@ -1,7 +1,11 @@
 <script lang="ts">
   import { pageState } from '../page.svelte'
 
-  const { data, children, fallback }: { 
+  const {
+    data,
+    children,
+    fallback,
+  }: {
     data: string | string[]
     children?: any
     fallback?: any
@@ -17,7 +21,7 @@
     $effect(() => {
       // Access pageState.props to make this effect reactive
       const props = pageState.props
-      
+
       // Ensures the content isn't loaded before the deferred props are available
       window.queueMicrotask(() => {
         const newLoaded = keys.every((key) => typeof props[key] !== 'undefined')

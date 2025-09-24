@@ -96,7 +96,7 @@
     {
       a: { href: _href },
       button: { type: 'button' },
-    }[asProp] || {}
+    }[asProp] || {},
   )
 </script>
 

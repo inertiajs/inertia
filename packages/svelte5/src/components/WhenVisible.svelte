@@ -9,7 +9,7 @@
     as = 'div',
     always = false,
     children,
-    fallback
+    fallback,
   }: {
     data?: string | string[]
     params?: ReloadOptions
