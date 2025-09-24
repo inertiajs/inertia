@@ -223,18 +223,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           const result = options.onSuccess ? await options.onSuccess(page) : null
 
           if (!defaultsCalledInOnSuccess) {
-            defaults = cloneDeep(getData())
+            form.defaults()
           }
 
           return result
         },
-        onError: async (errors) => {
+        onError: async (errorResponse) => {
           processing = false
           progress = null
-          form.errors = errors as FormDataErrors<TForm>
+          errors = errorResponse as FormDataErrors<TForm>
 
           if (options.onError) {
-            return await options.onError(errors)
+            return await options.onError(errorResponse)
           }
         },
         onCancel: () => {
