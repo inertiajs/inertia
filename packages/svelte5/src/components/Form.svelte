@@ -9,9 +9,9 @@
     type VisitOptions,
     isUrlMethodPair,
   } from '@inertiajs/core'
+  import useForm from '../useForm'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
-  import useForm from '../useForm.svelte'
 
   const noop = () => undefined
 
