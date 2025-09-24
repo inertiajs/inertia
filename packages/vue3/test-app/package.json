@@ -7,10 +7,10 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
     "nodemon": "^3.0.0",
-    "typescript": "^5.2.2",
+    "typescript": "^5.9.2",
     "vite": "^6.3.0",
-    "vue-tsc": "^2.2.4",
-    "vue": "^3.4.33"
+    "vue": "^3.4.33",
+    "vue-tsc": "^2.2.4"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

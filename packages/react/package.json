@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "2.1.6",
+  "version": "2.1.10",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -58,7 +58,7 @@
     "esbuild": "^0.25.0",
     "esbuild-node-externals": "^1.6.0",
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
-    "typescript": "^4.9.4"
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
