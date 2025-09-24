@@ -1,3 +1,4 @@
+import { AxiosInstance } from 'axios'
 import { hideProgress, revealProgress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -66,6 +67,10 @@ export class Router {
     eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
       this.loadDeferredProps(deferredProps)
     })
+  }
+
+  public setAxiosInstance(axiosInstance: AxiosInstance): void {
+    Request.setAxiosInstance(axiosInstance)
   }
 
   public get<T extends RequestPayload = RequestPayload>(
