@@ -10,19 +10,13 @@
       <div>
         <input type="text" name="name" id="name" placeholder="Name" value="John Doe" />
         {#if errors.name}
-          <div>{errors.name}</div>
+          <p id="error_name">{errors.name}</p>
         {/if}
       </div>
 
       <div>
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email" value="john@doe.biz" />
-        {#if errors.email}
-          <div>{errors.email}</div>
-        {/if}
+        <button type="submit">Submit</button>
       </div>
-
-      <button type="submit">Submit</button>
     {/snippet}
   </Form>
 </div>
