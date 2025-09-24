@@ -843,6 +843,9 @@ app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerStartBuffer'),
 )
 app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
+app.get('/infinite-scroll/manual-reverse', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),
+)
 app.get('/infinite-scroll/update-query-string', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/UpdateQueryString'),
 )

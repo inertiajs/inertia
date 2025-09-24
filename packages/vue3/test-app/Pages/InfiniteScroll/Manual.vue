@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <InfiniteScroll data="users" style="display: grid; gap: 20px" manual>
-    <template #before="{ loading, fetch, hasMore }">
+    <template #previous="{ loading, fetch, hasMore }">
       <p>Has more previous items: {{ hasMore }}</p>
 
       <button @click="fetch">
@@ -19,7 +19,7 @@ defineProps<{
 
     <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
-    <template #after="{ loading, fetch, hasMore }">
+    <template #next="{ loading, fetch, hasMore }">
       <p>Has more next items: {{ hasMore }}</p>
 
       <button @click="fetch">

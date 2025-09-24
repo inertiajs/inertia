@@ -406,38 +406,6 @@ test.describe('Toggle configuration', () => {
     await smoothScrollTo(page, newPageHeight)
     await expectQueryString(page, '3')
   })
-
-  test('it toggles between normal and reverse order when reverse prop changes', async ({ page }) => {
-    requests.listen(page)
-    await page.goto('/infinite-scroll/toggles?page=2')
-
-    // Make sure both triggers are enabled
-    await page.selectOption('select', 'both')
-    await expect(page.getByText('Trigger: both')).toBeVisible()
-
-    // Start on page 2, should auto-load page 1 because trigger=both
-    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
-    await expect(page.getByText('User 30')).toBeVisible()
-    await expect(page.getByText('User 31')).toBeHidden()
-    await expect(page.getByText('Total items on page: 30')).toBeVisible()
-
-    // Scroll to top, nothing should happen yet
-    await scrollToTop(page)
-    await page.waitForTimeout(500)
-    await expect(page.getByText('User 31')).toBeHidden()
-    await expect(page.getByText('Total items on page: 30')).toBeVisible()
-
-    // Enable reverse mode
-    await page.getByLabel('Reverse: false').check()
-    await expect(page.getByText('Reverse: true')).toBeVisible()
-
-    // Scroll to top again, should now load page 3 because reverse=true and trigger=both
-    await scrollToTop(page)
-    await expect(page.getByText('User 31')).toBeVisible()
-    await expect(page.getByText('User 40')).toBeVisible()
-    await expect(page.getByText('Total items on page: 40')).toBeVisible()
-    await expect(infiniteScrollRequests().length).toBe(2)
-  })
 })
 
 test.describe('Buffer margin configuration', () => {

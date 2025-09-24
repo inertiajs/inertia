@@ -69,11 +69,11 @@ const InfiniteScroll = defineComponent({
       type: [String, Function, Object] as PropType<string | (() => HTMLElement | null | undefined)>,
       default: null,
     },
-    beforeElement: {
+    startElement: {
       type: [String, Function, Object] as PropType<string | (() => HTMLElement | null | undefined)>,
       default: null,
     },
-    afterElement: {
+    endElement: {
       type: [String, Function, Object] as PropType<string | (() => HTMLElement | null | undefined)>,
       default: null,
     },
@@ -81,20 +81,18 @@ const InfiniteScroll = defineComponent({
   inheritAttrs: false,
   setup(props, { slots, attrs, expose }) {
     const slotElementRef = ref<HTMLElement | null>(null)
-    const beforeElementRef = ref<HTMLElement | null>(null)
-    const afterElementRef = ref<HTMLElement | null>(null)
+    const startElementRef = ref<HTMLElement | null>(null)
+    const endElementRef = ref<HTMLElement | null>(null)
 
     const slotElement = computed<HTMLElement | null>(() => resolveHTMLElement(props.slotElement, slotElementRef.value))
     const scrollableParent = computed(() => getScrollableParent(slotElement.value))
-    const beforeElement = computed<HTMLElement | null>(() =>
-      resolveHTMLElement(props.beforeElement, beforeElementRef.value),
+    const startElement = computed<HTMLElement | null>(() =>
+      resolveHTMLElement(props.startElement, startElementRef.value),
     )
-    const afterElement = computed<HTMLElement | null>(() =>
-      resolveHTMLElement(props.afterElement, afterElementRef.value),
-    )
+    const endElement = computed<HTMLElement | null>(() => resolveHTMLElement(props.endElement, endElementRef.value))
 
-    const loadingBefore = ref(false)
-    const loadingAfter = ref(false)
+    const loadingPrevious = ref(false)
+    const loadingNext = ref(false)
     const requestCount = ref(0)
 
     const autoLoad = computed<boolean>(() => !manualMode.value)
@@ -111,27 +109,21 @@ const InfiniteScroll = defineComponent({
       // Elements
       getTrigger: () => props.trigger,
       getTriggerMargin: () => props.buffer,
-      getBeforeElement: () => beforeElement.value!,
-      getAfterElement: () => afterElement.value!,
+      getStartElement: () => startElement.value!,
+      getEndElement: () => endElement.value!,
       getSlotElement: () => slotElement.value!,
       getScrollableParent: () => scrollableParent.value,
 
       // Request callbacks
-      onRequestStart: (side) => {
-        if (side === 'before') {
-          loadingBefore.value = true
-        } else {
-          loadingAfter.value = true
-        }
-      },
-      onRequestComplete: (side) => {
+      onBeforePreviousRequest: () => (loadingPrevious.value = true),
+      onBeforeNextRequest: () => (loadingNext.value = true),
+      onCompletePreviousRequest: () => {
         requestCount.value += 1
-
-        if (side === 'before') {
-          loadingBefore.value = false
-        } else {
-          loadingAfter.value = false
-        }
+        loadingPrevious.value = false
+      },
+      onCompleteNextRequest: () => {
+        requestCount.value += 1
+        loadingNext.value = false
       },
     })
 
@@ -155,6 +147,7 @@ const InfiniteScroll = defineComponent({
 
       // autoScroll defaults to reverse value if not explicitly set
       const shouldAutoScroll = props.autoScroll !== undefined ? props.autoScroll : props.reverse
+
       if (shouldAutoScroll) {
         scrollToBottom()
       }
@@ -167,40 +160,44 @@ const InfiniteScroll = defineComponent({
     onUnmounted(elementManager.flushAll())
 
     watch(
-      () => [autoLoad.value, props.trigger, props.reverse],
+      () => [autoLoad.value, props.trigger],
       ([enabled]) => {
         enabled ? elementManager.enableTriggers() : elementManager.disableTriggers()
       },
     )
 
     expose<InfiniteScrollRef>({
-      loadAfter: dataManager.loadAfter,
-      loadBefore: dataManager.loadBefore,
-      hasMoreBefore: dataManager.hasMoreBefore,
-      hasMoreAfter: dataManager.hasMoreAfter,
+      loadNext: dataManager.loadNext,
+      loadPrevious: dataManager.loadPrevious,
+      hasPrevious: dataManager.hasPrevious,
+      hasNext: dataManager.hasNext,
     })
 
     return () => {
       const renderElements = []
 
-      // Only render before trigger if not using custom element
-      if (!props.beforeElement) {
+      // Only render previous trigger if not using custom element
+      if (!props.startElement) {
         const headerAutoMode = autoLoad.value && props.trigger !== 'end'
-        const exposedBefore: InfiniteScrollActionSlotProps = {
-          loading: loadingBefore.value,
-          loadingBefore: loadingBefore.value,
-          loadingAfter: loadingAfter.value,
-          fetch: dataManager.loadBefore,
+        const exposedPrevious: InfiniteScrollActionSlotProps = {
+          loading: loadingPrevious.value,
+          loadingPrevious: loadingPrevious.value,
+          loadingNext: loadingNext.value,
+          fetch: dataManager.loadPrevious,
           autoMode: headerAutoMode,
           manualMode: !headerAutoMode,
-          hasMore: dataManager.hasMoreBefore(),
+          hasMore: dataManager.hasPrevious(),
         }
 
         renderElements.push(
           h(
             'div',
-            { ref: beforeElementRef },
-            slots.before ? slots.before(exposedBefore) : loadingBefore.value ? slots.loading?.(exposedBefore) : null,
+            { ref: startElementRef },
+            slots.previous
+              ? slots.previous(exposedPrevious)
+              : loadingPrevious.value
+                ? slots.loading?.(exposedPrevious)
+                : null,
           ),
         )
       }
@@ -210,36 +207,36 @@ const InfiniteScroll = defineComponent({
           props.as,
           { ...attrs, ref: slotElementRef },
           slots.default?.({
-            loading: loadingBefore.value || loadingAfter.value,
-            loadingBefore: loadingBefore.value,
-            loadingAfter: loadingAfter.value,
+            loading: loadingPrevious.value || loadingNext.value,
+            loadingPrevious: loadingPrevious.value,
+            loadingNext: loadingNext.value,
           } as InfiniteScrollSlotProps),
         ),
       )
 
-      // Only render after trigger if not using custom element
-      if (!props.afterElement) {
+      // Only render next trigger if not using custom element
+      if (!props.endElement) {
         const footerAutoMode = autoLoad.value && props.trigger !== 'start'
-        const exposedAfter: InfiniteScrollActionSlotProps = {
-          loading: loadingAfter.value,
-          loadingBefore: loadingBefore.value,
-          loadingAfter: loadingAfter.value,
-          fetch: dataManager.loadAfter,
+        const exposedNext: InfiniteScrollActionSlotProps = {
+          loading: loadingNext.value,
+          loadingPrevious: loadingPrevious.value,
+          loadingNext: loadingNext.value,
+          fetch: dataManager.loadNext,
           autoMode: footerAutoMode,
           manualMode: !footerAutoMode,
-          hasMore: dataManager.hasMoreAfter(),
+          hasMore: dataManager.hasNext(),
         }
 
         renderElements.push(
           h(
             'div',
-            { ref: afterElementRef },
-            slots.after ? slots.after(exposedAfter) : loadingAfter.value ? slots.loading?.(exposedAfter) : null,
+            { ref: endElementRef },
+            slots.next ? slots.next(exposedNext) : loadingNext.value ? slots.loading?.(exposedNext) : null,
           ),
         )
       }
 
-      return h(Fragment, {}, renderElements)
+      return h(Fragment, {}, props.reverse ? [...renderElements].reverse() : renderElements)
     }
   },
 })

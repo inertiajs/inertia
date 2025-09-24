@@ -9,7 +9,6 @@ defineProps<{
 
 const manual = ref(false)
 const preserveUrl = ref(false)
-const reverse = ref(false)
 const trigger = ref<'start' | 'end' | 'both'>('end')
 </script>
 
@@ -32,13 +31,6 @@ const trigger = ref<'start' | 'end' | 'both'>('end')
 
       <p>
         <label>
-          <input type="checkbox" v-model="reverse" />
-          Reverse: {{ reverse }}
-        </label>
-      </p>
-
-      <p>
-        <label>
           Trigger: {{ trigger }}
           <select v-model="trigger">
             <option value="start">start</option>
@@ -54,7 +46,6 @@ const trigger = ref<'start' | 'end' | 'both'>('end')
       style="display: grid; gap: 20px"
       :manual="manual"
       :preserve-url="preserveUrl"
-      :reverse="reverse"
       :trigger="trigger"
     >
       <UserCard v-for="user in users.data" :key="user.id" :user="user" />

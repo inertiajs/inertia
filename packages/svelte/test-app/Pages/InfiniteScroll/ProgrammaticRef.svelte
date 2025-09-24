@@ -6,23 +6,23 @@
 
   // Use the actual component type like Form component does
   let infRef: any = null
-  let hasMoreBefore = false
-  let hasMoreAfter = false
+  let hasPrevious = false
+  let hasNext = false
 
   function updateStates() {
-    hasMoreBefore = infRef?.hasMoreBefore() || false
-    hasMoreAfter = infRef?.hasMoreAfter() || false
+    hasPrevious = infRef?.hasPrevious() || false
+    hasNext = infRef?.hasNext() || false
   }
 
   function loadNext() {
     if (infRef) {
-      infRef.loadAfter({ onFinish: updateStates })
+      infRef.loadNext({ onFinish: updateStates })
     }
   }
 
   function loadPrevious() {
     if (infRef) {
-      infRef.loadBefore({ onFinish: updateStates })
+      infRef.loadPrevious({ onFinish: updateStates })
     }
   }
 
@@ -33,8 +33,8 @@
   <h1>Programmatic Ref Test</h1>
 
   <div style="margin-bottom: 20px">
-    <p>Has more previous items: {hasMoreBefore.toString()}</p>
-    <p>Has more next items: {hasMoreAfter.toString()}</p>
+    <p>Has more previous items: {hasPrevious.toString()}</p>
+    <p>Has more next items: {hasNext.toString()}</p>
 
     <div style="display: flex; gap: 10px; margin: 10px 0">
       <button on:click={loadPrevious}>Load Previous (Ref)</button>

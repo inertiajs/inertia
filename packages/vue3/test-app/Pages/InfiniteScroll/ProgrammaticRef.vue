@@ -8,20 +8,20 @@ const props = defineProps<{
 }>()
 
 const infRef = ref()
-const hasMoreBefore = ref(false)
-const hasMoreAfter = ref(false)
+const hasPrevious = ref(false)
+const hasNext = ref(false)
 
 const updateStates = () => {
-  hasMoreBefore.value = infRef.value.hasMoreBefore()
-  hasMoreAfter.value = infRef.value.hasMoreAfter()
+  hasPrevious.value = infRef.value.hasPrevious()
+  hasNext.value = infRef.value.hasNext()
 }
 
 const loadNext = async () => {
-  infRef.value.loadAfter({ onFinish: updateStates })
+  infRef.value.loadNext({ onFinish: updateStates })
 }
 
 const loadPrevious = async () => {
-  infRef.value.loadBefore({ onFinish: updateStates })
+  infRef.value.loadPrevious({ onFinish: updateStates })
 }
 
 onMounted(updateStates)
@@ -32,8 +32,8 @@ onMounted(updateStates)
     <h1>Programmatic Ref Test</h1>
 
     <div style="margin-bottom: 20px">
-      <p>Has more previous items: {{ hasMoreBefore }}</p>
-      <p>Has more next items: {{ hasMoreAfter }}</p>
+      <p>Has more previous items: {{ hasPrevious }}</p>
+      <p>Has more next items: {{ hasNext }}</p>
 
       <div style="display: flex; gap: 10px; margin: 10px 0">
         <button @click="loadPrevious">Load Previous (Ref)</button>

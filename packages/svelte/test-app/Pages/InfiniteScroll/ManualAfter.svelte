@@ -10,15 +10,15 @@
     <UserCard {user} />
   {/each}
 
-  <div slot="after" let:exposedAfter>
-    {#if exposedAfter.loading}
+  <div slot="next" let:exposedNext>
+    {#if exposedNext.loading}
       <p>Loading...</p>
     {/if}
 
-    <p>Manual mode: {exposedAfter.manualMode}</p>
+    <p>Manual mode: {exposedNext.manualMode}</p>
 
-    {#if exposedAfter.manualMode}
-      <button on:click={exposedAfter.fetch}>Load next items...</button>
+    {#if exposedNext.manualMode}
+      <button on:click={exposedNext.fetch}>Load next items...</button>
     {/if}
   </div>
 </InfiniteScroll>

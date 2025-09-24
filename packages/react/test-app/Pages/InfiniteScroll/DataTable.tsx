@@ -4,7 +4,7 @@ import { User } from './UserCard'
 export default ({ users }: { users: { data: User[] } }) => {
   return (
     <InfiniteScroll data="users" slotElement="tbody">
-      {({ loadingBefore, loadingAfter }) => (
+      {({ loadingPrevious, loadingNext }) => (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -23,7 +23,7 @@ export default ({ users }: { users: { data: User[] } }) => {
           </tbody>
 
           <tfoot>
-            {(loadingBefore || loadingAfter) && (
+            {(loadingPrevious || loadingNext) && (
               <tr>
                 <td colSpan={2} style={{ padding: '8px', border: '1px solid #ccc', textAlign: 'center' }}>
                   Loading...

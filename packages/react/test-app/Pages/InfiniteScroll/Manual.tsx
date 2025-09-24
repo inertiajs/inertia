@@ -7,13 +7,13 @@ export default ({ users }: { users: { data: User[] } }) => {
       data="users"
       style={{ display: 'grid', gap: '20px' }}
       manual
-      before={({ loading, fetch, hasMore }) => (
+      previous={({ loading, fetch, hasMore }) => (
         <>
           <p>Has more previous items: {hasMore.toString()}</p>
           <button onClick={fetch}>{loading ? 'Loading previous items...' : 'Load previous items'}</button>
         </>
       )}
-      after={({ loading, fetch, hasMore }) => (
+      next={({ loading, fetch, hasMore }) => (
         <>
           <p>Has more next items: {hasMore.toString()}</p>
           <button onClick={fetch}>{loading ? 'Loading next items...' : 'Load next items'}</button>

@@ -18,10 +18,10 @@ const tableBody = ref<HTMLElement>()
 
     <InfiniteScroll
       data="users"
-      :before-element="() => tableHeader"
-      :after-element="() => tableFooter"
+      :start-element="() => tableHeader"
+      :end-element="() => tableFooter"
       :slot-element="() => tableBody"
-      #default="{ loadingBefore, loadingAfter }"
+      #default="{ loadingPrevious, loadingNext }"
     >
       <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
         Spacer
@@ -40,7 +40,7 @@ const tableBody = ref<HTMLElement>()
             <td style="padding: 80px 12px; border: 1px solid #ccc">{{ user.id }}</td>
             <td style="padding: 80px 12px; border: 1px solid #ccc">{{ user.name }}</td>
           </tr>
-          <tr v-if="loadingBefore || loadingAfter">
+          <tr v-if="loadingPrevious || loadingNext">
             <td colspan="2" style="padding: 12px; border: 1px solid #ccc; text-align: center">Loading...</td>
           </tr>
         </tbody>

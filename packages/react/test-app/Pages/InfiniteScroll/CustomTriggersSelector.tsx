@@ -6,8 +6,8 @@ export default ({ users }: { users: { data: User[] } }) => {
     <div style={{ padding: '20px' }}>
       <h1>Custom Triggers with Selectors Test</h1>
 
-      <InfiniteScroll data="users" slotElement="#table-body" beforeElement="#table-header" afterElement="#table-footer">
-        {({ loadingBefore, loadingAfter }) => (
+      <InfiniteScroll data="users" slotElement="#table-body" startElement="#table-header" endElement="#table-footer">
+        {({ loadingPrevious, loadingNext }) => (
           <>
             <div
               style={{
@@ -37,7 +37,7 @@ export default ({ users }: { users: { data: User[] } }) => {
                   </tr>
                 ))}
 
-                {(loadingBefore || loadingAfter) && (
+                {(loadingPrevious || loadingNext) && (
                   <tr>
                     <td colSpan={2} style={{ padding: '12px', border: '1px solid #ccc', textAlign: 'center' }}>
                       Loading...

@@ -1,25 +1,19 @@
 import { router } from '../index'
 import { page as currentPage } from '../page'
-import {
-  InfiniteScrollSide,
-  Page,
-  PendingVisit,
-  ReloadOptions,
-  ScrollProp,
-  UseInfiniteScrollDataManager,
-} from '../types'
+import { Page, PendingVisit, ReloadOptions, ScrollProp, UseInfiniteScrollDataManager } from '../types'
 
 const MERGE_INTENT_HEADER = 'X-Inertia-Infinite-Scroll-Merge-Intent'
 
-type MergeIntent = 'append' | 'prepend'
+type Side = 'previous' | 'next'
 type ScrollPropPageNames = keyof Pick<ScrollProp, 'previousPage' | 'nextPage'>
 
 export const useInfiniteScrollData = (options: {
   getPropName: () => string
-  inReverseMode: () => boolean
   onBeforeUpdate: () => void
-  onRequestStart: (side: InfiniteScrollSide) => void
-  onRequestComplete: (side: InfiniteScrollSide, lastLoadedPage?: string | number) => void
+  onBeforePreviousRequest: () => void
+  onBeforeNextRequest: () => void
+  onCompletePreviousRequest: (loadedPage?: string | number) => void
+  onCompleteNextRequest: (loadedPage?: string | number) => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
     const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
@@ -40,37 +34,17 @@ export const useInfiniteScrollData = (options: {
     lastLoadedPage,
   }
 
-  const getPageName = () => getScrollPropFromCurrentPage().pageName
+  const getScrollPropKeyForSide = (side: Side): ScrollPropPageNames => {
+    return side === 'next' ? 'nextPage' : 'previousPage'
+  }
 
-  const findPageToLoad = (side: InfiniteScrollSide) => {
+  const findPageToLoad = (side: Side) => {
     const pagePropName = getScrollPropKeyForSide(side)
 
     return state[pagePropName]
   }
 
-  const getMergeIntent = (side: InfiniteScrollSide): MergeIntent => {
-    const reverse = options.inReverseMode()
-    // In reverse mode, loading "after" actually means prepending 'older' content
-    // In normal mode, loading "before" means prepending 'newer' content
-    const shouldPrepend = (side === 'before' && !reverse) || (side === 'after' && reverse)
-
-    return shouldPrepend ? 'prepend' : 'append'
-  }
-
-  const getScrollPropKeyForSide = (side: InfiniteScrollSide): ScrollPropPageNames => {
-    const reverse = options.inReverseMode()
-
-    // In reverse mode, the logical meaning of before/after is flipped
-    // - "after" in reverse mode means loading 'older' pages (previousPage)
-    // - "before" in reverse mode means loading 'newer' pages (nextPage)
-    if (side === 'after') {
-      return reverse ? 'previousPage' : 'nextPage'
-    }
-
-    return reverse ? 'nextPage' : 'previousPage'
-  }
-
-  const syncStateOnSuccess = (side: InfiniteScrollSide) => {
+  const syncStateOnSuccess = (side: Side) => {
     const scrollProp = getScrollPropFromCurrentPage()
     const paginationProp = getScrollPropKeyForSide(side)
 
@@ -78,7 +52,9 @@ export const useInfiniteScrollData = (options: {
     state[paginationProp] = scrollProp[paginationProp]
   }
 
-  const loadPage = (side: InfiniteScrollSide, reloadOptions: ReloadOptions = {}): void => {
+  const getPageName = () => getScrollPropFromCurrentPage().pageName
+
+  const loadPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {
     const page = findPageToLoad(side)
 
     if (state.loading || page === null) {
@@ -93,11 +69,11 @@ export const useInfiniteScrollData = (options: {
       only: [options.getPropName()],
       preserveUrl: true, // we handle URL updates manually via useInfiniteScrollQueryString()
       headers: {
-        [MERGE_INTENT_HEADER]: getMergeIntent(side),
+        [MERGE_INTENT_HEADER]: side === 'previous' ? 'prepend' : 'append',
         ...reloadOptions.headers,
       },
       onBefore: (visit: PendingVisit) => {
-        options.onRequestStart(side)
+        side === 'next' ? options.onBeforeNextRequest() : options.onBeforePreviousRequest()
         reloadOptions.onBefore?.(visit)
       },
       onBeforeUpdate: (page: Page) => {
@@ -110,27 +86,26 @@ export const useInfiniteScrollData = (options: {
       },
       onFinish: (visit: any) => {
         state.loading = false
-        options.onRequestComplete(side, state.lastLoadedPage)
+        side === 'next'
+          ? options.onCompleteNextRequest(state.lastLoadedPage)
+          : options.onCompletePreviousRequest(state.lastLoadedPage)
         reloadOptions.onFinish?.(visit)
       },
     })
   }
 
   const getLastLoadedPage = () => state.lastLoadedPage
-
-  // Check if more content is available in each direction, accounting for reverse mode
-  const hasMoreBefore = () => !!(options.inReverseMode() ? state.nextPage : state.previousPage)
-  const hasMoreAfter = () => !!(options.inReverseMode() ? state.previousPage : state.nextPage)
-
-  const loadBefore = (reloadOptions?: ReloadOptions): void => loadPage('before', reloadOptions)
-  const loadAfter = (reloadOptions?: ReloadOptions): void => loadPage('after', reloadOptions)
+  const hasPrevious = () => !!state.previousPage
+  const hasNext = () => !!state.nextPage
+  const loadPrevious = (reloadOptions?: ReloadOptions): void => loadPage('previous', reloadOptions)
+  const loadNext = (reloadOptions?: ReloadOptions): void => loadPage('next', reloadOptions)
 
   return {
     getLastLoadedPage,
     getPageName,
-    hasMoreBefore,
-    hasMoreAfter,
-    loadAfter,
-    loadBefore,
+    hasPrevious,
+    hasNext,
+    loadNext,
+    loadPrevious,
   }
 }

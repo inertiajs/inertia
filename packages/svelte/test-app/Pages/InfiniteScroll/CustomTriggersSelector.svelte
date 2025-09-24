@@ -11,8 +11,8 @@
   <InfiniteScroll
     data="users"
     slotElement="#table-body"
-    beforeElement="#table-header"
-    afterElement="#table-footer"
+    startElement="#table-header"
+    endElement="#table-footer"
     let:exposedSlot
   >
     <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
@@ -33,7 +33,7 @@
           </tr>
         {/each}
 
-        {#if exposedSlot.loadingBefore || exposedSlot.loadingAfter}
+        {#if exposedSlot.loadingPrevious || exposedSlot.loadingNext}
           <tr>
             <td colspan="2" style="padding: 12px; border: 1px solid #ccc; text-align: center"> Loading... </td>
           </tr>

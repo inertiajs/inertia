@@ -14,8 +14,8 @@
 
   <InfiniteScroll
     data="users"
-    beforeElement={() => tableHeader}
-    afterElement={() => tableFooter}
+    startElement={() => tableHeader}
+    endElement={() => tableFooter}
     slotElement={() => tableBody}
     let:exposedSlot
   >
@@ -37,7 +37,7 @@
           </tr>
         {/each}
 
-        {#if exposedSlot.loadingBefore || exposedSlot.loadingAfter}
+        {#if exposedSlot.loadingPrevious || exposedSlot.loadingNext}
           <tr>
             <td colspan="2" style="padding: 12px; border: 1px solid #ccc; text-align: center"> Loading... </td>
           </tr>

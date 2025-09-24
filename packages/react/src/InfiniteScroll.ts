@@ -58,13 +58,13 @@ export interface InfiniteScrollProps
   children?: React.ReactNode | ((props: InfiniteScrollSlotProps) => React.ReactNode)
 
   // Element references for custom trigger detection (when you want different trigger elements)
-  beforeElement?: string | React.RefObject<HTMLElement | null>
-  afterElement?: string | React.RefObject<HTMLElement | null>
+  startElement?: string | React.RefObject<HTMLElement | null>
+  endElement?: string | React.RefObject<HTMLElement | null>
   slotElement?: string | React.RefObject<HTMLElement | null>
 
   // Render slots for UI components (when you want custom loading/action components)
-  before?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
-  after?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
+  previous?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
+  next?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
   loading?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
 }
 
@@ -81,43 +81,43 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       reverse = false,
       autoScroll,
       children,
-      beforeElement,
-      afterElement,
+      startElement,
+      endElement,
       slotElement,
-      before,
-      after,
+      previous,
+      next,
       loading,
       ...props
     },
     ref,
   ) => {
-    const [beforeElementFromRef, setBeforeElementFromRef] = useState<HTMLElement | null>(null)
-    const beforeElementRef = useCallback((node: HTMLElement | null) => setBeforeElementFromRef(node), [])
+    const [startElementFromRef, setStartElementFromRef] = useState<HTMLElement | null>(null)
+    const startElementRef = useCallback((node: HTMLElement | null) => setStartElementFromRef(node), [])
 
-    const [afterElementFromRef, setAfterElementFromRef] = useState<HTMLElement | null>(null)
-    const afterElementRef = useCallback((node: HTMLElement | null) => setAfterElementFromRef(node), [])
+    const [endElementFromRef, setEndElementFromRef] = useState<HTMLElement | null>(null)
+    const endElementRef = useCallback((node: HTMLElement | null) => setEndElementFromRef(node), [])
 
     const [slotElementFromRef, setSlotElementFromRef] = useState<HTMLElement | null>(null)
     const slotElementRef = useCallback((node: HTMLElement | null) => setSlotElementFromRef(node), [])
 
-    const [loadingBefore, setLoadingBefore] = useState(false)
-    const [loadingAfter, setLoadingAfter] = useState(false)
+    const [loadingPrevious, setLoadingPrevious] = useState(false)
+    const [loadingNext, setLoadingNext] = useState(false)
     const [requestCount, setRequestCount] = useState(0)
 
-    const [resolvedBeforeElement, setResolvedBeforeElement] = useState<HTMLElement | null>(null)
-    const [resolvedAfterElement, setResolvedAfterElement] = useState<HTMLElement | null>(null)
+    const [resolvedStartElement, setResolvedStartElement] = useState<HTMLElement | null>(null)
+    const [resolvedEndElement, setResolvedEndElement] = useState<HTMLElement | null>(null)
     const [resolvedSlotElement, setResolvedSlotElement] = useState<HTMLElement | null>(null)
 
     // Update elements when refs or props change
     useEffect(() => {
-      const element = beforeElement ? resolveHTMLElement(beforeElement, beforeElementFromRef) : beforeElementFromRef
-      setResolvedBeforeElement(element)
-    }, [beforeElement, beforeElementFromRef])
+      const element = startElement ? resolveHTMLElement(startElement, startElementFromRef) : startElementFromRef
+      setResolvedStartElement(element)
+    }, [startElement, startElementFromRef])
 
     useEffect(() => {
-      const element = afterElement ? resolveHTMLElement(afterElement, afterElementFromRef) : afterElementFromRef
-      setResolvedAfterElement(element)
-    }, [afterElement, afterElementFromRef])
+      const element = endElement ? resolveHTMLElement(endElement, endElementFromRef) : endElementFromRef
+      setResolvedEndElement(element)
+    }, [endElement, endElementFromRef])
 
     useEffect(() => {
       const element = slotElement ? resolveHTMLElement(slotElement, slotElementFromRef) : slotElementFromRef
@@ -180,27 +180,21 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         // Elements
         getTrigger: () => callbackPropsRef.current.trigger,
         getTriggerMargin: () => callbackPropsRef.current.buffer,
-        getBeforeElement: () => resolvedBeforeElement,
-        getAfterElement: () => resolvedAfterElement,
+        getStartElement: () => resolvedStartElement,
+        getEndElement: () => resolvedEndElement,
         getSlotElement: () => resolvedSlotElement,
         getScrollableParent: () => scrollableParent,
 
-        // Request callbacks
-        onRequestStart: (side) => {
-          if (side === 'before') {
-            setLoadingBefore(true)
-          } else {
-            setLoadingAfter(true)
-          }
+        // Callbacks
+        onBeforePreviousRequest: () => setLoadingPrevious(true),
+        onBeforeNextRequest: () => setLoadingNext(true),
+        onCompletePreviousRequest: () => {
+          setLoadingPrevious(false)
+          setRequestCount((count) => count + 1)
         },
-        onRequestComplete: (side) => {
-          setRequestCount((previous) => previous + 1)
-
-          if (side === 'before') {
-            setLoadingBefore(false)
-          } else {
-            setLoadingAfter(false)
-          }
+        onCompleteNextRequest: () => {
+          setLoadingNext(false)
+          setRequestCount((count) => count + 1)
         },
       })
 
@@ -210,13 +204,6 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       elementManager.setupObservers()
       elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
 
-      // autoScroll defaults to reverse value if not explicitly set
-      const shouldAutoScroll = autoScroll !== undefined ? autoScroll : reverse
-
-      if (shouldAutoScroll) {
-        scrollToBottom()
-      }
-
       if (autoLoad) {
         elementManager.enableTriggers()
       }
@@ -225,19 +212,28 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         elementManager.flushAll()
         setInfiniteScroll(null)
       }
-    }, [data, resolvedSlotElement, resolvedBeforeElement, resolvedAfterElement, scrollableParent])
+    }, [data, resolvedSlotElement, resolvedStartElement, resolvedEndElement, scrollableParent])
 
     useEffect(() => {
       autoLoad ? elementManager?.enableTriggers() : elementManager?.disableTriggers()
-    }, [autoLoad, trigger, reverse, resolvedBeforeElement, resolvedAfterElement])
+    }, [autoLoad, trigger, resolvedStartElement, resolvedEndElement])
+
+    useEffect(() => {
+      // autoScroll defaults to reverse value if not explicitly set
+      const shouldAutoScroll = autoScroll !== undefined ? autoScroll : reverse
+
+      if (shouldAutoScroll) {
+        scrollToBottom()
+      }
+    }, [])
 
     useImperativeHandle(
       ref,
       () => ({
-        loadAfter: dataManager?.loadAfter || (() => {}),
-        loadBefore: dataManager?.loadBefore || (() => {}),
-        hasMoreBefore: dataManager?.hasMoreBefore || (() => false),
-        hasMoreAfter: dataManager?.hasMoreAfter || (() => false),
+        loadNext: dataManager?.loadNext || (() => {}),
+        loadPrevious: dataManager?.loadPrevious || (() => {}),
+        hasPrevious: dataManager?.hasPrevious || (() => false),
+        hasNext: dataManager?.hasNext || (() => false),
       }),
       [dataManager],
     )
@@ -245,42 +241,42 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     const headerAutoMode = autoLoad && trigger !== 'end'
     const footerAutoMode = autoLoad && trigger !== 'start'
 
-    const exposedBefore: InfiniteScrollActionSlotProps = {
-      loading: loadingBefore,
-      loadingBefore,
-      loadingAfter,
-      fetch: dataManager?.loadBefore || (() => {}),
+    const exposedPrevious: InfiniteScrollActionSlotProps = {
+      loading: loadingPrevious,
+      loadingPrevious,
+      loadingNext,
+      fetch: dataManager?.loadPrevious || (() => {}),
       autoMode: headerAutoMode,
       manualMode: !headerAutoMode,
-      hasMore: dataManager?.hasMoreBefore() || false,
+      hasMore: dataManager?.hasPrevious() || false,
     }
 
-    const exposedAfter: InfiniteScrollActionSlotProps = {
-      loading: loadingAfter,
-      loadingBefore,
-      loadingAfter,
-      fetch: dataManager?.loadAfter || (() => {}),
+    const exposedNext: InfiniteScrollActionSlotProps = {
+      loading: loadingNext,
+      loadingPrevious,
+      loadingNext,
+      fetch: dataManager?.loadNext || (() => {}),
       autoMode: footerAutoMode,
       manualMode: !footerAutoMode,
-      hasMore: dataManager?.hasMoreAfter() || false,
+      hasMore: dataManager?.hasNext() || false,
     }
 
     const exposedSlot: InfiniteScrollSlotProps = {
-      loading: loadingBefore || loadingAfter,
-      loadingBefore,
-      loadingAfter,
+      loading: loadingPrevious || loadingNext,
+      loadingPrevious,
+      loadingNext,
     }
 
     const renderElements = []
 
-    // Only render before trigger if not using custom element selector/ref
-    if (!beforeElement) {
+    // Only render previous trigger if not using custom element selector/ref
+    if (!startElement) {
       renderElements.push(
         createElement(
           'div',
-          { ref: beforeElementRef },
-          // Render before slot or fallback to loading indicator
-          renderSlot(before, exposedBefore, loadingBefore ? renderSlot(loading, exposedBefore) : null),
+          { ref: startElementRef },
+          // Render previous slot or fallback to loading indicator
+          renderSlot(previous, exposedPrevious, loadingPrevious ? renderSlot(loading, exposedPrevious) : null),
         ),
       )
     }
@@ -293,19 +289,19 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       ),
     )
 
-    // Only render after trigger if not using custom element selector/ref
-    if (!afterElement) {
+    // Only render next trigger if not using custom element selector/ref
+    if (!endElement) {
       renderElements.push(
         createElement(
           'div',
-          { ref: afterElementRef },
-          // Render after slot or fallback to loading indicator
-          renderSlot(after, exposedAfter, loadingAfter ? renderSlot(loading, exposedAfter) : null),
+          { ref: endElementRef },
+          // Render next slot or fallback to loading indicator
+          renderSlot(next, exposedNext, loadingNext ? renderSlot(loading, exposedNext) : null),
         ),
       )
     }
 
-    return createElement(React.Fragment, {}, ...renderElements)
+    return createElement(React.Fragment, {}, ...(reverse ? [...renderElements].reverse() : renderElements))
   },
 )
 

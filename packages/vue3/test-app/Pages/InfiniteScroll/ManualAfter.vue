@@ -11,7 +11,7 @@ defineProps<{
   <InfiniteScroll data="users" style="display: grid; gap: 20px" :manual-after="2">
     <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
-    <template #after="{ fetch, manualMode, loading }">
+    <template #next="{ fetch, manualMode, loading }">
       <p v-if="loading">Loading...</p>
 
       <p>Manual mode: {{ manualMode }}</p>

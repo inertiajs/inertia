@@ -5,7 +5,6 @@ import UserCard, { User } from './UserCard'
 export default ({ users }: { users: { data: User[] } }) => {
   const [manual, setManual] = useState(false)
   const [preserveUrl, setPreserveUrl] = useState(false)
-  const [reverse, setReverse] = useState(false)
   const [trigger, setTrigger] = useState<'start' | 'end' | 'both'>('end')
 
   return (
@@ -27,13 +26,6 @@ export default ({ users }: { users: { data: User[] } }) => {
 
         <p>
           <label>
-            <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} />
-            Reverse: {reverse.toString()}
-          </label>
-        </p>
-
-        <p>
-          <label>
             Trigger: {trigger}
             <select value={trigger} onChange={(e) => setTrigger(e.target.value as 'start' | 'end' | 'both')}>
               <option value="start">start</option>
@@ -49,7 +41,6 @@ export default ({ users }: { users: { data: User[] } }) => {
         style={{ display: 'grid', gap: '20px' }}
         manual={manual}
         preserveUrl={preserveUrl}
-        reverse={reverse}
         trigger={trigger}
         loading={<div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>}
       >

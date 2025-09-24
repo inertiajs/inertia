@@ -59,8 +59,8 @@ function handleLoad(id: number) {
         </span>
       </div>
 
-      <template #loading="{ loadingBefore }">
-        <div class="flex justify-center" :class="loadingBefore ? 'py-16' : 'py-16'">
+      <template #loading="{ loadingPrevious }">
+        <div class="flex justify-center" :class="loadingPrevious ? 'py-16' : 'py-16'">
           <Spinner class="size-6 text-gray-400" />
         </div>
       </template>

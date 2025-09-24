@@ -18,15 +18,15 @@
   export let preserveUrl: InfiniteScrollComponentBaseProps['preserveUrl'] = false
   export let reverse: InfiniteScrollComponentBaseProps['reverse'] = false
   export let autoScroll: InfiniteScrollComponentBaseProps['autoScroll'] = undefined
-  export let beforeElement: string | (() => HTMLElement | null | undefined) = undefined
-  export let afterElement: string | (() => HTMLElement | null | undefined) = undefined
+  export let startElement: string | (() => HTMLElement | null | undefined) = undefined
+  export let endElement: string | (() => HTMLElement | null | undefined) = undefined
   export let slotElement: string | (() => HTMLElement | null | undefined) = undefined
 
   let slotElementRef: HTMLElement
-  let beforeElementRef: HTMLElement
-  let afterElementRef: HTMLElement
-  let loadingBefore = false
-  let loadingAfter = false
+  let startElementRef: HTMLElement
+  let endElementRef: HTMLElement
+  let loadingPrevious = false
+  let loadingNext = false
   let requestCount = 0
 
   $: resolvedSlotElement = resolveHTMLElement(slotElement, slotElementRef)
@@ -37,30 +37,30 @@
   $: headerAutoMode = autoLoad && trigger !== 'end'
   $: footerAutoMode = autoLoad && trigger !== 'start'
 
-  $: exposedBefore = {
-    loading: loadingBefore,
-    loadingBefore,
-    loadingAfter,
-    fetch: loadBefore,
+  $: exposedPrevious = {
+    loading: loadingPrevious,
+    loadingPrevious,
+    loadingNext,
+    fetch: loadPrevious,
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
-    hasMore: infiniteScrollInstance?.dataManager.hasMoreBefore() || false,
+    hasMore: infiniteScrollInstance?.dataManager.hasPrevious() || false,
   } satisfies InfiniteScrollActionSlotProps
 
-  $: exposedAfter = {
-    loading: loadingAfter,
-    loadingBefore,
-    loadingAfter,
-    fetch: loadAfter,
+  $: exposedNext = {
+    loading: loadingNext,
+    loadingPrevious,
+    loadingNext,
+    fetch: loadNext,
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
-    hasMore: infiniteScrollInstance?.dataManager.hasMoreAfter() || false,
+    hasMore: infiniteScrollInstance?.dataManager.hasNext() || false,
   } satisfies InfiniteScrollActionSlotProps
 
   $: exposedSlot = {
-    loading: loadingBefore || loadingAfter,
-    loadingBefore,
-    loadingAfter,
+    loading: loadingPrevious || loadingNext,
+    loadingPrevious,
+    loadingNext,
   } satisfies InfiniteScrollSlotProps
 
   let infiniteScrollInstance: UseInfiniteScrollProps | null = null
@@ -98,20 +98,20 @@
     }
   }
 
-  export function loadBefore(options?: any) {
-    infiniteScrollInstance?.dataManager.loadBefore(options)
+  export function loadPrevious(options?: any) {
+    infiniteScrollInstance?.dataManager.loadPrevious(options)
   }
 
-  export function loadAfter(options?: any) {
-    infiniteScrollInstance?.dataManager.loadAfter(options)
+  export function loadNext(options?: any) {
+    infiniteScrollInstance?.dataManager.loadNext(options)
   }
 
-  export function hasMoreBefore(): boolean {
-    return infiniteScrollInstance?.dataManager.hasMoreBefore() || false
+  export function hasPrevious(): boolean {
+    return infiniteScrollInstance?.dataManager.hasPrevious() || false
   }
 
-  export function hasMoreAfter(): boolean {
-    return infiniteScrollInstance?.dataManager.hasMoreAfter() || false
+  export function hasNext(): boolean {
+    return infiniteScrollInstance?.dataManager.hasNext() || false
   }
 
   onMount(() => {
@@ -120,8 +120,8 @@
 
   function setupInfiniteScrollInstance() {
     const resolvedSlotElement = resolveHTMLElement(slotElement, slotElementRef)
-    const resolvedBeforeElement = resolveHTMLElement(beforeElement, beforeElementRef)
-    const resolvedAfterElement = resolveHTMLElement(afterElement, afterElementRef)
+    const resolvedStartElement = resolveHTMLElement(startElement, startElementRef)
+    const resolvedEndElement = resolveHTMLElement(endElement, endElementRef)
 
     infiniteScrollInstance = useInfiniteScroll({
       // Data
@@ -132,27 +132,21 @@
       // Elements
       getTrigger: () => trigger,
       getTriggerMargin: () => buffer,
-      getBeforeElement: () => resolvedBeforeElement,
-      getAfterElement: () => resolvedAfterElement,
+      getStartElement: () => resolvedStartElement,
+      getEndElement: () => resolvedEndElement,
       getSlotElement: () => resolvedSlotElement,
       getScrollableParent: () => (resolvedSlotElement ? getScrollableParent(resolvedSlotElement) : null),
 
       // Request callbacks
-      onRequestStart: (side) => {
-        if (side === 'before') {
-          loadingBefore = true
-        } else {
-          loadingAfter = true
-        }
-      },
-      onRequestComplete: (side) => {
+      onBeforePreviousRequest: () => (loadingPrevious = true),
+      onBeforeNextRequest: () => (loadingNext = true),
+      onCompletePreviousRequest: () => {
         requestCount += 1
-
-        if (side === 'before') {
-          loadingBefore = false
-        } else {
-          loadingAfter = false
-        }
+        loadingPrevious = false
+      },
+      onCompleteNextRequest: () => {
+        requestCount += 1
+        loadingNext = false
       },
     })
 
@@ -181,11 +175,21 @@
   onDestroy(() => infiniteScrollInstance?.elementManager.flushAll())
 </script>
 
-{#if !beforeElement}
-  <div bind:this={beforeElementRef}>
-    <slot name="before" {exposedBefore}>
-      {#if loadingBefore}
-        <slot name="loading" {exposedBefore} />
+{#if !startElement && !reverse}
+  <div bind:this={startElementRef}>
+    <slot name="previous" {exposedPrevious}>
+      {#if loadingPrevious}
+        <slot name="loading" {exposedPrevious} />
+      {/if}
+    </slot>
+  </div>
+{/if}
+
+{#if !endElement && reverse}
+  <div bind:this={endElementRef}>
+    <slot name="next" {exposedNext}>
+      {#if loadingNext}
+        <slot name="loading" {exposedNext} />
       {/if}
     </slot>
   </div>
@@ -195,11 +199,21 @@
   <slot {exposedSlot} />
 </svelte:element>
 
-{#if !afterElement}
-  <div bind:this={afterElementRef}>
-    <slot name="after" {exposedAfter}>
-      {#if loadingAfter}
-        <slot name="loading" {exposedAfter} />
+{#if !startElement && reverse}
+  <div bind:this={startElementRef}>
+    <slot name="previous" {exposedPrevious}>
+      {#if loadingPrevious}
+        <slot name="loading" {exposedPrevious} />
+      {/if}
+    </slot>
+  </div>
+{/if}
+
+{#if !endElement && !reverse}
+  <div bind:this={endElementRef}>
+    <slot name="next" {exposedNext}>
+      {#if loadingNext}
+        <slot name="loading" {exposedNext} />
       {/if}
     </slot>
   </div>

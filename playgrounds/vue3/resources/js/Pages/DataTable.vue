@@ -38,7 +38,7 @@ defineProps<{
       </table>
     </div>
 
-    <template #loading="{ loadingBefore }">
+    <template #loading="{ loadingPrevious }">
       <div class="flex justify-center py-16">
         <Spinner class="size-6 text-gray-400" />
       </div>

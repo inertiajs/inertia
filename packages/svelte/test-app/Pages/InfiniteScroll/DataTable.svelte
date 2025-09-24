@@ -24,7 +24,7 @@
     </tbody>
 
     <tfoot>
-      {#if exposedSlot.loadingBefore || exposedSlot.loadingAfter}
+      {#if exposedSlot.loadingPrevious || exposedSlot.loadingNext}
         <tr>
           <td colspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center"> Loading... </td>
         </tr>

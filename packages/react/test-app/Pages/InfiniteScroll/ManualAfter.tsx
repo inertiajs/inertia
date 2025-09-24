@@ -7,7 +7,7 @@ export default ({ users }: { users: { data: User[] } }) => {
       data="users"
       style={{ display: 'grid', gap: '20px' }}
       manualAfter={2}
-      after={({ fetch, manualMode, loading }) => (
+      next={({ fetch, manualMode, loading }) => (
         <>
           {loading && <p>Loading...</p>}
 

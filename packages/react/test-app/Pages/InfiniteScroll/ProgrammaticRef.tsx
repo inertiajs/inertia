@@ -5,23 +5,23 @@ import UserCard, { User } from './UserCard'
 
 export default ({ users }: { users: { data: User[] } }) => {
   const infRef = useRef<InfiniteScrollRef>(null)
-  const [hasMoreBefore, setHasMoreBefore] = useState(false)
-  const [hasMoreAfter, setHasMoreAfter] = useState(false)
+  const [hasPrevious, setHasMoreBefore] = useState(false)
+  const [hasNext, setHasMoreAfter] = useState(false)
 
   const updateStates = () => {
-    setHasMoreBefore(infRef.current?.hasMoreBefore() || false)
-    setHasMoreAfter(infRef.current?.hasMoreAfter() || false)
+    setHasMoreBefore(infRef.current?.hasPrevious() || false)
+    setHasMoreAfter(infRef.current?.hasNext() || false)
   }
 
   const loadNext = () => {
     if (infRef.current) {
-      infRef.current.loadAfter({ onFinish: updateStates })
+      infRef.current.loadNext({ onFinish: updateStates })
     }
   }
 
   const loadPrevious = () => {
     if (infRef.current) {
-      infRef.current.loadBefore({ onFinish: updateStates })
+      infRef.current.loadPrevious({ onFinish: updateStates })
     }
   }
 
@@ -34,8 +34,8 @@ export default ({ users }: { users: { data: User[] } }) => {
       <h1>Programmatic Ref Test</h1>
 
       <div style={{ marginBottom: '20px' }}>
-        <p>Has more previous items: {hasMoreBefore.toString()}</p>
-        <p>Has more next items: {hasMoreAfter.toString()}</p>
+        <p>Has more previous items: {hasPrevious.toString()}</p>
+        <p>Has more next items: {hasNext.toString()}</p>
 
         <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
           <button onClick={loadPrevious}>Load Previous (Ref)</button>

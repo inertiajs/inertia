@@ -6,7 +6,6 @@
 
   let manual = false
   let preserveUrl = false
-  let reverse = false
   let trigger: 'start' | 'end' | 'both' = 'end'
 </script>
 
@@ -28,13 +27,6 @@
 
     <p>
       <label>
-        <input type="checkbox" bind:checked={reverse} />
-        Reverse: {reverse.toString()}
-      </label>
-    </p>
-
-    <p>
-      <label>
         Trigger: {trigger}
         <select bind:value={trigger}>
           <option value="start">start</option>
@@ -45,7 +37,7 @@
     </p>
   </div>
 
-  <InfiniteScroll data="users" style="display: grid; gap: 20px" {manual} {preserveUrl} {reverse} {trigger}>
+  <InfiniteScroll data="users" style="display: grid; gap: 20px" {manual} {preserveUrl} {trigger}>
     <div slot="loading" style="text-align: center; padding: 20px">Loading...</div>
 
     {#each users.data as user (user.id)}

@@ -14,9 +14,9 @@ defineProps<{
     <InfiniteScroll
       data="users"
       slot-element="#table-body"
-      before-element="#table-header"
-      after-element="#table-footer"
-      #default="{ loadingBefore, loadingAfter }"
+      start-element="#table-header"
+      end-element="#table-footer"
+      #default="{ loadingPrevious, loadingNext }"
     >
       <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
         Spacer
@@ -36,7 +36,7 @@ defineProps<{
             <td style="padding: 80px 12px; border: 1px solid #ccc">{{ user.name }}</td>
           </tr>
 
-          <tr v-if="loadingBefore || loadingAfter">
+          <tr v-if="loadingPrevious || loadingNext">
             <td colspan="2" style="padding: 12px; border: 1px solid #ccc; text-align: center">Loading...</td>
           </tr>
         </tbody>

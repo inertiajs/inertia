@@ -10,8 +10,8 @@ export const getPageFromElement = (element: HTMLElement): string | undefined =>
 export const useInfiniteScrollElementManager = (options: {
   getTrigger: () => 'start' | 'end' | 'both'
   getTriggerMargin: () => number
-  getBeforeElement: () => HTMLElement
-  getAfterElement: () => HTMLElement
+  getStartElement: () => HTMLElement
+  getEndElement: () => HTMLElement
   getSlotElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
   onTopTriggered: () => void
@@ -62,8 +62,8 @@ export const useInfiniteScrollElementManager = (options: {
   const enableTriggers = () => {
     disableTriggers()
 
-    const topElement = options.getBeforeElement()
-    const bottomElement = options.getAfterElement()
+    const topElement = options.getStartElement()
+    const bottomElement = options.getEndElement()
     const trigger = options.getTrigger()
 
     if (topElement && trigger !== 'end') {
@@ -112,12 +112,12 @@ export const useInfiniteScrollElementManager = (options: {
     )
   }
 
-  const processServerLoadedElements = (currentPage?: string | number) => {
+  const processServerLoadedElements = (loadedPage?: string | number) => {
     // Tag new server-loaded elements with their page number for URL management
     // This allows us to update the URL based on which page's content is most visible
     findUntaggedElements(options.getSlotElement()).forEach((element) => {
       if (elementIsUntagged(element)) {
-        element.dataset[INFINITE_SCROLL_PAGE_KEY] = currentPage?.toString() || '1'
+        element.dataset[INFINITE_SCROLL_PAGE_KEY] = loadedPage?.toString() || '1'
       }
 
       itemsObserver.observe(element)

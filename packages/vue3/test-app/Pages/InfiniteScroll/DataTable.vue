@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <InfiniteScroll data="users" slot-element="tbody" #default="{ loadingBefore, loadingAfter }">
+  <InfiniteScroll data="users" slot-element="tbody" #default="{ loadingPrevious, loadingNext }">
     <table style="width: 100%; border-collapse: collapse">
       <thead>
         <tr>
@@ -25,7 +25,7 @@ defineProps<{
       </tbody>
 
       <tfoot>
-        <tr v-if="loadingBefore || loadingAfter">
+        <tr v-if="loadingPrevious || loadingNext">
           <td :colspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center">Loading...</td>
         </tr>
       </tfoot>

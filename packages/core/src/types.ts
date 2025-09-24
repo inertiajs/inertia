@@ -502,8 +502,6 @@ export type FormComponentSlotProps = FormComponentMethods & FormComponentState
 
 export type FormComponentRef = FormComponentSlotProps
 
-export type InfiniteScrollSide = 'before' | 'after'
-
 export interface UseInfiniteScrollOptions {
   // Core data
   getPropName: () => string
@@ -513,23 +511,25 @@ export interface UseInfiniteScrollOptions {
   // Elements
   getTrigger: () => 'start' | 'end' | 'both'
   getTriggerMargin: () => number
-  getBeforeElement: () => HTMLElement
-  getAfterElement: () => HTMLElement
+  getStartElement: () => HTMLElement
+  getEndElement: () => HTMLElement
   getSlotElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
 
   // Callbacks
-  onRequestStart: (side: InfiniteScrollSide) => void
-  onRequestComplete: (side: InfiniteScrollSide) => void
+  onBeforePreviousRequest: () => void
+  onBeforeNextRequest: () => void
+  onCompletePreviousRequest: () => void
+  onCompleteNextRequest: () => void
 }
 
 export interface UseInfiniteScrollDataManager {
   getLastLoadedPage: () => number | string | undefined
   getPageName: () => string
-  hasMoreBefore: () => boolean
-  hasMoreAfter: () => boolean
-  loadAfter: (reloadOptions?: ReloadOptions) => void
-  loadBefore: (reloadOptions?: ReloadOptions) => void
+  hasPrevious: () => boolean
+  hasNext: () => boolean
+  loadNext: (reloadOptions?: ReloadOptions) => void
+  loadPrevious: (reloadOptions?: ReloadOptions) => void
 }
 
 export interface UseInfiniteScrollElementManager {
@@ -538,7 +538,7 @@ export interface UseInfiniteScrollElementManager {
   disableTriggers: () => void
   flushAll: () => void
   processManuallyAddedElements: () => void
-  processServerLoadedElements: (lastLoadedPage?: string | number | undefined) => void
+  processServerLoadedElements: (loadedPage?: string | number | undefined) => void
 }
 
 export interface UseInfiniteScrollProps {
@@ -548,14 +548,14 @@ export interface UseInfiniteScrollProps {
 
 export interface InfiniteScrollSlotProps {
   loading: boolean
-  loadingBefore: boolean
-  loadingAfter: boolean
+  loadingPrevious: boolean
+  loadingNext: boolean
 }
 
 export interface InfiniteScrollActionSlotProps {
   loading: boolean
-  loadingBefore: boolean
-  loadingAfter: boolean
+  loadingPrevious: boolean
+  loadingNext: boolean
   fetch: () => void
   autoMode: boolean
   manualMode: boolean
@@ -563,10 +563,10 @@ export interface InfiniteScrollActionSlotProps {
 }
 
 export interface InfiniteScrollRef {
-  loadAfter: (reloadOptions?: ReloadOptions) => void
-  loadBefore: (reloadOptions?: ReloadOptions) => void
-  hasMoreBefore: () => boolean
-  hasMoreAfter: () => boolean
+  loadNext: (reloadOptions?: ReloadOptions) => void
+  loadPrevious: (reloadOptions?: ReloadOptions) => void
+  hasPrevious: () => boolean
+  hasNext: () => boolean
 }
 
 export interface InfiniteScrollComponentBaseProps {
