@@ -66,8 +66,6 @@ export const useInfiniteScrollElementManager = (options: {
     const bottomElement = options.getAfterElement()
     const trigger = options.getTrigger()
 
-    console.log('Enabling triggers:', { trigger, topElement, bottomElement })
-
     if (topElement && trigger !== 'end') {
       topElementObserver.observe(topElement)
     }

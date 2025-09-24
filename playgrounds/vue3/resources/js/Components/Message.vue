@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { marked } from 'marked'
 
+export type Message = {
+  id: number | 'pending'
+  type: 'prompt' | 'response'
+  content: string
+}
+
 defineProps<{
-  message: {
-    id: number
-    type: 'prompt' | 'response'
-    content: string
-  }
+  message: Message
 }>()
 </script>
 
@@ -14,14 +16,11 @@ defineProps<{
   <div
     class="flex w-full"
     :class="{
-      'justify-end': message.type === 'prompt',
-      'justify-start': message.type === 'response',
-      'ml-auto': message.type === 'prompt',
-      'mr-auto': message.type === 'response',
+      'ml-auto justify-end': message.type === 'prompt',
+      'mr-auto justify-start': message.type === 'response',
     }"
   >
-    <div class="flex max-w-[80%] items-start" :class="{}">
-      <!-- Message Content -->
+    <div class="flex max-w-[80%] items-start">
       <div
         v-html="marked.parse(message.content)"
         class="prose min-w-0 flex-1 text-[15px] leading-relaxed"

@@ -171,7 +171,6 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         return
       }
 
-      console.log('InfiniteScroll: Setting up infinite scroll...')
       const infiniteScrollInstance = useInfiniteScroll({
         // Data
         getPropName: () => data,

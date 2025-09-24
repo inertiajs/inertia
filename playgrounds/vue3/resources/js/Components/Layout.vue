@@ -30,6 +30,7 @@ const appName = computed(() => page.props.appName)
     <Link href="/defer" class="hover:underline">Defer</Link>
     <Link href="/poll" class="hover:underline">Poll</Link>
     <Link href="/infinite-scroll" class="hover:underline">To Infinity</Link>
+    <Link href="/chat" class="hover:underline">Chat</Link>
   </nav>
   <main :class="padding ? 'px-10 py-8' : ''">
     <slot />

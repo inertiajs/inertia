@@ -7,17 +7,11 @@ export default { layout: (h, page) => h(Layout, { padding: false }, () => page) 
 import { Head, InfiniteScroll, router } from '@inertiajs/vue3'
 import { useStream } from '@laravel/stream-vue'
 import { computed, ref } from 'vue'
-import ChatMessage from '../Components/ChatMessage.vue'
+import { type Message, default as MessageComponent } from '../Components/Message.vue'
 import PaperAirplaneIcon from '../Components/PaperAirplaneIcon.vue'
 import Spinner from '../Components/Spinner.vue'
 import StreamingIndicator from '../Components/StreamingIndicator.vue'
 import Textarea from '../Components/Textarea.vue'
-
-type Message = {
-  id: number | 'pending'
-  type: 'prompt' | 'response'
-  content: string
-}
 
 const props = defineProps<{
   messages: {
@@ -25,22 +19,17 @@ const props = defineProps<{
   }
 }>()
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string
-
-const scrollContainer = ref(null)
-
-const requestCount = ref(0)
-const newPrompt = ref('')
-const pendingResponse = ref('')
+const newPrompt = ref<string>('')
+const pendingResponse = ref<string>('')
+const requestCount = ref<number>(0)
+const scrollContainer = ref<HTMLElement | null>(null)
 
 const { isFetching, isStreaming, send } = useStream('messages', {
-  csrfToken,
-  onData: (data) => {
-    pendingResponse.value += data
-  },
+  csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string,
+  onData: (data) => (pendingResponse.value += data),
   onFinish: () => {
     router.prependToProp('messages.data', {
-      id: 0,
+      id: Date.now(),
       content: pendingResponse.value,
       type: 'response',
     })
@@ -78,7 +67,7 @@ const sendMessage = () => {
 }
 
 const reversedMessages = computed(() => {
-  const messages = [...props.messages.data].reverse()
+  const messages = props.messages.data.toReversed()
 
   if (pendingResponse.value) {
     // Append the pending response to the end of the reversed messages
@@ -103,7 +92,7 @@ const isLastMessage = (message: Message) => {
 
   <div class="relative flex h-[calc(100vh-88px)] flex-col bg-gray-50">
     <div ref="scrollContainer" class="h-full flex-1 overflow-y-auto">
-      <InfiniteScroll reverse bottom data="messages" class="mx-auto grid max-w-3xl gap-6 px-8 py-16" trigger="both">
+      <InfiniteScroll reverse data="messages" class="mx-auto grid max-w-3xl gap-6 px-8 py-16">
         <div
           v-for="message in reversedMessages"
           :key="message.id"
@@ -111,7 +100,7 @@ const isLastMessage = (message: Message) => {
             'min-h-[calc(100vh-88px-131px-64px)]': isLastMessage(message) && requestCount > 0,
           }"
         >
-          <ChatMessage :message />
+          <MessageComponent :message />
           <StreamingIndicator class="mt-6" v-if="isLastMessage(message) && isFetching" />
         </div>
 

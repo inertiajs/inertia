@@ -208,7 +208,7 @@ Route::post('/messages', function (Request $request) {
 
             if ($message->is($prompt)) {
                 // Tell LLM not to answer too long and don't halucinate
-                // $content = "Max half a page!.\n\n".$content;
+                $content = "Answer in max. 10 sentences, may be shorter, code examples allowed when needed. Don't hallucinate, just answer based on the provided context.\n\n".$content;
             }
 
             return $message->type === 'prompt'
@@ -243,12 +243,12 @@ Route::post('/messages', function (Request $request) {
     }, 200, ['X-Accel-Buffering' => 'no']);
 });
 
-Route::get('/infinite-scrolling', function () {
+Route::get('/chat', function () {
     if (request()->inertia()) {
         usleep(500_000);
     }
 
-    return inertia('InfiniteScrolling', [
+    return inertia('Chat', [
         'messages' => Inertia::scroll(ChatMessage::latest('id')->cursorPaginate(10)),
     ]);
 });
