@@ -8,9 +8,11 @@
     remember: boolean
   }
 
-  export let user: {
-    username?: string | null
-  } | null = null
+  const { user = null }: {
+    user?: {
+      username?: string | null;
+    } | null;
+  } = $props()
 
   useForm<LoginData>({
     username: user?.username ?? '',

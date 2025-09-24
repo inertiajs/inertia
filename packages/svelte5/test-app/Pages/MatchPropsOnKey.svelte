@@ -1,18 +1,20 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  export let foo: {
-    page: number
-    data: Array<{ name: string }>
-    companies: Array<{ name: string }>
-    teams: Array<{ name: string }>
-    per_page: number
-    meta: { label: string }
-  }
-  export let bar: number[]
-  export let baz: number[]
+  const { foo, bar, baz }: {
+    foo: {
+      page: number;
+      data: Array<{ name: string }>;
+      companies: Array<{ name: string }>;
+      teams: Array<{ name: string }>;
+      per_page: number;
+      meta: { label: string };
+    };
+    bar: number[];
+    baz: number[];
+  } = $props()
 
-  let page = foo.page
+  let page = $state(foo.page)
 
   const reloadIt = () => {
     router.reload({
