@@ -1,4 +1,4 @@
-import test, { expect } from '@playwright/test'
+import test, { expect, Page } from '@playwright/test'
 import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
@@ -281,27 +281,30 @@ test.describe('Form Component', () => {
       await page.goto('/form-component/events')
     })
 
+    const waitForEvents = async (page: Page, events: string[]) => {
+      await page.waitForFunction(async (expected) => {
+        return document.querySelector('#events')?.innerText === expected
+      }, events.join(','))
+    }
+
     test('fires events in order on success', async ({ page }) => {
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
     })
 
     test('fires events in order on error', async ({ page }) => {
       await page.getByRole('button', { name: 'Fail Request' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
     })
 
     test('fires only onBefore and onCancel when canceled via event cancellation', async ({ page }) => {
       await page.getByRole('button', { name: 'Cancel in onBefore' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancel'])
+      await waitForEvents(page, ['onBefore', 'onCancel'])
     })
 
     test('fires onCancelToken and cancels the request via the token', async ({ page }) => {
@@ -309,8 +312,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Submit' }).click()
       await page.getByRole('button', { name: 'Cancel Visit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
     })
 
     test('fires onProgress during file upload', async ({ page }) => {
@@ -323,8 +325,7 @@ test.describe('Form Component', () => {
       await page.setInputFiles('#avatar', file)
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toContain('onProgress')
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onProgress'])
     })
 
     test('updates processing during request', async ({ page }) => {
