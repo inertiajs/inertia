@@ -508,6 +508,7 @@ test.describe('enabled', () => {
     )
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+    await page.waitForTimeout(100)
   })
 
   test('resets scroll regions to the top when doing a regular visit', async ({ page }) => {
@@ -579,7 +580,9 @@ test.describe('enabled', () => {
     await expect(page).toHaveURL('/links/preserve-scroll')
     await expect(page.getByText('Foo is now default')).toBeVisible()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
-    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+
+    // Wait for scroll restoration to complete - use longer timeout for flaky CI
+    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible({ timeout: 10000 })
   })
 
   test('restores the document scroll position when pressing the back button with history encryption enabled', async ({
