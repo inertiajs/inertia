@@ -127,11 +127,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       if (typeof fieldOrFields === 'undefined') {
         defaults = cloneDeep(getData())
+      } else if (typeof fieldOrFields === 'string') {
+        // Update single field
+        const newDefaults = cloneDeep(defaults)
+        set(newDefaults, fieldOrFields, maybeValue)
+        defaults = newDefaults
       } else {
-        defaults =
-          typeof fieldOrFields === 'string'
-            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
-            : Object.assign(cloneDeep(defaults), fieldOrFields)
+        // Update multiple fields
+        const newDefaults = cloneDeep(defaults)
+        Object.assign(newDefaults, fieldOrFields)
+        defaults = newDefaults
       }
 
       return form
