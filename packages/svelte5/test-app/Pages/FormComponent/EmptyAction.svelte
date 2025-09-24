@@ -10,7 +10,7 @@
       <div>
         <input type="text" name="name" placeholder="Name" value="John Doe" />
         {#if errors.name}
-          <div>{errors.name}</div>
+          <div id="error_name">{errors.name}</div>
         {/if}
       </div>
 
