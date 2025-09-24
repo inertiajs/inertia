@@ -60,7 +60,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
     : null
 
-  let defaults = cloneDeep(initialData)
+  let defaults = $state(cloneDeep(initialData))
   let cancelToken: { cancel: () => void } | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
@@ -96,7 +96,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     if (typeof keyOrData === 'string') {
       set(formData, keyOrData, maybeValue)
     } else {
-      Object.assign(formData, keyOrData)
+      // For runes, we need to update each property individually to trigger reactivity
+      Object.keys(keyOrData).forEach(key => {
+        set(formData, key, get(keyOrData, key))
+      })
     }
   }
 
@@ -135,16 +138,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     },
 
     reset(...fields: FormDataKeys<TForm>[]) {
-      const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
+        // Reset all fields
+        const clonedData = cloneDeep(defaults)
         setFormData(clonedData)
       } else {
-        const resetData = fields
-          .filter((key) => has(clonedData, key))
-          .reduce((carry, key) => {
-            return set(carry, key, get(clonedData, key))
-          }, {} as Partial<TForm>)
-        setFormData(resetData as TForm)
+        // Reset specific fields
+        fields.forEach(field => {
+          if (has(defaults, field)) {
+            const defaultValue = get(defaults, field)
+            setFormData(field as keyof TForm, defaultValue)
+          }
+        })
       }
 
       return form
