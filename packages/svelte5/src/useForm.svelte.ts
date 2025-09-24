@@ -143,7 +143,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       } else {
         // Update multiple fields
         const newDefaults = cloneDeep(defaults)
-        Object.assign(newDefaults, fieldOrFields)
+        Object.keys(fieldOrFields).forEach(key => {
+          set(newDefaults, key, get(fieldOrFields, key))
+        })
         defaults = newDefaults
       }
 
@@ -325,7 +327,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   // Set up remember functionality
   $effect(() => {
     if (rememberKey) {
-      router.remember({ data: getData(), errors }, rememberKey)
+      router.remember({ data: formData, errors }, rememberKey)
     }
   })
 
