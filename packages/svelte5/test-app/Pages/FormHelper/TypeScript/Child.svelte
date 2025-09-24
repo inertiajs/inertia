@@ -1,11 +1,11 @@
 <script lang="ts">
   // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
-  import type { InertiaForm } from '@inertiajs/svelte5'
+  import type { InertiaFormRunes } from '@inertiajs/svelte5'
 
-  export let form: InertiaForm<{
-    name: string
-    email?: string
-  }>
+  const { form }: { form: InertiaFormRunes<{
+    name: string;
+    email?: string;
+  }> } = $props()
 </script>
 
 <p>Name: {form.name}</p>
