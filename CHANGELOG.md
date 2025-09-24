@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.10...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.11...master)
 
 - Nothing yet
+
+## [v2.1.11](https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11) - 2025-09-24
+
+### What's Changed
+
+* Fix flaky tests in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2582
+* Bump Playwright by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2585
+* Progress indicator API by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2581
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11
 
 ## [v2.1.10](https://github.com/inertiajs/inertia/compare/v2.1.9...v2.1.10) - 2025-09-22
 
