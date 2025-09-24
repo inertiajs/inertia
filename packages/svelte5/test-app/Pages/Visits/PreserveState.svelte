@@ -2,7 +2,7 @@
   import { router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
-  export let foo = 'default'
+  const { foo = 'default' } = $props()
 
   onMount(() => {
     window._inertia_page_key = crypto.randomUUID()

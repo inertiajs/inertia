@@ -7,12 +7,11 @@
     bar: string
   }
 
-  export let foo: string
-  export let bar: string
+  const { foo, bar }: { foo: string; bar: string } = $props()
 
-  let errors = 0
-  let finished = 0
-  let success = 0
+  let errors = $state(0)
+  let finished = $state(0)
+  let success = $state(0)
 
   const bagErrors = () => {
     router.replace({
