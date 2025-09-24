@@ -7,15 +7,15 @@
   })
 
   const submit = () => {
-    $form.post('')
+    form.post('')
   }
 
   const defaults = () => {
-    $form.defaults()
+    form.defaults()
   }
 
   const pushValue = () => {
-    $form.foo.push('bar')
+    form.foo.push('bar')
   }
 
   const dataAndDefaults = () => {
@@ -24,25 +24,25 @@
   }
 
   const submitAndSetDefaults = () => {
-    $form.post('/form-helper/dirty/redirect-back', {
-      onSuccess: () => $form.defaults(),
+    form.post('/form-helper/dirty/redirect-back', {
+      onSuccess: () => form.defaults(),
     })
   }
 
   const submitAndSetCustomDefaults = () => {
-    $form.post('/form-helper/dirty/redirect-back', {
-      onSuccess: () => $form.defaults({ name: 'Custom Default', foo: [] }),
+    form.post('/form-helper/dirty/redirect-back', {
+      onSuccess: () => form.defaults({ name: 'Custom Default', foo: [] }),
     })
   }
 </script>
 
 <div>
   <div>
-    Form is {#if $form.isDirty}dirty{:else}clean{/if}
+    Form is {#if form.isDirty}dirty{:else}clean{/if}
   </div>
   <label>
     Full Name
-    <input type="text" id="name" name="name" bind:value={$form.name} />
+    <input type="text" id="name" name="name" bind:value={form.name} />
   </label>
 
   <button on:click={submit} class="submit">Submit form</button>
