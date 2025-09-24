@@ -1,11 +1,13 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  export let foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
-  export let bar: number[]
-  export let baz: number[]
+  const { foo, bar, baz }: {
+    foo: { page: number; data: number[]; per_page: number; meta: { label: string } };
+    bar: number[];
+    baz: number[];
+  } = $props()
 
-  let page = foo.page
+  let page = $state(foo.page)
 
   const reloadIt = () => {
     router.reload({
