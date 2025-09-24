@@ -33,27 +33,29 @@
 <div>
   <h1>Form Ref Test</h1>
 
-  <Form bind:this={formRef} action="/dump/post" method="post" let:isDirty let:errors let:hasErrors>
-    <!-- State display for testing -->
-    <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
-    {#if hasErrors}
-      <div>Form has errors</div>
-    {/if}
-    {#if errors.name}
-      <div id="error_name">{errors.name}</div>
-    {/if}
+  <Form bind:this={formRef} action="/dump/post" method="post">
+    {#snippet children({ isDirty, errors, hasErrors })}
+      <!-- State display for testing -->
+      <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
+      {#if hasErrors}
+        <div>Form has errors</div>
+      {/if}
+      {#if errors.name}
+        <div id="error_name">{errors.name}</div>
+      {/if}
 
-    <div>
-      <input type="text" name="name" placeholder="Name" value="John Doe" />
-    </div>
+      <div>
+        <input type="text" name="name" placeholder="Name" value="John Doe" />
+      </div>
 
-    <div>
-      <input type="email" name="email" placeholder="Email" value="john@example.com" />
-    </div>
+      <div>
+        <input type="email" name="email" placeholder="Email" value="john@example.com" />
+      </div>
 
-    <div>
-      <button type="submit">Submit via Form</button>
-    </div>
+      <div>
+        <button type="submit">Submit via Form</button>
+      </div>
+    {/snippet}
   </Form>
 
   <div>
