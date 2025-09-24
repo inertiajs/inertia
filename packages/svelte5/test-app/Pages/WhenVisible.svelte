@@ -1,7 +1,8 @@
 <script lang="ts">
   import { WhenVisible } from '@inertiajs/svelte5'
 
-  export let count = 0
+  let { count = 0 } = $props()
+  let countState = $state(count)
 </script>
 
 <div style="margin-top: 5000px">

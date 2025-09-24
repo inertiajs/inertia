@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Link } from '@inertiajs/svelte5'
 
-  export let page: number
+  const { page }: { page: number } = $props()
 </script>
 
 <h1 style="font-size: 40px;">

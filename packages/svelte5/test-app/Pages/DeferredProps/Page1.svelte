@@ -1,8 +1,7 @@
 <script lang="ts">
   import { Deferred, inertia } from '@inertiajs/svelte5'
 
-  export let foo: { text: string } | undefined
-  export let bar: { text: string } | undefined
+  const { foo, bar }: { foo?: { text: string }; bar?: { text: string } } = $props()
 </script>
 
 <Deferred data="foo">

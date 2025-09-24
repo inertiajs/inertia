@@ -5,7 +5,7 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  export let foo: string = 'default'
+  const { foo = 'default' }: { foo?: string } = $props()
 
   const preserve = () => {
     router.visit('/visits/preserve-scroll-page-two', {

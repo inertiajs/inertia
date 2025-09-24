@@ -2,7 +2,8 @@
   import { onMount } from 'svelte'
   import { page } from '@inertiajs/svelte5'
 
-  let createdAt: number | null = null
+  const { children } = $props()
+  let createdAt = $state<number | null>(null)
 
   onMount(() => {
     window._inertia_nested_layout_id = crypto.randomUUID()
@@ -21,6 +22,6 @@
   <span>Nested Layout</span>
   <span>{createdAt}</span>
   <div>
-    <slot />
+    {@render children?.()}
   </div>
 </div>

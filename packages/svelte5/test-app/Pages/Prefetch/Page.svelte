@@ -3,8 +3,7 @@
 </script>
 
 <script lang="ts">
-  export let pageNumber: number
-  export let lastLoaded: number
+  const { pageNumber, lastLoaded }: { pageNumber: number; lastLoaded: number } = $props()
 </script>
 
 <div>This is page {pageNumber}</div>

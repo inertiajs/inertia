@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { beforeUpdate } from 'svelte'
   import { page } from '@inertiajs/svelte5'
   import type { Method } from '@inertiajs/core'
   import type { MulterFile } from '../types'
 
-  export let headers: Record<string, string>
-  export let method: Method
-  export let form: Record<string, unknown>
-  export let files: MulterFile[] | object = {}
-  export let url: string
-  export let query: Record<string, unknown>
+  const { headers, method, form, files = {}, url, query }: {
+    headers: Record<string, string>;
+    method: Method;
+    form: Record<string, unknown>;
+    files?: MulterFile[] | object;
+    url: string;
+    query: Record<string, unknown>;
+  } = $props()
 
   const dump = {
     headers,
@@ -21,7 +22,8 @@
     $page: page,
   }
 
-  beforeUpdate(() => {
+  // Set window dump for testing
+  $effect(() => {
     window._inertia_request_dump = dump
   })
 </script>

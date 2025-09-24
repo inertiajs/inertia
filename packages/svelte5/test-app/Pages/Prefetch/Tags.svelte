@@ -1,8 +1,6 @@
 <script lang="ts">
   import { inertia, router, useForm } from '@inertiajs/svelte5'
-  export let pageNumber
-  export let lastLoaded
-  export let propType: string
+  const { pageNumber, lastLoaded, propType }: { pageNumber: any; lastLoaded: any; propType: string } = $props()
 
   const form = useForm({
     name: '',
@@ -31,7 +29,7 @@
   }
 
   function submitWithUserInvalidation() {
-    $form.post('/dump/post', {
+    form.post('/dump/post', {
       invalidateCacheTags: propType === 'string' ? 'user' : ['user'],
     })
   }
@@ -64,7 +62,7 @@
   <div id="form-section">
     <h3>Form Test</h3>
     <form on:submit|preventDefault>
-      <input id="form-name" bind:value={$form.name} type="text" placeholder="Enter name" />
+      <input id="form-name" bind:value={form.name} type="text" placeholder="Enter name" />
       <button id="submit-invalidate-user" on:click={submitWithUserInvalidation}> Submit (Invalidate User) </button>
     </form>
   </div>

@@ -6,7 +6,7 @@
   import { inertia } from '@inertiajs/svelte5'
   import type { Page } from '@inertiajs/core'
 
-  export let foo: string = 'default'
+  const { foo = 'default' }: { foo?: string } = $props()
 
   const preserveCallback = (page: Page) => {
     console.log(JSON.stringify(page))

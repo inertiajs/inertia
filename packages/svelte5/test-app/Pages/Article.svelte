@@ -6,7 +6,8 @@
     document.documentElement.style.scrollBehavior = 'smooth'
   }
 
-  export let scrollLog: number[] = []
+  let { scrollLog = [] }: { scrollLog?: number[] } = $props()
+  let scrollLogState = $state(scrollLog)
 
   const handleScrollEvent = () => {
     scrollLog = [...scrollLog, document.documentElement.scrollTop]

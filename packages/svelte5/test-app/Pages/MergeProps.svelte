@@ -1,8 +1,7 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  export let foo: number[] = []
-  export let bar: number[] = []
+  const { foo = [], bar = [] }: { foo?: number[]; bar?: number[] } = $props()
 
   const reloadIt = () => {
     router.reload({
