@@ -1413,7 +1413,7 @@ test.describe('Form Component', () => {
       // Submit form that invalidates 'user' tag
       await page.fill('#form-name', 'Test User')
       await page.click('#submit-invalidate-user')
-      await page.waitForURL('/dump/post')
+      await shouldBeDumpPage(page, 'post')
 
       await page.goBack()
 
@@ -1421,6 +1421,7 @@ test.describe('Form Component', () => {
       requests.listen(page)
       await page.getByRole('link', { name: 'User Tagged Page' }).click()
       await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+      await expect(page).toHaveURL('/prefetch/tags/1')
 
       // Go back and check product page is still cached
       await page.goBack()

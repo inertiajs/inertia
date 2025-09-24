@@ -73,6 +73,18 @@ test.describe('Form Helper', () => {
       await page.check('#remember')
     })
 
+    const waitForErrors = async (page: Page) => {
+      await page.waitForFunction(() => {
+        return document.querySelector('.errors-status')?.textContent === 'Form has errors'
+      })
+    }
+
+    const waitForNoErrors = async (page: Page) => {
+      await page.waitForFunction(() => {
+        return document.querySelector('.errors-status')?.textContent === 'Form has no errors'
+      })
+    }
+
     test('can display form errors', async ({ page }) => {
       await page.waitForSelector('.name_error', { state: 'detached' })
       await page.waitForSelector('.handle_error', { state: 'detached' })
@@ -83,12 +95,11 @@ test.describe('Form Helper', () => {
       await expect(page).toHaveURL('form-helper/errors')
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
+      await waitForErrors(page)
 
-      const errorsStatus = await page.locator('.errors-status')
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
     })
@@ -100,11 +111,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -114,7 +125,7 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+      await waitForNoErrors(page)
     })
 
     test('does not reset fields back to their initial values when it clears all form errors', async ({ page }) => {
@@ -124,11 +135,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -142,7 +153,7 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+      await waitForNoErrors(page)
 
       await expect(await page.locator('#name').inputValue()).toEqual('A')
       await expect(await page.locator('#handle').inputValue()).toEqual('B')
@@ -156,17 +167,18 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
       await page.getByRole('button', { name: 'Clear one error' }).click()
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      await waitForErrors(page)
+
       await expect(await nameError.textContent()).toEqual('Some name error')
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
@@ -181,11 +193,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -195,7 +207,8 @@ test.describe('Form Helper', () => {
 
       await page.getByRole('button', { name: 'Clear one error' }).click()
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      await waitForErrors(page)
+
       await expect(await nameError.textContent()).toEqual('Some name error')
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
@@ -213,10 +226,9 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.remember_error', { state: 'detached' })
       await page.waitForSelector('.name_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
-      const handleError = await page.locator('.handle_error')
+      await waitForErrors(page)
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      const handleError = await page.locator('.handle_error')
       await expect(await handleError.textContent()).toEqual('Manually set Handle error')
     })
 
@@ -227,11 +239,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const handleError = await page.locator('.handle_error')
       const nameError = await page.locator('.name_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await handleError.textContent()).toEqual('Manually set Handle error')
       await expect(await nameError.textContent()).toEqual('Manually set Name error')
     })
@@ -243,11 +255,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -261,7 +273,7 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+      await waitForNoErrors(page)
     })
 
     test('can reset a single error and reset a single field to its initial value', async ({ page }) => {
@@ -271,11 +283,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -288,7 +300,8 @@ test.describe('Form Helper', () => {
       await expect(await nameError.textContent()).toEqual('Some name error')
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+
+      await waitForErrors(page)
     })
   })
 
