@@ -1,8 +1,15 @@
 <?php
 
+use App\Models\ChatMessage;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Prism\Prism\Enums\Provider;
+use Prism\Prism\Prism;
+use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 /*
 |--------------------------------------------------------------------------
@@ -257,4 +264,129 @@ Route::post('/sleepy/{duration}', function ($duration) {
     sleep($duration);
 
     return inertia('Article');
+});
+
+Route::post('/messages', function (Request $request) {
+    $data = $request->validate([
+        'message' => ['required', 'string'],
+    ]);
+
+    // Store the new user message
+    $prompt = ChatMessage::create([
+        'type' => 'prompt',
+        'content' => $data['message'],
+    ]);
+
+    $messages = ChatMessage::latest('id')
+        ->limit(10)
+        ->get()
+        ->reverse()
+        ->map(function (ChatMessage $message) use ($prompt) {
+            $content = $message->content;
+
+            if ($message->is($prompt)) {
+                // Tell LLM not to answer too long and don't halucinate
+                $content = "Answer in max. 10 sentences, may be shorter, code examples allowed when needed. Don't hallucinate, just answer based on the provided context.\n\n".$content;
+            }
+
+            return $message->type === 'prompt'
+                ? new UserMessage($content)
+                : new AssistantMessage($content);
+        })
+        ->all();
+
+    // Create a streaming response from the LLM
+    $stream = Prism::text()
+        ->using(Provider::Ollama, 'gemma3:1b')
+        ->using(Provider::Ollama, 'gemma3:4b')
+        ->withMessages($messages)
+        ->asStream();
+
+    return response()->stream(function () use ($stream) {
+        $response = '';
+
+        foreach ($stream as $chunk) {
+            $response .= $chunk->text;
+            echo $chunk->text;
+            ob_flush();
+            flush();
+        }
+
+        if (! blank($response)) {
+            ChatMessage::create([
+                'type' => 'response',
+                'content' => $response,
+            ]);
+        }
+    }, 200, ['X-Accel-Buffering' => 'no']);
+});
+
+Route::get('/chat', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        usleep(500_000);
+    }
+
+    return inertia('Chat', [
+        'messages' => Inertia::scroll(ChatMessage::latest('id')->cursorPaginate(10)),
+    ]);
+});
+
+Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        usleep(250_000);
+    }
+
+    $perPage = 24;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $photos = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'url' => "https://picsum.photos/id/{$i}/300/300",
+        ])
+        ->values()
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos,
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia($horizontal ? 'PhotoHorizontal' : 'PhotoGrid', [
+        'photos' => Inertia::scroll($photos),
+    ]);
+});
+
+Route::get('/data-table', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        usleep(500_000);
+    }
+
+    $perPage = 200;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $users = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'name' => "User {$i}",
+        ])
+        ->values()
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos,
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia('DataTable', [
+        'users' => Inertia::scroll($users),
+    ]);
 });
