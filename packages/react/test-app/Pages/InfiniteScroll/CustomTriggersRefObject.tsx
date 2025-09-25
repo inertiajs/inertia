@@ -11,7 +11,7 @@ export default ({ users }: { users: { data: User[] } }) => {
     <div style={{ padding: '20px' }}>
       <h1>Custom Triggers with React Ref Objects Test</h1>
 
-      <InfiniteScroll data="users" startElement={tableHeader} endElement={tableFooter} slotElement={tableBody}>
+      <InfiniteScroll data="users" startElement={tableHeader} endElement={tableFooter} itemsElement={tableBody}>
         {({ loadingPrevious, loadingNext }) => (
           <>
             <div

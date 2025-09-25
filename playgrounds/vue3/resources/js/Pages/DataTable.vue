@@ -20,7 +20,7 @@ defineProps<{
 <template>
   <Head title="Data Table" />
 
-  <InfiniteScroll data="users" class="mx-auto max-w-7xl px-8" :buffer="3000" slot-element="tbody">
+  <InfiniteScroll data="users" class="mx-auto max-w-7xl px-8" :buffer="3000" items-element="tbody">
     <div class="overflow-hidden rounded-2xl shadow ring-1 ring-gray-200">
       <table class="min-w-full">
         <thead class="bg-gray-50">

@@ -6,7 +6,7 @@ export default ({ users }: { users: { data: User[] } }) => {
     <div style={{ padding: '20px' }}>
       <h1>Custom Triggers with Selectors Test</h1>
 
-      <InfiniteScroll data="users" slotElement="#table-body" startElement="#table-header" endElement="#table-footer">
+      <InfiniteScroll data="users" itemsElement="#table-body" startElement="#table-header" endElement="#table-footer">
         {({ loadingPrevious, loadingNext }) => (
           <>
             <div

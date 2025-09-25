@@ -20,17 +20,17 @@
   export let autoScroll: InfiniteScrollComponentBaseProps['autoScroll'] = undefined
   export let startElement: string | (() => HTMLElement | null | undefined) = undefined
   export let endElement: string | (() => HTMLElement | null | undefined) = undefined
-  export let slotElement: string | (() => HTMLElement | null | undefined) = undefined
+  export let itemsElement: string | (() => HTMLElement | null | undefined) = undefined
 
-  let slotElementRef: HTMLElement
+  let itemsElementRef: HTMLElement
   let startElementRef: HTMLElement
   let endElementRef: HTMLElement
   let loadingPrevious = false
   let loadingNext = false
   let requestCount = 0
 
-  $: resolvedSlotElement = resolveHTMLElement(slotElement, slotElementRef)
-  $: scrollableParent = resolvedSlotElement ? getScrollableParent(resolvedSlotElement) : null
+  $: resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
+  $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null
   $: manualMode = manual || (manualAfter > 0 && requestCount >= manualAfter)
   $: autoLoad = !manualMode
 
@@ -124,7 +124,7 @@
   })
 
   function setupInfiniteScrollInstance() {
-    const resolvedSlotElement = resolveHTMLElement(slotElement, slotElementRef)
+    const resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
     const resolvedStartElement = resolveHTMLElement(startElement, startElementRef)
     const resolvedEndElement = resolveHTMLElement(endElement, endElementRef)
 
@@ -139,8 +139,8 @@
       getTriggerMargin: () => buffer,
       getStartElement: () => resolvedStartElement,
       getEndElement: () => resolvedEndElement,
-      getSlotElement: () => resolvedSlotElement,
-      getScrollableParent: () => (resolvedSlotElement ? getScrollableParent(resolvedSlotElement) : null),
+      getItemsElement: () => resolvedItemsElement,
+      getScrollableParent: () => (resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null),
 
       // Request callbacks
       onBeforePreviousRequest: () => (loadingPrevious = true),
@@ -200,7 +200,7 @@
   </div>
 {/if}
 
-<svelte:element this={as} bind:this={slotElementRef} {...$$restProps}>
+<svelte:element this={as} bind:this={itemsElementRef} {...$$restProps}>
   <slot {exposedSlot} />
 </svelte:element>
 

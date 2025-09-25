@@ -20,7 +20,7 @@ const tableBody = ref<HTMLElement>()
       data="users"
       :start-element="() => tableHeader"
       :end-element="() => tableFooter"
-      :slot-element="() => tableBody"
+      :items-element="() => tableBody"
       #default="{ loadingPrevious, loadingNext }"
     >
       <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">

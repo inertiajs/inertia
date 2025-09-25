@@ -13,7 +13,7 @@ defineProps<{
 
     <InfiniteScroll
       data="users"
-      slot-element="#table-body"
+      items-element="#table-body"
       start-element="#table-header"
       end-element="#table-footer"
       #default="{ loadingPrevious, loadingNext }"

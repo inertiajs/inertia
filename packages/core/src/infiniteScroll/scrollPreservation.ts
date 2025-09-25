@@ -11,7 +11,7 @@ import { getElementsInViewportFromCollection } from '../domUtils'
  */
 export const useInfiniteScrollPreservation = (options: {
   getScrollableParent: () => HTMLElement | null
-  getSlotElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
 }) => {
   const createCallbacks = () => {
     let currentScrollTop: number
@@ -20,7 +20,7 @@ export const useInfiniteScrollPreservation = (options: {
 
     const captureScrollPosition = () => {
       const scrollableContainer = options.getScrollableParent()
-      const slotElement = options.getSlotElement()
+      const itemsElement = options.getItemsElement()
 
       // Capture current scroll position
       currentScrollTop = scrollableContainer?.scrollTop || window.scrollY
@@ -28,8 +28,8 @@ export const useInfiniteScrollPreservation = (options: {
       // Find the first visible element to use as a reference point
       // This element will help us calculate how much the content shifted after the update
       const visibleElements = getElementsInViewportFromCollection(
-        slotElement.firstElementChild as HTMLElement,
-        [...slotElement.children] as HTMLElement[],
+        itemsElement.firstElementChild as HTMLElement,
+        [...itemsElement.children] as HTMLElement[],
       )
 
       if (visibleElements.length > 0) {

@@ -3,7 +3,7 @@ import { User } from './UserCard'
 
 export default ({ users }: { users: { data: User[] } }) => {
   return (
-    <InfiniteScroll data="users" slotElement="tbody">
+    <InfiniteScroll data="users" itemsElement="tbody">
       {({ loadingPrevious, loadingNext }) => (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>

@@ -15,7 +15,7 @@
 </svelte:head>
 
 <div class="mx-auto max-w-7xl px-8">
-  <InfiniteScroll data="users" buffer={3000} slotElement="tbody">
+  <InfiniteScroll data="users" buffer={3000} itemsElement="tbody">
     <tr slot="loading">
       <td colspan="2" class="px-6 py-4 text-center">
         <Spinner class="mx-auto size-6 text-gray-400" />

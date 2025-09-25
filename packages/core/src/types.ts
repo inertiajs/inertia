@@ -513,7 +513,7 @@ export interface UseInfiniteScrollOptions {
   getTriggerMargin: () => number
   getStartElement: () => HTMLElement
   getEndElement: () => HTMLElement
-  getSlotElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
 
   // Callbacks

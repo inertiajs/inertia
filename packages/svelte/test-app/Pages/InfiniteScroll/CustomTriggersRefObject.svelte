@@ -16,7 +16,7 @@
     data="users"
     startElement={() => tableHeader}
     endElement={() => tableFooter}
-    slotElement={() => tableBody}
+    itemsElement={() => tableBody}
     let:exposedSlot
   >
     <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>

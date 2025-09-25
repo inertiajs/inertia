@@ -60,7 +60,7 @@ export interface InfiniteScrollProps
   // Element references for custom trigger detection (when you want different trigger elements)
   startElement?: string | React.RefObject<HTMLElement | null>
   endElement?: string | React.RefObject<HTMLElement | null>
-  slotElement?: string | React.RefObject<HTMLElement | null>
+  itemsElement?: string | React.RefObject<HTMLElement | null>
 
   // Render slots for UI components (when you want custom loading/action components)
   previous?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
@@ -83,7 +83,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       children,
       startElement,
       endElement,
-      slotElement,
+      itemsElement,
       previous,
       next,
       loading,
@@ -97,8 +97,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     const [endElementFromRef, setEndElementFromRef] = useState<HTMLElement | null>(null)
     const endElementRef = useCallback((node: HTMLElement | null) => setEndElementFromRef(node), [])
 
-    const [slotElementFromRef, setSlotElementFromRef] = useState<HTMLElement | null>(null)
-    const slotElementRef = useCallback((node: HTMLElement | null) => setSlotElementFromRef(node), [])
+    const [itemsElementFromRef, setItemsElementFromRef] = useState<HTMLElement | null>(null)
+    const itemsElementRef = useCallback((node: HTMLElement | null) => setItemsElementFromRef(node), [])
 
     const [loadingPrevious, setLoadingPrevious] = useState(false)
     const [loadingNext, setLoadingNext] = useState(false)
@@ -106,7 +106,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
 
     const [resolvedStartElement, setResolvedStartElement] = useState<HTMLElement | null>(null)
     const [resolvedEndElement, setResolvedEndElement] = useState<HTMLElement | null>(null)
-    const [resolvedSlotElement, setResolvedSlotElement] = useState<HTMLElement | null>(null)
+    const [resolvedItemsElement, setResolvedItemsElement] = useState<HTMLElement | null>(null)
 
     // Update elements when refs or props change
     useEffect(() => {
@@ -120,11 +120,11 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     }, [endElement, endElementFromRef])
 
     useEffect(() => {
-      const element = slotElement ? resolveHTMLElement(slotElement, slotElementFromRef) : slotElementFromRef
-      setResolvedSlotElement(element)
-    }, [slotElement, slotElementFromRef])
+      const element = itemsElement ? resolveHTMLElement(itemsElement, itemsElementFromRef) : itemsElementFromRef
+      setResolvedItemsElement(element)
+    }, [itemsElement, itemsElementFromRef])
 
-    const scrollableParent = useMemo(() => getScrollableParent(resolvedSlotElement), [resolvedSlotElement])
+    const scrollableParent = useMemo(() => getScrollableParent(resolvedItemsElement), [resolvedItemsElement])
 
     const manualMode = useMemo(
       () => manual || (manualAfter > 0 && requestCount >= manualAfter),
@@ -167,7 +167,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
 
     // Main setup effect - only recreate when structural dependencies change
     useEffect(() => {
-      if (!resolvedSlotElement) {
+      if (!resolvedItemsElement) {
         return
       }
 
@@ -182,7 +182,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         getTriggerMargin: () => callbackPropsRef.current.buffer,
         getStartElement: () => resolvedStartElement,
         getEndElement: () => resolvedEndElement,
-        getSlotElement: () => resolvedSlotElement,
+        getItemsElement: () => resolvedItemsElement,
         getScrollableParent: () => scrollableParent,
 
         // Callbacks
@@ -212,7 +212,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         elementManager.flushAll()
         setInfiniteScroll(null)
       }
-    }, [data, resolvedSlotElement, resolvedStartElement, resolvedEndElement, scrollableParent])
+    }, [data, resolvedItemsElement, resolvedStartElement, resolvedEndElement, scrollableParent])
 
     useEffect(() => {
       autoLoad ? elementManager?.enableTriggers() : elementManager?.disableTriggers()
@@ -292,7 +292,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     renderElements.push(
       createElement(
         as,
-        { ...props, ref: slotElementRef },
+        { ...props, ref: itemsElementRef },
         typeof children === 'function' ? children(exposedSlot) : children,
       ),
     )

@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <InfiniteScroll data="users" slot-element="tbody" #default="{ loadingPrevious, loadingNext }">
+  <InfiniteScroll data="users" items-element="tbody" #default="{ loadingPrevious, loadingNext }">
     <table style="width: 100%; border-collapse: collapse">
       <thead>
         <tr>

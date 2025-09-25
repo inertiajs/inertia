@@ -21,9 +21,9 @@
   buffer={1000}
 >
   <div slot="loading">
-      <div class="p-6 flex items-center justify-center">
-        <Spinner class="size-6 text-gray-400" />
-      </div>
+    <div class="flex items-center justify-center p-6">
+      <Spinner class="size-6 text-gray-400" />
+    </div>
   </div>
 
   {#each photos.data as photo (photo.id)}

@@ -65,7 +65,7 @@ const InfiniteScroll = defineComponent({
       type: Boolean as PropType<InfiniteScrollComponentBaseProps['autoScroll']>,
       default: undefined,
     },
-    slotElement: {
+    itemsElement: {
       type: [String, Function, Object] as PropType<string | (() => HTMLElement | null | undefined)>,
       default: null,
     },
@@ -80,12 +80,14 @@ const InfiniteScroll = defineComponent({
   },
   inheritAttrs: false,
   setup(props, { slots, attrs, expose }) {
-    const slotElementRef = ref<HTMLElement | null>(null)
+    const itemsElementRef = ref<HTMLElement | null>(null)
     const startElementRef = ref<HTMLElement | null>(null)
     const endElementRef = ref<HTMLElement | null>(null)
 
-    const slotElement = computed<HTMLElement | null>(() => resolveHTMLElement(props.slotElement, slotElementRef.value))
-    const scrollableParent = computed(() => getScrollableParent(slotElement.value))
+    const itemsElement = computed<HTMLElement | null>(() =>
+      resolveHTMLElement(props.itemsElement, itemsElementRef.value),
+    )
+    const scrollableParent = computed(() => getScrollableParent(itemsElement.value))
     const startElement = computed<HTMLElement | null>(() =>
       resolveHTMLElement(props.startElement, startElementRef.value),
     )
@@ -111,7 +113,7 @@ const InfiniteScroll = defineComponent({
       getTriggerMargin: () => props.buffer,
       getStartElement: () => startElement.value!,
       getEndElement: () => endElement.value!,
-      getSlotElement: () => slotElement.value!,
+      getItemsElement: () => itemsElement.value!,
       getScrollableParent: () => scrollableParent.value,
 
       // Request callbacks
@@ -214,7 +216,7 @@ const InfiniteScroll = defineComponent({
       renderElements.push(
         h(
           props.as,
-          { ...attrs, ref: slotElementRef },
+          { ...attrs, ref: itemsElementRef },
           slots.default?.({
             loading: loadingPrevious.value || loadingNext.value,
             loadingPrevious: loadingPrevious.value,

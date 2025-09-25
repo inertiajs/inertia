@@ -12,7 +12,7 @@ export const useInfiniteScrollElementManager = (options: {
   getTriggerMargin: () => number
   getStartElement: () => HTMLElement
   getEndElement: () => HTMLElement
-  getSlotElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
   onTopTriggered: () => void
   onBottomTriggered: () => void
@@ -23,14 +23,14 @@ export const useInfiniteScrollElementManager = (options: {
   let itemsObserver: IntersectionObserver
   let topElementObserver: IntersectionObserver
   let bottomElementObserver: IntersectionObserver
-  let slotMutationObserver: MutationObserver
+  let itemsMutationObserver: MutationObserver
   let triggersEnabled = false
 
   const setupObservers = () => {
     // Watch for manually added DOM elements (not from server responses)
     // This mutation observer tracks when new elements are added to the slot,
     // so we can distinguish between user-added content and server-loaded pages
-    slotMutationObserver = new MutationObserver((mutations) => {
+    itemsMutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
@@ -40,7 +40,7 @@ export const useInfiniteScrollElementManager = (options: {
       })
     })
 
-    slotMutationObserver.observe(options.getSlotElement(), { childList: true })
+    itemsMutationObserver.observe(options.getItemsElement(), { childList: true })
 
     // Track individual items entering/leaving viewport for URL synchronization
     // When items become visible, we update the URL to reflect the current page
@@ -98,7 +98,7 @@ export const useInfiniteScrollElementManager = (options: {
 
   const flushAll = () => {
     intersectionObservers.flushAll()
-    slotMutationObserver?.disconnect()
+    itemsMutationObserver?.disconnect()
   }
 
   const addedElements = new Set<HTMLElement>()
@@ -131,7 +131,7 @@ export const useInfiniteScrollElementManager = (options: {
   const processServerLoadedElements = (loadedPage?: string | number) => {
     // Tag new server-loaded elements with their page number for URL management
     // This allows us to update the URL based on which page's content is most visible
-    findUntaggedElements(options.getSlotElement()).forEach((element) => {
+    findUntaggedElements(options.getItemsElement()).forEach((element) => {
       if (elementIsUntagged(element)) {
         element.dataset[INFINITE_SCROLL_PAGE_KEY] = loadedPage?.toString() || '1'
       }

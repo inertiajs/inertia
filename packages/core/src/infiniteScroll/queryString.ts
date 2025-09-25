@@ -10,11 +10,9 @@ import { getPageFromElement } from './elements'
  */
 export const useInfiniteScrollQueryString = (options: {
   getPageName: () => string
-  getSlotElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
   shouldPreserveUrl: () => boolean
 }) => {
-  const slotChildren = () => [...options.getSlotElement().children] as HTMLElement[]
-
   // Debounced to avoid excessive URL updates during fast scrolling
   const onItemIntersected = debounce((itemElement: HTMLElement) => {
     if (options.shouldPreserveUrl() || !itemElement) {
@@ -23,8 +21,9 @@ export const useInfiniteScrollQueryString = (options: {
 
     // Count how many items from each page are currently visible in the viewport
     const pageMap = new Map<string, number>()
+    const elements = [...options.getItemsElement().children] as HTMLElement[]
 
-    getElementsInViewportFromCollection(itemElement, slotChildren()).forEach((element) => {
+    getElementsInViewportFromCollection(itemElement, elements).forEach((element) => {
       const page = getPageFromElement(element) ?? '1'
 
       if (pageMap.has(page)) {

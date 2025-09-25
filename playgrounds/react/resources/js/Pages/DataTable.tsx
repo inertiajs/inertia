@@ -16,7 +16,7 @@ const DataTable = ({
     <>
       <Head title="Data Table" />
 
-      <InfiniteScroll data="users" className="mx-auto max-w-7xl px-8" buffer={3000} slotElement="tbody">
+      <InfiniteScroll data="users" className="mx-auto max-w-7xl px-8" buffer={3000} itemsElement="tbody">
         {({ loadingPrevious, loadingNext }) => (
           <div className="overflow-hidden rounded-2xl shadow ring-1 ring-gray-200">
             <table className="min-w-full">

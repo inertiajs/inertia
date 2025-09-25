@@ -10,7 +10,7 @@
 
   <InfiniteScroll
     data="users"
-    slotElement="#table-body"
+    itemsElement="#table-body"
     startElement="#table-header"
     endElement="#table-footer"
     let:exposedSlot
