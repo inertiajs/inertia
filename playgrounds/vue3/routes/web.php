@@ -261,7 +261,7 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal =null) {
 
     $perPage = 24;
     $pages = 30;
-    $total =$perPage * $pages;
+    $total = $perPage * $pages;
     $page = request()->integer('page', 1);
 
     $photos = collect()
@@ -271,6 +271,7 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal =null) {
             'id' => $i,
             'url' => "https://picsum.photos/id/{$i}/300/300",
         ])
+        ->values()
         ->pipe(fn($photos) => new LengthAwarePaginator(
             $photos,
             $total,
@@ -300,6 +301,7 @@ Route::get('/data-table', function () {
             'id' => $i,
             'name' => "User {$i}",
         ])
+        ->values()
         ->pipe(fn($photos) => new LengthAwarePaginator(
             $photos,
             $total,
