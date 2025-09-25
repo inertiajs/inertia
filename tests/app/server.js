@@ -455,6 +455,24 @@ app.get('/deep-merge-props', (req, res) => {
   })
 })
 
+app.get('/complex-merge-selective', (req, res) => {
+  const isReload = req.headers['x-inertia-partial-component'] || req.headers['x-inertia-partial-data']
+
+  inertia.render(req, res, {
+    component: 'ComplexMergeSelective',
+    props: {
+      mixed: {
+        name: isReload ? 'Jane' : 'John',
+        users: isReload ? ['d', 'e', 'f'] : ['a', 'b', 'c'],
+        chat: {
+          data: isReload ? [4, 5, 6] : [1, 2, 3],
+        },
+      },
+    },
+    mergeProps: ['mixed.chat.data'],
+  })
+})
+
 app.get('/match-props-on-key', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
