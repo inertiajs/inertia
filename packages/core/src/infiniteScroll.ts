@@ -39,12 +39,14 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
       setTimeout(() => {
         elementManager.processServerLoadedElements(loadedPage)
         options.onCompletePreviousRequest()
+        window.queueMicrotask(elementManager.refreshTriggers)
       })
     },
     onCompleteNextRequest: (loadedPage?: string | number) => {
       setTimeout(() => {
         elementManager.processServerLoadedElements(loadedPage)
         options.onCompleteNextRequest()
+        window.queueMicrotask(elementManager.refreshTriggers)
       })
     },
   })

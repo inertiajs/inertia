@@ -24,6 +24,7 @@ export const useInfiniteScrollElementManager = (options: {
   let topElementObserver: IntersectionObserver
   let bottomElementObserver: IntersectionObserver
   let slotMutationObserver: MutationObserver
+  let triggersEnabled = false
 
   const setupObservers = () => {
     // Watch for manually added DOM elements (not from server responses)
@@ -60,7 +61,9 @@ export const useInfiniteScrollElementManager = (options: {
   }
 
   const enableTriggers = () => {
-    disableTriggers()
+    if (triggersEnabled) {
+      disableTriggers()
+    }
 
     const topElement = options.getStartElement()
     const bottomElement = options.getEndElement()
@@ -73,11 +76,18 @@ export const useInfiniteScrollElementManager = (options: {
     if (bottomElement && trigger !== 'start') {
       bottomElementObserver.observe(bottomElement)
     }
+
+    triggersEnabled = true
   }
 
   const disableTriggers = () => {
+    if (!triggersEnabled) {
+      return
+    }
+
     topElementObserver.disconnect()
     bottomElementObserver.disconnect()
+    triggersEnabled = false
   }
 
   const flushAll = () => {
@@ -124,6 +134,13 @@ export const useInfiniteScrollElementManager = (options: {
     })
   }
 
+  const refreshTriggers = () => {
+    if (triggersEnabled) {
+      disableTriggers()
+      enableTriggers()
+    }
+  }
+
   return {
     setupObservers,
     enableTriggers,
@@ -131,5 +148,6 @@ export const useInfiniteScrollElementManager = (options: {
     flushAll,
     processManuallyAddedElements,
     processServerLoadedElements,
+    refreshTriggers,
   }
 }

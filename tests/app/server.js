@@ -874,6 +874,9 @@ app.get('/infinite-scroll/custom-triggers-ref-object', (req, res) =>
 app.get('/infinite-scroll/programmatic-ref', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ProgrammaticRef'),
 )
+app.get('/infinite-scroll/short-content', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 

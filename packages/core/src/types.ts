@@ -539,6 +539,7 @@ export interface UseInfiniteScrollElementManager {
   flushAll: () => void
   processManuallyAddedElements: () => void
   processServerLoadedElements: (loadedPage?: string | number | undefined) => void
+  refreshTriggers: () => void
 }
 
 export interface UseInfiniteScrollProps {

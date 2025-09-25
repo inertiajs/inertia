@@ -178,6 +178,21 @@ test.describe('Automatic page loading', () => {
     await expect(user26).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user40).toHaveAttribute('data-infinite-scroll-page', '1')
   })
+
+  test('it loads pages until viewport is filled when individual pages are short', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/short-content') // 5 items per page
+
+    // It loads enough pages to fill the viewport
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 5')).toBeVisible()
+    await expect(page.getByText('User 10')).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 20')).toBeVisible()
+
+    await page.waitForTimeout(500)
+    await expect(page.getByText('User 25')).not.toBeVisible()
+  })
 })
 
 test.describe('Manual page loading', () => {
