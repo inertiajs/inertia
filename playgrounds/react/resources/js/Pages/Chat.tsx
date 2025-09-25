@@ -54,9 +54,11 @@ const Chat = ({
       },
       {
         onSuccess: () => {
-          scrollContainer.current?.scrollTo({
-            top: scrollContainer.current.scrollHeight,
-            behavior: 'smooth',
+          setTimeout(() => {
+            scrollContainer.current?.scrollTo({
+              top: scrollContainer.current.scrollHeight,
+              behavior: 'smooth',
+            })
           })
 
           send({ message: newPrompt })
@@ -91,26 +93,25 @@ const Chat = ({
 
       <div className="relative flex h-[calc(100vh-80px)] flex-col bg-gray-50">
         <div ref={scrollContainer} className="h-full flex-1 overflow-y-auto">
-          <InfiniteScroll reverse data="messages" className="mx-auto grid max-w-3xl gap-6 px-8 py-16">
-            {({ loadingPrevious, loadingNext }) => (
-              <>
-                {reversedMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={isLastMessage(message) && requestCount > 0 ? 'min-h-[calc(100vh-80px-131px-64px)]' : ''}
-                  >
-                    <MessageComponent message={message} />
-                    {isLastMessage(message) && isFetching && <StreamingIndicator className="mt-6" />}
-                  </div>
-                ))}
-
-                {(loadingPrevious || loadingNext) && (
-                  <div className={`flex justify-center ${loadingPrevious ? 'pt-16' : 'pb-16'}`}>
-                    <Spinner className="size-6 text-gray-400" />
-                  </div>
-                )}
-              </>
+          <InfiniteScroll
+            reverse
+            data="messages"
+            className="mx-auto grid max-w-3xl gap-6 px-8 py-16"
+            loading={({ loadingNext }) => (
+              <div className={`flex justify-center ${loadingNext ? 'pt-16' : 'pb-16'}`}>
+                <Spinner className="size-6 text-gray-400" />
+              </div>
             )}
+          >
+            {reversedMessages.map((message) => (
+              <div
+                key={message.id}
+                className={isLastMessage(message) && requestCount > 0 ? 'min-h-[calc(100vh-80px-131px-64px)]' : ''}
+              >
+                <MessageComponent message={message} />
+                {isLastMessage(message) && isFetching && <StreamingIndicator className="mt-6" />}
+              </div>
+            ))}
           </InfiniteScroll>
         </div>
 

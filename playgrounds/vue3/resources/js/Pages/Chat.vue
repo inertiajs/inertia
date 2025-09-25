@@ -104,8 +104,8 @@ const isLastMessage = (message: Message) => {
           <StreamingIndicator class="mt-6" v-if="isLastMessage(message) && isFetching" />
         </div>
 
-        <template #loading="{ loadingPrevious }">
-          <div class="flex justify-center" :class="loadingPrevious ? 'pt-16' : 'pb-16'">
+        <template #loading="{ loadingNext }">
+          <div class="flex justify-center" :class="loadingNext ? 'pt-16' : 'pb-16'">
             <Spinner class="size-6 text-gray-400" />
           </div>
         </template>
