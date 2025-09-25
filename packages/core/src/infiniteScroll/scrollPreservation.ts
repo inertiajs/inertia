@@ -47,26 +47,23 @@ export const useInfiniteScrollPreservation = (options: {
         return
       }
 
-      // Wait for DOM to be updated before adjusting scroll
-      window.queueMicrotask(() => {
-        // Calculate where our reference element ended up after new content was prepended
-        const scrollableContainer = options.getScrollableParent()
-        const containerRect = scrollableContainer?.getBoundingClientRect() || { top: 0 }
-        const containerTop = scrollableContainer ? containerRect.top : 0
-        const newRect = referenceElement!.getBoundingClientRect()
-        const newElementTop = newRect.top - containerTop
+      // Calculate where our reference element ended up after new content was prepended
+      const scrollableContainer = options.getScrollableParent()
+      const containerRect = scrollableContainer?.getBoundingClientRect() || { top: 0 }
+      const containerTop = scrollableContainer ? containerRect.top : 0
+      const newRect = referenceElement!.getBoundingClientRect()
+      const newElementTop = newRect.top - containerTop
 
-        // Calculate how much the reference element moved due to content being prepended
-        const adjustment = newElementTop - referenceElementTop
+      // Calculate how much the reference element moved due to content being prepended
+      const adjustment = newElementTop - referenceElementTop
 
-        // Adjust scroll position to compensate for the movement, keeping the reference element
-        // in the same visual position as before the update
-        if (scrollableContainer) {
-          scrollableContainer.scrollTop = currentScrollTop + adjustment
-        } else {
-          window.scrollTo(0, window.scrollY + adjustment)
-        }
-      })
+      // Adjust scroll position to compensate for the movement, keeping the reference element
+      // in the same visual position as before the update
+      if (scrollableContainer) {
+        scrollableContainer.scrollTop = currentScrollTop + adjustment
+      } else {
+        window.scrollTo(0, window.scrollY + adjustment)
+      }
     }
 
     return {

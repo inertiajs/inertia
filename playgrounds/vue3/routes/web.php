@@ -254,7 +254,7 @@ Route::get('/chat', function () {
     ]);
 });
 
-Route::get('/photo-grid/{horizontal?}', function ($horizontal =null) {
+Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
     if (request()->header('X-Inertia-Partial-Component')) {
         usleep(250_000);
     }
@@ -272,14 +272,14 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal =null) {
             'url' => "https://picsum.photos/id/{$i}/300/300",
         ])
         ->values()
-        ->pipe(fn($photos) => new LengthAwarePaginator(
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
             $photos,
             $total,
             $perPage,
             $page,
         ));
 
-    return inertia($horizontal?'PhotoHorizontal':'PhotoGrid', [
+    return inertia($horizontal ? 'PhotoHorizontal' : 'PhotoGrid', [
         'photos' => Inertia::scroll($photos),
     ]);
 });
@@ -302,7 +302,7 @@ Route::get('/data-table', function () {
             'name' => "User {$i}",
         ])
         ->values()
-        ->pipe(fn($photos) => new LengthAwarePaginator(
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
             $photos,
             $total,
             $perPage,

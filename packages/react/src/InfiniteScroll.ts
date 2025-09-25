@@ -184,6 +184,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         getEndElement: () => resolvedEndElement,
         getSlotElement: () => resolvedSlotElement,
         getScrollableParent: () => scrollableParent,
+        queueScrollRestoration: true,
 
         // Callbacks
         onBeforePreviousRequest: () => setLoadingPrevious(true),

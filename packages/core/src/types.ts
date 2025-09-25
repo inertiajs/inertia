@@ -515,6 +515,7 @@ export interface UseInfiniteScrollOptions {
   getEndElement: () => HTMLElement
   getSlotElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
+  queueScrollRestoration?: boolean
 
   // Callbacks
   onBeforePreviousRequest: () => void
