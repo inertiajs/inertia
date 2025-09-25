@@ -19,6 +19,9 @@
   <a href="/async" use:inertia class="hover:underline">Async</a>
   <a href="/defer" use:inertia class="hover:underline">Defer</a>
   <a href="/poll" use:inertia class="hover:underline">Poll</a>
+  <a href="/photo-grid" use:inertia class="hover:underline">Photo Grid</a>
+  <a href="/photo-grid/horizontal" use:inertia class="hover:underline">Photo Row</a>
+  <a href="/data-table" use:inertia class="hover:underline">Data Table</a>
 </nav>
 
 <main class="px-10 py-8">
