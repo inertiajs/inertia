@@ -16,10 +16,9 @@
   <a href="/form-component" use:inertia class="hover:underline">Form Component</a>
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
   <a href="/goodbye" use:inertia class="hover:underline">External</a>
-  <a href="/async" use:inertia class="hover:underline">Async Request</a>
+  <a href="/async" use:inertia class="hover:underline">Async</a>
   <a href="/defer" use:inertia class="hover:underline">Defer</a>
   <a href="/poll" use:inertia class="hover:underline">Poll</a>
-  <a href="/infinite-scroll" use:inertia class="hover:underline">To Infinity</a>
 </nav>
 
 <main class="px-10 py-8">

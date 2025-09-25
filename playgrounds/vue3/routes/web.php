@@ -256,7 +256,7 @@ Route::get('/chat', function () {
 
 Route::get('/photo-grid/{horizontal?}', function ($horizontal =null) {
     if (request()->header('X-Inertia-Partial-Component')) {
-        usleep(500_000);
+        usleep(250_000);
     }
 
     $perPage = 24;
@@ -288,7 +288,7 @@ Route::get('/data-table', function () {
         usleep(500_000);
     }
 
-    $perPage = 500;
+    $perPage = 200;
     $pages = 30;
     $total = $perPage * $pages;
     $page = request()->integer('page', 1);

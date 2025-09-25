@@ -26,13 +26,12 @@ const appName = computed(() => page.props.appName)
     <Link href="/form-component" class="hover:underline">Form Component</Link>
     <Link href="/logout" method="post" class="hover:underline">Logout</Link>
     <Link href="/goodbye" class="hover:underline">External</Link>
-    <Link href="/async" class="hover:underline">Async Request</Link>
+    <Link href="/async" class="hover:underline">Async</Link>
     <Link href="/defer" class="hover:underline">Defer</Link>
     <Link href="/poll" class="hover:underline">Poll</Link>
-    <Link href="/infinite-scroll" class="hover:underline">To Infinity</Link>
     <Link href="/chat" class="hover:underline">Chat</Link>
     <Link href="/photo-grid" class="hover:underline">Photo Grid</Link>
-    <Link href="/photo-grid/horizontal" class="hover:underline">Photo Horizontal</Link>
+    <Link href="/photo-grid/horizontal" class="hover:underline">Photo Row</Link>
     <Link href="/data-table" class="hover:underline">Data Table</Link>
   </nav>
   <main :class="padding ? 'px-10 py-8' : ''">
