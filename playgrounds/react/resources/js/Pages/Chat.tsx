@@ -28,7 +28,6 @@ const Chat = ({
         id: Date.now(),
         content: pendingResponse,
         type: 'response',
-        html: pendingResponse,
       })
 
       setPendingResponse('')
@@ -52,7 +51,6 @@ const Chat = ({
         id: Date.now(),
         content: newPrompt,
         type: 'prompt',
-        html: newPrompt,
       },
       {
         onSuccess: () => {
@@ -77,7 +75,6 @@ const Chat = ({
         id: 'pending',
         content: pendingResponse,
         type: 'response',
-        html: pendingResponse,
       })
     }
 

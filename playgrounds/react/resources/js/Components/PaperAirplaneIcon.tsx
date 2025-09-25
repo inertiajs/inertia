@@ -1,4 +1,4 @@
-export default function PaperAirplaneIcon({ className = "size-6" }: { className?: string }) {
+export default function PaperAirplaneIcon({ className = 'size-6' }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

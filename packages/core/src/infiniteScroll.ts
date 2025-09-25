@@ -64,7 +64,7 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
 
     reloadOptions.onSuccess = (page: Page) => {
       originalOnSuccess(page)
-      options.queueScrollRestoration ? setTimeout(restoreScrollPosition) : restoreScrollPosition()
+      restoreScrollPosition()
     }
 
     return reloadOptions

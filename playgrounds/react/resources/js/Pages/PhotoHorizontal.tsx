@@ -1,9 +1,11 @@
 import { Head, InfiniteScroll } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 import Image from '../Components/Image'
+import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
-const PhotoHorizontal = ({ photos = { data: [] } }: {
+const PhotoHorizontal = ({
+  photos = { data: [] },
+}: {
   photos?: {
     data: {
       id: number

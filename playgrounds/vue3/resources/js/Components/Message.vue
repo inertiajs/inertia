@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import { marked } from 'marked'
+import { computed } from 'vue'
+
 export type Message = {
   id: number | 'pending'
   type: 'prompt' | 'response'
-  html: string
+  content: string
 }
 
-defineProps<{
+const props = defineProps<{
   message: Message
 }>()
+
+const htmlContent = computed(() => marked(props.message.content))
 </script>
 
 <template>
@@ -20,7 +25,7 @@ defineProps<{
   >
     <div class="flex max-w-[80%] items-start">
       <div
-        v-html="message.html"
+        v-html="htmlContent"
         class="prose min-w-0 flex-1 text-[15px] leading-relaxed"
         :class="{
           'rounded-xl bg-gray-800 px-4 py-2 text-white': message.type === 'prompt',

@@ -515,7 +515,6 @@ export interface UseInfiniteScrollOptions {
   getEndElement: () => HTMLElement
   getSlotElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
-  queueScrollRestoration?: boolean
 
   // Callbacks
   onBeforePreviousRequest: () => void
@@ -537,10 +536,10 @@ export interface UseInfiniteScrollElementManager {
   setupObservers: () => void
   enableTriggers: () => void
   disableTriggers: () => void
+  refreshTriggers: () => void
   flushAll: () => void
   processManuallyAddedElements: () => void
   processServerLoadedElements: (loadedPage?: string | number | undefined) => void
-  refreshTriggers: () => void
 }
 
 export interface UseInfiniteScrollProps {

@@ -10,7 +10,7 @@ export default function Textarea({
   onChange,
   placeholder,
   onKeyDown,
-  className = ""
+  className = '',
 }: {
   value: string
   onChange: (value: string) => void

@@ -2,7 +2,9 @@ import { Head, InfiniteScroll } from '@inertiajs/react'
 import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
-const DataTable = ({ users = { data: [] } }: {
+const DataTable = ({
+  users = { data: [] },
+}: {
   users?: {
     data: {
       id: number

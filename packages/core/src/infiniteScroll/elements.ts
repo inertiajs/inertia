@@ -90,6 +90,12 @@ export const useInfiniteScrollElementManager = (options: {
     triggersEnabled = false
   }
 
+  const refreshTriggers = () => {
+    if (triggersEnabled) {
+      enableTriggers()
+    }
+  }
+
   const flushAll = () => {
     intersectionObservers.flushAll()
     slotMutationObserver?.disconnect()
@@ -134,20 +140,13 @@ export const useInfiniteScrollElementManager = (options: {
     })
   }
 
-  const refreshTriggers = () => {
-    if (triggersEnabled) {
-      disableTriggers()
-      enableTriggers()
-    }
-  }
-
   return {
     setupObservers,
     enableTriggers,
     disableTriggers,
+    refreshTriggers,
     flushAll,
     processManuallyAddedElements,
     processServerLoadedElements,
-    refreshTriggers,
   }
 }
