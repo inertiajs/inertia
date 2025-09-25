@@ -22,11 +22,11 @@ defineProps<{
 
   <InfiniteScroll data="users" class="mx-auto max-w-7xl px-8" :buffer="3000" slot-element="tbody">
     <div class="overflow-hidden rounded-2xl shadow ring-1 ring-gray-200">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="min-w-full">
         <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-900">ID</th>
-            <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">ID</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
@@ -38,7 +38,7 @@ defineProps<{
       </table>
     </div>
 
-    <template #loading="{ loadingPrevious }">
+    <template #loading>
       <div class="flex justify-center py-16">
         <Spinner class="size-6 text-gray-400" />
       </div>
