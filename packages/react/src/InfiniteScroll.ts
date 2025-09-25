@@ -241,24 +241,32 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     const headerAutoMode = autoLoad && trigger !== 'end'
     const footerAutoMode = autoLoad && trigger !== 'start'
 
-    const exposedPrevious: InfiniteScrollActionSlotProps = {
-      loading: loadingPrevious,
+    const sharedExposed: Pick<
+      InfiniteScrollActionSlotProps,
+      'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'
+    > = {
       loadingPrevious,
       loadingNext,
-      fetch: dataManager?.loadPrevious || (() => {}),
+      hasPrevious: dataManager?.hasPrevious() ?? false,
+      hasNext: dataManager?.hasNext() ?? false,
+    }
+
+    const exposedPrevious: InfiniteScrollActionSlotProps = {
+      loading: loadingPrevious,
+      fetch: dataManager?.loadPrevious ?? (() => {}),
       autoMode: headerAutoMode,
       manualMode: !headerAutoMode,
-      hasMore: dataManager?.hasPrevious() || false,
+      hasMore: dataManager?.hasPrevious() ?? false,
+      ...sharedExposed,
     }
 
     const exposedNext: InfiniteScrollActionSlotProps = {
       loading: loadingNext,
-      loadingPrevious,
-      loadingNext,
-      fetch: dataManager?.loadNext || (() => {}),
+      fetch: dataManager?.loadNext ?? (() => {}),
       autoMode: footerAutoMode,
       manualMode: !footerAutoMode,
-      hasMore: dataManager?.hasNext() || false,
+      hasMore: dataManager?.hasNext() ?? false,
+      ...sharedExposed,
     }
 
     const exposedSlot: InfiniteScrollSlotProps = {

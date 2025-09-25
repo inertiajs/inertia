@@ -560,6 +560,8 @@ export interface InfiniteScrollActionSlotProps {
   autoMode: boolean
   manualMode: boolean
   hasMore: boolean
+  hasPrevious: boolean
+  hasNext: boolean
 }
 
 export interface InfiniteScrollRef {

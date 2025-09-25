@@ -176,17 +176,26 @@ const InfiniteScroll = defineComponent({
     return () => {
       const renderElements = []
 
+      const sharedExposed: Pick<
+        InfiniteScrollActionSlotProps,
+        'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'
+      > = {
+        loadingPrevious: loadingPrevious.value,
+        loadingNext: loadingNext.value,
+        hasPrevious: dataManager.hasPrevious(),
+        hasNext: dataManager.hasNext(),
+      }
+
       // Only render previous trigger if not using custom element
       if (!props.startElement) {
         const headerAutoMode = autoLoad.value && props.trigger !== 'end'
         const exposedPrevious: InfiniteScrollActionSlotProps = {
           loading: loadingPrevious.value,
-          loadingPrevious: loadingPrevious.value,
-          loadingNext: loadingNext.value,
           fetch: dataManager.loadPrevious,
           autoMode: headerAutoMode,
           manualMode: !headerAutoMode,
           hasMore: dataManager.hasPrevious(),
+          ...sharedExposed,
         }
 
         renderElements.push(
@@ -219,12 +228,11 @@ const InfiniteScroll = defineComponent({
         const footerAutoMode = autoLoad.value && props.trigger !== 'start'
         const exposedNext: InfiniteScrollActionSlotProps = {
           loading: loadingNext.value,
-          loadingPrevious: loadingPrevious.value,
-          loadingNext: loadingNext.value,
           fetch: dataManager.loadNext,
           autoMode: footerAutoMode,
           manualMode: !footerAutoMode,
           hasMore: dataManager.hasNext(),
+          ...sharedExposed,
         }
 
         renderElements.push(

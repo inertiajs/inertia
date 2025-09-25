@@ -37,24 +37,29 @@
   $: headerAutoMode = autoLoad && trigger !== 'end'
   $: footerAutoMode = autoLoad && trigger !== 'start'
 
-  $: exposedPrevious = {
-    loading: loadingPrevious,
+  $: sharedExposed = {
     loadingPrevious,
     loadingNext,
+    hasPrevious: infiniteScrollInstance?.dataManager.hasPrevious() || false,
+    hasNext: infiniteScrollInstance?.dataManager.hasNext() || false,
+  } satisfies Pick<InfiniteScrollActionSlotProps, 'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'>
+
+  $: exposedPrevious = {
+    loading: loadingPrevious,
     fetch: loadPrevious,
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
     hasMore: infiniteScrollInstance?.dataManager.hasPrevious() || false,
+    ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps
 
   $: exposedNext = {
     loading: loadingNext,
-    loadingPrevious,
-    loadingNext,
     fetch: loadNext,
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
     hasMore: infiniteScrollInstance?.dataManager.hasNext() || false,
+    ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps
 
   $: exposedSlot = {
