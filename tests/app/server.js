@@ -374,6 +374,66 @@ app.get('/merge-props', (req, res) => {
   })
 })
 
+app.get('/merge-nested-props/:strategy', (req, res) => {
+  const perPage = 3
+  const page = parseInt(req.query.page ?? 1)
+  const shouldAppend = req.params.strategy === 'append'
+
+  const users = new Array(perPage).fill(1).map((_, index) => ({
+    id: index + 1 + (page - 1) * perPage,
+    name: `User ${index + 1 + (page - 1) * perPage}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'MergeNestedProps',
+    props: {
+      users: {
+        data: shouldAppend ? users : users.slice().reverse(),
+        meta: {
+          perPage,
+          page,
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : shouldAppend
+        ? { mergeProps: ['users.data'] }
+        : { prependProps: ['users.data'] }),
+  })
+})
+
+app.get('/merge-nested-props-with-match/:strategy', (req, res) => {
+  const page = parseInt(req.query.page ?? 1)
+  const shouldAppend = req.params.strategy === 'append'
+
+  let users
+
+  if (page === 1) {
+    users = (shouldAppend ? [1, 2, 3, 4, 5] : [4, 5, 6, 7, 8]).map((id) => ({ id, name: `User ${id} - initial` }))
+  } else {
+    users = (shouldAppend ? [4, 5, 6, 7, 8] : [1, 2, 3, 4, 5]).map((id) => ({ id, name: `User ${id} - subsequent` }))
+  }
+
+  inertia.render(req, res, {
+    component: 'MergeNestedProps',
+    props: {
+      users: {
+        data: users,
+        meta: {
+          perPage: 5,
+          page,
+        },
+      },
+    },
+    ...(req.headers['x-inertia-reset']
+      ? {}
+      : shouldAppend
+        ? { mergeProps: ['users.data'], matchPropsOn: ['users.data.id'] }
+        : { prependProps: ['users.data'], matchPropsOn: ['users.data.id'] }),
+  })
+})
+
 app.get('/deep-merge-props', (req, res) => {
   const labels = ['first', 'second', 'third', 'fourth', 'fifth']
 
@@ -394,6 +454,31 @@ app.get('/deep-merge-props', (req, res) => {
       },
     },
     ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['foo', 'baz'] }),
+  })
+})
+
+app.get('/complex-merge-selective', (req, res) => {
+  const isReload = req.headers['x-inertia-partial-component'] || req.headers['x-inertia-partial-data']
+
+  inertia.render(req, res, {
+    component: 'ComplexMergeSelective',
+    props: {
+      mixed: {
+        name: isReload ? 'Jane' : 'John',
+        users: isReload ? ['d', 'e', 'f'] : ['a', 'b', 'c'],
+        chat: {
+          data: isReload ? [4, 5, 6] : [1, 2, 3],
+        },
+        post: {
+          id: 1,
+          comments: {
+            allowed: isReload ? false : true,
+            data: isReload ? ['D', 'E', 'F'] : ['A', 'B', 'C'],
+          },
+        },
+      },
+    },
+    mergeProps: ['mixed.chat.data', 'mixed.post.comments.data'],
   })
 })
 
