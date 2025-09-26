@@ -482,6 +482,19 @@ export type FormComponentState = {
   isDirty: boolean
 }
 
+export type PreloadOptions = {
+  as?: string
+  crossorigin?: 'anonymous' | 'use-credentials'
+  type?: string
+  fetchpriority?: 'high' | 'low' | 'auto'
+}
+
+export type AssetOptions = {
+  secure?: boolean
+  fallbackUrl?: string
+  preload?: boolean | PreloadOptions
+}
+
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState
 
 export type FormComponentRef = FormComponentSlotProps
