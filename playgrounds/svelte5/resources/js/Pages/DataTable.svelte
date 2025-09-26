@@ -15,11 +15,11 @@
 
 <div class="mx-auto max-w-7xl px-8">
   <InfiniteScroll data="users" buffer={3000} itemsElement="tbody">
-    <tr slot="loading">
-      <td colspan="2" class="px-6 py-4 text-center">
-        <Spinner class="mx-auto size-6 text-gray-400" />
-      </td>
-    </tr>
+    <div slot="loading">
+      <div class="flex justify-center py-16">
+        <Spinner class="size-6 text-gray-400" />
+      </div>
+    </div>
 
     <div class="overflow-hidden rounded-2xl shadow ring-1 ring-gray-200">
       <table class="min-w-full">

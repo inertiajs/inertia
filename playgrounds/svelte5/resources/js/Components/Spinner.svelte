@@ -1,5 +1,6 @@
 <script>
-  export let className = ''
+  let className = ''
+  export { className as class }
 </script>
 
 <svg class={`animate-spin text-black ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

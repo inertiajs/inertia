@@ -14,7 +14,7 @@
   <title>Photo Grid (Horizontal) - {appName}</title>
 </svelte:head>
 
-<div class="flex h-[200px] w-screen overflow-x-scroll">
+<div class="flex h-[200px] w-full overflow-x-scroll">
   <InfiniteScroll data="photos" buffer={1000} class="flex h-[200px] gap-6" preserveUrl onlyNext>
     <div slot="loading">
       <div class="flex size-[200px] items-center justify-center">

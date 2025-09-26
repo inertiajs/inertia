@@ -1,4 +1,9 @@
-<svg class="mr-2 h-5 w-5 animate-spin text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+<script>
+  let className = ''
+  export { className as class }
+</script>
+
+<svg class={`animate-spin text-black ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
   <path
     class="opacity-75"
