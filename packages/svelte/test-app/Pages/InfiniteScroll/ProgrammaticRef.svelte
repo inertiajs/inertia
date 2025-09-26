@@ -14,15 +14,15 @@
     hasNext = infRef?.hasNext() || false
   }
 
-  function loadNext() {
+  function fetchNext() {
     if (infRef) {
-      infRef.loadNext({ onFinish: updateStates })
+      infRef.fetchNext({ onFinish: updateStates })
     }
   }
 
-  function loadPrevious() {
+  function fetchPrevious() {
     if (infRef) {
-      infRef.loadPrevious({ onFinish: updateStates })
+      infRef.fetchPrevious({ onFinish: updateStates })
     }
   }
 
@@ -37,8 +37,8 @@
     <p>Has more next items: {hasNext.toString()}</p>
 
     <div style="display: flex; gap: 10px; margin: 10px 0">
-      <button on:click={loadPrevious}>Load Previous (Ref)</button>
-      <button on:click={loadNext}>Load Next (Ref)</button>
+      <button on:click={fetchPrevious}>Load Previous (Ref)</button>
+      <button on:click={fetchNext}>Load Next (Ref)</button>
     </div>
   </div>
 

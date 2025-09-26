@@ -47,7 +47,7 @@
 
   $: exposedPrevious = {
     loading: loadingPrevious,
-    fetch: loadPrevious,
+    fetch: fetchPrevious,
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
     hasMore: infiniteScrollInstance?.dataManager.hasPrevious() || false,
@@ -56,7 +56,7 @@
 
   $: exposedNext = {
     loading: loadingNext,
-    fetch: loadNext,
+    fetch: fetchNext,
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
     hasMore: infiniteScrollInstance?.dataManager.hasNext() || false,
@@ -104,12 +104,12 @@
     }
   }
 
-  export function loadPrevious(options?: any) {
-    infiniteScrollInstance?.dataManager.loadPrevious(options)
+  export function fetchPrevious(options?: any) {
+    infiniteScrollInstance?.dataManager.fetchPrevious(options)
   }
 
-  export function loadNext(options?: any) {
-    infiniteScrollInstance?.dataManager.loadNext(options)
+  export function fetchNext(options?: any) {
+    infiniteScrollInstance?.dataManager.fetchNext(options)
   }
 
   export function hasPrevious(): boolean {
@@ -133,8 +133,8 @@
       // Data
       getPropName: () => data,
       inReverseMode: () => reverse,
-      shouldLoadNext: () => !onlyPrevious,
-      shouldLoadPrevious: () => !onlyNext,
+      shouldFetchNext: () => !onlyPrevious,
+      shouldFetchPrevious: () => !onlyNext,
       shouldPreserveUrl: () => preserveUrl,
 
       // Elements

@@ -16,12 +16,12 @@ const updateStates = () => {
   hasNext.value = infRef.value.hasNext()
 }
 
-const loadNext = async () => {
-  infRef.value.loadNext({ onFinish: updateStates })
+const fetchNext = async () => {
+  infRef.value.fetchNext({ onFinish: updateStates })
 }
 
-const loadPrevious = async () => {
-  infRef.value.loadPrevious({ onFinish: updateStates })
+const fetchPrevious = async () => {
+  infRef.value.fetchPrevious({ onFinish: updateStates })
 }
 
 onMounted(updateStates)
@@ -36,8 +36,8 @@ onMounted(updateStates)
       <p>Has more next items: {{ hasNext }}</p>
 
       <div style="display: flex; gap: 10px; margin: 10px 0">
-        <button @click="loadPrevious">Load Previous (Ref)</button>
-        <button @click="loadNext">Load Next (Ref)</button>
+        <button @click="fetchPrevious">Load Previous (Ref)</button>
+        <button @click="fetchNext">Load Next (Ref)</button>
       </div>
     </div>
 

@@ -181,8 +181,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         // Data
         getPropName: () => data,
         inReverseMode: () => callbackPropsRef.current.reverse,
-        shouldLoadNext: () => !callbackPropsRef.current.onlyPrevious,
-        shouldLoadPrevious: () => !callbackPropsRef.current.onlyNext,
+        shouldFetchNext: () => !callbackPropsRef.current.onlyPrevious,
+        shouldFetchPrevious: () => !callbackPropsRef.current.onlyNext,
         shouldPreserveUrl: () => callbackPropsRef.current.preserveUrl,
 
         // Elements
@@ -237,8 +237,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
     useImperativeHandle(
       ref,
       () => ({
-        loadNext: dataManager?.loadNext || (() => {}),
-        loadPrevious: dataManager?.loadPrevious || (() => {}),
+        fetchNext: dataManager?.fetchNext || (() => {}),
+        fetchPrevious: dataManager?.fetchPrevious || (() => {}),
         hasPrevious: dataManager?.hasPrevious || (() => false),
         hasNext: dataManager?.hasNext || (() => false),
       }),
@@ -260,7 +260,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
 
     const exposedPrevious: InfiniteScrollActionSlotProps = {
       loading: loadingPrevious,
-      fetch: dataManager?.loadPrevious ?? (() => {}),
+      fetch: dataManager?.fetchPrevious ?? (() => {}),
       autoMode: headerAutoMode,
       manualMode: !headerAutoMode,
       hasMore: dataManager?.hasPrevious() ?? false,
@@ -269,7 +269,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
 
     const exposedNext: InfiniteScrollActionSlotProps = {
       loading: loadingNext,
-      fetch: dataManager?.loadNext ?? (() => {}),
+      fetch: dataManager?.fetchNext ?? (() => {}),
       autoMode: footerAutoMode,
       manualMode: !footerAutoMode,
       hasMore: dataManager?.hasNext() ?? false,

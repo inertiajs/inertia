@@ -13,15 +13,15 @@ export default ({ users }: { users: { data: User[] } }) => {
     setHasMoreAfter(infRef.current?.hasNext() || false)
   }
 
-  const loadNext = () => {
+  const fetchNext = () => {
     if (infRef.current) {
-      infRef.current.loadNext({ onFinish: updateStates })
+      infRef.current.fetchNext({ onFinish: updateStates })
     }
   }
 
-  const loadPrevious = () => {
+  const fetchPrevious = () => {
     if (infRef.current) {
-      infRef.current.loadPrevious({ onFinish: updateStates })
+      infRef.current.fetchPrevious({ onFinish: updateStates })
     }
   }
 
@@ -38,8 +38,8 @@ export default ({ users }: { users: { data: User[] } }) => {
         <p>Has more next items: {hasNext.toString()}</p>
 
         <div style={{ display: 'flex', gap: '10px', margin: '10px 0' }}>
-          <button onClick={loadPrevious}>Load Previous (Ref)</button>
-          <button onClick={loadNext}>Load Next (Ref)</button>
+          <button onClick={fetchPrevious}>Load Previous (Ref)</button>
+          <button onClick={fetchNext}>Load Next (Ref)</button>
         </div>
       </div>
 

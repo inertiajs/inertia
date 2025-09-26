@@ -54,7 +54,7 @@ export const useInfiniteScrollData = (options: {
 
   const getPageName = () => getScrollPropFromCurrentPage().pageName
 
-  const loadPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {
+  const fetchPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {
     const page = findPageToLoad(side)
 
     if (state.loading || page === null) {
@@ -97,15 +97,15 @@ export const useInfiniteScrollData = (options: {
   const getLastLoadedPage = () => state.lastLoadedPage
   const hasPrevious = () => !!state.previousPage
   const hasNext = () => !!state.nextPage
-  const loadPrevious = (reloadOptions?: ReloadOptions): void => loadPage('previous', reloadOptions)
-  const loadNext = (reloadOptions?: ReloadOptions): void => loadPage('next', reloadOptions)
+  const fetchPrevious = (reloadOptions?: ReloadOptions): void => fetchPage('previous', reloadOptions)
+  const fetchNext = (reloadOptions?: ReloadOptions): void => fetchPage('next', reloadOptions)
 
   return {
     getLastLoadedPage,
     getPageName,
     hasPrevious,
     hasNext,
-    loadNext,
-    loadPrevious,
+    fetchNext,
+    fetchPrevious,
   }
 }

@@ -25,8 +25,8 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     ...options,
     // As items enter viewport, update URL to reflect the most visible page
     onItemIntersected: queryStringManager.onItemIntersected,
-    onPreviousTriggered: () => dataManager.loadPrevious(),
-    onNextTriggered: () => dataManager.loadNext(),
+    onPreviousTriggered: () => dataManager.fetchPrevious(),
+    onNextTriggered: () => dataManager.fetchNext(),
   })
 
   const dataManager = useInfiniteScrollData({
@@ -70,22 +70,22 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     return reloadOptions
   }
 
-  const originalLoadNext = dataManager.loadNext
-  dataManager.loadNext = (reloadOptions: ReloadOptions = {}) => {
+  const originalFetchNext = dataManager.fetchNext
+  dataManager.fetchNext = (reloadOptions: ReloadOptions = {}) => {
     if (options.inReverseMode()) {
       reloadOptions = addScrollPreservationCallbacks(reloadOptions)
     }
 
-    originalLoadNext(reloadOptions)
+    originalFetchNext(reloadOptions)
   }
 
-  const originalLoadPrevious = dataManager.loadPrevious
-  dataManager.loadPrevious = (reloadOptions: ReloadOptions = {}) => {
+  const originalFetchPrevious = dataManager.fetchPrevious
+  dataManager.fetchPrevious = (reloadOptions: ReloadOptions = {}) => {
     if (!options.inReverseMode()) {
       reloadOptions = addScrollPreservationCallbacks(reloadOptions)
     }
 
-    originalLoadPrevious(reloadOptions)
+    originalFetchPrevious(reloadOptions)
   }
 
   return {

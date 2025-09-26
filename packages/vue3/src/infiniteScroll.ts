@@ -110,8 +110,8 @@ const InfiniteScroll = defineComponent({
       // Data
       getPropName: () => props.data,
       inReverseMode: () => props.reverse,
-      shouldLoadNext: () => !props.onlyPrevious,
-      shouldLoadPrevious: () => !props.onlyNext,
+      shouldFetchNext: () => !props.onlyPrevious,
+      shouldFetchPrevious: () => !props.onlyNext,
       shouldPreserveUrl: () => props.preserveUrl,
 
       // Elements
@@ -174,8 +174,8 @@ const InfiniteScroll = defineComponent({
     )
 
     expose<InfiniteScrollRef>({
-      loadNext: dataManager.loadNext,
-      loadPrevious: dataManager.loadPrevious,
+      fetchNext: dataManager.fetchNext,
+      fetchPrevious: dataManager.fetchPrevious,
       hasPrevious: dataManager.hasPrevious,
       hasNext: dataManager.hasNext,
     })
@@ -198,7 +198,7 @@ const InfiniteScroll = defineComponent({
         const headerAutoMode = autoLoad.value && !props.onlyNext
         const exposedPrevious: InfiniteScrollActionSlotProps = {
           loading: loadingPrevious.value,
-          fetch: dataManager.loadPrevious,
+          fetch: dataManager.fetchPrevious,
           autoMode: headerAutoMode,
           manualMode: !headerAutoMode,
           hasMore: dataManager.hasPrevious(),
@@ -235,7 +235,7 @@ const InfiniteScroll = defineComponent({
         const footerAutoMode = autoLoad.value && !props.onlyPrevious
         const exposedNext: InfiniteScrollActionSlotProps = {
           loading: loadingNext.value,
-          fetch: dataManager.loadNext,
+          fetch: dataManager.fetchNext,
           autoMode: footerAutoMode,
           manualMode: !footerAutoMode,
           hasMore: dataManager.hasNext(),

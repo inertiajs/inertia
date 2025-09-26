@@ -8,8 +8,8 @@ export const getPageFromElement = (element: HTMLElement): string | undefined =>
   element.dataset[INFINITE_SCROLL_PAGE_KEY]
 
 export const useInfiniteScrollElementManager = (options: {
-  shouldLoadNext: () => boolean
-  shouldLoadPrevious: () => boolean
+  shouldFetchNext: () => boolean
+  shouldFetchPrevious: () => boolean
   getTriggerMargin: () => number
   getStartElement: () => HTMLElement
   getEndElement: () => HTMLElement
@@ -71,11 +71,11 @@ export const useInfiniteScrollElementManager = (options: {
     const startElement = options.getStartElement()
     const endElement = options.getEndElement()
 
-    if (startElement && options.shouldLoadPrevious()) {
+    if (startElement && options.shouldFetchPrevious()) {
       startElementObserver.observe(startElement)
     }
 
-    if (endElement && options.shouldLoadNext()) {
+    if (endElement && options.shouldFetchNext()) {
       endElementObserver.observe(endElement)
     }
 

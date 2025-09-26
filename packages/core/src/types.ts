@@ -506,8 +506,8 @@ export interface UseInfiniteScrollOptions {
   // Core data
   getPropName: () => string
   inReverseMode: () => boolean
-  shouldLoadNext: () => boolean
-  shouldLoadPrevious: () => boolean
+  shouldFetchNext: () => boolean
+  shouldFetchPrevious: () => boolean
   shouldPreserveUrl: () => boolean
 
   // Elements
@@ -529,8 +529,8 @@ export interface UseInfiniteScrollDataManager {
   getPageName: () => string
   hasPrevious: () => boolean
   hasNext: () => boolean
-  loadNext: (reloadOptions?: ReloadOptions) => void
-  loadPrevious: (reloadOptions?: ReloadOptions) => void
+  fetchNext: (reloadOptions?: ReloadOptions) => void
+  fetchPrevious: (reloadOptions?: ReloadOptions) => void
 }
 
 export interface UseInfiniteScrollElementManager {
@@ -567,8 +567,8 @@ export interface InfiniteScrollActionSlotProps {
 }
 
 export interface InfiniteScrollRef {
-  loadNext: (reloadOptions?: ReloadOptions) => void
-  loadPrevious: (reloadOptions?: ReloadOptions) => void
+  fetchNext: (reloadOptions?: ReloadOptions) => void
+  fetchPrevious: (reloadOptions?: ReloadOptions) => void
   hasPrevious: () => boolean
   hasNext: () => boolean
 }
