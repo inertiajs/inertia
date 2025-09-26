@@ -4,9 +4,9 @@ import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
 const PhotoGrid = ({
-  photos = { data: [] },
+  photos,
 }: {
-  photos?: {
+  photos: {
     data: {
       id: number
       url: string

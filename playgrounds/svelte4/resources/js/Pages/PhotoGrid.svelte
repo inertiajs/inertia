@@ -8,7 +8,7 @@
   import Spinner from '../Components/Spinner.svelte'
 
   export let appName
-  export let photos = { data: [] }
+  export let photos
 </script>
 
 <svelte:head>
@@ -21,7 +21,7 @@
   buffer={1000}
 >
   <div slot="loading">
-    <div class="flex items-center justify-center p-6">
+    <div class="flex justify-center py-16">
       <Spinner class="size-6 text-gray-400" />
     </div>
   </div>

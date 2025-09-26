@@ -8,7 +8,7 @@
   import Spinner from '../Components/Spinner.svelte'
 
   export let appName
-  export let photos = { data: [] }
+  export let photos
 </script>
 
 <svelte:head>

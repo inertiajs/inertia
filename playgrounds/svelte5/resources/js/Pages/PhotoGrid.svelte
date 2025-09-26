@@ -7,7 +7,7 @@
   import Image from '../Components/Image.svelte'
   import Spinner from '../Components/Spinner.svelte'
 
-  let { appName, photos = { data: [] } } = $props()
+  let { appName, photos } = $props()
 </script>
 
 <svelte:head>
@@ -20,7 +20,7 @@
   buffer={1000}
 >
   <div slot="loading">
-    <div class="flex items-center justify-center p-6">
+    <div class="flex justify-center py-16">
       <Spinner class="size-6 text-gray-400" />
     </div>
   </div>

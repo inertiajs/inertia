@@ -7,7 +7,7 @@
   import Image from '../Components/Image.svelte'
   import Spinner from '../Components/Spinner.svelte'
 
-  let { appName, photos = { data: [] } } = $props()
+  let { appName, photos } = $props()
 </script>
 
 <svelte:head>
