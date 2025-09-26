@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.11...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.0...master)
 
 - Nothing yet
+
+## [v2.2.0](https://github.com/inertiajs/inertia/compare/v2.1.11...v2.2.0) - 2025-09-26
+
+### What's Changed
+
+* Support for merging nested prop paths by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2561
+* Client-side visit helpers to update props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2589
+* Introduction of the `<InfiniteScroll>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2580
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.11...v2.2.0
 
 ## [v2.1.11](https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11) - 2025-09-24
 
