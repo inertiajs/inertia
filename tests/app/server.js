@@ -113,6 +113,23 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.get('/client-side-visit/props', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Props',
+    props: {
+      items: ['item1', 'item2'],
+      tags: [
+        { id: 1, name: 'tag1' },
+        { id: 2, name: 'tag2' },
+      ],
+      user: { name: 'John Doe', age: 30 },
+      count: 5,
+      singleValue: 'hello',
+      undefinedValue: undefined,
+    },
+  }),
+)
+
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/PartialReloads',
