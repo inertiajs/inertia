@@ -52,7 +52,7 @@ const renderSlot = (
   return typeof slotContent === 'function' ? slotContent(slotProps) : slotContent
 }
 
-export interface InfiniteScrollProps
+interface ComponentProps
   extends InfiniteScrollComponentBaseProps,
     Omit<React.HTMLAttributes<HTMLElement>, keyof InfiniteScrollComponentBaseProps | 'children'> {
   children?: React.ReactNode | ((props: InfiniteScrollSlotProps) => React.ReactNode)
@@ -71,7 +71,7 @@ export interface InfiniteScrollProps
   onlyPrevious?: boolean
 }
 
-const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
+const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
   (
     {
       data,
