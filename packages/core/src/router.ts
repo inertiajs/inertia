@@ -1,3 +1,4 @@
+import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -311,6 +312,63 @@ export class Router {
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params, { replace: true })
+  }
+
+  public replaceProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | ((oldValue: unknown, props: TProps) => unknown),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replace({
+      preserveScroll: true,
+      preserveState: true,
+      props(currentProps) {
+        const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
+
+        return set(cloneDeep(currentProps), name, newValue)
+      },
+      ...(options || {}),
+    })
+  }
+
+  public appendToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [...(currentValue as unknown[]), newValue]
+      },
+      options,
+    )
+  }
+
+  public prependToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [newValue, ...(currentValue as unknown[])]
+      },
+      options,
+    )
   }
 
   public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
