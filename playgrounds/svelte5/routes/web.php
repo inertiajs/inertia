@@ -156,6 +156,7 @@ Route::get('/async', function () {
     ]);
 });
 
+// @deprecated - We now have a InfiniteScroll component and Inertia::scroll() method...
 Route::get('/infinite-scroll', function () {
     $page = request()->integer('page', 1);
     $perPage = 25;
@@ -398,6 +399,7 @@ Route::post('/form-component', function () {
 
 Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
     if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
         usleep(250_000);
     }
 
@@ -413,9 +415,8 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
             'id' => $i,
             'url' => "https://picsum.photos/id/{$i}/300/300",
         ])
-        ->values()
         ->pipe(fn ($photos) => new LengthAwarePaginator(
-            $photos,
+            $photos->values(),
             $total,
             $perPage,
             $page,
@@ -428,6 +429,7 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
 
 Route::get('/data-table', function () {
     if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
         usleep(500_000);
     }
 
@@ -443,9 +445,8 @@ Route::get('/data-table', function () {
             'id' => $i,
             'name' => "User {$i}",
         ])
-        ->values()
         ->pipe(fn ($photos) => new LengthAwarePaginator(
-            $photos,
+            $photos->values(),
             $total,
             $perPage,
             $page,

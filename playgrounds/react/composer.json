@@ -14,7 +14,7 @@
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.7",
-        "prism-php/prism": "*"
+        "prism-php/prism": "^0.89.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

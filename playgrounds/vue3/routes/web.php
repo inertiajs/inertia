@@ -209,7 +209,7 @@ Route::post('/messages', function (Request $request) {
 
             if ($message->is($prompt)) {
                 // Tell LLM not to answer too long and don't halucinate
-                $content = "Answer in max. 10 sentences, may be shorter, code examples allowed when needed. Don't hallucinate, just answer based on the provided context.\n\n".$content;
+                $content = "Answer in max. 10 sentences, may be shorter. Code examples allowed when needed. Don't hallucinate, just answer based on the provided context.\n\n".$content;
             }
 
             return $message->type === 'prompt'
@@ -220,7 +220,6 @@ Route::post('/messages', function (Request $request) {
 
     // Create a streaming response from the LLM
     $stream = Prism::text()
-        ->using(Provider::Ollama, 'gemma3:1b')
         ->using(Provider::Ollama, 'gemma3:4b')
         ->withMessages($messages)
         ->asStream();
@@ -246,6 +245,7 @@ Route::post('/messages', function (Request $request) {
 
 Route::get('/chat', function () {
     if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
         usleep(500_000);
     }
 
@@ -256,6 +256,7 @@ Route::get('/chat', function () {
 
 Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
     if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
         usleep(250_000);
     }
 
@@ -271,9 +272,8 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
             'id' => $i,
             'url' => "https://picsum.photos/id/{$i}/300/300",
         ])
-        ->values()
         ->pipe(fn ($photos) => new LengthAwarePaginator(
-            $photos,
+            $photos->values(),
             $total,
             $perPage,
             $page,
@@ -286,6 +286,7 @@ Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
 
 Route::get('/data-table', function () {
     if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
         usleep(500_000);
     }
 
@@ -301,9 +302,8 @@ Route::get('/data-table', function () {
             'id' => $i,
             'name' => "User {$i}",
         ])
-        ->values()
         ->pipe(fn ($photos) => new LengthAwarePaginator(
-            $photos,
+            $photos->values(),
             $total,
             $perPage,
             $page,
@@ -314,6 +314,7 @@ Route::get('/data-table', function () {
     ]);
 });
 
+// @deprecated - We now have a InfiniteScroll component and Inertia::scroll() method...
 Route::get('/infinite-scroll', function () {
     $page = request()->integer('page', 1);
     $perPage = 25;

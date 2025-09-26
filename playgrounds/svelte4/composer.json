@@ -13,8 +13,7 @@
         "inertiajs/inertia-laravel": "dev-merge-improvements",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.7",
-        "prism-php/prism": "*"
+        "laravel/tinker": "^2.7"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
