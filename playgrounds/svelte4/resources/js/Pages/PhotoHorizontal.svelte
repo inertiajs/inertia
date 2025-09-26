@@ -15,10 +15,10 @@
   <title>Photo Grid (Horizontal) - {appName}</title>
 </svelte:head>
 
-<div class="flex h-[200px] w-screen overflow-x-scroll">
-  <InfiniteScroll data="photos" buffer={1000} class="flex h-[200px] gap-6">
+<div class="flex h-[200px] w-full overflow-x-scroll">
+  <InfiniteScroll data="photos" buffer={1000} class="flex h-[200px] gap-6" preserveUrl onlyNext>
     <div slot="loading">
-      <div class="mx-6 flex h-[200px] w-[200px] animate-pulse items-center justify-center rounded-lg bg-gray-300">
+      <div class="flex size-[200px] items-center justify-center">
         <Spinner class="size-6 text-gray-400" />
       </div>
     </div>
