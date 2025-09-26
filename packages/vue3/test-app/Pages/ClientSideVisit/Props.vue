@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -19,7 +19,7 @@ const replacePropNumber = () => {
 }
 
 const replacePropFunction = () => {
-  router.replaceProp('count', (oldValue) => oldValue * 2)
+  router.replaceProp('count', (oldValue: number) => oldValue * 2)
 }
 
 const appendToPropArray = () => {
@@ -31,7 +31,7 @@ const appendToPropMultiple = () => {
 }
 
 const appendToPropFunction = () => {
-  router.appendToProp('tags', (oldValue) => ({ id: 3, name: 'tag3' }))
+  router.appendToProp('tags', () => ({ id: 3, name: 'tag3' }))
 }
 
 const appendArrayToArray = () => {

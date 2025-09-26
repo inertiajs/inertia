@@ -27,7 +27,7 @@
   }
 
   const replacePropFunction = () => {
-    router.replaceProp('count', (oldValue) => (oldValue as number) * 2)
+    router.replaceProp('count', (oldValue: number) => oldValue * 2)
   }
 
   const appendToPropArray = () => {
