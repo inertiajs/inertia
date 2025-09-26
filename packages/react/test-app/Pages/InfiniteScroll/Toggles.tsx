@@ -5,7 +5,7 @@ import UserCard, { User } from './UserCard'
 export default ({ users }: { users: { data: User[] } }) => {
   const [manual, setManual] = useState(false)
   const [preserveUrl, setPreserveUrl] = useState(false)
-  const [trigger, setTrigger] = useState<'start' | 'end' | 'both'>('end')
+  const [triggerMode, setTriggerMode] = useState<'onlyPrevious' | 'onlyNext' | 'both'>('onlyNext')
 
   return (
     <div>
@@ -26,10 +26,10 @@ export default ({ users }: { users: { data: User[] } }) => {
 
         <p>
           <label>
-            Trigger: {trigger}
-            <select value={trigger} onChange={(e) => setTrigger(e.target.value as 'start' | 'end' | 'both')}>
-              <option value="start">start</option>
-              <option value="end">end</option>
+            Trigger mode: {triggerMode}
+            <select value={triggerMode} onChange={(e) => setTriggerMode(e.target.value as 'onlyPrevious' | 'onlyNext' | 'both')}>
+              <option value="onlyPrevious">onlyPrevious</option>
+              <option value="onlyNext">onlyNext</option>
               <option value="both">both</option>
             </select>
           </label>
@@ -41,8 +41,8 @@ export default ({ users }: { users: { data: User[] } }) => {
         style={{ display: 'grid', gap: '20px' }}
         manual={manual}
         preserveUrl={preserveUrl}
-        onlyNext={trigger === 'end'}
-        onlyPrevious={trigger === 'start'}
+        onlyNext={triggerMode === 'onlyNext'}
+        onlyPrevious={triggerMode === 'onlyPrevious'}
         loading={<div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>}
       >
         {users.data.map((user) => (

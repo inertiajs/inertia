@@ -336,12 +336,12 @@ test.describe('Toggle configuration', () => {
   test('it toggles between different trigger directions when trigger prop changes', async ({ page }) => {
     requests.listen(page)
 
-    // Start on page 2 with trigger='end' (default), change to trigger='start' to auto-load page 1
+    // Start on page 2 with triggerMode='onlyNext' (default), change to triggerMode='onlyPrevious' to auto-load page 1
     await page.goto('/infinite-scroll/toggles?page=2')
 
-    await expect(page.getByText('Trigger: end')).toBeVisible()
-    await page.selectOption('select', 'start')
-    await expect(page.getByText('Trigger: start')).toBeVisible()
+    await expect(page.getByText('Trigger mode: onlyNext')).toBeVisible()
+    await page.selectOption('select', 'onlyPrevious')
+    await expect(page.getByText('Trigger mode: onlyPrevious')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
 
@@ -354,7 +354,7 @@ test.describe('Toggle configuration', () => {
     // Verify User 31 is not loaded yet
     await expect(page.getByText('User 31')).toBeHidden()
 
-    // Scroll to bottom - should NOT load page 3 since trigger='start'
+    // Scroll to bottom - should NOT load page 3 since triggerMode='onlyPrevious'
     await scrollToBottom(page)
     await page.waitForTimeout(500)
 
@@ -362,12 +362,12 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('Total items on page: 30')).toBeVisible()
     await expect(infiniteScrollRequests().length).toBe(1)
 
-    // Scroll to top, change trigger to 'end' (loads next pages)
+    // Scroll to top, change triggerMode to 'onlyNext' (loads next pages)
     await scrollToTop(page)
-    await page.selectOption('select', 'end')
-    await expect(page.getByText('Trigger: end')).toBeVisible()
+    await page.selectOption('select', 'onlyNext')
+    await expect(page.getByText('Trigger mode: onlyNext')).toBeVisible()
 
-    // Scroll to bottom - should now load page 3 since trigger='end'
+    // Scroll to bottom - should now load page 3 since triggerMode='onlyNext'
     await scrollToBottom(page)
 
     await expect(page.getByText('User 31')).toBeVisible()

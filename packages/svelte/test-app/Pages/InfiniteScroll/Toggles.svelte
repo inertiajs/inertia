@@ -6,7 +6,7 @@
 
   let manual = false
   let preserveUrl = false
-  let trigger: 'start' | 'end' | 'both' = 'end'
+  let triggerMode: 'onlyPrevious' | 'onlyNext' | 'both' = 'onlyNext'
 </script>
 
 <div>
@@ -27,17 +27,17 @@
 
     <p>
       <label>
-        Trigger: {trigger}
-        <select bind:value={trigger}>
-          <option value="start">start</option>
-          <option value="end">end</option>
+        Trigger mode: {triggerMode}
+        <select bind:value={triggerMode}>
+          <option value="onlyPrevious">onlyPrevious</option>
+          <option value="onlyNext">onlyNext</option>
           <option value="both">both</option>
         </select>
       </label>
     </p>
   </div>
 
-  <InfiniteScroll data="users" style="display: grid; gap: 20px" {manual} {preserveUrl} onlyNext={trigger === 'end'} onlyPrevious={trigger === 'start'}>
+  <InfiniteScroll data="users" style="display: grid; gap: 20px" {manual} {preserveUrl} onlyNext={triggerMode === 'onlyNext'} onlyPrevious={triggerMode === 'onlyPrevious'}>
     <div slot="loading" style="text-align: center; padding: 20px">Loading...</div>
 
     {#each users.data as user (user.id)}

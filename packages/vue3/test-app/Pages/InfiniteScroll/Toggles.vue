@@ -9,7 +9,7 @@ defineProps<{
 
 const manual = ref(false)
 const preserveUrl = ref(false)
-const trigger = ref<'start' | 'end' | 'both'>('end')
+const triggerMode = ref<'onlyPrevious' | 'onlyNext' | 'both'>('onlyNext')
 </script>
 
 <template>
@@ -31,10 +31,10 @@ const trigger = ref<'start' | 'end' | 'both'>('end')
 
       <p>
         <label>
-          Trigger: {{ trigger }}
-          <select v-model="trigger">
-            <option value="start">start</option>
-            <option value="end">end</option>
+          Trigger mode: {{ triggerMode }}
+          <select v-model="triggerMode">
+            <option value="onlyPrevious">onlyPrevious</option>
+            <option value="onlyNext">onlyNext</option>
             <option value="both">both</option>
           </select>
         </label>
@@ -46,8 +46,8 @@ const trigger = ref<'start' | 'end' | 'both'>('end')
       style="display: grid; gap: 20px"
       :manual="manual"
       :preserve-url="preserveUrl"
-      :only-next="trigger === 'end'"
-      :only-previous="trigger === 'start'"
+      :only-next="triggerMode === 'onlyNext'"
+      :only-previous="triggerMode === 'onlyPrevious'"
     >
       <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 

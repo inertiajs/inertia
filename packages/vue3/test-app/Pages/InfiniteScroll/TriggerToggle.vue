@@ -7,27 +7,27 @@ defineProps<{
   users: { data: User[] }
 }>()
 
-const trigger = ref<'start' | 'end' | 'both'>('start')
+const triggerMode = ref<'onlyPrevious' | 'onlyNext' | 'both'>('onlyPrevious')
 </script>
 
 <template>
   <div>
     <p>
       <label>
-        <select v-model="trigger">
-          <option value="start">start</option>
-          <option value="end">end</option>
+        <select v-model="triggerMode">
+          <option value="onlyPrevious">onlyPrevious</option>
+          <option value="onlyNext">onlyNext</option>
           <option value="both">both</option>
         </select>
-        Trigger: {{ trigger }}
+        Trigger mode: {{ triggerMode }}
       </label>
     </p>
 
     <InfiniteScroll
       data="users"
       style="display: grid; gap: 20px"
-      :only-next="trigger === 'end'"
-      :only-previous="trigger === 'start'"
+      :only-next="triggerMode === 'onlyNext'"
+      :only-previous="triggerMode === 'onlyPrevious'"
     >
       <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
