@@ -1,14 +1,24 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 
-const props = defineProps({
-  items: Array,
-  tags: Array,
-  user: Object,
-  count: Number,
-  singleValue: String,
-  undefinedValue: undefined,
-})
+interface Tag {
+  id: number
+  name: string
+}
+
+interface User {
+  name: string
+  age: number
+}
+
+defineProps<{
+  items?: string[]
+  tags?: Tag[]
+  user?: User
+  count?: number
+  singleValue?: string | string[]
+  undefinedValue?: string | string[]
+}>()
 
 const replacePropString = () => {
   router.replaceProp('user.name', 'Jane Smith')
@@ -50,7 +60,7 @@ const prependToPropMultiple = () => {
 }
 
 const prependToPropFunction = () => {
-  router.prependToProp('tags', (oldValue) => ({ id: 0, name: 'tag0' }))
+  router.prependToProp('tags', () => ({ id: 0, name: 'tag0' }))
 }
 
 // Edge case tests for mergeArrays behavior
