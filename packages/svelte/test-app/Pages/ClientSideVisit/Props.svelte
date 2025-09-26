@@ -39,7 +39,14 @@
   }
 
   const appendToPropFunction = () => {
-    router.appendToProp('tags', () => [{ id: 3, name: 'tag3' }])
+    router.appendToProp('tags', () => ({ id: 3, name: 'tag3' }))
+  }
+
+  const appendArrayToArray = () => {
+    router.appendToProp('tags', [
+      { id: 3, name: 'tag3' },
+      { id: 4, name: 'tag4' },
+    ])
   }
 
   const prependToPropArray = () => {
@@ -51,7 +58,7 @@
   }
 
   const prependToPropFunction = () => {
-    router.prependToProp('tags', () => [{ id: 0, name: 'tag0' }])
+    router.prependToProp('tags', () => ({ id: 0, name: 'tag0' }))
   }
 
   // Edge case tests for mergeArrays behavior
@@ -78,13 +85,6 @@
   const prependToUndefined = () => {
     router.prependToProp('undefinedValue', 'start value')
   }
-
-  const renderValue = (value: string | string[] | undefined): string => {
-    if (Array.isArray(value)) {
-      return value.join(', ')
-    }
-    return value || 'undefined'
-  }
 </script>
 
 <div>
@@ -93,10 +93,10 @@
   <div>User: {user?.name || 'Unknown'} (Age: {user?.age || 'Unknown'})</div>
   <div>Count: {count}</div>
 
-  <div>Items: {items.join(', ')}</div>
-  <div>Tags: {tags.map((tag) => tag.name).join(', ')}</div>
-  <div>Single Value: {renderValue(singleValue)}</div>
-  <div>Undefined Value: {renderValue(undefinedValue)}</div>
+  <div>Items: {JSON.stringify(items)}</div>
+  <div>Tags: {JSON.stringify(tags)}</div>
+  <div>Single Value: {JSON.stringify(singleValue)}</div>
+  <div>Undefined Value: {JSON.stringify(undefinedValue)}</div>
 
   <hr />
 
@@ -109,6 +109,7 @@
   <button on:click={appendToPropArray}>Append to items (single)</button>
   <button on:click={appendToPropMultiple}>Append to items (multiple)</button>
   <button on:click={appendToPropFunction}>Append to tags (function)</button>
+  <button on:click={appendArrayToArray}>Append array to array (objects)</button>
 
   <h2>Prepend To Prop Tests</h2>
   <button on:click={prependToPropArray}>Prepend to items (single)</button>

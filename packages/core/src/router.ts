@@ -331,22 +331,6 @@ export class Router {
     })
   }
 
-  protected mergeArrays(a: unknown, b: unknown): unknown[] {
-    if (Array.isArray(a) && Array.isArray(b)) {
-      return [...a, ...b]
-    }
-
-    if (Array.isArray(a)) {
-      return typeof b === 'undefined' ? a : [...a, b]
-    }
-
-    if (Array.isArray(b)) {
-      return typeof a === 'undefined' ? b : [a, ...b]
-    }
-
-    return [...(typeof a === 'undefined' ? [] : [a]), ...(typeof b === 'undefined' ? [] : [b])]
-  }
-
   public appendToProp<TProps = Page['props']>(
     name: string,
     value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
@@ -356,7 +340,12 @@ export class Router {
       name,
       (currentValue: unknown, currentProps: TProps) => {
         const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
-        return this.mergeArrays(currentValue, newValue)
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [...(currentValue as unknown[]), newValue]
       },
       options,
     )
@@ -371,7 +360,12 @@ export class Router {
       name,
       (currentValue: unknown, currentProps: TProps) => {
         const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
-        return this.mergeArrays(newValue, currentValue)
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [newValue, ...(currentValue as unknown[])]
       },
       options,
     )

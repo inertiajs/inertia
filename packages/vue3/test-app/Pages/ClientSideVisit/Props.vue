@@ -31,7 +31,14 @@ const appendToPropMultiple = () => {
 }
 
 const appendToPropFunction = () => {
-  router.appendToProp('tags', (oldValue) => [{ id: 3, name: 'tag3' }])
+  router.appendToProp('tags', (oldValue) => ({ id: 3, name: 'tag3' }))
+}
+
+const appendArrayToArray = () => {
+  router.appendToProp('tags', [
+    { id: 3, name: 'tag3' },
+    { id: 4, name: 'tag4' },
+  ])
 }
 
 const prependToPropArray = () => {
@@ -43,7 +50,7 @@ const prependToPropMultiple = () => {
 }
 
 const prependToPropFunction = () => {
-  router.prependToProp('tags', (oldValue) => [{ id: 0, name: 'tag0' }])
+  router.prependToProp('tags', (oldValue) => ({ id: 0, name: 'tag0' }))
 }
 
 // Edge case tests for mergeArrays behavior
@@ -79,12 +86,10 @@ const prependToUndefined = () => {
     <div>User: {{ user?.name || 'Unknown' }} (Age: {{ user?.age || 'Unknown' }})</div>
     <div>Count: {{ count }}</div>
 
-    <div>Items: {{ items?.join(', ') }}</div>
-    <div>Tags: {{ tags?.map((tag) => tag.name).join(', ') }}</div>
-    <div>Single Value: {{ Array.isArray(singleValue) ? singleValue.join(', ') : singleValue || 'undefined' }}</div>
-    <div>
-      Undefined Value: {{ Array.isArray(undefinedValue) ? undefinedValue.join(', ') : undefinedValue || 'undefined' }}
-    </div>
+    <div>Items: {{ JSON.stringify(items) }}</div>
+    <div>Tags: {{ JSON.stringify(tags) }}</div>
+    <div>Single Value: {{ JSON.stringify(singleValue) }}</div>
+    <div>Undefined Value: {{ JSON.stringify(undefinedValue) }}</div>
 
     <hr />
 
@@ -97,6 +102,7 @@ const prependToUndefined = () => {
     <button @click="appendToPropArray">Append to items (single)</button>
     <button @click="appendToPropMultiple">Append to items (multiple)</button>
     <button @click="appendToPropFunction">Append to tags (function)</button>
+    <button @click="appendArrayToArray">Append array to array (objects)</button>
 
     <h2>Prepend To Prop Tests</h2>
     <button @click="prependToPropArray">Prepend to items (single)</button>
