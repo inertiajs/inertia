@@ -5,7 +5,7 @@
     name: string
     users: string[]
     chat: { data: number[] }
-    post?: { id: number; comments: { allowed: boolean; data: string[] } }
+    post: { id: number; comments: { allowed: boolean; data: string[] } }
   }
 
   const reload = () => {
