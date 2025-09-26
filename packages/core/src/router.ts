@@ -1,3 +1,4 @@
+import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -311,6 +312,69 @@ export class Router {
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params, { replace: true })
+  }
+
+  public replaceProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | ((oldValue: unknown, props: TProps) => unknown),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replace({
+      preserveScroll: true,
+      preserveState: true,
+      props(currentProps) {
+        const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
+
+        return set(cloneDeep(currentProps), name, newValue)
+      },
+      ...(options || {}),
+    })
+  }
+
+  protected mergeArrays(a: unknown, b: unknown): unknown[] {
+    if (Array.isArray(a) && Array.isArray(b)) {
+      return [...a, ...b]
+    }
+
+    if (Array.isArray(a)) {
+      return typeof b === 'undefined' ? a : [...a, b]
+    }
+
+    if (Array.isArray(b)) {
+      return typeof a === 'undefined' ? b : [a, ...b]
+    }
+
+    return [...(typeof a === 'undefined' ? [] : [a]), ...(typeof b === 'undefined' ? [] : [b])]
+  }
+
+  public appendToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+        return this.mergeArrays(currentValue, newValue)
+      },
+      options,
+    )
+  }
+
+  public prependToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+        return this.mergeArrays(newValue, currentValue)
+      },
+      options,
+    )
   }
 
   public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
