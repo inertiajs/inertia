@@ -136,28 +136,18 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     )
     const autoLoad = useMemo(() => !manualMode, [manualMode])
 
-    const trigger = useMemo<'start' | 'end' | 'both'>(() => {
-      if (onlyNext && !onlyPrevious) {
-        return 'end'
-      }
-
-      if (onlyPrevious && !onlyNext) {
-        return 'start'
-      }
-
-      return 'both'
-    }, [onlyNext, onlyPrevious])
-
     const callbackPropsRef = useRef({
       buffer,
-      trigger,
+      onlyNext,
+      onlyPrevious,
       reverse,
       preserveUrl,
     })
 
     callbackPropsRef.current = {
       buffer,
-      trigger,
+      onlyNext,
+      onlyPrevious,
       reverse,
       preserveUrl,
     }
@@ -191,10 +181,11 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
         // Data
         getPropName: () => data,
         inReverseMode: () => callbackPropsRef.current.reverse,
+        shouldLoadNext: () => !callbackPropsRef.current.onlyPrevious,
+        shouldLoadPrevious: () => !callbackPropsRef.current.onlyNext,
         shouldPreserveUrl: () => callbackPropsRef.current.preserveUrl,
 
         // Elements
-        getTrigger: () => callbackPropsRef.current.trigger,
         getTriggerMargin: () => callbackPropsRef.current.buffer,
         getStartElement: () => resolvedStartElement,
         getEndElement: () => resolvedEndElement,
@@ -232,7 +223,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
 
     useEffect(() => {
       autoLoad ? elementManager?.enableTriggers() : elementManager?.disableTriggers()
-    }, [autoLoad, trigger, resolvedStartElement, resolvedEndElement])
+    }, [autoLoad, onlyNext, onlyPrevious, resolvedStartElement, resolvedEndElement])
 
     useEffect(() => {
       // autoScroll defaults to reverse value if not explicitly set
@@ -254,8 +245,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       [dataManager],
     )
 
-    const headerAutoMode = autoLoad && trigger !== 'end'
-    const footerAutoMode = autoLoad && trigger !== 'start'
+    const headerAutoMode = autoLoad && !onlyNext
+    const footerAutoMode = autoLoad && !onlyPrevious
 
     const sharedExposed: Pick<
       InfiniteScrollActionSlotProps,

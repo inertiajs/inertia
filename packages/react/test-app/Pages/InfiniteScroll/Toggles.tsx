@@ -27,7 +27,10 @@ export default ({ users }: { users: { data: User[] } }) => {
         <p>
           <label>
             Trigger mode: {triggerMode}
-            <select value={triggerMode} onChange={(e) => setTriggerMode(e.target.value as 'onlyPrevious' | 'onlyNext' | 'both')}>
+            <select
+              value={triggerMode}
+              onChange={(e) => setTriggerMode(e.target.value as 'onlyPrevious' | 'onlyNext' | 'both')}
+            >
               <option value="onlyPrevious">onlyPrevious</option>
               <option value="onlyNext">onlyNext</option>
               <option value="both">both</option>

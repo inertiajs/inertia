@@ -17,9 +17,9 @@
   export let preserveUrl: InfiniteScrollComponentBaseProps['preserveUrl'] = false
   export let reverse: InfiniteScrollComponentBaseProps['reverse'] = false
   export let autoScroll: InfiniteScrollComponentBaseProps['autoScroll'] = undefined
-  export let startElement: string | (() => HTMLElement | null | undefined) = undefined
-  export let endElement: string | (() => HTMLElement | null | undefined) = undefined
-  export let itemsElement: string | (() => HTMLElement | null | undefined) = undefined
+  export let startElement: string | (() => HTMLElement | null) | null = null
+  export let endElement: string | (() => HTMLElement | null) | null = null
+  export let itemsElement: string | (() => HTMLElement | null) | null = null
   export let onlyNext = false
   export let onlyPrevious = false
 
@@ -35,20 +35,8 @@
   $: manualMode = manual || (manualAfter > 0 && requestCount >= manualAfter)
   $: autoLoad = !manualMode
 
-  $: trigger = (() => {
-    if (onlyNext && !onlyPrevious) {
-      return 'end'
-    }
-
-    if (onlyPrevious && !onlyNext) {
-      return 'start'
-    }
-
-    return 'both'
-  })()
-
-  $: headerAutoMode = autoLoad && trigger !== 'end'
-  $: footerAutoMode = autoLoad && trigger !== 'start'
+  $: headerAutoMode = autoLoad && !onlyNext
+  $: footerAutoMode = autoLoad && !onlyPrevious
 
   $: sharedExposed = {
     loadingPrevious,
@@ -84,7 +72,7 @@
   let infiniteScrollInstance: UseInfiniteScrollProps | null = null
 
   function resolveHTMLElement(
-    value: string | (() => HTMLElement | null | undefined) | undefined,
+    value: string | (() => HTMLElement | null) | null,
     fallback: HTMLElement | null,
   ): HTMLElement | null {
     if (!value) {
@@ -145,10 +133,11 @@
       // Data
       getPropName: () => data,
       inReverseMode: () => reverse,
+      shouldLoadNext: () => !onlyPrevious,
+      shouldLoadPrevious: () => !onlyNext,
       shouldPreserveUrl: () => preserveUrl,
 
       // Elements
-      getTrigger: () => trigger,
       getTriggerMargin: () => buffer,
       getStartElement: () => resolvedStartElement,
       getEndElement: () => resolvedEndElement,
@@ -183,7 +172,7 @@
 
   $: {
     // Make this block run whenever these change
-    ;[autoLoad, trigger, reverse]
+    ;[autoLoad, onlyNext, onlyPrevious, reverse]
 
     autoLoad
       ? infiniteScrollInstance?.elementManager.enableTriggers()

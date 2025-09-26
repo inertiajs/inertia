@@ -8,21 +8,22 @@ export const getPageFromElement = (element: HTMLElement): string | undefined =>
   element.dataset[INFINITE_SCROLL_PAGE_KEY]
 
 export const useInfiniteScrollElementManager = (options: {
-  getTrigger: () => 'start' | 'end' | 'both'
+  shouldLoadNext: () => boolean
+  shouldLoadPrevious: () => boolean
   getTriggerMargin: () => number
   getStartElement: () => HTMLElement
   getEndElement: () => HTMLElement
   getItemsElement: () => HTMLElement
   getScrollableParent: () => HTMLElement | null
-  onTopTriggered: () => void
-  onBottomTriggered: () => void
+  onPreviousTriggered: () => void
+  onNextTriggered: () => void
   onItemIntersected: (element: HTMLElement) => void
 }): UseInfiniteScrollElementManager => {
   const intersectionObservers = useIntersectionObservers()
 
   let itemsObserver: IntersectionObserver
-  let topElementObserver: IntersectionObserver
-  let bottomElementObserver: IntersectionObserver
+  let startElementObserver: IntersectionObserver
+  let endElementObserver: IntersectionObserver
   let itemsMutationObserver: MutationObserver
   let triggersEnabled = false
 
@@ -49,32 +50,33 @@ export const useInfiniteScrollElementManager = (options: {
       { threshold: 0 },
     )
 
-    // Set up trigger zones at top/bottom that load more content when intersected
-    // The rootMargin creates a buffer zone so loading starts before user reaches the edge
+    // Set up trigger zones at start/end that load more content when intersected. The rootMargin
+    // creates a buffer zone so loading starts before user reaches the edge. We should always
+    // have a root margin of at least 1px as our default elements have no height
     const observerOptions: IntersectionObserverInit = {
       root: options.getScrollableParent(),
       rootMargin: `${Math.max(1, options.getTriggerMargin())}px`,
     }
 
-    topElementObserver = intersectionObservers.new(options.onTopTriggered, observerOptions)
-    bottomElementObserver = intersectionObservers.new(options.onBottomTriggered, observerOptions)
+    startElementObserver = intersectionObservers.new(options.onPreviousTriggered, observerOptions)
+    endElementObserver = intersectionObservers.new(options.onNextTriggered, observerOptions)
   }
 
   const enableTriggers = () => {
     if (triggersEnabled) {
+      // Make sure we don't register multiple watchers
       disableTriggers()
     }
 
-    const topElement = options.getStartElement()
-    const bottomElement = options.getEndElement()
-    const trigger = options.getTrigger()
+    const startElement = options.getStartElement()
+    const endElement = options.getEndElement()
 
-    if (topElement && trigger !== 'end') {
-      topElementObserver.observe(topElement)
+    if (startElement && options.shouldLoadPrevious()) {
+      startElementObserver.observe(startElement)
     }
 
-    if (bottomElement && trigger !== 'start') {
-      bottomElementObserver.observe(bottomElement)
+    if (endElement && options.shouldLoadNext()) {
+      endElementObserver.observe(endElement)
     }
 
     triggersEnabled = true
@@ -85,8 +87,8 @@ export const useInfiniteScrollElementManager = (options: {
       return
     }
 
-    topElementObserver.disconnect()
-    bottomElementObserver.disconnect()
+    startElementObserver.disconnect()
+    endElementObserver.disconnect()
     triggersEnabled = false
   }
 

@@ -506,10 +506,11 @@ export interface UseInfiniteScrollOptions {
   // Core data
   getPropName: () => string
   inReverseMode: () => boolean
+  shouldLoadNext: () => boolean
+  shouldLoadPrevious: () => boolean
   shouldPreserveUrl: () => boolean
 
   // Elements
-  getTrigger: () => 'start' | 'end' | 'both'
   getTriggerMargin: () => number
   getStartElement: () => HTMLElement
   getEndElement: () => HTMLElement

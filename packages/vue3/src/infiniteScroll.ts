@@ -105,26 +105,16 @@ const InfiniteScroll = defineComponent({
     const manualMode = computed<boolean>(
       () => props.manual || (props.manualAfter > 0 && requestCount.value >= props.manualAfter),
     )
-    const trigger = computed<'start' | 'end' | 'both'>(() => {
-      if (props.onlyNext && !props.onlyPrevious) {
-        return 'end'
-      }
-
-      if (props.onlyPrevious && !props.onlyNext) {
-        return 'start'
-      }
-
-      return 'both'
-    })
 
     const { dataManager, elementManager } = useInfiniteScroll({
       // Data
       getPropName: () => props.data,
       inReverseMode: () => props.reverse,
+      shouldLoadNext: () => !props.onlyPrevious,
+      shouldLoadPrevious: () => !props.onlyNext,
       shouldPreserveUrl: () => props.preserveUrl,
 
       // Elements
-      getTrigger: () => trigger.value,
       getTriggerMargin: () => props.buffer,
       getStartElement: () => startElement.value!,
       getEndElement: () => endElement.value!,
@@ -177,7 +167,7 @@ const InfiniteScroll = defineComponent({
     onUnmounted(elementManager.flushAll)
 
     watch(
-      () => [autoLoad.value, trigger.value],
+      () => [autoLoad.value, props.onlyNext, props.onlyPrevious],
       ([enabled]) => {
         enabled ? elementManager.enableTriggers() : elementManager.disableTriggers()
       },
@@ -205,7 +195,7 @@ const InfiniteScroll = defineComponent({
 
       // Only render previous trigger if not using custom element
       if (!props.startElement) {
-        const headerAutoMode = autoLoad.value && trigger.value !== 'end'
+        const headerAutoMode = autoLoad.value && !props.onlyNext
         const exposedPrevious: InfiniteScrollActionSlotProps = {
           loading: loadingPrevious.value,
           fetch: dataManager.loadPrevious,
@@ -242,7 +232,7 @@ const InfiniteScroll = defineComponent({
 
       // Only render next trigger if not using custom element
       if (!props.endElement) {
-        const footerAutoMode = autoLoad.value && trigger.value !== 'start'
+        const footerAutoMode = autoLoad.value && !props.onlyPrevious
         const exposedNext: InfiniteScrollActionSlotProps = {
           loading: loadingNext.value,
           fetch: dataManager.loadNext,

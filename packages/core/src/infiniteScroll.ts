@@ -25,8 +25,8 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     ...options,
     // As items enter viewport, update URL to reflect the most visible page
     onItemIntersected: queryStringManager.onItemIntersected,
-    onTopTriggered: () => dataManager.loadPrevious(),
-    onBottomTriggered: () => dataManager.loadNext(),
+    onPreviousTriggered: () => dataManager.loadPrevious(),
+    onNextTriggered: () => dataManager.loadNext(),
   })
 
   const dataManager = useInfiniteScrollData({
