@@ -3,9 +3,9 @@ import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
 const DataTable = ({
-  users = { data: [] },
+  users,
 }: {
-  users?: {
+  users: {
     data: {
       id: number
       name: string
