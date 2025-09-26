@@ -6,7 +6,7 @@ export default ({ users }: { users: { data: User[] } }) => {
     <InfiniteScroll
       data="users"
       buffer={200}
-      trigger="end"
+      onlyNext
       style={{ display: 'grid', gap: '20px' }}
       loading={() => <div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>}
     >

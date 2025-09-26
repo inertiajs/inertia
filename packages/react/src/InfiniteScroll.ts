@@ -66,6 +66,9 @@ export interface InfiniteScrollProps
   previous?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
   next?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
   loading?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
+
+  onlyNext?: boolean
+  onlyPrevious?: boolean
 }
 
 const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
@@ -73,7 +76,6 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
     {
       data,
       buffer = 0,
-      trigger = 'both',
       as = 'div',
       manual = false,
       manualAfter = 0,
@@ -87,6 +89,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       previous,
       next,
       loading,
+      onlyNext = false,
+      onlyPrevious = false,
       ...props
     },
     ref,
@@ -131,6 +135,18 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, InfiniteScrollProps>(
       [manual, manualAfter, requestCount],
     )
     const autoLoad = useMemo(() => !manualMode, [manualMode])
+
+    const trigger = useMemo<'start' | 'end' | 'both'>(() => {
+      if (onlyNext && !onlyPrevious) {
+        return 'end'
+      }
+
+      if (onlyPrevious && !onlyNext) {
+        return 'start'
+      }
+
+      return 'both'
+    }, [onlyNext, onlyPrevious])
 
     const callbackPropsRef = useRef({
       buffer,

@@ -575,13 +575,14 @@ export interface InfiniteScrollRef {
 export interface InfiniteScrollComponentBaseProps {
   data?: string
   buffer?: number
-  trigger?: 'start' | 'end' | 'both'
   as?: string
   manual?: boolean
   manualAfter?: number
   preserveUrl?: boolean
   reverse?: boolean
   autoScroll?: boolean
+  onlyNext?: boolean
+  onlyPrevious?: boolean
 }
 
 declare global {

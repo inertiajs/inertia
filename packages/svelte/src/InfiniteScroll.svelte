@@ -11,7 +11,6 @@
 
   export let data: InfiniteScrollComponentBaseProps['data'] = undefined
   export let buffer: InfiniteScrollComponentBaseProps['buffer'] = 0
-  export let trigger: InfiniteScrollComponentBaseProps['trigger'] = 'both'
   export let as: InfiniteScrollComponentBaseProps['as'] = 'div'
   export let manual: InfiniteScrollComponentBaseProps['manual'] = false
   export let manualAfter: InfiniteScrollComponentBaseProps['manualAfter'] = 0
@@ -21,6 +20,8 @@
   export let startElement: string | (() => HTMLElement | null | undefined) = undefined
   export let endElement: string | (() => HTMLElement | null | undefined) = undefined
   export let itemsElement: string | (() => HTMLElement | null | undefined) = undefined
+  export let onlyNext = false
+  export let onlyPrevious = false
 
   let itemsElementRef: HTMLElement
   let startElementRef: HTMLElement
@@ -33,6 +34,18 @@
   $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null
   $: manualMode = manual || (manualAfter > 0 && requestCount >= manualAfter)
   $: autoLoad = !manualMode
+
+  $: trigger = (() => {
+    if (onlyNext && !onlyPrevious) {
+      return 'end'
+    }
+
+    if (onlyPrevious && !onlyNext) {
+      return 'start'
+    }
+
+    return 'both'
+  })()
 
   $: headerAutoMode = autoLoad && trigger !== 'end'
   $: footerAutoMode = autoLoad && trigger !== 'start'

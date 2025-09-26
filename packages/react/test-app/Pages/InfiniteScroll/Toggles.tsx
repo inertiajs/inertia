@@ -41,7 +41,8 @@ export default ({ users }: { users: { data: User[] } }) => {
         style={{ display: 'grid', gap: '20px' }}
         manual={manual}
         preserveUrl={preserveUrl}
-        trigger={trigger}
+        onlyNext={trigger === 'end'}
+        onlyPrevious={trigger === 'start'}
         loading={<div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>}
       >
         {users.data.map((user) => (
