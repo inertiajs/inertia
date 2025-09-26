@@ -469,9 +469,16 @@ app.get('/complex-merge-selective', (req, res) => {
         chat: {
           data: isReload ? [4, 5, 6] : [1, 2, 3],
         },
+        post: {
+          id: 1,
+          comments: {
+            allowed: isReload ? false : true,
+            data: isReload ? ['D', 'E', 'F'] : ['A', 'B', 'C'],
+          },
+        },
       },
     },
-    mergeProps: ['mixed.chat.data'],
+    mergeProps: ['mixed.chat.data', 'mixed.post.comments.data'],
   })
 })
 
