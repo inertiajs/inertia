@@ -4,6 +4,7 @@ const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const { showServerStatus } = require('./server-status')
+const { paginateUsers } = require('./eloquent')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -855,6 +856,70 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
     component: 'FormComponent/InvalidateTags',
     props: { lastLoaded: Date.now(), propType: req.params.propType },
   }),
+)
+
+function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, perPage, total, orderByDesc)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component,
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+}
+
+app.get('/infinite-scroll/manual', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Manual'))
+app.get('/infinite-scroll/manual-after', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/ManualAfter', 60))
+app.get('/infinite-scroll/toggles', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Toggles'))
+app.get('/infinite-scroll/trigger-both', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerBoth'))
+app.get('/infinite-scroll/trigger-end-buffer', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerEndBuffer'),
+)
+app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerStartBuffer'),
+)
+app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
+app.get('/infinite-scroll/manual-reverse', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),
+)
+app.get('/infinite-scroll/update-query-string', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/UpdateQueryString'),
+)
+app.get('/infinite-scroll/custom-element', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/CustomElement'))
+app.get('/infinite-scroll/preserve-url', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/PreserveUrl'))
+app.get('/infinite-scroll/scroll-container', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ScrollContainer'),
+)
+app.get('/infinite-scroll/grid', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Grid', 240, false, 60))
+app.get('/infinite-scroll/data-table', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/DataTable', 1000, false, 250),
+)
+app.get('/infinite-scroll/horizontal-scroll', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/HorizontalScroll'),
+)
+app.get('/infinite-scroll/empty', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Empty', 0))
+app.get('/infinite-scroll/custom-triggers-ref', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/CustomTriggersRef'),
+)
+app.get('/infinite-scroll/custom-triggers-selector', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/CustomTriggersSelector'),
+)
+app.get('/infinite-scroll/custom-triggers-ref-object', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/CustomTriggersRefObject'),
+)
+app.get('/infinite-scroll/programmatic-ref', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ProgrammaticRef'),
+)
+app.get('/infinite-scroll/short-content', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
 )
 
 app.all('*', (req, res) => inertia.render(req, res))

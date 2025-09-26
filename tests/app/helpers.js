@@ -22,6 +22,10 @@ module.exports = {
       ...data,
     }
 
+    if (data.component.startsWith('InfiniteScroll')) {
+      data.url = req.originalUrl
+    }
+
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''
     const partialExceptHeader = req.headers['x-inertia-partial-except'] || ''
     const partialComponentHeader = req.headers['x-inertia-partial-component'] || ''

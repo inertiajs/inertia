@@ -1,7 +1,13 @@
 import { AxiosResponse } from 'axios'
 import { get, set } from 'lodash-es'
 import { router } from '.'
-import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
+import {
+  fireBeforeUpdateEvent,
+  fireErrorEvent,
+  fireInvalidEvent,
+  firePrefetchedEvent,
+  fireSuccessEvent,
+} from './events'
 import { history } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
@@ -163,6 +169,9 @@ export class Response {
     this.requestParams.setPreserveOptions(pageResponse)
 
     pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
+
+    this.requestParams.all().onBeforeUpdate(pageResponse)
+    fireBeforeUpdateEvent(pageResponse)
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,

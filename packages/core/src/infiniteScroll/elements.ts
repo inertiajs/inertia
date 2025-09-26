@@ -1,0 +1,154 @@
+import { useIntersectionObservers } from '../intersectionObservers'
+import { UseInfiniteScrollElementManager } from '../types'
+
+const INFINITE_SCROLL_PAGE_KEY = 'infiniteScrollPage'
+const INFINITE_SCROLL_IGNORE_KEY = 'infiniteScrollIgnore'
+
+export const getPageFromElement = (element: HTMLElement): string | undefined =>
+  element.dataset[INFINITE_SCROLL_PAGE_KEY]
+
+export const useInfiniteScrollElementManager = (options: {
+  shouldFetchNext: () => boolean
+  shouldFetchPrevious: () => boolean
+  getTriggerMargin: () => number
+  getStartElement: () => HTMLElement
+  getEndElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
+  getScrollableParent: () => HTMLElement | null
+  onPreviousTriggered: () => void
+  onNextTriggered: () => void
+  onItemIntersected: (element: HTMLElement) => void
+}): UseInfiniteScrollElementManager => {
+  const intersectionObservers = useIntersectionObservers()
+
+  let itemsObserver: IntersectionObserver
+  let startElementObserver: IntersectionObserver
+  let endElementObserver: IntersectionObserver
+  let itemsMutationObserver: MutationObserver
+  let triggersEnabled = false
+
+  const setupObservers = () => {
+    // Watch for manually added DOM elements (not from server responses)
+    // This mutation observer tracks when new elements are added to the slot,
+    // so we can distinguish between user-added content and server-loaded pages
+    itemsMutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            addedElements.add(node as HTMLElement)
+          }
+        })
+      })
+    })
+
+    itemsMutationObserver.observe(options.getItemsElement(), { childList: true })
+
+    // Track individual items entering/leaving viewport for URL synchronization
+    // When items become visible, we update the URL to reflect the current page
+    itemsObserver = intersectionObservers.new(
+      (entry: IntersectionObserverEntry) => options.onItemIntersected(entry.target as HTMLElement),
+      { threshold: 0 },
+    )
+
+    // Set up trigger zones at start/end that load more content when intersected. The rootMargin
+    // creates a buffer zone so loading starts before user reaches the edge. We should always
+    // have a root margin of at least 1px as our default elements have no height
+    const observerOptions: IntersectionObserverInit = {
+      root: options.getScrollableParent(),
+      rootMargin: `${Math.max(1, options.getTriggerMargin())}px`,
+    }
+
+    startElementObserver = intersectionObservers.new(options.onPreviousTriggered, observerOptions)
+    endElementObserver = intersectionObservers.new(options.onNextTriggered, observerOptions)
+  }
+
+  const enableTriggers = () => {
+    if (triggersEnabled) {
+      // Make sure we don't register multiple watchers
+      disableTriggers()
+    }
+
+    const startElement = options.getStartElement()
+    const endElement = options.getEndElement()
+
+    if (startElement && options.shouldFetchPrevious()) {
+      startElementObserver.observe(startElement)
+    }
+
+    if (endElement && options.shouldFetchNext()) {
+      endElementObserver.observe(endElement)
+    }
+
+    triggersEnabled = true
+  }
+
+  const disableTriggers = () => {
+    if (!triggersEnabled) {
+      return
+    }
+
+    startElementObserver.disconnect()
+    endElementObserver.disconnect()
+    triggersEnabled = false
+  }
+
+  const refreshTriggers = () => {
+    if (triggersEnabled) {
+      enableTriggers()
+    }
+  }
+
+  const flushAll = () => {
+    intersectionObservers.flushAll()
+    itemsMutationObserver?.disconnect()
+  }
+
+  const addedElements = new Set<HTMLElement>()
+
+  const elementIsUntagged = (element: HTMLElement): boolean =>
+    !(INFINITE_SCROLL_PAGE_KEY in element.dataset) && !(INFINITE_SCROLL_IGNORE_KEY in element.dataset)
+
+  const processManuallyAddedElements = () => {
+    // Tag manually added elements so they don't interfere with URL management
+    // These elements get marked as "ignore" since they weren't loaded from the server
+    Array.from(addedElements).forEach((element) => {
+      if (elementIsUntagged(element)) {
+        element.dataset[INFINITE_SCROLL_IGNORE_KEY] = 'true'
+      }
+
+      itemsObserver.observe(element)
+    })
+
+    addedElements.clear()
+  }
+
+  const findUntaggedElements = (containerElement: HTMLElement): HTMLElement[] => {
+    return Array.from(
+      containerElement.querySelectorAll(
+        `:scope > *:not([data-infinite-scroll-page]):not([data-infinite-scroll-ignore])`,
+      ),
+    )
+  }
+
+  const processServerLoadedElements = (loadedPage?: string | number) => {
+    // Tag new server-loaded elements with their page number for URL management
+    // This allows us to update the URL based on which page's content is most visible
+    findUntaggedElements(options.getItemsElement()).forEach((element) => {
+      if (elementIsUntagged(element)) {
+        element.dataset[INFINITE_SCROLL_PAGE_KEY] = loadedPage?.toString() || '1'
+      }
+
+      itemsObserver.observe(element)
+    })
+  }
+
+  return {
+    setupObservers,
+    enableTriggers,
+    disableTriggers,
+    refreshTriggers,
+    flushAll,
+    processManuallyAddedElements,
+    processServerLoadedElements,
+  }
+}
