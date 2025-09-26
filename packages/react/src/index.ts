@@ -1,5 +1,6 @@
-import { router as Router } from '@inertiajs/core'
+import { progress as Progress, router as Router } from '@inertiajs/core'
 
+export const progress = Progress
 export const router = Router
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'

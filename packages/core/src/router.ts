@@ -1,5 +1,5 @@
 import { cloneDeep, get, set } from 'lodash-es'
-import { hideProgress, revealProgress } from '.'
+import { progress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { history } from './history'
@@ -193,10 +193,10 @@ export class Router {
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
-      revealProgress(prefetched.inFlight)
+      progress.reveal(prefetched.inFlight)
       prefetchedRequests.use(prefetched, requestParams)
     } else {
-      revealProgress(true)
+      progress.reveal(true)
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
@@ -260,7 +260,7 @@ export class Router {
       return
     }
 
-    hideProgress()
+    progress.hide()
 
     this.asyncRequestStream.interruptInFlight()
 

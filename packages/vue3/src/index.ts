@@ -1,4 +1,4 @@
-export { router } from '@inertiajs/core'
+export { progress, router } from '@inertiajs/core'
 export { usePage } from './app'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './deferred'

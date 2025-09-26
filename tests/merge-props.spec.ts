@@ -97,3 +97,23 @@ test('can prepend to nested props with matchOn', async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByText('Page: 2, Per Page: 5')).toBeVisible()
 })
+
+test('can selectively merge nested props in complex object', async ({ page }) => {
+  await page.goto('/complex-merge-selective')
+
+  await expect(page.getByText('name is John')).toBeVisible()
+  await expect(page.getByText('users: a, b, c')).toBeVisible()
+  await expect(page.getByText('chat.data: 1, 2, 3')).toBeVisible()
+  await expect(page.getByText('post.id: 1')).toBeVisible()
+  await expect(page.getByText('post.comments.allowed: true')).toBeVisible()
+  await expect(page.getByText('post.comments.data: A, B, C')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Reload', null, 'button')
+
+  await expect(page.getByText('name is Jane')).toBeVisible()
+  await expect(page.getByText('users: d, e, f')).toBeVisible()
+  await expect(page.getByText('chat.data: 1, 2, 3, 4, 5, 6')).toBeVisible()
+  await expect(page.getByText('post.id: 1')).toBeVisible()
+  await expect(page.getByText('post.comments.allowed: false')).toBeVisible()
+  await expect(page.getByText('post.comments.data: A, B, C, D, E, F')).toBeVisible()
+})

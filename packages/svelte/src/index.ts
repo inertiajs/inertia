@@ -1,4 +1,4 @@
-export { router } from '@inertiajs/core'
+export { progress, router } from '@inertiajs/core'
 export { default as Deferred } from './components/Deferred.svelte'
 export { default as Form } from './components/Form.svelte'
 export { default as Link } from './components/Link.svelte'

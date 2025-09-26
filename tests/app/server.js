@@ -362,6 +362,8 @@ app.get('/progress/:pageNumber', (req, res) => {
   )
 })
 
+app.get('/progress-component', (req, res) => inertia.render(req, res, { component: 'ProgressComponent' }))
+
 app.get('/merge-props', (req, res) => {
   inertia.render(req, res, {
     component: 'MergeProps',
@@ -453,6 +455,31 @@ app.get('/deep-merge-props', (req, res) => {
       },
     },
     ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['foo', 'baz'] }),
+  })
+})
+
+app.get('/complex-merge-selective', (req, res) => {
+  const isReload = req.headers['x-inertia-partial-component'] || req.headers['x-inertia-partial-data']
+
+  inertia.render(req, res, {
+    component: 'ComplexMergeSelective',
+    props: {
+      mixed: {
+        name: isReload ? 'Jane' : 'John',
+        users: isReload ? ['d', 'e', 'f'] : ['a', 'b', 'c'],
+        chat: {
+          data: isReload ? [4, 5, 6] : [1, 2, 3],
+        },
+        post: {
+          id: 1,
+          comments: {
+            allowed: isReload ? false : true,
+            data: isReload ? ['D', 'E', 'F'] : ['A', 'B', 'C'],
+          },
+        },
+      },
+    },
+    mergeProps: ['mixed.chat.data', 'mixed.post.comments.data'],
   })
 })
 
