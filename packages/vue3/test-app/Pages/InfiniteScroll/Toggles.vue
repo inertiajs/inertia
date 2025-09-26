@@ -46,7 +46,8 @@ const trigger = ref<'start' | 'end' | 'both'>('end')
       style="display: grid; gap: 20px"
       :manual="manual"
       :preserve-url="preserveUrl"
-      :trigger="trigger"
+      :only-next="trigger === 'end'"
+      :only-previous="trigger === 'start'"
     >
       <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 

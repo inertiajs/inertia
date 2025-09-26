@@ -23,7 +23,12 @@ const trigger = ref<'start' | 'end' | 'both'>('start')
       </label>
     </p>
 
-    <InfiniteScroll data="users" style="display: grid; gap: 20px" :trigger="trigger">
+    <InfiniteScroll
+      data="users"
+      style="display: grid; gap: 20px"
+      :only-next="trigger === 'end'"
+      :only-previous="trigger === 'start'"
+    >
       <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
       <template #loading>

@@ -37,9 +37,13 @@ const InfiniteScroll = defineComponent({
       type: Number as PropType<InfiniteScrollComponentBaseProps['buffer']>,
       default: 0,
     },
-    trigger: {
-      type: String as PropType<InfiniteScrollComponentBaseProps['trigger']>,
-      default: 'both',
+    onlyNext: {
+      type: Boolean,
+      default: false,
+    },
+    onlyPrevious: {
+      type: Boolean,
+      default: false,
     },
     as: {
       type: String as PropType<InfiniteScrollComponentBaseProps['as']>,
@@ -101,6 +105,17 @@ const InfiniteScroll = defineComponent({
     const manualMode = computed<boolean>(
       () => props.manual || (props.manualAfter > 0 && requestCount.value >= props.manualAfter),
     )
+    const trigger = computed<'start' | 'end' | 'both'>(() => {
+      if (props.onlyNext && !props.onlyPrevious) {
+        return 'end'
+      }
+
+      if (props.onlyPrevious && !props.onlyNext) {
+        return 'start'
+      }
+
+      return 'both'
+    })
 
     const { dataManager, elementManager } = useInfiniteScroll({
       // Data
@@ -109,7 +124,7 @@ const InfiniteScroll = defineComponent({
       shouldPreserveUrl: () => props.preserveUrl,
 
       // Elements
-      getTrigger: () => props.trigger,
+      getTrigger: () => trigger.value,
       getTriggerMargin: () => props.buffer,
       getStartElement: () => startElement.value!,
       getEndElement: () => endElement.value!,
@@ -162,7 +177,7 @@ const InfiniteScroll = defineComponent({
     onUnmounted(elementManager.flushAll)
 
     watch(
-      () => [autoLoad.value, props.trigger],
+      () => [autoLoad.value, trigger.value],
       ([enabled]) => {
         enabled ? elementManager.enableTriggers() : elementManager.disableTriggers()
       },
@@ -190,7 +205,7 @@ const InfiniteScroll = defineComponent({
 
       // Only render previous trigger if not using custom element
       if (!props.startElement) {
-        const headerAutoMode = autoLoad.value && props.trigger !== 'end'
+        const headerAutoMode = autoLoad.value && trigger.value !== 'end'
         const exposedPrevious: InfiniteScrollActionSlotProps = {
           loading: loadingPrevious.value,
           fetch: dataManager.loadPrevious,
@@ -227,7 +242,7 @@ const InfiniteScroll = defineComponent({
 
       // Only render next trigger if not using custom element
       if (!props.endElement) {
-        const footerAutoMode = autoLoad.value && props.trigger !== 'start'
+        const footerAutoMode = autoLoad.value && trigger.value !== 'start'
         const exposedNext: InfiniteScrollActionSlotProps = {
           loading: loadingNext.value,
           fetch: dataManager.loadNext,

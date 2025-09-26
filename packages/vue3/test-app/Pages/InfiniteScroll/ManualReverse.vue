@@ -11,7 +11,7 @@ const reversedUsers = computed(() => [...props.users.data].reverse())
 </script>
 
 <template>
-  <InfiniteScroll manual data="users" style="display: grid; gap: 20px" reverse trigger="start">
+  <InfiniteScroll data="users" style="display: grid; gap: 20px" reverse only-next>
     <template #previous="{ fetch, hasMore }">
       <button v-if="hasMore" @click="fetch" style="padding: 10px 20px; font-size: 16px; cursor: pointer">
         Load previous page (rendered at the end because of reverse mode)

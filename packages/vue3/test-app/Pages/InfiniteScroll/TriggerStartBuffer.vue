@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <InfiniteScroll data="users" :buffer="200" trigger="start" style="display: grid; gap: 20px">
+  <InfiniteScroll data="users" :buffer="200" only-previous style="display: grid; gap: 20px">
     <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 
     <template #loading>
