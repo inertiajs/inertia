@@ -145,19 +145,10 @@ export const useInfiniteScrollElementManager = (options: {
   let hasRestoredElements = false
 
   const processServerLoadedElements = (loadedPage?: string | number) => {
-    // Restore elements on first call if we haven't already
     if (!hasRestoredElements) {
       hasRestoredElements = true
-      const wasRestored = restoreElements()
 
-      // If we restored elements, we still need to tag any untagged ones as page 1
-      if (wasRestored) {
-        findUntaggedElements(options.getItemsElement()).forEach((element) => {
-          if (elementIsUntagged(element)) {
-            element.dataset[INFINITE_SCROLL_PAGE_KEY] = '1'
-          }
-          itemsObserver.observe(element)
-        })
+      if (restoreElements()) {
         return
       }
     }
@@ -179,16 +170,19 @@ export const useInfiniteScrollElementManager = (options: {
 
   const rememberElements = () => {
     const pageRanges: Record<string, PageRange> = {}
+    const childNodes = options.getItemsElement().childNodes
 
-    options.getItemsElement().childNodes.forEach((node, index) => {
+    for (let index = 0; index < childNodes.length; index++) {
+      const node = childNodes[index]
+
       if (node.nodeType !== Node.ELEMENT_NODE) {
-        return
+        continue
       }
 
       const page = getPageFromElement(node as HTMLElement)
 
       if (typeof page === 'undefined') {
-        return
+        continue
       }
 
       if (!(page in pageRanges)) {
@@ -196,7 +190,7 @@ export const useInfiniteScrollElementManager = (options: {
       } else {
         pageRanges[page].end = index
       }
-    })
+    }
 
     router.remember(pageRanges, getElementsRememberKey())
   }
@@ -210,9 +204,14 @@ export const useInfiniteScrollElementManager = (options: {
       return false
     }
 
-    options.getItemsElement().childNodes.forEach((node, index) => {
+    const childNodes = options.getItemsElement().childNodes
+
+    // Use for loop instead of forEach for better performance
+    for (let index = 0; index < childNodes.length; index++) {
+      const node = childNodes[index]
+
       if (node.nodeType !== Node.ELEMENT_NODE) {
-        return
+        continue
       }
 
       const element = node as HTMLElement
@@ -230,13 +229,13 @@ export const useInfiniteScrollElementManager = (options: {
       if (elementPage) {
         element.dataset[INFINITE_SCROLL_PAGE_KEY] = elementPage
       } else if (!elementIsUntagged(element)) {
-        return
+        continue
       } else {
         element.dataset[INFINITE_SCROLL_IGNORE_KEY] = 'true'
       }
 
       itemsObserver.observe(element)
-    })
+    }
 
     return true
   }
