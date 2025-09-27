@@ -1,9 +1,21 @@
 <script lang="ts">
-  import { InfiniteScroll, Link } from '@inertiajs/svelte'
+  import { InfiniteScroll, Link, router } from '@inertiajs/svelte'
   import UserCard, { type User } from './UserCard.svelte'
 
   export let users: { data: User[] }
+
+  function prependUser(id: number) {
+    router.prependToProp('users.data', { id, name: `User ${id}` })
+  }
 </script>
+
+<div style="margin-bottom: 40px; padding: 20px; border-top: 2px solid #ccc">
+  <div style="margin-bottom: 20px">
+    <button on:click={() => prependUser(0)} style="margin-right: 10px">Prepend User '0'</button>
+    <button on:click={() => prependUser(-1)} style="margin-right: 10px">Prepend User '-1'</button>
+  </div>
+  <Link href="/home">Go Home</Link>
+</div>
 
 <InfiniteScroll data="users" style="display: grid; gap: 20px" manualAfter={2}>
   {#each users.data as user (user.id)}
@@ -18,7 +30,7 @@
     <p>Manual mode: {exposedNext.manualMode}</p>
 
     {#if exposedNext.manualMode}
-      <button on:click={exposedNext.fetch}>Load next items...</button>
+      <button on:click|preventDefault={exposedNext.fetch}>Load next items...</button>
     {/if}
   </div>
 </InfiniteScroll>
