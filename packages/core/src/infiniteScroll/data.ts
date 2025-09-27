@@ -81,7 +81,7 @@ export const useInfiniteScrollData = (options: {
   }
 
   const getPageName = () => getScrollPropFromCurrentPage().pageName
-  const getRememberedRequestCount = () => state.requestCount
+  const getRequestCount = () => state.requestCount
 
   const fetchPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {
     const page = findPageToLoad(side)
@@ -132,7 +132,7 @@ export const useInfiniteScrollData = (options: {
   return {
     getLastLoadedPage,
     getPageName,
-    getRememberedRequestCount,
+    getRequestCount,
     hasPrevious,
     hasNext,
     fetchNext,

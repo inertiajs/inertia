@@ -143,18 +143,18 @@
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
       onCompletePreviousRequest: () => {
-        requestCount = infiniteScrollInstance.dataManager.getRememberedRequestCount()
+        requestCount = infiniteScrollInstance.dataManager.getRequestCount()
         loadingPrevious = false
       },
       onCompleteNextRequest: () => {
-        requestCount = infiniteScrollInstance.dataManager.getRememberedRequestCount()
+        requestCount = infiniteScrollInstance.dataManager.getRequestCount()
         loadingNext = false
       },
     })
 
     const { dataManager, elementManager } = infiniteScrollInstance
 
-    requestCount = dataManager.getRememberedRequestCount()
+    requestCount = dataManager.getRequestCount()
 
     elementManager.setupObservers()
     elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())

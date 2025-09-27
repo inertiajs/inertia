@@ -191,18 +191,18 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         onBeforeNextRequest: () => setLoadingNext(true),
         onCompletePreviousRequest: () => {
           setLoadingPrevious(false)
-          setRequestCount(infiniteScrollInstance.dataManager.getRememberedRequestCount())
+          setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
         },
         onCompleteNextRequest: () => {
           setLoadingNext(false)
-          setRequestCount(infiniteScrollInstance.dataManager.getRememberedRequestCount())
+          setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
         },
       })
 
       setInfiniteScroll(infiniteScrollInstance)
       const { dataManager, elementManager } = infiniteScrollInstance
 
-      setRequestCount(dataManager.getRememberedRequestCount())
+      setRequestCount(dataManager.getRequestCount())
 
       elementManager.setupObservers()
       elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())

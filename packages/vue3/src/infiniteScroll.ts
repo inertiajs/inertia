@@ -120,16 +120,16 @@ const InfiniteScroll = defineComponent({
       onBeforePreviousRequest: () => (loadingPrevious.value = true),
       onBeforeNextRequest: () => (loadingNext.value = true),
       onCompletePreviousRequest: () => {
-        requestCount.value = dataManager.getRememberedRequestCount()
+        requestCount.value = dataManager.getRequestCount()
         loadingPrevious.value = false
       },
       onCompleteNextRequest: () => {
-        requestCount.value = dataManager.getRememberedRequestCount()
+        requestCount.value = dataManager.getRequestCount()
         loadingNext.value = false
       },
     })
 
-    requestCount.value = dataManager.getRememberedRequestCount()
+    requestCount.value = dataManager.getRequestCount()
 
     const autoLoad = computed<boolean>(() => !manualMode.value)
     const manualMode = computed<boolean>(
