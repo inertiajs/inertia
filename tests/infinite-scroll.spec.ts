@@ -88,12 +88,12 @@ test.describe('Automatic page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(2) // Should still be 2, no additional request
 
     // Check if the data-infinite-scroll attribute is set correctly
-    const user1 = page.locator('[data-user-id="1"]')
-    const user15 = page.locator('[data-user-id="15"]')
-    const user16 = page.locator('[data-user-id="16"]')
-    const user30 = page.locator('[data-user-id="30"]')
-    const user31 = page.locator('[data-user-id="31"]')
-    const user40 = page.locator('[data-user-id="40"]')
+    const user1 = await page.locator('[data-user-id="1"]')
+    const user15 = await page.locator('[data-user-id="15"]')
+    const user16 = await page.locator('[data-user-id="16"]')
+    const user30 = await page.locator('[data-user-id="30"]')
+    const user31 = await page.locator('[data-user-id="31"]')
+    const user40 = await page.locator('[data-user-id="40"]')
 
     await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
@@ -164,12 +164,12 @@ test.describe('Automatic page loading', () => {
     await expect(infiniteScrollRequests().length).toBe(2)
 
     // Check if the data-infinite-scroll attribute is set correctly
-    const user1 = page.locator('[data-user-id="1"]')
-    const user10 = page.locator('[data-user-id="10"]')
-    const user11 = page.locator('[data-user-id="11"]')
-    const user25 = page.locator('[data-user-id="25"]')
-    const user26 = page.locator('[data-user-id="26"]')
-    const user40 = page.locator('[data-user-id="40"]')
+    const user1 = await page.locator('[data-user-id="1"]')
+    const user10 = await page.locator('[data-user-id="10"]')
+    const user11 = await page.locator('[data-user-id="11"]')
+    const user25 = await page.locator('[data-user-id="25"]')
+    const user26 = await page.locator('[data-user-id="26"]')
+    const user40 = await page.locator('[data-user-id="40"]')
 
     await expect(user1).toHaveAttribute('data-infinite-scroll-page', '3')
     await expect(user10).toHaveAttribute('data-infinite-scroll-page', '3')
@@ -296,7 +296,7 @@ test.describe('Remember state', () => {
 
     requests.listen(page)
 
-    // Load page 2 (auto mode)
+    // Load page 2
     await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
@@ -305,7 +305,7 @@ test.describe('Remember state', () => {
     await expect(page.getByText('Manual mode: false')).toBeVisible()
     await expect(infiniteScrollRequests().length).toBe(1)
 
-    // Load page 3 (this is the 2nd request, which triggers manual mode)
+    // Load page 3
     await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
@@ -314,11 +314,12 @@ test.describe('Remember state', () => {
     await expect(page.getByText('Manual mode: true')).toBeVisible()
     await expect(infiniteScrollRequests().length).toBe(2)
 
+    await page.waitForTimeout(100)
+
     // Navigate to home page
     await page.getByRole('link', { name: 'Go to Home' }).click()
     await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
 
-    // Navigate back
     await page.goBack()
 
     // Verify state is restored - should show all 3 pages of content
@@ -332,12 +333,12 @@ test.describe('Remember state', () => {
     await expect(page.getByText('Manual mode: true')).toBeVisible()
 
     // Assert the data-infinite-scroll-page attributes are still correct
-    const user1 = page.locator('[data-user-id="1"]')
-    const user15 = page.locator('[data-user-id="15"]')
-    const user16 = page.locator('[data-user-id="16"]')
-    const user30 = page.locator('[data-user-id="30"]')
-    const user31 = page.locator('[data-user-id="31"]')
-    const user45 = page.locator('[data-user-id="45"]')
+    const user1 = await page.locator('[data-user-id="1"]')
+    const user15 = await page.locator('[data-user-id="15"]')
+    const user16 = await page.locator('[data-user-id="16"]')
+    const user30 = await page.locator('[data-user-id="30"]')
+    const user31 = await page.locator('[data-user-id="31"]')
+    const user45 = await page.locator('[data-user-id="45"]')
     await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
@@ -345,17 +346,13 @@ test.describe('Remember state', () => {
     await expect(user31).toHaveAttribute('data-infinite-scroll-page', '3')
     await expect(user45).toHaveAttribute('data-infinite-scroll-page', '3')
 
-    // Verify basic scrolling behavior works after restoration
-    // Note: URL synchronization after restoration needs further investigation
+    // Verify URL synchronization works after restoration
     await scrollToTop(page)
-    await page.waitForTimeout(100)
+    await expectQueryString(page, '1')
 
     const pageHeight = await page.evaluate(() => document.body.scrollHeight)
-    await smoothScrollTo(page, pageHeight * 0.5)
-    await page.waitForTimeout(100)
-
     await smoothScrollTo(page, pageHeight * 0.9)
-    await page.waitForTimeout(100)
+    await expectQueryString(page, '3')
 
     // Test that load more button works for page 4
     requests.requests = [] // Reset request tracking
@@ -423,6 +420,93 @@ test.describe('Remember state', () => {
     expect(page.url()).not.toContain('page=')
   })
 
+  test('it preserves prepended items when navigating away and back', async ({ page }) => {
+    await page.goto('/infinite-scroll/remember-state')
+
+    // Page 1 should be loaded
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+
+    requests.listen(page)
+
+    // Scroll to bottom to load page 2
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Loading...')).toBeHidden()
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    scrollToTop(page)
+
+    // Prepend two users: User 0 and User -1
+    await page.getByRole('button', { name: "Prepend User '0'" }).click()
+    await page.getByRole('button', { name: "Prepend User '-1'" }).click()
+
+    // Verify prepended users are visible
+    await expect(page.getByText('User 0')).toBeVisible()
+    await expect(page.getByText('User -1')).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+    await page.waitForTimeout(250)
+
+    // Navigate to home page
+    await page.getByRole('link', { name: 'Go Home' }).click()
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+
+    // Navigate back
+    await page.goBack()
+
+    // Verify the users we prepended are still there along with pages 1 and 2 content
+    await expect(page.getByText('User -1')).toBeVisible()
+    await expect(page.getByText('User 0')).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    // Verify the dataset attributes are correctly assigned
+    // Users -1 and 0 should be part of page 1
+    const userMinus1 = await page.locator('[data-user-id="-1"]')
+    const user0 = await page.locator('[data-user-id="0"]')
+    const user1 = await page.locator('[data-user-id="1"]')
+    const user15 = await page.locator('[data-user-id="15"]')
+    const user16 = await page.locator('[data-user-id="16"]')
+    const user30 = await page.locator('[data-user-id="30"]')
+
+    await expect(userMinus1).toHaveAttribute('data-infinite-scroll-ignore', 'true')
+    await expect(userMinus1).not.toHaveAttribute('data-infinite-scroll-page')
+    await expect(user0).toHaveAttribute('data-infinite-scroll-ignore', 'true')
+    await expect(user0).not.toHaveAttribute('data-infinite-scroll-page')
+
+    await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
+    await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
+    await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
+    await expect(user30).toHaveAttribute('data-infinite-scroll-page', '2')
+
+    // Scroll to bottom to load page 3
+    requests.requests = [] // Reset request tracking
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+    await expect(page.getByText('Loading...')).toBeHidden()
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    // Verify page 3 loaded correctly
+    const user31 = await page.locator('[data-user-id="31"]')
+    const user45 = await page.locator('[data-user-id="45"]')
+    await expect(user31).toHaveAttribute('data-infinite-scroll-page', '3')
+    await expect(user45).toHaveAttribute('data-infinite-scroll-page', '3')
+
+    await scrollToBottom(page)
+    await expectQueryString(page, '3')
+  })
+
   test('it handles starting on page 2, loading pages, refresh, and dataset verification', async ({ page }) => {
     await page.goto('/infinite-scroll/remember-state?page=2')
 
@@ -464,10 +548,10 @@ test.describe('Remember state', () => {
     expect(page.url()).toContain('page=2')
 
     // Verify dataset tags for existing elements (pages 2+3 are present)
-    const user16 = page.locator('[data-user-id="16"]')
-    const user30 = page.locator('[data-user-id="30"]')
-    const user31 = page.locator('[data-user-id="31"]')
-    const user45 = page.locator('[data-user-id="45"]')
+    const user16 = await page.locator('[data-user-id="16"]')
+    const user30 = await page.locator('[data-user-id="30"]')
+    const user31 = await page.locator('[data-user-id="31"]')
+    const user45 = await page.locator('[data-user-id="45"]')
 
     // Check that restored elements have correct page tags
     await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
@@ -481,8 +565,8 @@ test.describe('Remember state', () => {
     await expect(page.getByText('User 15')).toBeVisible()
     await expect(page.getByText('Manual mode: true')).toBeVisible() // two requests have been made
 
-    const user1 = page.locator('[data-user-id="1"]')
-    const user15 = page.locator('[data-user-id="15"]')
+    const user1 = await page.locator('[data-user-id="1"]')
+    const user15 = await page.locator('[data-user-id="15"]')
 
     await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
@@ -876,7 +960,7 @@ test.describe('Component customization', () => {
     await page.goto('/infinite-scroll/custom-element')
 
     // Verify the InfiniteScroll component renders as a section element
-    const container = page.locator('section[data-testid="infinite-scroll-container"]')
+    const container = await page.locator('section[data-testid="infinite-scroll-container"]')
     await expect(container).toBeVisible()
 
     // Verify it still functions as infinite scroll
@@ -1161,7 +1245,7 @@ test.describe('Scrollable container support', () => {
     await page.goto('/infinite-scroll/scroll-container?page=2')
 
     // Get the scrollable container element
-    const scrollContainer = page.locator('[data-testid="scroll-container"]')
+    const scrollContainer = await page.locator('[data-testid="scroll-container"]')
     await expect(scrollContainer).toBeVisible()
 
     // Initially, page 2 should be visible
@@ -1201,7 +1285,7 @@ test.describe('Scrollable container support', () => {
     // Initially should be on page 1 (no page param)
     expect(page.url()).not.toContain('page=')
 
-    const scrollContainer = page.locator('[data-testid="scroll-container"]')
+    const scrollContainer = await page.locator('[data-testid="scroll-container"]')
     await expect(scrollContainer).toBeVisible()
 
     // Load all 3 pages first
@@ -1284,7 +1368,7 @@ test.describe('Scrollable container support', () => {
     test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
-    const scrollContainer = page.locator('[data-testid="scroll-container"]')
+    const scrollContainer = await page.locator('[data-testid="scroll-container"]')
     await expect(scrollContainer).toBeVisible()
 
     // Wait for page 2 to load automatically...
@@ -1310,7 +1394,7 @@ test.describe('Scrollable container support', () => {
     test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container')
 
-    const scrollContainer = page.locator('[data-testid="scroll-container"]')
+    const scrollContainer = await page.locator('[data-testid="scroll-container"]')
     await expect(scrollContainer).toBeVisible()
 
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
@@ -1344,7 +1428,7 @@ test.describe('Horizontal scrolling support', () => {
     await expect(page.getByText('User 15')).toBeVisible()
     await expect(page.getByText('User 16')).toBeHidden()
 
-    const scrollContainer = page.locator('div[style*="overflow-x: scroll"]')
+    const scrollContainer = await page.locator('div[style*="overflow-x: scroll"]')
 
     await expect(infiniteScrollRequests().length).toBe(0)
 
@@ -1377,11 +1461,11 @@ test.describe('Horizontal scrolling support', () => {
     expect(page.url()).toContain('page=3')
 
     // Check if the data-infinite-scroll attribute is set correctly for horizontal scroll
-    const user15 = page.locator('[data-user-id="15"]')
-    const user16 = page.locator('[data-user-id="16"]')
-    const user30 = page.locator('[data-user-id="30"]')
-    const user31 = page.locator('[data-user-id="31"]')
-    const user40 = page.locator('[data-user-id="40"]')
+    const user15 = await page.locator('[data-user-id="15"]')
+    const user16 = await page.locator('[data-user-id="16"]')
+    const user30 = await page.locator('[data-user-id="30"]')
+    const user31 = await page.locator('[data-user-id="31"]')
+    const user40 = await page.locator('[data-user-id="40"]')
 
     await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
@@ -1530,9 +1614,9 @@ test.describe('Data table layout support', () => {
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(infiniteScrollRequests().length).toBe(3)
 
-    const user500 = page.locator('[data-user-id="500"]')
-    const user501 = page.locator('[data-user-id="501"]')
-    const user1000 = page.locator('[data-user-id="1000"]')
+    const user500 = await page.locator('[data-user-id="500"]')
+    const user501 = await page.locator('[data-user-id="501"]')
+    const user1000 = await page.locator('[data-user-id="1000"]')
 
     await expect(user500).toHaveAttribute('data-infinite-scroll-page', '2')
     await expect(user501).toHaveAttribute('data-infinite-scroll-page', '3')
@@ -1634,9 +1718,9 @@ Object.entries({
       await expect(infiniteScrollRequests().length).toBe(2)
 
       // Verify all three pages are loaded with correct data attributes
-      const user1 = page.locator('[data-user-id="1"]')
-      const user16 = page.locator('[data-user-id="16"]')
-      const user40 = page.locator('[data-user-id="40"]')
+      const user1 = await page.locator('[data-user-id="1"]')
+      const user16 = await page.locator('[data-user-id="16"]')
+      const user40 = await page.locator('[data-user-id="40"]')
 
       await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
       await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')

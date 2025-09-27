@@ -1,4 +1,5 @@
 import { router } from '..'
+import debounce from '../debounce'
 import { useIntersectionObservers } from '../intersectionObservers'
 import { UseInfiniteScrollElementManager } from '../types'
 
@@ -41,11 +42,15 @@ export const useInfiniteScrollElementManager = (options: {
     itemsMutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            addedElements.add(node as HTMLElement)
+          if (node.nodeType !== Node.ELEMENT_NODE) {
+            return
           }
+
+          addedElements.add(node as HTMLElement)
         })
       })
+
+      rememberElementsDebounced()
     })
 
     itemsMutationObserver.observe(options.getItemsElement(), { childList: true })
@@ -167,46 +172,36 @@ export const useInfiniteScrollElementManager = (options: {
       itemsObserver.observe(element)
     })
 
-    // Only remember elements after processing new ones
-    if (loadedPage !== undefined) {
-      rememberElements()
-    }
+    rememberElements()
   }
 
   const getElementsRememberKey = () => `inertia:infinite-scroll-elements:${options.getPropName()}`
 
   const rememberElements = () => {
     const pageRanges: Record<string, PageRange> = {}
-    let currentPage: string | undefined
-    let rangeStart = -1
 
     options.getItemsElement().childNodes.forEach((node, index) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as HTMLElement
-        const page = getPageFromElement(element)
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return
+      }
 
-        if (page !== undefined) {
-          if (page !== currentPage) {
-            // Finish previous page range
-            if (currentPage !== undefined && rangeStart !== -1) {
-              pageRanges[currentPage] = { start: rangeStart, end: index - 1 }
-            }
-            // Start new page range
-            currentPage = page
-            rangeStart = index
-          }
-        }
+      const page = getPageFromElement(node as HTMLElement)
+
+      if (typeof page === 'undefined') {
+        return
+      }
+
+      if (!(page in pageRanges)) {
+        pageRanges[page] = { start: index, end: index }
+      } else {
+        pageRanges[page].end = index
       }
     })
 
-    // Finish the last page range
-    if (currentPage !== undefined && rangeStart !== -1) {
-      const totalElements = options.getItemsElement().childNodes.length
-      pageRanges[currentPage] = { start: rangeStart, end: totalElements - 1 }
-    }
-
     router.remember(pageRanges, getElementsRememberKey())
   }
+
+  const rememberElementsDebounced = debounce(rememberElements, 250)
 
   const restoreElements = (): boolean => {
     const remembered = router.restore(getElementsRememberKey()) as Record<string, PageRange> | undefined
@@ -215,9 +210,7 @@ export const useInfiniteScrollElementManager = (options: {
       return false
     }
 
-    const itemsElement = options.getItemsElement()
-
-    itemsElement.childNodes.forEach((node, index) => {
+    options.getItemsElement().childNodes.forEach((node, index) => {
       if (node.nodeType !== Node.ELEMENT_NODE) {
         return
       }
