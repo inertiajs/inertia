@@ -45,25 +45,14 @@ export const useInfiniteScrollData = (options: {
 
   const getRememberKey = () => `inertia:infinite-scroll-data:${options.getPropName()}`
 
-  // Restore state from previous navigation
   const restoreState = () => {
-    try {
-      const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+    const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
 
-      if (rememberedState && typeof rememberedState === 'object') {
-        // Only restore if the remembered state has valid structure
-        if ('previousPage' in rememberedState || 'nextPage' in rememberedState) {
-          state.previousPage = rememberedState.previousPage
-          state.nextPage = rememberedState.nextPage
-          state.lastLoadedPage = rememberedState.lastLoadedPage
-          state.requestCount = rememberedState.requestCount || 0
-          // Don't restore loading state to avoid UI inconsistencies
-          state.loading = false
-        }
-      }
-    } catch (error) {
-      // Ignore restore errors and use initial state
-      console.warn('Failed to restore infinite scroll state:', error)
+    if (rememberedState && typeof rememberedState === 'object') {
+      state.previousPage = rememberedState.previousPage
+      state.nextPage = rememberedState.nextPage
+      state.lastLoadedPage = rememberedState.lastLoadedPage
+      state.requestCount = rememberedState.requestCount || 0
     }
   }
 
