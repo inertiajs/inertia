@@ -8,10 +8,9 @@ type Side = 'previous' | 'next'
 type ScrollPropPageNames = keyof Pick<ScrollProp, 'previousPage' | 'nextPage'>
 
 type InfiniteScrollState = {
-  loading: boolean
-  previousPage: string | number | undefined
-  nextPage: string | number | undefined
-  lastLoadedPage: string | number | undefined
+  previousPage?: number | string
+  nextPage?: number | string
+  lastLoadedPage?: number | string
   requestCount: number
 }
 
@@ -45,18 +44,14 @@ export const useInfiniteScrollData = (options: {
 
   const getRememberKey = () => `inertia:infinite-scroll-data:${options.getPropName()}`
 
-  const restoreState = () => {
-    const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+  const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
 
-    if (rememberedState && typeof rememberedState === 'object') {
-      state.previousPage = rememberedState.previousPage
-      state.nextPage = rememberedState.nextPage
-      state.lastLoadedPage = rememberedState.lastLoadedPage
-      state.requestCount = rememberedState.requestCount || 0
-    }
+  if (rememberedState && typeof rememberedState === 'object') {
+    state.previousPage = rememberedState.previousPage
+    state.nextPage = rememberedState.nextPage
+    state.lastLoadedPage = rememberedState.lastLoadedPage
+    state.requestCount = rememberedState.requestCount || 0
   }
-
-  restoreState()
 
   const getScrollPropKeyForSide = (side: Side): ScrollPropPageNames => {
     return side === 'next' ? 'nextPage' : 'previousPage'
