@@ -284,6 +284,211 @@ test.describe('Manual page loading', () => {
   })
 })
 
+test.describe('Remember state', () => {
+  test('it preserves state and element tags when navigating away and back', async ({ page }) => {
+    await page.goto('/infinite-scroll/remember-state')
+
+    // Verify initial state
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+
+    requests.listen(page)
+
+    // Load page 2 (auto mode)
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    // Load page 3 (this is the 2nd request, which triggers manual mode)
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+    await expect(page.getByText('User 46')).toBeHidden()
+    await expect(page.getByText('Manual mode: true')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(2)
+
+    // Navigate to home page
+    await page.getByRole('link', { name: 'Go to Home' }).click()
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+
+    // Navigate back
+    await page.goBack()
+
+    // Verify state is restored - should show all 3 pages of content
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+    await expect(page.getByText('User 46')).toBeHidden()
+    await expect(page.getByText('Manual mode: true')).toBeVisible()
+
+    // Assert the data-infinite-scroll-page attributes are still correct
+    const user1 = page.locator('[data-user-id="1"]')
+    const user15 = page.locator('[data-user-id="15"]')
+    const user16 = page.locator('[data-user-id="16"]')
+    const user30 = page.locator('[data-user-id="30"]')
+    const user31 = page.locator('[data-user-id="31"]')
+    const user45 = page.locator('[data-user-id="45"]')
+    await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
+    await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
+    await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
+    await expect(user30).toHaveAttribute('data-infinite-scroll-page', '2')
+    await expect(user31).toHaveAttribute('data-infinite-scroll-page', '3')
+    await expect(user45).toHaveAttribute('data-infinite-scroll-page', '3')
+
+    // Verify basic scrolling behavior works after restoration
+    // Note: URL synchronization after restoration needs further investigation
+    await scrollToTop(page)
+    await page.waitForTimeout(100)
+
+    const pageHeight = await page.evaluate(() => document.body.scrollHeight)
+    await smoothScrollTo(page, pageHeight * 0.5)
+    await page.waitForTimeout(100)
+
+    await smoothScrollTo(page, pageHeight * 0.9)
+    await page.waitForTimeout(100)
+
+    // Test that load more button works for page 4
+    requests.requests = [] // Reset request tracking
+    await scrollToBottom(page)
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 46')).toBeVisible()
+    await expect(page.getByText('User 60')).toBeVisible()
+    await expect(page.getByText('Manual mode: true')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(1)
+  })
+
+  test('it resets to page 1 after browser refresh', async ({ page }) => {
+    await page.goto('/infinite-scroll/remember-state')
+
+    // Verify initial state
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+
+    requests.listen(page)
+
+    // Load page 2 (auto mode)
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    // Load page 3 (this is the 2nd request, which triggers manual mode)
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+    await expect(page.getByText('User 46')).toBeHidden()
+    await expect(page.getByText('Manual mode: true')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(2)
+
+    // Verify we can see all content (pages 1-3)
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+
+    // Scroll to top to make page 1 visible and clear the page parameter
+    await scrollToTop(page)
+    await expectQueryString(page, '1') // This waits for the URL to clear
+
+    // Refresh the browser
+    await page.reload()
+
+    // Verify we're back to page 1 with only initial 15 items
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('User 30')).toBeHidden()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('User 45')).toBeHidden()
+
+    // Verify we're back to initial state (not manual mode)
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+
+    // Verify no page param in URL
+    expect(page.url()).not.toContain('page=')
+  })
+
+  test('it handles starting on page 2, loading pages, refresh, and dataset verification', async ({ page }) => {
+    await page.goto('/infinite-scroll/remember-state?page=2')
+
+    requests.listen(page)
+
+    // Should see page 1 content first, then load page 2
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    // Scroll to bottom to load page 3
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+    await expect(page.getByText('User 46')).toBeHidden()
+    await expect(page.getByText('Manual mode: true')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(2)
+
+    // Scroll to middle to trigger page 2 URL
+    const pageHeight = await page.evaluate(() => document.body.scrollHeight)
+    await smoothScrollTo(page, pageHeight * 0.5)
+    await expectQueryString(page, '2')
+
+    await page.reload()
+
+    // After refresh on ?page=2, loads page 2 content AND loads page 3 automatically (because of scroll position)
+    await expect(page.getByText('User 1', { exact: true })).toBeHidden()
+    await expect(page.getByText('User 15')).toBeHidden()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 45')).toBeVisible()
+    await expect(page.getByText('Manual mode: false')).toBeVisible()
+    expect(page.url()).toContain('page=2')
+
+    // Verify dataset tags for existing elements (pages 2+3 are present)
+    const user16 = page.locator('[data-user-id="16"]')
+    const user30 = page.locator('[data-user-id="30"]')
+    const user31 = page.locator('[data-user-id="31"]')
+    const user45 = page.locator('[data-user-id="45"]')
+
+    // Check that restored elements have correct page tags
+    await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
+    await expect(user30).toHaveAttribute('data-infinite-scroll-page', '2')
+    await expect(user31).toHaveAttribute('data-infinite-scroll-page', '3')
+    await expect(user45).toHaveAttribute('data-infinite-scroll-page', '3')
+
+    // scroll to top, load page 1
+    await scrollToTop(page)
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Manual mode: true')).toBeVisible() // two requests have been made
+
+    const user1 = page.locator('[data-user-id="1"]')
+    const user15 = page.locator('[data-user-id="15"]')
+
+    await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
+    await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
+  })
+})
+
 test.describe('Toggle configuration', () => {
   test('it toggles between automatic and manual loading when manual prop changes', async ({ page }) => {
     requests.listen(page)

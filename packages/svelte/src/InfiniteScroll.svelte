@@ -32,11 +32,6 @@
 
   $: resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
   $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null
-  $: manualMode = manual || (manualAfter > 0 && requestCount >= manualAfter)
-  $: autoLoad = !manualMode
-
-  $: headerAutoMode = autoLoad && !onlyNext
-  $: footerAutoMode = autoLoad && !onlyPrevious
 
   $: sharedExposed = {
     loadingPrevious,
@@ -148,16 +143,18 @@
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
       onCompletePreviousRequest: () => {
-        requestCount += 1
+        requestCount = infiniteScrollInstance.dataManager.getRememberedRequestCount()
         loadingPrevious = false
       },
       onCompleteNextRequest: () => {
-        requestCount += 1
+        requestCount = infiniteScrollInstance.dataManager.getRememberedRequestCount()
         loadingNext = false
       },
     })
 
     const { dataManager, elementManager } = infiniteScrollInstance
+
+    requestCount = dataManager.getRememberedRequestCount()
 
     elementManager.setupObservers()
     elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
@@ -169,6 +166,12 @@
       scrollToBottom()
     }
   }
+
+  $: manualMode = manual || (manualAfter > 0 && requestCount >= manualAfter)
+  $: autoLoad = !manualMode
+
+  $: headerAutoMode = autoLoad && !onlyNext
+  $: footerAutoMode = autoLoad && !onlyPrevious
 
   $: {
     // Make this block run whenever these change

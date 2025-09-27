@@ -1,8 +1,14 @@
+import { router } from '..'
 import { useIntersectionObservers } from '../intersectionObservers'
 import { UseInfiniteScrollElementManager } from '../types'
 
 const INFINITE_SCROLL_PAGE_KEY = 'infiniteScrollPage'
 const INFINITE_SCROLL_IGNORE_KEY = 'infiniteScrollIgnore'
+
+type PageRange = {
+  start: number
+  end: number
+}
 
 export const getPageFromElement = (element: HTMLElement): string | undefined =>
   element.dataset[INFINITE_SCROLL_PAGE_KEY]
@@ -18,6 +24,7 @@ export const useInfiniteScrollElementManager = (options: {
   onPreviousTriggered: () => void
   onNextTriggered: () => void
   onItemIntersected: (element: HTMLElement) => void
+  getPropName: () => string
 }): UseInfiniteScrollElementManager => {
   const intersectionObservers = useIntersectionObservers()
 
@@ -130,7 +137,26 @@ export const useInfiniteScrollElementManager = (options: {
     )
   }
 
+  let hasRestoredElements = false
+
   const processServerLoadedElements = (loadedPage?: string | number) => {
+    // Restore elements on first call if we haven't already
+    if (!hasRestoredElements) {
+      hasRestoredElements = true
+      const wasRestored = restoreElements()
+
+      // If we restored elements, we still need to tag any untagged ones as page 1
+      if (wasRestored) {
+        findUntaggedElements(options.getItemsElement()).forEach((element) => {
+          if (elementIsUntagged(element)) {
+            element.dataset[INFINITE_SCROLL_PAGE_KEY] = '1'
+          }
+          itemsObserver.observe(element)
+        })
+        return
+      }
+    }
+
     // Tag new server-loaded elements with their page number for URL management
     // This allows us to update the URL based on which page's content is most visible
     findUntaggedElements(options.getItemsElement()).forEach((element) => {
@@ -140,6 +166,86 @@ export const useInfiniteScrollElementManager = (options: {
 
       itemsObserver.observe(element)
     })
+
+    // Only remember elements after processing new ones
+    if (loadedPage !== undefined) {
+      rememberElements()
+    }
+  }
+
+  const getElementsRememberKey = () => `inertia:infinite-scroll-elements:${options.getPropName()}`
+
+  const rememberElements = () => {
+    const pageRanges: Record<string, PageRange> = {}
+    let currentPage: string | undefined
+    let rangeStart = -1
+
+    options.getItemsElement().childNodes.forEach((node, index) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement
+        const page = getPageFromElement(element)
+
+        if (page !== undefined) {
+          if (page !== currentPage) {
+            // Finish previous page range
+            if (currentPage !== undefined && rangeStart !== -1) {
+              pageRanges[currentPage] = { start: rangeStart, end: index - 1 }
+            }
+            // Start new page range
+            currentPage = page
+            rangeStart = index
+          }
+        }
+      }
+    })
+
+    // Finish the last page range
+    if (currentPage !== undefined && rangeStart !== -1) {
+      const totalElements = options.getItemsElement().childNodes.length
+      pageRanges[currentPage] = { start: rangeStart, end: totalElements - 1 }
+    }
+
+    router.remember(pageRanges, getElementsRememberKey())
+  }
+
+  const restoreElements = (): boolean => {
+    const remembered = router.restore(getElementsRememberKey()) as Record<string, PageRange> | undefined
+
+    if (!remembered || typeof remembered !== 'object') {
+      return false
+    }
+
+    const itemsElement = options.getItemsElement()
+
+    itemsElement.childNodes.forEach((node, index) => {
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return
+      }
+
+      const element = node as HTMLElement
+
+      // Find which page this element belongs to based on ranges
+      let elementPage: string | undefined
+
+      for (const [page, range] of Object.entries(remembered)) {
+        if (index >= range.start && index <= range.end) {
+          elementPage = page
+          break
+        }
+      }
+
+      if (elementPage) {
+        element.dataset[INFINITE_SCROLL_PAGE_KEY] = elementPage
+      } else if (!elementIsUntagged(element)) {
+        return
+      } else {
+        element.dataset[INFINITE_SCROLL_IGNORE_KEY] = 'true'
+      }
+
+      itemsObserver.observe(element)
+    })
+
+    return true
   }
 
   return {

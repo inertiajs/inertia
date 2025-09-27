@@ -7,6 +7,14 @@ const MERGE_INTENT_HEADER = 'X-Inertia-Infinite-Scroll-Merge-Intent'
 type Side = 'previous' | 'next'
 type ScrollPropPageNames = keyof Pick<ScrollProp, 'previousPage' | 'nextPage'>
 
+type InfiniteScrollState = {
+  loading: boolean
+  previousPage: string | number | undefined
+  nextPage: string | number | undefined
+  lastLoadedPage: string | number | undefined
+  requestCount: number
+}
+
 export const useInfiniteScrollData = (options: {
   getPropName: () => string
   onBeforeUpdate: () => void
@@ -32,7 +40,34 @@ export const useInfiniteScrollData = (options: {
     previousPage,
     nextPage,
     lastLoadedPage,
+    requestCount: 0,
   }
+
+  const getRememberKey = () => `inertia:infinite-scroll-data:${options.getPropName()}`
+
+  // Restore state from previous navigation
+  const restoreState = () => {
+    try {
+      const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+
+      if (rememberedState && typeof rememberedState === 'object') {
+        // Only restore if the remembered state has valid structure
+        if ('previousPage' in rememberedState || 'nextPage' in rememberedState) {
+          state.previousPage = rememberedState.previousPage
+          state.nextPage = rememberedState.nextPage
+          state.lastLoadedPage = rememberedState.lastLoadedPage
+          state.requestCount = rememberedState.requestCount || 0
+          // Don't restore loading state to avoid UI inconsistencies
+          state.loading = false
+        }
+      }
+    } catch (error) {
+      // Ignore restore errors and use initial state
+      console.warn('Failed to restore infinite scroll state:', error)
+    }
+  }
+
+  restoreState()
 
   const getScrollPropKeyForSide = (side: Side): ScrollPropPageNames => {
     return side === 'next' ? 'nextPage' : 'previousPage'
@@ -50,9 +85,14 @@ export const useInfiniteScrollData = (options: {
 
     state.lastLoadedPage = scrollProp.currentPage
     state[paginationProp] = scrollProp[paginationProp]
+
+    state.requestCount += 1
+
+    router.remember(state, getRememberKey())
   }
 
   const getPageName = () => getScrollPropFromCurrentPage().pageName
+  const getRememberedRequestCount = () => state.requestCount
 
   const fetchPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {
     const page = findPageToLoad(side)
@@ -103,6 +143,7 @@ export const useInfiniteScrollData = (options: {
   return {
     getLastLoadedPage,
     getPageName,
+    getRememberedRequestCount,
     hasPrevious,
     hasNext,
     fetchNext,
