@@ -158,6 +158,30 @@ test.describe('Remember (local state caching)', () => {
     // await expect(page.locator('#untracked')).toHaveValue('')
   })
 
+  test('does not restore remembered data after browser refresh', async ({ page }) => {
+    await page.goto('remember/object')
+
+    await page.fill('#name', 'RefreshTest')
+    await page.check('#remember')
+    await page.fill('#untracked', 'ShouldNotRemember')
+
+    await page.getByRole('link', { name: 'Navigate away' }).click()
+    await shouldBeDumpPage(page, 'get')
+
+    await page.goBack()
+    await expect(page).toHaveURL('remember/object')
+    await expect(page.locator('#name')).toHaveValue('RefreshTest')
+    await expect(page.locator('#remember')).toBeChecked()
+    await expect(page.locator('#untracked')).toHaveValue('')
+
+    await page.reload()
+
+    // After refresh, fields should be empty (not restored from remember state)
+    await expect(page.locator('#name')).toHaveValue('')
+    await expect(page.locator('#remember')).not.toBeChecked()
+    await expect(page.locator('#untracked')).toHaveValue('')
+  })
+
   test.describe('form helper', () => {
     test('does not remember form data as of default', async ({ page }) => {
       await page.goto('remember/form-helper/default')
