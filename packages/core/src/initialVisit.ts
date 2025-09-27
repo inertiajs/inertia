@@ -19,6 +19,7 @@ export class InitialVisit {
   protected static clearRememberedStateOnReload(): void {
     if (navigationType.isReload()) {
       history.deleteState(history.rememberedState)
+      history.clearInitialState(history.rememberedState)
     }
   }
 
@@ -92,10 +93,8 @@ export class InitialVisit {
       currentPage.setUrlHash(window.location.hash)
     }
 
-    const isReload = navigationType.isReload()
-
-    currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: !isReload }).then(() => {
-      if (isReload) {
+    currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true }).then(() => {
+      if (navigationType.isReload()) {
         Scroll.restore(history.getScrollRegions())
       }
       fireNavigateEvent(currentPage.get())
