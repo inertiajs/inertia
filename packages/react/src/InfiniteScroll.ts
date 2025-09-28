@@ -130,12 +130,6 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
 
     const scrollableParent = useMemo(() => getScrollableParent(resolvedItemsElement), [resolvedItemsElement])
 
-    const manualMode = useMemo(
-      () => manual || (manualAfter > 0 && requestCount >= manualAfter),
-      [manual, manualAfter, requestCount],
-    )
-    const autoLoad = useMemo(() => !manualMode, [manualMode])
-
     const callbackPropsRef = useRef({
       buffer,
       onlyNext,
@@ -197,16 +191,18 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         onBeforeNextRequest: () => setLoadingNext(true),
         onCompletePreviousRequest: () => {
           setLoadingPrevious(false)
-          setRequestCount((count) => count + 1)
+          setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
         },
         onCompleteNextRequest: () => {
           setLoadingNext(false)
-          setRequestCount((count) => count + 1)
+          setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
         },
       })
 
       setInfiniteScroll(infiniteScrollInstance)
       const { dataManager, elementManager } = infiniteScrollInstance
+
+      setRequestCount(dataManager.getRequestCount())
 
       elementManager.setupObservers()
       elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
@@ -220,6 +216,12 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         setInfiniteScroll(null)
       }
     }, [data, resolvedItemsElement, resolvedStartElement, resolvedEndElement, scrollableParent])
+
+    const manualMode = useMemo(
+      () => manual || (manualAfter > 0 && requestCount >= manualAfter),
+      [manual, manualAfter, requestCount],
+    )
+    const autoLoad = useMemo(() => !manualMode, [manualMode])
 
     useEffect(() => {
       autoLoad ? elementManager?.enableTriggers() : elementManager?.disableTriggers()

@@ -7,6 +7,13 @@ const MERGE_INTENT_HEADER = 'X-Inertia-Infinite-Scroll-Merge-Intent'
 type Side = 'previous' | 'next'
 type ScrollPropPageNames = keyof Pick<ScrollProp, 'previousPage' | 'nextPage'>
 
+type InfiniteScrollState = {
+  previousPage?: number | string
+  nextPage?: number | string
+  lastLoadedPage?: number | string
+  requestCount: number
+}
+
 export const useInfiniteScrollData = (options: {
   getPropName: () => string
   onBeforeUpdate: () => void
@@ -32,6 +39,19 @@ export const useInfiniteScrollData = (options: {
     previousPage,
     nextPage,
     lastLoadedPage,
+    requestCount: 0,
+  }
+
+  const getRememberKey = () => `inertia:infinite-scroll-data:${options.getPropName()}`
+
+  const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+
+  if (rememberedState && typeof rememberedState === 'object') {
+    // Restore the remembered state so the state matches the remembered prop data...
+    state.previousPage = rememberedState.previousPage
+    state.nextPage = rememberedState.nextPage
+    state.lastLoadedPage = rememberedState.lastLoadedPage
+    state.requestCount = rememberedState.requestCount || 0
   }
 
   const getScrollPropKeyForSide = (side: Side): ScrollPropPageNames => {
@@ -50,9 +70,24 @@ export const useInfiniteScrollData = (options: {
 
     state.lastLoadedPage = scrollProp.currentPage
     state[paginationProp] = scrollProp[paginationProp]
+
+    state.requestCount += 1
+
+    // We save the state in the browser history so it can be restored
+    // if the user navigates away and then back to the page...
+    router.remember(
+      {
+        previousPage: state.previousPage,
+        nextPage: state.nextPage,
+        lastLoadedPage: state.lastLoadedPage,
+        requestCount: state.requestCount,
+      } as InfiniteScrollState,
+      getRememberKey(),
+    )
   }
 
   const getPageName = () => getScrollPropFromCurrentPage().pageName
+  const getRequestCount = () => state.requestCount
 
   const fetchPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {
     const page = findPageToLoad(side)
@@ -103,6 +138,7 @@ export const useInfiniteScrollData = (options: {
   return {
     getLastLoadedPage,
     getPageName,
+    getRequestCount,
     hasPrevious,
     hasNext,
     fetchNext,

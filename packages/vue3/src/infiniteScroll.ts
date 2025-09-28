@@ -101,11 +101,6 @@ const InfiniteScroll = defineComponent({
     const loadingNext = ref(false)
     const requestCount = ref(0)
 
-    const autoLoad = computed<boolean>(() => !manualMode.value)
-    const manualMode = computed<boolean>(
-      () => props.manual || (props.manualAfter > 0 && requestCount.value >= props.manualAfter),
-    )
-
     const { dataManager, elementManager } = useInfiniteScroll({
       // Data
       getPropName: () => props.data,
@@ -125,14 +120,21 @@ const InfiniteScroll = defineComponent({
       onBeforePreviousRequest: () => (loadingPrevious.value = true),
       onBeforeNextRequest: () => (loadingNext.value = true),
       onCompletePreviousRequest: () => {
-        requestCount.value += 1
+        requestCount.value = dataManager.getRequestCount()
         loadingPrevious.value = false
       },
       onCompleteNextRequest: () => {
-        requestCount.value += 1
+        requestCount.value = dataManager.getRequestCount()
         loadingNext.value = false
       },
     })
+
+    requestCount.value = dataManager.getRequestCount()
+
+    const autoLoad = computed<boolean>(() => !manualMode.value)
+    const manualMode = computed<boolean>(
+      () => props.manual || (props.manualAfter > 0 && requestCount.value >= props.manualAfter),
+    )
 
     const scrollToBottom = () => {
       if (scrollableParent.value) {

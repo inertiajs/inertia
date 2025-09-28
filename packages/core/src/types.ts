@@ -527,6 +527,7 @@ export interface UseInfiniteScrollOptions {
 export interface UseInfiniteScrollDataManager {
   getLastLoadedPage: () => number | string | undefined
   getPageName: () => string
+  getRequestCount: () => number
   hasPrevious: () => boolean
   hasNext: () => boolean
   fetchNext: (reloadOptions?: ReloadOptions) => void

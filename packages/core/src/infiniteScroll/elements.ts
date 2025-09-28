@@ -1,8 +1,15 @@
+import { router } from '..'
+import debounce from '../debounce'
 import { useIntersectionObservers } from '../intersectionObservers'
 import { UseInfiniteScrollElementManager } from '../types'
 
 const INFINITE_SCROLL_PAGE_KEY = 'infiniteScrollPage'
 const INFINITE_SCROLL_IGNORE_KEY = 'infiniteScrollIgnore'
+
+type ElementRange = {
+  from: number
+  to: number
+}
 
 export const getPageFromElement = (element: HTMLElement): string | undefined =>
   element.dataset[INFINITE_SCROLL_PAGE_KEY]
@@ -18,6 +25,7 @@ export const useInfiniteScrollElementManager = (options: {
   onPreviousTriggered: () => void
   onNextTriggered: () => void
   onItemIntersected: (element: HTMLElement) => void
+  getPropName: () => string
 }): UseInfiniteScrollElementManager => {
   const intersectionObservers = useIntersectionObservers()
 
@@ -34,11 +42,15 @@ export const useInfiniteScrollElementManager = (options: {
     itemsMutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            addedElements.add(node as HTMLElement)
+          if (node.nodeType !== Node.ELEMENT_NODE) {
+            return
           }
+
+          addedElements.add(node as HTMLElement)
         })
       })
+
+      rememberElementsDebounced()
     })
 
     itemsMutationObserver.observe(options.getItemsElement(), { childList: true })
@@ -130,7 +142,18 @@ export const useInfiniteScrollElementManager = (options: {
     )
   }
 
+  let hasRestoredElements = false
+
   const processServerLoadedElements = (loadedPage?: string | number) => {
+    // On first run, try to restore the elements tags from browser history
+    if (!hasRestoredElements) {
+      hasRestoredElements = true
+
+      if (restoreElements()) {
+        return
+      }
+    }
+
     // Tag new server-loaded elements with their page number for URL management
     // This allows us to update the URL based on which page's content is most visible
     findUntaggedElements(options.getItemsElement()).forEach((element) => {
@@ -140,6 +163,84 @@ export const useInfiniteScrollElementManager = (options: {
 
       itemsObserver.observe(element)
     })
+
+    rememberElements()
+  }
+
+  const getElementsRememberKey = () => `inertia:infinite-scroll-elements:${options.getPropName()}`
+
+  // Remember in browser history which elements belong to which page, so we can restore
+  // them on back/forward navigation and keep URL synchronization working correctly
+  const rememberElements = () => {
+    const pageElementRange: Record<string, ElementRange> = {}
+    const childNodes = options.getItemsElement().childNodes
+
+    for (let index = 0; index < childNodes.length; index++) {
+      const node = childNodes[index]
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        continue
+      }
+
+      const page = getPageFromElement(node as HTMLElement)
+
+      if (typeof page === 'undefined') {
+        continue
+      }
+
+      if (!(page in pageElementRange)) {
+        pageElementRange[page] = { from: index, to: index }
+      } else {
+        pageElementRange[page].to = index
+      }
+    }
+
+    router.remember(pageElementRange, getElementsRememberKey())
+  }
+
+  const rememberElementsDebounced = debounce(rememberElements, 250)
+
+  const restoreElements = (): boolean => {
+    const pageElementRange = router.restore(getElementsRememberKey()) as Record<string, ElementRange> | undefined
+
+    if (!pageElementRange || typeof pageElementRange !== 'object') {
+      return false
+    }
+
+    const childNodes = options.getItemsElement().childNodes
+
+    // Use for loop instead of forEach for better performance
+    for (let index = 0; index < childNodes.length; index++) {
+      const node = childNodes[index]
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        continue
+      }
+
+      const element = node as HTMLElement
+
+      // Find which page this element belongs to based on ranges
+      let elementPage: string | undefined
+
+      for (const [page, range] of Object.entries(pageElementRange)) {
+        if (index >= range.from && index <= range.to) {
+          elementPage = page
+          break
+        }
+      }
+
+      if (elementPage) {
+        element.dataset[INFINITE_SCROLL_PAGE_KEY] = elementPage
+      } else if (!elementIsUntagged(element)) {
+        continue
+      } else {
+        element.dataset[INFINITE_SCROLL_IGNORE_KEY] = 'true'
+      }
+
+      itemsObserver.observe(element)
+    }
+
+    return true
   }
 
   return {
