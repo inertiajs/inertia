@@ -1862,13 +1862,15 @@ Object.entries({
       requests.listen(page)
       await page.goto(path + '?filter=n-z')
 
-      await page.locator('input').nth(1).fill('adelle')
+      await page.locator('input').nth(0).fill('adelle')
       await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+
+      await page.waitForTimeout(500)
 
       const userIds = await getUserIdsFromDOM(page)
       expect(userIds.length).toBe(1)
 
-      await page.locator('input').nth(1).fill('')
+      await page.locator('input').nth(0).fill('')
 
       // Wait for second user
       await expect(page.getByText('Alison Walter PhD')).toBeVisible()
