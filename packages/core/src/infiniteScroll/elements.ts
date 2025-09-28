@@ -6,9 +6,9 @@ import { UseInfiniteScrollElementManager } from '../types'
 const INFINITE_SCROLL_PAGE_KEY = 'infiniteScrollPage'
 const INFINITE_SCROLL_IGNORE_KEY = 'infiniteScrollIgnore'
 
-type PageRange = {
-  start: number
-  end: number
+type ElementRange = {
+  from: number
+  to: number
 }
 
 export const getPageFromElement = (element: HTMLElement): string | undefined =>
@@ -145,6 +145,7 @@ export const useInfiniteScrollElementManager = (options: {
   let hasRestoredElements = false
 
   const processServerLoadedElements = (loadedPage?: string | number) => {
+    // On first run, try to restore the elements tags from browser history
     if (!hasRestoredElements) {
       hasRestoredElements = true
 
@@ -168,8 +169,10 @@ export const useInfiniteScrollElementManager = (options: {
 
   const getElementsRememberKey = () => `inertia:infinite-scroll-elements:${options.getPropName()}`
 
+  // Remember in browser history which elements belong to which page, so we can restore
+  // them on back/forward navigation and keep URL synchronization working correctly
   const rememberElements = () => {
-    const pageRanges: Record<string, PageRange> = {}
+    const pageElementRange: Record<string, ElementRange> = {}
     const childNodes = options.getItemsElement().childNodes
 
     for (let index = 0; index < childNodes.length; index++) {
@@ -185,22 +188,22 @@ export const useInfiniteScrollElementManager = (options: {
         continue
       }
 
-      if (!(page in pageRanges)) {
-        pageRanges[page] = { start: index, end: index }
+      if (!(page in pageElementRange)) {
+        pageElementRange[page] = { from: index, to: index }
       } else {
-        pageRanges[page].end = index
+        pageElementRange[page].to = index
       }
     }
 
-    router.remember(pageRanges, getElementsRememberKey())
+    router.remember(pageElementRange, getElementsRememberKey())
   }
 
   const rememberElementsDebounced = debounce(rememberElements, 250)
 
   const restoreElements = (): boolean => {
-    const remembered = router.restore(getElementsRememberKey()) as Record<string, PageRange> | undefined
+    const pageElementRange = router.restore(getElementsRememberKey()) as Record<string, ElementRange> | undefined
 
-    if (!remembered || typeof remembered !== 'object') {
+    if (!pageElementRange || typeof pageElementRange !== 'object') {
       return false
     }
 
@@ -219,8 +222,8 @@ export const useInfiniteScrollElementManager = (options: {
       // Find which page this element belongs to based on ranges
       let elementPage: string | undefined
 
-      for (const [page, range] of Object.entries(remembered)) {
-        if (index >= range.start && index <= range.end) {
+      for (const [page, range] of Object.entries(pageElementRange)) {
+        if (index >= range.from && index <= range.to) {
           elementPage = page
           break
         }
