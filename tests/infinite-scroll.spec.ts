@@ -1728,3 +1728,32 @@ Object.entries({
     })
   })
 })
+
+test.describe('Query parameter handling', () => {
+  test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
+    await page.goto('/infinite-scroll/filtering')
+
+    // Click N-Z filter
+    // See 'Niko Christiansen Jr.' as first user
+    // Scroll to bottom to load page 2
+    // Assert filter=n-z&page=2
+    // See 'Nike Christiansen Jr.' still as first user
+    // See 'Woodrow Kuvalis' as last user
+  })
+
+  test('it resets the infinite scroll component when navigating to the same page with different query params', async ({
+    page,
+  }) => {
+    await page.goto('/infinite-scroll/filtering')
+
+    // Click A-M filter
+    // See 'Adelle Crona DVM' as first user and 'Breana Herzog' as last user
+    // Scroll to bottom to load page 2
+    // See 'Camylle Metz Sr.' as 16th user
+    // Click N-Z filter
+    // See 'Niko Christiansen Jr.' as first
+    // Scroll to bottom to load page 2
+    // See 'Nike Christiansen Jr.' as first user
+    // See 'Woodrow Kuvalis' as last user
+  })
+})

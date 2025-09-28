@@ -4,7 +4,7 @@ const inertia = require('./helpers')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const { showServerStatus } = require('./server-status')
-const { paginateUsers } = require('./eloquent')
+const { getUserNames, paginateUsers } = require('./eloquent')
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -924,6 +924,49 @@ app.get('/infinite-scroll/programmatic-ref', (req, res) =>
 app.get('/infinite-scroll/short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
 )
+
+function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) {}
+
+app.get('/infinite-scroll/filtering', (req, res) => {
+  const filter = req.query.filter
+  const search = req.query.search
+
+  let users = getUserNames()
+
+  if (search) {
+    users = users.filter((user) => user.toLowerCase().includes(search.toLowerCase()))
+  }
+
+  if (filter === 'a-m') {
+    users = users.filter((user) => user.toLowerCase() >= 'a' && user.toLowerCase() <= 'm')
+  } else if (filter === 'n-z') {
+    users = users.filter((user) => user.toLowerCase() >= 'n' && user.toLowerCase() <= 'z')
+  }
+
+  const perPage = 15
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, perPage, users.length)
+
+  if (page > 1) {
+    users = users.slice((page - 1) * perPage, page * perPage)
+  }
+
+  paginated.data = paginated.data.map((user, i) => ({ ...user, name: users[i] }))
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/Filtering',
+        props: { users: paginated, filter, search },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
 
 app.all('*', (req, res) => inertia.render(req, res))
 
