@@ -6,6 +6,7 @@ import { User, default as UserCard } from './UserCard.vue'
 
 const props = defineProps<{
   users: { data: User[] }
+  preserveState: boolean
   filter?: string
   search?: string
 }>()
@@ -18,7 +19,23 @@ const form = useForm({
 
 watch(
   () => form.search,
-  debounce(() => form.get('', { replace: true }), 250),
+  debounce(
+    () =>
+      form.get(
+        '',
+        props.preserveState
+          ? {
+              preserveState: true,
+              replace: true,
+              only: ['users', 'search', 'filter'],
+              reset: ['users'],
+            }
+          : {
+              replace: true,
+            },
+      ),
+    250,
+  ),
 )
 </script>
 

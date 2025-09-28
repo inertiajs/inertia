@@ -41,7 +41,8 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
+      reset = [],
+    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState' | 'reset'>> = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
       this.pendingDeferredProps = {
@@ -84,6 +85,10 @@ class CurrentPage {
 
         if (this.isFirstPageLoad) {
           this.fireEventsFor('firstLoad')
+        }
+
+        if (reset.length) {
+          eventHandler.fireInternalEvent('propsReset', reset)
         }
 
         this.isFirstPageLoad = false

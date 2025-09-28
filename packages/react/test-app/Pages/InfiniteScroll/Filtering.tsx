@@ -5,11 +5,12 @@ import UserCard, { User } from './UserCard'
 
 interface Props {
   users: { data: User[] }
+  preserveState: boolean
   filter?: string
   search?: string
 }
 
-export default ({ users, filter, search }: Props) => {
+export default ({ users, preserveState, filter, search }: Props) => {
   const { data, setData, get } = useForm({
     filter: undefined,
     page: undefined,
@@ -18,7 +19,19 @@ export default ({ users, filter, search }: Props) => {
 
   const debouncedSearch = useCallback(
     debounce(() => {
-      get('', { replace: true })
+      get(
+        '',
+        preserveState
+          ? {
+              preserveState: true,
+              replace: true,
+              only: ['users', 'search', 'filter'],
+              reset: ['users'],
+            }
+          : {
+              replace: true,
+            },
+      )
     }, 250),
     [get],
   )

@@ -927,9 +927,9 @@ app.get('/infinite-scroll/short-content', (req, res) =>
 
 function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) {}
 
-app.get('/infinite-scroll/filtering', (req, res) => {
-  const filter = req.query.filter
-  const search = req.query.search
+app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
+  const filter = req.query.filter || ''
+  const search = req.query.search || ''
 
   let users = getUserNames()
 
@@ -960,8 +960,8 @@ app.get('/infinite-scroll/filtering', (req, res) => {
     () =>
       inertia.render(req, res, {
         component: 'InfiniteScroll/Filtering',
-        props: { users: paginated, filter, search },
-        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        props: { users: paginated, filter, search, preserveState: req.params.preserveState === 'preserve-state' },
+        ...(req.headers['x-inertia-reset'] ? {} : { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }),
         scrollProps: { users: scrollProp },
       }),
     partialReload ? 250 : 0,

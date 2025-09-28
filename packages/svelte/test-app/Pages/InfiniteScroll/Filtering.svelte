@@ -4,6 +4,7 @@
   import UserCard, { type User } from './UserCard.svelte'
 
   export let users: { data: User[] }
+  export let preserveState: boolean = false
   export let filter: string | undefined = undefined
   export let search: string | undefined = undefined
 
@@ -30,7 +31,17 @@
 
     // Set new timeout for debounced search
     timeoutId = setTimeout(() => {
-      $form.get('', { replace: true })
+      $form.get(
+        '',
+        preserveState
+          ? {
+              preserveState: true,
+              replace: true,
+              only: ['users', 'search', 'filter'],
+              reset: ['users'],
+            }
+          : { replace: true },
+      )
     }, 250)
   }
 </script>

@@ -24,6 +24,18 @@ async function smoothScrollTo(page: any, targetY: number) {
   await page.waitForTimeout(150)
 }
 
+async function getUserIdsFromDOM(page: Page) {
+  const userCards = await page.locator('[data-user-id]').all()
+  const userIds = []
+
+  for (const card of userCards) {
+    const userId = await card.getAttribute('data-user-id')
+    userIds.push(parseInt(userId || '0'))
+  }
+
+  return userIds
+}
+
 // Helper function to check URL updates
 async function expectQueryString(page: any, expectedPage: string) {
   if (expectedPage === '1') {
@@ -875,18 +887,6 @@ test.describe('Directional trigger constraints', () => {
 })
 
 test.describe('DOM element ordering', () => {
-  async function getUserIdsFromDOM(page: Page) {
-    const userCards = await page.locator('[data-user-id]').all()
-    const userIds = []
-
-    for (const card of userCards) {
-      const userId = await card.getAttribute('data-user-id')
-      userIds.push(parseInt(userId || '0'))
-    }
-
-    return userIds
-  }
-
   test('it maintains correct DOM element order when pages load out of sequence', async ({ page }) => {
     requests.listen(page)
     await page.goto('/infinite-scroll/trigger-both?page=2')
@@ -1729,130 +1729,153 @@ Object.entries({
   })
 })
 
-test.describe('Query parameter handling', () => {
-  test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
-    requests.listen(page)
-    await page.goto('/infinite-scroll/filtering')
+Object.entries({
+  'refresh state': '/infinite-scroll/filtering/refresh-state',
+  'preserve state': '/infinite-scroll/filtering/preserve-state',
+}).forEach(([key, path]) => {
+  test.describe(`Query parameter handling (${key})`, () => {
+    test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
+      requests.listen(page)
+      await page.goto(path)
 
-    await page.getByRole('link', { name: 'N-Z' }).first().click()
+      await page.getByRole('link', { name: 'N-Z' }).first().click()
 
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
-    await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
-    expect(page.url()).toContain('filter=n-z')
-    expect(page.url()).not.toContain('page=')
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
+      expect(page.url()).toContain('filter=n-z')
+      expect(page.url()).not.toContain('page=')
 
-    // Scroll to bottom to load page 2
-    await scrollToBottom(page)
-    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+      // Scroll to bottom to load page 2
+      await scrollToBottom(page)
+      await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
 
-    // Assert filter=n-z&page=2
-    await scrollToBottom(page)
-    await expectQueryString(page, '2')
-    expect(page.url()).toContain('filter=n-z')
-    expect(page.url()).toContain('page=2')
+      // Assert filter=n-z&page=2
+      await scrollToBottom(page)
+      await expectQueryString(page, '2')
+      expect(page.url()).toContain('filter=n-z')
+      expect(page.url()).toContain('page=2')
 
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
-    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
 
-    await expect(infiniteScrollRequests().length).toBe(1)
-  })
+      await expect(infiniteScrollRequests().length).toBe(1)
+    })
 
-  test('it resets the infinite scroll component when navigating to the same page with different query params', async ({
-    page,
-  }) => {
-    requests.listen(page)
-    await page.goto('/infinite-scroll/filtering')
+    test('it resets the infinite scroll component when navigating to the same page with different query params', async ({
+      page,
+    }) => {
+      requests.listen(page)
+      await page.goto(path)
 
-    await page.getByRole('link', { name: 'A-M' }).first().click()
+      await page.getByRole('link', { name: 'A-M' }).first().click()
 
-    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
-    await expect(page.getByText('Breana Herzog')).toBeVisible()
-    await expect(page.getByText('Current filter: a-m').first()).toBeVisible()
+      await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+      await expect(page.getByText('Breana Herzog')).toBeVisible()
+      await expect(page.getByText('Current filter: a-m').first()).toBeVisible()
 
-    await scrollToBottom(page)
-    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
+      await scrollToBottom(page)
+      await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
 
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - 1000))
-    await expectQueryString(page, '2')
-    expect(page.url()).toContain('filter=a-m')
-    expect(page.url()).toContain('page=2')
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - 1000))
+      await expectQueryString(page, '2')
+      expect(page.url()).toContain('filter=a-m')
+      expect(page.url()).toContain('page=2')
 
-    await expect(infiniteScrollRequests().length).toBe(1)
+      await expect(infiniteScrollRequests().length).toBe(1)
 
-    await page.getByRole('link', { name: 'N-Z' }).first().click()
+      await page.getByRole('link', { name: 'N-Z' }).first().click()
 
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
-    await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
 
-    await expect(page.getByText('Adelle Crona DVM')).toBeHidden()
-    await expect(page.getByText('Camylle Metz Sr.')).toBeHidden()
+      await expect(page.getByText('Adelle Crona DVM')).toBeHidden()
+      await expect(page.getByText('Camylle Metz Sr.')).toBeHidden()
 
-    expect(page.url()).toContain('filter=n-z')
-    expect(page.url()).not.toContain('page=')
+      expect(page.url()).toContain('filter=n-z')
+      expect(page.url()).not.toContain('page=')
 
-    await scrollToBottom(page)
-    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
-    await expect(infiniteScrollRequests().length).toBe(2)
-  })
+      await scrollToBottom(page)
+      await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      await expect(infiniteScrollRequests().length).toBe(2)
+    })
 
-  test('it reset the page and filter params when searching for a user', async ({ page }) => {
-    requests.listen(page)
-    await page.goto('/infinite-scroll/filtering')
-    await page.getByRole('link', { name: 'N-Z' }).first().click()
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
-    await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
+    test('it resets the page and filter params when searching for a user', async ({ page }) => {
+      requests.listen(page)
+      await page.goto(path)
+      await page.getByRole('link', { name: 'N-Z' }).first().click()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
 
-    await scrollToBottom(page)
-    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+      await scrollToBottom(page)
+      await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
 
-    await scrollToBottom(page)
-    await expectQueryString(page, '2')
-    expect(page.url()).toContain('filter=n-z')
-    expect(page.url()).toContain('page=2')
+      await scrollToBottom(page)
+      await expectQueryString(page, '2')
+      expect(page.url()).toContain('filter=n-z')
+      expect(page.url()).toContain('page=2')
 
-    // Search for 'adelle' in bottom input box
-    await page.locator('input').nth(1).fill('adelle')
+      // Search for 'adelle' in bottom input box
+      await page.locator('input').nth(1).fill('adelle')
 
-    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+      await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
 
-    // Assert search=adelle (no page param, no filter param)
-    expect(page.url()).toContain('search=adelle')
-    expect(page.url()).not.toContain('page=')
-    expect(page.url()).not.toContain('filter=')
-    await expect(page.getByText('Current search: adelle').first()).toBeVisible()
-    await expect(page.getByText('Current filter: none').first()).toBeVisible()
+      // Assert search=adelle (no page param, no filter param)
+      expect(page.url()).toContain('search=adelle')
+      expect(page.url()).not.toContain('page=')
+      expect(page.url()).not.toContain('filter=')
+      await expect(page.getByText('Current search: adelle').first()).toBeVisible()
+      await expect(page.getByText('Current filter: none').first()).toBeVisible()
 
-    // Assert only 'Adelle Crona DVM' is visible
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeHidden()
-    await expect(page.getByText('Woodrow Kuvalis')).toBeHidden()
+      // Assert only 'Adelle Crona DVM' is visible
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeHidden()
+      await expect(page.getByText('Woodrow Kuvalis')).toBeHidden()
 
-    // Click N-Z again (this should reset search and apply filter)
-    await page.getByRole('link', { name: 'N-Z' }).first().click()
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      // Click N-Z again (this should reset search and apply filter)
+      await page.getByRole('link', { name: 'N-Z' }).first().click()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
 
-    // Assert filter=n-z (no page param, no search param)
-    expect(page.url()).toContain('filter=n-z')
-    expect(page.url()).not.toContain('page=')
-    expect(page.url()).not.toContain('search=')
-    await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
-    await expect(page.getByText('Current search: none').first()).toBeVisible()
+      // Assert filter=n-z (no page param, no search param)
+      expect(page.url()).toContain('filter=n-z')
+      expect(page.url()).not.toContain('page=')
+      expect(page.url()).not.toContain('search=')
+      await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
+      await expect(page.getByText('Current search: none').first()).toBeVisible()
 
-    // Assert 'Adelle Crona DVM' is hidden, 'Niko Christiansen Jr.' is visible
-    await expect(page.getByText('Adelle Crona DVM')).toBeHidden()
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      // Assert 'Adelle Crona DVM' is hidden, 'Niko Christiansen Jr.' is visible
+      await expect(page.getByText('Adelle Crona DVM')).toBeHidden()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
 
-    await scrollToBottom(page)
-    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+      await scrollToBottom(page)
+      await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
 
-    await scrollToBottom(page)
-    await expectQueryString(page, '2')
-    expect(page.url()).toContain('filter=n-z')
-    expect(page.url()).toContain('page=2')
+      await scrollToBottom(page)
+      await expectQueryString(page, '2')
+      expect(page.url()).toContain('filter=n-z')
+      expect(page.url()).toContain('page=2')
 
-    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
-    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+      await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+      await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+    })
 
-    await expect(infiniteScrollRequests().length).toBe(2) // Initial N-Z page 2 load, final N-Z page 2 load
+    test('it can load additional content after removing the search filter', async ({ page }) => {
+      requests.listen(page)
+      await page.goto(path + '?filter=n-z')
+
+      await page.locator('input').nth(1).fill('adelle')
+      await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+
+      const userIds = await getUserIdsFromDOM(page)
+      expect(userIds.length).toBe(1)
+
+      await page.locator('input').nth(1).fill('')
+
+      // Wait for second user
+      await expect(page.getByText('Alison Walter PhD')).toBeVisible()
+
+      // Scroll to bottom to load more users
+      await scrollToBottom(page)
+      await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
+    })
   })
 })
