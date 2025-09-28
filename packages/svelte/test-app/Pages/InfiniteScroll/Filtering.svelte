@@ -15,6 +15,7 @@
   })
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined
+  let previousSearch = search
 
   onDestroy(() => {
     if (timeoutId) {
@@ -23,7 +24,7 @@
   })
 
   // Debounced search using manual setTimeout/clearTimeout
-  $: if ($form.search !== search && $form.search !== undefined) {
+  $: if ($form.search !== previousSearch) {
     // Clear previous timeout
     if (timeoutId) {
       clearTimeout(timeoutId)
@@ -42,6 +43,7 @@
             }
           : { replace: true },
       )
+      previousSearch = $form.search
     }, 250)
   }
 </script>
