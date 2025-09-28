@@ -12,12 +12,13 @@ const props = defineProps<{
 
 const form = useForm({
   filter: undefined,
+  page: undefined,
   search: props.search,
 })
 
 watch(
   () => form.search,
-  debounce(() => form.get(''), 250),
+  debounce(() => form.get('', { replace: true }), 250),
 )
 </script>
 

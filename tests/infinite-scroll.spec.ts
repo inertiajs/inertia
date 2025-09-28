@@ -1731,29 +1731,86 @@ Object.entries({
 
 test.describe('Query parameter handling', () => {
   test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
+    requests.listen(page)
     await page.goto('/infinite-scroll/filtering')
 
-    // Click N-Z filter
-    // See 'Niko Christiansen Jr.' as first user
+    await page.getByRole('link', { name: 'N-Z' }).first().click()
+
+    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+    await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
+    expect(page.url()).toContain('filter=n-z')
+    expect(page.url()).not.toContain('page=')
+
     // Scroll to bottom to load page 2
+    await scrollToBottom(page)
+    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+
     // Assert filter=n-z&page=2
-    // See 'Nike Christiansen Jr.' still as first user
-    // See 'Woodrow Kuvalis' as last user
+    await scrollToBottom(page)
+    await expectQueryString(page, '2')
+    expect(page.url()).toContain('filter=n-z')
+    expect(page.url()).toContain('page=2')
+
+    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+
+    await expect(infiniteScrollRequests().length).toBe(1)
   })
 
   test('it resets the infinite scroll component when navigating to the same page with different query params', async ({
     page,
   }) => {
+    requests.listen(page)
     await page.goto('/infinite-scroll/filtering')
 
-    // Click A-M filter
-    // See 'Adelle Crona DVM' as first user and 'Breana Herzog' as last user
-    // Scroll to bottom to load page 2
-    // See 'Camylle Metz Sr.' as 16th user
-    // Click N-Z filter
-    // See 'Niko Christiansen Jr.' as first
-    // Scroll to bottom to load page 2
-    // See 'Nike Christiansen Jr.' as first user
-    // See 'Woodrow Kuvalis' as last user
+    await page.getByRole('link', { name: 'A-M' }).first().click()
+
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Breana Herzog')).toBeVisible()
+    await expect(page.getByText('Current filter: a-m').first()).toBeVisible()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - 1000))
+    await expectQueryString(page, '2')
+    expect(page.url()).toContain('filter=a-m')
+    expect(page.url()).toContain('page=2')
+
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    await page.getByRole('link', { name: 'N-Z' }).first().click()
+
+    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+    await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
+
+    await expect(page.getByText('Adelle Crona DVM')).toBeHidden()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeHidden()
+
+    expect(page.url()).toContain('filter=n-z')
+    expect(page.url()).not.toContain('page=')
+
+    await scrollToBottom(page)
+    await expect(page.getByText('Woodrow Kuvalis')).toBeVisible()
+    await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(2)
+  })
+
+  test('it reset the page and filter params when searching for a user', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/filtering')
+
+    // Click N-Z
+    // Scroll to bottom, load next page
+    // Assert filter=n-z&page=2
+    // Search for 'adelle' in bottom input box
+    // Assert filter=adelle (no page param, no filter param)
+    // Assert only 'Adelle Crona DVM' is visible
+    // Click N-Z again
+    // Assert filter=n-z (no page param, no filter param)
+    // Assert 'Adelle Crona DVM' is hidden, 'Niko Christiansen Jr.' is visible
+    // Scroll to bottom, load next page
+    // Assert filter=n-z&page=2
+    // Assert 'Niko Christiansen Jr.' and 'Woodrow Kuvalis' are visible
   })
 })
