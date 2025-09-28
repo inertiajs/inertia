@@ -166,7 +166,10 @@ const InfiniteScroll = defineComponent({
       }
     })
 
-    onUnmounted(elementManager.flushAll)
+    onUnmounted(() => {
+      dataManager.removeEventListener()
+      elementManager.flushAll()
+    })
 
     watch(
       () => [autoLoad.value, props.onlyNext, props.onlyPrevious],

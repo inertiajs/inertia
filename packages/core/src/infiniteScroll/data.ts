@@ -54,6 +54,17 @@ export const useInfiniteScrollData = (options: {
     state.requestCount = rememberedState.requestCount || 0
   }
 
+  const removeEventListener = router.on('success', () => {
+    const scrollProp = getScrollPropFromCurrentPage()
+
+    if (scrollProp.reset) {
+      state.previousPage = scrollProp.previousPage
+      state.nextPage = scrollProp.nextPage
+      state.lastLoadedPage = scrollProp.currentPage
+      state.requestCount = 0
+    }
+  })
+
   const getScrollPropKeyForSide = (side: Side): ScrollPropPageNames => {
     return side === 'next' ? 'nextPage' : 'previousPage'
   }
@@ -143,5 +154,6 @@ export const useInfiniteScrollData = (options: {
     hasNext,
     fetchNext,
     fetchPrevious,
+    removeEventListener,
   }
 }

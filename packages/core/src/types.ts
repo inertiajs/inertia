@@ -110,6 +110,7 @@ export type ScrollProp = {
   previousPage?: number | string
   nextPage?: number | string
   currentPage?: number | string
+  reset: boolean
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
@@ -532,6 +533,7 @@ export interface UseInfiniteScrollDataManager {
   hasNext: () => boolean
   fetchNext: (reloadOptions?: ReloadOptions) => void
   fetchPrevious: (reloadOptions?: ReloadOptions) => void
+  removeEventListener: () => void
 }
 
 export interface UseInfiniteScrollElementManager {
