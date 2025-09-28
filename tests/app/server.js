@@ -956,6 +956,10 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
 
   paginated.data = paginated.data.map((user, i) => ({ ...user, name: users[i] }))
 
+  if (req.headers['x-inertia-reset']) {
+    scrollProp.reset = true
+  }
+
   setTimeout(
     () =>
       inertia.render(req, res, {

@@ -148,6 +148,7 @@ export function paginateUsers(page = 1, perPage = 15, total = 40, orderByDesc = 
       previousPage: page > 1 ? page - 1 : null,
       nextPage: hasMore ? page + 1 : null,
       currentPage: page,
+      reset: false,
     },
   }
 }

@@ -110,6 +110,7 @@ export type ScrollProp = {
   previousPage?: number | string
   nextPage?: number | string
   currentPage?: number | string
+  reset: boolean
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
@@ -320,7 +321,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
   ...params: GlobalEventParameters<TEventName, T>
 ) => GlobalEventResult<TEventName, T>
 
-export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'propsReset'
+export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
@@ -532,6 +533,7 @@ export interface UseInfiniteScrollDataManager {
   hasNext: () => boolean
   fetchNext: (reloadOptions?: ReloadOptions) => void
   fetchPrevious: (reloadOptions?: ReloadOptions) => void
+  removeEventListener: () => void
 }
 
 export interface UseInfiniteScrollElementManager {
