@@ -205,6 +205,80 @@ test.describe('Automatic page loading', () => {
     await page.waitForTimeout(500)
     await expect(page.getByText('User 25')).not.toBeVisible()
   })
+
+  test('it handles dual scroll containers with separate data props and page query parameters', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/dual-containers')
+
+    // Get both scroll containers
+    const container1 = page.locator('[data-testid="scroll-container-1"]')
+    const container2 = page.locator('[data-testid="scroll-container-2"]')
+
+    await expect(container1).toBeVisible()
+    await expect(container2).toBeVisible()
+
+    // Initially both containers should show their first pages
+    await expect(container1.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(container1.getByText('User 15')).toBeVisible()
+    await expect(container1.getByText('User 16')).toBeHidden()
+    await expect(container2.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(container2.getByText('User 15')).toBeVisible()
+    await expect(container2.getByText('User 16')).toBeHidden()
+
+    // No query parameters should be present initially
+    expect(page.url()).not.toContain('users1=')
+    expect(page.url()).not.toContain('users2=')
+
+    // Scroll first container to load page 2 of users1
+    await container1.evaluate((container) => {
+      container.scrollTop = container.scrollHeight
+    })
+
+    await expect(container1.getByText('User 16')).toBeVisible()
+    await expect(container1.getByText('User 30')).toBeVisible()
+    await expect(container1.getByText('User 31')).toBeHidden()
+    await expect(container2.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(container2.getByText('User 15')).toBeVisible()
+    await expect(container2.getByText('User 16')).toBeHidden()
+
+    // Scroll to bottom of first container to check URL synchronization
+    await container1.evaluate((container) => (container.scrollTop = container.scrollHeight - 500))
+    await page.waitForFunction(
+      () => window.location.search.includes('users1=2'),
+      {},
+      {
+        timeout: 800,
+      },
+    )
+
+    // expect ?users1=2 in URL, but not users2
+    expect(page.url()).toContain('users1=2')
+    expect(page.url()).not.toContain('users2=')
+
+    // Scroll second container to load page 2 of users2
+    await container2.evaluate((container) => (container.scrollTop = container.scrollHeight))
+
+    await expect(container1.getByText('User 16')).toBeVisible()
+    await expect(container1.getByText('User 30')).toBeVisible()
+    await expect(container1.getByText('User 31')).toBeHidden()
+    await expect(container2.getByText('User 16')).toBeVisible()
+    await expect(container2.getByText('User 30')).toBeVisible()
+    await expect(container2.getByText('User 31')).toBeHidden()
+
+    // Scroll to bottom of second container to check URL synchronization
+    await container2.evaluate((container) => (container.scrollTop = container.scrollHeight - 500))
+    await page.waitForFunction(
+      () => window.location.search.includes('users2=2'),
+      {},
+      {
+        timeout: 800,
+      },
+    )
+
+    // expect both ?users1=2 and users2=2 in URL
+    expect(page.url()).toContain('users1=2')
+    expect(page.url()).toContain('users2=2')
+  })
 })
 
 test.describe('Manual page loading', () => {

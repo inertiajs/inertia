@@ -131,7 +131,7 @@ function getUsers(page = 1, perPage = 15, total = 40, orderByDesc = false) {
   }
 }
 
-export function paginateUsers(page = 1, perPage = 15, total = 40, orderByDesc = false) {
+export function paginateUsers(page = 1, perPage = 15, total = 40, orderByDesc = false, pageName = 'page') {
   const users = getUsers(page, perPage, total, orderByDesc)
   const hasMore = getUsers(page + 1, perPage, total, orderByDesc).length > 0
 
@@ -144,7 +144,7 @@ export function paginateUsers(page = 1, perPage = 15, total = 40, orderByDesc = 
       total,
     },
     scrollProp: {
-      pageName: 'page',
+      pageName,
       previousPage: page > 1 ? page - 1 : null,
       nextPage: hasMore ? page + 1 : null,
       currentPage: page,
