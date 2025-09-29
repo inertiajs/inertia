@@ -930,8 +930,20 @@ app.get('/infinite-scroll/dual-containers', (req, res) => {
   const partialReload = !!req.headers['x-inertia-partial-data']
   const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
 
-  const { paginated: users1Paginated, scrollProp: users1ScrollProp } = paginateUsers(users1Page, 15, 40, false, 'users1')
-  const { paginated: users2Paginated, scrollProp: users2ScrollProp } = paginateUsers(users2Page, 15, 60, false, 'users2')
+  const { paginated: users1Paginated, scrollProp: users1ScrollProp } = paginateUsers(
+    users1Page,
+    15,
+    40,
+    false,
+    'users1',
+  )
+  const { paginated: users2Paginated, scrollProp: users2ScrollProp } = paginateUsers(
+    users2Page,
+    15,
+    60,
+    false,
+    'users2',
+  )
 
   setTimeout(
     () =>
