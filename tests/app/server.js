@@ -945,13 +945,26 @@ app.get('/infinite-scroll/dual-containers', (req, res) => {
     'users2',
   )
 
+  const props = {}
+  const scrollProps = {}
+
+  if (!partialReload || req.headers['x-inertia-partial-data']?.includes('users1')) {
+    props.users1 = users1Paginated
+    scrollProps.users1 = users1ScrollProp
+  }
+
+  if (!partialReload || req.headers['x-inertia-partial-data']?.includes('users2')) {
+    props.users2 = users2Paginated
+    scrollProps.users2 = users2ScrollProp
+  }
+
   setTimeout(
     () =>
       inertia.render(req, res, {
         component: 'InfiniteScroll/DualContainers',
-        props: { users1: users1Paginated, users2: users2Paginated },
+        props,
         [shouldAppend ? 'mergeProps' : 'prependProps']: ['users1.data', 'users2.data'],
-        scrollProps: { users1: users1ScrollProp, users2: users2ScrollProp },
+        scrollProps,
       }),
     partialReload ? 250 : 0,
   )
