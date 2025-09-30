@@ -96,9 +96,7 @@ class EventHandler {
         router.cancelAll()
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          window.requestAnimationFrame(() => {
-            Scroll.restore(history.getScrollRegions())
-          })
+          Scroll.restore(history.getScrollRegions())
           fireNavigateEvent(currentPage.get())
         })
       })

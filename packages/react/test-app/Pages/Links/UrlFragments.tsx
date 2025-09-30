@@ -18,6 +18,7 @@ export default () => {
     <div>
       <span className="text">This is the links page that demonstrates url fragment behaviour</span>
       <div style={{ width: '200vw', height: '200vh', marginTop: '50vh' }}>
+        <button onClick={handleScrollEvent}>Update scroll positions</button>
         {/* prettier-ignore */}
         <div className="document-position">
           Document scroll position is {documentScrollLeft} & {documentScrollTop}
