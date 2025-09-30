@@ -389,8 +389,8 @@ test.describe('preserve url', () => {
     const initialUrl = page.url()
 
     await page.getByRole('link', { name: '[URL] Preserve: true' }).click()
-    await expect(page).toHaveURL(initialUrl) // URL should remain the same
     await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await expect(page).toHaveURL(initialUrl) // URL should remain the same
   })
 
   test('does not preserve the current URL', async ({ page }) => {
@@ -399,8 +399,8 @@ test.describe('preserve url', () => {
 
     await page.getByRole('link', { name: '[URL] Preserve: false' }).click()
     await expect(page).toHaveURL('/links/preserve-url-page-two')
-    await expect(page.url()).not.toBe(initialUrl) // URL should have changed
     await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await expect(page.url()).not.toBe(initialUrl) // URL should have changed
   })
 
   test('can load more items with preserveUrl via Link', async ({ page }) => {
