@@ -392,6 +392,7 @@ test.describe('preserve scroll', () => {
       page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
     )
 
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -400,6 +401,7 @@ test.describe('preserve scroll', () => {
     await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -412,6 +414,7 @@ test.describe('preserve scroll', () => {
     await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click({ position: { x: 0, y: 0 } })
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
 
@@ -441,6 +444,7 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -473,6 +477,7 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -488,6 +493,7 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click() //
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -515,6 +521,7 @@ test.describe('enabled', () => {
     await page.getByText('Reset Scroll', { exact: true }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -525,6 +532,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
@@ -542,6 +550,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -552,6 +561,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
 
@@ -579,6 +589,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
 
     // Wait for scroll restoration to complete - use longer timeout for flaky CI
@@ -631,6 +642,7 @@ test.describe('enabled', () => {
     await page.goBack()
 
     await expect(page).toHaveURL('/links/preserve-scroll')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -642,24 +654,28 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/links/url-fragments')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
   })
 
   test('scrolls to the fragment element when making a visit to a different page', async ({ page }) => {
     await page.getByRole('link', { name: 'Basic link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#target')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
   })
 
   test('scrolls to the fragment element when making a visit to the same page', async ({ page }) => {
     await page.getByRole('link', { exact: true, name: 'Fragment link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#target')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
   })
 
   test('does not scroll to the fragment element when it does not exist on the page', async ({ page }) => {
     await page.getByRole('link', { exact: true, name: 'Non-existent fragment link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#non-existent-fragment')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
   })
 })

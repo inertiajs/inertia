@@ -58,6 +58,7 @@ export default () => {
           marginTop: '50vh',
         }}
       >
+        <button onClick={handleScrollEvent}>Update scroll positions</button>
         {/* prettier-ignore */}
         <div className="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
         <a href="#" onClick={basicVisit} className="basic">

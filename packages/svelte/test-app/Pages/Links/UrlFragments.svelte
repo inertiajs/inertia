@@ -16,6 +16,7 @@
   <span class="text">This is the links page that demonstrates url fragment behaviour</span>
   <div style="width: 200vw; height: 200vh; margin-top: 50vh">
     <!-- prettier-ignore -->
+    <button on:click={handleScrollEvent}>Update scroll positions</button>
     <div class="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
     <a href="/links/url-fragments#target" use:inertia class="basic">Basic link</a>
     <a href="#target" use:inertia class="fragment">Fragment link</a>
