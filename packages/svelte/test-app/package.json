@@ -11,8 +11,8 @@
     "nodemon": "^3.0.0",
     "svelte": "^4.2.14",
     "svelte-check": "^4.1.0",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.19"
+    "typescript": "^5.9.2",
+    "vite": "^5.4.20"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

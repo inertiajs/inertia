@@ -211,6 +211,12 @@ class History {
     }
   }
 
+  public clearInitialState(key: keyof Page) {
+    if (this.initialState && this.initialState[key] !== undefined) {
+      delete this.initialState[key]
+    }
+  }
+
   public hasAnyState(): boolean {
     return !!this.getAllState()
   }

@@ -1,11 +1,11 @@
-import test, { expect } from '@playwright/test'
+import test, { expect, Page } from '@playwright/test'
 import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
   test.describe('Elements', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-component/elements')
+      await page.goto('/form-component/elements')
     })
 
     test('can submit the form with the default values', async ({ page }) => {
@@ -281,27 +281,30 @@ test.describe('Form Component', () => {
       await page.goto('/form-component/events')
     })
 
+    const waitForEvents = async (page: Page, events: string[]) => {
+      await page.waitForFunction(async (expected) => {
+        return document.querySelector('#events')?.innerText === expected
+      }, events.join(','))
+    }
+
     test('fires events in order on success', async ({ page }) => {
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
     })
 
     test('fires events in order on error', async ({ page }) => {
       await page.getByRole('button', { name: 'Fail Request' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
     })
 
     test('fires only onBefore and onCancel when canceled via event cancellation', async ({ page }) => {
       await page.getByRole('button', { name: 'Cancel in onBefore' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancel'])
+      await waitForEvents(page, ['onBefore', 'onCancel'])
     })
 
     test('fires onCancelToken and cancels the request via the token', async ({ page }) => {
@@ -309,8 +312,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Submit' }).click()
       await page.getByRole('button', { name: 'Cancel Visit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
     })
 
     test('fires onProgress during file upload', async ({ page }) => {
@@ -323,8 +325,7 @@ test.describe('Form Component', () => {
       await page.setInputFiles('#avatar', file)
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toContain('onProgress')
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onProgress'])
     })
 
     test('updates processing during request', async ({ page }) => {
@@ -1412,7 +1413,7 @@ test.describe('Form Component', () => {
       // Submit form that invalidates 'user' tag
       await page.fill('#form-name', 'Test User')
       await page.click('#submit-invalidate-user')
-      await page.waitForURL('/dump/post')
+      await shouldBeDumpPage(page, 'post')
 
       await page.goBack()
 
@@ -1420,12 +1421,31 @@ test.describe('Form Component', () => {
       requests.listen(page)
       await page.getByRole('link', { name: 'User Tagged Page' }).click()
       await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+      await expect(page).toHaveURL('/prefetch/tags/1')
 
       // Go back and check product page is still cached
       await page.goBack()
       requests.listen(page)
       await page.getByRole('link', { name: 'Product Tagged Page' }).click()
       await expect(requests.requests.length).toBe(0)
+    })
+  })
+
+  test.describe('React', () => {
+    test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
+
+    test('it preserves the internal state of child components', async ({ page }) => {
+      await page.goto('/form-component/child-component')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await page.fill('#child', 'a')
+      await expect(page.locator('#child')).toHaveValue('A')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      const dump = await shouldBeDumpPage(page, 'post')
+      expect(dump.form).toEqual({ child: 'A' })
     })
   })
 })

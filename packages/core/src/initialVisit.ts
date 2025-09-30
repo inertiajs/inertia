@@ -19,6 +19,7 @@ export class InitialVisit {
   protected static clearRememberedStateOnReload(): void {
     if (navigationType.isReload()) {
       history.deleteState(history.rememberedState)
+      history.clearInitialState(history.rememberedState)
     }
   }
 

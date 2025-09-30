@@ -2,6 +2,7 @@ import {
   ActiveVisit,
   CacheForOption,
   GlobalEventCallback,
+  isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -177,7 +178,7 @@ const Link: InertiaLink = defineComponent({
     })
 
     const method = computed(() =>
-      typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.href) ? props.href.method : (props.method.toLowerCase() as Method),
     )
     const as = computed(() => {
       if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
@@ -190,7 +191,7 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        typeof props.href === 'object' ? props.href.url : props.href,
+        isUrlMethodPair(props.href) ? props.href.url : props.href,
         props.data,
         props.queryStringArrayFormat,
       ),

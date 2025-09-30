@@ -105,6 +105,14 @@ export interface PageProps {
   [key: string]: unknown
 }
 
+export type ScrollProp = {
+  pageName: string
+  previousPage?: number | string
+  nextPage?: number | string
+  currentPage?: number | string
+  reset: boolean
+}
+
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
@@ -118,8 +126,10 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps?: string[]
+  prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
+  scrollProps?: Record<keyof PageProps, ScrollProp>
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -219,6 +229,13 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     details: {}
     result: void
   }
+  beforeUpdate: {
+    parameters: [Page]
+    details: {
+      page: Page
+    }
+    result: void
+  }
   navigate: {
     parameters: [Page]
     details: {
@@ -309,6 +326,7 @@ export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
   onBefore: GlobalEventCallback<'before', T>
+  onBeforeUpdate: GlobalEventCallback<'beforeUpdate', T>
   onStart: GlobalEventCallback<'start', T>
   onProgress: GlobalEventCallback<'progress', T>
   onFinish: GlobalEventCallback<'finish', T>
@@ -486,6 +504,92 @@ export type FormComponentSlotProps = FormComponentMethods & FormComponentState
 
 export type FormComponentRef = FormComponentSlotProps
 
+export interface UseInfiniteScrollOptions {
+  // Core data
+  getPropName: () => string
+  inReverseMode: () => boolean
+  shouldFetchNext: () => boolean
+  shouldFetchPrevious: () => boolean
+  shouldPreserveUrl: () => boolean
+
+  // Elements
+  getTriggerMargin: () => number
+  getStartElement: () => HTMLElement
+  getEndElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
+  getScrollableParent: () => HTMLElement | null
+
+  // Callbacks
+  onBeforePreviousRequest: () => void
+  onBeforeNextRequest: () => void
+  onCompletePreviousRequest: () => void
+  onCompleteNextRequest: () => void
+}
+
+export interface UseInfiniteScrollDataManager {
+  getLastLoadedPage: () => number | string | undefined
+  getPageName: () => string
+  getRequestCount: () => number
+  hasPrevious: () => boolean
+  hasNext: () => boolean
+  fetchNext: (reloadOptions?: ReloadOptions) => void
+  fetchPrevious: (reloadOptions?: ReloadOptions) => void
+  removeEventListener: () => void
+}
+
+export interface UseInfiniteScrollElementManager {
+  setupObservers: () => void
+  enableTriggers: () => void
+  disableTriggers: () => void
+  refreshTriggers: () => void
+  flushAll: () => void
+  processManuallyAddedElements: () => void
+  processServerLoadedElements: (loadedPage?: string | number | undefined) => void
+}
+
+export interface UseInfiniteScrollProps {
+  dataManager: UseInfiniteScrollDataManager
+  elementManager: UseInfiniteScrollElementManager
+}
+
+export interface InfiniteScrollSlotProps {
+  loading: boolean
+  loadingPrevious: boolean
+  loadingNext: boolean
+}
+
+export interface InfiniteScrollActionSlotProps {
+  loading: boolean
+  loadingPrevious: boolean
+  loadingNext: boolean
+  fetch: () => void
+  autoMode: boolean
+  manualMode: boolean
+  hasMore: boolean
+  hasPrevious: boolean
+  hasNext: boolean
+}
+
+export interface InfiniteScrollRef {
+  fetchNext: (reloadOptions?: ReloadOptions) => void
+  fetchPrevious: (reloadOptions?: ReloadOptions) => void
+  hasPrevious: () => boolean
+  hasNext: () => boolean
+}
+
+export interface InfiniteScrollComponentBaseProps {
+  data?: string
+  buffer?: number
+  as?: string
+  manual?: boolean
+  manualAfter?: number
+  preserveUrl?: boolean
+  reverse?: boolean
+  autoScroll?: boolean
+  onlyNext?: boolean
+  onlyPrevious?: boolean
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
@@ -496,6 +600,7 @@ declare global {
     'inertia:invalid': GlobalEvent<'invalid'>
     'inertia:exception': GlobalEvent<'exception'>
     'inertia:finish': GlobalEvent<'finish'>
+    'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
   }
 }
