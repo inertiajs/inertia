@@ -378,6 +378,54 @@ test.describe('preserve state', () => {
   })
 })
 
+test.describe('preserve url', () => {
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/links/preserve-url')
+  })
+
+  test('preserves the current URL', async ({ page }) => {
+    await expect(page.getByText('Foo is now default')).toBeVisible()
+    const initialUrl = page.url()
+
+    await page.getByRole('link', { name: '[URL] Preserve: true' }).click()
+    await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await expect(page).toHaveURL(initialUrl) // URL should remain the same
+  })
+
+  test('does not preserve the current URL', async ({ page }) => {
+    await expect(page.getByText('Foo is now default')).toBeVisible()
+    const initialUrl = page.url()
+
+    await page.getByRole('link', { name: '[URL] Preserve: false' }).click()
+    await expect(page).toHaveURL('/links/preserve-url-page-two')
+    await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await expect(page.url()).not.toBe(initialUrl) // URL should have changed
+  })
+
+  test('can load more items with preserveUrl via Link', async ({ page }) => {
+    await expect(page.getByText('Items loaded: 3')).toBeVisible()
+    await expect(page.locator('.has-next-page')).toHaveText('true')
+
+    await page.getByRole('link', { name: 'Load More' }).click()
+
+    // With mergeProps, the items.data array should be merged, giving us 6 total items
+    await expect(page.getByText('Items loaded: 6')).toBeVisible()
+    await expect(page).toHaveURL('/links/preserve-url')
+  })
+
+  test('can load more items with preserveUrl via router.visit', async ({ page }) => {
+    await expect(page.getByText('Items loaded: 3')).toBeVisible()
+    await expect(page.locator('.has-next-page')).toHaveText('true')
+
+    await page.getByRole('button', { name: 'Load More Router' }).click()
+
+    // With mergeProps, the items.data array should be merged, giving us 6 total items
+    await expect(page.getByText('Items loaded: 6')).toBeVisible()
+    await expect(page).toHaveURL('/links/preserve-url')
+  })
+})
+
 test.describe('preserve scroll', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/links/preserve-scroll-false')
