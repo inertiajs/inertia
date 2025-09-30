@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "build:all": "pnpm -r --filter './packages/*' build",
-    "dev": "pnpm -r --parallel --filter './packages/*' dev",
+    "dev": "pnpx concurrently -c \"#facc15,#f472b6,#60a5fa,#a3e635\" \"pnpm dev:core\" \"pnpm dev:vue\" \"pnpm dev:react\" \"pnpm dev:svelte\" --names=core,vue,react,svelte",
+    "dev:core": "cd packages/core && pnpm run dev",
+    "dev:vue": "cd packages/vue3 && pnpm run dev",
+    "dev:react": "cd packages/react && pnpm run dev",
+    "dev:svelte": "cd packages/svelte && pnpm run dev",
     "dev:test-app": "pnpx concurrently -c \"#93c5fd,#c4b5fd,#fb7185\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
     "dev:test-app:react": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
     "dev:test-app:svelte": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
