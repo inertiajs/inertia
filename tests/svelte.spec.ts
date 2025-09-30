@@ -12,6 +12,7 @@ test('props and page store are in sync', async ({ page }) => {
 
   await expect(page.getByText('foo prop is default')).toBeVisible()
   await expect(page.getByText('$page.props.foo is default')).toBeVisible()
+  await expect(page.getByText('pageProps.foo is default')).toBeVisible()
   await expect(consoleMessages.messages).toHaveLength(7)
   await expect(consoleMessages.messages[0]).toBe('[script] foo prop is default')
   await expect(consoleMessages.messages[1]).toBe('[script] $page.props.foo is default')
@@ -53,8 +54,11 @@ test('props and page store are in sync', async ({ page }) => {
   await expect(await page.locator('#input').inputValue()).toEqual('baz')
 
   await page.getByRole('link', { name: 'Home' }).click()
-  consoleMessages.messages = []
+  await page.waitForURL('/')
+
   await page.goBack()
+  await page.waitForURL('/svelte/props-and-page-store')
+  consoleMessages.messages = []
 
   await expect(page.getByText('foo prop is baz')).toBeVisible()
   await expect(page.getByText('$page.props.foo is baz')).toBeVisible()

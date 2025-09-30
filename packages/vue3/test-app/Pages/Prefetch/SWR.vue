@@ -1,8 +1,9 @@
 <script lang="ts">
 import Layout from '@/Layouts/SWR.vue'
+import type { Component } from 'vue'
 
 export default {
-  layout: (h, page) => h(Layout, [page]),
+  layout: (h: Function, page: Component) => h(Layout, [page]),
 }
 </script>
 

@@ -1,13 +1,13 @@
 name: Bug Report - Vue 3
-description: "Submit a Vue 3 related issue."
-labels: ["vue 3"]
+description: 'Submit a Vue 3 related issue.'
+labels: ['vue 3']
 body:
   - type: markdown
     attributes:
-      value: "Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports."
+      value: 'Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.'
   - type: input
     attributes:
-      label: "@inertiajs/vue3 Version"
+      label: '@inertiajs/vue3 Version'
       description: Provide the version of `@inertiajs/vue3` you are using.
       placeholder: 2.0.0
     validations:

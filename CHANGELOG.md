@@ -7,9 +7,268 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.0.14...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.3...master)
 
 - Nothing yet
+
+## [v2.2.3](https://github.com/inertiajs/inertia/compare/v2.2.2...v2.2.3) - 2025-09-29
+
+### What's Changed
+
+* Preserve `ScrollProp` on Partial Reloads by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2597
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.2...v2.2.3
+
+## [v2.2.2](https://github.com/inertiajs/inertia/compare/v2.2.1...v2.2.2) - 2025-09-28
+
+### What's Changed
+
+* Reset `ScrollProp` when requested by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2595
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.1...v2.2.2
+
+## [v2.2.1](https://github.com/inertiajs/inertia/compare/v2.2.0...v2.2.1) - 2025-09-28
+
+### What's Changed
+
+* Don't restore remembered state after a refresh by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2591
+* Remember Infinite Scroll state by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2592
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.0...v2.2.1
+
+## [v2.2.0](https://github.com/inertiajs/inertia/compare/v2.1.11...v2.2.0) - 2025-09-26
+
+### What's Changed
+
+* Support for merging nested prop paths by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2561
+* Client-side visit helpers to update props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2589
+* Introduction of the `<InfiniteScroll>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2580
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.11...v2.2.0
+
+## [v2.1.11](https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11) - 2025-09-24
+
+### What's Changed
+
+* Fix flaky tests in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2582
+* Bump Playwright by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2585
+* Progress indicator API by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2581
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11
+
+## [v2.1.10](https://github.com/inertiajs/inertia/compare/v2.1.9...v2.1.10) - 2025-09-22
+
+### What's Changed
+
+* Fix PNPM publishing by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2578
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.9...v2.1.10
+
+## [v2.1.9](https://github.com/inertiajs/inertia/compare/v2.1.8...v2.1.9) - 2025-09-22
+
+### What's Changed
+
+* Fix PNPM build by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2577
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.8...v2.1.9
+
+## [v2.1.8](https://github.com/inertiajs/inertia/compare/v2.1.7...v2.1.8) - 2025-09-22
+
+### What's Changed
+
+* Publish packages in CI by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2575
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.7...v2.1.8
+
+## [v2.1.7](https://github.com/inertiajs/inertia/compare/v2.1.6...v2.1.7) - 2025-09-18
+
+### What's Changed
+
+* Bump axios from 1.11.0 to 1.12.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2568
+* Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2571
+* TypeScript upgrade by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2573
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.6...v2.1.7
+
+## [v2.1.6](https://github.com/inertiajs/inertia/compare/v2.1.5...v2.1.6) - 2025-09-12
+
+### What's Changed
+
+* Invalidate prefetch cache when page is received from a network request by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2567
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.5...v2.1.6
+
+## [v2.1.5](https://github.com/inertiajs/inertia/compare/v2.1.4...v2.1.5) - 2025-09-05
+
+### What's Changed
+
+* Fix race condition when combining Deferred Props with an instant Partial Reload on mount by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2562
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.4...v2.1.5
+
+## [v2.1.4](https://github.com/inertiajs/inertia/compare/v2.1.3...v2.1.4) - 2025-09-03
+
+### What's Changed
+
+* Replace html-escape with built-in function on Svelte package by [@kresnasatya](https://github.com/kresnasatya) in https://github.com/inertiajs/inertia/pull/2535
+* Update dirty state after DOM changes (React only) by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2558
+* Prevent errors caused by null href value by [@fritz-c](https://github.com/fritz-c) in https://github.com/inertiajs/inertia/pull/2550
+* Remove data from the dependency array of setDefaults by [@jasonlbeggs](https://github.com/jasonlbeggs) in https://github.com/inertiajs/inertia/pull/2554
+
+### New Contributors
+
+* [@fritz-c](https://github.com/fritz-c) made their first contribution in https://github.com/inertiajs/inertia/pull/2550
+* [@jasonlbeggs](https://github.com/jasonlbeggs) made their first contribution in https://github.com/inertiajs/inertia/pull/2554
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.3...v2.1.4
+
+## [v2.1.3](https://github.com/inertiajs/inertia/compare/v2.1.2...v2.1.3) - 2025-08-27
+
+### What's Changed
+
+* Code formatting with Prettier by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2515
+* Add EditorConfig and fix some whitespace issues by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2516
+* Fix for nullable object types in `useForm` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2528
+* Fix for Form Component in Svelte when resetting use input/button by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2525
+* Improve Link component `as` prop by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2524
+* [v2.x] fix: type error by changing page props type to `any` by [@peaklabs-dev](https://github.com/peaklabs-dev) in https://github.com/inertiajs/inertia/pull/2520
+* Revert to back to Lodash to retain ES2020 compatibility by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2527
+* Verify ES2020 compatibility in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2530
+* [Vue] Fixing action attribute on Form Component when using Wayfinder by [@nicolagianelli](https://github.com/nicolagianelli) in https://github.com/inertiajs/inertia/pull/2532
+* Make package.json structure in Svelte package Consistent as Vue and React by [@kresnasatya](https://github.com/kresnasatya) in https://github.com/inertiajs/inertia/pull/2529
+* Remove Svelte 5-next version constraint by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2533
+* improve typescript configuration by [@sudo-barun](https://github.com/sudo-barun) in https://github.com/inertiajs/inertia/pull/2470
+* Format JSON files with Prettier by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2534
+* Fix warning about `inert` attribute in React < 19 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2536
+* Fix keyboard activation when using `prefetch: 'click'` by [@pedroborges](https://github.com/pedroborges) in https://github.com/inertiajs/inertia/pull/2538
+* Fix `useForm` to respect manual `setDefaults()` calls in `onSuccess` and unify timing across adapters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2539
+* Run Playwright in parallel in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2540
+* Fix Coding Standards workflow by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2547
+* bumpup axios to fix CVE-2025-7783 by [@vallerydelexy](https://github.com/vallerydelexy) in https://github.com/inertiajs/inertia/pull/2546
+* Bump `@sveltejs/kit` version by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2548
+
+### New Contributors
+
+* [@peaklabs-dev](https://github.com/peaklabs-dev) made their first contribution in https://github.com/inertiajs/inertia/pull/2520
+* [@nicolagianelli](https://github.com/nicolagianelli) made their first contribution in https://github.com/inertiajs/inertia/pull/2532
+* [@kresnasatya](https://github.com/kresnasatya) made their first contribution in https://github.com/inertiajs/inertia/pull/2529
+* [@vallerydelexy](https://github.com/vallerydelexy) made their first contribution in https://github.com/inertiajs/inertia/pull/2546
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.2...v2.1.3
+
+## [v2.1.2](https://github.com/inertiajs/inertia/compare/v2.1.1...v2.1.2) - 2025-08-15
+
+### What's Changed
+
+* Fix for manipulating form after redirect in `onSubmitComplete` by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2510
+* Support for passing Wayfinder objects to router methods by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2497
+* Tag-based cache invalidation for prefetch requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2484
+* Add `resetOnError`, `resetOnSuccess`, `setDefaultsOnSuccess` to Form component by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2514
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.1...v2.1.2
+
+## [v2.1.1](https://github.com/inertiajs/inertia/compare/v2.1.0...v2.1.1) - 2025-08-14
+
+### What's Changed
+
+* Improve `Link` component types and support for prefetch events by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2464
+* allow passing partial errors object to `setError()` by [@sudo-barun](https://github.com/sudo-barun) in https://github.com/inertiajs/inertia/pull/2461
+* Add missing generic type support to PendingVisit and VisitHelperOptions by [@HichemTab-tech](https://github.com/HichemTab-tech) in https://github.com/inertiajs/inertia/pull/2454
+* Revamp useForm's generic types across adaptors by [@Spice-King](https://github.com/Spice-King) in https://github.com/inertiajs/inertia/pull/2335
+* TypeScript improvements for `Link` component and Client Side Visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2472
+* Further TS improvements for `useForm` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2475
+* Improve consistency in `useForm` across adapters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2482
+* Improve TypeScript support for Client Side Visit `props` callback by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2483
+* TS improvements to Svelte's `<Form>` and `useForm()` implementations by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2489
+* Typescript Improvements by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2468
+* Test apps in TypeScript by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2469
+* Fix empty action in `<Form>` component when the current URL has more than one segment by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2501
+* Support uppercase method in `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2502
+* Add `Form` component `disableWhileProcessing` prop by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2504
+* Reset form fields by name in Form components by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2499
+* Add `onSubmitComplete` prop to `Form` component by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2503
+* Remove failed prefetch requests from in-flight array by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2500
+* Add `defaults()` method to Form component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2507
+* Release script by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2508
+* Only `reset()` and `defaults()` in `onSubmitComplete` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2509
+
+### New Contributors
+
+* [@sudo-barun](https://github.com/sudo-barun) made their first contribution in https://github.com/inertiajs/inertia/pull/2461
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.0...v2.1.1
+
+## [v2.1.0](https://github.com/inertiajs/inertia/compare/v2.0.17...v2.1.0) - 2025-08-13
+
+### What's Changed
+
+* Support for passing custom component to `as` prop of `Link` component. by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2443
+* Use `nodemon` to trigger new files and deleted files in test apps by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2442
+* Use ReactNode type for children props by [@chack1172](https://github.com/chack1172) in https://github.com/inertiajs/inertia/pull/2385
+* Allow function as children component in react Deferred and WhenVisible by [@chack1172](https://github.com/chack1172) in https://github.com/inertiajs/inertia/pull/2386
+* Improve test that waits for scroll position restoration by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2473
+* Introduction of the `Form` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2474
+* Improve `children` prop of `<Form>` Component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2487
+* Add Form component ref support by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2496
+* Make Svelte's <Deferred> not crash in an SSR environment by [@dkulchenko](https://github.com/dkulchenko) in https://github.com/inertiajs/inertia/pull/2396
+* Fix core: Queue processing when an item fails by [@pintend](https://github.com/pintend) in https://github.com/inertiajs/inertia/pull/2467
+* Migrate playgrounds to Tailwind 4 by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2369
+
+### New Contributors
+
+* [@dkulchenko](https://github.com/dkulchenko) made their first contribution in https://github.com/inertiajs/inertia/pull/2396
+* [@pintend](https://github.com/pintend) made their first contribution in https://github.com/inertiajs/inertia/pull/2467
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.17...v2.1.0
+
+## [v2.0.17](https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17) - 2025-07-18
+
+### What's Changed
+
+* Bump multer from 2.0.1 to 2.0.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2447
+* Bump vite from 5.4.12 to 5.4.19 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2450
+* Bump esbuild from 0.21.5 to 0.25.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2451
+* Explicit string coercion in `Head` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2453
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.16...v2.0.17
+
+## [v2.0.16](https://github.com/inertiajs/inertia/compare/v2.0.15...v2.0.16) - 2025-07-18
+
+### What's Changed
+
+* Make errorBag parameter optional by [@joelstein](https://github.com/joelstein) in https://github.com/inertiajs/inertia/pull/2445
+
+### New Contributors
+
+* [@joelstein](https://github.com/joelstein) made their first contribution in https://github.com/inertiajs/inertia/pull/2445
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.15...v2.0.16
+
+## [v2.0.15](https://github.com/inertiajs/inertia/compare/v2.0.14...v2.0.15) - 2025-07-17
+
+### What's Changed
+
+* Improve GitHub issue templates by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2418
+* Escape the attribute values that are passed into the `Head` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2403
+* Introduce single method to reset form state and clear errors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2414
+* Use `CacheForOption` type in React `Link` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2426
+* Improve query string merging in `mergeDataIntoQueryString()`  by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2417
+* Improve scrolling when using anchor hash by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2428
+* Cancel sync request on popstate event by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2429
+* Support for path traversal by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2413
+* Add event callbacks to `ClientSideVisitOptions` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2405
+* Pass parameters to `onFinish` and `onSuccess` callbacks on Client Side Visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2433
+* Prevent JS builds and test apps from being minified by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2424
+* Migrate to pnpm by [@jrmajor](https://github.com/jrmajor) in https://github.com/inertiajs/inertia/pull/2276
+* Fix single-use prefetching by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2440
+* Change defaults values order in onSuccess callback of useForm by [@yilanboy](https://github.com/yilanboy) in https://github.com/inertiajs/inertia/pull/2437
+* Improve reactivity of Link components by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2441
+
+### New Contributors
+
+* [@yilanboy](https://github.com/yilanboy) made their first contribution in https://github.com/inertiajs/inertia/pull/2437
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.0.14...v2.0.15
 
 ## [v2.0.14](https://github.com/inertiajs/inertia/compare/v2.0.13...v2.0.14) - 2025-06-26
 

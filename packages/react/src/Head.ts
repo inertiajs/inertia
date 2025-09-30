@@ -1,4 +1,4 @@
-import { escape } from 'es-toolkit'
+import { escape } from 'lodash-es'
 import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
@@ -49,7 +49,7 @@ const Head: InertiaHead = function ({ children, title }) {
       if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
       }
-      const value = node.props[name]
+      const value = String(node.props[name])
       if (value === '') {
         return carry + ` ${name}`
       } else {

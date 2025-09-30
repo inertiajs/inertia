@@ -7,39 +7,95 @@ declare module 'axios' {
   }
 }
 
-export type Errors = Record<string, string>
+export type DefaultInertiaConfig = {
+  errorValueType: string
+}
+/**
+ * Designed to allow overriding of some core types using TypeScript
+ * interface declaration merging.
+ *
+ * @see {@link DefaultInertiaConfig} for keys to override
+ * @example
+ * ```ts
+ * declare module '@inertiajs/core' {
+ *   export interface InertiaConfig {
+ *     errorValueType: string[]
+ *   }
+ * }
+ * ```
+ */
+export interface InertiaConfig {}
+export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key extends keyof InertiaConfig
+  ? InertiaConfig[Key]
+  : DefaultInertiaConfig[Key]
+export type ErrorValue = InertiaConfigFor<'errorValueType'>
+
+export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
 
+export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | null | undefined
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
-  | Blob
-  | FormDataEntryValue
-  | Date
-  | boolean
-  | number
-  | null
-  | undefined
+  | FormDataConvertibleValue
 
-export type FormDataKeys<T extends Record<any, any>> = T extends T
-  ? keyof T extends infer Key extends Extract<keyof T, string>
-    ? Key extends Key
-      ? T[Key] extends Record<any, any>
-        ? `${Key}.${FormDataKeys<T[Key]>}` | Key
-        : Key
-      : never
+export type FormDataType<T extends object> = {
+  [K in keyof T]: T[K] extends infer U
+    ? U extends FormDataConvertibleValue
+      ? U
+      : U extends (...args: unknown[]) => unknown
+        ? never
+        : U extends object | Array<unknown>
+          ? FormDataType<U>
+          : never
     : never
-  : never
+}
 
-export type FormDataValues<T extends Record<any, any>, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
-  ? P extends keyof T
-    ? Rest extends FormDataKeys<T[P]>
-      ? FormDataValues<T[P], Rest>
+export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
+  ? never
+  : T extends Array<unknown>
+    ? number extends T['length']
+      ? `${number}` | `${number}.${FormDataKeys<T[number]>}`
+      :
+          | Extract<keyof T, `${number}`>
+          | {
+              [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
+            }[Extract<keyof T, `${number}`>]
+    : string extends keyof T
+      ? string
+      :
+          | Extract<keyof T, string>
+          | {
+              [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
+            }[Extract<keyof T, string>]
+
+type PartialFormDataErrors<T> = {
+  [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
+}
+
+export type FormDataErrors<T> = PartialFormDataErrors<T> & {
+  [K in keyof PartialFormDataErrors<T>]: NonNullable<PartialFormDataErrors<T>[K]>
+}
+
+export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}.${infer Rest}`
+  ? T extends unknown[]
+    ? P extends `${infer I extends number}`
+      ? Rest extends FormDataKeys<T[I]>
+        ? FormDataValues<T[I], Rest>
+        : never
       : never
-    : never
+    : P extends keyof T
+      ? Rest extends FormDataKeys<T[P]>
+        ? FormDataValues<T[P], Rest>
+        : never
+      : never
   : K extends keyof T
     ? T[K]
-    : never
+    : T extends unknown[]
+      ? T[K & number]
+      : never
+
+export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
@@ -47,6 +103,14 @@ export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
 export interface PageProps {
   [key: string]: unknown
+}
+
+export type ScrollProp = {
+  pageName: string
+  previousPage?: number | string
+  nextPage?: number | string
+  currentPage?: number | string
+  reset: boolean
 }
 
 export interface Page<SharedProps extends PageProps = PageProps> {
@@ -62,8 +126,10 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   encryptHistory: boolean
   deferredProps?: Record<string, VisitOptions['only']>
   mergeProps?: string[]
+  prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
+  scrollProps?: Record<keyof PageProps, ScrollProp>
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -74,17 +140,17 @@ export type ScrollRegion = {
   left: number
 }
 
-export interface ClientSideVisitOptions {
+export interface ClientSideVisitOptions<TProps = Page['props']> {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: Page['props']) => Page['props']) | Page['props']
+  props?: ((props: TProps) => PageProps) | PageProps
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
-  errorBag: string | null
+  errorBag?: string | null
   onError?: (errors: Errors) => void
-  onFinish?: (visit: ClientSideVisitOptions) => void
+  onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onSuccess?: (page: Page) => void
 }
 
@@ -126,20 +192,21 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  invalidateCacheTags: string | string[]
 }
 
-export type GlobalEventsMap = {
+export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
   before: {
-    parameters: [PendingVisit]
+    parameters: [PendingVisit<T>]
     details: {
-      visit: PendingVisit
+      visit: PendingVisit<T>
     }
     result: boolean | void
   }
   start: {
-    parameters: [PendingVisit]
+    parameters: [PendingVisit<T>]
     details: {
-      visit: PendingVisit
+      visit: PendingVisit<T>
     }
     result: void
   }
@@ -151,15 +218,22 @@ export type GlobalEventsMap = {
     result: void
   }
   finish: {
-    parameters: [ActiveVisit]
+    parameters: [ActiveVisit<T>]
     details: {
-      visit: ActiveVisit
+      visit: ActiveVisit<T>
     }
     result: void
   }
   cancel: {
     parameters: []
     details: {}
+    result: void
+  }
+  beforeUpdate: {
+    parameters: [Page]
+    details: {
+      page: Page
+    }
     result: void
   }
   navigate: {
@@ -198,18 +272,18 @@ export type GlobalEventsMap = {
     result: boolean | void
   }
   prefetched: {
-    parameters: [AxiosResponse, ActiveVisit]
+    parameters: [AxiosResponse, ActiveVisit<T>]
     details: {
       response: AxiosResponse
       fetchedAt: number
-      visit: ActiveVisit
+      visit: ActiveVisit<T>
     }
     result: void
   }
   prefetching: {
-    parameters: [ActiveVisit]
+    parameters: [ActiveVisit<T>]
     details: {
-      visit: ActiveVisit
+      visit: ActiveVisit<T>
     }
     result: void
   }
@@ -217,40 +291,53 @@ export type GlobalEventsMap = {
 
 export type PageEvent = 'newComponent' | 'firstLoad'
 
-export type GlobalEventNames = keyof GlobalEventsMap
+export type GlobalEventNames<T extends RequestPayload = RequestPayload> = keyof GlobalEventsMap<T>
 
-export type GlobalEvent<TEventName extends GlobalEventNames> = CustomEvent<GlobalEventDetails<TEventName>>
+export type GlobalEvent<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = CustomEvent<GlobalEventDetails<TEventName, T>>
 
-export type GlobalEventParameters<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['parameters']
+export type GlobalEventParameters<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['parameters']
 
-export type GlobalEventResult<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['result']
+export type GlobalEventResult<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['result']
 
-export type GlobalEventDetails<TEventName extends GlobalEventNames> = GlobalEventsMap[TEventName]['details']
+export type GlobalEventDetails<
+  TEventName extends GlobalEventNames<T>,
+  T extends RequestPayload = RequestPayload,
+> = GlobalEventsMap<T>[TEventName]['details']
 
-export type GlobalEventTrigger<TEventName extends GlobalEventNames> = (
-  ...params: GlobalEventParameters<TEventName>
-) => GlobalEventResult<TEventName>
+export type GlobalEventTrigger<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = (
+  ...params: GlobalEventParameters<TEventName, T>
+) => GlobalEventResult<TEventName, T>
 
-export type GlobalEventCallback<TEventName extends GlobalEventNames> = (
-  ...params: GlobalEventParameters<TEventName>
-) => GlobalEventResult<TEventName>
+export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extends RequestPayload = RequestPayload> = (
+  ...params: GlobalEventParameters<TEventName, T>
+) => GlobalEventResult<TEventName, T>
 
 export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 
-export type VisitCallbacks = {
+export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
-  onBefore: GlobalEventCallback<'before'>
-  onStart: GlobalEventCallback<'start'>
-  onProgress: GlobalEventCallback<'progress'>
-  onFinish: GlobalEventCallback<'finish'>
-  onCancel: GlobalEventCallback<'cancel'>
-  onSuccess: GlobalEventCallback<'success'>
-  onError: GlobalEventCallback<'error'>
-  onPrefetched: GlobalEventCallback<'prefetched'>
-  onPrefetching: GlobalEventCallback<'prefetching'>
+  onBefore: GlobalEventCallback<'before', T>
+  onBeforeUpdate: GlobalEventCallback<'beforeUpdate', T>
+  onStart: GlobalEventCallback<'start', T>
+  onProgress: GlobalEventCallback<'progress', T>
+  onFinish: GlobalEventCallback<'finish', T>
+  onCancel: GlobalEventCallback<'cancel', T>
+  onSuccess: GlobalEventCallback<'success', T>
+  onError: GlobalEventCallback<'error', T>
+  onPrefetched: GlobalEventCallback<'prefetched', T>
+  onPrefetching: GlobalEventCallback<'prefetching', T>
 }
 
-export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks>
+export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks<T>>
 
 export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
   VisitOptions<T>,
@@ -277,12 +364,13 @@ export type PendingVisitOptions = {
   interrupted: boolean
 }
 
-export type PendingVisit = Visit & PendingVisitOptions
+export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
-export type ActiveVisit = PendingVisit & Required<VisitOptions>
+export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions<T>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
+  onPrefetchError?: (error: Error) => void
 }
 
 export type VisitId = unknown
@@ -296,7 +384,33 @@ export type CacheForOption = number | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
+  cacheTags: string | string[]
 }
+
+export interface LinkComponentBaseProps
+  extends Partial<
+    Pick<
+      Visit<RequestPayload>,
+      | 'data'
+      | 'method'
+      | 'replace'
+      | 'preserveScroll'
+      | 'preserveState'
+      | 'preserveUrl'
+      | 'only'
+      | 'except'
+      | 'headers'
+      | 'queryStringArrayFormat'
+      | 'async'
+    > &
+      Omit<VisitCallbacks, 'onCancelToken'> & {
+        href: string | UrlMethodPair
+        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
+        prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+        cacheFor: CacheForOption | CacheForOption[]
+        cacheTags: string | string[]
+      }
+  > {}
 
 type PrefetchObject = {
   params: ActiveVisit
@@ -318,6 +432,7 @@ export type PrefetchedResponse = PrefetchObject & {
   timestamp: number
   singleUse: boolean
   inFlight: false
+  tags: string[]
 }
 
 export type PrefetchRemovalTimer = {
@@ -341,6 +456,140 @@ export type ProgressSettings = {
   color: string
 }
 
+export type UrlMethodPair = { url: string; method: Method }
+
+export type FormComponentOptions = Pick<
+  VisitOptions,
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+>
+
+export type FormComponentProps = Partial<
+  Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress' | 'invalidateCacheTags'> &
+    Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
+> & {
+  method?: Method | Uppercase<Method>
+  action?: string | UrlMethodPair
+  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  options?: FormComponentOptions
+  onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
+  disableWhileProcessing?: boolean
+  resetOnSuccess?: boolean | string[]
+  resetOnError?: boolean | string[]
+  setDefaultsOnSuccess?: boolean
+}
+
+export type FormComponentMethods = {
+  clearErrors: (...fields: string[]) => void
+  resetAndClearErrors: (...fields: string[]) => void
+  setError(field: string, value: string): void
+  setError(errors: Record<string, string>): void
+  reset: (...fields: string[]) => void
+  submit: () => void
+  defaults: () => void
+}
+
+export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
+
+export type FormComponentState = {
+  errors: Record<string, string>
+  hasErrors: boolean
+  processing: boolean
+  progress: Progress | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  isDirty: boolean
+}
+
+export type FormComponentSlotProps = FormComponentMethods & FormComponentState
+
+export type FormComponentRef = FormComponentSlotProps
+
+export interface UseInfiniteScrollOptions {
+  // Core data
+  getPropName: () => string
+  inReverseMode: () => boolean
+  shouldFetchNext: () => boolean
+  shouldFetchPrevious: () => boolean
+  shouldPreserveUrl: () => boolean
+
+  // Elements
+  getTriggerMargin: () => number
+  getStartElement: () => HTMLElement
+  getEndElement: () => HTMLElement
+  getItemsElement: () => HTMLElement
+  getScrollableParent: () => HTMLElement | null
+
+  // Callbacks
+  onBeforePreviousRequest: () => void
+  onBeforeNextRequest: () => void
+  onCompletePreviousRequest: () => void
+  onCompleteNextRequest: () => void
+}
+
+export interface UseInfiniteScrollDataManager {
+  getLastLoadedPage: () => number | string | undefined
+  getPageName: () => string
+  getRequestCount: () => number
+  hasPrevious: () => boolean
+  hasNext: () => boolean
+  fetchNext: (reloadOptions?: ReloadOptions) => void
+  fetchPrevious: (reloadOptions?: ReloadOptions) => void
+  removeEventListener: () => void
+}
+
+export interface UseInfiniteScrollElementManager {
+  setupObservers: () => void
+  enableTriggers: () => void
+  disableTriggers: () => void
+  refreshTriggers: () => void
+  flushAll: () => void
+  processManuallyAddedElements: () => void
+  processServerLoadedElements: (loadedPage?: string | number | undefined) => void
+}
+
+export interface UseInfiniteScrollProps {
+  dataManager: UseInfiniteScrollDataManager
+  elementManager: UseInfiniteScrollElementManager
+}
+
+export interface InfiniteScrollSlotProps {
+  loading: boolean
+  loadingPrevious: boolean
+  loadingNext: boolean
+}
+
+export interface InfiniteScrollActionSlotProps {
+  loading: boolean
+  loadingPrevious: boolean
+  loadingNext: boolean
+  fetch: () => void
+  autoMode: boolean
+  manualMode: boolean
+  hasMore: boolean
+  hasPrevious: boolean
+  hasNext: boolean
+}
+
+export interface InfiniteScrollRef {
+  fetchNext: (reloadOptions?: ReloadOptions) => void
+  fetchPrevious: (reloadOptions?: ReloadOptions) => void
+  hasPrevious: () => boolean
+  hasNext: () => boolean
+}
+
+export interface InfiniteScrollComponentBaseProps {
+  data?: string
+  buffer?: number
+  as?: string
+  manual?: boolean
+  manualAfter?: number
+  preserveUrl?: boolean
+  reverse?: boolean
+  autoScroll?: boolean
+  onlyNext?: boolean
+  onlyPrevious?: boolean
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
@@ -351,6 +600,7 @@ declare global {
     'inertia:invalid': GlobalEvent<'invalid'>
     'inertia:exception': GlobalEvent<'exception'>
     'inertia:finish': GlobalEvent<'finish'>
+    'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
   }
 }

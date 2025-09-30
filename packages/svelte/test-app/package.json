@@ -2,16 +2,17 @@
   "type": "module",
   "scripts": {
     "build": "vite build .",
-    "dev": "vite build . --watch",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../svelte/dist --ext js,ts,svelte,html,json --ignore dist/ --exec 'vite build .'",
+    "type-check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.4",
+    "nodemon": "^3.0.0",
     "svelte": "^4.2.14",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.8"
+    "svelte-check": "^4.1.0",
+    "typescript": "^5.9.2",
+    "vite": "^5.4.20"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

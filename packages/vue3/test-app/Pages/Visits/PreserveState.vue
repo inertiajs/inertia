@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
 import { getCurrentInstance, onMounted } from 'vue'
 
@@ -10,7 +11,7 @@ defineProps({
 })
 
 onMounted(() => {
-  window._inertia_page_key = getCurrentInstance().uid
+  window._inertia_page_key = getCurrentInstance()?.uid
 })
 
 const preserve = () => {
@@ -34,7 +35,7 @@ const preserveCallback = () => {
       foo: 'callback-bar',
     },
     {
-      preserveState: (page) => {
+      preserveState: (page: Page) => {
         alert(page)
 
         return true
@@ -50,7 +51,7 @@ const preserveCallbackFalse = () => {
       foo: 'callback-baz',
     },
     {
-      preserveState: (page) => {
+      preserveState: (page: Page) => {
         alert(page)
 
         return false

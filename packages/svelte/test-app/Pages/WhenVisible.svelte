@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { WhenVisible } from '@inertiajs/svelte'
 
   export let count = 0
@@ -43,14 +43,17 @@
 </div>
 
 <div style="margin-top: 6000px">
-  <WhenVisible always params={{
-    data: {
+  <WhenVisible
+    always
+    params={{
+      data: {
         count,
-    },
-    onSuccess() {
+      },
+      onSuccess() {
         count += 1
-    }
-  }}>
+      },
+    }}
+  >
     <svelte:fragment slot="fallback">
       <div>Loading fifth one...</div>
     </svelte:fragment>

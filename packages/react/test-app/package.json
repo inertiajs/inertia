@@ -1,9 +1,15 @@
 {
   "scripts": {
     "build": "vite build .",
-    "dev": "vite build . --watch"
+    "dev": "nodemon --watch . --watch ../../core/dist --watch ../../react/dist --ext js,tsx,html,json --ignore dist/ --exec 'vite build .'",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "nodemon": "^3.0.0",
+    "typescript": "^5.9.2",
     "vite": "^6.3.0"
   },
   "dependencies": {

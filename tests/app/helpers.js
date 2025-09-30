@@ -16,9 +16,14 @@ module.exports = {
         .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
         .join(''),
       props: {},
+      // TODO: url should be req.originalUrl as that includes the query string
       url: req.path,
       version: null,
       ...data,
+    }
+
+    if (data.component.startsWith('InfiniteScroll')) {
+      data.url = req.originalUrl
     }
 
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''

@@ -1,43 +1,22 @@
 import {
-  CacheForOption,
-  FormDataConvertible,
+  ActiveVisit,
+  isUrlMethodPair,
+  LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
-  Progress,
   router,
   shouldIntercept,
+  shouldNavigate,
 } from '@inertiajs/core'
-import { createElement, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
 const noop = () => undefined
 
-interface BaseInertiaLinkProps {
-  as?: string
-  data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
+interface BaseInertiaLinkProps extends LinkComponentBaseProps {
+  as?: ElementType
   onClick?: (event: React.MouseEvent<Element>) => void
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (event: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (event: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
-  queryStringArrayFormat?: 'indices' | 'brackets'
-  async?: boolean
-  cacheFor?: CacheForOption | CacheForOption[]
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -50,10 +29,11 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       children,
       as = 'a',
       data = {},
-      href,
+      href = '',
       method = 'get',
       preserveScroll = false,
       preserveState = null,
+      preserveUrl = false,
       replace = false,
       only = [],
       except = [],
@@ -69,8 +49,11 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onCancel = noop,
       onSuccess = noop,
       onError = noop,
+      onPrefetching = noop,
+      onPrefetched = noop,
       prefetch = false,
       cacheFor = 0,
+      cacheTags = [],
       ...props
     },
     ref,
@@ -78,50 +61,63 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(null)
 
-    as = as.toLowerCase()
-    method = typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
-    const [_href, _data] = mergeDataIntoQueryString(
-      method,
-      typeof href === 'object' ? href.url : href || '',
-      data,
-      queryStringArrayFormat,
+    const _method = useMemo(() => {
+      return isUrlMethodPair(href) ? href.method : (method.toLowerCase() as Method)
+    }, [href, method])
+
+    const _as = useMemo(() => {
+      if (typeof as !== 'string' || as.toLowerCase() !== 'a') {
+        // Custom component or element
+        return as
+      }
+
+      return _method !== 'get' ? 'button' : as.toLowerCase()
+    }, [as, _method])
+
+    const mergeDataArray = useMemo(
+      () => mergeDataIntoQueryString(_method, isUrlMethodPair(href) ? href.url : href, data, queryStringArrayFormat),
+      [href, _method, data, queryStringArrayFormat],
     )
-    const url = _href
-    data = _data
 
-    const baseParams = {
-      data,
-      method,
-      preserveScroll,
-      preserveState: preserveState ?? method !== 'get',
-      replace,
-      only,
-      except,
-      headers,
-      async,
-    }
+    const url = useMemo(() => mergeDataArray[0], [mergeDataArray])
+    const _data = useMemo(() => mergeDataArray[1], [mergeDataArray])
 
-    const visitParams = {
-      ...baseParams,
-      onCancelToken,
-      onBefore,
-      onStart(event) {
-        setInFlightCount((count) => count + 1)
-        onStart(event)
-      },
-      onProgress,
-      onFinish(event) {
-        setInFlightCount((count) => count - 1)
-        onFinish(event)
-      },
-      onCancel,
-      onSuccess,
-      onError,
-    }
+    const baseParams = useMemo(
+      () => ({
+        data: _data,
+        method: _method,
+        preserveScroll,
+        preserveState: preserveState ?? _method !== 'get',
+        preserveUrl,
+        replace,
+        only,
+        except,
+        headers,
+        async,
+      }),
+      [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async],
+    )
 
-    const doPrefetch = () => {
-      router.prefetch(url, baseParams, { cacheFor: cacheForValue })
-    }
+    const visitParams = useMemo(
+      () => ({
+        ...baseParams,
+        onCancelToken,
+        onBefore,
+        onStart(visit: PendingVisit) {
+          setInFlightCount((count) => count + 1)
+          onStart(visit)
+        },
+        onProgress,
+        onFinish(visit: ActiveVisit) {
+          setInFlightCount((count) => count - 1)
+          onFinish(visit)
+        },
+        onCancel,
+        onSuccess,
+        onError,
+      }),
+      [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
+    )
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
       () => {
@@ -157,6 +153,20 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       // Otherwise, default to 30 seconds
       return 30_000
     }, [cacheFor, prefetchModes])
+
+    const doPrefetch = useMemo(() => {
+      return () => {
+        router.prefetch(
+          url,
+          {
+            ...baseParams,
+            onPrefetching,
+            onPrefetched,
+          },
+          { cacheFor: cacheForValue, cacheTags },
+        )
+      }
+    }, [url, baseParams, onPrefetching, onPrefetched, cacheForValue, cacheTags])
 
     useEffect(() => {
       return () => {
@@ -201,34 +211,49 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
           doPrefetch()
         }
       },
+      onKeyDown: (event) => {
+        if (shouldIntercept(event) && shouldNavigate(event)) {
+          event.preventDefault()
+          doPrefetch()
+        }
+      },
       onMouseUp: (event) => {
         event.preventDefault()
         router.visit(url, visitParams)
+      },
+      onKeyUp: (event) => {
+        if (shouldNavigate(event)) {
+          event.preventDefault()
+          router.visit(url, visitParams)
+        }
       },
       onClick: (event) => {
         onClick(event)
 
         if (shouldIntercept(event)) {
-          // Let the mouseup event handle the visit
+          // Let the mouseup/keyup event handle the visit
           event.preventDefault()
         }
       },
     }
 
-    if (method !== 'get') {
-      as = 'button'
-    }
+    const elProps = useMemo(() => {
+      if (_as === 'button') {
+        return { type: 'button' }
+      }
 
-    const elProps = {
-      a: { href: url },
-      button: { type: 'button' },
-    }
+      if (_as === 'a' || typeof _as !== 'string') {
+        return { href: url }
+      }
+
+      return {}
+    }, [_as, url])
 
     return createElement(
-      as,
+      _as,
       {
         ...props,
-        ...(elProps[as] || {}),
+        ...elProps,
         ref,
         ...(() => {
           if (prefetchModes.includes('hover')) {

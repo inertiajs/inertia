@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 import WithScrollRegion from '../../Layouts/WithScrollRegion.vue'
 
@@ -13,13 +14,13 @@ defineProps({
   },
 })
 
-const preserveCallback = (page) => {
+const preserveCallback = (page: Page) => {
   console.log(JSON.stringify(page))
 
   return true
 }
 
-const preserveCallbackFalse = (page) => {
+const preserveCallbackFalse = (page: Page) => {
   console.log(JSON.stringify(page))
 
   return false
@@ -62,11 +63,6 @@ const preserveCallbackFalse = (page) => {
 
     <a href="/non-inertia" class="off-site" style="display: block">Off-site link</a>
 
-    <Link
-      href="/article"
-      class="article"
-      data-testid="article"
-      >Article</Link
-    >
+    <Link href="/article" class="article" data-testid="article">Article</Link>
   </div>
 </template>

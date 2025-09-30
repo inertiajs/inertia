@@ -1,16 +1,22 @@
-<script setup>
+<script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3'
 
 const form = useForm({
   name: 'foo',
   handle: 'example',
-  remember: false,
+  remember: false as boolean,
 })
 
 const page = usePage()
 
 const submit = () => {
   form.post(page.url)
+}
+
+const submitAndReset = () => {
+  form.post('/form-helper/data/redirect-back', {
+    onSuccess: () => form.reset(),
+  })
 }
 
 const resetAll = () => {
@@ -56,6 +62,7 @@ const reassignSingle = () => {
     <span class="remember_error" v-if="form.errors.remember">{{ form.errors.remember }}</span>
 
     <button @click="submit" class="submit">Submit form</button>
+    <button @click="submitAndReset" class="submit">Submit form and reset</button>
 
     <button @click="resetAll" class="reset">Reset all data</button>
     <button @click="resetOne" class="reset-one">Reset one field</button>

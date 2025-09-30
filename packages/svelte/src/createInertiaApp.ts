@@ -1,5 +1,5 @@
 import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
-import escape from 'html-escape'
+import { escape } from 'lodash-es'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import type { ComponentResolver } from './types'
@@ -48,7 +48,7 @@ export default async function createInertiaApp({
   const svelteApp = setup({
     el,
     App: App as unknown as AppComponent,
-    props
+    props,
   })
 
   if (isServer) {

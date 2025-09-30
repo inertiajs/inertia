@@ -1,9 +1,10 @@
-<script setup>
+<script setup lang="ts">
+import type { Method } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 
-defineProps({
-  method: String,
-})
+defineProps<{
+  method: Method
+}>()
 </script>
 
 <template>

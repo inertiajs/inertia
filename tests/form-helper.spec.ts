@@ -1,11 +1,11 @@
-import test, { expect } from '@playwright/test'
+import test, { expect, Page } from '@playwright/test'
 import { clickAndWaitForResponse, pageLoads, shouldBeDumpPage } from './support'
 
 test.describe('Form Helper', () => {
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/methods')
+      await page.goto('/form-helper/methods')
       await page.check('#remember')
     })
 
@@ -35,7 +35,7 @@ test.describe('Form Helper', () => {
   test.describe('Transform', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/transform')
+      await page.goto('/form-helper/transform')
       await page.check('#remember')
     })
 
@@ -63,15 +63,27 @@ test.describe('Form Helper', () => {
   test.describe('Errors', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/errors')
-      const errorsStatus = await page.locator('.errors-status')
 
+      await page.goto('/form-helper/errors')
+      const errorsStatus = await page.locator('.errors-status')
       await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
 
       await page.fill('#name', 'A')
       await page.fill('#handle', 'B')
       await page.check('#remember')
     })
+
+    const waitForErrors = async (page: Page) => {
+      await page.waitForFunction(() => {
+        return document.querySelector('.errors-status')?.textContent === 'Form has errors'
+      })
+    }
+
+    const waitForNoErrors = async (page: Page) => {
+      await page.waitForFunction(() => {
+        return document.querySelector('.errors-status')?.textContent === 'Form has no errors'
+      })
+    }
 
     test('can display form errors', async ({ page }) => {
       await page.waitForSelector('.name_error', { state: 'detached' })
@@ -83,12 +95,11 @@ test.describe('Form Helper', () => {
       await expect(page).toHaveURL('form-helper/errors')
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
+      await waitForErrors(page)
 
-      const errorsStatus = await page.locator('.errors-status')
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
     })
@@ -100,11 +111,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -114,7 +125,7 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+      await waitForNoErrors(page)
     })
 
     test('does not reset fields back to their initial values when it clears all form errors', async ({ page }) => {
@@ -124,11 +135,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -142,7 +153,7 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+      await waitForNoErrors(page)
 
       await expect(await page.locator('#name').inputValue()).toEqual('A')
       await expect(await page.locator('#handle').inputValue()).toEqual('B')
@@ -156,17 +167,18 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
       await page.getByRole('button', { name: 'Clear one error' }).click()
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      await waitForErrors(page)
+
       await expect(await nameError.textContent()).toEqual('Some name error')
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
@@ -181,11 +193,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -195,7 +207,8 @@ test.describe('Form Helper', () => {
 
       await page.getByRole('button', { name: 'Clear one error' }).click()
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      await waitForErrors(page)
+
       await expect(await nameError.textContent()).toEqual('Some name error')
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
@@ -213,10 +226,9 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.remember_error', { state: 'detached' })
       await page.waitForSelector('.name_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
-      const handleError = await page.locator('.handle_error')
+      await waitForErrors(page)
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+      const handleError = await page.locator('.handle_error')
       await expect(await handleError.textContent()).toEqual('Manually set Handle error')
     })
 
@@ -227,11 +239,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const handleError = await page.locator('.handle_error')
       const nameError = await page.locator('.name_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await handleError.textContent()).toEqual('Manually set Handle error')
       await expect(await nameError.textContent()).toEqual('Manually set Name error')
     })
@@ -243,11 +255,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -261,7 +273,7 @@ test.describe('Form Helper', () => {
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has no errors')
+      await waitForNoErrors(page)
     })
 
     test('can reset a single error and reset a single field to its initial value', async ({ page }) => {
@@ -271,11 +283,11 @@ test.describe('Form Helper', () => {
 
       await page.waitForSelector('.remember_error', { state: 'detached' })
 
-      const errorsStatus = await page.locator('.errors-status')
+      await waitForErrors(page)
+
       const nameError = await page.locator('.name_error')
       const handleError = await page.locator('.handle_error')
 
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
       await expect(await nameError.textContent()).toEqual('Some name error')
       await expect(await handleError.textContent()).toEqual('The Handle was invalid')
 
@@ -288,14 +300,15 @@ test.describe('Form Helper', () => {
       await expect(await nameError.textContent()).toEqual('Some name error')
       await page.waitForSelector('.handle_error', { state: 'detached' })
       await page.waitForSelector('.remember_error', { state: 'detached' })
-      await expect(await errorsStatus.textContent()).toEqual('Form has errors')
+
+      await waitForErrors(page)
     })
   })
 
   test.describe('Dirty', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/dirty')
+      await page.goto('/form-helper/dirty')
     })
 
     test('can check if the form is dirty', async ({ page }) => {
@@ -326,12 +339,35 @@ test.describe('Form Helper', () => {
       await page.getByRole('button', { name: 'Push value' }).click()
       await expect(page.getByText('Form is dirty')).toBeVisible()
     })
+
+    test('does not override manual setDefaults() calls in onSuccess', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'changed')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit and setDefaults', exact: true }).click()
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await expect(page.locator('#name')).toHaveValue('changed')
+    })
+
+    test('respects custom defaults set in onSuccess callback', async ({ page }) => {
+      await expect(page.getByText('Form is clean')).toBeVisible()
+      await page.fill('#name', 'changed')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit and setDefaults custom' }).click()
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+      await expect(page.locator('#name')).toHaveValue('changed')
+
+      await page.fill('#name', 'Custom Default')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
   })
 
   test.describe('Data', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      page.goto('/form-helper/data')
+      await page.goto('/form-helper/data')
     })
 
     test('can reset all fields to their initial values', async ({ page }) => {
@@ -342,7 +378,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#handle')).toHaveValue('example')
       await expect(page.locator('#remember')).toBeChecked()
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -362,7 +398,7 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#handle')).toHaveValue('B')
       await expect(page.locator('#remember')).toBeChecked()
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -378,7 +414,7 @@ test.describe('Form Helper', () => {
       await page.fill('#handle', 'B')
       await page.check('#remember')
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -407,7 +443,7 @@ test.describe('Form Helper', () => {
       await page.fill('#handle', 'B')
       await page.check('#remember')
 
-      await page.getByRole('button', { name: 'Submit form' }).click()
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
 
       await expect(page).toHaveURL('form-helper/data')
 
@@ -429,6 +465,16 @@ test.describe('Form Helper', () => {
       await expect(page.locator('.name_error')).toHaveText('Some name error')
       await expect(page.locator('.handle_error')).toHaveText('The Handle was invalid')
       await expect(page.locator('.remember_error')).not.toBeVisible()
+    })
+
+    test('preserves original defaults after reset in onSuccess callback', async ({ page }) => {
+      await page.fill('#name', 'A')
+      await page.getByRole('button', { name: 'Submit form and reset' }).click()
+      await expect(page.locator('#name')).toHaveValue('foo')
+
+      await page.fill('#name', 'B')
+      await page.getByRole('button', { name: 'Submit form and reset' }).click()
+      await expect(page.locator('#name')).toHaveValue('foo')
     })
 
     test.describe('Update "reset" defaults', () => {
@@ -496,6 +542,22 @@ test.describe('Form Helper', () => {
     })
   })
 
+  const waitForEventMessages = async (page: Page, minCount?: number): Promise<any[string]> => {
+    if (typeof minCount === 'number') {
+      await page.waitForFunction((minCount) => (window as any).events.length >= minCount, minCount)
+    }
+
+    return await page.evaluate(() => (window as any).events)
+  }
+
+  const waitForDataMessages = async (page: Page, minCount?: number): Promise<any[string]> => {
+    if (typeof minCount === 'number') {
+      await page.waitForFunction((minCount) => (window as any).data.length >= minCount, minCount)
+    }
+
+    return await page.evaluate(() => (window as any).data)
+  }
+
   test.describe('Events', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
@@ -506,8 +568,8 @@ test.describe('Form Helper', () => {
       test('fires when a request is about to be made', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onBefore' }).click()
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 1)
+        const data = await waitForDataMessages(page, 1)
 
         await expect(messages[0]).toBe('onBefore')
 
@@ -523,7 +585,7 @@ test.describe('Form Helper', () => {
       test('can prevent the visit from starting by returning false', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onBefore cancellation' }).click()
 
-        const messages = await page.evaluate(() => (window as any).events)
+        const messages = await waitForEventMessages(page, 1)
 
         await expect(messages).toHaveLength(1)
         await expect(messages[0]).toBe('onBefore')
@@ -551,8 +613,8 @@ test.describe('Form Helper', () => {
       test('fires when the request has started', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onStart' }).click()
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 3)
+        const data = await waitForDataMessages(page, 3)
 
         await expect(messages[2]).toBe('onStart')
 
@@ -568,8 +630,8 @@ test.describe('Form Helper', () => {
       test('marks the form as processing', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onSuccess resets processing', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 5)
+        const data = await waitForDataMessages(page, 5)
 
         const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
 
@@ -584,8 +646,8 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(100)
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 4)
+        const data = await waitForDataMessages(page, 4)
 
         const event = data.find((d) => d.event === 'onProgress' && d.type === 'progressEvent').data
 
@@ -601,7 +663,7 @@ test.describe('Form Helper', () => {
       test('does not fire when the form has no files', async ({ page }) => {
         await clickAndWaitForResponse(page, 'progress no files', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
+        const messages = await waitForEventMessages(page, 5)
 
         await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
       })
@@ -609,8 +671,8 @@ test.describe('Form Helper', () => {
       test('updates the progress property of the form', async ({ page, context }) => {
         await clickAndWaitForResponse(page, 'onSuccess progress property', 'sleep', 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 4)
+        const data = await waitForDataMessages(page, 4)
 
         await expect(messages[2]).toBe('onStart')
         await expect(messages[3]).toBe('onProgress')
@@ -631,7 +693,7 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(200)
 
-        const messages = await page.evaluate(() => (window as any).events)
+        const messages = await waitForEventMessages(page, 5)
 
         await expect(messages[3]).toBe('CANCELLING!')
         await expect(messages[4]).toBe('onCancel')
@@ -642,8 +704,8 @@ test.describe('Form Helper', () => {
       test('fires the request succeeds without validation errors', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onSuccess' }).click()
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 4)
+        const data = await waitForDataMessages(page, 4)
 
         await expect(messages[0]).toBe('onBefore')
         await expect(messages[1]).toBe('onCancelToken')
@@ -661,7 +723,7 @@ test.describe('Form Helper', () => {
       test('marks the form as no longer processing', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'onSuccess resets processing' }).click()
 
-        const data = await page.evaluate(() => (window as any).data)
+        const data = await waitForDataMessages(page, 7)
 
         const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
         const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
@@ -673,8 +735,8 @@ test.describe('Form Helper', () => {
       test('resets the progress property back to null', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onSuccess progress property', 'sleep', 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 5)
+        const data = await waitForDataMessages(page, 5)
         const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
         const endEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
 
@@ -693,7 +755,7 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(50)
 
-        const messages = await page.evaluate(() => (window as any).events)
+        const messages = await waitForEventMessages(page, 6)
 
         await expect(messages).toEqual([
           'onBefore',
@@ -708,8 +770,8 @@ test.describe('Form Helper', () => {
       test('clears all existing errors and resets the hasErrors prop', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onSuccess resets errors', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 6)
+        const data = await waitForDataMessages(page, 6)
 
         await expect(messages).toEqual(['onError', 'onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
 
@@ -742,14 +804,30 @@ test.describe('Form Helper', () => {
         await expect(page.locator('.success-status')).toHaveText('Form was successful')
         await expect(page.locator('.recently-status')).toHaveText('Form was not recently successful')
       })
+
+      test('resets the input value to the default value', async ({ page }) => {
+        await expect(page.locator('.name-input')).toHaveValue('foo')
+        await expect(page.locator('.remember-input')).not.toBeChecked()
+
+        await page.fill('.name-input', 'bar')
+        await page.check('.remember-input')
+
+        await expect(page.locator('.name-input')).toHaveValue('bar')
+        await expect(page.locator('.remember-input')).toBeChecked()
+
+        await clickAndWaitForResponse(page, 'onSuccess resets value', null, 'button')
+
+        await expect(page.locator('.name-input')).toHaveValue('foo')
+        await expect(page.locator('.remember-input')).not.toBeChecked()
+      })
     })
 
     test.describe('onError', () => {
       test('fires when the request finishes with validation errors', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onError', 'form-helper/events/errors', 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 5)
+        const data = await waitForDataMessages(page, 4)
 
         await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
 
@@ -762,8 +840,8 @@ test.describe('Form Helper', () => {
       test('marks the form as no longer processing', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onError resets processing', 'form-helper/events/errors', 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 5)
+        const data = await waitForDataMessages(page, 5)
 
         await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
 
@@ -777,8 +855,8 @@ test.describe('Form Helper', () => {
       test('resets the progress property back to null', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onError progress property', 'form-helper/events/errors', 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 4)
+        const data = await waitForDataMessages(page, 4)
 
         await expect(messages[3]).toBe('onProgress')
 
@@ -798,8 +876,8 @@ test.describe('Form Helper', () => {
       test('sets form errors', async ({ page }) => {
         await clickAndWaitForResponse(page, 'Errors set on error', 'form-helper/events/errors', 'button')
 
-        const messages = await page.evaluate(() => (window as any).events)
-        const data = await page.evaluate(() => (window as any).data)
+        const messages = await waitForEventMessages(page, 5)
+        const data = await waitForDataMessages(page, 5)
 
         await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
 
@@ -817,7 +895,7 @@ test.describe('Form Helper', () => {
 
         await page.waitForTimeout(50)
 
-        const messages = await page.evaluate(() => (window as any).events)
+        const messages = await waitForEventMessages(page, 6)
 
         await expect(messages).toEqual([
           'onBefore',
@@ -834,7 +912,7 @@ test.describe('Form Helper', () => {
       test('fires when the request is completed', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Successful request' }).click()
 
-        const messages = await page.evaluate(() => (window as any).events)
+        const messages = await waitForEventMessages(page, 5)
 
         await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
       })
@@ -845,7 +923,7 @@ test.describe('Form Helper', () => {
 test.describe('Nested', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
-    page.goto('/form-helper/nested')
+    await page.goto('/form-helper/nested')
   })
 
   test('can handle nested data', async ({ page }) => {
@@ -894,5 +972,23 @@ test.describe('Nested', () => {
     await expect(dump.form.organization.repo.name).toEqual('inertiajs/inersha')
     await expect(dump.form.organization.name).toEqual('Inertia')
     await expect(dump.form.organization.repo.tags).toEqual(['v0.2', 'v0.3'])
+  })
+})
+
+test.describe('React', () => {
+  test.skip(process.env.PACKAGE !== 'react', 'Only for React')
+
+  test('setDefaults callback in useEffect executes once per change', async ({ page }) => {
+    await page.goto('/form-helper/effect-count')
+
+    await expect(page.locator('#data-count')).toHaveText('Count: 0')
+    await expect(page.locator('#form-data')).toHaveText('Form data: {"count":0,"foo":"bar"}')
+    await expect(page.locator('#effect-count')).toHaveText('Effect count: 1')
+
+    await page.getByRole('button', { name: 'Increment' }).click()
+
+    await expect(page.locator('#data-count')).toHaveText('Count: 1')
+    await expect(page.locator('#form-data')).toHaveText('Form data: {"count":1,"foo":"bar"}')
+    await expect(page.locator('#effect-count')).toHaveText('Effect count: 2')
   })
 })

@@ -29,11 +29,14 @@ export const pageLoads = {
 }
 
 export const consoleMessages = {
+  errors: [] as string[],
   messages: [] as string[],
 
   listen(page: Page) {
+    this.errors = []
     this.messages = []
     page.on('console', (msg) => this.messages.push(msg.text()))
+    page.on('pageerror', (error: Error) => this.errors.push(error.message))
   },
 }
 

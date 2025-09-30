@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { getCurrentInstance } from 'vue'
 
@@ -22,9 +22,9 @@ const redirectExternal = () => {
   router.post('/redirect-external')
 }
 
-window._inertia_page_key = getCurrentInstance().uid
+window._inertia_page_key = getCurrentInstance()?.uid
 window._inertia_props = props
-window._plugin_global_props = getCurrentInstance().appContext.config.globalProperties
+window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProperties || {}
 
 const page = usePage()
 </script>
@@ -35,6 +35,7 @@ const page = usePage()
 
     <Link href="/links/method" class="links-method">Basic Links</Link>
     <Link href="/links/replace" class="links-replace">'Replace' Links</Link>
+    <Link href="/links/as-component" class="links-as-component">Custom Component</Link>
 
     <a href="#" @click="visitsMethod" class="visits-method">Manual basic visits</a>
     <a href="#" @click="visitsReplace" class="visits-replace">Manual 'Replace' visits</a>

@@ -168,3 +168,32 @@ test('it will not revert to fallback when fetching a url that is different than 
 
   await expect(page.getByText('John Doe')).toBeVisible()
 })
+
+test('load deferred props in multiple groups', async ({ page }) => {
+  const props = ['foo', 'bar', 'baz', 'qux', 'quux']
+
+  await page.goto('/deferred-props/many-groups')
+
+  for (const prop of props) {
+    await expect(page.getByText(`Loading ${prop}...`)).toBeVisible()
+  }
+
+  for (const prop of props) {
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === prop && response.status() === 200,
+    )
+  }
+
+  for (const prop of props) {
+    await expect(page.getByText(`${prop} value`)).toBeVisible()
+  }
+})
+
+test('load deferred props with partial reload on mount', async ({ page }) => {
+  await page.goto('/deferred-props/instant-reload')
+
+  await expect(page.getByText('Loading bar...')).toBeVisible()
+
+  await expect(page.getByText('foo value')).toBeVisible()
+  await expect(page.getByText('bar value')).toBeVisible()
+})

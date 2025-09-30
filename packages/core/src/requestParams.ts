@@ -17,6 +17,7 @@ export class RequestParams {
     } else {
       const wrappedCallbacks: Record<keyof VisitCallbacks, () => any> = {
         onBefore: this.wrapCallback(params, 'onBefore'),
+        onBeforeUpdate: this.wrapCallback(params, 'onBeforeUpdate'),
         onStart: this.wrapCallback(params, 'onStart'),
         onProgress: this.wrapCallback(params, 'onProgress'),
         onFinish: this.wrapCallback(params, 'onFinish'),
@@ -32,6 +33,7 @@ export class RequestParams {
         ...params,
         ...wrappedCallbacks,
         onPrefetchResponse: params.onPrefetchResponse || (() => {}),
+        onPrefetchError: params.onPrefetchError || (() => {}),
       }
     }
     //
@@ -92,6 +94,12 @@ export class RequestParams {
   public onPrefetchResponse(response: Response) {
     if (this.params.onPrefetchResponse) {
       this.params.onPrefetchResponse(response)
+    }
+  }
+
+  public onPrefetchError(error: Error) {
+    if (this.params.onPrefetchError) {
+      this.params.onPrefetchError(error)
     }
   }
 

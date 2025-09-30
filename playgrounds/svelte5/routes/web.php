@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -154,6 +156,7 @@ Route::get('/async', function () {
     ]);
 });
 
+// @deprecated - We now have a InfiniteScroll component and Inertia::scroll() method...
 Route::get('/infinite-scroll', function () {
     $page = request()->integer('page', 1);
     $perPage = 25;
@@ -364,4 +367,92 @@ Route::post('/sleepy/{duration}', function ($duration) {
 
 Route::post('/logout', function () {
     return redirect('/login');
+});
+
+Route::get('/form-component', function () {
+    return inertia('FormComponent', [
+        'foo' => fn () => now()->getTimestampMs(),
+        'bar' => fn () => now()->getTimestampMs(),
+        'quux' => fn () => now()->getTimestampMs(),
+    ]);
+});
+
+Route::post('/form-component', function () {
+    $data = request()->validateWithBag('custom-bag', [
+        'name' => ['required', 'string', 'max:255'],
+        'avatar' => ['nullable', 'file', 'image', 'max:2048'],
+        'skills' => ['nullable', 'array', 'min:2'],
+        'skills.*' => ['string', 'in:vue,react,laravel,tailwind'],
+        'tags' => ['nullable', 'array'],
+        'tags.*' => ['string', 'max:50'],
+        'user.address.street' => ['nullable', 'string', 'max:255'],
+        'user.address.city' => ['nullable', 'string', 'max:255'],
+    ]);
+
+    // Simulate file upload progress
+    if (request()->hasFile('avatar')) {
+        sleep(1);
+    }
+
+    return back();
+});
+
+Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(250_000);
+    }
+
+    $perPage = 24;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $photos = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'url' => "https://picsum.photos/id/{$i}/300/300",
+        ])
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos->values(),
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia($horizontal ? 'PhotoHorizontal' : 'PhotoGrid', [
+        'photos' => Inertia::scroll($photos),
+    ]);
+});
+
+Route::get('/data-table', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(500_000);
+    }
+
+    $perPage = 200;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $users = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'name' => "User {$i}",
+        ])
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos->values(),
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia('DataTable', [
+        'users' => Inertia::scroll($users),
+    ]);
 });

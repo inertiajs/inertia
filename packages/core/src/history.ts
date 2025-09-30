@@ -107,12 +107,10 @@ class History {
           return
         }
 
-        this.doReplaceState(
-          {
-            page: window.history.state.page,
-            scrollRegions,
-          }
-        )
+        this.doReplaceState({
+          page: window.history.state.page,
+          scrollRegions,
+        })
       })
     })
   }
@@ -124,12 +122,10 @@ class History {
           return
         }
 
-        this.doReplaceState(
-          {
-            page: window.history.state.page,
-            documentScrollPosition: scrollRegion,
-          }
-        )
+        this.doReplaceState({
+          page: window.history.state.page,
+          documentScrollPosition: scrollRegion,
+        })
       })
     })
   }
@@ -212,6 +208,12 @@ class History {
     if (this.current[key] !== undefined) {
       delete this.current[key]
       this.replaceState(this.current as Page)
+    }
+  }
+
+  public clearInitialState(key: keyof Page) {
+    if (this.initialState && this.initialState[key] !== undefined) {
+      delete this.initialState[key]
     }
   }
 
