@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.3...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.4...master)
 
 - Nothing yet
+
+## [v2.2.4](https://github.com/inertiajs/inertia/compare/v2.2.3...v2.2.4) - 2025-09-30
+
+### What's Changed
+
+* Compile TS while developing + improve CLI output by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2600
+* Improve testing of scroll restoration by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2602
+* Fix for reloading an unrelated prop affecting infinite scroll by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2603
+* Add `preserve-url` prop to `<Link>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2541
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.3...v2.2.4
 
 ## [v2.2.3](https://github.com/inertiajs/inertia/compare/v2.2.2...v2.2.3) - 2025-09-29
 
