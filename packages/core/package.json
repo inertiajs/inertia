@@ -47,9 +47,8 @@
     "build": "pnpm clean && ./build.js && tsc",
     "build:with-deps": "./build.js --with-deps",
     "clean": "rm -rf types && rm -rf dist",
-    "dev": "./build.js --watch",
-    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose",
-    "prepublishOnly": "pnpm build"
+    "dev": "pnpx concurrently \"./build.js --watch\" \"tsc --watch\"",
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.12",
