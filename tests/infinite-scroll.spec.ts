@@ -1955,3 +1955,29 @@ Object.entries({
     })
   })
 })
+
+test('it can reload unrelated props without affecting infinite scroll', async ({ page }) => {
+  await page.goto('/infinite-scroll/reload-unrelated')
+
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('User 15')).toBeVisible()
+  await expect(page.getByText('User 16')).toBeHidden()
+
+  const initialTime = await page.locator('#time-display').textContent()
+
+  await page.locator('#reload-button').click()
+
+  // Wait for reload to complete and verify timestamp changed
+  await page.waitForTimeout(300)
+  const updatedTime = await page.locator('#time-display').textContent()
+  expect(updatedTime).not.toBe(initialTime)
+
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('User 15')).toBeVisible()
+  await expect(page.getByText('User 16')).toBeHidden()
+
+  await scrollToBottom(page)
+  await expect(page.getByText('User 16')).toBeVisible()
+  await expect(page.getByText('User 30')).toBeVisible()
+  await expect(page.getByText('User 31')).toBeHidden()
+})
