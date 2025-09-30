@@ -45,7 +45,7 @@
     "build": "pnpm clean && ./build.js && tsc",
     "build:with-deps": "./build.js --with-deps",
     "clean": "rm -rf types && rm -rf dist",
-    "dev": "pnpx concurrently -c \"#fdba74,#34d399\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
+    "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
     "dev:build": "./build.js --watch",
     "dev:types": "tsc --watch --preserveWatchOutput",
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
