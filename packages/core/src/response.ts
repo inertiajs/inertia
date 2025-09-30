@@ -295,7 +295,7 @@ export class Response {
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
     // Preserve the existing scrollProps
-    if (pageResponse.scrollProps) {
+    if (currentPage.get().scrollProps) {
       pageResponse.scrollProps = {
         ...(currentPage.get().scrollProps || {}),
         ...(pageResponse.scrollProps || {}),

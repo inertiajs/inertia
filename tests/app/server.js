@@ -924,6 +924,28 @@ app.get('/infinite-scroll/programmatic-ref', (req, res) =>
 app.get('/infinite-scroll/short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
 )
+app.get('/infinite-scroll/reload-unrelated', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/ReloadUnrelated',
+        props: {
+          time: Date.now(),
+          users: paginated,
+        },
+        ...(req.headers['x-inertia-partial-data'] === 'users'
+          ? { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }
+          : {}),
+        ...(req.headers['x-inertia-partial-data'] === 'time' ? {} : { scrollProps: { users: scrollProp } }),
+      }),
+    partialReload ? 250 : 0,
+  )
+})
 app.get('/infinite-scroll/dual-containers', (req, res) => {
   const users1Page = req.query.users1 ? parseInt(req.query.users1) : 1
   const users2Page = req.query.users2 ? parseInt(req.query.users2) : 1
