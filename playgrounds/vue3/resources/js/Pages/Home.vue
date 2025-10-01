@@ -13,6 +13,10 @@ const form = useForm('post', '/users', {
   email: '',
 })
 
+form.setValidationTimeout(3000)
+
+console.log(form)
+
 const submit = () => form.submit()
 
 const validate = () =>
@@ -40,14 +44,16 @@ const validate = () =>
     </div>
 
     <form @submit.prevent="submit">
+      <div v-if="form.validating">Validating...</div>
+
       <label for="name">Name</label>
-      <input id="name" v-model="form.name" @blur="form.validate('name')" />
+      <input id="name" v-model="form.name" @change="form.validate('name')" />
       <div v-if="form.invalid('name')">
         {{ form.errors.name }}
       </div>
 
       <label for="email">Email</label>
-      <input id="email" type="email" v-model="form.email" @blur="form.validate('email')" />
+      <input id="email" type="email" v-model="form.email" @change="form.validate('email')" />
       <div v-if="form.invalid('email')">
         {{ form.errors.email }}
       </div>

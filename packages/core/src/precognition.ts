@@ -4,7 +4,7 @@ import debounce from './debounce'
 import { hasFiles, isFile } from './files'
 import { ErrorBag, Errors, Method } from './types'
 
-type ValidatableData = Record<string, unknown>
+type ValidatableData = Record<string, any>
 
 export function forgetFiles(data: ValidatableData): ValidatableData {
   const newData = { ...data }
@@ -43,14 +43,29 @@ interface UsePrecognitionOptions {
   onFinish: () => void
 }
 
-interface PrecognitionValidator {}
+interface PrecognitionValidateOptions {
+  url: string
+  method: Method
+  data: ValidatableData
+  only: string[]
+  errorBag?: string
+  onPrecognitionSuccess: () => void
+  onValidationError: (errors: Errors & ErrorBag) => void
+}
+
+interface PrecognitionValidator {
+  setOldData: (data: ValidatableData) => void
+  validateFiles: (value: boolean) => void
+  validate: (options: PrecognitionValidateOptions) => void
+  setTimeout: (value: number) => void
+}
 
 export default function usePrecognition(precognitionOptions: UsePrecognitionOptions): PrecognitionValidator {
   let oldData: ValidatableData = {}
   let validatingData: ValidatableData = {}
 
   let validateFiles: boolean = false
-  let debounceTimeoutDuration = 1500
+  let debounceTimeoutDuration = 3000
 
   const setDebounceTimeout = (value: number) => {
     debounceTimeoutDuration = value
@@ -59,18 +74,11 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
 
   const createValidateFunction = () =>
     debounce(
-      (options: {
-        url: string
-        method: Method
-        data: ValidatableData
-        only: string[]
-        errorBag?: string
-        onPrecognitionSuccess: () => void
-        onValidationError: (errors: Errors & ErrorBag) => void
-      }) => {
+      (options: PrecognitionValidateOptions) => {
         const data = validateFiles ? options.data : forgetFiles(options.data)
+        const changed = options.only.filter((field) => !isEqual(get(data, field), get(oldData, field)))
 
-        if (options.only && isEqual(get(data, options.only), get(oldData, options.only))) {
+        if (options.only.length > 0 && changed.length === 0) {
           return
         }
 
@@ -90,21 +98,22 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
         })
           .then((response) => {
             if (response.status === 204 && response.headers['precognition-success'] === 'true') {
-              return options.onPrecognitionSuccess()
+              options.onPrecognitionSuccess()
             }
           })
           .catch((error) => {
-            if (error.response && error.response.status === 422) {
-              return options.onValidationError(error.response.data.errors || {})
-            } else {
-              throw error
+            if (error.response?.status === 422) {
+              return options.onValidationError(error.response.data?.errors || {})
             }
+
+            throw error
           })
           .finally(() => {
             precognitionOptions.onFinish()
           })
       },
       debounceTimeoutDuration,
+      { leading: true, trailing: true },
     )
 
   let validate = createValidateFunction()
