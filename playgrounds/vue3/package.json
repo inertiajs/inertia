@@ -23,5 +23,9 @@
     "vue": "^3.5.21",
     "vue-tsc": "^2.2.12"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "laravel-precognition": "link:../../../precognition/packages/core",
+    "laravel-precognition-vue": "link:../../../precognition/packages/vue"
+  }
 }

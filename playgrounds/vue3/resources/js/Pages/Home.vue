@@ -5,6 +5,15 @@ export default { layout: Layout }
 
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+
+import { useForm } from 'laravel-precognition-vue'
+
+const form = useForm('post', '/users', {
+  name: '',
+  email: '',
+})
+
+const submit = () => form.submit()
 </script>
 
 <template>
@@ -20,5 +29,21 @@ import { Head, Link, router } from '@inertiajs/vue3'
         Clear History
       </button>
     </div>
+
+    <form @submit.prevent="submit">
+      <label for="name">Name</label>
+      <input id="name" v-model="form.name" @blur="form.validate('name')" />
+      <div v-if="form.invalid('name')">
+        {{ form.errors.name }}
+      </div>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" v-model="form.email" @blur="form.validate('email')" />
+      <div v-if="form.invalid('email')">
+        {{ form.errors.email }}
+      </div>
+
+      <button :disabled="form.processing">Create User</button>
+    </form>
   </div>
 </template>

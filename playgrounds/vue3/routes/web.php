@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Requests\StoreUserRequest;
 use App\Models\ChatMessage;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -25,6 +27,10 @@ use Prism\Prism\ValueObjects\Messages\UserMessage;
 Route::get('/', function () {
     return inertia('Home');
 });
+
+Route::post('/users', function (StoreUserRequest $request) {
+    return back();
+})->middleware([HandlePrecognitiveRequests::class]);
 
 Route::get('/users', function () {
     sleep(2);

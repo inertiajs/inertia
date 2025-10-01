@@ -884,6 +884,52 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
   }),
 )
 
+//
+
+app.post('/form-component/precognition', (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const token = req.body['token']
+    const errors = {}
+
+    if (!name) {
+      errors.name = 'The name field is required.'
+    }
+
+    if (name && name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    if (!email) {
+      errors.email = 'The email field is required.'
+    }
+
+    if (email && !/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'The email must be a valid email address.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 500)
+})
+
+//
+
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']

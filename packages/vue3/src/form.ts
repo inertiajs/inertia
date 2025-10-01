@@ -8,6 +8,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  usePrecognition,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
@@ -146,14 +147,16 @@ const Form: InertiaForm = defineComponent({
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
-    const submit = () => {
-      const [action, data] = mergeDataIntoQueryString(
+    const getActionAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
         method.value,
         isUrlMethodPair(props.action) ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )
+    }
 
+    const submit = () => {
       const maybeReset = (resetOption: boolean | string[]) => {
         if (!resetOption) {
           return
@@ -193,12 +196,15 @@ const Form: InertiaForm = defineComponent({
         ...props.options,
       }
 
+      const [action, data] = getActionAndData()
+
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
+      validator.setOldData(getData()) // TODO: should it really do this?
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -209,6 +215,37 @@ const Form: InertiaForm = defineComponent({
     const defaults = () => {
       defaultData.value = getFormData()
       isDirty.value = false
+    }
+
+    const validating = ref(false)
+
+    const validator = usePrecognition({
+      onStart: () => {
+        validating.value = true
+      },
+      onFinish: () => {
+        validating.value = false
+      },
+      onPrecognitionSuccess: () => form.clearErrors(),
+      onValidationError: (errors) => form.setError(errors),
+    })
+
+    onMounted(() => {
+      const [_action, data] = getActionAndData()
+
+      // Set the initial data on the validator
+      validator.setOldData(data)
+    })
+
+    const validate = (field?: string | string[]) => {
+      const [action, data] = getActionAndData()
+
+      validator.validate({
+        action,
+        method: method.value,
+        data,
+        only: Array.isArray(field) ? field : [field],
+      })
     }
 
     const exposed = {
@@ -230,6 +267,9 @@ const Form: InertiaForm = defineComponent({
       get recentlySuccessful() {
         return form.recentlySuccessful
       },
+      get validating() {
+        return validating.value
+      },
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
@@ -240,6 +280,11 @@ const Form: InertiaForm = defineComponent({
       reset,
       submit,
       defaults,
+
+      // Precognition
+      valid: (field: string) => form.errors[field] === undefined,
+      invalid: (field: string) => form.errors[field] !== undefined,
+      validate,
     }
 
     expose<FormComponentRef>(exposed)
