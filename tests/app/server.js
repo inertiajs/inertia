@@ -919,6 +919,7 @@ app.post('/form-component/precognition', (req, res) => {
     }
 
     res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
 
     if (Object.keys(errors).length) {
       return res.status(422).json({ errors })

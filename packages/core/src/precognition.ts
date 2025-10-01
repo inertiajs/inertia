@@ -41,8 +41,6 @@ export function forgetFiles(data: ValidatableData): ValidatableData {
 interface UsePrecognitionOptions {
   onStart: () => void
   onFinish: () => void
-  onPrecognitionSuccess: () => void
-  onValidationError: (errors: Errors & ErrorBag) => void
 }
 
 interface PrecognitionValidator {}
@@ -60,43 +58,54 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   }
 
   const createValidateFunction = () =>
-    debounce((options: { action: string; method: Method; data: ValidatableData; only: string[] }) => {
-      const data = validateFiles ? options.data : forgetFiles(options.data)
+    debounce(
+      (options: {
+        url: string
+        method: Method
+        data: ValidatableData
+        only: string[]
+        errorBag?: string
+        onPrecognitionSuccess: () => void
+        onValidationError: (errors: Errors & ErrorBag) => void
+      }) => {
+        const data = validateFiles ? options.data : forgetFiles(options.data)
 
-      if (options.only && isEqual(get(data, options.only), get(oldData, options.only))) {
-        return
-      }
+        if (options.only && isEqual(get(data, options.only), get(oldData, options.only))) {
+          return
+        }
 
-      oldData = validatingData = { ...data }
+        oldData = validatingData = { ...data }
 
-      precognitionOptions.onStart()
+        precognitionOptions.onStart()
 
-      axios({
-        method: options.method,
-        url: options.action,
-        data: validatingData,
-        headers: {
-          'Content-Type': hasFiles(data) ? 'multipart/form-data' : 'application/json',
-          Precognition: true,
-          ...(options.only.length ? { 'Precognition-Validate-Only': options.only.join(',') } : {}),
-        },
-      })
-        .then((response) => {
-          if (response.status === 204 && response.headers['precognition-success'] === 'true') {
-            return precognitionOptions.onPrecognitionSuccess()
-          }
+        axios({
+          method: options.method,
+          url: options.url,
+          data: validatingData,
+          headers: {
+            'Content-Type': hasFiles(data) ? 'multipart/form-data' : 'application/json',
+            Precognition: true,
+            ...(options.only.length ? { 'Precognition-Validate-Only': options.only.join(',') } : {}),
+          },
         })
-        .catch((error) => {
-          if (error.response && error.response.status === 422) {
-            return precognitionOptions.onValidationError(error.response.data.errors || {})
-          } else {
-            throw error
-          }
-        })
-        .finally(() => {
-          precognitionOptions.onFinish()
-        })
-    }, debounceTimeoutDuration)
+          .then((response) => {
+            if (response.status === 204 && response.headers['precognition-success'] === 'true') {
+              return options.onPrecognitionSuccess()
+            }
+          })
+          .catch((error) => {
+            if (error.response && error.response.status === 422) {
+              return options.onValidationError(error.response.data.errors || {})
+            } else {
+              throw error
+            }
+          })
+          .finally(() => {
+            precognitionOptions.onFinish()
+          })
+      },
+      debounceTimeoutDuration,
+    )
 
   let validate = createValidateFunction()
 

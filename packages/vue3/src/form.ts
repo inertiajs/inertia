@@ -220,14 +220,8 @@ const Form: InertiaForm = defineComponent({
     const validating = ref(false)
 
     const validator = usePrecognition({
-      onStart: () => {
-        validating.value = true
-      },
-      onFinish: () => {
-        validating.value = false
-      },
-      onPrecognitionSuccess: () => form.clearErrors(),
-      onValidationError: (errors) => form.setError(errors),
+      onStart: () => (validating.value = true),
+      onFinish: () => (validating.value = false),
     })
 
     onMounted(() => {
@@ -237,14 +231,24 @@ const Form: InertiaForm = defineComponent({
       validator.setOldData(data)
     })
 
-    const validate = (field?: string | string[]) => {
-      const [action, data] = getActionAndData()
+    const validate = (field: string | string[]) => {
+      const only = Array.isArray(field) ? field : [field]
+
+      const [url, data] = getActionAndData()
 
       validator.validate({
-        action,
+        url,
         method: method.value,
         data,
-        only: Array.isArray(field) ? field : [field],
+        only,
+        onPrecognitionSuccess: () => form.clearErrors(...only),
+        onValidationError: (errors) => {
+          const scopedErrors = props.errorBag ? errors[props.errorBag || ''] || {} : errors
+          const errorKeys = Object.keys(scopedErrors)
+          const valid = only.filter((field) => !errorKeys.includes(field))
+          form.clearErrors(...valid)
+          form.setError(scopedErrors)
+        },
       })
     }
 

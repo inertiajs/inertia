@@ -14,6 +14,11 @@ const form = useForm('post', '/users', {
 })
 
 const submit = () => form.submit()
+
+const validate = () =>
+  form.validate({
+    only: ['name', 'email'],
+  })
 </script>
 
 <template>
@@ -28,6 +33,10 @@ const submit = () => form.submit()
       <button type="button" @click="router.clearHistory()" class="rounded-lg bg-blue-500 px-4 py-2 text-white">
         Clear History
       </button>
+    </div>
+
+    <div>
+      <button type="button" @click="validate" class="rounded-lg bg-blue-500 px-4 py-2 text-white">PValidate</button>
     </div>
 
     <form @submit.prevent="submit">
