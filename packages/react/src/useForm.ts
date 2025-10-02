@@ -11,7 +11,8 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useIsomorphicLayoutEffect } from './react'
 import useRemember from './useRemember'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
@@ -248,8 +249,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     },
     [setDefaults],
   )
-
-  const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
   useIsomorphicLayoutEffect(() => {
     if (!dataAsDefaults) {
