@@ -10,7 +10,7 @@
     <UserCard {user} />
   {/each}
 
-  <div slot="next" let:loading let:manualMode let:fetch >
+  <div slot="next" let:loading let:manualMode let:fetch>
     {#if loading}
       <p>Loading...</p>
     {/if}

@@ -8,7 +8,7 @@
 <InfiniteScroll data="users" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px">
   <div slot="loading" style="grid-column: 1 / -1; text-align: center; padding: 20px">Loading more users...</div>
 
-  <svelte:fragment slot="default" >
+  <svelte:fragment slot="default">
     {#each users.data as user (user.id)}
       <UserCard {user} />
     {/each}

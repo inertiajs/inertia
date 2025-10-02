@@ -33,7 +33,7 @@
           </tr>
         {/each}
 
-        {#if loading }
+        {#if loading}
           <tr>
             <td colspan="2" style="padding: 12px; border: 1px solid #ccc; text-align: center"> Loading... </td>
           </tr>
