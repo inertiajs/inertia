@@ -5,7 +5,7 @@
   export let users: { data: User[] }
 </script>
 
-<InfiniteScroll data="users" itemsElement="tbody" let:exposedSlot>
+<InfiniteScroll data="users" itemsElement="tbody" let:loading>
   <table style="width: 100%; border-collapse: collapse">
     <thead>
       <tr>
@@ -24,7 +24,7 @@
     </tbody>
 
     <tfoot>
-      {#if exposedSlot.loadingPrevious || exposedSlot.loadingNext}
+      {#if loading}
         <tr>
           <td colspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center"> Loading... </td>
         </tr>
