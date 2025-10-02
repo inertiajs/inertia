@@ -32,6 +32,10 @@ export const useInfiniteScrollData = (options: {
     throw new Error(`The page object does not contain a scroll prop named "${options.getPropName()}".`)
   }
 
+  const tryGetScrollPropFromCurrentPage = (): ScrollProp | undefined => {
+    return currentPage.get().scrollProps?.[options.getPropName()]
+  }
+
   const { previousPage, nextPage, currentPage: lastLoadedPage } = getScrollPropFromCurrentPage()
 
   const state = {
@@ -55,7 +59,11 @@ export const useInfiniteScrollData = (options: {
   }
 
   const removeEventListener = router.on('success', () => {
-    const scrollProp = getScrollPropFromCurrentPage()
+    const scrollProp = tryGetScrollPropFromCurrentPage()
+
+    if (!scrollProp) {
+      return
+    }
 
     if (scrollProp.reset) {
       state.previousPage = scrollProp.previousPage
