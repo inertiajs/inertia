@@ -182,10 +182,7 @@
       : infiniteScrollInstance?.elementManager.disableTriggers()
   }
 
-  onDestroy(() => {
-    infiniteScrollInstance?.dataManager.removeEventListener()
-    infiniteScrollInstance?.elementManager.flushAll()
-  })
+  onDestroy(() => infiniteScrollInstance?.flush())
 </script>
 
 {#if !startElement && !reverse}

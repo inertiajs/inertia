@@ -550,6 +550,7 @@ export interface UseInfiniteScrollElementManager {
 export interface UseInfiniteScrollProps {
   dataManager: UseInfiniteScrollDataManager
   elementManager: UseInfiniteScrollElementManager
+  flush: () => void
 }
 
 export interface InfiniteScrollSlotProps {

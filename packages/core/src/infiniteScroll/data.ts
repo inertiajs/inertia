@@ -35,6 +35,7 @@ export const useInfiniteScrollData = (options: {
   const { previousPage, nextPage, currentPage: lastLoadedPage } = getScrollPropFromCurrentPage()
 
   const state = {
+    component: currentPage.get().component,
     loading: false,
     previousPage,
     nextPage,
@@ -54,7 +55,12 @@ export const useInfiniteScrollData = (options: {
     state.requestCount = rememberedState.requestCount || 0
   }
 
-  const removeEventListener = router.on('success', () => {
+  const removeEventListener = router.on('success', (event) => {
+    if (state.component !== event.detail.page.component) {
+      // Only reset state if it's the same component
+      return
+    }
+
     const scrollProp = getScrollPropFromCurrentPage()
 
     if (scrollProp.reset) {

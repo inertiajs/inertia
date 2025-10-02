@@ -902,6 +902,10 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
   )
 }
 
+app.get('/infinite-scroll', (req, res) => inertia.render(req, res, { component: 'InfiniteScroll/Links' }))
+app.get('/infinite-scroll-with-link', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/InfiniteScrollWithLink'),
+)
 app.get('/infinite-scroll/manual', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Manual'))
 app.get('/infinite-scroll/manual-after', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/ManualAfter', 60))
 app.get('/infinite-scroll/remember-state', (req, res) =>
@@ -1066,6 +1070,12 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
 })
 
 app.all('*', (req, res) => inertia.render(req, res))
+
+// Send errors to the console (instead of crashing the server)
+app.use((err, req, res, next) => {
+  console.error('❌ Express Error:', err)
+  res.status(500).send('Internal Server Error')
+})
 
 const adapterPorts = {
   vue3: 13715,
