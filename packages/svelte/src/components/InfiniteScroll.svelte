@@ -187,9 +187,9 @@
 
 {#if !startElement && !reverse}
   <div bind:this={startElementRef}>
-    <slot name="previous" {exposedPrevious}>
+    <slot name="previous" {exposedPrevious} {...exposedPrevious}>
       {#if loadingPrevious}
-        <slot name="loading" {exposedPrevious} />
+        <slot name="loading" {exposedPrevious} {...exposedPrevious} />
       {/if}
     </slot>
   </div>
@@ -197,23 +197,23 @@
 
 {#if !endElement && reverse}
   <div bind:this={endElementRef}>
-    <slot name="next" {exposedNext}>
+    <slot name="next" {exposedNext} {...exposedNext}>
       {#if loadingNext}
-        <slot name="loading" {exposedNext} />
+        <slot name="loading" {exposedNext} {...exposedNext} />
       {/if}
     </slot>
   </div>
 {/if}
 
 <svelte:element this={as} bind:this={itemsElementRef} {...$$restProps}>
-  <slot {exposedSlot} />
+  <slot {exposedSlot} {...exposedSlot} />
 </svelte:element>
 
 {#if !startElement && reverse}
   <div bind:this={startElementRef}>
-    <slot name="previous" {exposedPrevious}>
+    <slot name="previous" {exposedPrevious} {...exposedPrevious}>
       {#if loadingPrevious}
-        <slot name="loading" {exposedPrevious} />
+        <slot name="loading" {exposedPrevious} {...exposedPrevious} />
       {/if}
     </slot>
   </div>
@@ -221,9 +221,9 @@
 
 {#if !endElement && !reverse}
   <div bind:this={endElementRef}>
-    <slot name="next" {exposedNext}>
+    <slot name="next" {exposedNext} {...exposedNext}>
       {#if loadingNext}
-        <slot name="loading" {exposedNext} />
+        <slot name="loading" {exposedNext} {...exposedNext} />
       {/if}
     </slot>
   </div>
