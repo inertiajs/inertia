@@ -49,7 +49,7 @@ export const useInfiniteScrollQueryString = (options: {
           setTimeout(() => resolve())
         })
       })
-      .then(() => {
+      .finally(() => {
         if (enabled && initialUrl && payloadUrl && initialUrl.href !== payloadUrl.href) {
           // Update URL without triggering a page reload or affecting scroll position
           router.replace({

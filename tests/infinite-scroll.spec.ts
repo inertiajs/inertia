@@ -279,6 +279,45 @@ test.describe('Automatic page loading', () => {
     expect(page.url()).toContain('users1=2')
     expect(page.url()).toContain('users2=2')
   })
+
+  test('it handles dual sibling InfiniteScroll with manual mode and query string updates', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/dual-sibling')
+
+    await expect(page.getByText('User 1', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('User 15').first()).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true }).last()).toBeVisible()
+    await expect(page.getByText('User 15').last()).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await page.getByRole('button', { name: 'Load More Users 1' }).click()
+    await expect(page.getByText('User 16').first()).toBeVisible()
+    await expect(page.getByText('User 30').first()).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load More Users 2' }).click()
+    await expect(page.getByText('User 16').last()).toBeVisible()
+    await expect(page.getByText('User 30').last()).toBeVisible()
+
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForFunction(
+      () => window.location.search.includes('users1=2') && window.location.search.includes('users2=2'),
+      {},
+      { timeout: 1000 },
+    )
+    expect(page.url()).toContain('users1=2')
+    expect(page.url()).toContain('users2=2')
+
+    await scrollToTop(page)
+    await page.waitForFunction(
+      () => !window.location.search.includes('users1=') && !window.location.search.includes('users2='),
+      {},
+      { timeout: 1000 },
+    )
+    expect(page.url()).not.toContain('users1=')
+    expect(page.url()).not.toContain('users2=')
+  })
 })
 
 test.describe('Manual page loading', () => {
