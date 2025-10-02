@@ -37,10 +37,10 @@ async function getUserIdsFromDOM(page: Page) {
 }
 
 // Helper function to check URL updates
-async function expectQueryString(page: any, expectedPage: string) {
+async function expectQueryString(page: Page, expectedPage: string) {
   if (expectedPage === '1') {
     // Page 1 removes the page param entirely
-    await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 800 })
+    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 800 })
     const currentUrl = await page.url()
     expect(currentUrl).not.toContain('page=')
   } else {
@@ -1811,6 +1811,7 @@ Object.entries({
     test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
       requests.listen(page)
       await page.goto(path)
+      await page.setViewportSize({ width: 1200, height: 400 })
 
       await page.getByRole('link', { name: 'N-Z' }).first().click()
 
@@ -1877,6 +1878,8 @@ Object.entries({
     test('it resets the page and filter params when searching for a user', async ({ page }) => {
       requests.listen(page)
       await page.goto(path)
+      await page.setViewportSize({ width: 1200, height: 400 })
+
       await page.getByRole('link', { name: 'N-Z' }).first().click()
       await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
       await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
