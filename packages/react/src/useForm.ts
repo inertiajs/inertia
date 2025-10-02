@@ -249,7 +249,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     [setDefaults],
   )
 
-  useLayoutEffect(() => {
+  const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
+
+  useIsomorphicLayoutEffect(() => {
     if (!dataAsDefaults) {
       return
     }
