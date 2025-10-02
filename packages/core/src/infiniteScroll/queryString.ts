@@ -22,16 +22,12 @@ export const useInfiniteScrollQueryString = (options: {
 }) => {
   let enabled = true
 
-  const cleanupUrlInstances = (): void => {
-    initialUrl = payloadUrl = null
-  }
-
   const queuePageUpdate = (page: string) => {
     queue
       .add(() => {
         return new Promise((resolve) => {
           if (!enabled) {
-            cleanupUrlInstances()
+            initialUrl = payloadUrl = null
             return resolve()
           }
 
@@ -63,7 +59,7 @@ export const useInfiniteScrollQueryString = (options: {
           })
         }
 
-        cleanupUrlInstances()
+        initialUrl = payloadUrl = null
       })
   }
 
