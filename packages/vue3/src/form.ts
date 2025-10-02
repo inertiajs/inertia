@@ -204,7 +204,7 @@ const Form: InertiaForm = defineComponent({
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
-      validator.setOldData(getData()) // TODO: should it really do this?
+      validator.setOldData(getData())
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -218,6 +218,7 @@ const Form: InertiaForm = defineComponent({
     }
 
     const validating = ref(false)
+    const validated = ref<string[]>([])
 
     const validator = usePrecognition({
       onStart: () => (validating.value = true),
@@ -241,8 +242,12 @@ const Form: InertiaForm = defineComponent({
         method: method.value,
         data,
         only,
-        onPrecognitionSuccess: () => form.clearErrors(...only),
+        onPrecognitionSuccess: () => {
+          validated.value = [...validated.value, ...only]
+          form.clearErrors(...only)
+        },
         onValidationError: (errors) => {
+          validated.value = [...validated.value, ...only]
           const scopedErrors = props.errorBag ? errors[props.errorBag || ''] || {} : errors
           const errorKeys = Object.keys(scopedErrors)
           const valid = only.filter((field) => !errorKeys.includes(field))
@@ -286,9 +291,11 @@ const Form: InertiaForm = defineComponent({
       defaults,
 
       // Precognition
-      valid: (field: string) => form.errors[field] === undefined,
+      valid: (field: string) => validated.value.has(field) && form.errors[field] === undefined,
       invalid: (field: string) => form.errors[field] !== undefined,
       validate,
+      setValidationTimeout: (duration: number) => validator.setTimeout(duration),
+      validateFiles: () => validator.validateFiles(true),
     }
 
     expose<FormComponentRef>(exposed)

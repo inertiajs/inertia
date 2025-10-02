@@ -82,7 +82,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
           return
         }
 
-        oldData = validatingData = { ...data }
+        validatingData = { ...data }
 
         precognitionOptions.onStart()
 
@@ -109,6 +109,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
             throw error
           })
           .finally(() => {
+            oldData = validatingData
             precognitionOptions.onFinish()
           })
       },
