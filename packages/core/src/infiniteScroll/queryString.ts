@@ -7,6 +7,9 @@ import { getPageFromElement } from './elements'
 // Shared queue among all instances to ensure URL updates are processed sequentially
 const queue = new Queue<Promise<void>>()
 
+let initialUrl: URL | null
+let payloadUrl: URL | null
+
 /**
  * As users scroll through infinite content, this system updates the URL to reflect
  * which page they're currently viewing. It uses a "most visible page" calculation
@@ -19,34 +22,49 @@ export const useInfiniteScrollQueryString = (options: {
 }) => {
   let enabled = true
 
+  const cleanupUrlInstances = (): void => {
+    initialUrl = payloadUrl = null
+  }
+
   const queuePageUpdate = (page: string) => {
-    queue.add(() => {
-      return new Promise((resolve) => {
-        if (!enabled) {
-          return resolve()
-        }
+    queue
+      .add(() => {
+        return new Promise((resolve) => {
+          if (!enabled) {
+            cleanupUrlInstances()
+            return resolve()
+          }
 
-        const pageName = options.getPageName()
-        const url = new URL(window.location.href)
+          if (!initialUrl || !payloadUrl) {
+            initialUrl = new URL(window.location.href)
+            payloadUrl = new URL(window.location.href)
+          }
 
-        // Clean URLs: don't show ?page=1 in the URL, just remove the parameter entirely
-        if (page === '1') {
-          url.searchParams.delete(pageName)
-        } else {
-          url.searchParams.set(pageName, page)
-        }
+          const pageName = options.getPageName()
+          const searchParams = payloadUrl.searchParams
 
-        // Update URL without triggering a page reload or affecting scroll position
-        router.replace({
-          url: url.toString(),
-          preserveScroll: true,
-          preserveState: true,
-          onFinish: () => {
-            resolve()
-          },
+          // Clean URLs: don't show ?page=1 in the URL, just remove the parameter entirely
+          if (page === '1') {
+            searchParams.delete(pageName)
+          } else {
+            searchParams.set(pageName, page)
+          }
+
+          setTimeout(() => resolve())
         })
       })
-    })
+      .then(() => {
+        if (enabled && initialUrl && payloadUrl && initialUrl.href !== payloadUrl.href) {
+          // Update URL without triggering a page reload or affecting scroll position
+          router.replace({
+            url: payloadUrl.toString(),
+            preserveScroll: true,
+            preserveState: true,
+          })
+        }
+
+        cleanupUrlInstances()
+      })
   }
 
   // Debounced to avoid excessive URL updates during fast scrolling
