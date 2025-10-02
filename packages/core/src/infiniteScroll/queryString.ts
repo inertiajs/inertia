@@ -17,13 +17,15 @@ export const useInfiniteScrollQueryString = (options: {
 
   // Debounced to avoid excessive URL updates during fast scrolling
   const onItemIntersected = debounce((itemElement: HTMLElement) => {
-    if (!enabled || options.shouldPreserveUrl() || !itemElement) {
+    const itemsElement = options.getItemsElement()
+
+    if (!enabled || options.shouldPreserveUrl() || !itemElement || !itemsElement) {
       return
     }
 
     // Count how many items from each page are currently visible in the viewport
     const pageMap = new Map<string, number>()
-    const elements = [...options.getItemsElement().children] as HTMLElement[]
+    const elements = [...itemsElement.children] as HTMLElement[]
 
     getElementsInViewportFromCollection(itemElement, elements).forEach((element) => {
       const page = getPageFromElement(element) ?? '1'

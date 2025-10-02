@@ -1,5 +1,5 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import { requests } from './support'
+import { consoleMessages, requests } from './support'
 
 function infiniteScrollRequests() {
   return requests.requests.filter((req) => {
@@ -1984,4 +1984,30 @@ test.describe('Router', () => {
   })
 
   test('it can prefetch a page with scroll props', async ({ page }) => {})
+
+  test('it can navigate rapidly between pages with infinite scroll without errors', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/infinite-scroll')
+
+    // Navigate back and forth 10 times rapidly
+    for (let i = 0; i < 20; i++) {
+      await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink' }).click()
+      expect(consoleMessages.errors).toHaveLength(0)
+      await page.getByRole('link', { name: 'Go back to Links' }).click()
+      expect(consoleMessages.errors).toHaveLength(0)
+    }
+
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink' }).click()
+
+    // Check if the infinite scroll content is still functional
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
 })
