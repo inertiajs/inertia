@@ -37,10 +37,10 @@ async function getUserIdsFromDOM(page: Page) {
 }
 
 // Helper function to check URL updates
-async function expectQueryString(page: any, expectedPage: string) {
+async function expectQueryString(page: Page, expectedPage: string) {
   if (expectedPage === '1') {
     // Page 1 removes the page param entirely
-    await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 800 })
+    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 800 })
     const currentUrl = await page.url()
     expect(currentUrl).not.toContain('page=')
   } else {
@@ -278,6 +278,45 @@ test.describe('Automatic page loading', () => {
     // expect both ?users1=2 and users2=2 in URL
     expect(page.url()).toContain('users1=2')
     expect(page.url()).toContain('users2=2')
+  })
+
+  test('it handles dual sibling InfiniteScroll with manual mode and query string updates', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/dual-sibling')
+
+    await expect(page.getByText('User 1', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('User 15').first()).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true }).last()).toBeVisible()
+    await expect(page.getByText('User 15').last()).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await page.getByRole('button', { name: 'Load More Users 1' }).click()
+    await expect(page.getByText('User 16').first()).toBeVisible()
+    await expect(page.getByText('User 30').first()).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load More Users 2' }).click()
+    await expect(page.getByText('User 16').last()).toBeVisible()
+    await expect(page.getByText('User 30').last()).toBeVisible()
+
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForFunction(
+      () => window.location.search.includes('users1=2') && window.location.search.includes('users2=2'),
+      {},
+      { timeout: 1000 },
+    )
+    expect(page.url()).toContain('users1=2')
+    expect(page.url()).toContain('users2=2')
+
+    await scrollToTop(page)
+    await page.waitForFunction(
+      () => !window.location.search.includes('users1=') && !window.location.search.includes('users2='),
+      {},
+      { timeout: 1000 },
+    )
+    expect(page.url()).not.toContain('users1=')
+    expect(page.url()).not.toContain('users2=')
   })
 })
 
@@ -1811,6 +1850,7 @@ Object.entries({
     test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
       requests.listen(page)
       await page.goto(path)
+      await page.setViewportSize({ width: 1200, height: 400 })
 
       await page.getByRole('link', { name: 'N-Z' }).first().click()
 
@@ -1877,6 +1917,8 @@ Object.entries({
     test('it resets the page and filter params when searching for a user', async ({ page }) => {
       requests.listen(page)
       await page.goto(path)
+      await page.setViewportSize({ width: 1200, height: 400 })
+
       await page.getByRole('link', { name: 'N-Z' }).first().click()
       await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
       await expect(page.getByText('Current filter: n-z').first()).toBeVisible()

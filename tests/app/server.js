@@ -1021,6 +1021,51 @@ app.get('/infinite-scroll/dual-containers', (req, res) => {
     partialReload ? 250 : 0,
   )
 })
+app.get('/infinite-scroll/dual-sibling', (req, res) => {
+  const users1Page = req.query.users1 ? parseInt(req.query.users1) : 1
+  const users2Page = req.query.users2 ? parseInt(req.query.users2) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+
+  const { paginated: users1Paginated, scrollProp: users1ScrollProp } = paginateUsers(
+    users1Page,
+    15,
+    40,
+    false,
+    'users1',
+  )
+  const { paginated: users2Paginated, scrollProp: users2ScrollProp } = paginateUsers(
+    users2Page,
+    15,
+    60,
+    false,
+    'users2',
+  )
+
+  const props = {}
+  const scrollProps = {}
+
+  if (!partialReload || req.headers['x-inertia-partial-data']?.includes('users1')) {
+    props.users1 = users1Paginated
+    scrollProps.users1 = users1ScrollProp
+  }
+
+  if (!partialReload || req.headers['x-inertia-partial-data']?.includes('users2')) {
+    props.users2 = users2Paginated
+    scrollProps.users2 = users2ScrollProp
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/DualSibling',
+        props,
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users1.data', 'users2.data'],
+        scrollProps,
+      }),
+    partialReload ? 250 : 0,
+  )
+})
 
 function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) {}
 
