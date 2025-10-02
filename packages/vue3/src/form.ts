@@ -249,10 +249,7 @@ const Form: InertiaForm = defineComponent({
         onValidationError: (errors) => {
           validated.value = [...validated.value, ...only]
           const scopedErrors = props.errorBag ? errors[props.errorBag || ''] || {} : errors
-          const errorKeys = Object.keys(scopedErrors)
-          const valid = only.filter((field) => !errorKeys.includes(field))
-          form.clearErrors(...valid)
-          form.setError(scopedErrors)
+          form.setError({ ...form.errors, ...scopedErrors })
         },
       })
     }

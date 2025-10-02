@@ -22,13 +22,6 @@ import { Form } from '@inertiajs/vue3'
           {{ errors.email }}
         </p>
       </div>
-
-      <div>
-        <input name="token" @blur="validate('token')" value="default" />
-        <p v-if="invalid('token')">
-          {{ errors.token }}
-        </p>
-      </div>
     </Form>
   </div>
 </template>

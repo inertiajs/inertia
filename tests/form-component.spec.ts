@@ -1431,6 +1431,69 @@ test.describe('Form Component', () => {
     })
   })
 
+  test.describe('Precognition', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/precognition')
+    })
+
+    test('shows validation error when field is invalid', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+    })
+
+    test('clears validation error when field becomes valid', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+    })
+
+    test('validates only the specified field', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email field is required.')).not.toBeVisible()
+    })
+
+    test('validates multiple fields independently', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('does not clear unrelated field errors', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+
+      await page.fill('input[name="email"]', 'test@example.com')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+    })
+  })
+
   test.describe('React', () => {
     test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
 

@@ -65,7 +65,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   let validatingData: ValidatableData = {}
 
   let validateFiles: boolean = false
-  let debounceTimeoutDuration = 3000
+  let debounceTimeoutDuration = 1500
 
   const setDebounceTimeout = (value: number) => {
     debounceTimeoutDuration = value
@@ -109,7 +109,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
             throw error
           })
           .finally(() => {
-            oldData = validatingData
+            oldData = { ...validatingData }
             precognitionOptions.onFinish()
           })
       },
