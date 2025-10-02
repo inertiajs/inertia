@@ -212,8 +212,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       }
 
       return () => {
-        dataManager.removeEventListener()
-        elementManager.flushAll()
+        infiniteScrollInstance.flush()
         setInfiniteScroll(null)
       }
     }, [data, resolvedItemsElement, resolvedStartElement, resolvedEndElement, scrollableParent])

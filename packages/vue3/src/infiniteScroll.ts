@@ -101,7 +101,11 @@ const InfiniteScroll = defineComponent({
     const loadingNext = ref(false)
     const requestCount = ref(0)
 
-    const { dataManager, elementManager } = useInfiniteScroll({
+    const {
+      dataManager,
+      elementManager,
+      flush: flushInfiniteScroll,
+    } = useInfiniteScroll({
       // Data
       getPropName: () => props.data,
       inReverseMode: () => props.reverse,
@@ -166,10 +170,7 @@ const InfiniteScroll = defineComponent({
       }
     })
 
-    onUnmounted(() => {
-      dataManager.removeEventListener()
-      elementManager.flushAll()
-    })
+    onUnmounted(flushInfiniteScroll)
 
     watch(
       () => [autoLoad.value, props.onlyNext, props.onlyPrevious],

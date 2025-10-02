@@ -57,9 +57,8 @@ export const useInfiniteScrollElementManager = (options: {
 
     // Track individual items entering/leaving viewport for URL synchronization
     // When items become visible, we update the URL to reflect the current page
-    itemsObserver = intersectionObservers.new(
-      (entry: IntersectionObserverEntry) => options.onItemIntersected(entry.target as HTMLElement),
-      { threshold: 0 },
+    itemsObserver = intersectionObservers.new((entry: IntersectionObserverEntry) =>
+      options.onItemIntersected(entry.target as HTMLElement),
     )
 
     // Set up trigger zones at start/end that load more content when intersected. The rootMargin
@@ -111,6 +110,7 @@ export const useInfiniteScrollElementManager = (options: {
   }
 
   const flushAll = () => {
+    disableTriggers()
     intersectionObservers.flushAll()
     itemsMutationObserver?.disconnect()
   }

@@ -91,5 +91,10 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
   return {
     dataManager,
     elementManager,
+    flush: () => {
+      dataManager.removeEventListener()
+      elementManager.flushAll()
+      queryStringManager.cancel()
+    },
   }
 }

@@ -13,9 +13,11 @@ export const useInfiniteScrollQueryString = (options: {
   getItemsElement: () => HTMLElement
   shouldPreserveUrl: () => boolean
 }) => {
+  let enabled = true
+
   // Debounced to avoid excessive URL updates during fast scrolling
   const onItemIntersected = debounce((itemElement: HTMLElement) => {
-    if (options.shouldPreserveUrl() || !itemElement) {
+    if (!enabled || options.shouldPreserveUrl() || !itemElement) {
       return
     }
 
@@ -60,5 +62,6 @@ export const useInfiniteScrollQueryString = (options: {
 
   return {
     onItemIntersected,
+    cancel: () => (enabled = false),
   }
 }
