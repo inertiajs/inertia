@@ -1,4 +1,5 @@
 import {
+  Errors,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
@@ -248,7 +249,7 @@ const Form: InertiaForm = defineComponent({
         },
         onValidationError: (errors) => {
           validated.value = [...validated.value, ...only]
-          const scopedErrors = props.errorBag ? errors[props.errorBag || ''] || {} : errors
+          const scopedErrors = (props.errorBag ? errors[props.errorBag || ''] || {} : errors) as Errors
           form.setError({ ...form.errors, ...scopedErrors })
         },
       })
@@ -288,7 +289,7 @@ const Form: InertiaForm = defineComponent({
       defaults,
 
       // Precognition
-      valid: (field: string) => validated.value.has(field) && form.errors[field] === undefined,
+      valid: (field: string) => validated.value.includes(field) && form.errors[field] === undefined,
       invalid: (field: string) => form.errors[field] !== undefined,
       validate,
       setValidationTimeout: (duration: number) => validator.setTimeout(duration),
