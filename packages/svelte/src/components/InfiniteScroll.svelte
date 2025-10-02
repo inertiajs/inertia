@@ -197,9 +197,9 @@
 
 {#if !endElement && reverse}
   <div bind:this={endElementRef}>
-    <slot name="next" {exposedNext} {...exposedPrevious}>
+    <slot name="next" {exposedNext} {...exposedNext}>
       {#if loadingNext}
-        <slot name="loading" {exposedNext} {...exposedPrevious} />
+        <slot name="loading" {exposedNext} {...exposedNext} />
       {/if}
     </slot>
   </div>
@@ -221,9 +221,9 @@
 
 {#if !endElement && !reverse}
   <div bind:this={endElementRef}>
-    <slot name="next" {exposedNext} {...exposedPrevious}>
+    <slot name="next" {exposedNext} {...exposedNext}>
       {#if loadingNext}
-        <slot name="loading" {exposedNext} {...exposedPrevious} />
+        <slot name="loading" {exposedNext} {...exposedNext} />
       {/if}
     </slot>
   </div>
