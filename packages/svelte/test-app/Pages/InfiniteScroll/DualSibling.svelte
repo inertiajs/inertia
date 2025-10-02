@@ -18,13 +18,10 @@
           <UserCard {user} />
         {/each}
 
-        <div slot="next" let:loading let:fetch  style="text-align: center; padding: 20px">
-            <button
-              on:click={fetch}
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Load More Users 1'}
-            </button>
+        <div slot="next" let:exposedNext style="text-align: center; padding: 20px">
+          <button on:click={exposedNext.fetch} disabled={exposedNext.loading}>
+            {exposedNext.loading ? 'Loading...' : 'Load More Users 1'}
+          </button>
         </div>
       </InfiniteScroll>
     </div>
@@ -36,13 +33,10 @@
           <UserCard {user} />
         {/each}
 
-        <div slot="next" let:loading let:fetch  style="text-align: center; padding: 20px">
-            <button
-              on:click={fetch}
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Load More Users 2'}
-            </button>
+        <div slot="next" let:exposedNext style="text-align: center; padding: 20px">
+          <button on:click={exposedNext.fetch} disabled={exposedNext.loading}>
+            {exposedNext.loading ? 'Loading...' : 'Load More Users 2'}
+          </button>
         </div>
       </InfiniteScroll>
     </div>
