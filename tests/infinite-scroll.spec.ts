@@ -1983,7 +1983,56 @@ test.describe('Router', () => {
     await expect(page.getByText('User 31')).toBeHidden()
   })
 
-  test('it can prefetch a page with scroll props', async ({ page }) => {})
+  test('it can prefetch a page with scroll props', async ({ page }) => {
+    await page.goto('/infinite-scroll')
+
+    const prefetchPromise = page.waitForResponse('/infinite-scroll-with-link')
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).hover()
+    await page.waitForTimeout(75)
+    await prefetchPromise
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).click()
+    await page.waitForURL('/infinite-scroll-with-link')
+    await expect(requests.requests.length).toBe(0)
+
+    // Verify infinite scroll works - check initial users
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForTimeout(300)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await scrollToTop(page)
+    await page.waitForTimeout(100)
+    await page.getByRole('link', { name: 'Go back to Links' }).click()
+    await page.waitForURL('/infinite-scroll')
+
+    // Click the link again, should behave the same
+    const prefetchPromise2 = page.waitForResponse('/infinite-scroll-with-link')
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).hover()
+    await page.waitForTimeout(75)
+    await prefetchPromise2
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).click()
+    await page.waitForURL('/infinite-scroll-with-link')
+    await expect(requests.requests.length).toBe(0)
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForTimeout(300)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
 
   test('it can navigate rapidly between pages with infinite scroll without errors', async ({ page }) => {
     consoleMessages.listen(page)
@@ -1992,13 +2041,13 @@ test.describe('Router', () => {
 
     // Navigate back and forth 10 times rapidly
     for (let i = 0; i < 20; i++) {
-      await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink' }).click()
+      await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true }).click()
       expect(consoleMessages.errors).toHaveLength(0)
       await page.getByRole('link', { name: 'Go back to Links' }).click()
       expect(consoleMessages.errors).toHaveLength(0)
     }
 
-    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink' }).click()
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true }).click()
 
     // Check if the infinite scroll content is still functional
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
