@@ -28,8 +28,13 @@ import { Form } from '@inertiajs/vue3'
       </div>
 
       <button type="button" @click="validate()">Validate All Touched</button>
+      <button type="button" @click="validate('name')">Validate Name</button>
+      <button type="button" @click="validate(['name', 'email'])">Validate Name and Email</button>
       <button type="button" @click="reset()">Reset All</button>
       <button type="button" @click="reset('name')">Reset Name</button>
+      <button type="button" @click="reset(['name', 'email'])">Reset Name and Email</button>
+      <button type="button" @click="touch(['name', 'email'])">Touch Name and Email</button>
+      <button type="button" @click="touch('name'); touch('name')">Touch Name Twice</button>
     </Form>
   </div>
 </template>
