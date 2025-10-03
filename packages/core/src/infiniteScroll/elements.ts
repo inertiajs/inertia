@@ -144,7 +144,7 @@ export const useInfiniteScrollElementManager = (options: {
 
   let hasRestoredElements = false
 
-  const processServerLoadedElements = (loadedPage?: string | number) => {
+  const processServerLoadedElements = (loadedPage: string | number | null) => {
     // On first run, try to restore the elements tags from browser history
     if (!hasRestoredElements) {
       hasRestoredElements = true

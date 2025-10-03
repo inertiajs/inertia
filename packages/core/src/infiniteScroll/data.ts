@@ -8,9 +8,9 @@ type Side = 'previous' | 'next'
 type ScrollPropPageNames = keyof Pick<ScrollProp, 'previousPage' | 'nextPage'>
 
 type InfiniteScrollState = {
-  previousPage?: number | string
-  nextPage?: number | string
-  lastLoadedPage?: number | string
+  previousPage: number | string | null
+  nextPage: number | string | null
+  lastLoadedPage: number | string | null
   requestCount: number
 }
 
@@ -19,8 +19,8 @@ export const useInfiniteScrollData = (options: {
   onBeforeUpdate: () => void
   onBeforePreviousRequest: () => void
   onBeforeNextRequest: () => void
-  onCompletePreviousRequest: (loadedPage?: string | number) => void
-  onCompleteNextRequest: (loadedPage?: string | number) => void
+  onCompletePreviousRequest: (loadedPage: string | number | null) => void
+  onCompleteNextRequest: (loadedPage: string | number | null) => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
     const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
@@ -32,42 +32,48 @@ export const useInfiniteScrollData = (options: {
     throw new Error(`The page object does not contain a scroll prop named "${options.getPropName()}".`)
   }
 
-  const { previousPage, nextPage, currentPage: lastLoadedPage } = getScrollPropFromCurrentPage()
-
   const state = {
-    component: currentPage.get().component,
+    component: null,
     loading: false,
-    previousPage,
-    nextPage,
-    lastLoadedPage,
+    previousPage: null,
+    nextPage: null,
+    lastLoadedPage: null,
     requestCount: 0,
+  } as {
+    component: string | null
+    loading: boolean
+  } & InfiniteScrollState
+
+  const resetState = () => {
+    const scrollProp = getScrollPropFromCurrentPage()
+
+    state.component = currentPage.get().component
+    state.loading = false
+    state.previousPage = scrollProp.previousPage
+    state.nextPage = scrollProp.nextPage
+    state.lastLoadedPage = scrollProp.currentPage
+    state.requestCount = 0
   }
 
   const getRememberKey = () => `inertia:infinite-scroll-data:${options.getPropName()}`
 
-  const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+  if (typeof window !== 'undefined') {
+    resetState()
 
-  if (rememberedState && typeof rememberedState === 'object') {
-    // Restore the remembered state so the state matches the remembered prop data...
-    state.previousPage = rememberedState.previousPage
-    state.nextPage = rememberedState.nextPage
-    state.lastLoadedPage = rememberedState.lastLoadedPage
-    state.requestCount = rememberedState.requestCount || 0
+    const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+
+    if (rememberedState && typeof rememberedState === 'object') {
+      // Restore the remembered state so the state matches the remembered prop data...
+      state.previousPage = rememberedState.previousPage
+      state.nextPage = rememberedState.nextPage
+      state.lastLoadedPage = rememberedState.lastLoadedPage
+      state.requestCount = rememberedState.requestCount || 0
+    }
   }
 
   const removeEventListener = router.on('success', (event) => {
-    if (state.component !== event.detail.page.component) {
-      // Only reset state if it's the same component
-      return
-    }
-
-    const scrollProp = getScrollPropFromCurrentPage()
-
-    if (scrollProp.reset) {
-      state.previousPage = scrollProp.previousPage
-      state.nextPage = scrollProp.nextPage
-      state.lastLoadedPage = scrollProp.currentPage
-      state.requestCount = 0
+    if (state.component === event.detail.page.component && getScrollPropFromCurrentPage().reset) {
+      resetState()
     }
   })
 
