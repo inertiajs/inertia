@@ -489,6 +489,14 @@ export type FormComponentMethods = {
   defaults: () => void
 }
 
+export type FormComponentPrecognition = {
+  valid: (field: string) => boolean
+  invalid: (field: string) => boolean
+  validate: (field?: string | string[]) => void
+  touch: (field: string | string[]) => void
+  validating: boolean
+}
+
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {

@@ -1,5 +1,6 @@
 import {
   Errors,
+  FormComponentPrecognition,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
@@ -216,6 +217,12 @@ const Form: InertiaForm = defineComponent({
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
       updateDataOnValidator()
+
+      if (fields.length === 0) {
+        touched.value = []
+      } else {
+        touched.value = touched.value.filter((field) => !fields.includes(field))
+      }
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -230,14 +237,15 @@ const Form: InertiaForm = defineComponent({
 
     const validating = ref(false)
     const validated = ref<string[]>([])
+    const touched = ref<string[]>([])
 
     const validator = usePrecognition({
       onStart: () => (validating.value = true),
       onFinish: () => (validating.value = false),
     })
 
-    const validate = (field: string | string[]) => {
-      const only = Array.isArray(field) ? field : [field]
+    const validate = (field?: string | string[]) => {
+      const only = field === undefined ? touched.value : Array.isArray(field) ? field : [field]
 
       // We're not using the data object from this method as it might be empty
       // on GET requests, and we still want to pass a data object to the
@@ -259,6 +267,13 @@ const Form: InertiaForm = defineComponent({
           form.setError({ ...form.errors, ...scopedErrors })
         },
       })
+    }
+
+    const touch = (field: string | string[]) => {
+      const fields = Array.isArray(field) ? field : [field]
+
+      // Use Set to avoid duplicates
+      touched.value = [...new Set([...touched.value, ...fields])]
     }
 
     const exposed = {
@@ -298,11 +313,12 @@ const Form: InertiaForm = defineComponent({
       valid: (field: string) => validated.value.includes(field) && form.errors[field] === undefined,
       invalid: (field: string) => form.errors[field] !== undefined,
       validate,
+      touch,
       setValidationTimeout: (duration: number) => validator.setTimeout(duration),
       validateFiles: () => validator.validateFiles(true),
     }
 
-    expose<FormComponentRef>(exposed)
+    expose<FormComponentRef & FormComponentPrecognition>(exposed)
 
     return () => {
       return h(
@@ -318,7 +334,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
+        slots.default ? slots.default(<FormComponentSlotProps & FormComponentPrecognition>exposed) : [],
       )
     }
   },
