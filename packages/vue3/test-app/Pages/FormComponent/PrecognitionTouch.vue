@@ -9,7 +9,7 @@ import { Form } from '@inertiajs/vue3'
     <Form
       action="/form-component/precognition"
       method="post"
-      #default="{ invalid, errors, validate, touch, validating }"
+      #default="{ invalid, errors, validate, touch, validating, reset }"
     >
       <p v-if="validating">Validating...</p>
 
@@ -28,6 +28,8 @@ import { Form } from '@inertiajs/vue3'
       </div>
 
       <button type="button" @click="validate()">Validate All Touched</button>
+      <button type="button" @click="reset()">Reset All</button>
+      <button type="button" @click="reset('name')">Reset Name</button>
     </Form>
   </div>
 </template>

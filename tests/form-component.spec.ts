@@ -1504,12 +1504,63 @@ test.describe('Form Component', () => {
       await page.fill('input[name="email"]', 'x')
       await page.locator('input[name="email"]').blur()
 
+      await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
 
       await page.getByRole('button', { name: 'Validate All Touched' }).click()
 
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('reset all fields clears all touched fields', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await page.getByRole('button', { name: 'Reset All' }).click()
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+    })
+
+    test('reset specific fields removes only those fields from touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.locator('input[name="name"]')).toHaveValue('ab')
+      await expect(page.locator('input[name="email"]')).toHaveValue('x')
+
+      await page.getByRole('button', { name: 'Reset Name' }).click()
+
+      await expect(page.locator('input[name="name"]')).toHaveValue('')
+      await expect(page.locator('input[name="email"]')).toHaveValue('x')
+
+      await page.fill('input[name="name"]', 'abc')
+
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
     })
   })
