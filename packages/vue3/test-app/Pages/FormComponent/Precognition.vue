@@ -6,7 +6,11 @@ import { Form } from '@inertiajs/vue3'
   <div>
     <h1>Form Precognition</h1>
 
-    <Form action="/form-component/precognition" method="post" #default="{ invalid, errors, validate, validating }">
+    <Form
+      action="/form-component/precognition"
+      method="post"
+      #default="{ invalid, errors, validate, valid, validating }"
+    >
       <p v-if="validating">Validating...</p>
 
       <div>
@@ -14,6 +18,7 @@ import { Form } from '@inertiajs/vue3'
         <p v-if="invalid('name')">
           {{ errors.name }}
         </p>
+        <p v-if="valid('name')">Name is valid!</p>
       </div>
 
       <div>
@@ -21,6 +26,7 @@ import { Form } from '@inertiajs/vue3'
         <p v-if="invalid('email')">
           {{ errors.email }}
         </p>
+        <p v-if="valid('email')">Email is valid!</p>
       </div>
     </Form>
   </div>

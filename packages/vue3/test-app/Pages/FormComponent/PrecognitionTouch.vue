@@ -32,8 +32,10 @@ import { Form } from '@inertiajs/vue3'
       <button
         type="button"
         @click="
-          touch('name')
-          touch('name')
+          () => {
+            touch('name')
+            touch('name')
+          }
         "
       >
         Touch Name Twice
