@@ -928,12 +928,6 @@ app.post('/form-component/precognition', (req, res) => {
   }, 500)
 })
 
-app.get('/form-component/precognition-files', (req, res) => {
-  inertia.render(req, res, {
-    component: 'FormComponent/PrecognitionFiles',
-  })
-})
-
 app.post('/form-component/precognition-files', upload.any(), (req, res) => {
   setTimeout(() => {
     console.log(req, req)
@@ -952,6 +946,38 @@ app.post('/form-component/precognition-files', upload.any(), (req, res) => {
 
     if (!hasAvatar) {
       errors.avatar = 'The avatar field is required.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 500)
+})
+
+app.post('/form-component/precognition-transform', (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const errors = {}
+
+    // Validate that name is uppercase
+    if (!name) {
+      errors.name = 'The name field is required.'
+    } else if (name !== name.toUpperCase()) {
+      errors.name = 'The name must be uppercase.'
     }
 
     if (only.length) {

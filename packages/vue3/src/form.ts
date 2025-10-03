@@ -1,6 +1,6 @@
 import {
-  Errors,
   FormComponentPrecognition,
+  FormComponentPrecognitionValidateOptions,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
@@ -264,8 +264,23 @@ const Form: InertiaForm = defineComponent({
       isDirty.value = false
     }
 
-    const validate = (field?: string | string[]) => {
-      const only = field === undefined ? touched.value : Array.isArray(field) ? field : [field]
+    const validate = (
+      only?: string | string[] | FormComponentPrecognitionValidateOptions,
+      maybeOptions?: FormComponentPrecognitionValidateOptions,
+    ) => {
+      let fields: string[]
+      let options: FormComponentPrecognitionValidateOptions = {}
+
+      if (typeof only === 'object' && !Array.isArray(only)) {
+        // Called as validate({ only: [...], onSuccess, onError, onFinish })
+        const onlyFields = only.only
+        fields = onlyFields === undefined ? touched.value : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
+        options = only
+      } else {
+        // Called as validate('field') or validate(['field1', 'field2']) or validate('field', {options})
+        fields = only === undefined ? touched.value : Array.isArray(only) ? only : [only]
+        options = maybeOptions || {}
+      }
 
       // We're not using the data object from this method as it might be empty
       // on GET requests, and we still want to pass a data object to the
@@ -275,23 +290,28 @@ const Form: InertiaForm = defineComponent({
       validator.validate({
         url,
         method: method.value,
-        data: getData(),
-        only,
+        data: props.transform(getData()),
+        only: fields,
+        errorBag: props.errorBag,
         onPrecognitionSuccess: () => {
-          validated.value = [...validated.value, ...only]
-          form.clearErrors(...only)
+          validated.value = [...validated.value, ...fields]
+          form.clearErrors(...fields)
+          options.onSuccess?.()
         },
         onValidationError: (errors) => {
-          validated.value = [...validated.value, ...only]
+          validated.value = [...validated.value, ...fields]
 
-          const validFields = only.filter((field) => errors[field] === undefined)
+          const validFields = fields.filter((field) => errors[field] === undefined)
 
           if (validFields.length) {
             form.clearErrors(...validFields)
           }
 
-          const scopedErrors = (props.errorBag ? errors[props.errorBag || ''] || {} : errors) as Errors
-          form.setError({ ...form.errors, ...scopedErrors })
+          form.setError({ ...form.errors, ...errors })
+          options.onError?.(errors)
+        },
+        onFinish: () => {
+          options.onFinish?.()
         },
       })
     }

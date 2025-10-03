@@ -1793,6 +1793,47 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
       await expect(page.getByText('The avatar field is required.')).not.toBeVisible()
     })
+
+    test('transforms data for validation requests', async ({ page }) => {
+      await page.goto('/form-component/precognition-transform')
+
+      await page.fill('input[name="name"]', 'taylor')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should succeed because transform converts to uppercase
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+    })
+
+    test('calls onSuccess and onFinish callbacks when validation succeeds', async ({ page }) => {
+      await page.goto('/form-component/precognition-callbacks')
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.click('button:has-text("Validate with onSuccess")')
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('onSuccess called!')).toBeVisible()
+      await expect(page.getByText('onError called!')).not.toBeVisible()
+      await expect(page.getByText('onFinish called!')).toBeVisible()
+    })
+
+    test('calls onError and onFinish callbacks when validation fails', async ({ page }) => {
+      await page.goto('/form-component/precognition-callbacks')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.click('button:has-text("Validate with onError")')
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('onSuccess called!')).not.toBeVisible()
+      await expect(page.getByText('onError called!')).toBeVisible()
+      await expect(page.getByText('onFinish called!')).toBeVisible()
+    })
   })
 
   test.describe('React', () => {

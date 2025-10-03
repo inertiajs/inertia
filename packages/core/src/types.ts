@@ -499,6 +499,13 @@ export type FormComponentPrecognition = {
   validating: boolean
 }
 
+export type FormComponentPrecognitionValidateOptions = {
+  only?: string | string[]
+  onSuccess?: () => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+}
+
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {

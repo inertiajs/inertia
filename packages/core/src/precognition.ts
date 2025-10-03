@@ -3,7 +3,7 @@ import { get, isEqual } from 'lodash-es'
 import debounce from './debounce'
 import { forgetFiles, hasFiles } from './files'
 import { objectToFormData } from './formData'
-import { ErrorBag, Errors, Method, RequestData } from './types'
+import { Errors, Method, RequestData } from './types'
 
 interface UsePrecognitionOptions {
   onStart: () => void
@@ -15,9 +15,10 @@ interface PrecognitionValidateOptions {
   method: Method
   data: RequestData
   only: string[]
-  errorBag?: string
+  errorBag?: string | null
   onPrecognitionSuccess: () => void
-  onValidationError: (errors: Errors & ErrorBag) => void
+  onValidationError: (errors: Errors) => void
+  onFinish?: () => void
 }
 
 interface PrecognitionValidator {
@@ -71,13 +72,16 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
           })
           .catch((error) => {
             if (error.response?.status === 422) {
-              return options.onValidationError(error.response.data?.errors || {})
+              const errors = error.response.data?.errors || {}
+              const scopedErrors = (options.errorBag ? errors[options.errorBag] || {} : errors) as Errors
+              return options.onValidationError(scopedErrors)
             }
 
             throw error
           })
           .finally(() => {
             oldData = { ...data }
+            options.onFinish?.()
             precognitionOptions.onFinish()
           })
       },
