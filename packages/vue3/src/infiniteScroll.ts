@@ -6,7 +6,7 @@ import {
   InfiniteScrollSlotProps,
   useInfiniteScroll,
 } from '@inertiajs/core'
-import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, watch } from 'vue'
+import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
 
 // Vue-specific element resolver
 const resolveHTMLElement = (value, fallback): HTMLElement | null => {
@@ -29,6 +29,12 @@ const resolveHTMLElement = (value, fallback): HTMLElement | null => {
 
 const InfiniteScroll = defineComponent({
   name: 'InfiniteScroll',
+  slots: Object as SlotsType<{
+    default: InfiniteScrollSlotProps
+    previous: InfiniteScrollActionSlotProps
+    next: InfiniteScrollActionSlotProps
+    loading: InfiniteScrollActionSlotProps
+  }>,
   props: {
     data: {
       type: String as PropType<InfiniteScrollComponentBaseProps['data']>,
@@ -232,7 +238,7 @@ const InfiniteScroll = defineComponent({
             loading: loadingPrevious.value || loadingNext.value,
             loadingPrevious: loadingPrevious.value,
             loadingNext: loadingNext.value,
-          } as InfiniteScrollSlotProps),
+          }),
         ),
       )
 

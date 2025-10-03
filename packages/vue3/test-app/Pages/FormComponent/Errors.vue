@@ -14,7 +14,7 @@ function setErrorBag(bag: string) {
     :action="errorBag ? '/form-component/errors/bag' : '/form-component/errors'"
     method="post"
     v-slot="{ errors, hasErrors, setError, clearErrors }"
-    :error-bag="errorBag"
+    v-bind="errorBag ? { errorBag } : {}"
   >
     <h1>Form Errors</h1>
 
