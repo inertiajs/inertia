@@ -884,6 +884,123 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
   }),
 )
 
+//
+
+app.post('/form-component/precognition', (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const errors = {}
+
+    if (!name) {
+      errors.name = 'The name field is required.'
+    }
+
+    if (name && name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    if (!email) {
+      errors.email = 'The email field is required.'
+    }
+
+    if (email && !/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'The email must be a valid email address.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 500)
+})
+
+app.post('/form-component/precognition-files', upload.any(), (req, res) => {
+  setTimeout(() => {
+    console.log(req, req)
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const hasAvatar = req.files && req.files.avatar
+    const errors = {}
+
+    if (!name) {
+      errors.name = 'The name field is required.'
+    }
+
+    if (name && name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    if (!hasAvatar) {
+      errors.avatar = 'The avatar field is required.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 500)
+})
+
+app.post('/form-component/precognition-transform', (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const errors = {}
+
+    // Validate that name is uppercase
+    if (!name) {
+      errors.name = 'The name field is required.'
+    } else if (name !== name.toUpperCase()) {
+      errors.name = 'The name must be uppercase.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 500)
+})
+
+//
+
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']

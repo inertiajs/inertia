@@ -1431,6 +1431,411 @@ test.describe('Form Component', () => {
     })
   })
 
+  test.describe('Precognition', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/precognition')
+    })
+
+    test('shows validation error when field is invalid', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+    })
+
+    test('clears validation error when field becomes valid', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+    })
+
+    test('validates only the specified field', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email field is required.')).not.toBeVisible()
+    })
+
+    test('validates multiple fields independently', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('does not clear unrelated field errors', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+
+      await page.fill('input[name="email"]', 'test@example.com')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+    })
+
+    test('valid returns false before validation', async ({ page }) => {
+      await expect(page.getByText('Name is valid!')).not.toBeVisible()
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+    })
+
+    test('valid returns false when field has validation errors', async ({ page }) => {
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('Name is valid!')).not.toBeVisible()
+    })
+
+    test('valid returns true after successful validation', async ({ page }) => {
+      await expect(page.getByText('Name is valid!')).not.toBeVisible()
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+    })
+
+    test('invalid returns true only when validation errors exist', async ({ page }) => {
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+    })
+
+    test('valid persists after successful validation', async ({ page }) => {
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'Jane Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+    })
+
+    test('valid becomes false when field is re-validated with errors', async ({ page }) => {
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('Name is valid!')).not.toBeVisible()
+    })
+
+    test('validates all touched fields when calling validate() without arguments', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('reset all fields clears all touched fields', async ({ page }) => {
+      await page.goto('/form-component/precognition-reset')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await page.getByRole('button', { name: 'Reset All' }).click()
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+    })
+
+    test('reset specific fields removes only those fields from touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-reset')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.locator('input[name="name"]')).toHaveValue('ab')
+      await expect(page.locator('input[name="email"]')).toHaveValue('x')
+
+      await page.getByRole('button', { name: 'Reset Name', exact: true }).click()
+
+      await expect(page.locator('input[name="name"]')).toHaveValue('')
+      await expect(page.locator('input[name="email"]')).toHaveValue('x')
+
+      await page.fill('input[name="name"]', 'abc')
+
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('touch with array marks multiple fields as touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.fill('input[name="email"]', 'x')
+
+      await page.getByRole('button', { name: 'Touch Name and Email' }).click()
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('touch deduplicates fields when called multiple times', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.fill('input[name="name"]', 'ab')
+
+      await page.getByRole('button', { name: 'Touch Name Twice' }).click()
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+    })
+
+    test('validate with specific field works independently of touched state', async ({ page }) => {
+      await page.goto('/form-component/precognition-validate')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.fill('input[name="email"]', 'x')
+
+      await page.getByRole('button', { name: 'Validate Name', exact: true }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+    })
+
+    test('validate with array of fields validates multiple fields', async ({ page }) => {
+      await page.goto('/form-component/precognition-validate')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.fill('input[name="email"]', 'x')
+
+      await page.getByRole('button', { name: 'Validate Name and Email' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
+
+    test('reset with array removes multiple fields from touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-reset')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Reset Name and Email' }).click()
+
+      await page.fill('input[name="name"]', 'abc')
+      await page.fill('input[name="email"]', 'test@example.com')
+
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await page.waitForTimeout(500)
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+    })
+
+    test('touching one field and validating another does not validate the touched field', async ({ page }) => {
+      await page.goto('/form-component/precognition-validate')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+
+      await page.getByRole('button', { name: 'Validate Name', exact: true }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+    })
+
+    test('does not submit files by default', async ({ page }) => {
+      await page.goto('/form-component/precognition-files')
+
+      await page.setInputFiles('#avatar', {
+        name: 'avatar.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      })
+
+      await page.getByRole('button', { name: 'Validate Both' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name field is required.')).toBeVisible()
+      await expect(page.getByText('The avatar field is required.')).toBeVisible()
+    })
+
+    test('validates files when validate-files prop is true', async ({ page }) => {
+      await page.goto('/form-component/precognition-files')
+      await page.getByRole('button', { name: /Toggle Validate Files/ }).click()
+      await expect(page.getByText('Toggle Validate Files (enabled)')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.setInputFiles('#avatar', {
+        name: 'avatar.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      })
+
+      await page.getByRole('button', { name: 'Validate Both' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The avatar field is required.')).not.toBeVisible()
+    })
+
+    test('transforms data for validation requests', async ({ page }) => {
+      await page.goto('/form-component/precognition-transform')
+
+      await page.fill('input[name="name"]', 'taylor')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should succeed because transform converts to uppercase
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+    })
+
+    test('calls onSuccess and onFinish callbacks when validation succeeds', async ({ page }) => {
+      await page.goto('/form-component/precognition-callbacks')
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.click('button:has-text("Validate with onSuccess")')
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('onSuccess called!')).toBeVisible()
+      await expect(page.getByText('onError called!')).not.toBeVisible()
+      await expect(page.getByText('onFinish called!')).toBeVisible()
+    })
+
+    test('calls onError and onFinish callbacks when validation fails', async ({ page }) => {
+      await page.goto('/form-component/precognition-callbacks')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.click('button:has-text("Validate with onError")')
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('onSuccess called!')).not.toBeVisible()
+      await expect(page.getByText('onError called!')).toBeVisible()
+      await expect(page.getByText('onFinish called!')).toBeVisible()
+    })
+  })
+
   test.describe('React', () => {
     test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
 

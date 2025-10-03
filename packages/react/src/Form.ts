@@ -2,12 +2,14 @@ import {
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
+  FormComponentValidateOptions,
   FormDataConvertible,
   formDataToObject,
   isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  usePrecognition,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
@@ -64,6 +66,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       resetOnSuccess = false,
       setDefaultsOnSuccess = false,
       invalidateCacheTags = [],
+      validateFiles = false,
+      validateTimeout = 1500,
       children,
       ...props
     },
@@ -79,12 +83,34 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
 
+    const [validating, setValidating] = useState(false)
+    const [validated, setValidated] = useState<string[]>([])
+    const [touched, setTouched] = useState<string[]>([])
+
+    const validator = useMemo(
+      () =>
+        usePrecognition({
+          onStart: () => setValidating(true),
+          onFinish: () => setValidating(false),
+        }),
+      [],
+    )
+
     const getFormData = (): FormData => new FormData(formElement.current)
 
     // Convert the FormData to an object because we can't compare two FormData
     // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
+
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
+        resolvedMethod,
+        isUrlMethodPair(action) ? action.url : action,
+        getData(),
+        queryStringArrayFormat,
+      )
+    }
 
     const updateDirtyState = (event: Event) =>
       deferStateUpdate(() =>
@@ -101,8 +127,36 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
     }, [])
 
+    useEffect(() => {
+      validator.validateFiles(validateFiles)
+    }, [validateFiles, validator])
+
+    useEffect(() => {
+      validator.setTimeout(validateTimeout)
+    }, [validateTimeout, validator])
+
+    useEffect(() => {
+      updateDataOnValidator()
+    }, [])
+
+    const updateDataOnValidator = () => {
+      try {
+        // This might fail if the component is already unmounted but this function
+        // is called after navigating away after a form submission.
+        const data = getData()
+        validator.setOldData(data)
+      } catch {}
+    }
+
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.current, defaultData.current, fields)
+      updateDataOnValidator()
+
+      if (fields.length === 0) {
+        setTouched([])
+      } else {
+        setTouched((prev) => prev.filter((field) => !fields.includes(field)))
+      }
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -123,12 +177,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const submit = () => {
-      const [url, _data] = mergeDataIntoQueryString(
-        resolvedMethod,
-        isUrlMethodPair(action) ? action.url : action,
-        getData(),
-        queryStringArrayFormat,
-      )
+      const [url, _data] = getUrlAndData()
 
       const submitOptions: FormSubmitOptions = {
         headers,
@@ -169,6 +218,65 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setIsDirty(false)
     }
 
+    const validate = (
+      only?: string | string[] | FormComponentValidateOptions,
+      maybeOptions?: FormComponentValidateOptions,
+    ) => {
+      let fields: string[]
+      let options: FormComponentValidateOptions = {}
+
+      if (typeof only === 'object' && !Array.isArray(only)) {
+        // Called as validate({ only: [...], onSuccess, onError, onFinish })
+        const onlyFields = only.only
+        fields = onlyFields === undefined ? touched : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
+        options = only
+      } else {
+        // Called as validate('field') or validate(['field1', 'field2']) or validate('field', {options})
+        fields = only === undefined ? touched : Array.isArray(only) ? only : [only]
+        options = maybeOptions || {}
+      }
+
+      // We're not using the data object from this method as it might be empty
+      // on GET requests, and we still want to pass a data object to the
+      // validator so it knows the current state of the form.
+      const [url] = getUrlAndData()
+
+      validator.validate({
+        url,
+        method: resolvedMethod,
+        data: transform(getData()),
+        only: fields,
+        errorBag,
+        onPrecognitionSuccess: () => {
+          setValidated((prev) => [...prev, ...fields])
+          form.clearErrors(...fields)
+          options.onSuccess?.()
+        },
+        onValidationError: (errors) => {
+          setValidated((prev) => [...prev, ...fields])
+
+          const validFields = fields.filter((field) => errors[field] === undefined)
+
+          if (validFields.length) {
+            form.clearErrors(...validFields)
+          }
+
+          form.setError({ ...form.errors, ...errors })
+          options.onError?.(errors)
+        },
+        onFinish: () => {
+          options.onFinish?.()
+        },
+      })
+    }
+
+    const touch = (field: string | string[]) => {
+      const fields = Array.isArray(field) ? field : [field]
+
+      // Use Set to avoid duplicates
+      setTouched((prev) => [...new Set([...prev, ...fields])])
+    }
+
     const exposed = () => ({
       errors: form.errors,
       hasErrors: form.hasErrors,
@@ -183,9 +291,28 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       reset,
       submit,
       defaults,
+
+      // Precognition
+      validating,
+      valid: (field: string) => validated.includes(field) && form.errors[field] === undefined,
+      invalid: (field: string) => form.errors[field] !== undefined,
+      validate,
+      touch,
+      setValidationTimeout: (duration: number) => validator.setTimeout(duration),
+      validateFiles: () => validator.validateFiles(true),
     })
 
-    useImperativeHandle(ref, exposed, [form, isDirty, submit])
+    useImperativeHandle(ref, exposed, [
+      form,
+      isDirty,
+      submit,
+      validating,
+      validated,
+      touched,
+      validate,
+      touch,
+      validator,
+    ])
 
     return createElement(
       'form',

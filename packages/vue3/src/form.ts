@@ -2,16 +2,18 @@ import {
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
+  FormComponentValidateOptions,
   FormDataConvertible,
   formDataToObject,
   isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  usePrecognition,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref, watch } from 'vue'
 import useForm from './useForm'
 
 type InertiaForm = DefineComponent<FormComponentProps>
@@ -110,6 +112,14 @@ const Form: InertiaForm = defineComponent({
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
+    validateFiles: {
+      type: Boolean as PropType<FormComponentProps['validateFiles']>,
+      default: false,
+    },
+    validateTimeout: {
+      type: Number as PropType<FormComponentProps['validateTimeout']>,
+      default: 1500,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -132,10 +142,32 @@ const Form: InertiaForm = defineComponent({
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
+    const validating = ref(false)
+    const validated = ref<string[]>([])
+    const touched = ref<string[]>([])
+
+    const validator = usePrecognition({
+      onStart: () => (validating.value = true),
+      onFinish: () => (validating.value = false),
+    })
+
     onMounted(() => {
       defaultData.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
+      updateDataOnValidator()
     })
+
+    watch(
+      () => props.validateFiles,
+      (value) => validator.validateFiles(value),
+      { immediate: true },
+    )
+
+    watch(
+      () => props.validateTimeout,
+      (value) => validator.setTimeout(value),
+      { immediate: true },
+    )
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
@@ -146,14 +178,16 @@ const Form: InertiaForm = defineComponent({
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
-    const submit = () => {
-      const [action, data] = mergeDataIntoQueryString(
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
         method.value,
         isUrlMethodPair(props.action) ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )
+    }
 
+    const submit = () => {
       const maybeReset = (resetOption: boolean | string[]) => {
         if (!resetOption) {
           return
@@ -193,12 +227,30 @@ const Form: InertiaForm = defineComponent({
         ...props.options,
       }
 
+      const [url, data] = getUrlAndData()
+
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
+      form.transform(() => props.transform(data)).submit(method.value, url, submitOptions)
+    }
+
+    const updateDataOnValidator = () => {
+      try {
+        // This might fail if the component is already unmounted but this function
+        // is called after navigating away after a form submission.
+        const data = getData()
+        validator.setOldData(data)
+      } catch {}
     }
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
+      updateDataOnValidator()
+
+      if (fields.length === 0) {
+        touched.value = []
+      } else {
+        touched.value = touched.value.filter((field) => !fields.includes(field))
+      }
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -209,6 +261,65 @@ const Form: InertiaForm = defineComponent({
     const defaults = () => {
       defaultData.value = getFormData()
       isDirty.value = false
+    }
+
+    const validate = (
+      only?: string | string[] | FormComponentValidateOptions,
+      maybeOptions?: FormComponentValidateOptions,
+    ) => {
+      let fields: string[]
+      let options: FormComponentValidateOptions = {}
+
+      if (typeof only === 'object' && !Array.isArray(only)) {
+        // Called as validate({ only: [...], onSuccess, onError, onFinish })
+        const onlyFields = only.only
+        fields = onlyFields === undefined ? touched.value : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
+        options = only
+      } else {
+        // Called as validate('field') or validate(['field1', 'field2']) or validate('field', {options})
+        fields = only === undefined ? touched.value : Array.isArray(only) ? only : [only]
+        options = maybeOptions || {}
+      }
+
+      // We're not using the data object from this method as it might be empty
+      // on GET requests, and we still want to pass a data object to the
+      // validator so it knows the current state of the form.
+      const [url] = getUrlAndData()
+
+      validator.validate({
+        url,
+        method: method.value,
+        data: props.transform(getData()),
+        only: fields,
+        errorBag: props.errorBag,
+        onPrecognitionSuccess: () => {
+          validated.value = [...validated.value, ...fields]
+          form.clearErrors(...fields)
+          options.onSuccess?.()
+        },
+        onValidationError: (errors) => {
+          validated.value = [...validated.value, ...fields]
+
+          const validFields = fields.filter((field) => errors[field] === undefined)
+
+          if (validFields.length) {
+            form.clearErrors(...validFields)
+          }
+
+          form.setError({ ...form.errors, ...errors })
+          options.onError?.(errors)
+        },
+        onFinish: () => {
+          options.onFinish?.()
+        },
+      })
+    }
+
+    const touch = (field: string | string[]) => {
+      const fields = Array.isArray(field) ? field : [field]
+
+      // Use Set to avoid duplicates
+      touched.value = [...new Set([...touched.value, ...fields])]
     }
 
     const exposed = {
@@ -230,6 +341,9 @@ const Form: InertiaForm = defineComponent({
       get recentlySuccessful() {
         return form.recentlySuccessful
       },
+      get validating() {
+        return validating.value
+      },
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
@@ -240,6 +354,14 @@ const Form: InertiaForm = defineComponent({
       reset,
       submit,
       defaults,
+
+      // Precognition
+      valid: (field: string) => validated.value.includes(field) && form.errors[field] === undefined,
+      invalid: (field: string) => form.errors[field] !== undefined,
+      validate,
+      touch,
+      setValidationTimeout: (duration: number) => validator.setTimeout(duration),
+      validateFiles: () => validator.validateFiles(true),
     }
 
     expose<FormComponentRef>(exposed)
