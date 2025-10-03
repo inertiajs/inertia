@@ -65,13 +65,11 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
 
         axios(submitOptions)
           .then((response) => {
-            console.log({ response })
             if (response.status === 204 && response.headers['precognition-success'] === 'true') {
               options.onPrecognitionSuccess()
             }
           })
           .catch((error) => {
-            console.log({ error })
             if (error.response?.status === 422) {
               return options.onValidationError(error.response.data?.errors || {})
             }
