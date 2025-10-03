@@ -8,6 +8,7 @@
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
+    usePrecognition,
   } from '@inertiajs/core'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
@@ -37,6 +38,8 @@
   export let resetOnError: FormComponentProps['resetOnError'] = false
   export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
+  export let validateFiles: FormComponentProps['validateFiles'] = false
+  export let validateTimeout: FormComponentProps['validateTimeout'] = 1500
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -44,6 +47,19 @@
   let formElement: HTMLFormElement
   let isDirty = false
   let defaultData: FormData = new FormData()
+
+  let validating = false
+  let validated: string[] = []
+  let touched: string[] = []
+
+  const validator = usePrecognition({
+    onStart: () => {
+      validating = true
+    },
+    onFinish: () => {
+      validating = false
+    },
+  })
 
   $: _method = isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = isUrlMethodPair(action) ? action.url : action
@@ -59,12 +75,16 @@
     return formDataToObject(getFormData())
   }
 
+  function getActionAndData(): [string, Record<string, FormDataConvertible>] {
+    return mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+  }
+
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
   export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+    const [url, _data] = getActionAndData()
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -133,8 +153,24 @@
     }
   }
 
+  function updateDataOnValidator() {
+    try {
+      // This might fail if the component is already unmounted but this function
+      // is called after navigating away after a form submission.
+      const data = getData()
+      validator.setOldData(data)
+    } catch {}
+  }
+
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
+    updateDataOnValidator()
+
+    if (fields.length === 0) {
+      touched = []
+    } else {
+      touched = touched.filter((field) => !fields.includes(field))
+    }
   }
 
   export function clearErrors(...fields: string[]) {
@@ -162,17 +198,87 @@
     isDirty = false
   }
 
+  export function validate(field?: string | string[]) {
+    const only = field === undefined ? touched : Array.isArray(field) ? field : [field]
+
+    // We're not using the data object from this method as it might be empty
+    // on GET requests, and we still want to pass a data object to the
+    // validator so it knows the current state of the form.
+    const [url] = getActionAndData()
+
+    validator.validate({
+      url,
+      method: _method,
+      data: getData(),
+      only,
+      onPrecognitionSuccess: () => {
+        validated = [...validated, ...only]
+        clearErrors(...only)
+      },
+      onValidationError: (errors) => {
+        validated = [...validated, ...only]
+
+        const validFields = only.filter((field) => errors[field] === undefined)
+
+        if (validFields.length) {
+          clearErrors(...validFields)
+        }
+
+        const scopedErrors = (errorBag ? errors[errorBag || ''] || {} : errors) as Errors
+
+        // Merge current errors with new scopedErrors
+        const mergedErrors = { ...$form.errors, ...scopedErrors }
+        setError(mergedErrors)
+      },
+    })
+  }
+
+  export function touch(field: string | string[]) {
+    const fields = Array.isArray(field) ? field : [field]
+
+    // Use Set to avoid duplicates
+    touched = [...new Set([...touched, ...fields])]
+  }
+
+  function valid(field: string): boolean {
+    return validated.includes(field) && $form.errors[field] === undefined
+  }
+
+  function invalid(field: string): boolean {
+    return $form.errors[field] !== undefined
+  }
+
+  export function setValidationTimeout(duration: number) {
+    validator.setTimeout(duration)
+  }
+
+  export function validateFilesEnabled() {
+    validator.validateFiles(true)
+  }
+
   onMount(() => {
     defaultData = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
+    updateDataOnValidator()
+    validator.validateFiles(validateFiles)
+    validator.setTimeout(validateTimeout)
+
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+
+  $: validator.validateFiles(validateFiles)
+  $: validator.setTimeout(validateTimeout)
+
   $: slotErrors = $form.errors as Errors
+
+  // Create reactive slot props that update when state changes
+  $: slotValid = (field: string) => validated.includes(field) && slotErrors[field] === undefined
+  $: slotInvalid = (field: string) => slotErrors[field] !== undefined
 </script>
 
 <form
@@ -197,5 +303,13 @@
     {isDirty}
     {submit}
     {defaults}
+    {reset}
+    {validating}
+    {validate}
+    {touch}
+    valid={slotValid}
+    invalid={slotInvalid}
+    {setValidationTimeout}
+    {validateFilesEnabled}
   />
 </form>
