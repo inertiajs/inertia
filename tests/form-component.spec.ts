@@ -1756,6 +1756,45 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
     })
+
+    test('does not submit files by default', async ({ page }) => {
+      await page.goto('/form-component/precognition-files')
+
+      await page.setInputFiles('#avatar', {
+        name: 'avatar.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      })
+
+      await page.getByRole('button', { name: 'Validate Both' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name field is required.')).toBeVisible()
+      await expect(page.getByText('The avatar field is required.')).toBeVisible()
+    })
+
+    test('validates files when validate-files prop is true', async ({ page }) => {
+      await page.goto('/form-component/precognition-files')
+      await page.getByRole('button', { name: /Toggle Validate Files/ }).click()
+      await expect(page.getByText('Toggle Validate Files (enabled)')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.setInputFiles('#avatar', {
+        name: 'avatar.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from('fake image data'),
+      })
+
+      await page.getByRole('button', { name: 'Validate Both' }).click()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The avatar field is required.')).not.toBeVisible()
+    })
   })
 
   test.describe('React', () => {

@@ -1,7 +1,8 @@
-import { default as axios } from 'axios'
+import { default as axios, AxiosRequestConfig } from 'axios'
 import { get, isEqual } from 'lodash-es'
 import debounce from './debounce'
 import { forgetFiles, hasFiles } from './files'
+import { objectToFormData } from './formData'
 import { ErrorBag, Errors, Method, RequestData } from './types'
 
 interface UsePrecognitionOptions {
@@ -27,11 +28,10 @@ interface PrecognitionValidator {
 }
 
 export default function usePrecognition(precognitionOptions: UsePrecognitionOptions): PrecognitionValidator {
-  let oldData: RequestData = {}
-  let validatingData: RequestData = {}
-
-  let validateFiles: boolean = false
   let debounceTimeoutDuration = 1500
+  let validateFiles: boolean = false
+
+  let oldData: RequestData = {}
 
   const setDebounceTimeout = (value: number) => {
     if (value !== debounceTimeoutDuration) {
@@ -43,33 +43,35 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   const createValidateFunction = () =>
     debounce(
       (options: PrecognitionValidateOptions) => {
+        const changed = options.only.filter((field) => !isEqual(get(options.data, field), get(oldData, field)))
         const data = validateFiles ? options.data : (forgetFiles(options.data) as RequestData)
-        const changed = options.only.filter((field) => !isEqual(get(data, field), get(oldData, field)))
 
         if (options.only.length > 0 && changed.length === 0) {
           return
         }
 
-        validatingData = { ...data }
-
         precognitionOptions.onStart()
 
-        axios({
+        const submitOptions: AxiosRequestConfig = {
           method: options.method,
           url: options.url,
-          data: validatingData,
+          data: hasFiles(data) ? objectToFormData(data) : { ...data },
           headers: {
-            'Content-Type': hasFiles(data) ? 'multipart/form-data' : 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             Precognition: true,
             ...(options.only.length ? { 'Precognition-Validate-Only': options.only.join(',') } : {}),
           },
-        })
+        }
+
+        axios(submitOptions)
           .then((response) => {
+            console.log({ response })
             if (response.status === 204 && response.headers['precognition-success'] === 'true') {
               options.onPrecognitionSuccess()
             }
           })
           .catch((error) => {
+            console.log({ error })
             if (error.response?.status === 422) {
               return options.onValidationError(error.response.data?.errors || {})
             }
@@ -77,7 +79,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
             throw error
           })
           .finally(() => {
-            oldData = { ...validatingData }
+            oldData = { ...data }
             precognitionOptions.onFinish()
           })
       },
