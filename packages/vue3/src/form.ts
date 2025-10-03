@@ -1,9 +1,8 @@
 import {
-  FormComponentPrecognition,
-  FormComponentPrecognitionValidateOptions,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
+  FormComponentValidateOptions,
   FormDataConvertible,
   formDataToObject,
   isUrlMethodPair,
@@ -265,11 +264,11 @@ const Form: InertiaForm = defineComponent({
     }
 
     const validate = (
-      only?: string | string[] | FormComponentPrecognitionValidateOptions,
-      maybeOptions?: FormComponentPrecognitionValidateOptions,
+      only?: string | string[] | FormComponentValidateOptions,
+      maybeOptions?: FormComponentValidateOptions,
     ) => {
       let fields: string[]
-      let options: FormComponentPrecognitionValidateOptions = {}
+      let options: FormComponentValidateOptions = {}
 
       if (typeof only === 'object' && !Array.isArray(only)) {
         // Called as validate({ only: [...], onSuccess, onError, onFinish })
@@ -365,7 +364,7 @@ const Form: InertiaForm = defineComponent({
       validateFiles: () => validator.validateFiles(true),
     }
 
-    expose<FormComponentRef & FormComponentPrecognition>(exposed)
+    expose<FormComponentRef>(exposed)
 
     return () => {
       return h(
@@ -381,7 +380,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default ? slots.default(<FormComponentSlotProps & FormComponentPrecognition>exposed) : [],
+        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
       )
     }
   },

@@ -481,6 +481,13 @@ export type FormComponentProps = Partial<
   validateTimeout?: number
 }
 
+export type FormComponentValidateOptions = {
+  only?: string | string[]
+  onSuccess?: () => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+}
+
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
@@ -489,24 +496,13 @@ export type FormComponentMethods = {
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
-}
-
-export type FormComponentPrecognitionValidateOptions = {
-  only?: string | string[]
-  onSuccess?: () => void
-  onError?: (errors: Errors) => void
-  onFinish?: () => void
-}
-
-export type FormComponentPrecognition = {
   valid: (field: string) => boolean
   invalid: (field: string) => boolean
   validate: (
-    only?: string | string[] | FormComponentPrecognitionValidateOptions,
-    maybeOptions?: FormComponentPrecognitionValidateOptions,
+    only?: string | string[] | FormComponentValidateOptions,
+    maybeOptions?: FormComponentValidateOptions,
   ) => void
   touch: (field: string | string[]) => void
-  validating: boolean
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
@@ -519,6 +515,7 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validating: boolean
 }
 
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState

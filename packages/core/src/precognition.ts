@@ -34,7 +34,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
 
   let oldData: RequestData = {}
 
-  const setDebounceTimeout = (value: number) => {
+  const setTimeout = (value: number) => {
     if (value !== debounceTimeoutDuration) {
       debounceTimeoutDuration = value
       validate = createValidateFunction()
@@ -92,15 +92,13 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   let validate = createValidateFunction()
 
   return {
-    setOldData(data: RequestData) {
+    setOldData: (data) => {
       oldData = { ...data }
     },
-
-    validateFiles(value: boolean) {
+    validateFiles: (value) => {
       validateFiles = value
     },
-
+    setTimeout,
     validate,
-    setTimeout: setDebounceTimeout,
   }
 }

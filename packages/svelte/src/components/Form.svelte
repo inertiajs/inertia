@@ -6,7 +6,7 @@
     type Errors,
     type FormComponentProps,
     type FormDataConvertible,
-    type FormComponentPrecognitionValidateOptions,
+    type FormComponentValidateOptions,
     type VisitOptions,
     isUrlMethodPair,
     usePrecognition,
@@ -200,11 +200,11 @@
   }
 
   export function validate(
-    only?: string | string[] | FormComponentPrecognitionValidateOptions,
-    maybeOptions?: FormComponentPrecognitionValidateOptions,
+    only?: string | string[] | FormComponentValidateOptions,
+    maybeOptions?: FormComponentValidateOptions,
   ) {
     let fields: string[]
-    let options: FormComponentPrecognitionValidateOptions = {}
+    let options: FormComponentValidateOptions = {}
 
     if (typeof only === 'object' && !Array.isArray(only)) {
       // Called as validate({ only: [...], onSuccess, onError, onFinish })

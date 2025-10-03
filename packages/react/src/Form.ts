@@ -1,9 +1,8 @@
 import {
-  FormComponentPrecognition,
-  FormComponentPrecognitionValidateOptions,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
+  FormComponentValidateOptions,
   FormDataConvertible,
   formDataToObject,
   isUrlMethodPair,
@@ -35,7 +34,7 @@ const deferStateUpdate = (callback: () => void) => {
 type ComponentProps = (FormComponentProps &
   Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
   Omit<React.AllHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'>) & {
-  children: ReactNode | ((props: FormComponentSlotProps & FormComponentPrecognition) => ReactNode)
+  children: ReactNode | ((props: FormComponentSlotProps) => ReactNode)
 }
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
@@ -220,11 +219,11 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const validate = (
-      only?: string | string[] | FormComponentPrecognitionValidateOptions,
-      maybeOptions?: FormComponentPrecognitionValidateOptions,
+      only?: string | string[] | FormComponentValidateOptions,
+      maybeOptions?: FormComponentValidateOptions,
     ) => {
       let fields: string[]
-      let options: FormComponentPrecognitionValidateOptions = {}
+      let options: FormComponentValidateOptions = {}
 
       if (typeof only === 'object' && !Array.isArray(only)) {
         // Called as validate({ only: [...], onSuccess, onError, onFinish })
