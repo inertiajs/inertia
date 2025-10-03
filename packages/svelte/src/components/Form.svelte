@@ -260,11 +260,11 @@
     touched = [...new Set([...touched, ...fields])]
   }
 
-  function valid(field: string): boolean {
+  export function valid(field: string): boolean {
     return validated.includes(field) && $form.errors[field] === undefined
   }
 
-  function invalid(field: string): boolean {
+  export function invalid(field: string): boolean {
     return $form.errors[field] !== undefined
   }
 
