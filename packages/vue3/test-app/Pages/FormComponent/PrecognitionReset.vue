@@ -9,6 +9,7 @@ import { Form } from '@inertiajs/vue3'
     <Form
       action="/form-component/precognition"
       method="post"
+      :validate-timeout="100"
       #default="{ invalid, errors, validate, touch, validating, reset }"
     >
       <p v-if="validating">Validating...</p>

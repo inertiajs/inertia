@@ -14,7 +14,7 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref, watch } from 'vue'
 import useForm from './useForm'
 
 type InertiaForm = DefineComponent<FormComponentProps>
@@ -113,6 +113,14 @@ const Form: InertiaForm = defineComponent({
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
+    validateFiles: {
+      type: Boolean as PropType<FormComponentProps['validateFiles']>,
+      default: false,
+    },
+    validateTimeout: {
+      type: Number as PropType<FormComponentProps['validateTimeout']>,
+      default: 1500,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -135,11 +143,32 @@ const Form: InertiaForm = defineComponent({
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
+    const validating = ref(false)
+    const validated = ref<string[]>([])
+    const touched = ref<string[]>([])
+
+    const validator = usePrecognition({
+      onStart: () => (validating.value = true),
+      onFinish: () => (validating.value = false),
+    })
+
     onMounted(() => {
       defaultData.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
       updateDataOnValidator()
     })
+
+    watch(
+      () => props.validateFiles,
+      (value) => validator.validateFiles(value),
+      { immediate: true },
+    )
+
+    watch(
+      () => props.validateTimeout,
+      (value) => validator.setTimeout(value),
+      { immediate: true },
+    )
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
@@ -234,15 +263,6 @@ const Form: InertiaForm = defineComponent({
       defaultData.value = getFormData()
       isDirty.value = false
     }
-
-    const validating = ref(false)
-    const validated = ref<string[]>([])
-    const touched = ref<string[]>([])
-
-    const validator = usePrecognition({
-      onStart: () => (validating.value = true),
-      onFinish: () => (validating.value = false),
-    })
 
     const validate = (field?: string | string[]) => {
       const only = field === undefined ? touched.value : Array.isArray(field) ? field : [field]

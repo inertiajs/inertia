@@ -477,6 +477,8 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  validateFiles?: boolean
+  validateTimeout?: number
 }
 
 export type FormComponentMethods = {

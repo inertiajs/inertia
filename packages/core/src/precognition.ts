@@ -34,8 +34,10 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   let debounceTimeoutDuration = 1500
 
   const setDebounceTimeout = (value: number) => {
-    debounceTimeoutDuration = value
-    validate = createValidateFunction()
+    if (value !== debounceTimeoutDuration) {
+      debounceTimeoutDuration = value
+      validate = createValidateFunction()
+    }
   }
 
   const createValidateFunction = () =>
