@@ -240,6 +240,8 @@ const Form: InertiaForm = defineComponent({
       reset,
       submit,
       defaults,
+      getData,
+      getFormData,
     }
 
     expose<FormComponentRef>(exposed)
