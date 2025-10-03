@@ -1432,8 +1432,6 @@ test.describe('Form Component', () => {
   })
 
   test.describe('Precognition', () => {
-    test.skip(process.env.PACKAGE !== 'vue3', 'Precognition is Vue-only for now')
-
     test.beforeEach(async ({ page }) => {
       await page.goto('/form-component/precognition')
     })
