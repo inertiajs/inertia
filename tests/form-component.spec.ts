@@ -1494,6 +1494,24 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
     })
+
+    test('validates all touched fields when calling validate() without arguments', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await page.fill('input[name="email"]', 'x')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+
+      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+    })
   })
 
   test.describe('React', () => {
