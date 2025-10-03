@@ -11,16 +11,18 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
 import useForm from './useForm'
 
-type InertiaForm = DefineComponent<FormComponentProps>
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const noop = () => undefined
 
-const Form: InertiaForm = defineComponent({
+const Form = defineComponent({
   name: 'Form',
+  slots: Object as SlotsType<{
+    default: FormComponentSlotProps
+  }>,
   props: {
     action: {
       type: [String, Object] as PropType<FormComponentProps['action']>,
@@ -258,7 +260,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
+        slots.default ? slots.default(exposed) : [],
       )
     }
   },
