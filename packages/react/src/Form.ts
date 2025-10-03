@@ -104,6 +104,15 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
+        resolvedMethod,
+        isUrlMethodPair(action) ? action.url : action,
+        getData(),
+        queryStringArrayFormat,
+      )
+    }
+
     const updateDirtyState = (event: Event) =>
       deferStateUpdate(() =>
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
@@ -169,12 +178,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const submit = () => {
-      const [url, _data] = mergeDataIntoQueryString(
-        resolvedMethod,
-        isUrlMethodPair(action) ? action.url : action,
-        getData(),
-        queryStringArrayFormat,
-      )
+      const [url, _data] = getUrlAndData()
 
       const submitOptions: FormSubmitOptions = {
         headers,
@@ -221,12 +225,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       // We're not using the data object from this method as it might be empty
       // on GET requests, and we still want to pass a data object to the
       // validator so it knows the current state of the form.
-      const [url] = mergeDataIntoQueryString(
-        resolvedMethod,
-        isUrlMethodPair(action) ? action.url : action,
-        getData(),
-        queryStringArrayFormat,
-      )
+      const [url] = getUrlAndData()
 
       validator.validate({
         url,

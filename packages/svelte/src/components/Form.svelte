@@ -75,7 +75,7 @@
     return formDataToObject(getFormData())
   }
 
-  function getActionAndData(): [string, Record<string, FormDataConvertible>] {
+  function getUrlAndData(): [string, Record<string, FormDataConvertible>] {
     return mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
   }
 
@@ -84,7 +84,7 @@
   }
 
   export function submit() {
-    const [url, _data] = getActionAndData()
+    const [url, _data] = getUrlAndData()
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -204,7 +204,7 @@
     // We're not using the data object from this method as it might be empty
     // on GET requests, and we still want to pass a data object to the
     // validator so it knows the current state of the form.
-    const [url] = getActionAndData()
+    const [url] = getUrlAndData()
 
     validator.validate({
       url,

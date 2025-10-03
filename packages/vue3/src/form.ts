@@ -179,7 +179,7 @@ const Form: InertiaForm = defineComponent({
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
-    const getActionAndData = (): [string, Record<string, FormDataConvertible>] => {
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
       return mergeDataIntoQueryString(
         method.value,
         isUrlMethodPair(props.action) ? props.action.url : props.action,
@@ -228,10 +228,10 @@ const Form: InertiaForm = defineComponent({
         ...props.options,
       }
 
-      const [action, data] = getActionAndData()
+      const [url, data] = getUrlAndData()
 
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
+      form.transform(() => props.transform(data)).submit(method.value, url, submitOptions)
     }
 
     const updateDataOnValidator = () => {
@@ -270,7 +270,7 @@ const Form: InertiaForm = defineComponent({
       // We're not using the data object from this method as it might be empty
       // on GET requests, and we still want to pass a data object to the
       // validator so it knows the current state of the form.
-      const [url] = getActionAndData()
+      const [url] = getUrlAndData()
 
       validator.validate({
         url,
