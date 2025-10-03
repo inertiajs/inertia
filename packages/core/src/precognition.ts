@@ -1,42 +1,8 @@
 import { default as axios } from 'axios'
 import { get, isEqual } from 'lodash-es'
 import debounce from './debounce'
-import { hasFiles, isFile } from './files'
-import { ErrorBag, Errors, Method } from './types'
-
-type ValidatableData = Record<string, any>
-
-export function forgetFiles(data: ValidatableData): ValidatableData {
-  const newData = { ...data }
-
-  Object.keys(newData).forEach((name) => {
-    const value = newData[name]
-
-    if (value === null) {
-      return
-    }
-
-    if (isFile(value)) {
-      delete newData[name]
-
-      return
-    }
-
-    if (Array.isArray(value)) {
-      newData[name] = Object.values(forgetFiles({ ...value }))
-
-      return
-    }
-
-    if (typeof value === 'object') {
-      newData[name] = forgetFiles(newData[name] as ValidatableData)
-
-      return
-    }
-  })
-
-  return newData
-}
+import { forgetFiles, hasFiles } from './files'
+import { ErrorBag, Errors, Method, RequestData } from './types'
 
 interface UsePrecognitionOptions {
   onStart: () => void
@@ -46,7 +12,7 @@ interface UsePrecognitionOptions {
 interface PrecognitionValidateOptions {
   url: string
   method: Method
-  data: ValidatableData
+  data: RequestData
   only: string[]
   errorBag?: string
   onPrecognitionSuccess: () => void
@@ -54,15 +20,15 @@ interface PrecognitionValidateOptions {
 }
 
 interface PrecognitionValidator {
-  setOldData: (data: ValidatableData) => void
+  setOldData: (data: RequestData) => void
   validateFiles: (value: boolean) => void
   validate: (options: PrecognitionValidateOptions) => void
   setTimeout: (value: number) => void
 }
 
 export default function usePrecognition(precognitionOptions: UsePrecognitionOptions): PrecognitionValidator {
-  let oldData: ValidatableData = {}
-  let validatingData: ValidatableData = {}
+  let oldData: RequestData = {}
+  let validatingData: RequestData = {}
 
   let validateFiles: boolean = false
   let debounceTimeoutDuration = 1500
@@ -75,7 +41,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   const createValidateFunction = () =>
     debounce(
       (options: PrecognitionValidateOptions) => {
-        const data = validateFiles ? options.data : forgetFiles(options.data)
+        const data = validateFiles ? options.data : (forgetFiles(options.data) as RequestData)
         const changed = options.only.filter((field) => !isEqual(get(data, field), get(oldData, field)))
 
         if (options.only.length > 0 && changed.length === 0) {
@@ -120,7 +86,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   let validate = createValidateFunction()
 
   return {
-    setOldData(data: ValidatableData) {
+    setOldData(data: RequestData) {
       oldData = { ...data }
     },
 
