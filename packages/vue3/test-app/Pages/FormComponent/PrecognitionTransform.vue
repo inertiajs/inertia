@@ -10,7 +10,7 @@ import { Form } from '@inertiajs/vue3'
       action="/form-component/precognition-transform"
       method="post"
       :validateTimeout="100"
-      :transform="(data) => ({ name: data.name.toUpperCase() })"
+      :transform="(data) => ({ name: String(data.name || '').toUpperCase() })"
     >
       <template #default="{ invalid, errors, validate, valid, validating }">
         <p v-if="validating">Validating...</p>

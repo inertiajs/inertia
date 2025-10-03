@@ -9,7 +9,7 @@
     action="/form-component/precognition-transform"
     method="post"
     validateTimeout={100}
-    transform={(data) => ({ name: data.name.toUpperCase() })}
+    transform={(data) => ({ name: String(data.name || '').toUpperCase() })}
     let:invalid
     let:errors
     let:validate
