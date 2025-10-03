@@ -107,9 +107,9 @@ export interface PageProps {
 
 export type ScrollProp = {
   pageName: string
-  previousPage?: number | string
-  nextPage?: number | string
-  currentPage?: number | string
+  previousPage: number | string | null
+  nextPage: number | string | null
+  currentPage: number | string | null
   reset: boolean
 }
 
@@ -527,7 +527,7 @@ export interface UseInfiniteScrollOptions {
 }
 
 export interface UseInfiniteScrollDataManager {
-  getLastLoadedPage: () => number | string | undefined
+  getLastLoadedPage: () => number | string | null
   getPageName: () => string
   getRequestCount: () => number
   hasPrevious: () => boolean
@@ -544,7 +544,7 @@ export interface UseInfiniteScrollElementManager {
   refreshTriggers: () => void
   flushAll: () => void
   processManuallyAddedElements: () => void
-  processServerLoadedElements: (loadedPage?: string | number | undefined) => void
+  processServerLoadedElements: (loadedPage: string | number | null) => void
 }
 
 export interface UseInfiniteScrollProps {
