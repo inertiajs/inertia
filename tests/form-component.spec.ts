@@ -1518,7 +1518,7 @@ test.describe('Form Component', () => {
     })
 
     test('reset all fields clears all touched fields', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-reset')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1537,7 +1537,7 @@ test.describe('Form Component', () => {
     })
 
     test('reset specific fields removes only those fields from touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-reset')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1596,7 +1596,7 @@ test.describe('Form Component', () => {
     })
 
     test('validate with specific field works independently of touched state', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-validate')
 
       await page.fill('input[name="name"]', 'ab')
       await page.fill('input[name="email"]', 'x')
@@ -1611,7 +1611,7 @@ test.describe('Form Component', () => {
     })
 
     test('validate with array of fields validates multiple fields', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-validate')
 
       await page.fill('input[name="name"]', 'ab')
       await page.fill('input[name="email"]', 'x')
@@ -1626,7 +1626,7 @@ test.describe('Form Component', () => {
     })
 
     test('reset with array removes multiple fields from touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-reset')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1656,7 +1656,7 @@ test.describe('Form Component', () => {
     })
 
     test('touching one field and validating another does not validate the touched field', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-validate')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()

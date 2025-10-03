@@ -4,7 +4,7 @@ import { Form } from '@inertiajs/vue3'
 
 <template>
   <div>
-    <h1>Form Precognition Touch</h1>
+    <h1>Form Precognition Validate</h1>
 
     <Form
       action="/form-component/precognition"
@@ -21,23 +21,14 @@ import { Form } from '@inertiajs/vue3'
       </div>
 
       <div>
-        <input name="email" @blur="touch('email')" />
+        <input name="email" />
         <p v-if="invalid('email')">
           {{ errors.email }}
         </p>
       </div>
 
-      <button type="button" @click="validate()">Validate All Touched</button>
-      <button type="button" @click="touch(['name', 'email'])">Touch Name and Email</button>
-      <button
-        type="button"
-        @click="
-          touch('name')
-          touch('name')
-        "
-      >
-        Touch Name Twice
-      </button>
+      <button type="button" @click="validate('name')">Validate Name</button>
+      <button type="button" @click="validate(['name', 'email'])">Validate Name and Email</button>
     </Form>
   </div>
 </template>
