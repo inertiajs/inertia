@@ -137,6 +137,7 @@ const Form: InertiaForm = defineComponent({
     onMounted(() => {
       defaultData.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
+      updateDataOnValidator()
     })
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
@@ -203,9 +204,18 @@ const Form: InertiaForm = defineComponent({
       form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
     }
 
+    const updateDataOnValidator = () => {
+      try {
+        // This might fail if the component is already unmounted but this function
+        // is called after navigating away after a form submission.
+        const data = getData()
+        validator.setOldData(data)
+      } catch {}
+    }
+
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
-      validator.setOldData(getData())
+      updateDataOnValidator()
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -226,22 +236,18 @@ const Form: InertiaForm = defineComponent({
       onFinish: () => (validating.value = false),
     })
 
-    onMounted(() => {
-      const [_action, data] = getActionAndData()
-
-      // Set the initial data on the validator
-      validator.setOldData(data)
-    })
-
     const validate = (field: string | string[]) => {
       const only = Array.isArray(field) ? field : [field]
 
-      const [url, data] = getActionAndData()
+      // We're not using the data object from this method as it might be empty
+      // on GET requests, and we still want to pass a data object to the
+      // validator so it knows the current state of the form.
+      const [url] = getActionAndData()
 
       validator.validate({
         url,
         method: method.value,
-        data,
+        data: getData(),
         only,
         onPrecognitionSuccess: () => {
           validated.value = [...validated.value, ...only]
