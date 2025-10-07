@@ -11,7 +11,7 @@ defineProps({
     <h1>Users Index</h1>
     <ul>
       <li v-for="user in users" :key="user.id">
-        <Link :href="`/users/${user.id}/edit?remember=true`">Edit {{ user.name }}</Link>
+        <Link :href="`/remember/users/${user.id}/edit?remember=true`">Edit {{ user.name }}</Link>
       </li>
     </ul>
   </div>
