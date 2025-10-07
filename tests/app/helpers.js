@@ -23,7 +23,14 @@ module.exports = {
     }
 
     if (data.component.startsWith('InfiniteScroll')) {
-      data.url = req.originalUrl
+      // Support absolute URL format for testing URL preservation
+      if (req.query.absolutePageUrl) {
+        const protocol = req.protocol
+        const host = req.get('host')
+        data.url = `${protocol}://${host}${req.originalUrl}`
+      } else {
+        data.url = req.originalUrl
+      }
     }
 
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''

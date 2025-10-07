@@ -1,6 +1,7 @@
-import { router } from '..'
+import { hrefToUrl, router, urlHasProtocol, urlToString } from '..'
 import debounce from '../debounce'
 import { getElementsInViewportFromCollection } from '../domUtils'
+import { page as currentPage } from './../page'
 import Queue from './../queue'
 import { getPageFromElement } from './elements'
 
@@ -9,6 +10,7 @@ const queue = new Queue<Promise<void>>()
 
 let initialUrl: URL | null
 let payloadUrl: URL | null
+let initialUrlWasAbsolute: boolean | null = null
 
 /**
  * As users scroll through infinite content, this system updates the URL to reflect
@@ -32,8 +34,10 @@ export const useInfiniteScrollQueryString = (options: {
           }
 
           if (!initialUrl || !payloadUrl) {
-            initialUrl = new URL(window.location.href)
-            payloadUrl = new URL(window.location.href)
+            const currentPageUrl = currentPage.get().url
+            initialUrl = hrefToUrl(currentPageUrl)
+            payloadUrl = hrefToUrl(currentPageUrl)
+            initialUrlWasAbsolute = urlHasProtocol(currentPageUrl)
           }
 
           const pageName = options.getPageName()
@@ -50,16 +54,22 @@ export const useInfiniteScrollQueryString = (options: {
         })
       })
       .finally(() => {
-        if (enabled && initialUrl && payloadUrl && initialUrl.href !== payloadUrl.href) {
+        if (
+          enabled &&
+          initialUrl &&
+          payloadUrl &&
+          initialUrl.href !== payloadUrl.href &&
+          initialUrlWasAbsolute !== null
+        ) {
           // Update URL without triggering a page reload or affecting scroll position
           router.replace({
-            url: payloadUrl.toString(),
+            url: urlToString(payloadUrl, initialUrlWasAbsolute),
             preserveScroll: true,
             preserveState: true,
           })
         }
 
-        initialUrl = payloadUrl = null
+        initialUrl = payloadUrl = initialUrlWasAbsolute = null
       })
   }
 
