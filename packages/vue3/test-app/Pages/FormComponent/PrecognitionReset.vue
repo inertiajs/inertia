@@ -31,7 +31,7 @@ import { Form } from '@inertiajs/vue3'
       <button type="button" @click="validate()">Validate All Touched</button>
       <button type="button" @click="reset()">Reset All</button>
       <button type="button" @click="reset('name')">Reset Name</button>
-      <button type="button" @click="reset(['name', 'email'])">Reset Name and Email</button>
+      <button type="button" @click="reset('name', 'email')">Reset Name and Email</button>
     </Form>
   </div>
 </template>
