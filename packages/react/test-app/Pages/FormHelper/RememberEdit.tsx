@@ -6,21 +6,15 @@ interface User {
   email: string
 }
 
-export default ({ user, withRememberKey = false }: { user: User; withRememberKey?: boolean }) => {
-  const form = withRememberKey
-    ? useForm('EditUserForm', {
-        name: user.name,
-        email: user.email,
-      })
-    : useForm({
-        name: user.name,
-        email: user.email,
-      })
+export default ({ user }: { user: User }) => {
+  const form = useForm('EditUserForm', {
+    name: user.name,
+    email: user.email,
+  })
 
   return (
     <div>
       <h1>Edit User {user.id}</h1>
-      <p>With remember key: {String(withRememberKey)}</p>
       <form>
         <div>
           <label>Name:</label>

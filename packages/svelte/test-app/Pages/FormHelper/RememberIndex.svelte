@@ -15,7 +15,7 @@
   <ul>
     {#each users as user (user.id)}
       <li>
-        <Link href="/remember/users/{user.id}/edit?remember=true">Edit {user.name}</Link>
+        <Link href="/remember/users/{user.id}/edit">Edit {user.name}</Link>
       </li>
     {/each}
   </ul>

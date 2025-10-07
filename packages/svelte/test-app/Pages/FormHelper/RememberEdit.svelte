@@ -8,22 +8,15 @@
   }
 
   export let user: User
-  export let withRememberKey: boolean = false
 
-  const form = withRememberKey
-    ? useForm('EditUserForm', {
-        name: user.name,
-        email: user.email,
-      })
-    : useForm({
-        name: user.name,
-        email: user.email,
-      })
+  const form = useForm('EditUserForm', {
+    name: user.name,
+    email: user.email,
+  })
 </script>
 
 <div>
   <h1>Edit User {user.id}</h1>
-  <p>With remember key: {withRememberKey}</p>
   <form>
     <div>
       <label>Name:</label>

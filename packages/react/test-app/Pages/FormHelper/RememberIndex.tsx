@@ -13,7 +13,7 @@ export default ({ users }: { users: User[] }) => {
       <ul>
         {users.map((user) => (
           <li key={user.id}>
-            <Link href={`/remember/users/${user.id}/edit?remember=true`}>Edit {user.name}</Link>
+            <Link href={`/remember/users/${user.id}/edit`}>Edit {user.name}</Link>
           </li>
         ))}
       </ul>

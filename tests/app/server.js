@@ -743,10 +743,9 @@ app.get('/remember/users/:id/edit', (req, res) => {
     3: { id: 3, name: 'User Three', email: 'user3@example.com' },
   }
   const user = users[req.params.id]
-  const withRememberKey = req.query.remember === 'true'
   inertia.render(req, res, {
     component: 'FormHelper/RememberEdit',
-    props: { user, withRememberKey },
+    props: { user },
   })
 })
 
