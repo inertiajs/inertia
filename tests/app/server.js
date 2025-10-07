@@ -733,7 +733,7 @@ app.get('/remember/users', (req, res) => {
     { id: 2, name: 'User Two', email: 'user2@example.com' },
     { id: 3, name: 'User Three', email: 'user3@example.com' },
   ]
-  inertia.render(req, res, { component: 'Users/Index', props: { users } })
+  inertia.render(req, res, { component: 'FormHelper/RememberIndex', props: { users } })
 })
 
 app.get('/remember/users/:id/edit', (req, res) => {
@@ -745,7 +745,7 @@ app.get('/remember/users/:id/edit', (req, res) => {
   const user = users[req.params.id]
   const withRememberKey = req.query.remember === 'true'
   inertia.render(req, res, {
-    component: 'Users/Edit',
+    component: 'FormHelper/RememberEdit',
     props: { user, withRememberKey },
   })
 })
