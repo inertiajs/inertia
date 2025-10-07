@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { InfiniteScroll } from '@inertiajs/vue3'
+import { InfiniteScroll, usePage } from '@inertiajs/vue3'
 import { User, default as UserCard } from './UserCard.vue'
 
 defineProps<{
   users: { data: User[] }
 }>()
+
+const page = usePage()
+
+window.testing = {
+  ...(window.testing || {}),
+  get pageUrl() {
+    return page.url
+  },
+}
 </script>
 
 <template>

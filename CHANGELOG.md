@@ -7,9 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.4...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.7...master)
 
 - Nothing yet
+
+## [v2.2.7](https://github.com/inertiajs/inertia/compare/v2.2.6...v2.2.7) - 2025-10-07
+
+### What's Changed
+
+* Preserve relative URL when `<InfiniteScroll>` updates query string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2623
+* Use `SlotsType` to type-hint Vue slots by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2620
+* Fix race condition in `history.ts` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2624
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.6...v2.2.7
+
+## [v2.2.6](https://github.com/inertiajs/inertia/compare/v2.2.5...v2.2.6) - 2025-10-03
+
+### What's Changed
+
+* SSR fixes for `<InfiniteScroll>` component. by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2616
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.5...v2.2.6
+
+## [v2.2.5](https://github.com/inertiajs/inertia/compare/v2.2.4...v2.2.5) - 2025-10-02
+
+### What's Changed
+
+* Improve `<InfiniteScroll>` cleanup after navigating away by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2610
+* Fix for `<Form>` component when using React SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2612
+* Fix conflicting Client Side Visits by queuing the URL synchronization by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2613
+* Improvements to `<InfiniteScroll>` in Svelte adapter by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2614
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.4...v2.2.5
 
 ## [v2.2.4](https://github.com/inertiajs/inertia/compare/v2.2.3...v2.2.4) - 2025-09-30
 

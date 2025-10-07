@@ -29,14 +29,15 @@ export const getElementsInViewportFromCollection = (
   elements: HTMLElement[],
 ): HTMLElement[] => {
   const referenceIndex = elements.indexOf(referenceElement)
-  const visibleElements: HTMLElement[] = []
+  const upwardElements: HTMLElement[] = []
+  const downwardElements: HTMLElement[] = []
 
   // Traverse upwards until an element is not visible
   for (let i = referenceIndex; i >= 0; i--) {
     const element = elements[i]
 
     if (elementInViewport(element)) {
-      visibleElements.push(element)
+      upwardElements.push(element)
     } else {
       break
     }
@@ -47,11 +48,12 @@ export const getElementsInViewportFromCollection = (
     const element = elements[i]
 
     if (elementInViewport(element)) {
-      visibleElements.push(element)
+      downwardElements.push(element)
     } else {
       break
     }
   }
 
-  return visibleElements
+  // Reverse upward elements to maintain DOM order, then append downward elements
+  return [...upwardElements.reverse(), ...downwardElements]
 }

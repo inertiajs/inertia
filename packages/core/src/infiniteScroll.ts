@@ -35,14 +35,14 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     // so they don't get confused with server-loaded content
     onBeforeUpdate: elementManager.processManuallyAddedElements,
     // After successful request, tag new server content
-    onCompletePreviousRequest: (loadedPage?: string | number) => {
+    onCompletePreviousRequest: (loadedPage) => {
       setTimeout(() => {
         elementManager.processServerLoadedElements(loadedPage)
         options.onCompletePreviousRequest()
         window.queueMicrotask(elementManager.refreshTriggers)
       })
     },
-    onCompleteNextRequest: (loadedPage?: string | number) => {
+    onCompleteNextRequest: (loadedPage) => {
       setTimeout(() => {
         elementManager.processServerLoadedElements(loadedPage)
         options.onCompleteNextRequest()
@@ -91,5 +91,10 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
   return {
     dataManager,
     elementManager,
+    flush: () => {
+      dataManager.removeEventListener()
+      elementManager.flushAll()
+      queryStringManager.cancel()
+    },
   }
 }

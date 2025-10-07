@@ -5,7 +5,7 @@
   export let users: { data: User[] }
 </script>
 
-<InfiniteScroll data="users" itemsElement="tbody" let:exposedSlot>
+<InfiniteScroll data="users" itemsElement="tbody">
   <table style="width: 100%; border-collapse: collapse">
     <tbody>
       {#each users.data as user (user.id)}
