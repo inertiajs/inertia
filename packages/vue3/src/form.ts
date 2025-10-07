@@ -237,8 +237,7 @@ const Form: InertiaForm = defineComponent({
       try {
         // This might fail if the component is already unmounted but this function
         // is called after navigating away after a form submission.
-        const data = getData()
-        validator.setOldData(data)
+        validator.setOldData(props.transform(getData()))
       } catch {}
     }
 
