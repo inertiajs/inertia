@@ -1224,6 +1224,62 @@ test.describe('URL query string management', () => {
     await page.waitForTimeout(250)
     expect(page.url()).toContain('page=2')
   })
+
+  test('it preserves relative URL format when updating query string', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/update-query-string')
+
+    // Verify we start with a relative URL
+    const initialUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(initialUrl).toBe('/infinite-scroll/update-query-string')
+    expect(initialUrl).not.toContain('http')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading...')).toBeHidden()
+
+    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    await expectQueryString(page, '2')
+
+    // Verify the internal Inertia page URL is still relative
+    const updatedUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(updatedUrl).toContain('page=2')
+    expect(updatedUrl).not.toContain('http')
+    expect(updatedUrl).toMatch(/^\/infinite-scroll/)
+  })
+
+  test('it preserves absolute URL format when updating query string', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/update-query-string?absolutePageUrl=1')
+
+    // Verify we start with an absolute URL
+    const initialUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(initialUrl).toContain('http://localhost')
+    expect(initialUrl).toContain('/infinite-scroll/update-query-string')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading...')).toBeHidden()
+
+    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    await expectQueryString(page, '2')
+
+    // Verify the internal Inertia page URL is still absolute
+    const updatedUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(updatedUrl).toContain('page=2')
+    expect(updatedUrl).toContain('http://localhost')
+    expect(updatedUrl).toContain('/infinite-scroll/update-query-string')
+  })
 })
 
 test.describe('Scroll position preservation', () => {

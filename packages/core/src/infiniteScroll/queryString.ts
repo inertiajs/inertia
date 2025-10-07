@@ -10,7 +10,7 @@ const queue = new Queue<Promise<void>>()
 
 let initialUrl: URL | null
 let payloadUrl: URL | null
-let initialUrlWasRelative: bool | null = null
+let initialUrlWasRelative: boolean | null = null
 
 /**
  * As users scroll through infinite content, this system updates the URL to reflect
@@ -34,9 +34,10 @@ export const useInfiniteScrollQueryString = (options: {
           }
 
           if (!initialUrl || !payloadUrl) {
-            initialUrl = hrefToUrl(currentPage.get().url)
-            payloadUrl = hrefToUrl(currentPage.get().url)
-            initialUrlWasRelative = initialUrl.toString() !== currentPage.get().url
+            const currentPageUrl = currentPage.get().url
+            initialUrl = hrefToUrl(currentPageUrl)
+            payloadUrl = hrefToUrl(currentPageUrl)
+            initialUrlWasRelative = initialUrl.toString() !== currentPageUrl
           }
 
           const pageName = options.getPageName()
