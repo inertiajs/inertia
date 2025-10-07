@@ -50,18 +50,15 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
-        const doPush = () => {
-          this.doPushState({ page: data }, page.url)
-          cb && cb()
-        }
+        const doPush = () => this.doPushState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          setTimeout(doPush)
-        } else {
-          doPush()
+          return new Promise((resolve) => {
+            setTimeout(() => doPush().then(resolve))
+          })
         }
 
-        return Promise.resolve()
+        return doPush()
       })
     })
   }
@@ -158,16 +155,15 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
-        const doReplace = () =>
-          this.doReplaceState({ page: data }, page.url).then(() => {
-            cb && cb()
-          })
+        const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          setTimeout(doReplace)
-        } else {
-          return doReplace()
+          return new Promise((resolve) => {
+            setTimeout(() => doReplace().then(resolve))
+          })
         }
+
+        return doReplace()
       })
     })
   }
