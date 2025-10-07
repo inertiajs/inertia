@@ -246,6 +246,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         data: transform(getData()),
         only: fields,
         errorBag,
+        headers,
         onPrecognitionSuccess: () => {
           setValidated((prev) => [...prev, ...fields])
           form.clearErrors(...fields)

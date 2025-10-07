@@ -3,23 +3,19 @@ import { get, isEqual } from 'lodash-es'
 import debounce from './debounce'
 import { forgetFiles, hasFiles } from './files'
 import { objectToFormData } from './formData'
-import { Errors, Method, RequestData } from './types'
+import { Errors, FormComponentValidateOptions, RequestData, Visit } from './types'
 
 interface UsePrecognitionOptions {
   onStart: () => void
   onFinish: () => void
 }
 
-interface PrecognitionValidateOptions {
-  url: string
-  method: Method
-  data: RequestData
-  only: string[]
-  errorBag?: string | null
-  onPrecognitionSuccess: () => void
-  onValidationError: (errors: Errors) => void
-  onFinish?: () => void
-}
+type PrecognitionValidateOptions = Pick<Visit<RequestData>, 'method' | 'data' | 'only' | 'errorBag' | 'headers'> &
+  Pick<FormComponentValidateOptions, 'onBeforeValidation' | 'onException' | 'onFinish'> & {
+    url: string
+    onPrecognitionSuccess: () => void
+    onValidationError: (errors: Errors) => void
+  }
 
 interface PrecognitionValidator {
   setOldData: (data: RequestData) => void
@@ -33,12 +29,24 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   let validateFiles: boolean = false
 
   let oldData: RequestData = {}
+  let oldTouched: string[] = []
+  const abortControllers: Record<string, AbortController> = {}
+
+  const cancelAll = () => {
+    Object.values(abortControllers).forEach((controller) => controller.abort())
+    Object.keys(abortControllers).forEach((key) => delete abortControllers[key])
+  }
 
   const setTimeout = (value: number) => {
     if (value !== debounceTimeoutDuration) {
+      cancelAll()
       debounceTimeoutDuration = value
       validate = createValidateFunction()
     }
+  }
+
+  const createFingerprint = (options: PrecognitionValidateOptions) => {
+    return `${options.method}:${options.url}`
   }
 
   const createValidateFunction = () =>
@@ -51,13 +59,33 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
           return
         }
 
+        const beforeValidatonResult = options.onBeforeValidation?.(
+          { data: options.data, touched: options.only },
+          { data: oldData, touched: oldTouched },
+        )
+
+        if (beforeValidatonResult === false) {
+          return
+        }
+
+        const fingerprint = createFingerprint(options)
+
+        if (abortControllers[fingerprint]) {
+          abortControllers[fingerprint].abort()
+          delete abortControllers[fingerprint]
+        }
+
+        abortControllers[fingerprint] = new AbortController()
+
         precognitionOptions.onStart()
 
         const submitOptions: AxiosRequestConfig = {
           method: options.method,
           url: options.url,
           data: hasFiles(data) ? objectToFormData(data) : { ...data },
+          signal: abortControllers[fingerprint].signal,
           headers: {
+            ...(options.headers || {}),
             'X-Requested-With': 'XMLHttpRequest',
             Precognition: true,
             ...(options.only.length ? { 'Precognition-Validate-Only': options.only.join(',') } : {}),
@@ -77,10 +105,17 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
               return options.onValidationError(scopedErrors)
             }
 
+            if (options.onException) {
+              options.onException(error)
+              return
+            }
+
             throw error
           })
           .finally(() => {
             oldData = { ...data }
+            oldTouched = [...options.only]
+            delete abortControllers[fingerprint]
             options.onFinish?.()
             precognitionOptions.onFinish()
           })

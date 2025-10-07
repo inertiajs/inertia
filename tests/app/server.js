@@ -999,6 +999,38 @@ app.post('/form-component/precognition-transform', (req, res) => {
   }, 500)
 })
 
+app.post('/form-component/precognition-headers', (req, res) => {
+  setTimeout(() => {
+    const customHeader = req.headers['x-custom-header']
+    const name = req.body['name']
+    const errors = {}
+
+    // Validate that custom header is present
+    if (customHeader !== 'custom-value') {
+      errors.name = 'Custom header missing or incorrect.'
+    } else if (!name) {
+      errors.name = 'The name field is required.'
+    } else if (name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 500)
+})
+
+app.post('/form-component/precognition-exception', (req, res) => {
+  // Return a 500 error with Precognition header to trigger exception handling
+  res.header('Precognition', 'true')
+  res.status(500).json({ message: 'Internal server error' })
+})
+
 //
 
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {

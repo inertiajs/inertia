@@ -260,6 +260,7 @@ const Form: InertiaForm = defineComponent({
     const defaults = () => {
       defaultData.value = getFormData()
       isDirty.value = false
+      updateDataOnValidator()
     }
 
     const validate = (
@@ -291,6 +292,8 @@ const Form: InertiaForm = defineComponent({
         data: props.transform(getData()),
         only: fields,
         errorBag: props.errorBag,
+        headers: props.headers,
+        onBeforeValidation: options.onBeforeValidation,
         onPrecognitionSuccess: () => {
           validated.value = [...validated.value, ...fields]
           form.clearErrors(...fields)
@@ -308,6 +311,7 @@ const Form: InertiaForm = defineComponent({
           form.setError({ ...form.errors, ...errors })
           options.onError?.(errors)
         },
+        onException: options.onException,
         onFinish: () => {
           options.onFinish?.()
         },

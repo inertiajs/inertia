@@ -481,11 +481,18 @@ export type FormComponentProps = Partial<
   validateTimeout?: number
 }
 
+type OnBeforeValidationCallback = (
+  newRequest: { data: RequestData; touched: string[] },
+  oldRequest: { data: RequestData; touched: string[] },
+) => boolean | undefined
+
 export type FormComponentValidateOptions = {
   only?: string | string[]
   onSuccess?: () => void
   onError?: (errors: Errors) => void
   onFinish?: () => void
+  onBeforeValidation?: OnBeforeValidationCallback
+  onException?: (error: Error) => void
 }
 
 export type FormComponentMethods = {

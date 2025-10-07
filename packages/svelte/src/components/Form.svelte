@@ -227,6 +227,7 @@
       data: transform(getData()),
       only: fields,
       errorBag,
+      headers,
       onPrecognitionSuccess: () => {
         validated = [...validated, ...fields]
         clearErrors(...fields)

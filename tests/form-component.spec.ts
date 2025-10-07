@@ -1834,6 +1834,120 @@ test.describe('Form Component', () => {
       await expect(page.getByText('onError called!')).toBeVisible()
       await expect(page.getByText('onFinish called!')).toBeVisible()
     })
+
+    test('onBeforeValidation can block validation', async ({ page }) => {
+      await page.goto('/form-component/precognition-before-validation')
+
+      // First validate with a normal value - should work
+      await page.fill('input[name="name"]', 'John')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+      await expect(page.getByText('Validation blocked by onBeforeValidation')).not.toBeVisible()
+
+      // Verify data structure is correct
+      await expect(page.getByText('Data structure is correct')).toBeVisible()
+
+      // Now validate with "block" - should be blocked
+      await page.fill('input[name="name"]', 'block')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validation blocked by onBeforeValidation')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Data structure should still be correct even when blocking
+      await expect(page.getByText('Data structure is correct')).toBeVisible()
+    })
+
+    test('onBeforeValidation can be passed per validate call', async ({ page }) => {
+      await page.goto('/form-component/precognition-before-validation-per-call')
+
+      await page.fill('#name-input', 'John')
+
+      // First button uses first callback
+      await page.click('button:has-text("Validate with First")')
+
+      await expect(page.getByText('Blocked by first callback')).toBeVisible()
+      await expect(page.getByText('Blocked by second callback')).not.toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Second button uses second callback
+      await page.click('button:has-text("Validate with Second")')
+
+      await expect(page.getByText('Blocked by second callback')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+    })
+
+    test('onException handles non-422 errors during validation', async ({ page }) => {
+      await page.goto('/form-component/precognition-exception')
+
+      await page.fill('#name-input', 'John')
+
+      // Trigger validation that will return 500 error
+      await page.click('button:has-text("Validate with Exception Handler")')
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Exception should be caught and displayed
+      await expect(page.getByText(/Exception caught:/)).toBeVisible()
+    })
+
+    test('sends custom headers with validation requests', async ({ page }) => {
+      await page.goto('/form-component/precognition-headers')
+
+      // Validation should succeed because custom header is sent
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should not show error because custom header was present
+      await expect(page.getByText('Custom header missing or incorrect.')).not.toBeVisible()
+    })
+
+    test('automatically cancels previous validation when new validation starts', async ({ page }) => {
+      await page.goto('/form-component/precognition-cancel')
+
+      // Start first validation (with 2 second timeout)
+      await page.fill('#name-input', 'ab')
+      await page.locator('#name-input').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+
+      // Immediately change value and trigger new validation - should cancel the first one
+      await page.fill('#name-input', 'xyz')
+      await page.locator('#name-input').blur()
+
+      // Wait for validation to complete
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show error for the second validation (xyz), not the first (ab)
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+    })
+
+    test('defaults() updates validator data to prevent unnecessary requests', async ({ page }) => {
+      await page.goto('/form-component/precognition-defaults')
+
+      // Fill in a value and validate
+      await page.fill('#name-input', 'John')
+      await page.locator('#name-input').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Set this as the new defaults
+      await page.click('button:has-text("Set Defaults")')
+
+      // Blur again without changing the value - should NOT trigger validation
+      // because the validator knows the data hasn't changed since defaults
+      await page.locator('#name-input').blur()
+
+      // Should not show validating because data hasn't changed
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+    })
   })
 
   test.describe('React', () => {
