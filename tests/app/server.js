@@ -727,6 +727,28 @@ app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
 
+app.get('/remember/users', (req, res) => {
+  const users = [
+    { id: 1, name: 'User One', email: 'user1@example.com' },
+    { id: 2, name: 'User Two', email: 'user2@example.com' },
+    { id: 3, name: 'User Three', email: 'user3@example.com' },
+  ]
+  inertia.render(req, res, { component: 'FormHelper/RememberIndex', props: { users } })
+})
+
+app.get('/remember/users/:id/edit', (req, res) => {
+  const users = {
+    1: { id: 1, name: 'User One', email: 'user1@example.com' },
+    2: { id: 2, name: 'User Two', email: 'user2@example.com' },
+    3: { id: 3, name: 'User Three', email: 'user3@example.com' },
+  }
+  const user = users[req.params.id]
+  inertia.render(req, res, {
+    component: 'FormHelper/RememberEdit',
+    props: { user },
+  })
+})
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
