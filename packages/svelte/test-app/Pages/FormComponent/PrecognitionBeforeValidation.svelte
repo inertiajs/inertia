@@ -1,30 +1,20 @@
 <script lang="ts">
+  import { isEqual } from 'lodash-es'
   import { Form } from '@inertiajs/svelte'
-
-  let blocked = false
-  let dataCorrect = false
 
   const handleBeforeValidation = (
     newRequest: { data: Record<string, any>; touched: string[] },
     oldRequest: { data: Record<string, any>; touched: string[] },
   ) => {
-    // Verify the data structure is correct
-    const hasNewData = typeof newRequest.data === 'object' && newRequest.data !== null
-    const hasNewTouched = Array.isArray(newRequest.touched)
-    const hasOldData = typeof oldRequest.data === 'object' && oldRequest.data !== null
-    const hasOldTouched = Array.isArray(oldRequest.touched)
-    const hasNameField = 'name' in newRequest.data
-    const touchedContainsName = newRequest.touched.includes('name')
-
-    dataCorrect = hasNewData && hasNewTouched && hasOldData && hasOldTouched && hasNameField && touchedContainsName
+    const payloadIsCorrect =
+      isEqual(newRequest, { data: { name: 'block' }, touched: ['name'] }) &&
+      isEqual(oldRequest, { data: {}, touched: [] })
 
     // Block validation if name is "block"
-    if (newRequest.data.name === 'block') {
-      blocked = true
+    if (payloadIsCorrect && newRequest.data.name === 'block') {
       return false
     }
 
-    blocked = false
     return true
   }
 </script>
@@ -32,7 +22,15 @@
 <div>
   <h1>Precognition - onBeforeValidation</h1>
 
-  <Form action="/form-component/precognition" method="post" let:errors let:invalid let:validate let:validating>
+  <Form
+    action="/form-component/precognition"
+    method="post"
+    let:errors
+    let:invalid
+    let:validate
+    let:validating
+    validateTimeout={100}
+  >
     <div>
       <label for="name">Name:</label>
       <input
@@ -58,12 +56,6 @@
 
     {#if validating}
       <p class="validating">Validating...</p>
-    {/if}
-    {#if blocked}
-      <p class="blocked">Validation blocked by onBeforeValidation</p>
-    {/if}
-    {#if dataCorrect}
-      <p class="data-correct">Data structure is correct</p>
     {/if}
 
     <button type="submit">Submit</button>

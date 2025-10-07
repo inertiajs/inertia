@@ -1,31 +1,19 @@
 import { Form } from '@inertiajs/react'
-import { useState } from 'react'
+import { isEqual } from 'lodash-es'
 
 export default function PrecognitionBeforeValidation() {
-  const [blocked, setBlocked] = useState(false)
-  const [dataCorrect, setDataCorrect] = useState(false)
-
   const handleBeforeValidation = (
     newRequest: { data: Record<string, any>; touched: string[] },
     oldRequest: { data: Record<string, any>; touched: string[] },
   ) => {
-    // Verify the data structure is correct
-    const hasNewData = typeof newRequest.data === 'object' && newRequest.data !== null
-    const hasNewTouched = Array.isArray(newRequest.touched)
-    const hasOldData = typeof oldRequest.data === 'object' && oldRequest.data !== null
-    const hasOldTouched = Array.isArray(oldRequest.touched)
-    const hasNameField = 'name' in newRequest.data
-    const touchedContainsName = newRequest.touched.includes('name')
+    const payloadIsCorrect =
+      isEqual(newRequest, { data: { name: 'block' }, touched: ['name'] }) &&
+      isEqual(oldRequest, { data: {}, touched: [] })
 
-    setDataCorrect(hasNewData && hasNewTouched && hasOldData && hasOldTouched && hasNameField && touchedContainsName)
-
-    // Block validation if name is "block"
-    if (newRequest.data.name === 'block') {
-      setBlocked(true)
+    if (payloadIsCorrect && newRequest.data.name === 'block') {
       return false
     }
 
-    setBlocked(false)
     return true
   }
 
@@ -33,7 +21,7 @@ export default function PrecognitionBeforeValidation() {
     <div>
       <h1>Precognition - onBeforeValidation</h1>
 
-      <Form action="/form-component/precognition" method="post">
+      <Form action="/form-component/precognition" method="post" validateTimeout={100}>
         {({ errors, invalid, validate, validating }) => (
           <>
             <div>
@@ -57,8 +45,6 @@ export default function PrecognitionBeforeValidation() {
             </div>
 
             {validating && <p className="validating">Validating...</p>}
-            {blocked && <p className="blocked">Validation blocked by onBeforeValidation</p>}
-            {dataCorrect && <p className="data-correct">Data structure is correct</p>}
 
             <button type="submit">Submit</button>
           </>

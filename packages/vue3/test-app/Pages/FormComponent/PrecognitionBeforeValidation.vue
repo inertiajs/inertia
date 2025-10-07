@@ -1,8 +1,33 @@
+<script setup lang="ts">
+import { Form } from '@inertiajs/vue3'
+import { isEqual } from 'lodash-es'
+
+const handleBeforeValidation = (
+  newRequest: { data: Record<string, any>; touched: string[] },
+  oldRequest: { data: Record<string, any>; touched: string[] },
+) => {
+  const payloadIsCorrect =
+    isEqual(newRequest, { data: { name: 'block' }, touched: ['name'] }) &&
+    isEqual(oldRequest, { data: {}, touched: [] })
+
+  if (payloadIsCorrect && newRequest.data.name === 'block') {
+    return false
+  }
+
+  return true
+}
+</script>
+
 <template>
   <div>
     <h1>Precognition - onBeforeValidation</h1>
 
-    <Form action="/form-component/precognition" method="post" #default="{ errors, invalid, validate, validating }">
+    <Form
+      action="/form-component/precognition"
+      method="post"
+      #default="{ errors, invalid, validate, validating }"
+      :validate-timeout="100"
+    >
       <div>
         <label for="name">Name:</label>
         <input
@@ -24,42 +49,8 @@
       </div>
 
       <p v-if="validating" class="validating">Validating...</p>
-      <p v-if="blocked" class="blocked">Validation blocked by onBeforeValidation</p>
-      <p v-if="dataCorrect" class="data-correct">Data structure is correct</p>
 
       <button type="submit">Submit</button>
     </Form>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Form } from '@inertiajs/vue3'
-import { ref } from 'vue'
-
-const blocked = ref(false)
-const dataCorrect = ref(false)
-
-const handleBeforeValidation = (
-  newRequest: { data: Record<string, any>; touched: string[] },
-  oldRequest: { data: Record<string, any>; touched: string[] },
-) => {
-  // Verify the data structure is correct
-  const hasNewData = typeof newRequest.data === 'object' && newRequest.data !== null
-  const hasNewTouched = Array.isArray(newRequest.touched)
-  const hasOldData = typeof oldRequest.data === 'object' && oldRequest.data !== null
-  const hasOldTouched = Array.isArray(oldRequest.touched)
-  const hasNameField = 'name' in newRequest.data
-  const touchedContainsName = newRequest.touched.includes('name')
-
-  dataCorrect.value = hasNewData && hasNewTouched && hasOldData && hasOldTouched && hasNameField && touchedContainsName
-
-  // Block validation if name is "block"
-  if (newRequest.data.name === 'block') {
-    blocked.value = true
-    return false
-  }
-
-  blocked.value = false
-  return true
-}
-</script>

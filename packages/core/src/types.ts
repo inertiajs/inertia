@@ -481,17 +481,17 @@ export type FormComponentProps = Partial<
   validateTimeout?: number
 }
 
-type OnBeforeValidationCallback = (
-  newRequest: { data: RequestData; touched: string[] },
-  oldRequest: { data: RequestData; touched: string[] },
-) => boolean | undefined
+type RevalidatePayload = {
+  data: RequestData
+  touched: string[]
+}
 
 export type FormComponentValidateOptions = {
   only?: string | string[]
   onSuccess?: () => void
   onError?: (errors: Errors) => void
   onFinish?: () => void
-  onBeforeValidation?: OnBeforeValidationCallback
+  onBeforeValidation?: (newRequest: RevalidatePayload, oldRequest: RevalidatePayload) => boolean | undefined
   onException?: (error: Error) => void
 }
 
