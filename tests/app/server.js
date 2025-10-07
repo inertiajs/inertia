@@ -727,7 +727,7 @@ app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
 
-app.get('/users', (req, res) => {
+app.get('/remember/users', (req, res) => {
   const users = [
     { id: 1, name: 'User One', email: 'user1@example.com' },
     { id: 2, name: 'User Two', email: 'user2@example.com' },
@@ -736,7 +736,7 @@ app.get('/users', (req, res) => {
   inertia.render(req, res, { component: 'Users/Index', props: { users } })
 })
 
-app.get('/users/:id/edit', (req, res) => {
+app.get('/remember/users/:id/edit', (req, res) => {
   const users = {
     1: { id: 1, name: 'User One', email: 'user1@example.com' },
     2: { id: 2, name: 'User Two', email: 'user2@example.com' },

@@ -176,7 +176,7 @@ class History {
     },
     url?: string,
   ): Promise<void> {
-    return Promise.resolve().then(() => {
+    return Promise.resolve().then(() =>
       window.history.replaceState(
         {
           ...data,
@@ -185,8 +185,8 @@ class History {
         },
         '',
         url,
-      )
-    })
+      ),
+    )
   }
 
   protected doPushState(
@@ -196,8 +196,8 @@ class History {
       documentScrollPosition?: ScrollRegion
     },
     url: string,
-  ): void {
-    window.history.pushState(data, '', url)
+  ): Promise<void> {
+    return Promise.resolve().then(() => window.history.pushState(data, '', url))
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
