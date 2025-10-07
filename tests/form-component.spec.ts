@@ -1443,6 +1443,20 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
     })
 
+    test('shows only first error when server returns errors as array', async ({ page }) => {
+      await page.goto('/form-component/precognition-array-errors')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show only the first error from the array, not the second
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The name contains invalid characters.')).not.toBeVisible()
+    })
+
     test('clears validation error when field becomes valid', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()

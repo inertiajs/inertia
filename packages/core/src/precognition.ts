@@ -33,8 +33,10 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   const abortControllers: Record<string, AbortController> = {}
 
   const cancelAll = () => {
-    Object.values(abortControllers).forEach((controller) => controller.abort())
-    Object.keys(abortControllers).forEach((key) => delete abortControllers[key])
+    Object.entries(abortControllers).forEach(([key, controller]) => {
+      controller.abort()
+      delete abortControllers[key]
+    })
   }
 
   const setTimeout = (value: number) => {
@@ -45,8 +47,16 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
     }
   }
 
-  const createFingerprint = (options: PrecognitionValidateOptions) => {
-    return `${options.method}:${options.url}`
+  const createFingerprint = (options: PrecognitionValidateOptions) => `${options.method}:${options.url}`
+
+  const toSimpleValidationErrors = (errors: Errors): Errors => {
+    return Object.keys(errors).reduce(
+      (carry, key) => ({
+        ...carry,
+        [key]: Array.isArray(errors[key]) ? errors[key][0] : errors[key],
+      }),
+      {},
+    )
   }
 
   const createValidateFunction = () =>
@@ -102,7 +112,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
             if (error.response?.status === 422) {
               const errors = error.response.data?.errors || {}
               const scopedErrors = (options.errorBag ? errors[options.errorBag] || {} : errors) as Errors
-              return options.onValidationError(scopedErrors)
+              return options.onValidationError(toSimpleValidationErrors(scopedErrors))
             }
 
             if (options.onException) {
