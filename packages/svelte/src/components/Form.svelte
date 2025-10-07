@@ -196,6 +196,7 @@
   export function defaults() {
     defaultData = getFormData()
     isDirty = false
+    updateDataOnValidator()
   }
 
   export function validate(
@@ -228,6 +229,7 @@
       only: fields,
       errorBag,
       headers,
+      onBeforeValidation: options.onBeforeValidation,
       onPrecognitionSuccess: () => {
         validated = [...validated, ...fields]
         clearErrors(...fields)
@@ -247,6 +249,7 @@
         setError(mergedErrors)
         options.onError?.(errors)
       },
+      onException: options.onException,
       onFinish: () => {
         options.onFinish?.()
       },

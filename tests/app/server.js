@@ -1005,9 +1005,9 @@ app.post('/form-component/precognition-headers', (req, res) => {
     const name = req.body['name']
     const errors = {}
 
-    // Validate that custom header is present
-    if (customHeader !== 'custom-value') {
-      errors.name = 'Custom header missing or incorrect.'
+    // Show error when custom header IS present (to prove it was sent)
+    if (customHeader === 'custom-value') {
+      errors.name = 'Custom header received: custom-value'
     } else if (!name) {
       errors.name = 'The name field is required.'
     } else if (name.length < 3) {

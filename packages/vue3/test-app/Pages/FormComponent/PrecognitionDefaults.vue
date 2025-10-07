@@ -23,13 +23,14 @@ const handleSetDefaults = () => {
       <p v-if="validating" class="validating">Validating...</p>
 
       <div>
-        <input id="name-input" name="name" @blur="validate('name')" />
+        <input id="name-input" name="name" />
         <p v-if="invalid('name')" class="error">
           {{ errors.name }}
         </p>
       </div>
 
       <button type="button" @click="handleSetDefaults">Set Defaults</button>
+      <button type="button" @click="validate('name')">Validate Name</button>
       <button type="submit">Submit</button>
     </Form>
   </div>

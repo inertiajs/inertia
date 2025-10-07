@@ -215,6 +215,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const defaults = () => {
       defaultData.current = getFormData()
       setIsDirty(false)
+      updateDataOnValidator()
     }
 
     const validate = (
@@ -247,6 +248,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         only: fields,
         errorBag,
         headers,
+        onBeforeValidation: options.onBeforeValidation,
         onPrecognitionSuccess: () => {
           setValidated((prev) => [...prev, ...fields])
           form.clearErrors(...fields)
@@ -264,6 +266,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           form.setError({ ...form.errors, ...errors })
           options.onError?.(errors)
         },
+        onException: options.onException,
         onFinish: () => {
           options.onFinish?.()
         },

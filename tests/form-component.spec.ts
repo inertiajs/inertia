@@ -1863,20 +1863,36 @@ test.describe('Form Component', () => {
     test('onBeforeValidation can be passed per validate call', async ({ page }) => {
       await page.goto('/form-component/precognition-before-validation-per-call')
 
-      await page.fill('#name-input', 'John')
+      await page.fill('#name-input', 'ab')
 
-      // First button uses first callback
+      // Set up network listener to verify no validation requests are made
+      let validationRequestMade = false
+      page.on('request', (request) => {
+        if (request.url().includes('/form-component/precognition') && request.method() === 'POST') {
+          validationRequestMade = true
+        }
+      })
+
+      // First button uses first callback - should block validation
       await page.click('button:has-text("Validate with First")')
 
       await expect(page.getByText('Blocked by first callback')).toBeVisible()
       await expect(page.getByText('Blocked by second callback')).not.toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      // Second button uses second callback
+      // Wait a moment to ensure no request was made
+      await page.waitForTimeout(300)
+      expect(validationRequestMade).toBe(false)
+
+      // Second button uses second callback - should also block validation
       await page.click('button:has-text("Validate with Second")')
 
       await expect(page.getByText('Blocked by second callback')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Wait again to ensure no request was made
+      await page.waitForTimeout(300)
+      expect(validationRequestMade).toBe(false)
     })
 
     test('onException handles non-422 errors during validation', async ({ page }) => {
@@ -1897,15 +1913,15 @@ test.describe('Form Component', () => {
     test('sends custom headers with validation requests', async ({ page }) => {
       await page.goto('/form-component/precognition-headers')
 
-      // Validation should succeed because custom header is sent
+      // Fill in a valid name to trigger validation
       await page.fill('input[name="name"]', 'John Doe')
       await page.locator('input[name="name"]').blur()
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      // Should not show error because custom header was present
-      await expect(page.getByText('Custom header missing or incorrect.')).not.toBeVisible()
+      // Should show error confirming custom header was received
+      await expect(page.getByText('Custom header received: custom-value')).toBeVisible()
     })
 
     test('automatically cancels previous validation when new validation starts', async ({ page }) => {
@@ -1928,24 +1944,25 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
     })
 
-    test('defaults() updates validator data to prevent unnecessary requests', async ({ page }) => {
+    test('defaults() updates validator data as well', async ({ page }) => {
       await page.goto('/form-component/precognition-defaults')
 
-      // Fill in a value and validate
       await page.fill('#name-input', 'John')
       await page.locator('#name-input').blur()
+      await page.click('button:has-text("Validate Name")')
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      // Set this as the new defaults
+      // Click again, should not validate again because data hasn't changed
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+      await page.click('button:has-text("Validate Name")')
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Now change default to a different value, should not validate because value matches new default
+      await page.fill('#name-input', 'Johnny')
       await page.click('button:has-text("Set Defaults")')
-
-      // Blur again without changing the value - should NOT trigger validation
-      // because the validator knows the data hasn't changed since defaults
-      await page.locator('#name-input').blur()
-
-      // Should not show validating because data hasn't changed
+      await page.click('button:has-text("Validate Name")')
       await expect(page.getByText('Validating...')).not.toBeVisible()
     })
   })
