@@ -60,6 +60,8 @@ class History {
         } else {
           doPush()
         }
+
+        return Promise.resolve()
       })
     })
   }
@@ -107,7 +109,7 @@ class History {
           return
         }
 
-        this.doReplaceState({
+        return this.doReplaceState({
           page: window.history.state.page,
           scrollRegions,
         })
@@ -122,7 +124,7 @@ class History {
           return
         }
 
-        this.doReplaceState({
+        return this.doReplaceState({
           page: window.history.state.page,
           documentScrollPosition: scrollRegion,
         })
@@ -156,15 +158,15 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
-        const doReplace = () => {
-          this.doReplaceState({ page: data }, page.url)
-          cb && cb()
-        }
+        const doReplace = () =>
+          this.doReplaceState({ page: data }, page.url).then(() => {
+            cb && cb()
+          })
 
         if (isChromeIOS) {
           setTimeout(doReplace)
         } else {
-          doReplace()
+          return doReplace()
         }
       })
     })
@@ -177,16 +179,18 @@ class History {
       documentScrollPosition?: ScrollRegion
     },
     url?: string,
-  ): void {
-    window.history.replaceState(
-      {
-        ...data,
-        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-      },
-      '',
-      url,
-    )
+  ): Promise<void> {
+    return Promise.resolve().then(() => {
+      window.history.replaceState(
+        {
+          ...data,
+          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+        },
+        '',
+        url,
+      )
+    })
   }
 
   protected doPushState(

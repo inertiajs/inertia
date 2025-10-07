@@ -542,6 +542,39 @@ test.describe('Form Helper', () => {
     })
   })
 
+  test.describe('Remember', () => {
+    test('navigates correctly with remember key', async ({ page }) => {
+      // Start on users index
+      await page.goto('/users')
+      await expect(page.getByRole('heading', { name: 'Users Index' })).toBeVisible()
+
+      // Navigate to user 1 edit with remember key
+      await page.getByRole('link', { name: 'Edit User One' }).click()
+      await expect(page).toHaveURL(/\/users\/1\/edit/)
+      await expect(page.getByRole('heading', { name: 'Edit User 1' })).toBeVisible()
+      await expect(page.getByText('With remember key: true')).toBeVisible()
+
+      // Navigate back to users index
+      await page.waitForTimeout(100)
+      await page.goBack()
+      await page.waitForTimeout(100)
+      await expect(page).toHaveURL('/users')
+      await expect(page.getByRole('heading', { name: 'Users Index' })).toBeVisible()
+
+      // Navigate to user 2 edit with remember key
+      await page.getByRole('link', { name: 'Edit User Two' }).click()
+      await expect(page).toHaveURL(/\/users\/2\/edit/)
+      await expect(page.getByRole('heading', { name: 'Edit User 2' })).toBeVisible()
+
+      // Navigate back - should go to users index
+      await page.waitForTimeout(100)
+      await page.goBack()
+      await page.waitForTimeout(100)
+      await expect(page).toHaveURL('/users')
+      await expect(page.getByRole('heading', { name: 'Users Index' })).toBeVisible()
+    })
+  })
+
   const waitForEventMessages = async (page: Page, minCount?: number): Promise<any[string]> => {
     if (typeof minCount === 'number') {
       await page.waitForFunction((minCount) => (window as any).events.length >= minCount, minCount)
