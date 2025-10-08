@@ -736,6 +736,7 @@ test.describe('scroll region with scrollable list', () => {
       test.beforeEach(async ({ page }) => await preparePage(page, url))
 
       test('resets scroll regions when clicking default button', async ({ page }) => {
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 0)
         await page.getByRole('button', { exact: true, name: 'Default' }).first().click()
 
         await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
@@ -751,6 +752,7 @@ test.describe('scroll region with scrollable list', () => {
       })
 
       test('resets scroll regions when clicking preserve false button', async ({ page }) => {
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 0)
         await page.getByRole('button', { exact: true, name: 'Preserve False' }).first().click()
 
         await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
@@ -766,6 +768,7 @@ test.describe('scroll region with scrollable list', () => {
       })
 
       test('preserves scroll regions when clicking preserve true button', async ({ page }) => {
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 0)
         await page.getByRole('button', { exact: true, name: 'Preserve True' }).first().click()
 
         await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
