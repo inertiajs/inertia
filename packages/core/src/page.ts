@@ -67,8 +67,11 @@ class CurrentPage {
 
       page.rememberedState ??= {}
 
-      const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
+      const isServer = typeof window === 'undefined'
+      const location = !isServer ? window.location : new URL(page.url)
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
+
+      const scrollRegions = !isServer && preserveScroll && !replace ? history.getScrollRegions() : undefined
 
       return new Promise((resolve) => {
         replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
@@ -89,9 +92,9 @@ class CurrentPage {
         this.isFirstPageLoad = false
 
         return this.swap({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
-            Scroll.reset()
-          }
+          scrollRegions
+            ? window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
+            : Scroll.reset()
 
           if (
             this.pendingDeferredProps &&
