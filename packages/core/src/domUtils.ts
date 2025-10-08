@@ -9,38 +9,36 @@ const elementInViewport = (el: HTMLElement) => {
 }
 
 export const getScrollableParent = (element: HTMLElement | null): HTMLElement | null => {
-  const allowsVerticalScroll = (computedStyle: CSSStyleDeclaration, el: HTMLElement): boolean => {
-    const overflowY = computedStyle.overflowY
-    const overflowX = computedStyle.overflowX
+  const allowsVerticalScroll = (el: HTMLElement): boolean => {
+    const computedStyle = window.getComputedStyle(el)
 
-    if (['scroll', 'overlay'].includes(overflowY)) {
+    if (['scroll', 'overlay'].includes(computedStyle.overflowY)) {
       return true
     }
 
-    if (!['auto'].includes(overflowY)) {
+    if (computedStyle.overflowY !== 'auto') {
       return false
     }
 
-    if (['visible', 'clip'].includes(overflowX)) {
+    if (['visible', 'clip'].includes(computedStyle.overflowX)) {
       return true
     }
 
     return hasDimensionConstraint(computedStyle.maxHeight, el.style.height)
   }
 
-  const allowsHorizontalScroll = (computedStyle: CSSStyleDeclaration, el: HTMLElement): boolean => {
-    const overflowY = computedStyle.overflowY
-    const overflowX = computedStyle.overflowX
+  const allowsHorizontalScroll = (el: HTMLElement): boolean => {
+    const computedStyle = window.getComputedStyle(el)
 
-    if (['scroll', 'overlay'].includes(overflowX)) {
+    if (['scroll', 'overlay'].includes(computedStyle.overflowX)) {
       return true
     }
 
-    if (!['auto'].includes(overflowX)) {
+    if (computedStyle.overflowX !== 'auto') {
       return false
     }
 
-    if (['visible', 'clip'].includes(overflowY)) {
+    if (['visible', 'clip'].includes(computedStyle.overflowY)) {
       return true
     }
 
@@ -62,12 +60,9 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
   let parent = element?.parentElement
 
   while (parent) {
-    const computedStyle = window.getComputedStyle(parent)
+    const allowsScroll = allowsVerticalScroll(parent) || allowsHorizontalScroll(parent)
 
-    if (
-      computedStyle.display !== 'contents' &&
-      (allowsVerticalScroll(computedStyle, parent) || allowsHorizontalScroll(computedStyle, parent))
-    ) {
+    if (window.getComputedStyle(parent).display !== 'contents' && allowsScroll) {
       return parent
     }
 
