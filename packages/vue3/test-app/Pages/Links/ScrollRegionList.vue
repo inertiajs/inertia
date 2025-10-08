@@ -1,10 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import WithScrollRegion from '@/Layouts/WithScrollRegion.vue'
+import { VisitHelperOptions } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
 
 defineProps({
   user_id: Number,
 })
+
+const navigate = (id: number, options: VisitHelperOptions = {}) => {
+  router.get(`/links/scroll-region-list/user/${id}`, {}, options)
+}
 
 const users = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `User ${i + 1}` }))
 </script>
@@ -17,13 +22,9 @@ const users = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `User ${i
 
       <div v-for="user in users" :key="user.id" style="padding: 20px; border-bottom: 1px solid #ccc">
         <div style="margin-bottom: 10px; width: 500px">{{ user.name }}</div>
-        <button @click="router.get(`/links/scroll-region-list/user/${user.id}`)">Default</button>
-        <button @click="router.get(`/links/scroll-region-list/user/${user.id}`, {}, { preserveScroll: true })">
-          Preserve True
-        </button>
-        <button @click="router.get(`/links/scroll-region-list/user/${user.id}`, {}, { preserveScroll: false })">
-          Preserve False
-        </button>
+        <button @click="navigate(user.id)">Default</button>
+        <button @click="navigate(user.id, { preserveScroll: true })">Preserve True</button>
+        <button @click="navigate(user.id, { preserveScroll: false })">Preserve False</button>
       </div>
     </div>
   </WithScrollRegion>

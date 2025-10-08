@@ -702,17 +702,30 @@ test.describe('scroll region with scrollable list', () => {
     await expect(page.getByText('Scrollable list with scroll region')).toBeVisible()
     await expect(page.getByText('Clicked user: none')).toBeVisible()
 
+    await page.evaluate(() => {
+      // @ts-ignore
+      window.navigateEvents = window.navigateEvents || []
+
+      document.addEventListener('inertia:navigate', (e) => {
+        // @ts-ignore
+        window.navigateEvents.push(e)
+      })
+    })
+
     await scrollElementTo(
       page,
       page.evaluate(() => window.scrollTo(5, 7)),
     )
+
     await scrollElementTo(
       page,
       page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
     )
 
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
-    await page.waitForTimeout(100)
+
+    await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
+    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   }
 
   Object.entries({
@@ -727,6 +740,7 @@ test.describe('scroll region with scrollable list', () => {
 
         await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
         await expect(page.getByText('Clicked user: 1')).toBeVisible()
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 1)
 
         await page.waitForTimeout(100)
         await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
@@ -741,6 +755,7 @@ test.describe('scroll region with scrollable list', () => {
 
         await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
         await expect(page.getByText('Clicked user: 1')).toBeVisible()
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 1)
 
         await page.waitForTimeout(100)
         await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
@@ -755,10 +770,9 @@ test.describe('scroll region with scrollable list', () => {
 
         await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
         await expect(page.getByText('Clicked user: 1')).toBeVisible()
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 1)
 
-        await page.waitForTimeout(100)
         await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
-        await page.waitForTimeout(100)
 
         await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
         await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
