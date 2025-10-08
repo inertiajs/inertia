@@ -1586,6 +1586,25 @@ test.describe('Scrollable container support', () => {
 
     expect(afterScreenshot).toEqual(beforeScreenshot)
   })
+
+  test('it does not treat overflow-x: hidden as a scroll container', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 400 })
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/overflow-x')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    expect(infiniteScrollRequests().length).toBe(1)
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await page.waitForTimeout(1000)
+
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
 })
 
 test.describe('Horizontal scrolling support', () => {

@@ -960,6 +960,9 @@ app.get('/infinite-scroll/data-table', (req, res) =>
 app.get('/infinite-scroll/horizontal-scroll', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/HorizontalScroll'),
 )
+app.get('/infinite-scroll/overflow-x', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/OverflowX', 150, false, 15),
+)
 app.get('/infinite-scroll/empty', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Empty', 0))
 app.get('/infinite-scroll/custom-triggers-ref', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/CustomTriggersRef'),
