@@ -19,6 +19,12 @@
   let originalBugCase: HTMLDivElement
   let inlineWidthStyle: HTMLDivElement
   let bothScrollDirections: HTMLDivElement
+  let overflowYAutoOverflowXVisible: HTMLDivElement
+  let overflowYAutoOverflowXClip: HTMLDivElement
+  let overflowXAutoOverflowYVisible: HTMLDivElement
+  let overflowXAutoOverflowYClip: HTMLDivElement
+  let overflowYAutoOverflowXHidden: HTMLDivElement
+  let overflowXAutoOverflowYHidden: HTMLDivElement
 
   let results: Record<string, HTMLElement | null> = {}
 
@@ -41,6 +47,12 @@
       originalBugCase,
       inlineWidthStyle,
       bothScrollDirections,
+      overflowYAutoOverflowXVisible,
+      overflowYAutoOverflowXClip,
+      overflowXAutoOverflowYVisible,
+      overflowXAutoOverflowYClip,
+      overflowYAutoOverflowXHidden,
+      overflowXAutoOverflowYHidden,
     }).forEach(([key, element]) => {
       results[key] = getScrollableParent(element)
     })
@@ -294,6 +306,100 @@
         </div>
       </div>
       <p data-testid="result-both-scroll-directions">{results.bothScrollDirections?.dataset?.testid || 'null'}</p>
+    </div>
+
+    <!-- overflow-y: auto + overflow-x: visible -->
+    <div>
+      <h3>overflow-y: auto + overflow-x: visible</h3>
+      <div
+        style="overflow-y: auto; overflow-x: visible; height: 100px; border: 2px solid red; padding: 10px"
+        data-testid="overflow-y-auto-x-visible"
+      >
+        <div bind:this={overflowYAutoOverflowXVisible} data-testid="overflow-y-auto-overflow-x-visible">
+          <p>Content</p>
+          <p>Content</p>
+          <p>Content</p>
+        </div>
+      </div>
+      <p data-testid="result-overflow-y-auto-overflow-x-visible">
+        {results.overflowYAutoOverflowXVisible?.dataset?.testid || 'null'}
+      </p>
+    </div>
+
+    <!-- overflow-y: auto + overflow-x: clip -->
+    <div>
+      <h3>overflow-y: auto + overflow-x: clip</h3>
+      <div
+        style="overflow-y: auto; overflow-x: clip; height: 100px; border: 2px solid red; padding: 10px"
+        data-testid="overflow-y-auto-x-clip"
+      >
+        <div bind:this={overflowYAutoOverflowXClip} data-testid="overflow-y-auto-overflow-x-clip">
+          <p>Content</p>
+          <p>Content</p>
+          <p>Content</p>
+        </div>
+      </div>
+      <p data-testid="result-overflow-y-auto-overflow-x-clip">
+        {results.overflowYAutoOverflowXClip?.dataset?.testid || 'null'}
+      </p>
+    </div>
+
+    <!-- overflow-x: auto + overflow-y: visible -->
+    <div>
+      <h3>overflow-x: auto + overflow-y: visible</h3>
+      <div
+        style="overflow-x: auto; overflow-y: visible; width: 300px; border: 2px solid red; padding: 10px"
+        data-testid="overflow-x-auto-y-visible"
+      >
+        <div
+          bind:this={overflowXAutoOverflowYVisible}
+          data-testid="overflow-x-auto-overflow-y-visible"
+          style="width: 600px"
+        >
+          Wide content
+        </div>
+      </div>
+      <p data-testid="result-overflow-x-auto-overflow-y-visible">
+        {results.overflowXAutoOverflowYVisible?.dataset?.testid || 'null'}
+      </p>
+    </div>
+
+    <!-- overflow-x: auto + overflow-y: clip -->
+    <div>
+      <h3>overflow-x: auto + overflow-y: clip</h3>
+      <div
+        style="overflow-x: auto; overflow-y: clip; width: 300px; border: 2px solid red; padding: 10px"
+        data-testid="overflow-x-auto-y-clip"
+      >
+        <div bind:this={overflowXAutoOverflowYClip} data-testid="overflow-x-auto-overflow-y-clip" style="width: 600px">
+          Wide content
+        </div>
+      </div>
+      <p data-testid="result-overflow-x-auto-overflow-y-clip">
+        {results.overflowXAutoOverflowYClip?.dataset?.testid || 'null'}
+      </p>
+    </div>
+
+    <!-- overflow-y: auto + overflow-x: hidden (no height) -->
+    <div>
+      <h3>overflow-y: auto + overflow-x: hidden (no height)</h3>
+      <div style="overflow-y: auto; overflow-x: hidden; border: 2px solid red; padding: 10px">
+        <div bind:this={overflowYAutoOverflowXHidden} data-testid="overflow-y-auto-overflow-x-hidden">Content</div>
+      </div>
+      <p data-testid="result-overflow-y-auto-overflow-x-hidden">
+        {results.overflowYAutoOverflowXHidden?.tagName || 'null'}
+      </p>
+    </div>
+
+    <!-- overflow-x: auto + overflow-y: hidden (no width) -->
+    <div>
+      <h3>overflow-x: auto + overflow-y: hidden (no width)</h3>
+      <div style="overflow-x: auto; overflow-y: hidden; border: 2px solid red; padding: 10px">
+        <div bind:this={overflowXAutoOverflowYHidden} data-testid="overflow-x-auto-overflow-y-hidden">Content</div>
+      </div>
+      <p data-testid="result-overflow-x-auto-overflow-y-hidden">
+        {results.overflowXAutoOverflowYHidden?.tagName || 'null'}
+      </p>
     </div>
   </div>
 </div>

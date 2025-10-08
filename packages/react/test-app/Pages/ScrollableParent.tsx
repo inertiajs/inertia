@@ -19,6 +19,12 @@ export default () => {
   const originalBugCase = useRef<HTMLDivElement>(null)
   const inlineWidthStyle = useRef<HTMLDivElement>(null)
   const bothScrollDirections = useRef<HTMLDivElement>(null)
+  const overflowYAutoOverflowXVisible = useRef<HTMLDivElement>(null)
+  const overflowYAutoOverflowXClip = useRef<HTMLDivElement>(null)
+  const overflowXAutoOverflowYVisible = useRef<HTMLDivElement>(null)
+  const overflowXAutoOverflowYClip = useRef<HTMLDivElement>(null)
+  const overflowYAutoOverflowXHidden = useRef<HTMLDivElement>(null)
+  const overflowXAutoOverflowYHidden = useRef<HTMLDivElement>(null)
 
   const [results, setResults] = useState<Record<string, HTMLElement | null>>({})
 
@@ -43,6 +49,12 @@ export default () => {
       originalBugCase,
       inlineWidthStyle,
       bothScrollDirections,
+      overflowYAutoOverflowXVisible,
+      overflowYAutoOverflowXClip,
+      overflowXAutoOverflowYVisible,
+      overflowXAutoOverflowYClip,
+      overflowYAutoOverflowXHidden,
+      overflowXAutoOverflowYHidden,
     }).forEach(([key, ref]) => {
       newResults[key] = getScrollableParent(ref.current)
     })
@@ -345,6 +357,120 @@ export default () => {
           </div>
           <p data-testid="result-both-scroll-directions">
             {(results.bothScrollDirections as any)?.dataset?.testid || 'null'}
+          </p>
+        </div>
+
+        {/* overflow-y: auto + overflow-x: visible */}
+        <div>
+          <h3>overflow-y: auto + overflow-x: visible</h3>
+          <div
+            style={{
+              overflowY: 'auto',
+              overflowX: 'visible',
+              height: '100px',
+              border: '2px solid red',
+              padding: '10px',
+            }}
+            data-testid="overflow-y-auto-x-visible"
+          >
+            <div ref={overflowYAutoOverflowXVisible} data-testid="overflow-y-auto-overflow-x-visible">
+              <p>Content</p>
+              <p>Content</p>
+              <p>Content</p>
+            </div>
+          </div>
+          <p data-testid="result-overflow-y-auto-overflow-x-visible">
+            {(results.overflowYAutoOverflowXVisible as any)?.dataset?.testid || 'null'}
+          </p>
+        </div>
+
+        {/* overflow-y: auto + overflow-x: clip */}
+        <div>
+          <h3>overflow-y: auto + overflow-x: clip</h3>
+          <div
+            style={{ overflowY: 'auto', overflowX: 'clip', height: '100px', border: '2px solid red', padding: '10px' }}
+            data-testid="overflow-y-auto-x-clip"
+          >
+            <div ref={overflowYAutoOverflowXClip} data-testid="overflow-y-auto-overflow-x-clip">
+              <p>Content</p>
+              <p>Content</p>
+              <p>Content</p>
+            </div>
+          </div>
+          <p data-testid="result-overflow-y-auto-overflow-x-clip">
+            {(results.overflowYAutoOverflowXClip as any)?.dataset?.testid || 'null'}
+          </p>
+        </div>
+
+        {/* overflow-x: auto + overflow-y: visible */}
+        <div>
+          <h3>overflow-x: auto + overflow-y: visible</h3>
+          <div
+            style={{
+              overflowX: 'auto',
+              overflowY: 'visible',
+              width: '300px',
+              border: '2px solid red',
+              padding: '10px',
+            }}
+            data-testid="overflow-x-auto-y-visible"
+          >
+            <div
+              ref={overflowXAutoOverflowYVisible}
+              data-testid="overflow-x-auto-overflow-y-visible"
+              style={{ width: '600px' }}
+            >
+              Wide content
+            </div>
+          </div>
+          <p data-testid="result-overflow-x-auto-overflow-y-visible">
+            {(results.overflowXAutoOverflowYVisible as any)?.dataset?.testid || 'null'}
+          </p>
+        </div>
+
+        {/* overflow-x: auto + overflow-y: clip */}
+        <div>
+          <h3>overflow-x: auto + overflow-y: clip</h3>
+          <div
+            style={{ overflowX: 'auto', overflowY: 'clip', width: '300px', border: '2px solid red', padding: '10px' }}
+            data-testid="overflow-x-auto-y-clip"
+          >
+            <div
+              ref={overflowXAutoOverflowYClip}
+              data-testid="overflow-x-auto-overflow-y-clip"
+              style={{ width: '600px' }}
+            >
+              Wide content
+            </div>
+          </div>
+          <p data-testid="result-overflow-x-auto-overflow-y-clip">
+            {(results.overflowXAutoOverflowYClip as any)?.dataset?.testid || 'null'}
+          </p>
+        </div>
+
+        {/* overflow-y: auto + overflow-x: hidden (no height) */}
+        <div>
+          <h3>overflow-y: auto + overflow-x: hidden (no height)</h3>
+          <div style={{ overflowY: 'auto', overflowX: 'hidden', border: '2px solid red', padding: '10px' }}>
+            <div ref={overflowYAutoOverflowXHidden} data-testid="overflow-y-auto-overflow-x-hidden">
+              Content
+            </div>
+          </div>
+          <p data-testid="result-overflow-y-auto-overflow-x-hidden">
+            {results.overflowYAutoOverflowXHidden?.tagName || 'null'}
+          </p>
+        </div>
+
+        {/* overflow-x: auto + overflow-y: hidden (no width) */}
+        <div>
+          <h3>overflow-x: auto + overflow-y: hidden (no width)</h3>
+          <div style={{ overflowX: 'auto', overflowY: 'hidden', border: '2px solid red', padding: '10px' }}>
+            <div ref={overflowXAutoOverflowYHidden} data-testid="overflow-x-auto-overflow-y-hidden">
+              Content
+            </div>
+          </div>
+          <p data-testid="result-overflow-x-auto-overflow-y-hidden">
+            {results.overflowXAutoOverflowYHidden?.tagName || 'null'}
           </p>
         </div>
       </div>
