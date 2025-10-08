@@ -52,7 +52,7 @@
 
   let validating = false
   let validated: string[] = []
-  let touched: string[] = []
+  let touchedFields: string[] = []
 
   const validator = usePrecognition({
     onStart: () => {
@@ -168,9 +168,9 @@
     updateDataOnValidator()
 
     if (fields.length === 0) {
-      touched = []
+      touchedFields = []
     } else {
-      touched = touched.filter((field) => !fields.includes(field))
+      touchedFields = touchedFields.filter((field) => !fields.includes(field))
     }
   }
 
@@ -210,11 +210,11 @@
     if (typeof only === 'object' && !Array.isArray(only)) {
       // Called as validate({ only: [...], onSuccess, onError, onFinish })
       const onlyFields = only.only
-      fields = onlyFields === undefined ? touched : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
+      fields = onlyFields === undefined ? touchedFields : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
       options = only
     } else {
       // Called as validate('field') or validate(['field1', 'field2']) or validate('field', {options})
-      fields = only === undefined ? touched : Array.isArray(only) ? only : [only]
+      fields = only === undefined ? touchedFields : Array.isArray(only) ? only : [only]
       options = maybeOptions || {}
     }
 
@@ -262,15 +262,15 @@
     const fields = Array.isArray(field) ? field : [field]
 
     // Use Set to avoid duplicates
-    touched = [...new Set([...touched, ...fields])]
+    touchedFields = [...new Set([...touchedFields, ...fields])]
   }
 
-  export function isTouched(field?: string): boolean {
+  export function touched(field?: string): boolean {
     if (typeof field === 'string') {
-      return touched.includes(field)
+      return touchedFields.includes(field)
     }
 
-    return touched.length > 0
+    return touchedFields.length > 0
   }
 
   export function valid(field: string): boolean {
@@ -312,7 +312,8 @@
   // Create reactive slot props that update when state changes
   $: slotValid = (field: string) => validated.includes(field) && slotErrors[field] === undefined
   $: slotInvalid = (field: string) => slotErrors[field] !== undefined
-  $: slotTouched = (field?: string) => (typeof field === 'string' ? touched.includes(field) : touched.length > 0)
+  $: slotTouched = (field?: string) =>
+    typeof field === 'string' ? touchedFields.includes(field) : touchedFields.length > 0
 </script>
 
 <form
