@@ -327,6 +327,14 @@ const Form = defineComponent({
       touched.value = [...new Set([...touched.value, ...fields])]
     }
 
+    const isTouched = (field?: string): boolean => {
+      if (typeof field === 'string') {
+        return touched.value.includes(field)
+      }
+
+      return touched.value.length > 0
+    }
+
     const exposed = {
       get errors() {
         return form.errors
@@ -365,6 +373,7 @@ const Form = defineComponent({
       invalid: (field: string) => form.errors[field] !== undefined,
       validate,
       touch,
+      touched: isTouched,
       setValidationTimeout: (duration: number) => validator.setTimeout(duration),
       validateFiles: () => validator.validateFiles(true),
     }

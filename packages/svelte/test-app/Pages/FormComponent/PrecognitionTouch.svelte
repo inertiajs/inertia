@@ -13,6 +13,7 @@
     let:errors
     let:validate
     let:touch
+    let:touched
     let:validating
   >
     {#if validating}
@@ -32,6 +33,10 @@
         <p>{errors.email}</p>
       {/if}
     </div>
+
+    <p data-testid="name-touched">{touched('name') ? 'Name is touched' : 'Name is not touched'}</p>
+    <p data-testid="email-touched">{touched('email') ? 'Email is touched' : 'Email is not touched'}</p>
+    <p data-testid="any-touched">{touched() ? 'Form has touched fields' : 'Form has no touched fields'}</p>
 
     <button type="button" on:click={() => validate()}>Validate All Touched</button>
     <button type="button" on:click={() => touch(['name', 'email'])}>Touch Name and Email</button>

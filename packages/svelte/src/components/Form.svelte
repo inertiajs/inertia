@@ -263,6 +263,14 @@
     touched = [...new Set([...touched, ...fields])]
   }
 
+  export function isTouched(field?: string): boolean {
+    if (typeof field === 'string') {
+      return touched.includes(field)
+    }
+
+    return touched.length > 0
+  }
+
   export function valid(field: string): boolean {
     return validated.includes(field) && $form.errors[field] === undefined
   }
@@ -302,6 +310,7 @@
   // Create reactive slot props that update when state changes
   $: slotValid = (field: string) => validated.includes(field) && slotErrors[field] === undefined
   $: slotInvalid = (field: string) => slotErrors[field] !== undefined
+  $: slotTouched = (field?: string) => (typeof field === 'string' ? touched.includes(field) : touched.length > 0)
 </script>
 
 <form
@@ -330,6 +339,7 @@
     {validating}
     {validate}
     {touch}
+    touched={slotTouched}
     valid={slotValid}
     invalid={slotInvalid}
     {setValidationTimeout}

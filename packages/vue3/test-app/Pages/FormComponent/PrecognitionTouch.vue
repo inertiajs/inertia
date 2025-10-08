@@ -10,7 +10,7 @@ import { Form } from '@inertiajs/vue3'
       action="/form-component/precognition"
       method="post"
       :validate-timeout="100"
-      #default="{ invalid, errors, validate, touch, validating }"
+      #default="{ invalid, errors, validate, touch, touched, validating }"
     >
       <p v-if="validating">Validating...</p>
 
@@ -27,6 +27,10 @@ import { Form } from '@inertiajs/vue3'
           {{ errors.email }}
         </p>
       </div>
+
+      <p data-testid="name-touched">{{ touched('name') ? 'Name is touched' : 'Name is not touched' }}</p>
+      <p data-testid="email-touched">{{ touched('email') ? 'Email is touched' : 'Email is not touched' }}</p>
+      <p data-testid="any-touched">{{ touched() ? 'Form has touched fields' : 'Form has no touched fields' }}</p>
 
       <button type="button" @click="validate()">Validate All Touched</button>
       <button type="button" @click="touch(['name', 'email'])">Touch Name and Email</button>

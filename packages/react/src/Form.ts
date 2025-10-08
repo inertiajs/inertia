@@ -280,6 +280,14 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setTouched((prev) => [...new Set([...prev, ...fields])])
     }
 
+    const isTouched = (field?: string): boolean => {
+      if (typeof field === 'string') {
+        return touched.includes(field)
+      }
+
+      return touched.length > 0
+    }
+
     const exposed = () => ({
       errors: form.errors,
       hasErrors: form.hasErrors,
@@ -301,6 +309,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       invalid: (field: string) => form.errors[field] !== undefined,
       validate,
       touch,
+      touched: isTouched,
       setValidationTimeout: (duration: number) => validator.setTimeout(duration),
       validateFiles: () => validator.validateFiles(true),
     })

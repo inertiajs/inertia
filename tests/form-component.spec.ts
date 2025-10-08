@@ -1692,6 +1692,49 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
     })
 
+    test('touched() returns false when no fields are touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await expect(page.getByTestId('any-touched')).toHaveText('Form has no touched fields')
+      await expect(page.getByTestId('name-touched')).toHaveText('Name is not touched')
+      await expect(page.getByTestId('email-touched')).toHaveText('Email is not touched')
+    })
+
+    test('touched(field) returns true when specific field is touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.locator('input[name="name"]').focus()
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByTestId('name-touched')).toHaveText('Name is touched')
+      await expect(page.getByTestId('email-touched')).toHaveText('Email is not touched')
+      await expect(page.getByTestId('any-touched')).toHaveText('Form has touched fields')
+    })
+
+    test('touched() returns true when any field is touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.locator('input[name="email"]').focus()
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByTestId('any-touched')).toHaveText('Form has touched fields')
+      await expect(page.getByTestId('email-touched')).toHaveText('Email is touched')
+      await expect(page.getByTestId('name-touched')).toHaveText('Name is not touched')
+    })
+
+    test('touched() updates when multiple fields are touched', async ({ page }) => {
+      await page.goto('/form-component/precognition-touch')
+
+      await page.locator('input[name="name"]').focus()
+      await page.locator('input[name="name"]').blur()
+      await page.locator('input[name="email"]').focus()
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByTestId('name-touched')).toHaveText('Name is touched')
+      await expect(page.getByTestId('email-touched')).toHaveText('Email is touched')
+      await expect(page.getByTestId('any-touched')).toHaveText('Form has touched fields')
+    })
+
     test('validate with specific field works independently of touched state', async ({ page }) => {
       await page.goto('/form-component/precognition-validate')
 

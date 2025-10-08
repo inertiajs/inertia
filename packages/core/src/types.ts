@@ -510,6 +510,7 @@ export type FormComponentMethods = {
     maybeOptions?: FormComponentValidateOptions,
   ) => void
   touch: (field: string | string[]) => void
+  touched(field?: string): boolean
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
