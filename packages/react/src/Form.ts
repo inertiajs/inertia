@@ -68,6 +68,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       invalidateCacheTags = [],
       validateFiles = false,
       validateTimeout = 1500,
+      simpleValidationErrors = true,
       children,
       ...props
     },
@@ -248,6 +249,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         only: fields,
         errorBag,
         headers,
+        simpleValidationErrors,
         onBeforeValidation: options.onBeforeValidation,
         onPrecognitionSuccess: () => {
           setValidated((prev) => [...prev, ...fields])

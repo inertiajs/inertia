@@ -41,6 +41,7 @@
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
   export let validateFiles: FormComponentProps['validateFiles'] = false
   export let validateTimeout: FormComponentProps['validateTimeout'] = 1500
+  export let simpleValidationErrors: FormComponentProps['simpleValidationErrors'] = true
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -229,6 +230,7 @@
       only: fields,
       errorBag,
       headers,
+      simpleValidationErrors,
       onBeforeValidation: options.onBeforeValidation,
       onPrecognitionSuccess: () => {
         validated = [...validated, ...fields]

@@ -15,6 +15,7 @@ type PrecognitionValidateOptions = Pick<Visit<RequestData>, 'method' | 'data' | 
     url: string
     onPrecognitionSuccess: () => void
     onValidationError: (errors: Errors) => void
+    simpleValidationErrors?: boolean
   }
 
 interface PrecognitionValidator {
@@ -112,7 +113,9 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
             if (error.response?.status === 422) {
               const errors = error.response.data?.errors || {}
               const scopedErrors = (options.errorBag ? errors[options.errorBag] || {} : errors) as Errors
-              return options.onValidationError(toSimpleValidationErrors(scopedErrors))
+              const formattedErrors =
+                options.simpleValidationErrors === false ? scopedErrors : toSimpleValidationErrors(scopedErrors)
+              return options.onValidationError(formattedErrors)
             }
 
             if (options.onException) {

@@ -122,6 +122,10 @@ const Form = defineComponent({
       type: Number as PropType<FormComponentProps['validateTimeout']>,
       default: 1500,
     },
+    simpleValidationErrors: {
+      type: Boolean as PropType<FormComponentProps['simpleValidationErrors']>,
+      default: true,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -295,6 +299,7 @@ const Form = defineComponent({
         only: fields,
         errorBag: props.errorBag,
         headers: props.headers,
+        simpleValidationErrors: props.simpleValidationErrors,
         onBeforeValidation: options.onBeforeValidation,
         onPrecognitionSuccess: () => {
           validated.value = [...validated.value, ...fields]

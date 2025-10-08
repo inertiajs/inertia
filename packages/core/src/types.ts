@@ -479,6 +479,7 @@ export type FormComponentProps = Partial<
   setDefaultsOnSuccess?: boolean
   validateFiles?: boolean
   validateTimeout?: number
+  simpleValidationErrors?: boolean
 }
 
 type RevalidatePayload = {

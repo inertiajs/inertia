@@ -1457,6 +1457,34 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name contains invalid characters.')).not.toBeVisible()
     })
 
+    test('shows all errors when simpleValidationErrors is false', async ({ page }) => {
+      await page.goto('/form-component/precognition-all-errors')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show all errors from the array
+      await expect(page.getByTestId('name-error-0')).toHaveText('The name must be at least 3 characters.')
+      await expect(page.getByTestId('name-error-1')).toHaveText('The name contains invalid characters.')
+    })
+
+    test('shows all email errors when simpleValidationErrors is false', async ({ page }) => {
+      await page.goto('/form-component/precognition-all-errors')
+
+      await page.fill('input[name="email"]', 'invalid')
+      await page.locator('input[name="email"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show all errors from the array
+      await expect(page.getByTestId('email-error-0')).toHaveText('The email must be a valid email address.')
+      await expect(page.getByTestId('email-error-1')).toHaveText('The email format is incorrect.')
+    })
+
     test('clears validation error when field becomes valid', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
