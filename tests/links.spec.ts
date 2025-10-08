@@ -623,8 +623,8 @@ test.describe('enabled', () => {
 
   test('restores all tracked scroll regions when pressing the back button', async ({ page }) => {
     await page.getByTestId('preserve').click()
-
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
+    await page.waitForTimeout(100)
 
     await scrollElementTo(
       page,
