@@ -156,6 +156,9 @@ onMounted(() => {
             <div ref="nestedScroll" data-testid="nested-scroll">
               <p>Content</p>
               <p>Content</p>
+              <p>Content</p>
+              <p>Content</p>
+              <p>Content</p>
             </div>
           </div>
         </div>
@@ -222,6 +225,8 @@ onMounted(() => {
             <div ref="displayContents" data-testid="display-contents">
               <p>Content</p>
               <p>Content</p>
+              <p>Content</p>
+              <p>Content</p>
             </div>
           </div>
         </div>
@@ -248,6 +253,8 @@ onMounted(() => {
           data-testid="scroll-container-overlay"
         >
           <div ref="overflowOverlay" data-testid="overflow-overlay">
+            <p>Content</p>
+            <p>Content</p>
             <p>Content</p>
             <p>Content</p>
           </div>
