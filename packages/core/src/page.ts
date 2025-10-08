@@ -92,9 +92,11 @@ class CurrentPage {
         this.isFirstPageLoad = false
 
         return this.swap({ component, page, preserveState }).then(() => {
-          scrollRegions
-            ? window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
-            : Scroll.reset()
+          if (!preserveScroll) {
+            Scroll.reset()
+          } else if (scrollRegions) {
+            window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
+          }
 
           if (
             this.pendingDeferredProps &&
