@@ -131,6 +131,16 @@ app.get('/links/cancel-sync-request/:page', (req, res) => {
     page == 3 ? 500 : 0,
   )
 })
+app.get('/links/scroll-region-list', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Links/ScrollRegionList',
+    props: { user_id: req.query.user_id },
+    url: req.originalUrl,
+  }),
+)
+app.get('/links/scroll-region-list/user/:id', (req, res) =>
+  res.redirect(303, `/links/scroll-region-list?user_id=${req.params.id}`),
+)
 
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
