@@ -16,7 +16,6 @@
   let displayContents: HTMLDivElement
   let overflowClip: HTMLDivElement
   let overflowOverlay: HTMLDivElement
-  let originalBugCase: HTMLDivElement
   let inlineWidthStyle: HTMLDivElement
   let bothScrollDirections: HTMLDivElement
   let overflowYAutoOverflowXVisible: HTMLDivElement
@@ -44,7 +43,6 @@
       displayContents,
       overflowClip,
       overflowOverlay,
-      originalBugCase,
       inlineWidthStyle,
       bothScrollDirections,
       overflowYAutoOverflowXVisible,
@@ -266,18 +264,6 @@
         </div>
       </div>
       <p data-testid="result-overflow-overlay">{results.overflowOverlay?.dataset?.testid || 'null'}</p>
-    </div>
-
-    <!-- Original bug -->
-    <div>
-      <h3>Original bug: overflow-x: hidden</h3>
-      <div style="overflow-x: hidden; border: 2px solid red; padding: 10px">
-        <div bind:this={originalBugCase} data-testid="original-bug-case">
-          <div>User 1</div>
-          <div>User 2</div>
-        </div>
-      </div>
-      <p data-testid="result-original-bug-case">{results.originalBugCase?.tagName || 'null'}</p>
     </div>
 
     <!-- Inline width -->

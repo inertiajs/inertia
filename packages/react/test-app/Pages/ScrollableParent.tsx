@@ -16,7 +16,6 @@ export default () => {
   const displayContents = useRef<HTMLDivElement>(null)
   const overflowClip = useRef<HTMLDivElement>(null)
   const overflowOverlay = useRef<HTMLDivElement>(null)
-  const originalBugCase = useRef<HTMLDivElement>(null)
   const inlineWidthStyle = useRef<HTMLDivElement>(null)
   const bothScrollDirections = useRef<HTMLDivElement>(null)
   const overflowYAutoOverflowXVisible = useRef<HTMLDivElement>(null)
@@ -46,7 +45,6 @@ export default () => {
       displayContents,
       overflowClip,
       overflowOverlay,
-      originalBugCase,
       inlineWidthStyle,
       bothScrollDirections,
       overflowYAutoOverflowXVisible,
@@ -307,18 +305,6 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-overflow-overlay">{(results.overflowOverlay as any)?.dataset?.testid || 'null'}</p>
-        </div>
-
-        {/* Original bug */}
-        <div>
-          <h3>Original bug: overflow-x: hidden</h3>
-          <div style={{ overflowX: 'hidden', border: '2px solid red', padding: '10px' }}>
-            <div ref={originalBugCase} data-testid="original-bug-case">
-              <div>User 1</div>
-              <div>User 2</div>
-            </div>
-          </div>
-          <p data-testid="result-original-bug-case">{results.originalBugCase?.tagName || 'null'}</p>
         </div>
 
         {/* Inline width */}

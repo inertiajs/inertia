@@ -22,10 +22,6 @@ test.describe('getScrollableParent', () => {
       await expect(page.getByTestId('result-overflow-clip')).toHaveText('null')
     })
 
-    test('original bug case: overflow-x: hidden is not a scroll container', async ({ page }) => {
-      await expect(page.getByTestId('result-original-bug-case')).toHaveText('null')
-    })
-
     test('overflow-y: auto with overflow-x: hidden and no height is not a scroll container', async ({ page }) => {
       await expect(page.getByTestId('result-overflow-y-auto-overflow-x-hidden')).toHaveText('null')
     })

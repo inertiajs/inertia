@@ -16,7 +16,6 @@ const coercedAutoNoConstraint = ref<HTMLElement | null>(null)
 const displayContents = ref<HTMLElement | null>(null)
 const overflowClip = ref<HTMLElement | null>(null)
 const overflowOverlay = ref<HTMLElement | null>(null)
-const originalBugCase = ref<HTMLElement | null>(null)
 const inlineWidthStyle = ref<HTMLElement | null>(null)
 const bothScrollDirections = ref<HTMLElement | null>(null)
 const overflowYAutoOverflowXVisible = ref<HTMLElement | null>(null)
@@ -44,7 +43,6 @@ onMounted(() => {
     displayContents,
     overflowClip,
     overflowOverlay,
-    originalBugCase,
     inlineWidthStyle,
     bothScrollDirections,
     overflowYAutoOverflowXVisible,
@@ -272,18 +270,6 @@ onMounted(() => {
           </div>
         </div>
         <p data-testid="result-overflow-overlay">{{ results.overflowOverlay?.dataset?.testid || 'null' }}</p>
-      </div>
-
-      <!-- Original bug -->
-      <div>
-        <h3>Original bug: overflow-x: hidden</h3>
-        <div style="overflow-x: hidden; border: 2px solid red; padding: 10px">
-          <div ref="originalBugCase" data-testid="original-bug-case">
-            <div>User 1</div>
-            <div>User 2</div>
-          </div>
-        </div>
-        <p data-testid="result-original-bug-case">{{ results.originalBugCase?.tagName || 'null' }}</p>
       </div>
 
       <!-- Inline width -->
