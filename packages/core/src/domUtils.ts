@@ -9,12 +9,60 @@ const elementInViewport = (el: HTMLElement) => {
 }
 
 export const getScrollableParent = (element: HTMLElement | null): HTMLElement | null => {
+  const allowsVerticalScroll = (el: HTMLElement): boolean => {
+    const computedStyle = window.getComputedStyle(el)
+
+    if (['scroll', 'overlay'].includes(computedStyle.overflowY)) {
+      return true
+    }
+
+    if (computedStyle.overflowY !== 'auto') {
+      return false
+    }
+
+    if (['visible', 'clip'].includes(computedStyle.overflowX)) {
+      return true
+    }
+
+    return hasDimensionConstraint(computedStyle.maxHeight, el.style.height)
+  }
+
+  const allowsHorizontalScroll = (el: HTMLElement): boolean => {
+    const computedStyle = window.getComputedStyle(el)
+
+    if (['scroll', 'overlay'].includes(computedStyle.overflowX)) {
+      return true
+    }
+
+    if (computedStyle.overflowX !== 'auto') {
+      return false
+    }
+
+    if (['visible', 'clip'].includes(computedStyle.overflowY)) {
+      return true
+    }
+
+    return hasDimensionConstraint(computedStyle.maxWidth, el.style.width)
+  }
+
+  const hasDimensionConstraint = (computedMaxDimension: string, inlineStyleDimension: string): boolean => {
+    if (computedMaxDimension && computedMaxDimension !== 'none' && computedMaxDimension !== '0px') {
+      return true
+    }
+
+    if (inlineStyleDimension && inlineStyleDimension !== 'auto' && inlineStyleDimension !== '0') {
+      return true
+    }
+
+    return false
+  }
+
   let parent = element?.parentElement
 
   while (parent) {
-    const overflowY = window.getComputedStyle(parent).overflowY
+    const allowsScroll = allowsVerticalScroll(parent) || allowsHorizontalScroll(parent)
 
-    if (overflowY === 'auto' || overflowY === 'scroll') {
+    if (window.getComputedStyle(parent).display !== 'contents' && allowsScroll) {
       return parent
     }
 
