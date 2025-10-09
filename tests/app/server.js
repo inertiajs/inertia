@@ -1094,9 +1094,9 @@ app.post('/form-component/precognition-headers', (req, res) => {
 })
 
 app.post('/form-component/precognition-exception', (req, res) => {
-  // Return a 500 error with Precognition header to trigger exception handling
-  res.header('Precognition', 'true')
-  res.status(500).json({ message: 'Internal server error' })
+  setTimeout(() => {
+    res.status(500).json({ message: 'Internal server error' })
+  }, 500)
 })
 
 //
