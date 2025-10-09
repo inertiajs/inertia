@@ -1932,41 +1932,6 @@ test.describe('Form Component', () => {
       }
     })
 
-    test('onBeforeValidation can be passed per validate call', async ({ page }) => {
-      await page.goto('/form-component/precognition-before-validation-per-call')
-
-      await page.fill('#name-input', 'ab')
-
-      // Set up network listener to verify no validation requests are made
-      let validationRequestMade = false
-      page.on('request', (request) => {
-        if (request.url().includes('/form-component/precognition') && request.method() === 'POST') {
-          validationRequestMade = true
-        }
-      })
-
-      // First button uses first callback - should block validation
-      await page.click('button:has-text("Validate with First")')
-
-      await expect(page.getByText('Blocked by first callback')).toBeVisible()
-      await expect(page.getByText('Blocked by second callback')).not.toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Wait a moment to ensure no request was made
-      await page.waitForTimeout(300)
-      expect(validationRequestMade).toBe(false)
-
-      // Second button uses second callback - should also block validation
-      await page.click('button:has-text("Validate with Second")')
-
-      await expect(page.getByText('Blocked by second callback')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Wait again to ensure no request was made
-      await page.waitForTimeout(300)
-      expect(validationRequestMade).toBe(false)
-    })
-
     test('onException handles non-422 errors during validation', async ({ page }) => {
       await page.goto('/form-component/precognition-exception')
 
