@@ -1933,7 +1933,7 @@ test.describe('Form Component', () => {
     })
 
     test('onException handles non-422 errors during validation', async ({ page }) => {
-      await page.goto('/form-component/precognition-exception')
+      await page.goto('/form-component/precognition-callbacks')
 
       await page.fill('#name-input', 'John')
 
