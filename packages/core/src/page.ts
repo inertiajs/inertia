@@ -25,6 +25,7 @@ class CurrentPage {
   }[] = []
   protected isFirstPageLoad = true
   protected cleared = false
+  protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
 
   public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
     this.page = initialPage
@@ -42,6 +43,14 @@ class CurrentPage {
       preserveState = false,
     }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
   ): Promise<void> {
+    if (Object.keys(page.deferredProps || {}).length) {
+      this.pendingDeferredProps = {
+        deferredProps: page.deferredProps,
+        component: page.component,
+        url: page.url,
+      }
+    }
+
     this.componentId = {}
 
     const componentId = this.componentId
@@ -58,7 +67,9 @@ class CurrentPage {
 
       page.rememberedState ??= {}
 
-      const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
+      const isServer = typeof window === 'undefined'
+      const location = !isServer ? window.location : new URL(page.url)
+      const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       return new Promise((resolve) => {
@@ -80,11 +91,24 @@ class CurrentPage {
         this.isFirstPageLoad = false
 
         return this.swap({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
+          if (preserveScroll) {
+            // Scroll regions must be explicitly restored since the DOM elements are destroyed
+            // and recreated during the component 'swap'. Document scroll is naturally
+            // preserved as the document element itself persists across navigations.
+            window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
+          } else {
             Scroll.reset()
           }
 
-          eventHandler.fireInternalEvent('loadDeferredProps')
+          if (
+            this.pendingDeferredProps &&
+            this.pendingDeferredProps.component === page.component &&
+            this.pendingDeferredProps.url === page.url
+          ) {
+            eventHandler.fireInternalEvent('loadDeferredProps', this.pendingDeferredProps.deferredProps)
+          }
+
+          this.pendingDeferredProps = null
 
           if (!replace) {
             fireNavigateEvent(page)

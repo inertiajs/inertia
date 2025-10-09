@@ -7,9 +7,160 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.1.3...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.7...master)
 
 - Nothing yet
+
+## [v2.2.7](https://github.com/inertiajs/inertia/compare/v2.2.6...v2.2.7) - 2025-10-07
+
+### What's Changed
+
+* Preserve relative URL when `<InfiniteScroll>` updates query string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2623
+* Use `SlotsType` to type-hint Vue slots by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2620
+* Fix race condition in `history.ts` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2624
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.6...v2.2.7
+
+## [v2.2.6](https://github.com/inertiajs/inertia/compare/v2.2.5...v2.2.6) - 2025-10-03
+
+### What's Changed
+
+* SSR fixes for `<InfiniteScroll>` component. by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2616
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.5...v2.2.6
+
+## [v2.2.5](https://github.com/inertiajs/inertia/compare/v2.2.4...v2.2.5) - 2025-10-02
+
+### What's Changed
+
+* Improve `<InfiniteScroll>` cleanup after navigating away by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2610
+* Fix for `<Form>` component when using React SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2612
+* Fix conflicting Client Side Visits by queuing the URL synchronization by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2613
+* Improvements to `<InfiniteScroll>` in Svelte adapter by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2614
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.4...v2.2.5
+
+## [v2.2.4](https://github.com/inertiajs/inertia/compare/v2.2.3...v2.2.4) - 2025-09-30
+
+### What's Changed
+
+* Compile TS while developing + improve CLI output by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2600
+* Improve testing of scroll restoration by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2602
+* Fix for reloading an unrelated prop affecting infinite scroll by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2603
+* Add `preserve-url` prop to `<Link>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2541
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.3...v2.2.4
+
+## [v2.2.3](https://github.com/inertiajs/inertia/compare/v2.2.2...v2.2.3) - 2025-09-29
+
+### What's Changed
+
+* Preserve `ScrollProp` on Partial Reloads by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2597
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.2...v2.2.3
+
+## [v2.2.2](https://github.com/inertiajs/inertia/compare/v2.2.1...v2.2.2) - 2025-09-28
+
+### What's Changed
+
+* Reset `ScrollProp` when requested by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2595
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.1...v2.2.2
+
+## [v2.2.1](https://github.com/inertiajs/inertia/compare/v2.2.0...v2.2.1) - 2025-09-28
+
+### What's Changed
+
+* Don't restore remembered state after a refresh by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2591
+* Remember Infinite Scroll state by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2592
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.0...v2.2.1
+
+## [v2.2.0](https://github.com/inertiajs/inertia/compare/v2.1.11...v2.2.0) - 2025-09-26
+
+### What's Changed
+
+* Support for merging nested prop paths by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2561
+* Client-side visit helpers to update props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2589
+* Introduction of the `<InfiniteScroll>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2580
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.11...v2.2.0
+
+## [v2.1.11](https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11) - 2025-09-24
+
+### What's Changed
+
+* Fix flaky tests in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2582
+* Bump Playwright by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2585
+* Progress indicator API by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2581
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.10...v2.1.11
+
+## [v2.1.10](https://github.com/inertiajs/inertia/compare/v2.1.9...v2.1.10) - 2025-09-22
+
+### What's Changed
+
+* Fix PNPM publishing by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2578
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.9...v2.1.10
+
+## [v2.1.9](https://github.com/inertiajs/inertia/compare/v2.1.8...v2.1.9) - 2025-09-22
+
+### What's Changed
+
+* Fix PNPM build by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2577
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.8...v2.1.9
+
+## [v2.1.8](https://github.com/inertiajs/inertia/compare/v2.1.7...v2.1.8) - 2025-09-22
+
+### What's Changed
+
+* Publish packages in CI by [@joetannenbaum](https://github.com/joetannenbaum) in https://github.com/inertiajs/inertia/pull/2575
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.7...v2.1.8
+
+## [v2.1.7](https://github.com/inertiajs/inertia/compare/v2.1.6...v2.1.7) - 2025-09-18
+
+### What's Changed
+
+* Bump axios from 1.11.0 to 1.12.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2568
+* Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2571
+* TypeScript upgrade by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2573
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.6...v2.1.7
+
+## [v2.1.6](https://github.com/inertiajs/inertia/compare/v2.1.5...v2.1.6) - 2025-09-12
+
+### What's Changed
+
+* Invalidate prefetch cache when page is received from a network request by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2567
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.5...v2.1.6
+
+## [v2.1.5](https://github.com/inertiajs/inertia/compare/v2.1.4...v2.1.5) - 2025-09-05
+
+### What's Changed
+
+* Fix race condition when combining Deferred Props with an instant Partial Reload on mount by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2562
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.4...v2.1.5
+
+## [v2.1.4](https://github.com/inertiajs/inertia/compare/v2.1.3...v2.1.4) - 2025-09-03
+
+### What's Changed
+
+* Replace html-escape with built-in function on Svelte package by [@kresnasatya](https://github.com/kresnasatya) in https://github.com/inertiajs/inertia/pull/2535
+* Update dirty state after DOM changes (React only) by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2558
+* Prevent errors caused by null href value by [@fritz-c](https://github.com/fritz-c) in https://github.com/inertiajs/inertia/pull/2550
+* Remove data from the dependency array of setDefaults by [@jasonlbeggs](https://github.com/jasonlbeggs) in https://github.com/inertiajs/inertia/pull/2554
+
+### New Contributors
+
+* [@fritz-c](https://github.com/fritz-c) made their first contribution in https://github.com/inertiajs/inertia/pull/2550
+* [@jasonlbeggs](https://github.com/jasonlbeggs) made their first contribution in https://github.com/inertiajs/inertia/pull/2554
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.1.3...v2.1.4
 
 ## [v2.1.3](https://github.com/inertiajs/inertia/compare/v2.1.2...v2.1.3) - 2025-08-27
 

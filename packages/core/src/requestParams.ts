@@ -17,6 +17,7 @@ export class RequestParams {
     } else {
       const wrappedCallbacks: Record<keyof VisitCallbacks, () => any> = {
         onBefore: this.wrapCallback(params, 'onBefore'),
+        onBeforeUpdate: this.wrapCallback(params, 'onBeforeUpdate'),
         onStart: this.wrapCallback(params, 'onStart'),
         onProgress: this.wrapCallback(params, 'onProgress'),
         onFinish: this.wrapCallback(params, 'onFinish'),

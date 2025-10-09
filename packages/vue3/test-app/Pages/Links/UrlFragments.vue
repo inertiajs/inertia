@@ -19,6 +19,7 @@ const handleScrollEvent = () => {
   <div>
     <span class="text">This is the links page that demonstrates url fragment behaviour</span>
     <div style="width: 200vw; height: 200vh; margin-top: 50vh">
+      <button @click="handleScrollEvent">Update scroll positions</button>
       <!-- prettier-ignore -->
       <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
       <Link href="/links/url-fragments#target" class="basic">Basic link</Link>

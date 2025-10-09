@@ -25,6 +25,7 @@ onUnmounted(() => {
 <template>
   <div style="width: 200vw">
     <span class="layout-text">Without scroll regions</span>
+    <button @click="handleScrollEvent">Update scroll positions</button>
     <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
     <div style="height: 200vh">
       <span class="slot-position">Slot scroll position is {{ slotScrollLeft }} & {{ slotScrollTop }}</span>
