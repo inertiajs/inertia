@@ -1999,21 +1999,25 @@ test.describe('Form Component', () => {
     test('automatically cancels previous validation when new validation starts', async ({ page }) => {
       await page.goto('/form-component/precognition-cancel')
 
-      // Start first validation (with 2 second timeout)
+      requests.listenForFailed(page)
+      requests.listenForResponses(page)
+
       await page.fill('#name-input', 'ab')
       await page.locator('#name-input').blur()
-
       await expect(page.getByText('Validating...')).toBeVisible()
 
       // Immediately change value and trigger new validation - should cancel the first one
-      await page.fill('#name-input', 'xyz')
+      await page.fill('#name-input', 'xy')
       await page.locator('#name-input').blur()
-
-      // Wait for validation to complete
       await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Should show error for the second validation (xyz), not the first (ab)
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+
+      // One cancelled, one 422 response
+      expect(requests.failed).toHaveLength(1)
+      expect(requests.responses).toHaveLength(1)
+
+      const cancelledRequestError = await requests.failed[0].failure()?.errorText
+      expect(cancelledRequestError).toBe('net::ERR_ABORTED')
     })
 
     test('defaults() updates validator data as well', async ({ page }) => {
