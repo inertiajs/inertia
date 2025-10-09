@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import Queue from './queue'
@@ -106,6 +107,10 @@ class History {
           return
         }
 
+        if (isEqual(this.getScrollRegions(), scrollRegions)) {
+          return
+        }
+
         return this.doReplaceState({
           page: window.history.state.page,
           scrollRegions,
@@ -118,6 +123,10 @@ class History {
     queue.add(() => {
       return Promise.resolve().then(() => {
         if (!window.history.state?.page) {
+          return
+        }
+
+        if (isEqual(this.getDocumentScrollPosition(), scrollRegion)) {
           return
         }
 
