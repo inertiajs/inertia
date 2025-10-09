@@ -5,7 +5,7 @@ export default function PrecognitionCancel() {
     <div>
       <h1>Precognition - Auto Cancel</h1>
 
-      <Form action="/form-component/precognition" method="post" validateTimeout={2000}>
+      <Form action="/form-component/precognition?slow=1" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, validating }) => (
           <>
             {validating && <p className="validating">Validating...</p>}

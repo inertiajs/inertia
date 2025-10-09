@@ -7,9 +7,9 @@ import { Form } from '@inertiajs/vue3'
     <h1>Precognition - Auto Cancel</h1>
 
     <Form
-      action="/form-component/precognition"
+      action="/form-component/precognition?slow=1"
       method="post"
-      :validate-timeout="2000"
+      :validate-timeout="100"
       #default="{ invalid, errors, validate, validating }"
     >
       <p v-if="validating" class="validating">Validating...</p>

@@ -12,6 +12,7 @@ app.use(bodyParser.json({ extended: true }))
 const upload = multer()
 
 const adapters = ['react', 'svelte', 'vue3']
+const runsInCI = !!process.env.CI
 
 if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
@@ -909,45 +910,48 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
 //
 
 app.post('/form-component/precognition', (req, res) => {
-  setTimeout(() => {
-    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
-    const name = req.body['name']
-    const email = req.body['email']
-    const errors = {}
+  setTimeout(
+    () => {
+      const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+      const name = req.body['name']
+      const email = req.body['email']
+      const errors = {}
 
-    if (!name) {
-      errors.name = 'The name field is required.'
-    }
+      if (!name) {
+        errors.name = 'The name field is required.'
+      }
 
-    if (name && name.length < 3) {
-      errors.name = 'The name must be at least 3 characters.'
-    }
+      if (name && name.length < 3) {
+        errors.name = 'The name must be at least 3 characters.'
+      }
 
-    if (!email) {
-      errors.email = 'The email field is required.'
-    }
+      if (!email) {
+        errors.email = 'The email field is required.'
+      }
 
-    if (email && !/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'The email must be a valid email address.'
-    }
+      if (email && !/\S+@\S+\.\S+/.test(email)) {
+        errors.email = 'The email must be a valid email address.'
+      }
 
-    if (only.length) {
-      Object.keys(errors).forEach((key) => {
-        if (!only.includes(key)) {
-          delete errors[key]
-        }
-      })
-    }
+      if (only.length) {
+        Object.keys(errors).forEach((key) => {
+          if (!only.includes(key)) {
+            delete errors[key]
+          }
+        })
+      }
 
-    res.header('Precognition', 'true')
-    res.header('Vary', 'Precognition')
+      res.header('Precognition', 'true')
+      res.header('Vary', 'Precognition')
 
-    if (Object.keys(errors).length) {
-      return res.status(422).json({ errors })
-    }
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ errors })
+      }
 
-    return res.status(204).header('Precognition-Success', 'true').send()
-  }, 500)
+      return res.status(204).header('Precognition-Success', 'true').send()
+    },
+    !!req.query['slow'] ? 2000 : 500,
+  )
 })
 
 app.post('/form-component/precognition-array-errors', (req, res) => {
@@ -991,10 +995,6 @@ app.post('/form-component/precognition-array-errors', (req, res) => {
     return res.status(204).header('Precognition-Success', 'true').send()
   }, 500)
 })
-
-app.get('/form-component/precognition-array-errors', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/PrecognitionArrayErrors', props: {} }),
-)
 
 app.post('/form-component/precognition-files', upload.any(), (req, res) => {
   setTimeout(() => {

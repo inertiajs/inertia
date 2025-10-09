@@ -6,9 +6,9 @@
   <h1>Precognition - Auto Cancel</h1>
 
   <Form
-    action="/form-component/precognition"
+    action="/form-component/precognition?slow=1"
     method="post"
-    validateTimeout={2000}
+    validateTimeout={100}
     let:invalid
     let:errors
     let:validate
