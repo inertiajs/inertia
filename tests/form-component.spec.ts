@@ -1967,13 +1967,13 @@ test.describe('Form Component', () => {
       requests.listenForFailed(page)
       requests.listenForResponses(page)
 
-      await page.fill('#name-input', 'ab')
-      await page.locator('#name-input').blur()
+      await page.fill('#auto-cancel-name-input', 'ab')
+      await page.locator('#auto-cancel-name-input').blur()
       await expect(page.getByText('Validating...')).toBeVisible()
 
       // Immediately change value and trigger new validation - should cancel the first one
-      await page.fill('#name-input', 'xy')
-      await page.locator('#name-input').blur()
+      await page.fill('#auto-cancel-name-input', 'xy')
+      await page.locator('#auto-cancel-name-input').blur()
       await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
 
@@ -1986,12 +1986,12 @@ test.describe('Form Component', () => {
     })
 
     test('cancelValidation() cancels in-flight validation and resets validating state', async ({ page }) => {
-      await page.goto('/form-component/precognition-manual-cancel')
+      await page.goto('/form-component/precognition-cancel')
 
       requests.listenForFailed(page)
 
-      await page.fill('#name-input', 'ab')
-      await page.locator('#name-input').blur()
+      await page.fill('#manual-cancel-name-input', 'ab')
+      await page.locator('#manual-cancel-name-input').blur()
       await expect(page.getByText('Validating...')).toBeVisible()
 
       await page.getByText('Cancel Validation').click()
