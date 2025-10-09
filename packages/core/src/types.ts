@@ -99,7 +99,8 @@ export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
-export type RequestPayload = Record<string, FormDataConvertible> | FormData
+export type RequestData = Record<string, FormDataConvertible>
+export type RequestPayload = RequestData | FormData
 
 export interface PageProps {
   [key: string]: unknown
@@ -476,6 +477,23 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  validateFiles?: boolean
+  validateTimeout?: number
+  simpleValidationErrors?: boolean
+}
+
+type RevalidatePayload = {
+  data: RequestData
+  touched: string[]
+}
+
+export type FormComponentValidateOptions = {
+  only?: string | string[]
+  onSuccess?: () => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+  onBeforeValidation?: (newRequest: RevalidatePayload, oldRequest: RevalidatePayload) => boolean | undefined
+  onException?: (error: Error) => void
 }
 
 export type FormComponentMethods = {
@@ -486,6 +504,15 @@ export type FormComponentMethods = {
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
+  valid: (field: string) => boolean
+  invalid: (field: string) => boolean
+  validate: (
+    only?: string | string[] | FormComponentValidateOptions,
+    maybeOptions?: FormComponentValidateOptions,
+  ) => void
+  touch: (field: string | string[]) => void
+  touched(field?: string): boolean
+  cancelValidation: () => void
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
@@ -498,6 +525,7 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validating: boolean
 }
 
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState
