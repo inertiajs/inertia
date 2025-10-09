@@ -381,6 +381,10 @@ const Form = defineComponent({
       touched: isTouched,
       setValidationTimeout: (duration: number) => validator.setTimeout(duration),
       validateFiles: () => validator.validateFiles(true),
+      cancelValidation: () => {
+        validator.cancelAll()
+        validating.value = false
+      },
     }
 
     expose<FormComponentRef>(exposed)

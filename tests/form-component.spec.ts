@@ -2020,6 +2020,24 @@ test.describe('Form Component', () => {
       expect(cancelledRequestError).toBe('net::ERR_ABORTED')
     })
 
+    test('cancelValidation() cancels in-flight validation and resets validating state', async ({ page }) => {
+      await page.goto('/form-component/precognition-manual-cancel')
+
+      requests.listenForFailed(page)
+
+      await page.fill('#name-input', 'ab')
+      await page.locator('#name-input').blur()
+      await expect(page.getByText('Validating...')).toBeVisible()
+
+      await page.getByText('Cancel Validation').click()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+      await page.waitForTimeout(100)
+      expect(requests.failed).toHaveLength(1)
+
+      const cancelledRequestError = await requests.failed[0].failure()?.errorText
+      expect(cancelledRequestError).toBe('net::ERR_ABORTED')
+    })
+
     test('defaults() updates validator data as well', async ({ page }) => {
       await page.goto('/form-component/precognition-defaults')
 

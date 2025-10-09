@@ -314,6 +314,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       touched: isTouched,
       setValidationTimeout: (duration: number) => validator.setTimeout(duration),
       validateFiles: () => validator.validateFiles(true),
+      cancelValidation: () => {
+        validator.cancelAll()
+        setValidating(false)
+      },
     })
 
     useImperativeHandle(ref, exposed, [

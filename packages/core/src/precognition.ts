@@ -23,6 +23,7 @@ interface PrecognitionValidator {
   validateFiles: (value: boolean) => void
   validate: (options: PrecognitionValidateOptions) => void
   setTimeout: (value: number) => void
+  cancelAll: () => void
 }
 
 export default function usePrecognition(precognitionOptions: UsePrecognitionOptions): PrecognitionValidator {
@@ -148,5 +149,6 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
     },
     setTimeout,
     validate,
+    cancelAll,
   }
 }

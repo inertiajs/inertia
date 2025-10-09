@@ -289,6 +289,11 @@
     validator.validateFiles(true)
   }
 
+  export function cancelValidation() {
+    validator.cancelAll()
+    validating = false
+  }
+
   onMount(() => {
     defaultData = getFormData()
 
@@ -347,5 +352,6 @@
     invalid={slotInvalid}
     {setValidationTimeout}
     {validateFilesEnabled}
+    {cancelValidation}
   />
 </form>
