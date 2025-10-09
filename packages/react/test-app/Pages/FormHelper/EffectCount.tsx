@@ -9,7 +9,7 @@ export default () => {
   useEffect(() => {
     setData('count', count)
     setDefaults()
-    setEffectCount(effectCount + 1)
+    setEffectCount((e) => e + 1)
   }, [count, setData, setDefaults])
 
   return (

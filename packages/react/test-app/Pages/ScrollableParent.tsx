@@ -87,7 +87,7 @@ export default () => {
               Wide content
             </div>
           </div>
-          <p data-testid="result-overflow-x-scroll">{(results.overflowXScroll as any)?.dataset?.testid || 'null'}</p>
+          <p data-testid="result-overflow-x-scroll">{results.overflowXScroll?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* overflow-y: auto with height */}
@@ -103,7 +103,7 @@ export default () => {
               <p>Content</p>
             </div>
           </div>
-          <p data-testid="result-overflow-y-auto">{(results.overflowYAuto as any)?.dataset?.testid || 'null'}</p>
+          <p data-testid="result-overflow-y-auto">{results.overflowYAuto?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* overflow-y: auto no height */}
@@ -139,7 +139,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-overflow-x-scroll-y-hidden">
-            {(results.overflowXScrollOverflowYHidden as any)?.dataset?.testid || 'null'}
+            {results.overflowXScrollOverflowYHidden?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -154,9 +154,7 @@ export default () => {
               Wide content
             </div>
           </div>
-          <p data-testid="result-horizontal-scroll-calc">
-            {(results.horizontalScrollCalc as any)?.dataset?.testid || 'null'}
-          </p>
+          <p data-testid="result-horizontal-scroll-calc">{results.horizontalScrollCalc?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* overflow-y: auto + max-height */}
@@ -173,7 +171,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-vertical-scroll-max-height">
-            {(results.verticalScrollMaxHeight as any)?.dataset?.testid || 'null'}
+            {results.verticalScrollMaxHeight?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -198,7 +196,7 @@ export default () => {
               </div>
             </div>
           </div>
-          <p data-testid="result-nested-scroll">{(results.nestedScroll as any)?.dataset?.testid || 'null'}</p>
+          <p data-testid="result-nested-scroll">{results.nestedScroll?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* overflow: auto (no constraints) */}
@@ -239,7 +237,7 @@ export default () => {
             <div style={{ minWidth: '150px', height: '50px', background: 'lightcoral' }}>Item</div>
           </div>
           <p data-testid="result-flex-horizontal-carousel">
-            {(results.flexHorizontalCarousel as any)?.dataset?.testid || 'null'}
+            {results.flexHorizontalCarousel?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -255,7 +253,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-coerced-auto-no-constraint">
-            {(results.coercedAutoNoConstraint as any)?.dataset?.testid || 'null'}
+            {results.coercedAutoNoConstraint?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -275,7 +273,7 @@ export default () => {
               </div>
             </div>
           </div>
-          <p data-testid="result-display-contents">{(results.displayContents as any)?.dataset?.testid || 'null'}</p>
+          <p data-testid="result-display-contents">{results.displayContents?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* overflow: clip */}
@@ -294,7 +292,7 @@ export default () => {
         <div>
           <h3>overflow: overlay</h3>
           <div
-            style={{ overflow: 'overlay' as any, height: '100px', border: '2px solid red', padding: '10px' }}
+            style={{ overflow: 'overlay', height: '100px', border: '2px solid red', padding: '10px' }}
             data-testid="scroll-container-overlay"
           >
             <div ref={overflowOverlay} data-testid="overflow-overlay">
@@ -304,7 +302,7 @@ export default () => {
               <p>Content</p>
             </div>
           </div>
-          <p data-testid="result-overflow-overlay">{(results.overflowOverlay as any)?.dataset?.testid || 'null'}</p>
+          <p data-testid="result-overflow-overlay">{results.overflowOverlay?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* Inline width */}
@@ -318,7 +316,7 @@ export default () => {
               Wide
             </div>
           </div>
-          <p data-testid="result-inline-width-style">{(results.inlineWidthStyle as any)?.dataset?.testid || 'null'}</p>
+          <p data-testid="result-inline-width-style">{results.inlineWidthStyle?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* Both scroll */}
@@ -341,9 +339,7 @@ export default () => {
               <p>Content</p>
             </div>
           </div>
-          <p data-testid="result-both-scroll-directions">
-            {(results.bothScrollDirections as any)?.dataset?.testid || 'null'}
-          </p>
+          <p data-testid="result-both-scroll-directions">{results.bothScrollDirections?.dataset?.testid || 'null'}</p>
         </div>
 
         {/* overflow-y: auto + overflow-x: visible */}
@@ -366,7 +362,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-overflow-y-auto-overflow-x-visible">
-            {(results.overflowYAutoOverflowXVisible as any)?.dataset?.testid || 'null'}
+            {results.overflowYAutoOverflowXVisible?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -384,7 +380,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-overflow-y-auto-overflow-x-clip">
-            {(results.overflowYAutoOverflowXClip as any)?.dataset?.testid || 'null'}
+            {results.overflowYAutoOverflowXClip?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -410,7 +406,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-overflow-x-auto-overflow-y-visible">
-            {(results.overflowXAutoOverflowYVisible as any)?.dataset?.testid || 'null'}
+            {results.overflowXAutoOverflowYVisible?.dataset?.testid || 'null'}
           </p>
         </div>
 
@@ -430,7 +426,7 @@ export default () => {
             </div>
           </div>
           <p data-testid="result-overflow-x-auto-overflow-y-clip">
-            {(results.overflowXAutoOverflowYClip as any)?.dataset?.testid || 'null'}
+            {results.overflowXAutoOverflowYClip?.dataset?.testid || 'null'}
           </p>
         </div>
 

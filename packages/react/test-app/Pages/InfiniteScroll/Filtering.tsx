@@ -1,6 +1,6 @@
 import { InfiniteScroll, Link, useForm } from '@inertiajs/react'
 import { debounce } from 'lodash-es'
-import { useCallback, useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import UserCard, { User } from './UserCard'
 
 interface Props {
@@ -17,23 +17,24 @@ export default ({ users, preserveState, filter, search }: Props) => {
     search: search,
   })
 
-  const debouncedSearch = useCallback(
-    debounce(() => {
-      get(
-        '',
-        preserveState
-          ? {
-              preserveState: true,
-              replace: true,
-              only: ['users', 'search', 'filter'],
-              reset: ['users'],
-            }
-          : {
-              replace: true,
-            },
-      )
-    }, 250),
-    [get],
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(() => {
+        get(
+          '',
+          preserveState
+            ? {
+                preserveState: true,
+                replace: true,
+                only: ['users', 'search', 'filter'],
+                reset: ['users'],
+              }
+            : {
+                replace: true,
+              },
+        )
+      }, 250),
+    [get, preserveState],
   )
 
   useEffect(() => {
