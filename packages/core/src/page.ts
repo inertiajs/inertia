@@ -67,7 +67,9 @@ class CurrentPage {
 
       page.rememberedState ??= {}
 
-      const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
+      const isServer = typeof window === 'undefined'
+      const location = !isServer ? window.location : new URL(page.url)
+      const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       return new Promise((resolve) => {
@@ -89,7 +91,12 @@ class CurrentPage {
         this.isFirstPageLoad = false
 
         return this.swap({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
+          if (preserveScroll) {
+            // Scroll regions must be explicitly restored since the DOM elements are destroyed
+            // and recreated during the component 'swap'. Document scroll is naturally
+            // preserved as the document element itself persists across navigations.
+            window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
+          } else {
             Scroll.reset()
           }
 

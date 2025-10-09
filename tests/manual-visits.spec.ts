@@ -690,8 +690,8 @@ test.describe('Preserve scroll', () => {
 
     test('restores all tracked scroll regions when pressing the back button (visit method)', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Preserve Scroll' }).click()
-
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two')
+      await page.waitForTimeout(100)
 
       await scrollElementTo(
         page,
@@ -711,8 +711,8 @@ test.describe('Preserve scroll', () => {
 
     test('restores all tracked scroll regions when pressing the back button (GET method)', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Preserve Scroll (GET)' }).click()
-
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two')
+      await page.waitForTimeout(100)
 
       await scrollElementTo(
         page,

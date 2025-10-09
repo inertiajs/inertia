@@ -51,21 +51,28 @@ export class Scroll {
 
     window.requestAnimationFrame(() => {
       this.restoreDocument()
+      this.restoreScrollRegions(scrollRegions)
+    })
+  }
 
-      this.regions().forEach((region: Element, index: number) => {
-        const scrollPosition = scrollRegions[index]
+  public static restoreScrollRegions(scrollRegions: ScrollRegion[]): void {
+    if (typeof window === 'undefined') {
+      return
+    }
 
-        if (!scrollPosition) {
-          return
-        }
+    this.regions().forEach((region: Element, index: number) => {
+      const scrollPosition = scrollRegions[index]
 
-        if (typeof region.scrollTo === 'function') {
-          region.scrollTo(scrollPosition.left, scrollPosition.top)
-        } else {
-          region.scrollTop = scrollPosition.top
-          region.scrollLeft = scrollPosition.left
-        }
-      })
+      if (!scrollPosition) {
+        return
+      }
+
+      if (typeof region.scrollTo === 'function') {
+        region.scrollTo(scrollPosition.left, scrollPosition.top)
+      } else {
+        region.scrollTop = scrollPosition.top
+        region.scrollLeft = scrollPosition.left
+      }
     })
   }
 
