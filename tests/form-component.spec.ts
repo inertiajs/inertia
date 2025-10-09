@@ -1621,7 +1621,7 @@ test.describe('Form Component', () => {
     })
 
     test('validates all touched fields when calling validate() without arguments', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1643,7 +1643,7 @@ test.describe('Form Component', () => {
     })
 
     test('reset all fields clears all touched fields', async ({ page }) => {
-      await page.goto('/form-component/precognition-reset')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1662,7 +1662,7 @@ test.describe('Form Component', () => {
     })
 
     test('reset specific fields removes only those fields from touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-reset')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1690,7 +1690,7 @@ test.describe('Form Component', () => {
     })
 
     test('touch with array marks multiple fields as touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.fill('input[name="email"]', 'x')
@@ -1706,7 +1706,7 @@ test.describe('Form Component', () => {
     })
 
     test('touch deduplicates fields when called multiple times', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
 
@@ -1721,7 +1721,7 @@ test.describe('Form Component', () => {
     })
 
     test('touched() returns false when no fields are touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await expect(page.getByTestId('any-touched')).toHaveText('Form has no touched fields')
       await expect(page.getByTestId('name-touched')).toHaveText('Name is not touched')
@@ -1729,7 +1729,7 @@ test.describe('Form Component', () => {
     })
 
     test('touched(field) returns true when specific field is touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await page.locator('input[name="name"]').focus()
       await page.locator('input[name="name"]').blur()
@@ -1740,7 +1740,7 @@ test.describe('Form Component', () => {
     })
 
     test('touched() returns true when any field is touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await page.locator('input[name="email"]').focus()
       await page.locator('input[name="email"]').blur()
@@ -1751,7 +1751,7 @@ test.describe('Form Component', () => {
     })
 
     test('touched() updates when multiple fields are touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-touch')
+      await page.goto('/form-component/precognition-methods')
 
       await page.locator('input[name="name"]').focus()
       await page.locator('input[name="name"]').blur()
@@ -1764,7 +1764,7 @@ test.describe('Form Component', () => {
     })
 
     test('validate with specific field works independently of touched state', async ({ page }) => {
-      await page.goto('/form-component/precognition-validate')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.fill('input[name="email"]', 'x')
@@ -1779,7 +1779,7 @@ test.describe('Form Component', () => {
     })
 
     test('validate with array of fields validates multiple fields', async ({ page }) => {
-      await page.goto('/form-component/precognition-validate')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.fill('input[name="email"]', 'x')
@@ -1794,7 +1794,7 @@ test.describe('Form Component', () => {
     })
 
     test('reset with array removes multiple fields from touched', async ({ page }) => {
-      await page.goto('/form-component/precognition-reset')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1824,7 +1824,7 @@ test.describe('Form Component', () => {
     })
 
     test('touching one field and validating another does not validate the touched field', async ({ page }) => {
-      await page.goto('/form-component/precognition-validate')
+      await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()

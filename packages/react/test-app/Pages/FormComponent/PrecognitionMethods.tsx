@@ -3,10 +3,10 @@ import { Form } from '@inertiajs/react'
 export default () => {
   return (
     <div>
-      <h1>Form Precognition Touch</h1>
+      <h1>Form Precognition - Touch, Reset & Validate</h1>
 
       <Form action="/form-component/precognition" method="post" validateTimeout={100}>
-        {({ invalid, errors, validate, touch, touched, validating }) => (
+        {({ invalid, errors, validate, touch, touched, validating, reset }) => (
           <>
             {validating && <p>Validating...</p>}
 
@@ -27,6 +27,12 @@ export default () => {
             <button type="button" onClick={() => validate()}>
               Validate All Touched
             </button>
+            <button type="button" onClick={() => validate('name')}>
+              Validate Name
+            </button>
+            <button type="button" onClick={() => validate(['name', 'email'])}>
+              Validate Name and Email
+            </button>
             <button type="button" onClick={() => touch(['name', 'email'])}>
               Touch Name and Email
             </button>
@@ -38,6 +44,15 @@ export default () => {
               }}
             >
               Touch Name Twice
+            </button>
+            <button type="button" onClick={() => reset()}>
+              Reset All
+            </button>
+            <button type="button" onClick={() => reset('name')}>
+              Reset Name
+            </button>
+            <button type="button" onClick={() => reset('name', 'email')}>
+              Reset Name and Email
             </button>
           </>
         )}

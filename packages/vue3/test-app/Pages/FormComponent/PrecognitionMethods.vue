@@ -4,13 +4,13 @@ import { Form } from '@inertiajs/vue3'
 
 <template>
   <div>
-    <h1>Form Precognition Touch</h1>
+    <h1>Form Precognition - Touch, Reset & Validate</h1>
 
     <Form
       action="/form-component/precognition"
       method="post"
       :validate-timeout="100"
-      #default="{ invalid, errors, validate, touch, touched, validating }"
+      #default="{ invalid, errors, validate, touch, touched, validating, reset }"
     >
       <p v-if="validating">Validating...</p>
 
@@ -33,6 +33,8 @@ import { Form } from '@inertiajs/vue3'
       <p data-testid="any-touched">{{ touched() ? 'Form has touched fields' : 'Form has no touched fields' }}</p>
 
       <button type="button" @click="validate()">Validate All Touched</button>
+      <button type="button" @click="validate('name')">Validate Name</button>
+      <button type="button" @click="validate(['name', 'email'])">Validate Name and Email</button>
       <button type="button" @click="touch(['name', 'email'])">Touch Name and Email</button>
       <button
         type="button"
@@ -45,6 +47,9 @@ import { Form } from '@inertiajs/vue3'
       >
         Touch Name Twice
       </button>
+      <button type="button" @click="reset()">Reset All</button>
+      <button type="button" @click="reset('name')">Reset Name</button>
+      <button type="button" @click="reset('name', 'email')">Reset Name and Email</button>
     </Form>
   </div>
 </template>

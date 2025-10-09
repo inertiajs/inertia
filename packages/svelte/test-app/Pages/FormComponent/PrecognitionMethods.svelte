@@ -3,7 +3,7 @@
 </script>
 
 <div>
-  <h1>Form Precognition Reset</h1>
+  <h1>Form Precognition - Touch, Reset & Validate</h1>
 
   <Form
     action="/form-component/precognition"
@@ -13,6 +13,7 @@
     let:errors
     let:validate
     let:touch
+    let:touched
     let:validating
     let:reset
   >
@@ -34,7 +35,23 @@
       {/if}
     </div>
 
+    <p data-testid="name-touched">{touched('name') ? 'Name is touched' : 'Name is not touched'}</p>
+    <p data-testid="email-touched">{touched('email') ? 'Email is touched' : 'Email is not touched'}</p>
+    <p data-testid="any-touched">{touched() ? 'Form has touched fields' : 'Form has no touched fields'}</p>
+
     <button type="button" on:click={() => validate()}>Validate All Touched</button>
+    <button type="button" on:click={() => validate('name')}>Validate Name</button>
+    <button type="button" on:click={() => validate(['name', 'email'])}>Validate Name and Email</button>
+    <button type="button" on:click={() => touch(['name', 'email'])}>Touch Name and Email</button>
+    <button
+      type="button"
+      on:click={() => {
+        touch('name')
+        touch('name')
+      }}
+    >
+      Touch Name Twice
+    </button>
     <button type="button" on:click={() => reset()}>Reset All</button>
     <button type="button" on:click={() => reset('name')}>Reset Name</button>
     <button type="button" on:click={() => reset('name', 'email')}>Reset Name and Email</button>
