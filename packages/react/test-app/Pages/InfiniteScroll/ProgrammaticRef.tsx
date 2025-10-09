@@ -1,6 +1,6 @@
 import { InfiniteScrollRef } from '@inertiajs/core'
 import { InfiniteScroll } from '@inertiajs/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import UserCard, { User } from './UserCard'
 
 export default ({ users }: { users: { data: User[] } }) => {
@@ -8,10 +8,10 @@ export default ({ users }: { users: { data: User[] } }) => {
   const [hasPrevious, setHasMoreBefore] = useState(false)
   const [hasNext, setHasMoreAfter] = useState(false)
 
-  const updateStates = () => {
+  const updateStates = useCallback(() => {
     setHasMoreBefore(infRef?.hasPrevious() || false)
     setHasMoreAfter(infRef?.hasNext() || false)
-  }
+  }, [infRef])
 
   const fetchNext = () => {
     if (infRef) {
@@ -27,7 +27,7 @@ export default ({ users }: { users: { data: User[] } }) => {
 
   useEffect(() => {
     updateStates()
-  }, [infRef])
+  }, [infRef, updateStates])
 
   return (
     <div>
