@@ -47,7 +47,7 @@ function App<SharedProps extends PageProps = PageProps>({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: swapComponent as PageHandler,
+      swapComponent: ((...args: Parameters<ReactPageHandler>) => swapComponent(...args)) as PageHandler,
     })
 
     routerIsInitialized = true
