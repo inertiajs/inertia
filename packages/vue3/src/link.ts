@@ -115,7 +115,7 @@ const Link: InertiaLink = defineComponent({
       default: noop,
     },
     onCancelToken: {
-      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
+      type: Function as PropType<({ cancel }: { cancel: VoidFunction }) => void>,
       default: noop,
     },
     onPrefetching: {

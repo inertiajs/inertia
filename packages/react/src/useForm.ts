@@ -77,7 +77,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [defaults, setDefaults] = useState(
     (typeof rememberKeyOrInitialValues === 'string' ? maybeInitialValues : rememberKeyOrInitialValues) || ({} as TForm),
   )
-  const cancelToken = useRef(null)
+  const cancelToken = useRef<{ cancel: VoidFunction } | null>(null)
   const recentlySuccessfulTimeoutId = useRef<number>(undefined)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
@@ -313,7 +313,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const newErrors = Object.keys(errors).reduce(
           (carry, field) => ({
             ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: errors[field] } : {}),
+            ...(fields.length > 0 && !fields.includes(field) ? { [field]: (errors as Errors)[field] } : {}),
           }),
           {},
         )
