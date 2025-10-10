@@ -68,7 +68,7 @@ function App<SharedProps extends PageProps = PageProps>({
         return
       }
 
-      setCurrent(() => ({
+      setCurrent((current) => ({
         component,
         page,
         key: preserveState ? current.key : Date.now(),
