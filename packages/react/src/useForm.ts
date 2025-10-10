@@ -1,11 +1,16 @@
 import {
+  ActiveVisit,
+  Errors,
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
   FormDataType,
   FormDataValues,
   Method,
+  Page,
+  PendingVisit,
   Progress,
+  RequestPayload,
   router,
   UrlMethodPair,
   VisitOptions,
@@ -26,6 +31,8 @@ export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TFor
   SetDataByKeyValuePair<TForm>
 
 type FormOptions = Omit<VisitOptions, 'data'>
+type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
+type TransformCallback<TForm> = (data: TForm) => object
 
 export interface InertiaFormProps<TForm extends object> {
   data: TForm
@@ -37,7 +44,7 @@ export interface InertiaFormProps<TForm extends object> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   setData: SetDataAction<TForm>
-  transform: (callback: (data: TForm) => object) => void
+  transform: (callback: TransformCallback<TForm>) => void
   setDefaults(): void
   setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
@@ -46,7 +53,7 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
   setError(errors: FormDataErrors<TForm>): void
-  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
+  submit: (...args: SubmitArgs) => void
   get: (url: string, options?: FormOptions) => void
   patch: (url: string, options?: FormOptions) => void
   post: (url: string, options?: FormOptions) => void
@@ -65,23 +72,23 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKeyOrInitialValues?: string | TForm | (() => TForm),
   maybeInitialValues?: TForm | (() => TForm),
 ): InertiaFormProps<TForm> {
-  const isMounted = useRef(null)
+  const isMounted = useRef(false)
   const rememberKey = typeof rememberKeyOrInitialValues === 'string' ? rememberKeyOrInitialValues : null
   const [defaults, setDefaults] = useState(
     (typeof rememberKeyOrInitialValues === 'string' ? maybeInitialValues : rememberKeyOrInitialValues) || ({} as TForm),
   )
   const cancelToken = useRef(null)
-  const recentlySuccessfulTimeoutId = useRef(null)
+  const recentlySuccessfulTimeoutId = useRef<number>(undefined)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
     ? useRemember({} as FormDataErrors<TForm>, `${rememberKey}:errors`)
     : useState({} as FormDataErrors<TForm>)
   const [hasErrors, setHasErrors] = useState(false)
   const [processing, setProcessing] = useState(false)
-  const [progress, setProgress] = useState(null)
+  const [progress, setProgress] = useState<Progress | null>(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  const transform = useRef((data) => data)
+  const transform = useRef<TransformCallback<TForm>>((data) => data)
   const isDirty = useMemo(() => !isEqual(data, defaults), [data, defaults])
 
   useEffect(() => {
@@ -96,7 +103,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const setDefaultsCalledInOnSuccess = useRef(false)
 
   const submit = useCallback(
-    (...args) => {
+    (...args: SubmitArgs) => {
       const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
@@ -105,7 +112,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       setDefaultsCalledInOnSuccess.current = false
 
-      const _options = {
+      const _options: VisitOptions = {
         ...options,
         onCancelToken: (token) => {
           cancelToken.current = token
@@ -114,7 +121,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onCancelToken(token)
           }
         },
-        onBefore: (visit) => {
+        onBefore: (visit: PendingVisit) => {
           setWasSuccessful(false)
           setRecentlySuccessful(false)
           clearTimeout(recentlySuccessfulTimeoutId.current)
@@ -123,21 +130,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onBefore(visit)
           }
         },
-        onStart: (visit) => {
+        onStart: (visit: PendingVisit) => {
           setProcessing(true)
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
-        onProgress: (event) => {
-          setProgress(event)
+        onProgress: (event?: Progress) => {
+          setProgress(event || null)
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
-        onSuccess: async (page) => {
+        onSuccess: async (page: Page) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -163,11 +170,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           return onSuccess
         },
-        onError: (errors) => {
+        onError: (errors: Errors) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
-            setErrors(errors)
+            setErrors(errors as FormDataErrors<TForm>)
             setHasErrors(true)
           }
 
@@ -185,7 +192,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onCancel()
           }
         },
-        onFinish: (visit) => {
+        onFinish: (visit: ActiveVisit) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -199,10 +206,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
       }
 
+      const transformedData = transform.current(data) as RequestPayload
+
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform.current(data) })
+        router.delete(url, { ..._options, data: transformedData })
       } else {
-        router[method](url, transform.current(data), _options)
+        router[method](url, transformedData, _options)
       }
     },
     [data, setErrors, transform],
@@ -265,7 +274,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   }, [dataAsDefaults])
 
   const reset = useCallback(
-    (...fields) => {
+    (...fields: string[]) => {
       if (fields.length === 0) {
         setData(defaults)
       } else {
@@ -299,7 +308,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const clearErrors = useCallback(
-    (...fields) => {
+    (...fields: string[]) => {
       setErrors((errors) => {
         const newErrors = Object.keys(errors).reduce(
           (carry, field) => ({
@@ -316,16 +325,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const resetAndClearErrors = useCallback(
-    (...fields) => {
+    (...fields: string[]) => {
       reset(...fields)
       clearErrors(...fields)
     },
     [reset, clearErrors],
   )
 
-  const createSubmitMethod = (method) => (url, options) => {
-    submit(method, url, options)
-  }
+  const createSubmitMethod =
+    (method: Method) =>
+    (url: string, options: VisitOptions = {}) => {
+      submit(method, url, options)
+    }
   const getMethod = useCallback(createSubmitMethod('get'), [submit])
   const post = useCallback(createSubmitMethod('post'), [submit])
   const put = useCallback(createSubmitMethod('put'), [submit])
@@ -338,7 +349,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   }, [])
 
-  const transformFunction = useCallback((callback) => {
+  const transformFunction = useCallback((callback: TransformCallback<TForm>) => {
     transform.current = callback
   }, [])
 

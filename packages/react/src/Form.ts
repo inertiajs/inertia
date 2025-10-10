@@ -79,7 +79,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
 
-    const getFormData = (): FormData => new FormData(formElement.current)
+    const getFormData = (): FormData => new FormData(formElement.current!)
 
     // Convert the FormData to an object because we can't compare two FormData
     // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
@@ -96,13 +96,13 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
-      formEvents.forEach((e) => formElement.current.addEventListener(e, updateDirtyState))
+      formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
 
       return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
     }, [])
 
     const reset = (...fields: string[]) => {
-      resetFormFields(formElement.current, defaultData.current, fields)
+      resetFormFields(formElement.current!, defaultData.current, fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {

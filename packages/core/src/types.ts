@@ -596,7 +596,7 @@ export interface InfiniteScrollRef {
 }
 
 export interface InfiniteScrollComponentBaseProps {
-  data?: string
+  data: string
   buffer?: number
   as?: string
   manual?: boolean

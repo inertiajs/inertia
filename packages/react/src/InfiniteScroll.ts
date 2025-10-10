@@ -181,8 +181,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
 
         // Elements
         getTriggerMargin: () => callbackPropsRef.current.buffer,
-        getStartElement: () => resolvedStartElement,
-        getEndElement: () => resolvedEndElement,
+        getStartElement: () => resolvedStartElement!,
+        getEndElement: () => resolvedEndElement!,
         getItemsElement: () => resolvedItemsElement,
         getScrollableParent: () => scrollableParent,
 
