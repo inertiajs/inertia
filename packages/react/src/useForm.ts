@@ -11,7 +11,8 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useIsomorphicLayoutEffect } from './react'
 import useRemember from './useRemember'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
@@ -96,7 +97,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   const submit = useCallback(
     (...args) => {
-      const objectPassed = typeof args[0] === 'object'
+      const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
       const url = objectPassed ? args[0].url : args[1]
@@ -222,12 +223,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   const [dataAsDefaults, setDataAsDefaults] = useState(false)
 
+  const dataRef = useRef(data)
+
+  useEffect(() => {
+    dataRef.current = data
+  })
+
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
       setDefaultsCalledInOnSuccess.current = true
 
       if (typeof fieldOrFields === 'undefined') {
-        setDefaults(data)
+        setDefaults(dataRef.current)
         // If setData was called right before setDefaults, data was not
         // updated in that render yet, so we set a flag to update
         // defaults right after the next render.
@@ -240,10 +247,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         })
       }
     },
-    [data, setDefaults],
+    [setDefaults],
   )
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!dataAsDefaults) {
       return
     }

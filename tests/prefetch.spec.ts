@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { clickAndWaitForResponse, requests } from './support'
+import { requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -12,9 +12,10 @@ const isPrefetchSwrPage = async (page: Page, id: number) => {
 }
 
 const hoverAndClick = async (page: Page, buttonText: string, id: number) => {
+  const prefetchPromise = page.waitForResponse(`prefetch/swr/${id}`)
   await page.getByRole('link', { name: buttonText, exact: true }).hover()
-  await page.waitForTimeout(75)
-  await clickAndWaitForResponse(page, buttonText, `prefetch/swr/${id}`)
+  await prefetchPromise
+  await page.getByRole('link', { name: buttonText, exact: true }).click()
   await isPrefetchSwrPage(page, id)
 }
 
@@ -260,6 +261,45 @@ test('can visit the page when prefetching has failed due to network error', asyn
   await page.getByRole('button', { name: 'Visit Page' }).click()
 
   await isPrefetchSwrPage(page, 1)
+})
+
+const submitButtonTexts = ['Submit to Same URL', 'Submit to Other URL']
+
+submitButtonTexts.forEach((buttonText) => {
+  test.describe('prefetch cache is invalidated after form submission redirect', () => {
+    test(buttonText, async ({ page }) => {
+      await page.goto('prefetch/test-page')
+
+      const prefetchPromise = page.waitForResponse('/prefetch/form')
+      await page.getByRole('link', { name: 'Go to Prefetch Form' }).hover()
+      await prefetchPromise
+
+      requests.listen(page)
+      await page.getByRole('link', { name: 'Go to Prefetch Form' }).click()
+      await page.waitForURL('/prefetch/form')
+      await expect(requests.requests.length).toBe(0)
+
+      const firstRandomValue = await page.locator('.random-value').textContent()
+      expect(firstRandomValue).toBeTruthy()
+
+      await page.getByRole('button', { name: buttonText }).click()
+      await page.waitForURL('/prefetch/form')
+
+      await page.waitForTimeout(100)
+      const secondRandomValue = await page.locator('.random-value').textContent()
+      expect(secondRandomValue).not.toBe(firstRandomValue)
+
+      await page.getByRole('link', { name: 'Back to Test Page' }).click()
+      await page.waitForURL('/prefetch/test-page')
+
+      requests.listen(page)
+      await page.getByRole('link', { name: 'Go to Prefetch Form' }).click()
+      await page.waitForURL('/prefetch/form')
+
+      const thirdRandomValue = await page.locator('.random-value').textContent()
+      expect(thirdRandomValue).not.toBe(firstRandomValue)
+    })
+  })
 })
 
 test.skip('can do SWR when the link cacheFor prop has two values', async ({ page }) => {

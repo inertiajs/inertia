@@ -4,22 +4,25 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
 import useForm from './useForm'
 
-type InertiaForm = DefineComponent<FormComponentProps>
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const noop = () => undefined
 
-const Form: InertiaForm = defineComponent({
+const Form = defineComponent({
   name: 'Form',
+  slots: Object as SlotsType<{
+    default: FormComponentSlotProps
+  }>,
   props: {
     action: {
       type: [String, Object] as PropType<FormComponentProps['action']>,
@@ -114,7 +117,7 @@ const Form: InertiaForm = defineComponent({
     const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
-      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.action) ? props.action.method : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive
@@ -148,7 +151,7 @@ const Form: InertiaForm = defineComponent({
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
         method.value,
-        typeof props.action === 'object' ? props.action.url : props.action,
+        isUrlMethodPair(props.action) ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )
@@ -249,7 +252,7 @@ const Form: InertiaForm = defineComponent({
         {
           ...attrs,
           ref: formElement,
-          action: typeof props.action === 'object' ? props.action.url : props.action,
+          action: isUrlMethodPair(props.action) ? props.action.url : props.action,
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
@@ -257,7 +260,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
+        slots.default ? slots.default(exposed) : [],
       )
     }
   },

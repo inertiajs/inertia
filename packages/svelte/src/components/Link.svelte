@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { isUrlMethodPair } from '@inertiajs/core'
   import type {
     CacheForOption,
     FormDataConvertible,
@@ -16,6 +17,7 @@
   export let replace: boolean = false
   export let preserveScroll: PreserveStateOption = false
   export let preserveState: PreserveStateOption | null = null
+  export let preserveUrl: boolean = false
   export let only: string[] = []
   export let except: string[] = []
   export let headers: Record<string, string> = {}
@@ -25,8 +27,8 @@
   export let cacheFor: CacheForOption | CacheForOption[] = 0
   export let cacheTags: string | string[] = []
 
-  $: _method = typeof href === 'object' ? href.method : method
-  $: _href = typeof href === 'object' ? href.url : href
+  $: _method = isUrlMethodPair(href) ? href.method : method
+  $: _href = isUrlMethodPair(href) ? href.url : href
 
   $: asProp = _method !== 'get' ? 'button' : as.toLowerCase()
   $: elProps =
@@ -46,6 +48,7 @@
     replace,
     preserveScroll,
     preserveState: preserveState ?? _method !== 'get',
+    preserveUrl,
     only,
     except,
     headers,

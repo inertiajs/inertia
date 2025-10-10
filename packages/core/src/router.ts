@@ -1,4 +1,5 @@
-import { hideProgress, revealProgress } from '.'
+import { cloneDeep, get, set } from 'lodash-es'
+import { progress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { history } from './history'
@@ -63,8 +64,8 @@ export class Router {
       }
     })
 
-    eventHandler.on('loadDeferredProps', () => {
-      this.loadDeferredProps()
+    eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
+      this.loadDeferredProps(deferredProps)
     })
   }
 
@@ -192,10 +193,10 @@ export class Router {
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
-      revealProgress(prefetched.inFlight)
+      progress.reveal(prefetched.inFlight)
       prefetchedRequests.use(prefetched, requestParams)
     } else {
-      revealProgress(true)
+      progress.reveal(true)
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
@@ -259,7 +260,7 @@ export class Router {
       return
     }
 
-    hideProgress()
+    progress.hide()
 
     this.asyncRequestStream.interruptInFlight()
 
@@ -311,6 +312,63 @@ export class Router {
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params, { replace: true })
+  }
+
+  public replaceProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | ((oldValue: unknown, props: TProps) => unknown),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replace({
+      preserveScroll: true,
+      preserveState: true,
+      props(currentProps) {
+        const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
+
+        return set(cloneDeep(currentProps), name, newValue)
+      },
+      ...(options || {}),
+    })
+  }
+
+  public appendToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [...(currentValue as unknown[]), newValue]
+      },
+      options,
+    )
+  }
+
+  public prependToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [newValue, ...(currentValue as unknown[])]
+      },
+      options,
+    )
   }
 
   public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
@@ -429,6 +487,7 @@ export class Router {
     return {
       onCancelToken: options.onCancelToken || (() => {}),
       onBefore: options.onBefore || (() => {}),
+      onBeforeUpdate: options.onBeforeUpdate || (() => {}),
       onStart: options.onStart || (() => {}),
       onProgress: options.onProgress || (() => {}),
       onFinish: options.onFinish || (() => {}),
@@ -440,9 +499,7 @@ export class Router {
     }
   }
 
-  protected loadDeferredProps(): void {
-    const deferred = currentPage.get()?.deferredProps
-
+  protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
         this.reload({ only: group })

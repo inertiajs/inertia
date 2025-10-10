@@ -1,5 +1,6 @@
 import {
   ActiveVisit,
+  isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -32,6 +33,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       method = 'get',
       preserveScroll = false,
       preserveState = null,
+      preserveUrl = false,
       replace = false,
       only = [],
       except = [],
@@ -60,7 +62,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const hoverTimeout = useRef<number>(null)
 
     const _method = useMemo(() => {
-      return typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
+      return isUrlMethodPair(href) ? href.method : (method.toLowerCase() as Method)
     }, [href, method])
 
     const _as = useMemo(() => {
@@ -73,7 +75,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [as, _method])
 
     const mergeDataArray = useMemo(
-      () => mergeDataIntoQueryString(_method, typeof href === 'object' ? href.url : href, data, queryStringArrayFormat),
+      () => mergeDataIntoQueryString(_method, isUrlMethodPair(href) ? href.url : href, data, queryStringArrayFormat),
       [href, _method, data, queryStringArrayFormat],
     )
 
@@ -86,13 +88,14 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         method: _method,
         preserveScroll,
         preserveState: preserveState ?? _method !== 'get',
+        preserveUrl,
         replace,
         only,
         except,
         headers,
         async,
       }),
-      [_data, _method, preserveScroll, preserveState, replace, only, except, headers, async],
+      [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async],
     )
 
     const visitParams = useMemo(

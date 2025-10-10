@@ -2,6 +2,7 @@ import {
   ActiveVisit,
   CacheForOption,
   GlobalEventCallback,
+  isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -52,6 +53,10 @@ const Link: InertiaLink = defineComponent({
     preserveState: {
       type: Boolean,
       default: null,
+    },
+    preserveUrl: {
+      type: Boolean,
+      default: false,
     },
     only: {
       type: Array<string>,
@@ -173,7 +178,7 @@ const Link: InertiaLink = defineComponent({
     })
 
     const method = computed(() =>
-      typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.href) ? props.href.method : (props.method.toLowerCase() as Method),
     )
     const as = computed(() => {
       if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
@@ -186,7 +191,7 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        typeof props.href === 'object' ? props.href.url : props.href,
+        isUrlMethodPair(props.href) ? props.href.url : props.href,
         props.data,
         props.queryStringArrayFormat,
       ),
@@ -212,6 +217,7 @@ const Link: InertiaLink = defineComponent({
       replace: props.replace,
       preserveScroll: props.preserveScroll,
       preserveState: props.preserveState ?? method.value !== 'get',
+      preserveUrl: props.preserveUrl,
       only: props.only,
       except: props.except,
       headers: props.headers,

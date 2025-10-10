@@ -5,6 +5,7 @@ test('renders the title tag and children', async ({ page }) => {
 
   await page.goto('/head')
 
+  await page.waitForSelector('title[inertia]', { state: 'attached' })
   const inertiaTitle = await page.evaluate(() => document.querySelector('title[inertia]')?.textContent)
 
   await expect(inertiaTitle).toBe('Test Head Component')
