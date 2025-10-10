@@ -378,6 +378,14 @@ export type Component = unknown
 
 export type HeadTitleCallback = (title: string) => string
 export type HeadOnUpdateCallback = (elements: string[]) => void
+export type HeadManager = {
+  forceUpdate: () => void
+  createProvider: () => {
+    reconnect: () => void
+    update: HeadOnUpdateCallback
+    disconnect: () => void
+  }
+}
 
 export interface InertiaAppProgressOptions {
   delay?: number
