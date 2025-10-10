@@ -1,8 +1,8 @@
-import { createHeadManager, PageHandler, PageProps, router } from '@inertiajs/core'
-import { createElement, ReactNode, useEffect, useMemo, useState } from 'react'
+import { createHeadManager, Page, PageHandler, PageProps, router } from '@inertiajs/core'
+import { ComponentType, createElement, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { AppComponent, AppOptions } from './createInertiaApp'
+import { AppComponent, AppOptions, RenderChildrenOptions } from './createInertiaApp'
 
 type ReactPageHandlerOptions = {
   component: ReactNode
@@ -82,13 +82,13 @@ function App<SharedProps extends PageProps = PageProps>({
     return createElement(
       HeadContext.Provider,
       { value: headManager },
-      createElement(PageContext.Provider, { value: current.page }, null),
+      createElement(PageContext.Provider, { value: current.page }),
     )
   }
 
   const renderChildren =
     children ||
-    (({ Component, props, key }) => {
+    (({ Component, props, key }: RenderChildrenOptions<SharedProps>) => {
       const child = createElement(Component, { key, ...props })
 
       if (typeof Component.layout === 'function') {
@@ -96,10 +96,12 @@ function App<SharedProps extends PageProps = PageProps>({
       }
 
       if (Array.isArray(Component.layout)) {
-        return Component.layout
-          .concat(child)
+        return [...Component.layout]
           .reverse()
-          .reduce((children, Layout) => createElement(Layout, { children, ...props }))
+          .reduce(
+            (children: ReactNode, Layout: ComponentType): ReactNode => createElement(Layout, { children, ...props }),
+            child,
+          )
       }
 
       return child
@@ -112,10 +114,10 @@ function App<SharedProps extends PageProps = PageProps>({
       PageContext.Provider,
       { value: current.page },
       renderChildren({
-        Component: current.component,
+        Component: current.component as unknown as ComponentType,
         key: current.key,
-        props: current.page.props,
-      }),
+        props: current.page.props as Page<SharedProps>['props'],
+      }) as ReactNode,
     ),
   )
 }

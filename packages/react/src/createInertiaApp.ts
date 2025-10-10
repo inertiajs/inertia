@@ -22,8 +22,18 @@ type SetupProps<SharedProps extends PageProps> = {
   onHeadUpdate?: HeadOnUpdateCallback
 }
 
+export type InertiaComponentType = ComponentType & {
+  layout?: ((page: ReactNode) => ReactNode) | ComponentType[]
+}
+
+export type RenderChildrenOptions<SharedProps extends PageProps> = {
+  Component: InertiaComponentType
+  key: Key | null
+  props: Page<SharedProps>['props']
+}
+
 export type AppOptions<SharedProps extends PageProps = PageProps> = SetupProps<SharedProps> & {
-  children?: (props: { Component: ComponentType; key: Key; props: Page<SharedProps>['props'] }) => ReactNode
+  children?: (props: RenderChildrenOptions<SharedProps>) => ReactNode
 }
 
 export type AppComponent<SharedProps extends PageProps = PageProps> = FunctionComponent<AppOptions<SharedProps>>
