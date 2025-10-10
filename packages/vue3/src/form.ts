@@ -242,6 +242,8 @@ const Form = defineComponent({
       reset,
       submit,
       defaults,
+      getData,
+      getFormData,
     }
 
     expose<FormComponentRef>(exposed)
