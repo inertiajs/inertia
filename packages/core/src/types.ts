@@ -163,7 +163,7 @@ export type PageHandler = ({
 }: {
   component: Component
   page: Page
-  preserveState: PreserveStateOption
+  preserveState: boolean
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)

@@ -175,8 +175,8 @@ export class Response {
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll,
-      preserveState: this.requestParams.all().preserveState,
+      preserveScroll: this.requestParams.all().preserveScroll as boolean,
+      preserveState: this.requestParams.all().preserveState as boolean,
     })
   }
 

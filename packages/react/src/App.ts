@@ -1,11 +1,26 @@
 import { createHeadManager, PageHandler, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createElement, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+import { AppOptions } from './createInertiaApp'
+
+type ReactPageHandlerOptions = {
+  component: ReactNode
+  page: AppOptions['initialPage']
+  preserveState: boolean
+}
+
+type ReactPageHandler = (options: ReactPageHandlerOptions) => Promise<void>
+
+type CurrentPage = {
+  component: ReactNode
+  page: AppOptions['initialPage']
+  key: number | null
+}
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
-let swapComponent: PageHandler = async () => {
+let swapComponent: ReactPageHandler = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
   // components. We swap in the real function in the useEffect hook below.
@@ -19,8 +34,8 @@ export default function App({
   resolveComponent,
   titleCallback,
   onHeadUpdate,
-}) {
-  const [current, setCurrent] = useState({
+}: AppOptions) {
+  const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
     page: initialPage,
     key: null,
@@ -38,7 +53,7 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async (args) => swapComponent(args),
+      swapComponent: (async (args: ReactPageHandlerOptions) => swapComponent(args)) as PageHandler,
     })
 
     routerIsInitialized = true
@@ -53,7 +68,7 @@ export default function App({
         return
       }
 
-      setCurrent((current) => ({
+      setCurrent(() => ({
         component,
         page,
         key: preserveState ? current.key : Date.now(),
