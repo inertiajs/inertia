@@ -87,7 +87,7 @@ const App = defineComponent({
       router.init({
         initialPage,
         resolveComponent,
-        swapComponent: ((options: Parameters<VuePageHandler>[0]) => {
+        swapComponent: (async (options: Parameters<VuePageHandler>[0]) => {
           component.value = markRaw(options.component)
           page.value = options.page
           key.value = options.preserveState ? key.value : Date.now()
