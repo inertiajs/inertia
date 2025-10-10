@@ -1,8 +1,8 @@
-import { createHeadManager, PageHandler, router } from '@inertiajs/core'
+import { createHeadManager, PageHandler, PageProps, router } from '@inertiajs/core'
 import { createElement, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { AppOptions } from './createInertiaApp'
+import { AppComponent, AppOptions } from './createInertiaApp'
 
 type ReactPageHandlerOptions = {
   component: ReactNode
@@ -27,14 +27,14 @@ let swapComponent: ReactPageHandler = async () => {
   currentIsInitialPage = false
 }
 
-export default function App({
+function App<SharedProps extends PageProps = PageProps>({
   children,
   initialPage,
   initialComponent,
   resolveComponent,
   titleCallback,
   onHeadUpdate,
-}: AppOptions) {
+}: AppOptions<SharedProps>): ReturnType<AppComponent<SharedProps>> {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
     page: initialPage,
@@ -121,3 +121,5 @@ export default function App({
 }
 
 App.displayName = 'Inertia'
+
+export default App
