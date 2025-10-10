@@ -4,17 +4,11 @@ import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 import { AppComponent, AppOptions, RenderChildrenOptions } from './createInertiaApp'
 
-type ReactPageHandlerOptions = {
-  component: ReactNode
-  page: AppOptions['initialPage']
-  preserveState: boolean
-}
-
-type ReactPageHandler = (options: ReactPageHandlerOptions) => Promise<void>
+type ReactPageHandler = (options: { component: ReactNode; page: Page; preserveState: boolean }) => Promise<void>
 
 type CurrentPage = {
   component: ReactNode
-  page: AppOptions['initialPage']
+  page: Page
   key: number | null
 }
 
@@ -53,7 +47,7 @@ function App<SharedProps extends PageProps = PageProps>({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: (async (args: ReactPageHandlerOptions) => swapComponent(args)) as PageHandler,
+      swapComponent: swapComponent as PageHandler,
     })
 
     routerIsInitialized = true
