@@ -19,12 +19,12 @@
   <h1>Edit User {user.id}</h1>
   <form>
     <div>
-      <label>Name:</label>
-      <input type="text" bind:value={$form.name} />
+      <label for="name">Name:</label>
+      <input type="text" bind:value={$form.name} name="name" />
     </div>
     <div>
-      <label>Email:</label>
-      <input type="email" bind:value={$form.email} />
+      <label for="email">Email:</label>
+      <input type="email" bind:value={$form.email} name="email" />
     </div>
   </form>
 </div>
