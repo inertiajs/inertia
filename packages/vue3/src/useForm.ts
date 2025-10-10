@@ -6,6 +6,7 @@ import {
   FormDataValues,
   Method,
   Progress,
+  RequestPayload,
   router,
   UrlMethodPair,
   VisitOptions,
@@ -14,6 +15,8 @@ import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { reactive, watch } from 'vue'
 
 type FormOptions = Omit<VisitOptions, 'data'>
+type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
+type TransformCallback<TForm> = (data: TForm) => object
 
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
@@ -24,7 +27,7 @@ export interface InertiaFormProps<TForm extends object> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm
-  transform(callback: (data: TForm) => object): this
+  transform(callback: TransformCallback<TForm>): this
   defaults(): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
@@ -59,9 +62,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
     : null
   let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
-  let cancelToken = null
-  let recentlySuccessfulTimeoutId = null
-  let transform = (data) => data
+  let cancelToken: { cancel: () => void } | null = null
+  let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout>
+  let transform: TransformCallback<TForm> = (data) => data
 
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
@@ -81,7 +84,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return set(carry, key, get(this, key))
       }, {} as Partial<TForm>) as TForm
     },
-    transform(callback) {
+    transform(callback: TransformCallback<TForm>) {
       transform = callback
 
       return this
@@ -105,7 +108,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    reset(...fields) {
+    reset(...fields: string[]) {
       const resolvedData = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(defaults)
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
@@ -129,7 +132,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    clearErrors(...fields) {
+    clearErrors(...fields: string[]) {
       this.errors = Object.keys(this.errors).reduce(
         (carry, field) => ({
           ...carry,
@@ -142,12 +145,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    resetAndClearErrors(...fields) {
+    resetAndClearErrors(...fields: string[]) {
       this.reset(...fields)
       this.clearErrors(...fields)
       return this
     },
-    submit(...args) {
+    submit(...args: SubmitArgs) {
       const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
@@ -157,7 +160,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       defaultsCalledInOnSuccess = false
 
       const data = transform(this.data())
-      const _options = {
+      const _options: VisitOptions = {
         ...options,
         onCancelToken: (token) => {
           cancelToken = token
@@ -235,24 +238,24 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data })
+        router.delete(url, { ..._options, data: data as RequestPayload })
       } else {
-        router[method](url, data, _options)
+        router[method](url, data as RequestPayload, _options)
       }
     },
-    get(url, options) {
+    get(url: string, options: VisitOptions) {
       this.submit('get', url, options)
     },
-    post(url, options) {
+    post(url: string, options: VisitOptions) {
       this.submit('post', url, options)
     },
-    put(url, options) {
+    put(url: string, options: VisitOptions) {
       this.submit('put', url, options)
     },
-    patch(url, options) {
+    patch(url: string, options: VisitOptions) {
       this.submit('patch', url, options)
     },
-    delete(url, options) {
+    delete(url: string, options: VisitOptions) {
       this.submit('delete', url, options)
     },
     cancel() {

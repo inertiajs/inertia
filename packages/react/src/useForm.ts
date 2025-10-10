@@ -1,5 +1,4 @@
 import {
-  ActiveVisit,
   Errors,
   ErrorValue,
   FormDataErrors,
@@ -7,8 +6,6 @@ import {
   FormDataType,
   FormDataValues,
   Method,
-  Page,
-  PendingVisit,
   Progress,
   RequestPayload,
   router,
@@ -78,7 +75,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     (typeof rememberKeyOrInitialValues === 'string' ? maybeInitialValues : rememberKeyOrInitialValues) || ({} as TForm),
   )
   const cancelToken = useRef<{ cancel: VoidFunction } | null>(null)
-  const recentlySuccessfulTimeoutId = useRef<number>(undefined)
+  const recentlySuccessfulTimeoutId = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey
     ? useRemember({} as FormDataErrors<TForm>, `${rememberKey}:errors`)
@@ -121,7 +118,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onCancelToken(token)
           }
         },
-        onBefore: (visit: PendingVisit) => {
+        onBefore: (visit) => {
           setWasSuccessful(false)
           setRecentlySuccessful(false)
           clearTimeout(recentlySuccessfulTimeoutId.current)
@@ -130,21 +127,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onBefore(visit)
           }
         },
-        onStart: (visit: PendingVisit) => {
+        onStart: (visit) => {
           setProcessing(true)
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
-        onProgress: (event?: Progress) => {
+        onProgress: (event) => {
           setProgress(event || null)
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
-        onSuccess: async (page: Page) => {
+        onSuccess: async (page) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -170,7 +167,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           return onSuccess
         },
-        onError: (errors: Errors) => {
+        onError: (errors) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
@@ -192,7 +189,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onCancel()
           }
         },
-        onFinish: (visit: ActiveVisit) => {
+        onFinish: (visit) => {
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)

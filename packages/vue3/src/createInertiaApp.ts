@@ -1,13 +1,25 @@
 import {
   CreateInertiaAppOptions,
+  HeadOnUpdateCallback,
   HeadTitleCallback,
   InertiaAppResponse,
   Page,
+  PageProps,
   router,
   setupProgress,
 } from '@inertiajs/core'
-import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
+import { ComponentPublicInstance, DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
+
+type VuePageResolver = (name: string) => DefineComponent | Promise<DefineComponent>
+
+export type SetupProps<SharedProps extends PageProps = PageProps> = {
+  initialPage: Page<SharedProps>
+  initialComponent: ComponentPublicInstance | Promise<ComponentPublicInstance>
+  resolveComponent: VuePageResolver
+  titleCallback?: HeadTitleCallback
+  onHeadUpdate?: HeadOnUpdateCallback
+}
 
 interface CreateInertiaAppProps extends CreateInertiaAppOptions {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
@@ -28,25 +40,36 @@ export default async function createInertiaApp({
 }: CreateInertiaAppProps): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el.dataset.page)
-  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const initialPage = page || (JSON.parse(el?.dataset.page ?? '{}') as Page)
 
-  let head = []
+  const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+
+  let head: string[] = []
 
   const vueApp = await Promise.all([
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
+    const setupProps: SetupProps = {
+      initialPage,
+      initialComponent,
+      resolveComponent,
+      titleCallback: title,
+    }
+
+    if (isServer) {
+      return setup({
+        el: null,
+        App,
+        props: { ...setupProps, onHeadUpdate: (elements) => (head = elements) },
+        plugin,
+      })
+    }
+
     return setup({
-      el,
+      el: el as HTMLElement,
       App,
-      props: {
-        initialPage,
-        initialComponent,
-        resolveComponent,
-        titleCallback: title,
-        onHeadUpdate: isServer ? (elements) => (head = elements) : null,
-      },
+      props: setupProps,
       plugin,
     })
   })

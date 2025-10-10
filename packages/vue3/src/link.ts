@@ -31,7 +31,7 @@ const Link: InertiaLink = defineComponent({
       default: 'a',
     },
     data: {
-      type: Object,
+      type: Object as PropType<InertiaLinkProps['data']>,
       default: () => ({}),
     },
     href: {
@@ -133,7 +133,7 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
-    const hoverTimeout = ref(null)
+    const hoverTimeout = ref<ReturnType<typeof setTimeout>>()
 
     const prefetchModes = computed<LinkPrefetchOption[]>(() => {
       if (props.prefetch === true) {
@@ -191,8 +191,8 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        isUrlMethodPair(props.href) ? props.href.url : props.href,
-        props.data,
+        isUrlMethodPair(props.href) ? props.href.url : (props.href as string),
+        props.data || {},
         props.queryStringArrayFormat,
       ),
     )
@@ -230,12 +230,12 @@ const Link: InertiaLink = defineComponent({
       onBefore: props.onBefore,
       onStart: (visit: PendingVisit) => {
         inFlightCount.value++
-        props.onStart(visit)
+        props.onStart?.(visit)
       },
       onProgress: props.onProgress,
       onFinish: (visit: ActiveVisit) => {
         inFlightCount.value--
-        props.onFinish(visit)
+        props.onFinish?.(visit)
       },
       onCancel: props.onCancel,
       onSuccess: props.onSuccess,
@@ -258,7 +258,7 @@ const Link: InertiaLink = defineComponent({
     }
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
@@ -279,29 +279,30 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetchClickEvents = {
-      onMousedown: (event) => {
+      onMousedown: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onKeydown: (event) => {
+      onKeydown: (event: KeyboardEvent) => {
+        // @ts-expect-error - shouldIntercept() expects a MouseEvent, probably needs refactoring
         if (shouldIntercept(event) && shouldNavigate(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onMouseup: (event) => {
+      onMouseup: (event: MouseEvent) => {
         event.preventDefault()
         router.visit(href.value, visitParams.value)
       },
-      onKeyup: (event) => {
+      onKeyup: (event: KeyboardEvent) => {
         if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
         }
       },
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           // Let the mouseup/keyup event handle the visit
           event.preventDefault()
