@@ -27,7 +27,7 @@ export default defineComponent({
     return {
       loaded: false,
       fetching: false,
-      observer: null,
+      observer: null as IntersectionObserver | null,
     }
   },
   unmounted() {
@@ -41,7 +41,7 @@ export default defineComponent({
         }
 
         if (!this.$props.always) {
-          this.observer.disconnect()
+          this.observer?.disconnect()
         }
 
         if (this.fetching) {

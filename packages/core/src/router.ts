@@ -8,6 +8,7 @@ import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
 import { Request } from './request'
+import { RequestParams } from './requestParams'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
@@ -386,19 +387,21 @@ export class Router {
 
     const { onError, onFinish, onSuccess, ...pageParams } = params
 
+    const page = {
+      ...current,
+      ...pageParams,
+      props: props as Page['props'],
+    }
+
+    const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
+    const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
+
     currentPage
-      .set(
-        {
-          ...current,
-          ...pageParams,
-          props: props as Page['props'],
-        },
-        {
-          replace,
-          preserveScroll: params.preserveScroll,
-          preserveState: params.preserveState,
-        },
-      )
+      .set(page, {
+        replace,
+        preserveScroll,
+        preserveState,
+      })
       .then(() => {
         const errors = currentPage.get().props.errors || {}
 

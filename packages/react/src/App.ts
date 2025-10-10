@@ -1,26 +1,35 @@
-import { createHeadManager, PageHandler, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import { createHeadManager, Page, PageHandler, PageProps, router } from '@inertiajs/core'
+import { ComponentType, createElement, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+import { AppComponent, AppOptions, RenderChildrenOptions } from './createInertiaApp'
+
+type ReactPageHandler = (options: { component: ReactNode; page: Page; preserveState: boolean }) => Promise<void>
+
+type CurrentPage = {
+  component: ReactNode
+  page: Page
+  key: number | null
+}
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
-let swapComponent: PageHandler = async () => {
+let swapComponent: ReactPageHandler = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
   // components. We swap in the real function in the useEffect hook below.
   currentIsInitialPage = false
 }
 
-export default function App({
+function App<SharedProps extends PageProps = PageProps>({
   children,
   initialPage,
   initialComponent,
   resolveComponent,
   titleCallback,
   onHeadUpdate,
-}) {
-  const [current, setCurrent] = useState({
+}: AppOptions<SharedProps>): ReturnType<AppComponent<SharedProps>> {
+  const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
     page: initialPage,
     key: null,
@@ -38,7 +47,7 @@ export default function App({
     router.init({
       initialPage,
       resolveComponent,
-      swapComponent: async (args) => swapComponent(args),
+      swapComponent: ((...args: Parameters<ReactPageHandler>) => swapComponent(...args)) as PageHandler,
     })
 
     routerIsInitialized = true
@@ -67,13 +76,13 @@ export default function App({
     return createElement(
       HeadContext.Provider,
       { value: headManager },
-      createElement(PageContext.Provider, { value: current.page }, null),
+      createElement(PageContext.Provider, { value: current.page }),
     )
   }
 
   const renderChildren =
     children ||
-    (({ Component, props, key }) => {
+    (({ Component, props, key }: RenderChildrenOptions<SharedProps>) => {
       const child = createElement(Component, { key, ...props })
 
       if (typeof Component.layout === 'function') {
@@ -81,10 +90,12 @@ export default function App({
       }
 
       if (Array.isArray(Component.layout)) {
-        return Component.layout
-          .concat(child)
+        return [...Component.layout]
           .reverse()
-          .reduce((children, Layout) => createElement(Layout, { children, ...props }))
+          .reduce(
+            (children: ReactNode, Layout: ComponentType): ReactNode => createElement(Layout, { children, ...props }),
+            child,
+          )
       }
 
       return child
@@ -97,12 +108,14 @@ export default function App({
       PageContext.Provider,
       { value: current.page },
       renderChildren({
-        Component: current.component,
+        Component: current.component as unknown as ComponentType,
         key: current.key,
-        props: current.page.props,
-      }),
+        props: current.page.props as Page<SharedProps>['props'],
+      }) as ReactNode,
     ),
   )
 }
 
 App.displayName = 'Inertia'
+
+export default App

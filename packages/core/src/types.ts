@@ -163,7 +163,7 @@ export type PageHandler = ({
 }: {
   component: Component
   page: Page
-  preserveState: PreserveStateOption
+  preserveState: boolean
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
@@ -376,7 +376,32 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+export type HeadTitleCallback = (title: string) => string
+export type HeadOnUpdateCallback = (elements: string[]) => void
+export type HeadManager = {
+  forceUpdate: () => void
+  createProvider: () => {
+    reconnect: () => void
+    update: HeadOnUpdateCallback
+    disconnect: () => void
+  }
+}
+
+export interface InertiaAppProgressOptions {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
+export type InertiaAppSSRContent = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
+
+export type CreateInertiaAppOptions = {
+  id?: string
+  progress?: InertiaAppProgressOptions | false
+  resolve: PageResolver
+}
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
@@ -403,9 +428,8 @@ export interface LinkComponentBaseProps
       | 'queryStringArrayFormat'
       | 'async'
     > &
-      Omit<VisitCallbacks, 'onCancelToken'> & {
+      VisitCallbacks & {
         href: string | UrlMethodPair
-        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
         cacheTags: string | string[]
@@ -579,7 +603,7 @@ export interface InfiniteScrollRef {
 }
 
 export interface InfiniteScrollComponentBaseProps {
-  data?: string
+  data: string
   buffer?: number
   as?: string
   manual?: boolean

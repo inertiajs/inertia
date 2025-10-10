@@ -1,4 +1,5 @@
 import {
+  Errors,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
@@ -180,8 +181,8 @@ const Form = defineComponent({
         onFinish: props.onFinish,
         onCancel: props.onCancel,
         onSuccess: (...args) => {
-          props.onSuccess(...args)
-          props.onSubmitComplete(exposed)
+          props.onSuccess?.(...args)
+          props.onSubmitComplete?.(exposed)
           maybeReset(props.resetOnSuccess)
 
           if (props.setDefaultsOnSuccess === true) {
@@ -189,7 +190,7 @@ const Form = defineComponent({
           }
         },
         onError: (...args) => {
-          props.onError(...args)
+          props.onError?.(...args)
           maybeReset(props.resetOnError)
         },
         ...props.options,
@@ -235,7 +236,7 @@ const Form = defineComponent({
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
-        form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
+        form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
       get isDirty() {
         return isDirty.value
       },

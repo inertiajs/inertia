@@ -15,6 +15,6 @@ export default defineComponent({
       throw new Error('`<Deferred>` requires a `<template #fallback>` slot')
     }
 
-    return keys.every((key) => this.$page.props[key] !== undefined) ? this.$slots.default() : this.$slots.fallback()
+    return keys.every((key) => this.$page.props[key] !== undefined) ? this.$slots.default?.() : this.$slots.fallback()
   },
 })

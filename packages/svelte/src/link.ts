@@ -11,7 +11,6 @@ import {
   type Method,
   type VisitOptions,
 } from '@inertiajs/core'
-import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
 
 type ActionEventHandlers = {
@@ -40,8 +39,8 @@ type ActionAttributes = {
     event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
   ) => void
 } & {
-  'on:cancel-token'?: (event: CustomEvent<CancelTokenSource>) => void
-  oncanceltoken?: (event: CustomEvent<CancelTokenSource>) => void
+  'on:cancel-token'?: (event: CustomEvent<{ cancel: VoidFunction }>) => void
+  oncanceltoken?: (event: CustomEvent<{ cancel: VoidFunction }>) => void
 }
 
 function link(
@@ -84,6 +83,7 @@ function link(
       }
     },
     keydown: (event) => {
+      // @ts-expect-error - shouldIntercept() expects a MouseEvent, probably needs refactoring
       if (shouldIntercept(event) && shouldNavigate(event)) {
         event.preventDefault()
         prefetch()
@@ -136,7 +136,7 @@ function link(
       return 30_000
     })()
 
-    cacheTags = cacheTagValues
+    cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
 
     method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)

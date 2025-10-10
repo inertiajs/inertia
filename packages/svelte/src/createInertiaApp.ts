@@ -1,4 +1,10 @@
-import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
+import {
+  router,
+  setupProgress,
+  type CreateInertiaAppOptions,
+  type InertiaAppResponse,
+  type Page,
+} from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -7,22 +13,13 @@ import type { ComponentResolver } from './types'
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
 
-interface CreateInertiaAppProps {
-  id?: string
+interface CreateInertiaAppProps extends CreateInertiaAppOptions {
   resolve: ComponentResolver
   setup: (props: {
     el: HTMLElement | null
     App: AppComponent
     props: InertiaAppProps
   }) => void | App | SvelteRenderResult
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
   page?: Page
 }
 
