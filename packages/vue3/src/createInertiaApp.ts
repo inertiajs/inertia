@@ -8,14 +8,13 @@ import {
   router,
   setupProgress,
 } from '@inertiajs/core'
-import { ComponentPublicInstance, DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
 type VuePageResolver = (name: string) => DefineComponent | Promise<DefineComponent>
 
 export type SetupProps<SharedProps extends PageProps = PageProps> = {
   initialPage: Page<SharedProps>
-  initialComponent: ComponentPublicInstance | Promise<ComponentPublicInstance>
+  initialComponent: DefineComponent
   resolveComponent: VuePageResolver
   titleCallback?: HeadTitleCallback
   onHeadUpdate?: HeadOnUpdateCallback
@@ -61,7 +60,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || (JSON.parse(el?.dataset.page ?? '{}') as Page<SharedProps>)
 
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const resolveComponent = (name: string) =>
+    Promise.resolve(resolve(name)).then((module) => {
+      const typedModule = module as DefineComponent | { default: DefineComponent }
+      return 'default' in typedModule ? typedModule.default : typedModule
+    })
 
   let head: string[] = []
 
