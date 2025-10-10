@@ -83,6 +83,7 @@ function link(
       }
     },
     keydown: (event) => {
+      // @ts-expect-error - shouldIntercept() expects a MouseEvent, probably needs refactoring
       if (shouldIntercept(event) && shouldNavigate(event)) {
         event.preventDefault()
         prefetch()
@@ -135,7 +136,7 @@ function link(
       return 30_000
     })()
 
-    cacheTags = cacheTagValues
+    cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
 
     method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)

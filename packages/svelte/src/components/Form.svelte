@@ -45,7 +45,9 @@
   let isDirty = false
   let defaultData: FormData = new FormData()
 
-  $: _method = isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method'])
+  $: _method = isUrlMethodPair(action)
+    ? action.method
+    : ((method?.toLowerCase() ?? 'get') as FormComponentProps['method'])
   $: _action = isUrlMethodPair(action) ? action.url : action
 
   function getFormData(): FormData {
@@ -64,7 +66,7 @@
   }
 
   export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+    const [url, _data] = mergeDataIntoQueryString(_method! as any, _action!, getData(), queryStringArrayFormat)
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -117,6 +119,7 @@
       ...options,
     }
 
+    // @ts-expect-error - submit method expects SubmitArgs but we're passing typed parameters
     $form.transform(() => transform(_data)).submit(_method, url, submitOptions)
   }
 
