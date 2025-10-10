@@ -23,8 +23,8 @@ import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
-export interface InertiaAppProps {
-  initialPage: Page
+export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
+  initialPage: Page<SharedProps>
   initialComponent?: object
   resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
   titleCallback?: HeadTitleCallback
@@ -34,7 +34,7 @@ export interface InertiaAppProps {
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
 const component = ref(null)
-const page = ref<Page<any>>(null)
+const page = ref<Page<any>>()
 const layout = shallowRef(null)
 const key = ref(null)
 let headManager: HeadManager
