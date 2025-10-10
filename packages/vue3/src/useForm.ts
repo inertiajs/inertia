@@ -267,7 +267,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     __remember() {
       return { data: this.data(), errors: this.errors }
     },
-    __restore(restored) {
+    __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }) {
       Object.assign(this, restored.data)
       this.setError(restored.errors)
     },
