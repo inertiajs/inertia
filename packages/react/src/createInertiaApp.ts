@@ -38,7 +38,7 @@ export type AppOptions<SharedProps extends PageProps = PageProps> = SetupProps<S
 
 export type AppComponent<SharedProps extends PageProps = PageProps> = FunctionComponent<AppOptions<SharedProps>>
 
-export type SetupOptions<ElementType, SharedProps extends PageProps> = {
+type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
   App: AppComponent<SharedProps>
   props: Omit<AppOptions<SharedProps>, 'children'>
