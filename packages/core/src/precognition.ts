@@ -142,14 +142,10 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
   let validateFunction = createValidateFunction()
 
   return {
-    setOldData: (data) => {
-      oldData = { ...data }
-    },
-    validateFiles: (value) => {
-      validateFiles = value
-    },
+    setOldData: (data) => (oldData = { ...data }),
+    validateFiles: (value) => (validateFiles = value),
     setTimeout,
-    validate: (options: PrecognitionValidateOptions) => validateFunction(options),
+    validate: (options) => validateFunction(options),
     cancelAll,
   }
 }

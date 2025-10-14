@@ -135,7 +135,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
     useEffect(() => {
       validator.setTimeout(validateTimeout)
-    }, [validateTimeout])
+    }, [validateTimeout, validator])
 
     useEffect(() => {
       updateDataOnValidator()
@@ -313,8 +313,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       validate,
       touch,
       touched: isTouched,
-      setValidationTimeout: (duration: number) => validator.setTimeout(duration),
-      validateFiles: () => validator.validateFiles(true),
       cancelValidation: () => {
         validator.cancelAll()
         setValidating(false)

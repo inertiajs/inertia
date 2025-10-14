@@ -380,8 +380,6 @@ const Form = defineComponent({
       validate,
       touch,
       touched: isTouched,
-      setValidationTimeout: (duration: number) => validator.setTimeout(duration),
-      validateFiles: () => validator.validateFiles(true),
       cancelValidation: () => {
         validator.cancelAll()
         validating.value = false

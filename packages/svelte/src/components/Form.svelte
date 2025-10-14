@@ -282,14 +282,6 @@
     return $form.errors[field] !== undefined
   }
 
-  export function setValidationTimeout(duration: number) {
-    validator.setTimeout(duration)
-  }
-
-  export function validateFilesEnabled() {
-    validator.validateFiles(true)
-  }
-
   export function cancelValidation() {
     validator.cancelAll()
     validating = false
@@ -316,9 +308,9 @@
   $: slotErrors = $form.errors as Errors
 
   // Create reactive slot props that update when state changes
-  $: slotValid = (field: string) => validated.includes(field) && slotErrors[field] === undefined
-  $: slotInvalid = (field: string) => slotErrors[field] !== undefined
-  $: slotTouched = (field?: string) =>
+  $: validMethod = (field: string) => validated.includes(field) && slotErrors[field] === undefined
+  $: invalidMethod = (field: string) => slotErrors[field] !== undefined
+  $: touchedMethod = (field?: string) =>
     typeof field === 'string' ? touchedFields.includes(field) : touchedFields.length > 0
 </script>
 
@@ -348,11 +340,9 @@
     {validating}
     {validate}
     {touch}
-    touched={slotTouched}
-    valid={slotValid}
-    invalid={slotInvalid}
-    {setValidationTimeout}
-    {validateFilesEnabled}
+    touched={touchedMethod}
+    valid={validMethod}
+    invalid={invalidMethod}
     {cancelValidation}
   />
 </form>
