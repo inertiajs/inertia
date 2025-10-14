@@ -153,6 +153,7 @@ const Form = defineComponent({
     const touched = ref<string[]>([])
 
     const validator = usePrecognition({
+      timeout: props.validateTimeout,
       onStart: () => (validating.value = true),
       onFinish: () => (validating.value = false),
     })

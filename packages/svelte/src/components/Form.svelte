@@ -55,6 +55,7 @@
   let touchedFields: string[] = []
 
   const validator = usePrecognition({
+    timeout: validateTimeout,
     onStart: () => {
       validating = true
     },

@@ -6,6 +6,7 @@ import { objectToFormData } from './formData'
 import { Errors, FormComponentValidateOptions, RequestData, Visit } from './types'
 
 interface UsePrecognitionOptions {
+  timeout: number
   onStart: () => void
   onFinish: () => void
 }
@@ -27,7 +28,7 @@ interface PrecognitionValidator {
 }
 
 export default function usePrecognition(precognitionOptions: UsePrecognitionOptions): PrecognitionValidator {
-  let debounceTimeoutDuration = 1500
+  let debounceTimeoutDuration = precognitionOptions.timeout
   let validateFiles: boolean = false
 
   let oldData: RequestData = {}
@@ -45,7 +46,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
     if (value !== debounceTimeoutDuration) {
       cancelAll()
       debounceTimeoutDuration = value
-      validate = createValidateFunction()
+      validateFunction = createValidateFunction()
     }
   }
 
@@ -138,7 +139,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
       { leading: true, trailing: true },
     )
 
-  let validate = createValidateFunction()
+  let validateFunction = createValidateFunction()
 
   return {
     setOldData: (data) => {
@@ -148,7 +149,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
       validateFiles = value
     },
     setTimeout,
-    validate,
+    validate: (options: PrecognitionValidateOptions) => validateFunction(options),
     cancelAll,
   }
 }

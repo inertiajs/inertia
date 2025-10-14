@@ -91,6 +91,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const validator = useMemo(
       () =>
         usePrecognition({
+          timeout: validateTimeout,
           onStart: () => setValidating(true),
           onFinish: () => setValidating(false),
         }),
@@ -134,7 +135,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
     useEffect(() => {
       validator.setTimeout(validateTimeout)
-    }, [validateTimeout, validator])
+    }, [validateTimeout])
 
     useEffect(() => {
       updateDataOnValidator()

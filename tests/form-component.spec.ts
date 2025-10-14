@@ -1480,10 +1480,12 @@ test.describe('Form Component', () => {
     test('does not clear unrelated field errors', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+
       await page.fill('input[name="email"]', 'x')
       await page.locator('input[name="email"]').blur()
 
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
 
       await page.fill('input[name="email"]', 'test@example.com')
