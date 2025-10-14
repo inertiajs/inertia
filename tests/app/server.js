@@ -1035,38 +1035,6 @@ app.post('/form-component/precognition-files', upload.any(), (req, res) => {
   }, 500)
 })
 
-app.post('/form-component/precognition-transform', (req, res) => {
-  setTimeout(() => {
-    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
-    const name = req.body['name']
-    const errors = {}
-
-    // Validate that name is uppercase
-    if (!name) {
-      errors.name = 'The name field is required.'
-    } else if (name !== name.toUpperCase()) {
-      errors.name = 'The name must be uppercase.'
-    }
-
-    if (only.length) {
-      Object.keys(errors).forEach((key) => {
-        if (!only.includes(key)) {
-          delete errors[key]
-        }
-      })
-    }
-
-    res.header('Precognition', 'true')
-    res.header('Vary', 'Precognition')
-
-    if (Object.keys(errors).length) {
-      return res.status(422).json({ errors })
-    }
-
-    return res.status(204).header('Precognition-Success', 'true').send()
-  }, 500)
-})
-
 app.post('/form-component/precognition-headers', (req, res) => {
   setTimeout(() => {
     const customHeader = req.headers['x-custom-header']

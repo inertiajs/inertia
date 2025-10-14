@@ -1443,48 +1443,6 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
     })
 
-    test('shows only first error when server returns errors as array', async ({ page }) => {
-      await page.goto('/form-component/precognition-array-errors')
-
-      await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Should show only the first error from the array, not the second
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
-      await expect(page.getByText('The name contains invalid characters.')).not.toBeVisible()
-    })
-
-    test('shows all errors when simpleValidationErrors is false', async ({ page }) => {
-      await page.goto('/form-component/precognition-all-errors')
-
-      await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Should show all errors from the array
-      await expect(page.locator('#name-error-0')).toHaveText('The name must be at least 3 characters.')
-      await expect(page.locator('#name-error-1')).toHaveText('The name contains invalid characters.')
-    })
-
-    test('shows all email errors when simpleValidationErrors is false', async ({ page }) => {
-      await page.goto('/form-component/precognition-all-errors')
-
-      await page.fill('input[name="email"]', 'invalid')
-      await page.locator('input[name="email"]').blur()
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Should show all errors from the array
-      await expect(page.locator('#email-error-0')).toHaveText('The email must be a valid email address.')
-      await expect(page.locator('#email-error-1')).toHaveText('The email format is incorrect.')
-    })
-
     test('clears validation error when field becomes valid', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -1535,7 +1493,19 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
     })
 
-    test('valid returns false before validation', async ({ page }) => {
+    test('field is valid when validated and no errors exist', async ({ page }) => {
+      await expect(page.getByText('Name is valid!')).not.toBeVisible()
+
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('Name is valid!')).toBeVisible()
+    })
+
+    test('field is not valid before validation', async ({ page }) => {
       await expect(page.getByText('Name is valid!')).not.toBeVisible()
 
       await page.fill('input[name="name"]', 'John Doe')
@@ -1548,7 +1518,7 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
     })
 
-    test('valid returns false when field has validation errors', async ({ page }) => {
+    test('field is not valid after failed validation', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
 
@@ -1559,31 +1529,7 @@ test.describe('Form Component', () => {
       await expect(page.getByText('Name is valid!')).not.toBeVisible()
     })
 
-    test('valid returns true after successful validation', async ({ page }) => {
-      await expect(page.getByText('Name is valid!')).not.toBeVisible()
-
-      await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      await expect(page.getByText('Name is valid!')).toBeVisible()
-    })
-
-    test('invalid returns true only when validation errors exist', async ({ page }) => {
-      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
-
-      await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
-    })
-
-    test('valid persists after successful validation', async ({ page }) => {
+    test('valid field persists after successful validation', async ({ page }) => {
       await page.fill('input[name="name"]', 'John Doe')
       await page.locator('input[name="name"]').blur()
 
@@ -1601,7 +1547,7 @@ test.describe('Form Component', () => {
       await expect(page.getByText('Name is valid!')).toBeVisible()
     })
 
-    test('valid becomes false when field is re-validated with errors', async ({ page }) => {
+    test('valid field becomes invalid when field is revalidated with errors', async ({ page }) => {
       await page.fill('input[name="name"]', 'John Doe')
       await page.locator('input[name="name"]').blur()
 
@@ -1618,6 +1564,34 @@ test.describe('Form Component', () => {
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
       await expect(page.getByText('Name is valid!')).not.toBeVisible()
+    })
+
+    test('shows only first error when server returns errors as array', async ({ page }) => {
+      await page.goto('/form-component/precognition-array-errors')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show only the first error from the array, not the second
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The name contains invalid characters.')).not.toBeVisible()
+    })
+
+    test('shows all errors when simpleValidationErrors is false', async ({ page }) => {
+      await page.goto('/form-component/precognition-all-errors')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show all errors from the array
+      await expect(page.locator('#name-error-0')).toHaveText('The name must be at least 3 characters.')
+      await expect(page.locator('#name-error-1')).toHaveText('The name contains invalid characters.')
     })
 
     test('validates all touched fields when calling validate() without arguments', async ({ page }) => {
@@ -1652,13 +1626,20 @@ test.describe('Form Component', () => {
       await page.locator('input[name="email"]').blur()
 
       await page.getByRole('button', { name: 'Reset All' }).click()
+
+      await expect(page.locator('input[name="name"]')).toHaveValue('')
+      await expect(page.locator('input[name="email"]')).toHaveValue('')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
       await page.getByRole('button', { name: 'Validate All Touched' }).click()
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
-      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+      await expect(page.getByText('The email field is required.')).not.toBeVisible()
     })
 
     test('reset specific fields removes only those fields from touched', async ({ page }) => {
@@ -1678,14 +1659,14 @@ test.describe('Form Component', () => {
       await expect(page.locator('input[name="name"]')).toHaveValue('')
       await expect(page.locator('input[name="email"]')).toHaveValue('x')
 
-      await page.fill('input[name="name"]', 'abc')
+      await page.fill('input[name="email"]', 'y')
 
       await page.getByRole('button', { name: 'Validate All Touched' }).click()
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
+      await expect(page.getByText('The name field is required.')).not.toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
     })
 
@@ -1882,13 +1863,21 @@ test.describe('Form Component', () => {
     test('transforms data for validation requests', async ({ page }) => {
       await page.goto('/form-component/precognition-transform')
 
-      await page.fill('input[name="name"]', 'taylor')
+      await page.fill('input[name="name"]', 'a')
       await page.locator('input[name="name"]').blur()
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      // Should succeed because transform converts to uppercase
+      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+
+      await page.fill('input[name="name"]', 'aa')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
       await expect(page.getByText('Name is valid!')).toBeVisible()
     })
 

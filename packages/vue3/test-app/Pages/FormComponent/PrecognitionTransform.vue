@@ -7,10 +7,10 @@ import { Form } from '@inertiajs/vue3'
     <h1>Form Precognition Transform</h1>
 
     <Form
-      action="/form-component/precognition-transform"
+      action="/form-component/precognition"
       method="post"
       :validateTimeout="100"
-      :transform="(data) => ({ name: String(data.name || '').toUpperCase() })"
+      :transform="(data) => ({ name: String(data.name || '').repeat(2) })"
     >
       <template #default="{ invalid, errors, validate, valid, validating }">
         <div>
