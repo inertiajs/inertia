@@ -21,14 +21,14 @@ export default () => {
       <Form action="/form-component/precognition" method="post" validateTimeout={100}>
         {({ validate, validating, touch }) => (
           <>
+            <div>
+              <input name="name" placeholder="Name" onBlur={() => touch('name')} />
+            </div>
+
             {validating && <p>Validating...</p>}
             {successCalled && <p>onSuccess called!</p>}
             {errorCalled && <p>onError called!</p>}
             {finishCalled && <p>onFinish called!</p>}
-
-            <div>
-              <input name="name" onBlur={() => touch('name')} />
-            </div>
 
             <button
               type="button"
@@ -73,12 +73,12 @@ export default () => {
       <Form action="/form-component/precognition-exception" method="post">
         {({ validate, validating }) => (
           <>
+            <div>
+              <input id="name-input" name="name" placeholder="Name" />
+            </div>
+
             {validating && <p className="validating">Validating...</p>}
             {exceptionCaught && <p className="exception-caught">Exception caught: {exceptionMessage}</p>}
-
-            <div>
-              <input id="name-input" name="name" />
-            </div>
 
             {/* This will trigger a validation request to a non-existent endpoint */}
             <button

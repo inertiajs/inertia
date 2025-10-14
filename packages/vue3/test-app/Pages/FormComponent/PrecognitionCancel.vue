@@ -13,14 +13,14 @@ import { Form } from '@inertiajs/vue3'
       :validate-timeout="100"
       #default="{ invalid, errors, validate, validating }"
     >
-      <p v-if="validating" class="validating">Validating...</p>
-
       <div>
-        <input id="auto-cancel-name-input" name="name" @blur="validate('name')" />
+        <input id="auto-cancel-name-input" name="name" placeholder="Name" @blur="validate('name')" />
         <p v-if="invalid('name')" class="error">
           {{ errors.name }}
         </p>
       </div>
+
+      <p v-if="validating" class="validating">Validating...</p>
 
       <button type="submit">Submit</button>
     </Form>
@@ -34,11 +34,11 @@ import { Form } from '@inertiajs/vue3'
       :validate-timeout="5000"
       #default="{ validate, cancelValidation, validating }"
     >
-      <p v-if="validating" class="validating">Validating...</p>
-
       <div>
-        <input id="manual-cancel-name-input" name="name" @blur="validate('name')" />
+        <input id="manual-cancel-name-input" name="name" placeholder="Name" @blur="validate('name')" />
       </div>
+
+      <p v-if="validating" class="validating">Validating...</p>
 
       <button type="button" @click="cancelValidation">Cancel Validation</button>
       <button type="submit">Submit</button>

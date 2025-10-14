@@ -13,12 +13,12 @@ export default function PrecognitionHeaders() {
       >
         {({ invalid, errors, validate, validating }) => (
           <>
-            {validating && <p>Validating...</p>}
-
             <div>
-              <input name="name" onBlur={() => validate('name')} />
+              <input name="name" placeholder="Name" onBlur={() => validate('name')} />
               {invalid('name') && <p>{errors.name}</p>}
             </div>
+
+            {validating && <p>Validating...</p>}
 
             <button type="submit">Submit</button>
           </>

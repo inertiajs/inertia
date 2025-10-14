@@ -13,20 +13,18 @@ export default () => {
       >
         {({ invalid, errors, validate, valid, validating }) => (
           <>
-            {validating && <p>Validating...</p>}
-
             <div>
-              <input name="name" onBlur={() => validate('name')} />
+              <input name="name" placeholder="Name" onBlur={() => validate('name')} />
               {invalid('name') && (
                 <div>
                   {Array.isArray(errors.name) ? (
                     errors.name.map((error, index) => (
-                      <p key={index} data-testid={`name-error-${index}`}>
+                      <p key={index} id={`name-error-${index}`}>
                         {error}
                       </p>
                     ))
                   ) : (
-                    <p data-testid="name-error-0">{errors.name}</p>
+                    <p id="name-error-0">{errors.name}</p>
                   )}
                 </div>
               )}
@@ -34,22 +32,24 @@ export default () => {
             </div>
 
             <div>
-              <input name="email" onBlur={() => validate('email')} />
+              <input name="email" placeholder="Email" onBlur={() => validate('email')} />
               {invalid('email') && (
                 <div>
                   {Array.isArray(errors.email) ? (
                     errors.email.map((error, index) => (
-                      <p key={index} data-testid={`email-error-${index}`}>
+                      <p key={index} id={`email-error-${index}`}>
                         {error}
                       </p>
                     ))
                   ) : (
-                    <p data-testid="email-error-0">{errors.email}</p>
+                    <p id="email-error-0">{errors.email}</p>
                   )}
                 </div>
               )}
               {valid('email') && <p>Email is valid!</p>}
             </div>
+
+            {validating && <p>Validating...</p>}
           </>
         )}
       </Form>

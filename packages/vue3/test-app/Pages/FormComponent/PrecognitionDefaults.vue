@@ -20,14 +20,14 @@ const handleSetDefaults = () => {
       :validate-timeout="100"
       #default="{ invalid, errors, validate, validating }"
     >
-      <p v-if="validating" class="validating">Validating...</p>
-
       <div>
-        <input id="name-input" name="name" />
+        <input id="name-input" name="name" placeholder="Name" />
         <p v-if="invalid('name')" class="error">
           {{ errors.name }}
         </p>
       </div>
+
+      <p v-if="validating" class="validating">Validating...</p>
 
       <button type="button" @click="handleSetDefaults">Set Defaults</button>
       <button type="button" @click="validate('name')">Validate Name</button>

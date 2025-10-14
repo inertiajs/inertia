@@ -15,18 +15,18 @@
     let:validate
     let:validating
   >
-    {#if validating}
-      <p class="validating">Validating...</p>
-    {/if}
-
     <div>
-      <input id="auto-cancel-name-input" name="name" on:blur={() => validate('name')} />
+      <input id="auto-cancel-name-input" name="name" placeholder="Name" on:blur={() => validate('name')} />
       {#if invalid('name')}
         <p class="error">
           {errors.name}
         </p>
       {/if}
     </div>
+
+    {#if validating}
+      <p class="validating">Validating...</p>
+    {/if}
 
     <button type="submit">Submit</button>
   </Form>
@@ -42,13 +42,13 @@
     let:cancelValidation
     let:validating
   >
+    <div>
+      <input id="manual-cancel-name-input" name="name" placeholder="Name" on:blur={() => validate('name')} />
+    </div>
+
     {#if validating}
       <p class="validating">Validating...</p>
     {/if}
-
-    <div>
-      <input id="manual-cancel-name-input" name="name" on:blur={() => validate('name')} />
-    </div>
 
     <button type="button" on:click={() => cancelValidation()}>Cancel Validation</button>
     <button type="submit">Submit</button>

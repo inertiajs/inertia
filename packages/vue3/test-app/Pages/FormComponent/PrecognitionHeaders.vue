@@ -13,14 +13,14 @@ import { Form } from '@inertiajs/vue3'
       :validate-timeout="100"
       #default="{ invalid, errors, validate, validating }"
     >
-      <p v-if="validating">Validating...</p>
-
       <div>
-        <input name="name" @blur="validate('name')" />
+        <input name="name" placeholder="Name" @blur="validate('name')" />
         <p v-if="invalid('name')">
           {{ errors.name }}
         </p>
       </div>
+
+      <p v-if="validating">Validating...</p>
 
       <button type="submit">Submit</button>
     </Form>

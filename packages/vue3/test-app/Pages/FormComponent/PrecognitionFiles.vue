@@ -16,10 +16,8 @@ const validateFilesEnabled = ref(false)
       :validate-files="validateFilesEnabled"
       #default="{ invalid, errors, validate, valid, validating, touch }"
     >
-      <p v-if="validating">Validating...</p>
-
       <div>
-        <input name="name" @blur="validate('name')" />
+        <input name="name" placeholder="Name" @blur="validate('name')" />
         <p v-if="invalid('name')">
           {{ errors.name }}
         </p>
@@ -33,6 +31,8 @@ const validateFilesEnabled = ref(false)
         </p>
         <p v-if="valid('avatar')">Avatar is valid!</p>
       </div>
+
+      <p v-if="validating">Validating...</p>
 
       <button type="button" @click="validateFilesEnabled = !validateFilesEnabled">
         Toggle Validate Files ({{ validateFilesEnabled ? 'enabled' : 'disabled' }})

@@ -15,12 +15,8 @@
     let:valid
     let:validating
   >
-    {#if validating}
-      <p>Validating...</p>
-    {/if}
-
     <div>
-      <input name="name" on:blur={() => validate('name')} />
+      <input name="name" placeholder="Name" on:blur={() => validate('name')} />
       {#if invalid('name')}
         <p>{errors.name}</p>
       {/if}
@@ -30,7 +26,7 @@
     </div>
 
     <div>
-      <input name="email" on:blur={() => validate('email')} />
+      <input name="email" placeholder="Email" on:blur={() => validate('email')} />
       {#if invalid('email')}
         <p>{errors.email}</p>
       {/if}
@@ -38,5 +34,9 @@
         <p>Email is valid!</p>
       {/if}
     </div>
+
+    {#if validating}
+      <p>Validating...</p>
+    {/if}
   </Form>
 </div>

@@ -8,21 +8,21 @@ export default () => {
       <Form action="/form-component/precognition" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, touch, touched, validating, reset }) => (
           <>
-            {validating && <p>Validating...</p>}
-
             <div>
-              <input name="name" onBlur={() => touch('name')} />
+              <input name="name" placeholder="Name" onBlur={() => touch('name')} />
               {invalid('name') && <p>{errors.name}</p>}
             </div>
 
             <div>
-              <input name="email" onBlur={() => touch('email')} />
+              <input name="email" placeholder="Email" onBlur={() => touch('email')} />
               {invalid('email') && <p>{errors.email}</p>}
             </div>
 
-            <p data-testid="name-touched">{touched('name') ? 'Name is touched' : 'Name is not touched'}</p>
-            <p data-testid="email-touched">{touched('email') ? 'Email is touched' : 'Email is not touched'}</p>
-            <p data-testid="any-touched">{touched() ? 'Form has touched fields' : 'Form has no touched fields'}</p>
+            {validating && <p>Validating...</p>}
+
+            <p id="name-touched">{touched('name') ? 'Name is touched' : 'Name is not touched'}</p>
+            <p id="email-touched">{touched('email') ? 'Email is touched' : 'Email is not touched'}</p>
+            <p id="any-touched">{touched() ? 'Form has touched fields' : 'Form has no touched fields'}</p>
 
             <button type="button" onClick={() => validate()}>
               Validate All Touched

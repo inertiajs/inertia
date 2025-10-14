@@ -21,14 +21,14 @@ const handleException = (error: Error) => {
     <h2>Callbacks Test</h2>
     <Form action="/form-component/precognition" method="post" :validateTimeout="100">
       <template #default="{ validate, validating, touch }">
+        <div>
+          <input name="name" placeholder="Name" @blur="() => touch('name')" />
+        </div>
+
         <p v-if="validating">Validating...</p>
         <p v-if="successCalled">onSuccess called!</p>
         <p v-if="errorCalled">onError called!</p>
         <p v-if="finishCalled">onFinish called!</p>
-
-        <div>
-          <input name="name" @blur="() => touch('name')" />
-        </div>
 
         <button
           type="button"
@@ -78,12 +78,12 @@ const handleException = (error: Error) => {
 
     <h2>Exception Test</h2>
     <Form action="/form-component/precognition-exception" method="post" #default="{ validate, validating }">
+      <div>
+        <input id="name-input" name="name" placeholder="Name" />
+      </div>
+
       <p v-if="validating" class="validating">Validating...</p>
       <p v-if="exceptionCaught" class="exception-caught">Exception caught: {{ exceptionMessage }}</p>
-
-      <div>
-        <input id="name-input" name="name" />
-      </div>
 
       <!-- This will trigger a validation request to a non-existent endpoint -->
       <button

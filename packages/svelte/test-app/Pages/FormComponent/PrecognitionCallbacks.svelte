@@ -18,6 +18,10 @@
 
   <h2>Callbacks Test</h2>
   <Form action="/form-component/precognition" method="post" validateTimeout={100} let:validate let:validating let:touch>
+    <div>
+      <input name="name" placeholder="Name" on:blur={() => touch('name')} />
+    </div>
+
     {#if validating}
       <p>Validating...</p>
     {/if}
@@ -30,10 +34,6 @@
     {#if finishCalled}
       <p>onFinish called!</p>
     {/if}
-
-    <div>
-      <input name="name" on:blur={() => touch('name')} />
-    </div>
 
     <button
       type="button"
@@ -74,16 +74,16 @@
 
   <h2>Exception Test</h2>
   <Form action="/form-component/precognition-exception" method="post" let:validate let:validating>
+    <div>
+      <input id="name-input" name="name" placeholder="Name" />
+    </div>
+
     {#if validating}
       <p class="validating">Validating...</p>
     {/if}
     {#if exceptionCaught}
       <p class="exception-caught">Exception caught: {exceptionMessage}</p>
     {/if}
-
-    <div>
-      <input id="name-input" name="name" />
-    </div>
 
     <!-- This will trigger a validation request to a non-existent endpoint -->
     <button

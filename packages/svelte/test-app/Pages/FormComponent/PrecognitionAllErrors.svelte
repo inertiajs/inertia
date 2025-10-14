@@ -16,20 +16,16 @@
     let:valid
     let:validating
   >
-    {#if validating}
-      <p>Validating...</p>
-    {/if}
-
     <div>
-      <input name="name" on:blur={() => validate('name')} />
+      <input name="name" placeholder="Name" on:blur={() => validate('name')} />
       {#if invalid('name')}
         <div>
           {#if Array.isArray(errors.name)}
             {#each errors.name as error, index}
-              <p data-testid="name-error-{index}">{error}</p>
+              <p id="name-error-{index}">{error}</p>
             {/each}
           {:else}
-            <p data-testid="name-error-0">{errors.name}</p>
+            <p id="name-error-0">{errors.name}</p>
           {/if}
         </div>
       {/if}
@@ -39,15 +35,15 @@
     </div>
 
     <div>
-      <input name="email" on:blur={() => validate('email')} />
+      <input name="email" placeholder="Email" on:blur={() => validate('email')} />
       {#if invalid('email')}
         <div>
           {#if Array.isArray(errors.email)}
             {#each errors.email as error, index}
-              <p data-testid="email-error-{index}">{error}</p>
+              <p id="email-error-{index}">{error}</p>
             {/each}
           {:else}
-            <p data-testid="email-error-0">{errors.email}</p>
+            <p id="email-error-0">{errors.email}</p>
           {/if}
         </div>
       {/if}
@@ -55,5 +51,9 @@
         <p>Email is valid!</p>
       {/if}
     </div>
+
+    {#if validating}
+      <p>Validating...</p>
+    {/if}
   </Form>
 </div>

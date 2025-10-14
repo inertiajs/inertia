@@ -13,13 +13,13 @@ import { Form } from '@inertiajs/vue3'
       :transform="(data) => ({ name: String(data.name || '').toUpperCase() })"
     >
       <template #default="{ invalid, errors, validate, valid, validating }">
-        <p v-if="validating">Validating...</p>
-
         <div>
-          <input name="name" @blur="() => validate('name')" />
+          <input name="name" placeholder="Name" @blur="() => validate('name')" />
           <p v-if="invalid('name')">{{ errors.name }}</p>
           <p v-if="valid('name')">Name is valid!</p>
         </div>
+
+        <p v-if="validating">Validating...</p>
       </template>
     </Form>
   </div>

@@ -12,25 +12,25 @@ import { Form } from '@inertiajs/vue3'
       :validate-timeout="100"
       #default="{ invalid, errors, validate, touch, touched, validating, reset }"
     >
-      <p v-if="validating">Validating...</p>
-
       <div>
-        <input name="name" @blur="touch('name')" />
+        <input name="name" placeholder="Name" @blur="touch('name')" />
         <p v-if="invalid('name')">
           {{ errors.name }}
         </p>
       </div>
 
       <div>
-        <input name="email" @blur="touch('email')" />
+        <input name="email" placeholder="Email" @blur="touch('email')" />
         <p v-if="invalid('email')">
           {{ errors.email }}
         </p>
       </div>
 
-      <p data-testid="name-touched">{{ touched('name') ? 'Name is touched' : 'Name is not touched' }}</p>
-      <p data-testid="email-touched">{{ touched('email') ? 'Email is touched' : 'Email is not touched' }}</p>
-      <p data-testid="any-touched">{{ touched() ? 'Form has touched fields' : 'Form has no touched fields' }}</p>
+      <p v-if="validating">Validating...</p>
+
+      <p id="name-touched">{{ touched('name') ? 'Name is touched' : 'Name is not touched' }}</p>
+      <p id="email-touched">{{ touched('email') ? 'Email is touched' : 'Email is not touched' }}</p>
+      <p id="any-touched">{{ touched() ? 'Form has touched fields' : 'Form has no touched fields' }}</p>
 
       <button type="button" @click="validate()">Validate All Touched</button>
       <button type="button" @click="validate('name')">Validate Name</button>

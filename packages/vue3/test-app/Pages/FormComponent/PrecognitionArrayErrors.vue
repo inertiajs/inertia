@@ -12,10 +12,8 @@ import { Form } from '@inertiajs/vue3'
       :validate-timeout="100"
       #default="{ invalid, errors, validate, valid, validating }"
     >
-      <p v-if="validating">Validating...</p>
-
       <div>
-        <input name="name" @blur="validate('name')" />
+        <input name="name" placeholder="Name" @blur="validate('name')" />
         <p v-if="invalid('name')">
           {{ errors.name }}
         </p>
@@ -23,12 +21,14 @@ import { Form } from '@inertiajs/vue3'
       </div>
 
       <div>
-        <input name="email" @blur="validate('email')" />
+        <input name="email" placeholder="Email" @blur="validate('email')" />
         <p v-if="invalid('email')">
           {{ errors.email }}
         </p>
         <p v-if="valid('email')">Email is valid!</p>
       </div>
+
+      <p v-if="validating">Validating...</p>
     </Form>
   </div>
 </template>

@@ -15,12 +15,12 @@ export default function PrecognitionDefaults() {
       <Form ref={formRef} action="/form-component/precognition" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, validating }) => (
           <>
-            {validating && <p className="validating">Validating...</p>}
-
             <div>
-              <input id="name-input" name="name" />
+              <input id="name-input" name="name" placeholder="Name" />
               {invalid('name') && <p className="error">{errors.name}</p>}
             </div>
+
+            {validating && <p className="validating">Validating...</p>}
 
             <button type="button" onClick={handleSetDefaults}>
               Set Defaults

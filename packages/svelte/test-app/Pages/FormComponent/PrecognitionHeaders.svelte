@@ -15,18 +15,18 @@
     let:validate
     let:validating
   >
-    {#if validating}
-      <p>Validating...</p>
-    {/if}
-
     <div>
-      <input name="name" on:blur={() => validate('name')} />
+      <input name="name" placeholder="Name" on:blur={() => validate('name')} />
       {#if invalid('name')}
         <p>
           {errors.name}
         </p>
       {/if}
     </div>
+
+    {#if validating}
+      <p>Validating...</p>
+    {/if}
 
     <button type="submit">Submit</button>
   </Form>

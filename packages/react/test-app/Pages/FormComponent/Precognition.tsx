@@ -8,19 +8,19 @@ export default () => {
       <Form action="/form-component/precognition" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, valid, validating }) => (
           <>
-            {validating && <p>Validating...</p>}
-
             <div>
-              <input name="name" onBlur={() => validate('name')} />
+              <input name="name" placeholder="Name" onBlur={() => validate('name')} />
               {invalid('name') && <p>{errors.name}</p>}
               {valid('name') && <p>Name is valid!</p>}
             </div>
 
             <div>
-              <input name="email" onBlur={() => validate('email')} />
+              <input name="email" placeholder="Email" onBlur={() => validate('email')} />
               {invalid('email') && <p>{errors.email}</p>}
               {valid('email') && <p>Email is valid!</p>}
             </div>
+
+            {validating && <p>Validating...</p>}
           </>
         )}
       </Form>

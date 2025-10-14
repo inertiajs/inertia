@@ -21,18 +21,18 @@
     let:validate
     let:validating
   >
-    {#if validating}
-      <p class="validating">Validating...</p>
-    {/if}
-
     <div>
-      <input id="name-input" name="name" />
+      <input id="name-input" name="name" placeholder="Name" />
       {#if invalid('name')}
         <p class="error">
           {errors.name}
         </p>
       {/if}
     </div>
+
+    {#if validating}
+      <p class="validating">Validating...</p>
+    {/if}
 
     <button type="button" on:click={handleSetDefaults}>Set Defaults</button>
     <button type="button" on:click={() => validate('name')}>Validate Name</button>
