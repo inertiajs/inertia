@@ -70,13 +70,7 @@
       </div>
     </div>
 
-    <Form
-      action="/form-component/precognition"
-      method="post"
-      {validateFiles}
-      {validateTimeout}
-      class="space-y-4"
-    >
+    <Form action="/form-component/precognition" method="post" {validateFiles} {validateTimeout} class="space-y-4">
       {#snippet children({ errors, invalid, valid, validate, validating })}
         <div>
           <label for="name" class="block font-medium">Name</label>
