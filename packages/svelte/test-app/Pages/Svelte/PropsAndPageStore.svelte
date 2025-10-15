@@ -29,8 +29,6 @@
     console.log('[onMount] $page.props.foo is', $page.props.foo)
     console.log('[onMount] $sveltePage.props.foo is', $sveltePage.props.foo)
   })
-
-
 </script>
 
 <div>
