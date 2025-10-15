@@ -307,7 +307,7 @@ export class Router {
   }
 
   public resolveComponent(component: string): Promise<Component> {
-    return currentPage.resolve(component)
+    return currentPage.resolve(component, currentPage.get())
   }
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
