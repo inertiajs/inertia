@@ -16,29 +16,37 @@ type AppComponent<SharedProps extends PageProps = PageProps> = ComponentType<App
   render: (props: InertiaAppProps<SharedProps>) => SvelteRenderResult
 }
 
-interface CreateInertiaAppProps extends CreateInertiaAppOptions {
-  resolve: ComponentResolver
-  setup: (props: {
-    el: HTMLElement | null
-    App: AppComponent
-    props: InertiaAppProps
-  }) => void | App | SvelteRenderResult
-  page?: Page
-}
-
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
-  App: AppComponent
+  App: AppComponent<SharedProps>
   props: InertiaAppProps<SharedProps>
 }
 
+interface InertiaAppOptionsForCSR<SharedProps extends PageProps = PageProps> extends CreateInertiaAppOptions {
+  page?: Page
+  resolve: ComponentResolver
+  setup: (options: SetupOptions<HTMLElement, SharedProps>) => void
+}
+
+interface InertiaAppOptionsForSSR<SharedProps extends PageProps = PageProps> extends CreateInertiaAppOptions {
+  page: Page
+  resolve: ComponentResolver
+  setup: (options: SetupOptions<null, SharedProps>) => void
+}
+
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): InertiaAppResponse
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForSSR<SharedProps>,
+): InertiaAppResponse
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
+  page,
   resolve,
   setup,
   progress = {},
-  page,
-}: CreateInertiaAppProps): InertiaAppResponse {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage: Page<SharedProps> = page || JSON.parse(el?.dataset.page || '{}')
@@ -51,7 +59,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const props = { initialPage, initialComponent, resolveComponent }
 
     if (isServer) {
-      const ssrSetup = setup as (props: SetupOptions<null, SharedProps>) => SvelteRenderResult
+      const ssrSetup = setup as (options: SetupOptions<null, SharedProps>) => SvelteRenderResult
 
       return ssrSetup({
         el: null,
@@ -60,7 +68,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       })
     }
 
-    const csrSetup = setup as (props: SetupOptions<HTMLElement, SharedProps>) => void
+    const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
 
     return csrSetup({
       el: el!,
@@ -74,7 +82,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   if (isServer && svelteApp) {
-    const { html, head, css } = svelteApp as SvelteRenderResult
+    const { html, head, css } = svelteApp
 
     return {
       body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
