@@ -14,7 +14,7 @@ test('replaces the page client side', async ({ page }) => {
   await expect(page.getByText('Finished: 0')).toBeVisible()
   await expect(page.getByText('Success: 0')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Replace' }).click()
+  await page.getByRole('button', { name: 'Replace', exact: true }).click()
 
   await expect(page).toHaveURL('/client-side-visit')
   await expect(page.getByText('foo from server')).not.toBeVisible()
