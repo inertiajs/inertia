@@ -378,6 +378,17 @@ export type Component = unknown
 
 export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
 
+export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerOnUpdateCallback = (elements: string[]) => void
+export type HeadManager = {
+  forceUpdate: () => void
+  createProvider: () => {
+    reconnect: () => void
+    update: HeadManagerOnUpdateCallback
+    disconnect: () => void
+  }
+}
+
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
 export type CacheForOption = number | string

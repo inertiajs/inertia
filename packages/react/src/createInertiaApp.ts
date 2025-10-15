@@ -1,13 +1,18 @@
-import { Page, PageProps, PageResolver, router, setupProgress } from '@inertiajs/core'
+import {
+  HeadManagerOnUpdateCallback,
+  HeadManagerTitleCallback,
+  Page,
+  PageProps,
+  PageResolver,
+  router,
+  setupProgress,
+} from '@inertiajs/core'
 import { ComponentType, FunctionComponent, Key, ReactElement, ReactNode, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App'
 
 type ReactInstance = ReactElement
 type ReactComponent = ReactNode
-
-type HeadManagerOnUpdate = (elements: string[]) => void // TODO: When shipped, replace with: Inertia.HeadManagerOnUpdate
-type HeadManagerTitleCallback = (title: string) => string // TODO: When shipped, replace with: Inertia.HeadManagerTitleCallback
 
 type AppType<SharedProps extends PageProps = PageProps> = FunctionComponent<
   {
@@ -23,7 +28,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
     initialComponent: ReactComponent
     resolveComponent: PageResolver
     titleCallback?: HeadManagerTitleCallback
-    onHeadUpdate?: HeadManagerOnUpdate
+    onHeadUpdate?: HeadManagerOnUpdateCallback
   }
 }
 
