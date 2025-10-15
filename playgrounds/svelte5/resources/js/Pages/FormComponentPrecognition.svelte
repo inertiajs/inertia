@@ -72,13 +72,15 @@
 
     <Form action="/form-component/precognition" method="post" {validateFiles} {validateTimeout} class="space-y-4">
       {#snippet children({ errors, invalid, valid, validate, validating })}
+        <p class="text-sm text-blue-600">Validating: {validating ? 'Yes...' : 'No'}</p>
+
         <div>
           <label for="name" class="block font-medium">Name</label>
           <input
             id="name"
             name="name"
             placeholder="Enter your name (min 3 chars)"
-            onchange={() => validate('name')}
+            onblur={() => validate('name')}
             class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
             class:border-red-500={invalid('name')}
             class:border-green-500={valid('name')}
@@ -98,7 +100,7 @@
             name="email"
             type="email"
             placeholder="Enter your email"
-            onchange={() => validate('email')}
+            onblur={() => validate('email')}
             class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
             class:border-red-500={invalid('email')}
             class:border-green-500={valid('email')}
@@ -131,21 +133,6 @@
           <p class="mt-1 text-xs text-gray-500">
             Files are validated during precognitive requests when validateFiles is enabled
           </p>
-        </div>
-
-        {#if validating}
-          <p class="text-sm text-blue-600">Validating...</p>
-        {/if}
-
-        <div class="flex gap-2">
-          <button type="submit" class="rounded bg-slate-800 px-4 py-2 text-white">Submit</button>
-          <button
-            type="button"
-            onclick={() => validate(['name', 'email', ...(validateFiles ? ['avatar'] : [])])}
-            class="rounded bg-blue-600 px-4 py-2 text-white"
-          >
-            Validate All
-          </button>
         </div>
       {/snippet}
     </Form>

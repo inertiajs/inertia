@@ -76,13 +76,15 @@ const validateTimeout = ref(1500)
         #default="{ errors, invalid, valid, validate, validating }"
         class="space-y-4"
       >
+        <p class="text-sm text-blue-600">Validating: {{ validating ? 'Yes...' : 'No' }}</p>
+
         <div>
           <label for="name" class="block font-medium">Name</label>
           <input
             id="name"
             name="name"
             placeholder="Enter your name (min 3 chars)"
-            @change="validate('name')"
+            @blur="validate('name')"
             class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
             :class="invalid('name') ? 'border-red-500' : valid('name') ? 'border-green-500' : ''"
           />
@@ -97,7 +99,7 @@ const validateTimeout = ref(1500)
             name="email"
             type="email"
             placeholder="Enter your email"
-            @change="validate('email')"
+            @blur="validate('email')"
             class="mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm"
             :class="invalid('email') ? 'border-red-500' : valid('email') ? 'border-green-500' : ''"
           />
@@ -120,19 +122,6 @@ const validateTimeout = ref(1500)
           <p class="mt-1 text-xs text-gray-500">
             Files are validated during precognitive requests when validateFiles is enabled
           </p>
-        </div>
-
-        <p v-if="validating" class="text-sm text-blue-600">Validating...</p>
-
-        <div class="flex gap-2">
-          <button type="submit" class="rounded bg-slate-800 px-4 py-2 text-white">Submit</button>
-          <button
-            type="button"
-            @click="validate(['name', 'email', ...(validateFiles ? ['avatar'] : [])])"
-            class="rounded bg-blue-600 px-4 py-2 text-white"
-          >
-            Validate All
-          </button>
         </div>
       </Form>
     </div>

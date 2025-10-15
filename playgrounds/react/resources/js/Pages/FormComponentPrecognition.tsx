@@ -82,6 +82,8 @@ const FormComponentPrecognition = () => {
           >
             {({ errors, invalid, valid, validate, validating }) => (
               <>
+                <p className="text-sm text-blue-600">Validating: {validating ? ' Yes...' : ' No'}</p>
+
                 <div>
                   <label htmlFor="name" className="block font-medium">
                     Name
@@ -90,7 +92,7 @@ const FormComponentPrecognition = () => {
                     id="name"
                     name="name"
                     placeholder="Enter your name (min 3 chars)"
-                    onChange={() => validate('name')}
+                    onBlur={() => validate('name')}
                     className={`mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm ${
                       invalid('name') ? 'border-red-500' : valid('name') ? 'border-green-500' : ''
                     }`}
@@ -108,7 +110,7 @@ const FormComponentPrecognition = () => {
                     name="email"
                     type="email"
                     placeholder="Enter your email"
-                    onChange={() => validate('email')}
+                    onBlur={() => validate('email')}
                     className={`mt-1 w-full appearance-none rounded border px-2 py-1 shadow-sm ${
                       invalid('email') ? 'border-red-500' : valid('email') ? 'border-green-500' : ''
                     }`}
@@ -135,21 +137,6 @@ const FormComponentPrecognition = () => {
                   <p className="mt-1 text-xs text-gray-500">
                     Files are validated during precognitive requests when validateFiles is enabled
                   </p>
-                </div>
-
-                {validating && <p className="text-sm text-blue-600">Validating...</p>}
-
-                <div className="flex gap-2">
-                  <button type="submit" className="rounded bg-slate-800 px-4 py-2 text-white">
-                    Submit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => validate(['name', 'email', ...(validateFiles ? ['avatar'] : [])])}
-                    className="rounded bg-blue-600 px-4 py-2 text-white"
-                  >
-                    Validate All
-                  </button>
                 </div>
               </>
             )}

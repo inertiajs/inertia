@@ -171,11 +171,13 @@ Route::get('/form-component/precognition', function () {
 });
 
 Route::post('/form-component/precognition', function (PrecognitionFormRequest $request) {
-
     $data = $request->validated();
 
-    return back()->with('success', 'Form submitted successfully!');
+    // dd($data);
+
+    return back();
 })->middleware([HandlePrecognitiveRequests::class]);
+
 Route::post('/user', function () {
     return inertia('User', [
         'user' => request()->validate([
