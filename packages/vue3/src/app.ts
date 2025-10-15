@@ -1,4 +1,11 @@
-import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
+import {
+  createHeadManager,
+  HeadManagerOnUpdateCallback,
+  HeadManagerTitleCallback,
+  Page,
+  PageProps,
+  router,
+} from '@inertiajs/core'
 import {
   computed,
   DefineComponent,
@@ -19,8 +26,8 @@ export interface InertiaAppProps {
   initialPage: Page
   initialComponent?: object
   resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
-  titleCallback?: (title: string) => string
-  onHeadUpdate?: (elements: string[]) => void
+  titleCallback?: HeadManagerTitleCallback
+  onHeadUpdate?: HeadManagerOnUpdateCallback
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -47,12 +54,12 @@ const App: InertiaApp = defineComponent({
       required: false,
     },
     titleCallback: {
-      type: Function as PropType<(title: string) => string>,
+      type: Function as PropType<HeadManagerTitleCallback>,
       required: false,
       default: (title) => title,
     },
     onHeadUpdate: {
-      type: Function as PropType<(elements: string[]) => void>,
+      type: Function as PropType<HeadManagerOnUpdateCallback>,
       required: false,
       default: () => () => {},
     },
