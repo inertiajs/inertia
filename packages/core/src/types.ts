@@ -382,17 +382,6 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type HeadManagerTitleCallback = (title: string) => string
-export type HeadManagerOnUpdateCallback = (elements: string[]) => void
-export type HeadManager = {
-  forceUpdate: () => void
-  createProvider: () => {
-    reconnect: () => void
-    update: HeadManagerOnUpdateCallback
-    disconnect: () => void
-  }
-}
-
 export interface InertiaAppProgressOptions {
   delay?: number
   color?: string
