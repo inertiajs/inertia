@@ -12,7 +12,7 @@ interface UsePrecognitionOptions {
 }
 
 type PrecognitionValidateOptions = Pick<Visit<RequestData>, 'method' | 'data' | 'only' | 'errorBag' | 'headers'> &
-  Pick<FormComponentValidateOptions, 'onBeforeValidation' | 'onException' | 'onFinish'> & {
+  Pick<FormComponentValidateOptions, 'onBefore' | 'onException' | 'onFinish'> & {
     url: string
     onPrecognitionSuccess: () => void
     onValidationError: (errors: Errors) => void
@@ -72,7 +72,7 @@ export default function usePrecognition(precognitionOptions: UsePrecognitionOpti
           return
         }
 
-        const beforeValidatonResult = options.onBeforeValidation?.(
+        const beforeValidatonResult = options.onBefore?.(
           { data: options.data, touched: options.only },
           { data: oldData, touched: oldTouched },
         )

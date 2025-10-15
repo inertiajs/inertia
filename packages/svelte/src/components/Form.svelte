@@ -232,7 +232,7 @@
       errorBag,
       headers,
       simpleValidationErrors,
-      onBeforeValidation: options.onBeforeValidation,
+      onBefore: options.onBefore,
       onPrecognitionSuccess: () => {
         validated = [...validated, ...fields]
         clearErrors(...fields)

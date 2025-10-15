@@ -301,7 +301,7 @@ const Form = defineComponent({
         errorBag: props.errorBag,
         headers: props.headers,
         simpleValidationErrors: props.simpleValidationErrors,
-        onBeforeValidation: options.onBeforeValidation,
+        onBefore: options.onBefore,
         onPrecognitionSuccess: () => {
           validated.value = [...validated.value, ...fields]
           form.clearErrors(...fields)

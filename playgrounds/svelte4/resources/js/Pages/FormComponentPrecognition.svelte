@@ -28,10 +28,10 @@
       onSuccess: () => (callbacks.success = true),
       onError: () => (callbacks.error = true),
       onFinish: () => (callbacks.finish = true),
-      onBeforeValidation: (newReq, oldReq) => {
+      onBefore: (newReq, oldReq) => {
         // Prevent validation if name is 'block'
         if (newReq.data.name === 'block') {
-          alert('Validation blocked by onBeforeValidation!')
+          alert('Validation blocked by onBefore!')
           return false
         }
       },

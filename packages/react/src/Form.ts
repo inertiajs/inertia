@@ -251,7 +251,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         errorBag,
         headers,
         simpleValidationErrors,
-        onBeforeValidation: options.onBeforeValidation,
+        onBefore: options.onBefore,
         onPrecognitionSuccess: () => {
           setValidated((prev) => [...prev, ...fields])
           form.clearErrors(...fields)

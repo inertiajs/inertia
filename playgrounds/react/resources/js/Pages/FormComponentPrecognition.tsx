@@ -24,10 +24,10 @@ const FormComponentPrecognition = () => {
       onSuccess: () => setCallbacks((prev) => ({ ...prev, success: true })),
       onError: () => setCallbacks((prev) => ({ ...prev, error: true })),
       onFinish: () => setCallbacks((prev) => ({ ...prev, finish: true })),
-      onBeforeValidation: (newReq, oldReq) => {
+      onBefore: (newReq, oldReq) => {
         // Prevent validation if name is 'block'
         if (newReq.data.name === 'block') {
-          alert('Validation blocked by onBeforeValidation!')
+          alert('Validation blocked by onBefore!')
           return false
         }
       },

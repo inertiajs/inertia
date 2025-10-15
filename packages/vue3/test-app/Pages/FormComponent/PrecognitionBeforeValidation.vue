@@ -20,7 +20,7 @@ const handleBeforeValidation = (
 
 <template>
   <div>
-    <h1>Precognition - onBeforeValidation</h1>
+    <h1>Precognition - onBefore</h1>
 
     <Form
       action="/form-component/precognition"
@@ -35,7 +35,7 @@ const handleBeforeValidation = (
           name="name"
           @change="
             validate('name', {
-              onBeforeValidation: handleBeforeValidation,
+              onBefore: handleBeforeValidation,
             })
           "
         />

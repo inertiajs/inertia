@@ -1911,7 +1911,7 @@ test.describe('Form Component', () => {
       await expect(page.getByText('onFinish called!')).toBeVisible()
     })
 
-    test('onBeforeValidation can block validation', async ({ page }) => {
+    test('onBefore can block validation', async ({ page }) => {
       await page.goto('/form-component/precognition-before-validation')
 
       await page.fill('input[name="name"]', 'block')

@@ -20,7 +20,7 @@
 </script>
 
 <div>
-  <h1>Precognition - onBeforeValidation</h1>
+  <h1>Precognition - onBefore</h1>
 
   <Form
     action="/form-component/precognition"
@@ -38,7 +38,7 @@
         name="name"
         on:change={() =>
           validate('name', {
-            onBeforeValidation: handleBeforeValidation,
+            onBefore: handleBeforeValidation,
           })}
       />
       {#if invalid('name')}

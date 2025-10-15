@@ -489,10 +489,10 @@ type RevalidatePayload = {
 
 export type FormComponentValidateOptions = {
   only?: string | string[]
+  onBefore?: (newRequest: RevalidatePayload, oldRequest: RevalidatePayload) => boolean | undefined
   onSuccess?: () => void
   onError?: (errors: Errors) => void
   onFinish?: () => void
-  onBeforeValidation?: (newRequest: RevalidatePayload, oldRequest: RevalidatePayload) => boolean | undefined
   onException?: (error: Error) => void
 }
 

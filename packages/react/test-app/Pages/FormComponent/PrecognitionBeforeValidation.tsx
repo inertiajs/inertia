@@ -1,7 +1,7 @@
 import { Form } from '@inertiajs/react'
 import { isEqual } from 'lodash-es'
 
-export default function PrecognitionBeforeValidation() {
+export default function PrecognitionBefore() {
   const handleBeforeValidation = (
     newRequest: { data: Record<string, any>; touched: string[] },
     oldRequest: { data: Record<string, any>; touched: string[] },
@@ -19,7 +19,7 @@ export default function PrecognitionBeforeValidation() {
 
   return (
     <div>
-      <h1>Precognition - onBeforeValidation</h1>
+      <h1>Precognition - onBefore</h1>
 
       <Form action="/form-component/precognition" method="post" validateTimeout={100}>
         {({ errors, invalid, validate, validating }) => (
@@ -31,7 +31,7 @@ export default function PrecognitionBeforeValidation() {
                 name="name"
                 onChange={(e) => {
                   validate('name', {
-                    onBeforeValidation: handleBeforeValidation,
+                    onBefore: handleBeforeValidation,
                   })
                 }}
               />
