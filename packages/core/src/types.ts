@@ -382,7 +382,7 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type HeadOnUpdateCallback = (title: string) => string
+export type HeadManagerTitleCallback = (title: string) => string
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
