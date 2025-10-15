@@ -30,6 +30,19 @@ test('replaces the page client side', async ({ page }) => {
   await expect(historyLength).toBe(2)
 })
 
+test('preserves the state based on the errors object', async ({ page }) => {
+  await page.goto('/client-side-visit')
+  const randomValue = await page.locator('#random').innerText()
+
+  await page.getByRole('button', { name: 'Replace with errors' }).click()
+  const randomValueAfter = await page.locator('#random').innerText()
+  await expect(randomValueAfter).toBe(randomValue)
+
+  await page.getByRole('button', { name: 'Replace without errors' }).click()
+  const randomValueAfterSecond = await page.locator('#random').innerText()
+  await expect(randomValueAfterSecond).not.toBe(randomValue)
+})
+
 test('fires an onError callback when the props has errors', async ({ page }) => {
   pageLoads.watch(page)
 
