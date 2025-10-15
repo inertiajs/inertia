@@ -1,3 +1,4 @@
+import { HeadManager, HeadManagerOnUpdateCallback, HeadManagerTitleCallback } from '.'
 import debounce from './debounce'
 import { HeadManager, HeadManagerOnUpdateCallback, HeadManagerTitleCallback } from './types'
 

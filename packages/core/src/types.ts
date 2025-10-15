@@ -409,6 +409,17 @@ export type CreateInertiaAppOptions = {
   resolve: PageResolver
 }
 
+export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerOnUpdateCallback = (elements: string[]) => void
+export type HeadManager = {
+  forceUpdate: () => void
+  createProvider: () => {
+    reconnect: () => void
+    update: HeadManagerOnUpdateCallback
+    disconnect: () => void
+  }
+}
+
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
 export type CacheForOption = number | string
