@@ -1,7 +1,7 @@
 import {
   CreateInertiaAppOptions,
+  HeadManagerOnUpdateCallback,
   HeadOnUpdateCallback,
-  HeadTitleCallback,
   InertiaAppResponse,
   Page,
   PageProps,
@@ -17,8 +17,8 @@ export type SetupProps<SharedProps extends PageProps = PageProps> = {
   initialPage: Page<SharedProps>
   initialComponent: DefineComponent
   resolveComponent: VuePageResolver
-  titleCallback?: HeadTitleCallback
-  onHeadUpdate?: HeadOnUpdateCallback
+  titleCallback?: HeadOnUpdateCallback
+  onHeadUpdate?: HeadManagerOnUpdateCallback
 }
 
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
@@ -31,7 +31,7 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
 type CreateInertiaAppOptionsForCSR<SharedProps extends PageProps = PageProps> = CreateInertiaAppOptions & {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
   setup: (options: { el: HTMLElement; App: InertiaApp; props: InertiaAppProps<SharedProps>; plugin: Plugin }) => void
-  title?: HeadTitleCallback
+  title?: HeadOnUpdateCallback
   page?: Page<SharedProps>
   render?: (app: VueApp) => Promise<string>
 }
@@ -39,7 +39,7 @@ type CreateInertiaAppOptionsForCSR<SharedProps extends PageProps = PageProps> = 
 type CreateInertiaAppOptionsForSSR<SharedProps extends PageProps = PageProps> = CreateInertiaAppOptions & {
   resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
   setup: (options: { el: null; App: InertiaApp; props: InertiaAppProps<SharedProps>; plugin: Plugin }) => VueApp
-  title?: HeadTitleCallback
+  title?: HeadOnUpdateCallback
   page?: Page<SharedProps>
   render?: (app: VueApp) => Promise<string>
 }

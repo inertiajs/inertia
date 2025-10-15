@@ -1,7 +1,7 @@
 import {
   CreateInertiaAppOptions,
+  HeadManagerOnUpdateCallback,
   HeadOnUpdateCallback,
-  HeadTitleCallback,
   InertiaAppResponse,
   Page,
   PageProps,
@@ -18,8 +18,8 @@ type SetupProps<SharedProps extends PageProps> = {
   initialPage: Page<SharedProps>
   initialComponent: ReactNode
   resolveComponent: ReactPageResolver
-  titleCallback?: HeadTitleCallback
-  onHeadUpdate?: HeadOnUpdateCallback
+  titleCallback?: HeadOnUpdateCallback
+  onHeadUpdate?: HeadManagerOnUpdateCallback
 }
 
 export type InertiaComponentType = ComponentType & {
@@ -45,14 +45,14 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
 }
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptions & {
-  title?: HeadTitleCallback
+  title?: HeadOnUpdateCallback
   page?: Page<SharedProps>
   render?: undefined
   setup(options: SetupOptions<HTMLElement, SharedProps>): void
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptions & {
-  title?: HeadTitleCallback
+  title?: HeadOnUpdateCallback
   page: Page<SharedProps>
   render: typeof renderToString
   setup(options: SetupOptions<null, SharedProps>): ReactElement

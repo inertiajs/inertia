@@ -1,5 +1,5 @@
 import debounce from './debounce'
-import { HeadManager, HeadOnUpdateCallback, HeadTitleCallback } from './types'
+import { HeadManager, HeadManagerOnUpdateCallback, HeadOnUpdateCallback } from './types'
 
 const Renderer = {
   buildDOMElement(tag: string): ChildNode {
@@ -58,8 +58,8 @@ const Renderer = {
 
 export default function createHeadManager(
   isServer: boolean,
-  titleCallback: HeadTitleCallback,
-  onUpdate: HeadOnUpdateCallback,
+  titleCallback: HeadOnUpdateCallback,
+  onUpdate: HeadManagerOnUpdateCallback,
 ): HeadManager {
   const states: Record<string, Array<string>> = {}
   let lastProviderId = 0

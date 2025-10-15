@@ -382,13 +382,13 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type HeadTitleCallback = (title: string) => string
-export type HeadOnUpdateCallback = (elements: string[]) => void
+export type HeadOnUpdateCallback = (title: string) => string
+export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   createProvider: () => {
     reconnect: () => void
-    update: HeadOnUpdateCallback
+    update: HeadManagerOnUpdateCallback
     disconnect: () => void
   }
 }

@@ -1,8 +1,8 @@
 import {
   createHeadManager,
   HeadManager,
+  HeadManagerOnUpdateCallback,
   HeadOnUpdateCallback,
-  HeadTitleCallback,
   Page,
   PageHandler,
   PageProps,
@@ -38,8 +38,8 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   initialPage: Page<SharedProps>
   initialComponent?: object
   resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
-  titleCallback?: HeadTitleCallback
-  onHeadUpdate?: HeadOnUpdateCallback
+  titleCallback?: HeadOnUpdateCallback
+  onHeadUpdate?: HeadManagerOnUpdateCallback
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -66,12 +66,12 @@ const App = defineComponent({
       required: false,
     },
     titleCallback: {
-      type: Function as PropType<HeadTitleCallback>,
+      type: Function as PropType<HeadOnUpdateCallback>,
       required: false,
       default: (title: string) => title,
     },
     onHeadUpdate: {
-      type: Function as PropType<HeadOnUpdateCallback>,
+      type: Function as PropType<HeadManagerOnUpdateCallback>,
       required: false,
       default: () => () => {},
     },
