@@ -9,6 +9,7 @@ declare module 'axios' {
 
 export type DefaultInertiaConfig = {
   errorValueType: string
+  sharedPageProps: PageProps
 }
 /**
  * Designed to allow overriding of some core types using TypeScript
@@ -20,6 +21,10 @@ export type DefaultInertiaConfig = {
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
+ *     sharedPageProps: {
+ *       auth: { user: User | null }
+ *       flash: { success?: string; error?: string }
+ *     }
  *   }
  * }
  * ```
@@ -29,6 +34,7 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
   ? InertiaConfig[Key]
   : DefaultInertiaConfig[Key]
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
+export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
 
 export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>

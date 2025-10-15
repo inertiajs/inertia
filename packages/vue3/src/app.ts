@@ -7,6 +7,7 @@ import {
   PageHandler,
   PageProps,
   router,
+  SharedPageProps,
 } from '@inertiajs/core'
 import {
   computed,
@@ -145,7 +146,7 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
+export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageProps & SharedPageProps> {
   return reactive({
     props: computed(() => page.value?.props),
     url: computed(() => page.value?.url),
@@ -159,5 +160,5 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     matchPropsOn: computed(() => page.value?.matchPropsOn),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
-  }) as Page<SharedProps>
+  }) as Page<TPageProps>
 }
