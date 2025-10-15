@@ -23,15 +23,15 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
 }
 
 interface InertiaAppOptionsForCSR<SharedProps extends PageProps = PageProps> extends CreateInertiaAppOptions {
-  page?: Page
+  page?: Page<SharedProps>
   resolve: ComponentResolver
   setup: (options: SetupOptions<HTMLElement, SharedProps>) => void
 }
 
 interface InertiaAppOptionsForSSR<SharedProps extends PageProps = PageProps> extends CreateInertiaAppOptions {
-  page: Page
+  page: Page<SharedProps>
   resolve: ComponentResolver
-  setup: (options: SetupOptions<null, SharedProps>) => void
+  setup: (options: SetupOptions<null, SharedProps>) => SvelteRenderResult
 }
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
@@ -63,7 +63,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
       return ssrSetup({
         el: null,
-        App: App as AppComponent,
+        App: App as AppComponent<SharedProps>,
         props,
       })
     }
@@ -72,7 +72,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
     return csrSetup({
       el: el!,
-      App: App as AppComponent,
+      App: App as AppComponent<SharedProps>,
       props,
     })
   })
