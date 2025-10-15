@@ -58,10 +58,12 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   setup(options: SetupOptions<null, SharedProps>): ReactElement
 }
 
-type InertiaAppOptions<SharedProps extends PageProps> =
-  | InertiaAppOptionsForCSR<SharedProps>
-  | InertiaAppOptionsForSSR<SharedProps>
-
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): InertiaAppResponse
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForSSR<SharedProps>,
+): InertiaAppResponse
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
@@ -70,7 +72,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-}: InertiaAppOptions<SharedProps>): InertiaAppResponse {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || (JSON.parse(el?.dataset.page ?? '{}') as Page<SharedProps>)

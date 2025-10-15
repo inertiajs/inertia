@@ -96,7 +96,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
 
     return csrSetup({
-      el: el as HTMLElement,
+      el: el!,
       App,
       props,
       plugin,

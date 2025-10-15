@@ -1,17 +1,6 @@
-<script context="module" lang="ts">
-  import type { ComponentResolver, ResolvedComponent } from '../types'
-  import { type Page } from '@inertiajs/core'
-
-  export interface InertiaAppProps {
-    initialComponent: ResolvedComponent
-    initialPage: Page
-    resolveComponent: ComponentResolver
-  }
-</script>
-
 <script lang="ts">
-  import type { LayoutType, LayoutResolver } from '../types'
-  import { router, type PageProps } from '@inertiajs/core'
+  import type { LayoutType, LayoutResolver, InertiaAppProps, ResolvedComponent } from '../types'
+  import { router, type Page, type PageProps } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page'
 
