@@ -1,5 +1,6 @@
 import type {
   ActiveVisit,
+  CancelToken,
   Errors,
   ErrorValue,
   FormDataErrors,
@@ -72,7 +73,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
     : null
   let defaults = cloneDeep(data)
-  let cancelToken: { cancel: () => void } | null = null
+  let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform: TransformCallback<TForm> = (data) => data
   // Track if defaults was called manually during onSuccess to avoid
@@ -176,7 +177,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
-        onCancelToken: (token: { cancel: () => void }) => {
+        onCancelToken: (token: CancelToken) => {
           cancelToken = token
 
           if (options.onCancelToken) {

@@ -5,6 +5,7 @@ import {
   shouldIntercept,
   shouldNavigate,
   type CacheForOption,
+  type CancelToken,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
   type LinkPrefetchOption,
@@ -39,8 +40,8 @@ type ActionAttributes = {
     event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
   ) => void
 } & {
-  'on:cancel-token'?: (event: CustomEvent<{ cancel: VoidFunction }>) => void
-  oncanceltoken?: (event: CustomEvent<{ cancel: VoidFunction }>) => void
+  'on:cancel-token'?: (event: CustomEvent<CancelToken>) => void
+  oncanceltoken?: (event: CustomEvent<CancelToken>) => void
 }
 
 function link(
