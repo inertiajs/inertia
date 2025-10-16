@@ -104,8 +104,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     (...args: SubmitArgs) => {
       const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
-      const method = objectPassed ? args[0].method : args[0]
-      const url = objectPassed ? args[0].url : args[1]
+      const method = objectPassed ? args[0].method : (args[0] as Method)
+      const url = objectPassed ? args[0].url : (args[1] as string)
       const options = (objectPassed ? args[1] : args[2]) ?? {}
 
       setDefaultsCalledInOnSuccess.current = false
