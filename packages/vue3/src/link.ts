@@ -286,8 +286,7 @@ const Link: InertiaLink = defineComponent({
         }
       },
       onKeydown: (event: KeyboardEvent) => {
-        // @ts-expect-error - shouldIntercept() expects a MouseEvent, probably needs refactoring
-        if (shouldIntercept(event) && shouldNavigate(event)) {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           prefetch()
         }

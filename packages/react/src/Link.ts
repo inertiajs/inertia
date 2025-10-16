@@ -213,8 +213,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         }
       },
       onKeyDown: (event: React.KeyboardEvent) => {
-        // @ts-expect-error - shouldIntercept() expects a MouseEvent, probably needs refactoring
-        if (shouldIntercept(event) && shouldNavigate(event)) {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           doPrefetch()
         }
