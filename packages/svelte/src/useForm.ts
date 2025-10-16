@@ -146,7 +146,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    clearErrors(...fields: Array<FormDataKeys<TForm>>) {
+    clearErrors(...fields: string[]) {
       setFormState(
         'errors',
         (Object.keys(this.errors) as Array<FormDataKeys<TForm>>).reduce(
@@ -221,7 +221,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           if (!defaultsCalledInOnSuccess) {
             store.update((form) => {
-              defaults = cloneDeep(form.data())
+              this.defaults(cloneDeep(form.data()))
               return form
             })
           }
@@ -262,19 +262,19 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         router[method](url, data, _options)
       }
     },
-    get(url: string, options?: FormOptions) {
+    get(url: string, options: VisitOptions) {
       this.submit('get', url, options)
     },
-    post(url: string, options?: FormOptions) {
+    post(url: string, options: VisitOptions) {
       this.submit('post', url, options)
     },
-    put(url: string, options?: FormOptions) {
+    put(url: string, options: VisitOptions) {
       this.submit('put', url, options)
     },
-    patch(url: string, options?: FormOptions) {
+    patch(url: string, options: VisitOptions) {
       this.submit('patch', url, options)
     },
-    delete(url: string, options?: FormOptions) {
+    delete(url: string, options: VisitOptions) {
       this.submit('delete', url, options)
     },
     cancel() {

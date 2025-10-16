@@ -37,7 +37,7 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
-  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
+  submit: (...args: SubmitArgs) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void
@@ -154,13 +154,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     submit(...args: SubmitArgs) {
       const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
-      const method = objectPassed ? args[0].method : args[0]
-      const url = objectPassed ? args[0].url : args[1]
+      const method = objectPassed ? args[0].method : (args[0] as Method)
+      const url = objectPassed ? args[0].url : (args[1] as string)
       const options = (objectPassed ? args[1] : args[2]) ?? {}
 
       defaultsCalledInOnSuccess = false
 
-      const data = transform(this.data())
       const _options: VisitOptions = {
         ...options,
         onCancelToken: (token) => {
@@ -238,10 +237,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
       }
 
+      const transformedData = transform(this.data()) as RequestPayload
+
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: data as RequestPayload })
+        router.delete(url, { ..._options, data: transformedData })
       } else {
-        router[method](url, data as RequestPayload, _options)
+        router[method](url, transformedData, _options)
       }
     },
     get(url: string, options: VisitOptions) {

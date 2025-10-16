@@ -126,7 +126,7 @@
 
     infiniteScrollInstance = useInfiniteScroll({
       // Data
-      getPropName: () => data,
+      getPropName: () => data!,
       inReverseMode: () => reverse ?? false,
       shouldFetchNext: () => !onlyPrevious,
       shouldFetchPrevious: () => !onlyNext,

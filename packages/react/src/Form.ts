@@ -70,7 +70,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     ref,
   ) => {
     const form = useForm<Record<string, any>>({})
-    const formElement = useRef<HTMLFormElement>(null)
+    const formElement = useRef<HTMLFormElement>(undefined)
 
     const resolvedMethod = useMemo(() => {
       return isUrlMethodPair(action) ? action.method : (method.toLowerCase() as Method)
@@ -102,7 +102,9 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [])
 
     const reset = (...fields: string[]) => {
-      resetFormFields(formElement.current!, defaultData.current, fields)
+      if (formElement.current) {
+        resetFormFields(formElement.current, defaultData.current, fields)
+      }
     }
 
     const resetAndClearErrors = (...fields: string[]) => {

@@ -146,10 +146,10 @@ const Link: InertiaLink = defineComponent({
       }
 
       if (Array.isArray(props.prefetch)) {
-        return props.prefetch as LinkPrefetchOption[]
+        return props.prefetch
       }
 
-      return [props.prefetch as LinkPrefetchOption]
+      return [props.prefetch] as LinkPrefetchOption[]
     })
 
     const cacheForValue = computed(() => {
@@ -179,7 +179,7 @@ const Link: InertiaLink = defineComponent({
     })
 
     const method = computed(() =>
-      isUrlMethodPair(props.href) ? props.href.method : (props.method!.toLowerCase() as Method),
+      isUrlMethodPair(props.href) ? props.href.method : ((props.method ?? 'get').toLowerCase() as Method),
     )
     const as = computed(() => {
       if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
