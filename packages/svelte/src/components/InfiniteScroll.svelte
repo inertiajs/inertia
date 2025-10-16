@@ -9,7 +9,7 @@
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
 
-  export let data: InfiniteScrollComponentBaseProps['data'] = undefined
+  export let data: InfiniteScrollComponentBaseProps['data']
   export let buffer: InfiniteScrollComponentBaseProps['buffer'] = 0
   export let as: InfiniteScrollComponentBaseProps['as'] = 'div'
   export let manual: InfiniteScrollComponentBaseProps['manual'] = false
@@ -126,28 +126,28 @@
 
     infiniteScrollInstance = useInfiniteScroll({
       // Data
-      getPropName: () => data,
-      inReverseMode: () => reverse,
+      getPropName: () => data!,
+      inReverseMode: () => reverse ?? false,
       shouldFetchNext: () => !onlyPrevious,
       shouldFetchPrevious: () => !onlyNext,
-      shouldPreserveUrl: () => preserveUrl,
+      shouldPreserveUrl: () => preserveUrl ?? false,
 
       // Elements
-      getTriggerMargin: () => buffer,
-      getStartElement: () => resolvedStartElement,
-      getEndElement: () => resolvedEndElement,
-      getItemsElement: () => resolvedItemsElement,
+      getTriggerMargin: () => buffer ?? 0,
+      getStartElement: () => resolvedStartElement!,
+      getEndElement: () => resolvedEndElement!,
+      getItemsElement: () => resolvedItemsElement!,
       getScrollableParent: () => (resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null),
 
       // Request callbacks
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
       onCompletePreviousRequest: () => {
-        requestCount = infiniteScrollInstance.dataManager.getRequestCount()
+        requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
         loadingPrevious = false
       },
       onCompleteNextRequest: () => {
-        requestCount = infiniteScrollInstance.dataManager.getRequestCount()
+        requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
         loadingNext = false
       },
     })
@@ -167,7 +167,7 @@
     }
   }
 
-  $: manualMode = manual || (manualAfter > 0 && requestCount >= manualAfter)
+  $: manualMode = manual || (manualAfter !== undefined && manualAfter > 0 && requestCount >= manualAfter)
   $: autoLoad = !manualMode
 
   $: headerAutoMode = autoLoad && !onlyNext

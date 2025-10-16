@@ -9,6 +9,7 @@ import {
   router,
   shouldIntercept,
   shouldNavigate,
+  VisitOptions,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -59,7 +60,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     ref,
   ) => {
     const [inFlightCount, setInFlightCount] = useState(0)
-    const hoverTimeout = useRef<number>(null)
+    const hoverTimeout = useRef<number>(undefined)
 
     const _method = useMemo(() => {
       return isUrlMethodPair(href) ? href.method : (method.toLowerCase() as Method)
@@ -82,7 +83,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const url = useMemo(() => mergeDataArray[0], [mergeDataArray])
     const _data = useMemo(() => mergeDataArray[1], [mergeDataArray])
 
-    const baseParams = useMemo(
+    const baseParams = useMemo<VisitOptions>(
       () => ({
         data: _data,
         method: _method,
@@ -98,7 +99,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async],
     )
 
-    const visitParams = useMemo(
+    const visitParams = useMemo<VisitOptions>(
       () => ({
         ...baseParams,
         onCancelToken,
