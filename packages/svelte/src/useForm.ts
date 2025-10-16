@@ -220,7 +220,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 
           if (!defaultsCalledInOnSuccess) {
-            this.defaults(cloneDeep(this.data()))
+            store.update((form) => {
+              this.defaults(cloneDeep(form.data()))
+              return form
+            })
           }
 
           return onSuccess
