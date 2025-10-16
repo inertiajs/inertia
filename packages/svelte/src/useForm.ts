@@ -35,6 +35,7 @@ export interface InertiaFormProps<TForm extends object> {
   recentlySuccessful: boolean
   processing: boolean
   setStore(data: TForm): void
+  setStore<T extends keyof InertiaFormProps<TForm>>(key: T, value: InertiaFormProps<TForm>[T]): void
   setStore<T extends FormDataKeys<TForm>>(key: T, value: FormDataValues<TForm, T>): void
   data(): TForm
   transform(callback: TransformCallback<TForm>): this
@@ -117,7 +118,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    reset(...fields: string[]) {
+    reset(...fields: Array<FormDataKeys<TForm>>) {
       const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
         this.setStore(clonedData)
@@ -147,14 +148,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         Object.keys(this.errors).reduce(
           (carry, field) => ({
             ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
+            ...(fields.length > 0 && !fields.includes(field) ? { [field]: (this.errors as Errors)[field] } : {}),
           }),
           {},
-        ) as Errors,
+        ) as FormDataErrors<TForm>,
       )
       return this
     },
-    resetAndClearErrors(...fields: string[]) {
+    resetAndClearErrors(...fields: Array<FormDataKeys<TForm>>) {
       this.reset(...fields)
       this.clearErrors(...fields)
       return this
@@ -198,7 +199,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onProgress: (event?: AxiosProgressEvent) => {
-          this.setStore('progress', event as any)
+          this.setStore('progress', event || null)
 
           if (options.onProgress) {
             return options.onProgress(event)
@@ -223,7 +224,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         onError: (errors: Errors) => {
           this.setStore('processing', false)
           this.setStore('progress', null)
-          this.clearErrors().setError(errors)
+          this.clearErrors().setError(errors as FormDataErrors<TForm>)
 
           if (options.onError) {
             return options.onError(errors)
@@ -289,5 +290,5 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   })
 
-  return store
+  return store as InertiaFormStore<TForm>
 }
