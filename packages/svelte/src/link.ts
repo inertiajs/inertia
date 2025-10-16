@@ -5,13 +5,13 @@ import {
   shouldIntercept,
   shouldNavigate,
   type CacheForOption,
+  type CancelToken,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
 } from '@inertiajs/core'
-import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
 
 type ActionEventHandlers = {
@@ -40,8 +40,8 @@ type ActionAttributes = {
     event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
   ) => void
 } & {
-  'on:cancel-token'?: (event: CustomEvent<CancelTokenSource>) => void
-  oncanceltoken?: (event: CustomEvent<CancelTokenSource>) => void
+  'on:cancel-token'?: (event: CustomEvent<CancelToken>) => void
+  oncanceltoken?: (event: CustomEvent<CancelToken>) => void
 }
 
 function link(
