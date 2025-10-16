@@ -134,7 +134,7 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
-    const hoverTimeout = ref(null)
+    const hoverTimeout = ref<ReturnType<typeof setTimeout>>()
 
     const prefetchModes = computed<LinkPrefetchOption[]>(() => {
       if (props.prefetch === true) {
@@ -149,7 +149,7 @@ const Link: InertiaLink = defineComponent({
         return props.prefetch
       }
 
-      return [props.prefetch]
+      return [props.prefetch] as LinkPrefetchOption[]
     })
 
     const cacheForValue = computed(() => {
@@ -179,7 +179,7 @@ const Link: InertiaLink = defineComponent({
     })
 
     const method = computed(() =>
-      isUrlMethodPair(props.href) ? props.href.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.href) ? props.href.method : ((props.method ?? 'get').toLowerCase() as Method),
     )
     const as = computed(() => {
       if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
@@ -192,8 +192,8 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        isUrlMethodPair(props.href) ? props.href.url : props.href,
-        props.data,
+        isUrlMethodPair(props.href) ? props.href.url : (props.href as string),
+        props.data || {},
         props.queryStringArrayFormat,
       ),
     )
@@ -231,12 +231,12 @@ const Link: InertiaLink = defineComponent({
       onBefore: props.onBefore,
       onStart: (visit: PendingVisit) => {
         inFlightCount.value++
-        props.onStart(visit)
+        props.onStart?.(visit)
       },
       onProgress: props.onProgress,
       onFinish: (visit: ActiveVisit) => {
         inFlightCount.value--
-        props.onFinish(visit)
+        props.onFinish?.(visit)
       },
       onCancel: props.onCancel,
       onSuccess: props.onSuccess,
@@ -312,7 +312,7 @@ const Link: InertiaLink = defineComponent({
 
     return () => {
       return h(
-        as.value,
+        as.value as string | Component,
         {
           ...attrs,
           ...elProps.value,

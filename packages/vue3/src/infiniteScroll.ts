@@ -9,7 +9,10 @@ import {
 import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
 
 // Vue-specific element resolver
-const resolveHTMLElement = (value, fallback): HTMLElement | null => {
+const resolveHTMLElement = (
+  value: string | object | (() => HTMLElement | null),
+  fallback: HTMLElement | null,
+): HTMLElement | null => {
   if (!value) {
     return fallback
   }
@@ -38,6 +41,7 @@ const InfiniteScroll = defineComponent({
   props: {
     data: {
       type: String as PropType<InfiniteScrollComponentBaseProps['data']>,
+      required: true,
     },
     buffer: {
       type: Number as PropType<InfiniteScrollComponentBaseProps['buffer']>,
@@ -225,7 +229,7 @@ const InfiniteScroll = defineComponent({
               ? slots.previous(exposedPrevious)
               : loadingPrevious.value
                 ? slots.loading?.(exposedPrevious)
-                : null,
+                : undefined,
           ),
         )
       }
@@ -258,7 +262,7 @@ const InfiniteScroll = defineComponent({
           h(
             'div',
             { ref: endElementRef },
-            slots.next ? slots.next(exposedNext) : loadingNext.value ? slots.loading?.(exposedNext) : null,
+            slots.next ? slots.next(exposedNext) : loadingNext.value ? slots.loading?.(exposedNext) : undefined,
           ),
         )
       }
