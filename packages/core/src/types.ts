@@ -180,6 +180,12 @@ export type LocationVisit = {
   preserveScroll: boolean
 }
 
+export type CancelToken = {
+  cancel: VoidFunction
+}
+
+export type CancelTokenCallback = (cancelToken: CancelToken) => void
+
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
   data: T
@@ -330,7 +336,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
 export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
-  onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
+  onCancelToken: CancelTokenCallback
   onBefore: GlobalEventCallback<'before', T>
   onBeforeUpdate: GlobalEventCallback<'beforeUpdate', T>
   onStart: GlobalEventCallback<'start', T>
@@ -420,9 +426,8 @@ export interface LinkComponentBaseProps
       | 'queryStringArrayFormat'
       | 'async'
     > &
-      Omit<VisitCallbacks, 'onCancelToken'> & {
+      VisitCallbacks & {
         href: string | UrlMethodPair
-        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
         cacheTags: string | string[]

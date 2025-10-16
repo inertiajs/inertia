@@ -1,4 +1,5 @@
 import {
+  CancelToken,
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
@@ -70,7 +71,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [defaults, setDefaults] = useState(
     (typeof rememberKeyOrInitialValues === 'string' ? maybeInitialValues : rememberKeyOrInitialValues) || ({} as TForm),
   )
-  const cancelToken = useRef(null)
+  const cancelToken = useRef<CancelToken | null>(null)
   const recentlySuccessfulTimeoutId = useRef(null)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
   const [errors, setErrors] = rememberKey

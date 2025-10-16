@@ -1,4 +1,5 @@
 import {
+  CancelToken,
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
@@ -59,7 +60,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
     : null
   let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
-  let cancelToken = null
+  let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId = null
   let transform = (data) => data
 
