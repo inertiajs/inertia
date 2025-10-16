@@ -142,14 +142,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       setFormState('errors', {
         ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
-      } as FormDataErrors<TForm>)
+      })
 
       return this
     },
     clearErrors(...fields: string[]) {
       setFormState(
         'errors',
-        (Object.keys(this.errors) as Array<FormDataKeys<TForm>>).reduce(
+        Object.keys(this.errors).reduce(
           (carry, field) => ({
             ...carry,
             ...(fields.length > 0 && !fields.includes(field) ? { [field]: (this.errors as Errors)[field] } : {}),

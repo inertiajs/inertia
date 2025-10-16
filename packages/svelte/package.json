@@ -38,9 +38,8 @@
     "build": "pnpm package && svelte-check --tsconfig ./tsconfig.json && publint",
     "build:with-deps": "svelte-kit sync && vite build --config vite-with-deps.config.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch --preserveWatchOutput",
-    "clean": "rm -rf dist",
-    "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm package --watch\" \"pnpm check:watch\" --names build,types",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "dev": "pnpm package --watch",
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
     "package": "svelte-kit sync && svelte-package --input src"
   },
