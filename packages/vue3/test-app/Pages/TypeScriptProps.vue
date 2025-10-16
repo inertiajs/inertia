@@ -31,3 +31,10 @@ console.log({
   userNames,
 })
 </script>
+
+<template>
+  {{ $page.props.flash.error }}
+
+  <!-- @vue-expect-error - 'message' does not exist on flash -->
+  {{ $page.props.flash.message }}
+</template>
