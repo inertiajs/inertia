@@ -1,4 +1,11 @@
-function isContentEditableOrPrevented(event: KeyboardEvent | MouseEvent): boolean {
+type MouseNavigationEvent = Pick<
+  MouseEvent,
+  'altKey' | 'ctrlKey' | 'shiftKey' | 'metaKey' | 'button' | 'currentTarget' | 'defaultPrevented' | 'target'
+>
+
+type KeyboardNavigationEvent = Pick<KeyboardEvent, 'currentTarget' | 'defaultPrevented' | 'key' | 'target'>
+
+function isContentEditableOrPrevented(event: KeyboardNavigationEvent | MouseNavigationEvent): boolean {
   return (event.target instanceof HTMLElement && event.target.isContentEditable) || event.defaultPrevented
 }
 
@@ -7,7 +14,7 @@ function isContentEditableOrPrevented(event: KeyboardEvent | MouseEvent): boolea
  * Links with modifier keys or non-left clicks should not be intercepted.
  * Content editable elements and prevented events are ignored.
  */
-export function shouldIntercept(event: MouseEvent): boolean {
+export function shouldIntercept(event: MouseNavigationEvent): boolean {
   const isLink = (event.currentTarget as HTMLElement).tagName.toLowerCase() === 'a'
 
   return !(
@@ -25,7 +32,7 @@ export function shouldIntercept(event: MouseEvent): boolean {
  * Enter triggers navigation for both links and buttons currently.
  * Space only triggers navigation for buttons specifically.
  */
-export function shouldNavigate(event: KeyboardEvent): boolean {
+export function shouldNavigate(event: KeyboardNavigationEvent): boolean {
   const isButton = (event.currentTarget as HTMLElement).tagName.toLowerCase() === 'button'
 
   return !isContentEditableOrPrevented(event) && (event.key === 'Enter' || (isButton && event.key === ' '))
