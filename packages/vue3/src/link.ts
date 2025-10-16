@@ -258,7 +258,7 @@ const Link: InertiaLink = defineComponent({
     }
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
@@ -279,29 +279,29 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetchClickEvents = {
-      onMousedown: (event) => {
+      onMousedown: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onKeydown: (event) => {
-        if (shouldIntercept(event) && shouldNavigate(event)) {
+      onKeydown: (event: KeyboardEvent) => {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onMouseup: (event) => {
+      onMouseup: (event: MouseEvent) => {
         event.preventDefault()
         router.visit(href.value, visitParams.value)
       },
-      onKeyup: (event) => {
+      onKeyup: (event: KeyboardEvent) => {
         if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
         }
       },
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           // Let the mouseup/keyup event handle the visit
           event.preventDefault()

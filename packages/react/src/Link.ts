@@ -16,7 +16,7 @@ const noop = () => undefined
 
 interface BaseInertiaLinkProps extends LinkComponentBaseProps {
   as?: ElementType
-  onClick?: (event: React.MouseEvent<Element>) => void
+  onClick?: (event: React.MouseEvent) => void
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -181,7 +181,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, prefetchModes)
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: React.MouseEvent) => {
         onClick(event)
 
         if (shouldIntercept(event)) {
@@ -205,29 +205,29 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const prefetchClickEvents = {
-      onMouseDown: (event) => {
+      onMouseDown: (event: React.MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           doPrefetch()
         }
       },
-      onKeyDown: (event) => {
-        if (shouldIntercept(event) && shouldNavigate(event)) {
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           doPrefetch()
         }
       },
-      onMouseUp: (event) => {
+      onMouseUp: (event: React.MouseEvent) => {
         event.preventDefault()
         router.visit(url, visitParams)
       },
-      onKeyUp: (event) => {
+      onKeyUp: (event: React.KeyboardEvent) => {
         if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(url, visitParams)
         }
       },
-      onClick: (event) => {
+      onClick: (event: React.MouseEvent) => {
         onClick(event)
 
         if (shouldIntercept(event)) {
