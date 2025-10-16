@@ -23,6 +23,8 @@ import { writable, type Writable } from 'svelte/store'
 type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
 
 type FormOptions = Omit<VisitOptions, 'data'>
+type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
+type TransformCallback<TForm> = (data: TForm) => object
 
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
@@ -35,7 +37,7 @@ export interface InertiaFormProps<TForm extends object> {
   setStore(data: TForm): void
   setStore<T extends FormDataKeys<TForm>>(key: T, value: FormDataValues<TForm, T>): void
   data(): TForm
-  transform(callback: (data: TForm) => object): this
+  transform(callback: TransformCallback<TForm>): this
   defaults(): this
   defaults(fields: Partial<TForm>): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
@@ -44,7 +46,7 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
-  submit: (...args: [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]) => void
+  submit: (...args: SubmitArgs) => void
   get(url: string, options?: FormOptions): void
   post(url: string, options?: FormOptions): void
   put(url: string, options?: FormOptions): void
@@ -97,7 +99,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return set(carry, key, get(this, key))
       }, {} as TForm)
     },
-    transform(callback) {
+    transform(callback: TransformCallback<TForm>) {
       transform = callback
       return this
     },
@@ -115,7 +117,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    reset(...fields) {
+    reset(...fields: string[]) {
       const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
         this.setStore(clonedData)
@@ -139,7 +141,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    clearErrors(...fields) {
+    clearErrors(...fields: string[]) {
       this.setStore(
         'errors',
         Object.keys(this.errors).reduce(
@@ -152,12 +154,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       )
       return this
     },
-    resetAndClearErrors(...fields) {
+    resetAndClearErrors(...fields: string[]) {
       this.reset(...fields)
       this.clearErrors(...fields)
       return this
     },
-    submit(...args) {
+    submit(...args: SubmitArgs) {
       const objectPassed = args[0] !== null && typeof args[0] === 'object'
 
       const method = objectPassed ? args[0].method : args[0]
@@ -252,19 +254,19 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         router[method](url, data, _options)
       }
     },
-    get(url, options) {
+    get(url: string, options: VisitOptions) {
       this.submit('get', url, options)
     },
-    post(url, options) {
+    post(url: string, options: VisitOptions) {
       this.submit('post', url, options)
     },
-    put(url, options) {
+    put(url: string, options: VisitOptions) {
       this.submit('put', url, options)
     },
-    patch(url, options) {
+    patch(url: string, options: VisitOptions) {
       this.submit('patch', url, options)
     },
-    delete(url, options) {
+    delete(url: string, options: VisitOptions) {
       this.submit('delete', url, options)
     },
     cancel() {

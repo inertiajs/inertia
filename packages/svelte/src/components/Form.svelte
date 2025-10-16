@@ -5,6 +5,7 @@
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type Method,
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
@@ -45,8 +46,8 @@
   let isDirty = false
   let defaultData: FormData = new FormData()
 
-  $: _method = isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method'])
-  $: _action = isUrlMethodPair(action) ? action.url : action
+  $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
+  $: _action = isUrlMethodPair(action) ? action.url : (action as string)
 
   function getFormData(): FormData {
     return new FormData(formElement)
@@ -117,7 +118,7 @@
       ...options,
     }
 
-    $form.transform(() => transform(_data)).submit(_method, url, submitOptions)
+    $form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
   }
 
   function handleSubmit(event: Event) {
