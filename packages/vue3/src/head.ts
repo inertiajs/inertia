@@ -21,7 +21,7 @@ const Head: InertiaHead = defineComponent({
     this.provider.disconnect()
   },
   methods: {
-    isUnaryTag(node: VNode): boolean {
+    isUnaryTag(node: VNode) {
       return (
         typeof node.type === 'string' &&
         [
@@ -43,12 +43,12 @@ const Head: InertiaHead = defineComponent({
         ].indexOf(node.type) > -1
       )
     },
-    renderTagStart(node: VNode): string {
+    renderTagStart(node: VNode) {
       node.props = node.props || {}
       node.props.inertia = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
+
       const attrs = Object.keys(node.props).reduce((carry, name) => {
         const value = String(node.props![name])
-
         if (['key', 'head-key'].includes(name)) {
           return carry
         } else if (value === '') {
@@ -57,6 +57,7 @@ const Head: InertiaHead = defineComponent({
           return carry + ` ${name}="${escape(value)}"`
         }
       }, '')
+
       return `<${String(node.type)}${attrs}>`
     },
     renderTagChildren(node: VNode): string {
@@ -67,7 +68,9 @@ const Head: InertiaHead = defineComponent({
       }
 
       if (Array.isArray(children)) {
-        return children.reduce((html: string, child) => html + this.renderTag(child as VNode), '')
+        return children.reduce<string>((html, child) => {
+          return html + this.renderTag(child as VNode)
+        }, '')
       }
 
       return ''
@@ -75,21 +78,21 @@ const Head: InertiaHead = defineComponent({
     isFunctionNode(node: VNode): node is VNode & { type: () => VNode } {
       return typeof node.type === 'function'
     },
-    isComponentNode(node: VNode): boolean {
+    isComponentNode(node: VNode): node is VNode & { type: object } {
       return typeof node.type === 'object'
     },
-    isCommentNode(node: VNode): boolean {
+    isCommentNode(node: VNode) {
       return /(comment|cmt)/i.test(node.type.toString())
     },
-    isFragmentNode(node: VNode): boolean {
+    isFragmentNode(node: VNode) {
       return /(fragment|fgt|symbol\(\))/i.test(node.type.toString())
     },
-    isTextNode(node: VNode): boolean {
+    isTextNode(node: VNode) {
       return /(text|txt)/i.test(node.type.toString())
     },
     renderTag(node: VNode): string {
       if (this.isTextNode(node)) {
-        return node.children as string
+        return String(node.children)
       } else if (this.isFragmentNode(node)) {
         return ''
       } else if (this.isCommentNode(node)) {
@@ -108,20 +111,20 @@ const Head: InertiaHead = defineComponent({
 
       return html
     },
-    addTitleElement(elements: string[]): string[] {
-      if (this.title && !elements.find((tag: string) => tag.startsWith('<title'))) {
+    addTitleElement(elements: string[]) {
+      if (this.title && !elements.find((tag) => tag.startsWith('<title'))) {
         elements.push(`<title inertia>${this.title}</title>`)
       }
 
       return elements
     },
-    renderNodes(nodes: VNode[]): string[] {
-      return this.addTitleElement(
-        nodes
-          .flatMap((node) => this.resolveNode(node))
-          .map((node) => this.renderTag(node))
-          .filter((node) => node),
-      )
+    renderNodes(nodes: VNode[]) {
+      const elements = nodes
+        .flatMap((node) => this.resolveNode(node))
+        .map((node) => this.renderTag(node))
+        .filter((node) => node)
+
+      return this.addTitleElement(elements)
     },
     resolveNode(node: VNode): VNode | VNode[] {
       if (this.isFunctionNode(node)) {

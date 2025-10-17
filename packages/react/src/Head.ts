@@ -1,28 +1,28 @@
 import { escape } from 'lodash-es'
-import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
-type HeadElement = React.ReactElement<React.HTMLAttributes<HTMLElement> & { 'head-key'?: string; inertia?: string }>
-type InertiaHead = FunctionComponent<InertiaHeadProps>
 type InertiaHeadProps = {
   title?: string
-  children?: HeadElement[]
+  children?: ReactNode
 }
 
+type InertiaHead = FunctionComponent<InertiaHeadProps>
+
 const Head: InertiaHead = function ({ children, title }) {
-  const headManager = useContext(HeadContext)!
-  const provider = useMemo(() => headManager.createProvider(), [headManager])
+  const headManager = useContext(HeadContext)
+  const provider = useMemo(() => headManager!.createProvider(), [headManager])
   const isServer = typeof window === 'undefined'
 
   useEffect(() => {
     provider.reconnect()
-    provider.update(renderNodes(children || []))
+    provider.update(renderNodes(children))
     return () => {
       provider.disconnect()
     }
   }, [provider, children, title])
 
-  function isUnaryTag(node: HeadElement): boolean {
+  function isUnaryTag(node: ReactElement<any>) {
     return (
       typeof node.type === 'string' &&
       [
@@ -45,25 +45,25 @@ const Head: InertiaHead = function ({ children, title }) {
     )
   }
 
-  function renderTagStart(node: HeadElement): string {
-    const props = node.props as Record<string, unknown>
-    const attrs = Object.keys(props).reduce((carry, name) => {
+  function renderTagStart(node: ReactElement<any>): string {
+    const attrs = Object.keys(node.props).reduce((carry, name) => {
       if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
       }
 
-      const value = String(props[name])
+      const value = String(node.props[name])
 
       if (value === '') {
         return carry + ` ${name}`
-      } else {
-        return carry + ` ${name}="${escape(value)}"`
       }
+
+      return carry + ` ${name}="${escape(value)}"`
     }, '')
-    return `<${node.type}${attrs}>`
+
+    return `<${String(node.type)}${attrs}>`
   }
 
-  function renderTagChildren(node: HeadElement): string {
+  function renderTagChildren(node: ReactElement<any>): string {
     const { children } = node.props
 
     if (typeof children === 'string') {
@@ -71,13 +71,13 @@ const Head: InertiaHead = function ({ children, title }) {
     }
 
     if (Array.isArray(children)) {
-      return children.reduce((html: string, child: HeadElement) => html + renderTag(child), '')
+      return children.reduce((html, child) => html + renderTag(child), '')
     }
 
     return ''
   }
 
-  function renderTag(node: HeadElement): string {
+  function renderTag(node: ReactElement<any>): string {
     let html = renderTagStart(node)
 
     if (node.props.children) {
@@ -89,36 +89,36 @@ const Head: InertiaHead = function ({ children, title }) {
     }
 
     if (!isUnaryTag(node)) {
-      html += `</${node.type}>`
+      html += `</${String(node.type)}>`
     }
 
     return html
   }
 
-  function ensureNodeHasInertiaProp(node: HeadElement): HeadElement {
+  function ensureNodeHasInertiaProp(node: ReactElement<any>) {
     return React.cloneElement(node, {
       inertia: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
     })
   }
 
-  function renderNode(node: HeadElement): string {
+  function renderNode(node: ReactElement<any>) {
     return renderTag(ensureNodeHasInertiaProp(node))
   }
 
-  function renderNodes(nodes: HeadElement[]): Array<string> {
-    const computed = React.Children.toArray(nodes)
+  function renderNodes(nodes: ReactNode) {
+    const elements = React.Children.toArray(nodes)
       .filter((node) => node)
-      .map((node) => renderNode(node as HeadElement))
+      .map((node) => renderNode(node as ReactElement<any>))
 
-    if (title && !computed.find((tag) => tag.startsWith('<title'))) {
-      computed.push(`<title inertia>${title}</title>`)
+    if (title && !elements.find((tag) => tag.startsWith('<title'))) {
+      elements.push(`<title inertia>${title}</title>`)
     }
 
-    return computed
+    return elements
   }
 
   if (isServer) {
-    provider.update(renderNodes(children || []))
+    provider.update(renderNodes(children))
   }
 
   return null
