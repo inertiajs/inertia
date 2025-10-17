@@ -8,4 +8,4 @@ export type ReactComponent = ComponentType<any> & {
   layout?: LayoutComponent | LayoutComponent[] | LayoutFunction
 }
 
-export type ReactPageHandlerArgs = Parameters<PageHandler<ReactComponent>>[0]
+export type ReactPageHandlerArgs = Parameters<PageHandler<ComponentType>>[0]

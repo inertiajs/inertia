@@ -10,15 +10,16 @@ import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
 type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
-type SetupOptions<SharedProps extends PageProps> = {
-  el: HTMLElement | null
+
+type SetupOptions<ElementType, SharedProps extends PageProps> = {
+  el: ElementType
   App: InertiaApp
   props: InertiaAppProps<SharedProps>
   plugin: Plugin
 }
 
 interface CreateInertiaVueAppProps<SharedProps extends PageProps>
-  extends CreateInertiaAppProps<SharedProps, ComponentResolver, SetupOptions<SharedProps>, VueApp> {
+  extends CreateInertiaAppProps<SharedProps, ComponentResolver, SetupOptions<HTMLElement | null, SharedProps>, VueApp> {
   title?: HeadManagerTitleCallback
   render?: (app: VueApp) => Promise<string>
 }

@@ -1,49 +1,41 @@
 import {
-  CreateInertiaAppProps,
-  HeadManagerOnUpdateCallback,
-  HeadManagerTitleCallback,
+  CreateInertiaAppPropsForCSR,
+  CreateInertiaAppPropsForSSR,
   InertiaAppResponse,
   InertiaAppSSRContent,
-  Page,
   PageProps,
-  PageResolver,
   router,
   setupProgress,
 } from '@inertiajs/core'
 import { ReactElement, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
-import App, { type InertiaApp } from './App'
+import App, { InertiaAppProps, type InertiaApp } from './App'
 import { ReactComponent } from './types'
 
 export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
   App: InertiaApp
-  props: {
-    initialPage: Page<SharedProps>
-    initialComponent: ReactComponent
-    resolveComponent: PageResolver
-    titleCallback?: HeadManagerTitleCallback
-    onHeadUpdate?: HeadManagerOnUpdateCallback
-  }
+  props: InertiaAppProps<SharedProps>
 }
 
-type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppProps<
+// The 'unknown' type is necessary for backwards compatibility...
+type ComponentResolver = (
+  name: string,
+) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent } | unknown
+
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
   SharedProps,
-  PageResolver,
+  ComponentResolver,
   SetupOptions<HTMLElement, SharedProps>,
   void
-> & {
-  title?: HeadManagerTitleCallback
-  render?: undefined
-}
+>
 
-type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppProps<
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppPropsForSSR<
   SharedProps,
-  PageResolver,
+  ComponentResolver,
   SetupOptions<null, SharedProps>,
   ReactElement
 > & {
-  title?: HeadManagerTitleCallback
   render: typeof renderToString
 }
 

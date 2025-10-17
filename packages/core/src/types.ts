@@ -388,9 +388,17 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export interface CreateInertiaAppProps<SharedProps extends PageProps, Resolver, SetupOptions, SetupReturn> {
+export interface CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
+  resolve: Resolver
+  setup: (options: SetupOptions) => SetupReturn
+  title?: HeadManagerTitleCallback
+}
+
+export interface CreateInertiaAppPropsForCSR<SharedProps extends PageProps, Resolver, SetupOptions, SetupReturn>
+  extends CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
   id?: string
   page?: Page<SharedProps>
+  render?: undefined
   progress?:
     | false
     | {
@@ -399,8 +407,13 @@ export interface CreateInertiaAppProps<SharedProps extends PageProps, Resolver, 
         includeCSS?: boolean
         showSpinner?: boolean
       }
-  resolve: Resolver
-  setup: (options: SetupOptions) => SetupReturn
+}
+
+export interface CreateInertiaAppPropsForSSR<SharedProps extends PageProps, Resolver, SetupOptions, SetupReturn>
+  extends CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
+  id?: undefined
+  page: Page<SharedProps>
+  progress?: undefined
 }
 
 export type InertiaAppSSRContent = { head: string[]; body: string }
