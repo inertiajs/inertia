@@ -1,12 +1,13 @@
 import {
-  CreateInertiaAppProps,
-  HeadManagerTitleCallback,
+  CreateInertiaAppPropsForCSR,
+  CreateInertiaAppPropsForSSR,
   InertiaAppResponse,
   PageProps,
   router,
   setupProgress,
 } from '@inertiajs/core'
 import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
+import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
 type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
@@ -18,10 +19,20 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
   plugin: Plugin
 }
 
-interface CreateInertiaVueAppProps<SharedProps extends PageProps>
-  extends CreateInertiaAppProps<SharedProps, ComponentResolver, SetupOptions<HTMLElement | null, SharedProps>, VueApp> {
-  title?: HeadManagerTitleCallback
-  render?: (app: VueApp) => Promise<string>
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<HTMLElement, SharedProps>,
+  void
+>
+
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppPropsForSSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<null, SharedProps>,
+  VueApp
+> & {
+  render: typeof renderToString
 }
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
@@ -32,7 +43,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-}: CreateInertiaVueAppProps<SharedProps>): InertiaAppResponse {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el?.dataset.page || '{}')
@@ -44,16 +55,30 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
-    return setup({
-      el,
+    const props = {
+      initialPage,
+      initialComponent,
+      resolveComponent,
+      titleCallback: title,
+    }
+
+    if (isServer) {
+      const ssrSetup = setup as (options: SetupOptions<null, SharedProps>) => VueApp
+
+      return ssrSetup({
+        el: null,
+        App,
+        props: { ...props, onHeadUpdate: (elements: string[]) => (head = elements) },
+        plugin,
+      })
+    }
+
+    const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
+
+    return csrSetup({
+      el: el as HTMLElement,
       App,
-      props: {
-        initialPage,
-        initialComponent,
-        resolveComponent,
-        titleCallback: title,
-        onHeadUpdate: isServer ? (elements) => (head = elements) : undefined,
-      },
+      props,
       plugin,
     })
   })
