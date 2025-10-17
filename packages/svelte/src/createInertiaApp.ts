@@ -1,4 +1,11 @@
-import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
+import {
+  router,
+  setupProgress,
+  type CreateInertiaAppProps,
+  type InertiaAppResponse,
+  type Page,
+  type PageProps,
+} from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -7,32 +14,24 @@ import type { ComponentResolver } from './types'
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
 
-interface CreateInertiaAppProps {
-  id?: string
-  resolve: ComponentResolver
-  setup: (props: {
-    el: HTMLElement | null
-    App: AppComponent
-    props: InertiaAppProps
-  }) => void | App | SvelteRenderResult
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
-  page?: Page
-}
+interface CreateInertiaSvelteAppProps<SharedProps extends PageProps = PageProps>
+  extends CreateInertiaAppProps<
+    SharedProps,
+    ComponentResolver,
+    {
+      el: HTMLElement | null
+      App: AppComponent
+      props: InertiaAppProps
+    }
+  > {}
 
-export default async function createInertiaApp({
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
   setup,
   progress = {},
   page,
-}: CreateInertiaAppProps): InertiaAppResponse {
+}: CreateInertiaSvelteAppProps<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')

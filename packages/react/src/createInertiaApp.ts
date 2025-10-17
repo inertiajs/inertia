@@ -1,6 +1,8 @@
 import {
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  InertiaAppResponse,
+  InertiaAppSSRContent,
   Page,
   PageProps,
   PageResolver,
@@ -37,7 +39,6 @@ type BaseInertiaAppOptions = {
   resolve: PageResolver
 }
 
-type CreateInertiaAppSetupReturnType = ReactInstance | void
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: string
   page?: Page | string
@@ -50,10 +51,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = BaseInertiaAppOpti
         includeCSS?: boolean
         showSpinner?: boolean
       }
-  setup(options: SetupOptions<HTMLElement, SharedProps>): CreateInertiaAppSetupReturnType
+  setup(options: SetupOptions<HTMLElement, SharedProps>): void
 }
 
-type CreateInertiaAppSSRContent = { head: string[]; body: string }
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOptions & {
   id?: undefined
   page: Page | string
@@ -64,10 +64,10 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = BaseInertiaAppOpti
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
-): Promise<CreateInertiaAppSetupReturnType>
+): Promise<void>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsForSSR<SharedProps>,
-): Promise<CreateInertiaAppSSRContent>
+): Promise<InertiaAppSSRContent>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
@@ -76,16 +76,14 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): Promise<
-  CreateInertiaAppSetupReturnType | CreateInertiaAppSSRContent
-> {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el.dataset.page)
+  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
   // @ts-expect-error
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
-  let head = []
+  let head: string[] = []
 
   const reactApp = await Promise.all([
     resolveComponent(initialPage.component),
@@ -109,7 +107,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     setupProgress(progress)
   }
 
-  if (isServer) {
+  if (isServer && render) {
     const body = await render(
       createElement(
         'div',
@@ -117,7 +115,6 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           id,
           'data-page': JSON.stringify(initialPage),
         },
-        // @ts-expect-error
         reactApp,
       ),
     )

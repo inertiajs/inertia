@@ -1,25 +1,33 @@
-import { HeadManagerTitleCallback, Page, router, setupProgress } from '@inertiajs/core'
-import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
+import {
+  CreateInertiaAppProps,
+  HeadManagerTitleCallback,
+  InertiaAppResponse,
+  PageProps,
+  router,
+  setupProgress,
+} from '@inertiajs/core'
+import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
-interface CreateInertiaAppProps {
-  id?: string
-  resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
-  setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
+type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
+
+interface CreateInertiaVueAppProps<SharedProps extends PageProps = PageProps>
+  extends CreateInertiaAppProps<
+    SharedProps,
+    ComponentResolver,
+    {
+      el: HTMLElement | null
+      App: InertiaApp
+      props: InertiaAppProps<SharedProps>
+      plugin: Plugin
+    },
+    VueApp
+  > {
   title?: HeadManagerTitleCallback
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
-  page?: Page
   render?: (app: VueApp) => Promise<string>
 }
 
-export default async function createInertiaApp({
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
   setup,
@@ -27,13 +35,13 @@ export default async function createInertiaApp({
   progress = {},
   page,
   render,
-}: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
+}: CreateInertiaVueAppProps<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el.dataset.page)
-  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
-  let head = []
+  let head: string[] = []
 
   const vueApp = await Promise.all([
     resolveComponent(initialPage.component),
@@ -47,7 +55,7 @@ export default async function createInertiaApp({
         initialComponent,
         resolveComponent,
         titleCallback: title,
-        onHeadUpdate: isServer ? (elements) => (head = elements) : null,
+        onHeadUpdate: isServer ? (elements) => (head = elements) : undefined,
       },
       plugin,
     })
@@ -57,7 +65,7 @@ export default async function createInertiaApp({
     setupProgress(progress)
   }
 
-  if (isServer) {
+  if (isServer && render) {
     const body = await render(
       createSSRApp({
         render: () =>
