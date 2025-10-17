@@ -58,6 +58,13 @@ app.get('/article', (req, res) =>
   }),
 )
 
+app.get('/long-page/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'LongPage',
+    props: { page: req.params.page },
+  }),
+)
+
 app.get('/links/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Links/PartialReloads',

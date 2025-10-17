@@ -13,6 +13,7 @@ import {
   defineComponent,
   h,
   markRaw,
+  nextTick,
   Plugin,
   PropType,
   reactive,
@@ -81,6 +82,8 @@ const App: InertiaApp = defineComponent({
           component.value = markRaw(args.component)
           page.value = args.page
           key.value = args.preserveState ? key.value : Date.now()
+
+          return nextTick()
         },
       })
 
