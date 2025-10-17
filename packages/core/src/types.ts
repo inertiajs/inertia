@@ -162,12 +162,12 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
 
 export type PageResolver = (name: string) => Component
 
-export type PageHandler = ({
+export type PageHandler<ComponentType = Component> = ({
   component,
   page,
   preserveState,
 }: {
-  component: Component
+  component: ComponentType
   page: Page
   preserveState: boolean
 }) => Promise<unknown>
@@ -363,10 +363,10 @@ export type PollOptions = {
 
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
-export type RouterInitParams = {
+export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
-  swapComponent: PageHandler
+  swapComponent: PageHandler<ComponentType>
 }
 
 export type PendingVisitOptions = {

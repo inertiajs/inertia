@@ -1,9 +1,9 @@
 import { createHeadManager, Page, PageHandler, PageProps, router, SharedPageProps } from '@inertiajs/core'
-import { ComponentPublicInstance } from 'vue'
+import { DefineComponent } from 'vue'
 import useForm from './useForm'
 
-export type VuePageHandlerArgs = Parameters<PageHandler>[0] & {
-  component: ComponentPublicInstance | Promise<ComponentPublicInstance>
+export type VuePageHandlerArgs = Omit<Parameters<PageHandler>[0], 'component'> & {
+  component: DefineComponent | Promise<DefineComponent>
 }
 
 declare module '@inertiajs/core' {

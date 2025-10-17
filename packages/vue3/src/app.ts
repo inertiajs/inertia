@@ -75,15 +75,13 @@ const App: InertiaApp = defineComponent({
     headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
 
     if (!isServer) {
-      router.init({
+      router.init<DefineComponent>({
         initialPage,
         resolveComponent: resolveComponent!,
         swapComponent: async (options: VuePageHandlerArgs) => {
-          component.value = markRaw(options.component)
+          component.value = markRaw(await options.component)
           page.value = options.page
           key.value = options.preserveState ? key.value : Date.now()
-
-          return Promise.resolve()
         },
       })
 
