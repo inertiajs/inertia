@@ -32,7 +32,7 @@ const Link: InertiaLink = defineComponent({
       default: 'a',
     },
     data: {
-      type: Object,
+      type: Object as PropType<InertiaLinkProps['data']>,
       default: () => ({}),
     },
     href: {

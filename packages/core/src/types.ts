@@ -388,7 +388,21 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+export interface InertiaAppProgressOptions {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
+export type InertiaAppSSRContent = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
+
+export type CreateInertiaAppOptions = {
+  id?: string
+  progress?: InertiaAppProgressOptions | false
+  resolve: PageResolver
+}
 
 export type HeadManagerTitleCallback = (title: string) => string
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
