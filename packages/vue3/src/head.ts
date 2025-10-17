@@ -68,7 +68,9 @@ const Head: InertiaHead = defineComponent({
       }
 
       if (Array.isArray(children)) {
-        return children.reduce((html: string, child) => html + this.renderTag(child as VNode), '')
+        return children.reduce<string>((html, child) => {
+          return html + this.renderTag(child as VNode)
+        }, '')
       }
 
       return ''
