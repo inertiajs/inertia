@@ -75,7 +75,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let defaults = cloneDeep(data)
   let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
-  let transform: TransformCallback<TForm> = (data) => data
+  let transform = (data: TForm) => data as object
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
   let defaultsCalledInOnSuccess = false

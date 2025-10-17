@@ -65,7 +65,7 @@
   }
 
   export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action!, getData(), queryStringArrayFormat)
+    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
