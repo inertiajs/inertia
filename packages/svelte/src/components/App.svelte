@@ -29,11 +29,11 @@
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
-    router.init({
+    router.init<ResolvedComponent>({
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
-        component = args.component as ResolvedComponent
+        component = args.component
         page = args.page
         key = args.preserveState ? key : Date.now()
 

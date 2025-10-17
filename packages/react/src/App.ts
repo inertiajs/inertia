@@ -1,26 +1,50 @@
-import { createHeadManager, PageHandler, router } from '@inertiajs/core'
-import { createElement, useEffect, useMemo, useState } from 'react'
+import {
+  createHeadManager,
+  HeadManagerOnUpdateCallback,
+  HeadManagerTitleCallback,
+  Page,
+  PageHandler,
+  PageProps,
+  router,
+} from '@inertiajs/core'
+import { createElement, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
+import { ReactPageHandlerArgs } from './types'
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
-let swapComponent: PageHandler = async () => {
+let swapComponent: PageHandler<ReactNode> = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
   // components. We swap in the real function in the useEffect hook below.
   currentIsInitialPage = false
 }
 
-export default function App({
+type CurrentPage = {
+  component: ReactNode | null
+  page: Page
+  key: number | null
+}
+
+export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
+  children?: (options: { component: ReactNode; props: PageProps; key: number | null }) => ReactNode
+  initialPage: Page<SharedProps>
+  initialComponent?: ReactNode
+  resolveComponent?: (name: string) => ReactNode | Promise<ReactNode>
+  titleCallback?: HeadManagerTitleCallback
+  onHeadUpdate?: HeadManagerOnUpdateCallback
+}
+
+export default function App<SharedProps extends PageProps = PageProps>({
   children,
   initialPage,
   initialComponent,
   resolveComponent,
   titleCallback,
   onHeadUpdate,
-}) {
-  const [current, setCurrent] = useState({
+}: InertiaAppProps<SharedProps>) {
+  const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
     page: initialPage,
     key: null,
@@ -35,9 +59,9 @@ export default function App({
   }, [])
 
   if (!routerIsInitialized) {
-    router.init({
+    router.init<ReactNode>({
       initialPage,
-      resolveComponent,
+      resolveComponent: resolveComponent!,
       swapComponent: async (args) => swapComponent(args),
     })
 
@@ -45,7 +69,7 @@ export default function App({
   }
 
   useEffect(() => {
-    swapComponent = async ({ component, page, preserveState }) => {
+    swapComponent = async ({ component, page, preserveState }: ReactPageHandlerArgs) => {
       if (currentIsInitialPage) {
         // We block setting the current page on the initial page to
         // prevent the initial page from being re-rendered again.
@@ -73,15 +97,15 @@ export default function App({
 
   const renderChildren =
     children ||
-    (({ Component, props, key }) => {
-      const child = createElement(Component, { key, ...props })
+    (({ component, props, key }) => {
+      const child = createElement(component, { key, ...props })
 
-      if (typeof Component.layout === 'function') {
-        return Component.layout(child)
+      if (typeof component.layout === 'function') {
+        return component.layout(child)
       }
 
-      if (Array.isArray(Component.layout)) {
-        return Component.layout
+      if (Array.isArray(component.layout)) {
+        return component.layout
           .concat(child)
           .reverse()
           .reduce((children, Layout) => createElement(Layout, { children, ...props }))
@@ -97,7 +121,7 @@ export default function App({
       PageContext.Provider,
       { value: current.page },
       renderChildren({
-        Component: current.component,
+        component: current.component,
         key: current.key,
         props: current.page.props,
       }),

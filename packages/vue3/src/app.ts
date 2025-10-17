@@ -79,7 +79,7 @@ const App: InertiaApp = defineComponent({
         initialPage,
         resolveComponent: resolveComponent!,
         swapComponent: async (options: VuePageHandlerArgs) => {
-          component.value = markRaw(await options.component)
+          component.value = markRaw(options.component)
           page.value = options.page
           key.value = options.preserveState ? key.value : Date.now()
         },

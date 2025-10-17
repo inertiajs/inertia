@@ -3,7 +3,7 @@ import { DefineComponent } from 'vue'
 import useForm from './useForm'
 
 export type VuePageHandlerArgs = Omit<Parameters<PageHandler>[0], 'component'> & {
-  component: DefineComponent | Promise<DefineComponent>
+  component: DefineComponent
 }
 
 declare module '@inertiajs/core' {
