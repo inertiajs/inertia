@@ -7,7 +7,7 @@ import {
   PageProps,
   router,
 } from '@inertiajs/core'
-import { createElement, ReactNode, useEffect, useMemo, useState } from 'react'
+import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
@@ -35,6 +35,8 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
 }
+
+export type InertiaApp = FunctionComponent<InertiaAppProps>
 
 export default function App<SharedProps extends PageProps = PageProps>({
   children,
