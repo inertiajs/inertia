@@ -12,9 +12,9 @@ import {
 import { ComponentType, FunctionComponent, Key, ReactElement, ReactNode, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App'
+import { ReactComponent } from './types'
 
 type ReactInstance = ReactElement
-type ReactComponent = ReactNode
 
 type AppType<SharedProps extends PageProps = PageProps> = FunctionComponent<
   {
@@ -91,8 +91,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   ]).then(([initialComponent]) => {
     return setup({
       // @ts-expect-error
-      el,
+      el: el!,
+      // @ts-expect-error
       App,
+      // @ts-expect-error
       props: {
         initialPage,
         initialComponent,
@@ -115,6 +117,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           id,
           'data-page': JSON.stringify(initialPage),
         },
+        // @ts-expect-error
         reactApp,
       ),
     )

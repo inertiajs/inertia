@@ -22,7 +22,8 @@ interface CreateInertiaSvelteAppProps<SharedProps extends PageProps = PageProps>
       el: HTMLElement | null
       App: AppComponent
       props: InertiaAppProps
-    }
+    },
+    unknown // TODO: Svelte app type
   > {}
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({

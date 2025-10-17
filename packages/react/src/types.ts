@@ -1,6 +1,11 @@
 import { PageHandler } from '@inertiajs/core'
-import { ReactNode } from 'react'
+import { ComponentType, ReactNode } from 'react'
 
-export type ReactPageHandlerArgs = Omit<Parameters<PageHandler>[0], 'component'> & {
-  component: ReactNode
+export type LayoutFunction = (page: ReactNode) => ReactNode
+export type LayoutComponent = ComponentType<{ children: ReactNode }>
+
+export type ReactComponent = ComponentType<any> & {
+  layout?: LayoutComponent | LayoutComponent[] | LayoutFunction
 }
+
+export type ReactPageHandlerArgs = Parameters<PageHandler<ReactComponent>>[0]

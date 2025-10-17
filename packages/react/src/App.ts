@@ -10,11 +10,11 @@ import {
 import { createElement, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { ReactPageHandlerArgs } from './types'
+import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
-let swapComponent: PageHandler<ReactNode> = async () => {
+let swapComponent: PageHandler<ReactComponent> = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
   // components. We swap in the real function in the useEffect hook below.
@@ -22,16 +22,16 @@ let swapComponent: PageHandler<ReactNode> = async () => {
 }
 
 type CurrentPage = {
-  component: ReactNode | null
+  component: ReactComponent | null
   page: Page
   key: number | null
 }
 
 export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
-  children?: (options: { component: ReactNode; props: PageProps; key: number | null }) => ReactNode
+  children?: (options: { component: ReactComponent; props: PageProps; key: number | null }) => ReactNode
   initialPage: Page<SharedProps>
-  initialComponent?: ReactNode
-  resolveComponent?: (name: string) => ReactNode | Promise<ReactNode>
+  initialComponent?: ReactComponent
+  resolveComponent?: (name: string) => ReactComponent | Promise<ReactComponent>
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
 }
@@ -59,7 +59,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
   }, [])
 
   if (!routerIsInitialized) {
-    router.init<ReactNode>({
+    router.init<ReactComponent>({
       initialPage,
       resolveComponent: resolveComponent!,
       swapComponent: async (args) => swapComponent(args),
@@ -101,14 +101,14 @@ export default function App<SharedProps extends PageProps = PageProps>({
       const child = createElement(component, { key, ...props })
 
       if (typeof component.layout === 'function') {
-        return component.layout(child)
+        return (component.layout as LayoutFunction)(child)
       }
 
       if (Array.isArray(component.layout)) {
-        return component.layout
+        return (component.layout as any)
           .concat(child)
           .reverse()
-          .reduce((children, Layout) => createElement(Layout, { children, ...props }))
+          .reduce((children: any, Layout: any) => createElement(Layout, { children, ...props }))
       }
 
       return child
