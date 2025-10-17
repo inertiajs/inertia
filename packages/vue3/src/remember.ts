@@ -2,12 +2,6 @@ import { router } from '@inertiajs/core'
 import { cloneDeep } from 'lodash-es'
 import { ComponentOptions } from 'vue'
 
-type RememberedData = Record<string, any>
-type RememberConfig = {
-  data: string[]
-  key?: string | (() => string)
-}
-
 const remember: ComponentOptions = {
   created() {
     if (!this.$options.remember) {
@@ -26,17 +20,18 @@ const remember: ComponentOptions = {
       this.$options.remember = { data: [this.$options.remember.data] }
     }
 
-    const rememberConfig = this.$options.remember as RememberConfig
+    const rememberKey =
+      this.$options.remember.key instanceof Function
+        ? this.$options.remember.key.call(this)
+        : this.$options.remember.key
 
-    const rememberKey = rememberConfig.key instanceof Function ? rememberConfig.key.call(this) : rememberConfig.key
+    const restored = router.restore(rememberKey) as Record<string, unknown> | undefined
 
-    const restored = router.restore(rememberKey) as RememberedData | undefined
-
-    const rememberable = rememberConfig.data.filter((key: string) => {
+    const rememberable = this.$options.remember.data.filter((key: string) => {
       return !(this[key] !== null && typeof this[key] === 'object' && this[key].__rememberable === false)
-    })
+    }) as string[]
 
-    const hasCallbacks = (key: string): boolean => {
+    const hasCallbacks = (key: string) => {
       return (
         this[key] !== null &&
         typeof this[key] === 'object' &&
@@ -55,7 +50,7 @@ const remember: ComponentOptions = {
         () => {
           router.remember(
             rememberable.reduce(
-              (data: RememberedData, key: string) => ({
+              (data, key) => ({
                 ...data,
                 [key]: cloneDeep(hasCallbacks(key) ? this[key].__remember() : this[key]),
               }),
