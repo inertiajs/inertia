@@ -7,9 +7,19 @@ import typescript from 'typescript-eslint'
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  js.configs.recommended,
-  ...typescript.configs.recommended,
   {
+    ignores: ['node_modules', 'dist/**/*'],
+  },
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    ...js.configs.recommended,
+  },
+  ...typescript.configs.recommended.map((config) => ({
+    ...config,
+    files: ['**/*.{ts,tsx}'],
+  })),
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
     ...react.configs.flat.recommended,
     ...react.configs.flat['jsx-runtime'],
     languageOptions: {
@@ -31,6 +41,7 @@ export default [
     },
   },
   {
+    files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
       'react-hooks': reactHooks,
     },
@@ -38,9 +49,6 @@ export default [
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
     },
-  },
-  {
-    ignores: ['node_modules', 'dist/**/*'],
   },
   prettier, // Turn off all rules that might conflict with Prettier
 ]

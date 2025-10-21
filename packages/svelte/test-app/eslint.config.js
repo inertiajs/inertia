@@ -5,6 +5,12 @@ import ts from 'typescript-eslint'
 import svelteConfig from './svelte.config.js'
 
 export default ts.config(
+  {
+    files: ['**/*.js', '**/*.ts', '**/*.svelte'],
+  },
+  {
+    ignores: ['node_modules', 'dist/**/*', '*.config.js'],
+  },
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs.recommended,
@@ -16,6 +22,7 @@ export default ts.config(
     },
   },
   {
+    files: ['**/*.ts', '**/*.svelte'],
     // See more details at: https://typescript-eslint.io/packages/parser/
     languageOptions: {
       parserOptions: {
@@ -41,7 +48,6 @@ export default ts.config(
     },
   },
   {
-    ignores: ['node_modules', 'dist/**/*'],
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
     },
