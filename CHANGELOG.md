@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.7...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.8...master)
 
 - Nothing yet
+
+## [v2.2.8](https://github.com/inertiajs/inertia/compare/v2.2.7...v2.2.8) - 2025-10-09
+
+### What's Changed
+
+* Prevent false positives in `getScrollableParent()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2626
+* Restore scroll regions after navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2627
+* Prevent replacing history state when scroll regions are unchanged to fix popstate behavior in WebKit by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2629
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.7...v2.2.8
 
 ## [v2.2.7](https://github.com/inertiajs/inertia/compare/v2.2.6...v2.2.7) - 2025-10-07
 

@@ -25,13 +25,13 @@ const remember: ComponentOptions = {
         ? this.$options.remember.key.call(this)
         : this.$options.remember.key
 
-    const restored = router.restore(rememberKey)
+    const restored = router.restore(rememberKey) as Record<string, unknown> | undefined
 
-    const rememberable = this.$options.remember.data.filter((key) => {
+    const rememberable = this.$options.remember.data.filter((key: string) => {
       return !(this[key] !== null && typeof this[key] === 'object' && this[key].__rememberable === false)
-    })
+    }) as string[]
 
-    const hasCallbacks = (key) => {
+    const hasCallbacks = (key: string) => {
       return (
         this[key] !== null &&
         typeof this[key] === 'object' &&
@@ -40,7 +40,7 @@ const remember: ComponentOptions = {
       )
     }
 
-    rememberable.forEach((key) => {
+    rememberable.forEach((key: string) => {
       if (this[key] !== undefined && restored !== undefined && restored[key] !== undefined) {
         hasCallbacks(key) ? this[key].__restore(restored[key]) : (this[key] = restored[key])
       }

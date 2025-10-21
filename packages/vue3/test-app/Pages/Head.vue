@@ -17,6 +17,9 @@ import { Head } from '@inertiajs/vue3'
     <meta name="null" :content="null" />
     <!-- @vue-expect-error -->
     <meta name="float" :content="3.14" />
+    <meta name="xss" content="<script>alert('xss')</script>" />
+    <meta name="ampersand" content="Laravel & Inertia" />
+    <meta name="unicode" content="Hélló! 🎉" />
   </Head>
 
   <h1 :style="{ fontSize: '40px' }">Head Component</h1>

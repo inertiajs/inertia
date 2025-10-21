@@ -2,21 +2,12 @@ import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
-import {
-  Component,
-  Page,
-  PageEvent,
-  PageHandler,
-  PageResolver,
-  PreserveStateOption,
-  RouterInitParams,
-  VisitOptions,
-} from './types'
+import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
   protected page!: Page
-  protected swapComponent!: PageHandler
+  protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
   protected componentId = {}
   protected listeners: {
@@ -27,7 +18,11 @@ class CurrentPage {
   protected cleared = false
   protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
 
-  public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
+  public init<ComponentType = Component>({
+    initialPage,
+    swapComponent,
+    resolveComponent,
+  }: RouterInitParams<ComponentType>) {
     this.page = initialPage
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
@@ -41,7 +36,11 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
+    }: {
+      replace?: boolean
+      preserveScroll?: boolean
+      preserveState?: boolean
+    } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
       this.pendingDeferredProps = {
@@ -123,7 +122,7 @@ class CurrentPage {
     {
       preserveState = false,
     }: {
-      preserveState?: PreserveStateOption
+      preserveState?: boolean
     } = {},
   ) {
     return this.resolve(page.component).then((component) => {
@@ -167,7 +166,7 @@ class CurrentPage {
   }: {
     component: Component
     page: Page
-    preserveState: PreserveStateOption
+    preserveState: boolean
   }): Promise<unknown> {
     return this.swapComponent({ component, page, preserveState })
   }

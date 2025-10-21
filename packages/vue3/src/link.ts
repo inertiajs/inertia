@@ -1,6 +1,7 @@
 import {
   ActiveVisit,
   CacheForOption,
+  CancelTokenCallback,
   GlobalEventCallback,
   isUrlMethodPair,
   LinkComponentBaseProps,
@@ -115,7 +116,7 @@ const Link: InertiaLink = defineComponent({
       default: noop,
     },
     onCancelToken: {
-      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
+      type: Function as PropType<CancelTokenCallback>,
       default: noop,
     },
     onPrefetching: {
@@ -133,7 +134,7 @@ const Link: InertiaLink = defineComponent({
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
-    const hoverTimeout = ref(null)
+    const hoverTimeout = ref<ReturnType<typeof setTimeout>>()
 
     const prefetchModes = computed<LinkPrefetchOption[]>(() => {
       if (props.prefetch === true) {
@@ -148,7 +149,7 @@ const Link: InertiaLink = defineComponent({
         return props.prefetch
       }
 
-      return [props.prefetch]
+      return [props.prefetch] as LinkPrefetchOption[]
     })
 
     const cacheForValue = computed(() => {
@@ -178,7 +179,7 @@ const Link: InertiaLink = defineComponent({
     })
 
     const method = computed(() =>
-      isUrlMethodPair(props.href) ? props.href.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.href) ? props.href.method : ((props.method ?? 'get').toLowerCase() as Method),
     )
     const as = computed(() => {
       if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
@@ -191,8 +192,8 @@ const Link: InertiaLink = defineComponent({
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
         method.value,
-        isUrlMethodPair(props.href) ? props.href.url : props.href,
-        props.data,
+        isUrlMethodPair(props.href) ? props.href.url : (props.href as string),
+        props.data || {},
         props.queryStringArrayFormat,
       ),
     )
@@ -230,12 +231,12 @@ const Link: InertiaLink = defineComponent({
       onBefore: props.onBefore,
       onStart: (visit: PendingVisit) => {
         inFlightCount.value++
-        props.onStart(visit)
+        props.onStart?.(visit)
       },
       onProgress: props.onProgress,
       onFinish: (visit: ActiveVisit) => {
         inFlightCount.value--
-        props.onFinish(visit)
+        props.onFinish?.(visit)
       },
       onCancel: props.onCancel,
       onSuccess: props.onSuccess,
@@ -258,7 +259,7 @@ const Link: InertiaLink = defineComponent({
     }
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
@@ -279,29 +280,29 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetchClickEvents = {
-      onMousedown: (event) => {
+      onMousedown: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onKeydown: (event) => {
-        if (shouldIntercept(event) && shouldNavigate(event)) {
+      onKeydown: (event: KeyboardEvent) => {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onMouseup: (event) => {
+      onMouseup: (event: MouseEvent) => {
         event.preventDefault()
         router.visit(href.value, visitParams.value)
       },
-      onKeyup: (event) => {
+      onKeyup: (event: KeyboardEvent) => {
         if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(href.value, visitParams.value)
         }
       },
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           // Let the mouseup/keyup event handle the visit
           event.preventDefault()
@@ -311,7 +312,7 @@ const Link: InertiaLink = defineComponent({
 
     return () => {
       return h(
-        as.value,
+        as.value as string | Component,
         {
           ...attrs,
           ...elProps.value,

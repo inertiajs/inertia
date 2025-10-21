@@ -9,6 +9,7 @@ declare module 'axios' {
 
 export type DefaultInertiaConfig = {
   errorValueType: string
+  sharedPageProps: PageProps
 }
 /**
  * Designed to allow overriding of some core types using TypeScript
@@ -20,6 +21,10 @@ export type DefaultInertiaConfig = {
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
+ *     sharedPageProps: {
+ *       auth: { user: User | null }
+ *       flash: { success?: string; error?: string }
+ *     }
  *   }
  * }
  * ```
@@ -29,6 +34,7 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
   ? InertiaConfig[Key]
   : DefaultInertiaConfig[Key]
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
+export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
 
 export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
@@ -156,14 +162,14 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
 
 export type PageResolver = (name: string) => Component
 
-export type PageHandler = ({
+export type PageHandler<ComponentType = Component> = ({
   component,
   page,
   preserveState,
 }: {
-  component: Component
+  component: ComponentType
   page: Page
-  preserveState: PreserveStateOption
+  preserveState: boolean
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
@@ -173,6 +179,12 @@ export type Progress = AxiosProgressEvent
 export type LocationVisit = {
   preserveScroll: boolean
 }
+
+export type CancelToken = {
+  cancel: VoidFunction
+}
+
+export type CancelTokenCallback = (cancelToken: CancelToken) => void
 
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
@@ -324,7 +336,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
 export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
-  onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
+  onCancelToken: CancelTokenCallback
   onBefore: GlobalEventCallback<'before', T>
   onBeforeUpdate: GlobalEventCallback<'beforeUpdate', T>
   onStart: GlobalEventCallback<'start', T>
@@ -351,10 +363,10 @@ export type PollOptions = {
 
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
-export type RouterInitParams = {
+export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
-  swapComponent: PageHandler
+  swapComponent: PageHandler<ComponentType>
 }
 
 export type PendingVisitOptions = {
@@ -376,7 +388,56 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  resolve: TComponentResolver
+  setup: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
+}
+
+export interface CreateInertiaAppOptionsForCSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  id?: string
+  page?: Page<SharedProps>
+  progress?:
+    | false
+    | {
+        delay?: number
+        color?: string
+        includeCSS?: boolean
+        showSpinner?: boolean
+      }
+  render?: undefined
+}
+
+export interface CreateInertiaAppOptionsForSSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  id?: undefined
+  page: Page<SharedProps>
+  progress?: undefined
+  render: unknown
+}
+
+export type InertiaAppSSRResponse = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
+
+export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerOnUpdateCallback = (elements: string[]) => void
+export type HeadManager = {
+  forceUpdate: () => void
+  createProvider: () => {
+    reconnect: () => void
+    update: HeadManagerOnUpdateCallback
+    disconnect: () => void
+  }
+}
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
@@ -403,9 +464,8 @@ export interface LinkComponentBaseProps
       | 'queryStringArrayFormat'
       | 'async'
     > &
-      Omit<VisitCallbacks, 'onCancelToken'> & {
+      VisitCallbacks & {
         href: string | UrlMethodPair
-        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
         cacheTags: string | string[]
@@ -579,7 +639,7 @@ export interface InfiniteScrollRef {
 }
 
 export interface InfiniteScrollComponentBaseProps {
-  data?: string
+  data: string
   buffer?: number
   as?: string
   manual?: boolean

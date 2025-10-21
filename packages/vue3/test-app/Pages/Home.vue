@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { getCurrentInstance } from 'vue'
 
 const props = defineProps({
@@ -30,6 +30,8 @@ const page = usePage()
 </script>
 
 <template>
+  <Head title="Home" />
+
   <div>
     <span class="text">This is the Test App Entrypoint page</span>
 
@@ -45,5 +47,7 @@ const page = usePage()
 
     <Link href="/redirect-external" method="post" class="links-redirect-external">External Redirect Link</Link>
     <a href="#" @click="redirectExternal" class="visits-redirect-external">Manual External Redirect visit</a>
+
+    <Link id="navigate-back" href="/head/mixed">Go to Mixed Head</Link>
   </div>
 </template>

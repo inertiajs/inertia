@@ -5,6 +5,7 @@ createInertiaApp({
   page: window.initialPage,
   resolve: async (name) => {
     const pages = import.meta.glob('./Pages/**/*.tsx', { eager: true })
+    // const typedPages = import.meta.glob<ComponentType>('./Pages/**/*.tsx', { eager: true })
 
     if (name === 'DeferredProps/InstantReload') {
       // Add small delay to ensure the component is loaded after the initial page load

@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -52,14 +52,14 @@
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "axios": "^1.12.2",
-    "es-check": "^9.3.1",
-    "esbuild": "^0.25.10",
+    "es-check": "^9.4.4",
+    "esbuild": "^0.25.11",
     "esbuild-node-externals": "^1.18.0",
-    "react": "^19.1.1",
-    "typescript": "^5.9.2"
+    "react": "^19.2.0",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": "^16.9.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"

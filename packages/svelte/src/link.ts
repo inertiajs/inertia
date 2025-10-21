@@ -5,13 +5,13 @@ import {
   shouldIntercept,
   shouldNavigate,
   type CacheForOption,
+  type CancelToken,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
 } from '@inertiajs/core'
-import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
 
 type ActionEventHandlers = {
@@ -40,8 +40,8 @@ type ActionAttributes = {
     event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
   ) => void
 } & {
-  'on:cancel-token'?: (event: CustomEvent<CancelTokenSource>) => void
-  oncanceltoken?: (event: CustomEvent<CancelTokenSource>) => void
+  'on:cancel-token'?: (event: CustomEvent<CancelToken>) => void
+  oncanceltoken?: (event: CustomEvent<CancelToken>) => void
 }
 
 function link(
@@ -62,7 +62,7 @@ function link(
   let visitParams: VisitOptions
 
   const regularEvents: ActionEventHandlers = {
-    click: (event) => {
+    click: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         event.preventDefault()
         router.visit(href, visitParams)
@@ -77,29 +77,29 @@ function link(
   }
 
   const prefetchClickEvents: ActionEventHandlers = {
-    mousedown: (event) => {
+    mousedown: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         event.preventDefault()
         prefetch()
       }
     },
-    keydown: (event) => {
-      if (shouldIntercept(event) && shouldNavigate(event)) {
+    keydown: (event: KeyboardEvent) => {
+      if (shouldNavigate(event)) {
         event.preventDefault()
         prefetch()
       }
     },
-    mouseup: (event) => {
+    mouseup: (event: MouseEvent) => {
       event.preventDefault()
       router.visit(href, visitParams)
     },
-    keyup: (event) => {
+    keyup: (event: KeyboardEvent) => {
       if (shouldNavigate(event)) {
         event.preventDefault()
         router.visit(href, visitParams)
       }
     },
-    click: (event) => {
+    click: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         // Let the mouseup/keyup event handle the visit
         event.preventDefault()
@@ -136,7 +136,7 @@ function link(
       return 30_000
     })()
 
-    cacheTags = cacheTagValues
+    cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
 
     method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)
