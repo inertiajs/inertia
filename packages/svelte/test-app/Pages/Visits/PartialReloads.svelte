@@ -110,9 +110,7 @@
   <a href={'#'} on:click={partialReloadVisit} class="visit">Update All (visit)</a>
   <a href={'#'} on:click={partialReloadVisitFooBar} class="visit-foo-bar">'Only' foo + bar (visit)</a>
   <a href={'#'} on:click={partialReloadVisitBaz} class="visit-baz">'Only' baz (visit)</a>
-  <a href={'#'} on:click={partialReloadVisitExceptFooBar} class="visit-except-foo-bar"
-    >'Except' foo + bar (visit)</a
-  >
+  <a href={'#'} on:click={partialReloadVisitExceptFooBar} class="visit-except-foo-bar">'Except' foo + bar (visit)</a>
   <a href={'#'} on:click={partialReloadVisitExceptBaz} class="visit-except-baz">'Except' baz (visit)</a>
 
   <a href={'#'} on:click={partialReloadGet} class="get">Update All (GET)</a>

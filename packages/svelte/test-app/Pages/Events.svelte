@@ -495,8 +495,7 @@
 
   <!-- Events: Before -->
   <a href={'#'} on:click|preventDefault={beforeVisit} class="before">Before Event</a>
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local"
-    >Before Event (Prevent)</a
+  <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a
   >
   <button
     use:inertia={{ href: $page.url, method: 'post' }}

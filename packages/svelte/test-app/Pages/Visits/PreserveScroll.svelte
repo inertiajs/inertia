@@ -69,8 +69,7 @@
 
   <a href={'#'} on:click|preventDefault={preserve} class="preserve">Preserve Scroll</a>
   <a href={'#'} on:click|preventDefault={preserveFalse} class="reset">Reset Scroll</a>
-  <a href={'#'} on:click|preventDefault={preserveCallback} class="preserve-callback">Preserve Scroll (Callback)</a
-  >
+  <a href={'#'} on:click|preventDefault={preserveCallback} class="preserve-callback">Preserve Scroll (Callback)</a>
   <br />
   <a href={'#'} on:click|preventDefault={preserveCallbackFalse} class="reset-callback">Reset Scroll (Callback)</a>
   <a href={'#'} on:click|preventDefault={preserveGet} class="preserve-get">Preserve Scroll (GET)</a>
