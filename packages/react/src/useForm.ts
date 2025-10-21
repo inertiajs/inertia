@@ -13,7 +13,7 @@ import {
   UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
+import { get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useIsomorphicLayoutEffect } from './react'
 import useRemember from './useRemember'
@@ -161,7 +161,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           if (isMounted.current && !setDefaultsCalledInOnSuccess.current) {
             setData((data) => {
-              setDefaults(cloneDeep(data))
+              setDefaults(structuredClone(data))
               return data
             })
           }
@@ -218,7 +218,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const setDataFunction = useCallback(
     (keyOrData: FormDataKeys<TForm> | Function | Partial<TForm>, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
-        setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
+        setData((data) => set(structuredClone(data), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
         setData((data) => keyOrData(data))
       } else {
@@ -249,8 +249,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       } else {
         setDefaults((defaults) => {
           return typeof fieldOrFields === 'string'
-            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
-            : Object.assign(cloneDeep(defaults), fieldOrFields)
+            ? set(structuredClone(defaults), fieldOrFields, maybeValue)
+            : Object.assign(structuredClone(defaults), fieldOrFields)
         })
       }
     },

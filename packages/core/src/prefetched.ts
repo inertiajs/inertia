@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash-es'
 import { objectsAreEqual } from './objectUtils'
 import { Response } from './response'
 import { timeToMs } from './time'
@@ -225,7 +224,7 @@ class PrefetchedRequests {
   }
 
   protected withoutPurposePrefetchHeader(params: ActiveVisit): ActiveVisit {
-    const newParams = cloneDeep(params)
+    const newParams = structuredClone(params)
     if (newParams.headers['Purpose'] === 'prefetch') {
       delete newParams.headers['Purpose']
     }

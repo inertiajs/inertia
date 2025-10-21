@@ -1,5 +1,4 @@
 import { router } from '@inertiajs/core'
-import { cloneDeep } from 'lodash-es'
 import { ComponentOptions } from 'vue'
 
 const remember: ComponentOptions = {
@@ -52,7 +51,7 @@ const remember: ComponentOptions = {
             rememberable.reduce(
               (data, key) => ({
                 ...data,
-                [key]: cloneDeep(hasCallbacks(key) ? this[key].__remember() : this[key]),
+                [key]: structuredClone(hasCallbacks(key) ? this[key].__remember() : this[key]),
               }),
               {},
             ),

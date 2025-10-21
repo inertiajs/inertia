@@ -17,7 +17,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
+import { get, has, isEqual, set } from 'lodash-es'
 import { writable, type Writable } from 'svelte/store'
 
 type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
@@ -72,7 +72,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
     : null
-  let defaults = cloneDeep(data)
+  let defaults = structuredClone(data)
   let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform = (data: TForm) => data as object
@@ -112,18 +112,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       defaultsCalledInOnSuccess = true
 
       if (typeof fieldOrFields === 'undefined') {
-        defaults = cloneDeep(this.data())
+        defaults = structuredClone(this.data())
       } else {
         defaults =
           typeof fieldOrFields === 'string'
-            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
-            : Object.assign(cloneDeep(defaults), fieldOrFields)
+            ? set(structuredClone(defaults), fieldOrFields, maybeValue)
+            : Object.assign(structuredClone(defaults), fieldOrFields)
       }
 
       return this
     },
     reset(...fields: Array<FormDataKeys<TForm>>) {
-      const clonedData = cloneDeep(defaults)
+      const clonedData = structuredClone(defaults)
       if (fields.length === 0) {
         this.setStore(clonedData)
       } else {
@@ -221,7 +221,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           if (!defaultsCalledInOnSuccess) {
             store.update((form) => {
-              this.defaults(cloneDeep(form.data()))
+              this.defaults(structuredClone(form.data()))
               return form
             })
           }

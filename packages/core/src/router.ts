@@ -1,4 +1,4 @@
-import { cloneDeep, get, set } from 'lodash-es'
+import { get, set } from 'lodash-es'
 import { progress } from '.'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
@@ -330,7 +330,7 @@ export class Router {
       props(currentProps) {
         const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
 
-        return set(cloneDeep(currentProps), name, newValue)
+        return set(structuredClone(currentProps), name, newValue)
       },
       ...(options || {}),
     })
