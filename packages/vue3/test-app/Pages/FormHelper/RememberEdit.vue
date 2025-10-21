@@ -1,8 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
-  user: Object,
+  user: {
+    type: Object as () => { id: number; name: string; email: string },
+    required: true,
+  },
 })
 
 const form = useForm('EditUserForm', {

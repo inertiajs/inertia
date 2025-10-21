@@ -2,10 +2,11 @@
   import { InfiniteScroll } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
   import UserCard, { type User } from './UserCard.svelte'
+  import type { InfiniteScrollRef } from '@inertiajs/core'
   export let users: { data: User[] }
 
   // Use the actual component type like Form component does
-  let infRef: any = null
+  let infRef: InfiniteScrollRef | null = null
   let hasPrevious = false
   let hasNext = false
 
@@ -15,15 +16,11 @@
   }
 
   function fetchNext() {
-    if (infRef) {
-      infRef.fetchNext({ onFinish: updateStates })
-    }
+    infRef?.fetchNext({ onFinish: updateStates })
   }
 
   function fetchPrevious() {
-    if (infRef) {
-      infRef.fetchPrevious({ onFinish: updateStates })
-    }
+    infRef?.fetchPrevious({ onFinish: updateStates })
   }
 
   onMount(() => setTimeout(updateStates))

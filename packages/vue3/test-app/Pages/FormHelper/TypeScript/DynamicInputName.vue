@@ -4,7 +4,7 @@ import { useForm } from '@inertiajs/vue3'
 
 interface ClientForm {
   name: string
-  [key: string]: any
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 const form = useForm<ClientForm>({

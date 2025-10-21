@@ -35,7 +35,7 @@
   {#if items}
     <div class="items-section">
       <div class="items">
-        {#each items.data as item}
+        {#each items.data as item, index (index)}
           <div class="item">{item}</div>
         {/each}
       </div>

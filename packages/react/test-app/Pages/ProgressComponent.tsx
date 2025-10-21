@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 declare global {
   interface Window {
-    progressTests: any[]
+    progressTests: unknown[]
   }
 }
 
@@ -12,7 +12,7 @@ window.progressTests = []
 export default () => {
   const [logs, setLogs] = useState<string[]>([])
 
-  const log = (...args: any[]) => {
+  const log = (...args: unknown[]) => {
     const message = args.join(' ')
     window.progressTests.push(...args)
     setLogs((prevLogs) => [...prevLogs, message])

@@ -4,7 +4,7 @@ import { ref } from 'vue'
 
 declare global {
   interface Window {
-    progressTests: any[]
+    progressTests: unknown[]
   }
 }
 
@@ -12,7 +12,7 @@ window.progressTests = []
 
 const logs = ref<string[]>([])
 
-const log = (...args: any[]) => {
+const log = (...args: unknown[]) => {
   const message = args.join(' ')
   window.progressTests.push(...args)
   logs.value.push(message)

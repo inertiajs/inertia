@@ -9,5 +9,6 @@ interface GenericProps<TFormData extends Record<string, FormDataConvertible>> {
 export default function Generic<TFormData extends Record<string, FormDataConvertible>>({
   form,
 }: GenericProps<TFormData>) {
+  console.log(form)
   return <div>{/* Generic form component */}</div>
 }

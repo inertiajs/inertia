@@ -32,6 +32,9 @@ jobs:
       - name: Type-check test-app
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run type-check
 
+      - name: ESLint test-app
+        run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run lint
+
       - name: Install Playwright Browsers
         run: pnpm playwright install chromium
 

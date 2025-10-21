@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
   declare global {
     interface Window {
-      progressTests: any[]
+      progressTests: unknown[]
     }
   }
 </script>
@@ -13,7 +13,7 @@
 
   let logs: string[] = []
 
-  const log = (...args: any[]) => {
+  const log = (...args: unknown[]) => {
     const message = args.join(' ')
     window.progressTests.push(...args)
     logs = [...logs, message]
