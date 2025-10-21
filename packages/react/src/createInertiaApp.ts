@@ -1,8 +1,8 @@
 import {
-  CreateInertiaAppPropsForCSR,
-  CreateInertiaAppPropsForSSR,
+  CreateInertiaAppOptionsForCSR,
+  CreateInertiaAppOptionsForSSR,
   InertiaAppResponse,
-  InertiaAppSSRContent,
+  InertiaAppSSRResponse,
   PageProps,
   router,
   setupProgress,
@@ -23,14 +23,14 @@ type ComponentResolver = (
   name: string,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent } | unknown
 
-type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<HTMLElement, SharedProps>,
   void
 >
 
-type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppPropsForSSR<
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<null, SharedProps>,
@@ -44,7 +44,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 ): Promise<void>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsForSSR<SharedProps>,
-): Promise<InertiaAppSSRContent>
+): Promise<InertiaAppSSRResponse>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,

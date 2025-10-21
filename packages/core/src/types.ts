@@ -388,14 +388,18 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export interface CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
-  resolve: Resolver
-  setup: (options: SetupOptions) => SetupReturn
+interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  resolve: TComponentResolver
+  setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
 }
 
-export interface CreateInertiaAppPropsForCSR<SharedProps extends PageProps, Resolver, SetupOptions, SetupReturn>
-  extends CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
+export interface CreateInertiaAppOptionsForCSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
   id?: string
   page?: Page<SharedProps>
   progress?:
@@ -409,16 +413,20 @@ export interface CreateInertiaAppPropsForCSR<SharedProps extends PageProps, Reso
   render?: undefined
 }
 
-export interface CreateInertiaAppPropsForSSR<SharedProps extends PageProps, Resolver, SetupOptions, SetupReturn>
-  extends CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
+export interface CreateInertiaAppOptionsForSSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined
   render: unknown
 }
 
-export type InertiaAppSSRContent = { head: string[]; body: string }
-export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
+export type InertiaAppSSRResponse = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void

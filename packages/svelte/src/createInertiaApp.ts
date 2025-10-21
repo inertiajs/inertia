@@ -1,7 +1,7 @@
 import {
   router,
   setupProgress,
-  type CreateInertiaAppPropsForCSR,
+  type CreateInertiaAppOptionsForCSR,
   type InertiaAppResponse,
   type PageProps,
 } from '@inertiajs/core'
@@ -17,9 +17,9 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: InertiaAppProps<SharedProps>
 }
 
-// Svelte doesn't use CreateInertiaAppPropsForSSR as it doesn't pass a
+// Svelte doesn't use CreateInertiaAppOptionsForSSR as it doesn't pass a
 // 'render' function, it calls it directly in the setup() method...
-type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
+type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<SharedProps>,
