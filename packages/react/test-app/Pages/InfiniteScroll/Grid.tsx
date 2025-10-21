@@ -10,7 +10,7 @@ export default ({ users }: { users: { data: User[] } }) => {
         <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>Loading more users...</div>
       )}
     >
-      {({ loading, loadingPrevious, loadingNext }) => users.data.map((user) => <UserCard key={user.id} user={user} />)}
+      {() => users.data.map((user) => <UserCard key={user.id} user={user} />)}
     </InfiniteScroll>
   )
 }

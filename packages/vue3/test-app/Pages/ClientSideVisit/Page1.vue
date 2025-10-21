@@ -8,7 +8,7 @@ interface PageProps {
   bar: string
 }
 
-const props = defineProps<PageProps>()
+defineProps<PageProps>()
 
 const errors = ref(0)
 const finished = ref(0)

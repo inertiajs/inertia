@@ -3,7 +3,7 @@ import { InfiniteScroll } from '@inertiajs/vue3'
 import { onMounted, ref } from 'vue'
 import { User, default as UserCard } from './UserCard.vue'
 
-const props = defineProps<{
+defineProps<{
   users: { data: User[] }
 }>()
 

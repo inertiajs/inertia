@@ -11,7 +11,7 @@ export default ({ foo, bar }: PageProps) => {
   const [errors, setErrors] = useState(0)
   const [finished, setFinished] = useState(0)
   const [success, setSuccess] = useState(0)
-  const [random, setRandom] = useState(Math.random())
+  const [random] = useState(Math.random())
 
   const bagErrors = () => {
     router.replace({
