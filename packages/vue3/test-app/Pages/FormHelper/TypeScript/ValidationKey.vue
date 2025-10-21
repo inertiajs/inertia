@@ -21,5 +21,5 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
 </script>
 
 <template>
-  <button @click="validation(() => $page.props.errors).unique('name')">Check TypeScript</button>
+  <button @click="validation(() => ({ name: 'Validation error' }))">Handle</button>
 </template>

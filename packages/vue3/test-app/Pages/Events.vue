@@ -15,7 +15,7 @@ const page = usePage()
 
 window.messages = []
 
-const internalAlert = (...args: any[]) => {
+const internalAlert = (...args: unknown[]) => {
   window.messages.push(...args)
 }
 
@@ -490,7 +490,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       :href="$page.url"
       method="post"
       @before="
-        (visit) => {
+        () => {
           internalAlert('linkOnBefore')
           return false
         }

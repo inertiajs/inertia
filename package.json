@@ -15,6 +15,7 @@
     "dev:test-app:vue": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
     "es2020-check": "pnpm -r --filter './packages/*' es2020-check",
     "lint:test-app:react": "cd packages/react/test-app && pnpm run lint",
+    "lint:test-app:svelte": "cd packages/svelte/test-app && pnpm run lint",
     "lint:test-app:vue": "cd packages/vue3/test-app && pnpm run lint",
     "type-check:test-app": "pnpm -r --filter './packages/*/test-app' type-check",
     "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
