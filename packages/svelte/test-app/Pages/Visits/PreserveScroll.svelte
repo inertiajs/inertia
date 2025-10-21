@@ -67,14 +67,14 @@
   </span>
   <span class="foo">Foo is now {foo}</span>
 
-  <a href={undefined} on:click|preventDefault={preserve} class="preserve">Preserve Scroll</a>
-  <a href={undefined} on:click|preventDefault={preserveFalse} class="reset">Reset Scroll</a>
-  <a href={undefined} on:click|preventDefault={preserveCallback} class="preserve-callback">Preserve Scroll (Callback)</a
+  <a href={'#'} on:click|preventDefault={preserve} class="preserve">Preserve Scroll</a>
+  <a href={'#'} on:click|preventDefault={preserveFalse} class="reset">Reset Scroll</a>
+  <a href={'#'} on:click|preventDefault={preserveCallback} class="preserve-callback">Preserve Scroll (Callback)</a
   >
   <br />
-  <a href={undefined} on:click|preventDefault={preserveCallbackFalse} class="reset-callback">Reset Scroll (Callback)</a>
-  <a href={undefined} on:click|preventDefault={preserveGet} class="preserve-get">Preserve Scroll (GET)</a>
-  <a href={undefined} on:click|preventDefault={preserveGetFalse} class="reset-get">Reset Scroll (GET)</a>
+  <a href={'#'} on:click|preventDefault={preserveCallbackFalse} class="reset-callback">Reset Scroll (Callback)</a>
+  <a href={'#'} on:click|preventDefault={preserveGet} class="preserve-get">Preserve Scroll (GET)</a>
+  <a href={'#'} on:click|preventDefault={preserveGetFalse} class="reset-get">Reset Scroll (GET)</a>
 
   <a href="/non-inertia" class="off-site">Off-site link</a>
 </div>

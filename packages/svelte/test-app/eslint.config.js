@@ -53,6 +53,7 @@ export default ts.config(
   {
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
+      'svelte/no-useless-mustaches': 'off',
     },
   },
 )

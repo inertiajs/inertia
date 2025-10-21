@@ -87,16 +87,16 @@
     <input type="text" name="example-field" class="field" />
   </label>
 
-  <a href={undefined} on:click|preventDefault={preserve} class="preserve">[State] Preserve visit: true</a>
-  <a href={undefined} on:click|preventDefault={preserveFalse} class="preserve-false">[State] Preserve visit: false</a>
-  <a href={undefined} on:click|preventDefault={preserveCallback} class="preserve-callback"
+  <a href={'#'} on:click|preventDefault={preserve} class="preserve">[State] Preserve visit: true</a>
+  <a href={'#'} on:click|preventDefault={preserveFalse} class="preserve-false">[State] Preserve visit: false</a>
+  <a href={'#'} on:click|preventDefault={preserveCallback} class="preserve-callback"
     >[State] Preserve Callback: true</a
   >
-  <a href={undefined} on:click|preventDefault={preserveCallbackFalse} class="preserve-callback-false"
+  <a href={'#'} on:click|preventDefault={preserveCallbackFalse} class="preserve-callback-false"
     >[State] Preserve Callback: false</a
   >
-  <a href={undefined} on:click|preventDefault={preserveGet} class="preserve-get">[State] Preserve GET: true</a>
-  <a href={undefined} on:click|preventDefault={preserveGetFalse} class="preserve-get-false"
+  <a href={'#'} on:click|preventDefault={preserveGet} class="preserve-get">[State] Preserve GET: true</a>
+  <a href={'#'} on:click|preventDefault={preserveGetFalse} class="preserve-get-false"
     >[State] Preserve GET: false</a
   >
 </div>

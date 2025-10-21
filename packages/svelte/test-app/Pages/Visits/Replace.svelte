@@ -37,8 +37,8 @@
 <div>
   <span class="text">This is the links page that demonstrates manual replace</span>
 
-  <a href={undefined} on:click|preventDefault={replace} class="replace">[State] Replace visit: true</a>
-  <a href={undefined} on:click|preventDefault={replaceFalse} class="replace-false">[State] Replace visit: false</a>
-  <a href={undefined} on:click|preventDefault={replaceGet} class="replace-get">[State] Replace GET: true</a>
-  <a href={undefined} on:click|preventDefault={replaceGetFalse} class="replace-get-false">[State] Replace GET: false</a>
+  <a href={'#'} on:click|preventDefault={replace} class="replace">[State] Replace visit: true</a>
+  <a href={'#'} on:click|preventDefault={replaceFalse} class="replace-false">[State] Replace visit: false</a>
+  <a href={'#'} on:click|preventDefault={replaceGet} class="replace-get">[State] Replace GET: true</a>
+  <a href={'#'} on:click|preventDefault={replaceGetFalse} class="replace-get-false">[State] Replace GET: false</a>
 </div>
