@@ -6,19 +6,17 @@ import {
   type PageProps,
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
-import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import type { ComponentResolver } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
-type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
 
 type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
   SharedProps,
   ComponentResolver,
   {
     el: HTMLElement | null
-    App: AppComponent
+    App: typeof App
     props: InertiaAppProps<SharedProps>
   },
   SvelteRenderResult | void
@@ -42,7 +40,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   ]).then(([initialComponent]) => {
     return setup({
       el,
-      App: App as unknown as AppComponent,
+      App,
       props: { initialPage, initialComponent, resolveComponent },
     })
   })
