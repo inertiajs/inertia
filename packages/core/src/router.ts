@@ -48,7 +48,11 @@ export class Router {
     interruptible: false,
   })
 
-  public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
+  public init<ComponentType = Component>({
+    initialPage,
+    resolveComponent,
+    swapComponent,
+  }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,

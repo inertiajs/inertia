@@ -7,7 +7,7 @@ import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
   protected page!: Page
-  protected swapComponent!: PageHandler
+  protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
   protected componentId = {}
   protected listeners: {
@@ -18,7 +18,11 @@ class CurrentPage {
   protected cleared = false
   protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
 
-  public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
+  public init<ComponentType = Component>({
+    initialPage,
+    swapComponent,
+    resolveComponent,
+  }: RouterInitParams<ComponentType>) {
     this.page = initialPage
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
