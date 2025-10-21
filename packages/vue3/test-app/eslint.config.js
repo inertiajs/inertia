@@ -18,6 +18,7 @@ export default defineConfigWithVueTs(
       ecmaVersion: 2020,
       sourceType: 'module',
       globals: {
+        ...globals.browser,
         ...globals.es2020,
       },
     },

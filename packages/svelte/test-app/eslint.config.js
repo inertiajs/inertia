@@ -16,8 +16,11 @@ export default ts.config(
   ...svelte.configs.recommended,
   {
     languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
       globals: {
         ...globals.browser,
+        ...globals.es2020,
       },
     },
   },
