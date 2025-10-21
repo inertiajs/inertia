@@ -1,9 +1,8 @@
 import {
   router,
   setupProgress,
-  type CreateInertiaAppProps,
+  type CreateInertiaAppPropsForCSR,
   type InertiaAppResponse,
-  type Page,
   type PageProps,
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
@@ -14,17 +13,16 @@ import type { ComponentResolver } from './types'
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
 
-interface CreateInertiaSvelteAppProps<SharedProps extends PageProps = PageProps>
-  extends CreateInertiaAppProps<
-    SharedProps,
-    ComponentResolver,
-    {
-      el: HTMLElement | null
-      App: AppComponent
-      props: InertiaAppProps
-    },
-    unknown // TODO: Svelte app type
-  > {}
+type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
+  SharedProps,
+  ComponentResolver,
+  {
+    el: HTMLElement | null
+    App: AppComponent
+    props: InertiaAppProps<SharedProps>
+  },
+  SvelteRenderResult | void
+>
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
@@ -32,27 +30,25 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   setup,
   progress = {},
   page,
-}: CreateInertiaSvelteAppProps<SharedProps>): InertiaAppResponse {
+}: InertiaAppOptions<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')
+  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
-  const [initialComponent] = await Promise.all([
+  const svelteApp = await Promise.all([
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
-  ])
-
-  const props: InertiaAppProps = { initialPage, initialComponent, resolveComponent }
-
-  const svelteApp = setup({
-    el,
-    App: App as unknown as AppComponent,
-    props,
+  ]).then(([initialComponent]) => {
+    return setup({
+      el,
+      App: App as unknown as AppComponent,
+      props: { initialPage, initialComponent, resolveComponent },
+    })
   })
 
-  if (isServer) {
-    const { html, head, css } = svelteApp as SvelteRenderResult
+  if (isServer && svelteApp) {
+    const { html, head, css } = svelteApp
 
     return {
       body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,

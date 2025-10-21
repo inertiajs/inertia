@@ -1,17 +1,17 @@
 <script context="module" lang="ts">
   import type { ComponentResolver, ResolvedComponent } from '../types'
-  import { type Page } from '@inertiajs/core'
+  import { type Page, type PageProps } from '@inertiajs/core'
 
-  export interface InertiaAppProps {
+  export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
     initialComponent: ResolvedComponent
-    initialPage: Page
+    initialPage: Page<SharedProps>
     resolveComponent: ComponentResolver
   }
 </script>
 
 <script lang="ts">
   import type { LayoutType, LayoutResolver } from '../types'
-  import { router, type PageProps } from '@inertiajs/core'
+  import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page'
 

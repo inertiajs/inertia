@@ -24,7 +24,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppPr
   ComponentResolver,
   SetupOptions<HTMLElement, SharedProps>,
   void
->
+> & {
+  render?: undefined
+}
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppPropsForSSR<
   SharedProps,

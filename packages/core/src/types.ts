@@ -398,7 +398,6 @@ export interface CreateInertiaAppPropsForCSR<SharedProps extends PageProps, Reso
   extends CreateInertiaAppProps<Resolver, SetupOptions, SetupReturn> {
   id?: string
   page?: Page<SharedProps>
-  render?: undefined
   progress?:
     | false
     | {
