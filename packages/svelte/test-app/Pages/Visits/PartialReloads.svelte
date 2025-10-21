@@ -107,15 +107,17 @@
   <span class="baz-text">Baz is now {baz}</span>
   <pre class="headers">{headers}</pre>
 
-  <a href="#" on:click={partialReloadVisit} class="visit">Update All (visit)</a>
-  <a href="#" on:click={partialReloadVisitFooBar} class="visit-foo-bar">'Only' foo + bar (visit)</a>
-  <a href="#" on:click={partialReloadVisitBaz} class="visit-baz">'Only' baz (visit)</a>
-  <a href="#" on:click={partialReloadVisitExceptFooBar} class="visit-except-foo-bar">'Except' foo + bar (visit)</a>
-  <a href="#" on:click={partialReloadVisitExceptBaz} class="visit-except-baz">'Except' baz (visit)</a>
+  <a href={undefined} on:click={partialReloadVisit} class="visit">Update All (visit)</a>
+  <a href={undefined} on:click={partialReloadVisitFooBar} class="visit-foo-bar">'Only' foo + bar (visit)</a>
+  <a href={undefined} on:click={partialReloadVisitBaz} class="visit-baz">'Only' baz (visit)</a>
+  <a href={undefined} on:click={partialReloadVisitExceptFooBar} class="visit-except-foo-bar"
+    >'Except' foo + bar (visit)</a
+  >
+  <a href={undefined} on:click={partialReloadVisitExceptBaz} class="visit-except-baz">'Except' baz (visit)</a>
 
-  <a href="#" on:click={partialReloadGet} class="get">Update All (GET)</a>
-  <a href="#" on:click={partialReloadGetFooBar} class="get-foo-bar">'Only' foo + bar (GET)</a>
-  <a href="#" on:click={partialReloadGetBaz} class="get-baz">'Only' baz (GET)</a>
-  <a href="#" on:click={partialReloadGetExceptFooBar} class="get-except-foo-bar">'Except' foo + bar (GET)</a>
-  <a href="#" on:click={partialReloadGetExceptBaz} class="get-except-baz">'Except' baz (GET)</a>
+  <a href={undefined} on:click={partialReloadGet} class="get">Update All (GET)</a>
+  <a href={undefined} on:click={partialReloadGetFooBar} class="get-foo-bar">'Only' foo + bar (GET)</a>
+  <a href={undefined} on:click={partialReloadGetBaz} class="get-baz">'Only' baz (GET)</a>
+  <a href={undefined} on:click={partialReloadGetExceptFooBar} class="get-except-foo-bar">'Except' foo + bar (GET)</a>
+  <a href={undefined} on:click={partialReloadGetExceptBaz} class="get-except-baz">'Except' baz (GET)</a>
 </div>

@@ -35,11 +35,11 @@
 <div>
   <span class="text">This is the page that demonstrates manual visit methods</span>
 
-  <a href="#" on:click={standardVisitMethod} class="visit-get">Standard visit Link</a>
-  <a href="#" on:click={specificVisitMethod} class="visit-specific">Specific visit Link</a>
-  <a href="#" on:click={getMethod} class="get">GET Link</a>
-  <a href="#" on:click={postMethod} class="post">POST Link</a>
-  <a href="#" on:click={putMethod} class="put">PUT Link</a>
-  <a href="#" on:click={patchMethod} class="patch">PATCH Link</a>
-  <a href="#" on:click={deleteMethod} class="delete">DELETE Link</a>
+  <a href={undefined} on:click={standardVisitMethod} class="visit-get">Standard visit Link</a>
+  <a href={undefined} on:click={specificVisitMethod} class="visit-specific">Specific visit Link</a>
+  <a href={undefined} on:click={getMethod} class="get">GET Link</a>
+  <a href={undefined} on:click={postMethod} class="post">POST Link</a>
+  <a href={undefined} on:click={putMethod} class="put">PUT Link</a>
+  <a href={undefined} on:click={patchMethod} class="patch">PATCH Link</a>
+  <a href={undefined} on:click={deleteMethod} class="delete">DELETE Link</a>
 </div>
