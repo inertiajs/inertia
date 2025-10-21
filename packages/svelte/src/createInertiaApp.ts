@@ -11,14 +11,18 @@ import type { ComponentResolver } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 
+type SetupOptions<SharedProps extends PageProps> = {
+  el: HTMLElement | null
+  App: typeof App
+  props: InertiaAppProps<SharedProps>
+}
+
+// Svelte doesn't use CreateInertiaAppPropsForSSR as it doesn't pass a
+// 'render' function, it calls it directly in the setup() method...
 type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppPropsForCSR<
   SharedProps,
   ComponentResolver,
-  {
-    el: HTMLElement | null
-    App: typeof App
-    props: InertiaAppProps<SharedProps>
-  },
+  SetupOptions<SharedProps>,
   SvelteRenderResult | void
 >
 

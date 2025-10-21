@@ -406,6 +406,7 @@ export interface CreateInertiaAppPropsForCSR<SharedProps extends PageProps, Reso
         includeCSS?: boolean
         showSpinner?: boolean
       }
+  render?: undefined
 }
 
 export interface CreateInertiaAppPropsForSSR<SharedProps extends PageProps, Resolver, SetupOptions, SetupReturn>
@@ -413,6 +414,7 @@ export interface CreateInertiaAppPropsForSSR<SharedProps extends PageProps, Reso
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined
+  render: unknown
 }
 
 export type InertiaAppSSRContent = { head: string[]; body: string }
