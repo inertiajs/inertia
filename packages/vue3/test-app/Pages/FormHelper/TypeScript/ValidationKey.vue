@@ -19,3 +19,7 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
   return { filterAndMap, unique }
 }
 </script>
+
+<template>
+  <button @click="validation(() => $page.props.errors).unique('name')">Check TypeScript</button>
+</template>

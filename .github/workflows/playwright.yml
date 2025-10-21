@@ -34,7 +34,7 @@ jobs:
 
       - name: ESLint test-app
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run lint
-        if: matrix.adapter == 'react'
+        if: matrix.adapter != 'svelte'
 
       - name: Install Playwright Browsers
         run: pnpm playwright install chromium

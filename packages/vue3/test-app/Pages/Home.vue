@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { getCurrentInstance } from 'vue'
 
 const props = defineProps({
@@ -25,8 +25,6 @@ const redirectExternal = () => {
 window._inertia_page_key = getCurrentInstance()?.uid
 window._inertia_props = props
 window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProperties || {}
-
-const page = usePage()
 </script>
 
 <template>

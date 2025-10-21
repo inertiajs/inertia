@@ -82,7 +82,7 @@ const beforeVisitPreventLocal = () => {
 
 const beforeVisitPreventGlobalInertia = () => {
   document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
-  router.on('before', (visit) => {
+  router.on('before', () => {
     internalAlert('Inertia.on(before)')
     return false
   })

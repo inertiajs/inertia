@@ -2,12 +2,19 @@
   "scripts": {
     "build": "vite build .",
     "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'",
+    "lint": "eslint . --ext .js,.vue,.ts",
     "type-check": "vue-tsc --noEmit"
   },
   "devDependencies": {
+    "@eslint/js": "^9.38.0",
     "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.5.1",
     "nodemon": "^3.1.10",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
     "vite": "^6.4.1",
     "vue": "^3.5.22",
     "vue-tsc": "^2.2.12"

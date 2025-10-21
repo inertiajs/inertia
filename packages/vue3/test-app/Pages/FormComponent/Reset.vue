@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const formRef = ref<InstanceType<typeof Form> | null>(null)
+const formRef = ref<FormComponentRef | null>(null)
 
 declare global {
   interface Window {
@@ -12,7 +13,6 @@ declare global {
 
 // Expose reset function to window for testing
 window.resetForm = (...fields: string[]) => {
-  // @ts-expect-error
   formRef.value?.reset(...fields)
 }
 </script>
