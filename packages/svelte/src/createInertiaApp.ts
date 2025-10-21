@@ -58,7 +58,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
   }
 
-  if (progress) {
+  if (!isServer && progress) {
     setupProgress(progress)
   }
 }

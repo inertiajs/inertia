@@ -71,7 +71,6 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       initialComponent,
       resolveComponent,
       titleCallback: title,
-      onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
     }
 
     if (isServer) {
