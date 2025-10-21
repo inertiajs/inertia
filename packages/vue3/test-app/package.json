@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "scripts": {
     "build": "vite build .",
     "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'",
