@@ -2,9 +2,7 @@ import { createHeadManager, Page, PageHandler, PageProps, router, SharedPageProp
 import { DefineComponent } from 'vue'
 import useForm from './useForm'
 
-export type VuePageHandlerArgs = Parameters<PageHandler>[0] & {
-  component: DefineComponent
-}
+export type VuePageHandlerArgs = Parameters<PageHandler<DefineComponent>>[0]
 
 declare module '@inertiajs/core' {
   export interface Router {

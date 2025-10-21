@@ -1,6 +1,17 @@
+<script context="module" lang="ts">
+  import type { ComponentResolver, ResolvedComponent } from '../types'
+  import { type Page, type PageProps } from '@inertiajs/core'
+
+  export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
+    initialComponent: ResolvedComponent
+    initialPage: Page<SharedProps>
+    resolveComponent: ComponentResolver
+  }
+</script>
+
 <script lang="ts">
-  import type { LayoutType, LayoutResolver, InertiaAppProps, ResolvedComponent } from '../types'
-  import { router, type Page, type PageProps } from '@inertiajs/core'
+  import type { LayoutType, LayoutResolver } from '../types'
+  import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page'
 
@@ -18,11 +29,11 @@
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
-    router.init({
+    router.init<ResolvedComponent>({
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
-        component = args.component as ResolvedComponent
+        component = args.component
         page = args.page
         key = args.preserveState ? key : Date.now()
 

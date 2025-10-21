@@ -20,11 +20,11 @@
   <form>
     <div>
       <label for="name">Name:</label>
-      <input type="text" bind:value={$form.name} name="name" />
+      <input id="name" type="text" bind:value={$form.name} />
     </div>
     <div>
       <label for="email">Email:</label>
-      <input type="email" bind:value={$form.email} name="email" />
+      <input id="email" type="email" bind:value={$form.email} />
     </div>
   </form>
 </div>

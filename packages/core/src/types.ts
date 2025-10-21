@@ -162,12 +162,12 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
 
 export type PageResolver = (name: string) => Component
 
-export type PageHandler = ({
+export type PageHandler<ComponentType = Component> = ({
   component,
   page,
   preserveState,
 }: {
-  component: Component
+  component: ComponentType
   page: Page
   preserveState: boolean
 }) => Promise<unknown>
@@ -363,10 +363,10 @@ export type PollOptions = {
 
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
-export type RouterInitParams = {
+export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
-  swapComponent: PageHandler
+  swapComponent: PageHandler<ComponentType>
 }
 
 export type PendingVisitOptions = {
@@ -388,21 +388,45 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export interface InertiaAppProgressOptions {
-  delay?: number
-  color?: string
-  includeCSS?: boolean
-  showSpinner?: boolean
+interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  resolve: TComponentResolver
+  setup: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
 }
 
-export type InertiaAppSSRContent = { head: string[]; body: string }
-export type InertiaAppResponse = Promise<InertiaAppSSRContent | void>
-
-export type CreateInertiaAppOptions = {
+export interface CreateInertiaAppOptionsForCSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
   id?: string
-  progress?: InertiaAppProgressOptions | false
-  resolve: PageResolver
+  page?: Page<SharedProps>
+  progress?:
+    | false
+    | {
+        delay?: number
+        color?: string
+        includeCSS?: boolean
+        showSpinner?: boolean
+      }
+  render?: undefined
 }
+
+export interface CreateInertiaAppOptionsForSSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  id?: undefined
+  page: Page<SharedProps>
+  progress?: undefined
+  render: unknown
+}
+
+export type InertiaAppSSRResponse = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void

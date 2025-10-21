@@ -4,7 +4,6 @@ import {
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
   Page,
-  PageHandler,
   PageProps,
   router,
   SharedPageProps,
@@ -21,22 +20,13 @@ import {
   ref,
   shallowRef,
 } from 'vue'
-import { SetupProps } from './createInertiaApp'
 import remember from './remember'
+import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
-
-type LayoutFunction = (h: typeof import('vue').h, page: ReturnType<typeof h>) => ReturnType<typeof h>
-
-type ComponentWithLayout = DefineComponent & {
-  layout?: DefineComponent | DefineComponent[] | LayoutFunction
-  inheritAttrs?: boolean
-}
-
-type VuePageHandler = (options: { component: DefineComponent; page: Page; preserveState: boolean }) => Promise<void>
 
 export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   initialPage: Page<SharedProps>
-  initialComponent?: object
+  initialComponent?: DefineComponent
   resolveComponent?: (name: string) => DefineComponent | Promise<DefineComponent>
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
@@ -44,13 +34,13 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
-const component = ref<ComponentWithLayout | null>(null)
+const component = ref<DefineComponent | undefined>(undefined)
 const page = ref<Page>()
-const layout = shallowRef<ComponentWithLayout | ComponentWithLayout[] | null>(null)
+const layout = shallowRef(null)
 const key = ref<number | undefined>(undefined)
 let headManager: HeadManager
 
-const App = defineComponent({
+const App: InertiaApp = defineComponent({
   name: 'Inertia',
   props: {
     initialPage: {
@@ -58,7 +48,7 @@ const App = defineComponent({
       required: true,
     },
     initialComponent: {
-      type: Object,
+      type: Object as PropType<DefineComponent>,
       required: false,
     },
     resolveComponent: {
@@ -76,23 +66,23 @@ const App = defineComponent({
       default: () => () => {},
     },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }: SetupProps) {
-    component.value = initialComponent ? markRaw(initialComponent) : null
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }: InertiaAppProps) {
+    component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = initialPage
     key.value = undefined
 
     const isServer = typeof window === 'undefined'
-    headManager = createHeadManager(isServer, titleCallback || ((title) => title), onHeadUpdate || (() => {}))
+    headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
 
     if (!isServer) {
-      router.init({
+      router.init<DefineComponent>({
         initialPage,
-        resolveComponent,
-        swapComponent: (async (options: Parameters<VuePageHandler>[0]) => {
+        resolveComponent: resolveComponent!,
+        swapComponent: async (options: VuePageHandlerArgs) => {
           component.value = markRaw(options.component)
           page.value = options.page
           key.value = options.preserveState ? key.value : Date.now()
-        }) as PageHandler,
+        },
       })
 
       router.on('navigate', () => headManager.forceUpdate())
@@ -114,24 +104,23 @@ const App = defineComponent({
 
         if (component.value.layout) {
           if (typeof component.value.layout === 'function') {
-            const layoutFunc = component.value.layout as LayoutFunction
-            return layoutFunc(h, child)
+            return component.value.layout(h, child)
           }
 
-          const layouts = Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout]
-
-          return layouts.reverse().reduce((children, layout) => {
-            layout.inheritAttrs = !!layout.inheritAttrs
-            return h(layout, { ...page.value!.props }, () => children)
-          }, child)
+          return (Array.isArray(component.value.layout) ? component.value.layout : [component.value.layout])
+            .concat(child)
+            .reverse()
+            .reduce((child, layout) => {
+              layout.inheritAttrs = !!layout.inheritAttrs
+              return h(layout, { ...page.value!.props }, () => child)
+            })
         }
 
         return child
       }
     }
   },
-}) as InertiaApp
-
+})
 export default App
 
 export const plugin: Plugin = {

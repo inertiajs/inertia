@@ -1,25 +1,17 @@
 import {
-  CreateInertiaAppOptions,
-  HeadManagerOnUpdateCallback,
-  HeadManagerTitleCallback,
+  CreateInertiaAppOptionsForCSR,
+  CreateInertiaAppOptionsForSSR,
   InertiaAppResponse,
-  Page,
+  InertiaAppSSRResponse,
   PageProps,
   router,
   setupProgress,
 } from '@inertiajs/core'
-import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
+import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
+import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 
-type VuePageResolver = (name: string) => DefineComponent | Promise<DefineComponent>
-
-export type SetupProps<SharedProps extends PageProps = PageProps> = {
-  initialPage: Page<SharedProps>
-  initialComponent: DefineComponent
-  resolveComponent: VuePageResolver
-  titleCallback?: HeadManagerTitleCallback
-  onHeadUpdate?: HeadManagerOnUpdateCallback
-}
+type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
@@ -28,28 +20,28 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
   plugin: Plugin
 }
 
-type CreateInertiaAppOptionsForCSR<SharedProps extends PageProps = PageProps> = CreateInertiaAppOptions & {
-  resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
-  setup: (options: { el: HTMLElement; App: InertiaApp; props: InertiaAppProps<SharedProps>; plugin: Plugin }) => void
-  title?: HeadManagerTitleCallback
-  page?: Page<SharedProps>
-  render?: (app: VueApp) => Promise<string>
-}
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<HTMLElement, SharedProps>,
+  void
+>
 
-type CreateInertiaAppOptionsForSSR<SharedProps extends PageProps = PageProps> = CreateInertiaAppOptions & {
-  resolve: (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
-  setup: (options: { el: null; App: InertiaApp; props: InertiaAppProps<SharedProps>; plugin: Plugin }) => VueApp
-  title?: HeadManagerTitleCallback
-  page?: Page<SharedProps>
-  render?: (app: VueApp) => Promise<string>
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<null, SharedProps>,
+  VueApp
+> & {
+  render: typeof renderToString
 }
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
-  options: CreateInertiaAppOptionsForCSR<SharedProps>,
-): InertiaAppResponse
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<void>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
-  options: CreateInertiaAppOptionsForSSR<SharedProps>,
-): InertiaAppResponse
+  options: InertiaAppOptionsForSSR<SharedProps>,
+): Promise<InertiaAppSSRResponse>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
@@ -58,16 +50,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-}: CreateInertiaAppOptionsForCSR<SharedProps> | CreateInertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || (JSON.parse(el?.dataset.page ?? '{}') as Page<SharedProps>)
-
-  const resolveComponent = (name: string) =>
-    Promise.resolve(resolve(name)).then((module) => {
-      const typedModule = module as DefineComponent | { default: DefineComponent }
-      return 'default' in typedModule ? typedModule.default : typedModule
-    })
+  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head: string[] = []
 
@@ -75,7 +62,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
-    const props: SetupProps<SharedProps> = {
+    const props = {
       initialPage,
       initialComponent,
       resolveComponent,
@@ -96,7 +83,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
 
     return csrSetup({
-      el: el!,
+      el: el as HTMLElement,
       App,
       props,
       plugin,
