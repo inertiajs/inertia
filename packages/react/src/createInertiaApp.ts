@@ -57,7 +57,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el?.dataset.page || '{}')
-  // @ts-expect-error
+  // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head: string[] = []
