@@ -488,15 +488,13 @@
 
 <div>
   <!-- Listeners -->
-  <a href={'#'} on:click|preventDefault={withoutEventListeners} class="without-listeners">Basic Visit</a>
-  <a href={'#'} on:click|preventDefault={removeInertiaListener} class="remove-inertia-listener"
-    >Remove Inertia Listener</a
+  <a href="#" on:click|preventDefault={withoutEventListeners} class="without-listeners">Basic Visit</a>
+  <a href="#" on:click|preventDefault={removeInertiaListener} class="remove-inertia-listener">Remove Inertia Listener</a
   >
 
   <!-- Events: Before -->
-  <a href={'#'} on:click|preventDefault={beforeVisit} class="before">Before Event</a>
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a
-  >
+  <a href="#" on:click|preventDefault={beforeVisit} class="before">Before Event</a>
+  <a href="#" on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:before={(event) => internalAlert('linkOnBefore', event.detail.visit)}
@@ -514,15 +512,15 @@
     }}
     class="link-before-prevent-local">Before Event Link (Prevent)</button
   >
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventGlobalInertia} class="before-prevent-global-inertia"
+  <a href="#" on:click|preventDefault={beforeVisitPreventGlobalInertia} class="before-prevent-global-inertia"
     >Before Event - Prevent globally using Inertia Event Listener</a
   >
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventGlobalNative} class="before-prevent-global-native"
+  <a href="#" on:click|preventDefault={beforeVisitPreventGlobalNative} class="before-prevent-global-native"
     >Before Event - Prevent globally using Native Event Listeners</a
   >
 
   <!-- Events: CancelToken -->
-  <a href={'#'} on:click|preventDefault={cancelTokenVisit} class="canceltoken">Cancel Token Event</a>
+  <a href="#" on:click|preventDefault={cancelTokenVisit} class="canceltoken">Cancel Token Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:cancel-token={(event) => internalAlert('linkOnCancelToken', event.detail)}
@@ -530,7 +528,7 @@
   >
 
   <!-- Events: Cancel -->
-  <a href={'#'} on:click|preventDefault={cancelVisit} class="cancel">Cancel Event</a>
+  <a href="#" on:click|preventDefault={cancelVisit} class="cancel">Cancel Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:cancel-token={handleCancelToken}
@@ -539,7 +537,7 @@
   >
 
   <!-- Events: Start -->
-  <a href={'#'} on:click|preventDefault={startVisit} class="start">Start Event</a>
+  <a href="#" on:click|preventDefault={startVisit} class="start">Start Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:start={(event) => internalAlert('linkOnStart', event.detail.visit)}
@@ -547,8 +545,8 @@
   >
 
   <!-- Events: Progress -->
-  <a href={'#'} on:click|preventDefault={progressVisit} class="progress">Progress Event</a>
-  <a href={'#'} on:click|preventDefault={progressNoFilesVisit} class="progress-no-files"
+  <a href="#" on:click|preventDefault={progressVisit} class="progress">Progress Event</a>
+  <a href="#" on:click|preventDefault={progressNoFilesVisit} class="progress-no-files"
     >Missing Progress Event (no files)</a
   >
   <button
@@ -564,8 +562,8 @@
   >
 
   <!-- Events: Error -->
-  <a href={'#'} on:click|preventDefault={errorVisit} class="error">Error Event</a>
-  <a href={'#'} on:click|preventDefault={errorPromiseVisit} class="error-promise"
+  <a href="#" on:click|preventDefault={errorVisit} class="error">Error Event</a>
+  <a href="#" on:click|preventDefault={errorPromiseVisit} class="error-promise"
     >Error Event (delaying onFinish w/ Promise)</a
   >
   <button
@@ -583,8 +581,8 @@
   >
 
   <!-- Events: Success -->
-  <a href={'#'} on:click|preventDefault={successVisit} class="success">Success Event</a>
-  <a href={'#'} on:click|preventDefault={successPromiseVisit} class="success-promise"
+  <a href="#" on:click|preventDefault={successVisit} class="success">Success Event</a>
+  <a href="#" on:click|preventDefault={successPromiseVisit} class="success-promise"
     >Success Event (delaying onFinish w/ Promise)</a
   >
   <button
@@ -602,13 +600,13 @@
   >
 
   <!-- Events: Invalid -->
-  <a href={'#'} on:click|preventDefault={invalidVisit} class="invalid">Invalid Event</a>
+  <a href="#" on:click|preventDefault={invalidVisit} class="invalid">Invalid Event</a>
 
   <!-- Events: Exception -->
-  <a href={'#'} on:click|preventDefault={exceptionVisit} class="exception">Exception Event</a>
+  <a href="#" on:click|preventDefault={exceptionVisit} class="exception">Exception Event</a>
 
   <!-- Events: Finish -->
-  <a href={'#'} on:click|preventDefault={finishVisit} class="finish">Finish Event</a>
+  <a href="#" on:click|preventDefault={finishVisit} class="finish">Finish Event</a>
   <button
     use:inertia={{ href: $page.url, method: 'post' }}
     on:finish={(event) => internalAlert('linkOnFinish', event.detail.visit)}
@@ -616,7 +614,7 @@
   >
 
   <!-- Events: Navigate -->
-  <a href={'#'} on:click|preventDefault={navigateVisit} class="navigate">Navigate Event</a>
+  <a href="#" on:click|preventDefault={navigateVisit} class="navigate">Navigate Event</a>
 
   <!-- Events: Prefetch -->
   <button
@@ -629,10 +627,10 @@
   </button>
 
   <!-- Lifecycles -->
-  <a href={'#'} on:click|preventDefault={lifecycleSuccess} class="lifecycle-success">Lifecycle Success</a>
-  <a href={'#'} on:click|preventDefault={lifecycleError} class="lifecycle-error">Lifecycle Error</a>
-  <a href={'#'} on:click|preventDefault={lifecycleCancel} class="lifecycle-cancel">Lifecycle Cancel</a>
-  <a href={'#'} on:click|preventDefault={lifecycleCancelAfterFinish} class="lifecycle-cancel-after-finish"
+  <a href="#" on:click|preventDefault={lifecycleSuccess} class="lifecycle-success">Lifecycle Success</a>
+  <a href="#" on:click|preventDefault={lifecycleError} class="lifecycle-error">Lifecycle Error</a>
+  <a href="#" on:click|preventDefault={lifecycleCancel} class="lifecycle-cancel">Lifecycle Cancel</a>
+  <a href="#" on:click|preventDefault={lifecycleCancelAfterFinish} class="lifecycle-cancel-after-finish"
     >Lifecycle Cancel - After Finish</a
   >
 </div>
