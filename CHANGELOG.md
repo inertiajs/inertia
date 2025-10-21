@@ -7,9 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.8...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.9...master)
 
 - Nothing yet
+
+## [v2.2.9](https://github.com/inertiajs/inertia/compare/v2.2.8...v2.2.9) - 2025-10-21
+
+### What's Changed
+
+* Use local `@inertiajs/core` in Playgrounds + dependencies bump by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2633
+* Introduce types for Head Manager by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2634
+* Fix resolving `preserveScroll` and `preserveState` in Client Side Visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2635
+* Support for type-hinting shared Page Props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2636
+* Add `globals.d.ts` file to Playgrounds by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2637
+* Remove wrong `shouldIntercept()` call in `keydown` event handler in `<Link>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2638
+* Introduce `CancelToken` and `CancelTokenCallback` types to replace Axios imports by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2639
+* Internal TypeScript improvements by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2640
+* Tests and TS improvements for the `<Head>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2641
+* Make `data` prop of `<InfiniteScroll>` required by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2642
+* TS fixes in Vue adapter for `useRemember` and `remember` mixin by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2643
+* Bump vite from 5.4.20 to 5.4.21 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2647
+* TypeScript improvements to `createInertiaApp()` and unifying it across adapters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2648
+* ESLint check for test-apps by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2560
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.8...v2.2.9
 
 ## [v2.2.8](https://github.com/inertiajs/inertia/compare/v2.2.7...v2.2.8) - 2025-10-09
 
