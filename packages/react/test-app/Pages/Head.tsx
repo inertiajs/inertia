@@ -17,7 +17,6 @@ export default () => {
         <meta name="null" content={null} />
         {/* @ts-expect-error - same as above */}
         <meta name="float" content={3.14} />
-        <meta name="undefined" content={undefined} />
         <meta name="xss" content="<script>alert('xss')</script>" />
         <meta name="ampersand" content="Laravel & Inertia" />
         <meta name="unicode" content="Hélló! 🎉" />
