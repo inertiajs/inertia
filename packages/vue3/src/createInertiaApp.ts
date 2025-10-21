@@ -2,6 +2,7 @@ import {
   CreateInertiaAppPropsForCSR,
   CreateInertiaAppPropsForSSR,
   InertiaAppResponse,
+  InertiaAppSSRContent,
   PageProps,
   router,
   setupProgress,
@@ -35,6 +36,12 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppPr
   render: typeof renderToString
 }
 
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<void>
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForSSR<SharedProps>,
+): Promise<InertiaAppSSRContent>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
