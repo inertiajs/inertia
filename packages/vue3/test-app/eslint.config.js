@@ -9,7 +9,7 @@ export default defineConfigWithVueTs(
     files: ['**/*.vue', '**/*.js', '**/*.ts'],
   },
   {
-    ignores: ['node_modules', 'dist/**/*'],
+    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts'],
   },
   vue.configs['flat/essential'],
   vueTsConfigs.recommended,
@@ -26,7 +26,6 @@ export default defineConfigWithVueTs(
   {
     rules: {
       'vue/multi-word-component-names': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   prettier,

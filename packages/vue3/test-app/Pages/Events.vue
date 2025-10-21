@@ -3,7 +3,7 @@ import { Link, router, usePage } from '@inertiajs/vue3'
 
 declare global {
   interface Window {
-    messages: any[]
+    messages: unknown[]
   }
 }
 

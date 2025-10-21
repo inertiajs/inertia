@@ -8,7 +8,7 @@ import typescript from 'typescript-eslint'
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    ignores: ['node_modules', 'dist/**/*'],
+    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
