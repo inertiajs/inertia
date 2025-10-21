@@ -9,7 +9,7 @@ export default ts.config(
     files: ['**/*.js', '**/*.ts', '**/*.svelte'],
   },
   {
-    ignores: ['node_modules', 'dist/**/*', '*.config.js'],
+    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts'],
   },
   js.configs.recommended,
   ...ts.configs.recommended,
