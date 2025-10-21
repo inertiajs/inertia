@@ -2,7 +2,10 @@
 import { Link } from '@inertiajs/vue3'
 
 defineProps({
-  users: Array,
+  users: {
+    type: Array as () => { id: number; name: string; email: string }[],
+    required: true,
+  },
 })
 </script>
 
