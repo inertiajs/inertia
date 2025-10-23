@@ -445,7 +445,7 @@ export type HeadManager = {
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
 export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd'
-export type CacheForOption = number | `${number}${TimeUnit}`
+export type CacheForOption = number | `${number}${TimeUnit}` | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
