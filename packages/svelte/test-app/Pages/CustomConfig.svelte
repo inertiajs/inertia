@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { VisitOptions } from '@inertiajs/core'
   import { config, Link, useForm, page } from '@inertiajs/svelte'
-  import { onMount } from 'svelte'
 
   const form = useForm({})
 
