@@ -7,7 +7,8 @@ import {
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import App, { type InertiaAppProps } from './components/App.svelte'
-import type { ComponentResolver } from './types'
+import { config } from './index'
+import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 
@@ -23,8 +24,11 @@ type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsF
   SharedProps,
   ComponentResolver,
   SetupOptions<SharedProps>,
-  SvelteRenderResult | void
->
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
+> & {
+  config?: Partial<SvelteInertiaAppConfig>
+}
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
@@ -32,10 +36,14 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   setup,
   progress = {},
   page,
+  config: userConfig = {},
 }: InertiaAppOptions<SharedProps>): InertiaAppResponse {
+  config.mergeConfig(userConfig)
+
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
   const svelteApp = await Promise.all([

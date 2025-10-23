@@ -38,7 +38,7 @@ export class Config<TConfig extends {} = {}> {
     return this as unknown as Config<TConfig & TExtension>
   }
 
-  public mergeConfig(newConfig: TConfig): void {
+  public mergeConfig(newConfig: Partial<TConfig>): void {
     this.config = { ...this.config, ...newConfig }
   }
 

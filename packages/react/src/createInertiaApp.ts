@@ -10,7 +10,8 @@ import {
 import { ReactElement, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App, { InertiaAppProps, type InertiaApp } from './App'
-import { ReactComponent } from './types'
+import { config } from './index'
+import { ReactComponent, ReactInertiaAppConfig } from './types'
 
 export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
@@ -27,14 +28,16 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SharedProps,
   ComponentResolver,
   SetupOptions<HTMLElement, SharedProps>,
-  void
+  void,
+  ReactInertiaAppConfig
 >
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<null, SharedProps>,
-  ReactElement
+  ReactElement,
+  ReactInertiaAppConfig
 > & {
   render: typeof renderToString
 }
@@ -53,10 +56,14 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
+  config: userConfig = {},
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
+  config.mergeConfig(userConfig)
+
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
   const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+
   // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
