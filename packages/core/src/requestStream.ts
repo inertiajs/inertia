@@ -25,7 +25,13 @@ export class RequestStream {
   }
 
   public cancelInFlight(): void {
-    this.cancel({ cancelled: true }, true)
+    // Cancel ALL in-flight requests (used for async stream with unlimited concurrency)
+    // Note: We don't clear this.requests = [] because cancelled requests will remove
+    // themselves via the filter in send() when their promise resolves
+    const requestsToCancel = [...this.requests]
+    requestsToCancel.forEach((request) => {
+      request.cancel({ cancelled: true })
+    })
   }
 
   protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean): void {

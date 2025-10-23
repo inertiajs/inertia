@@ -181,6 +181,15 @@ export class Router {
       return
     }
 
+    // Cancel in-flight async (deferred) requests when starting a new main visit
+    // This prevents stale deferred prop data from appearing after rapid navigation
+    const isDeferredRequest =
+      visit.only && Array.isArray(visit.only) && visit.only.length > 0 && visit.except.length === 0
+
+    if (!isDeferredRequest) {
+      this.asyncRequestStream.cancelInFlight()
+    }
+
     const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
 
     requestStream.interruptInFlight()
