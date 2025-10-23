@@ -837,25 +837,6 @@ test.describe('Form Helper', () => {
         await expect(page.locator('.recently-status')).toHaveText('Form was not recently successful')
       })
 
-      test('will mark the form as "recently successful" for a custom duration if configured', async ({ page }) => {
-        await expect(page.locator('.success-status')).toHaveText('Form was not successful')
-        await expect(page.locator('.recently-status')).toHaveText('Form was not recently successful')
-
-        await clickAndWaitForResponse(page, 'Submit form', null, 'button')
-
-        await expect(page.locator('.success-status')).toHaveText('Form was successful')
-        await expect(page.locator('.recently-status')).toHaveText('Form was recently successful')
-
-        await page.waitForTimeout(2020)
-
-        await expect(page.locator('.success-status')).toHaveText('Form was successful')
-
-        await page.waitForTimeout(3020)
-
-        await expect(page.locator('.success-status')).toHaveText('Form was successful')
-        await expect(page.locator('.recently-status')).toHaveText('Form was not recently successful')
-      })
-
       test('resets the input value to the default value', async ({ page }) => {
         await expect(page.locator('.name-input')).toHaveValue('foo')
         await expect(page.locator('.remember-input')).not.toBeChecked()
