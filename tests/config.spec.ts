@@ -1,11 +1,24 @@
 import { expect, test } from '@playwright/test'
 import { requests, shouldBeDumpPage } from './support'
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/custom-config')
+test.describe('passing defaults to createInertiaApp', () => {
+  test('applies visitOptions from app defaults', async ({ page }) => {
+    await page.goto('/?withAppDefaults=true')
+    await page.evaluate(() => window.testing.Inertia.visit('/dump/get'))
+
+    const dump = await shouldBeDumpPage(page, 'get')
+
+    await expect(dump.headers).toMatchObject({
+      'x-from-app-defaults': 'test',
+    })
+  })
 })
 
-test.describe('custom config', () => {
+test.describe('updating config via config instance', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/custom-config')
+  })
+
   test('visit options', async ({ page }) => {
     await page.getByRole('button', { name: 'Post Dump' }).click()
     const dump = await shouldBeDumpPage(page, 'post')
