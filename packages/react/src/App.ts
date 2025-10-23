@@ -28,7 +28,7 @@ type CurrentPage = {
 }
 
 export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
-  children?: (options: { component: ReactComponent; props: PageProps; key: number | null }) => ReactNode
+  children?: (options: { Component: ReactComponent; props: PageProps; key: number | null }) => ReactNode
   initialPage: Page<SharedProps>
   initialComponent?: ReactComponent
   resolveComponent?: (name: string) => ReactComponent | Promise<ReactComponent>
@@ -99,15 +99,15 @@ export default function App<SharedProps extends PageProps = PageProps>({
 
   const renderChildren =
     children ||
-    (({ component, props, key }) => {
-      const child = createElement(component, { key, ...props })
+    (({ Component, props, key }) => {
+      const child = createElement(Component, { key, ...props })
 
-      if (typeof component.layout === 'function') {
-        return (component.layout as LayoutFunction)(child)
+      if (typeof Component.layout === 'function') {
+        return (Component.layout as LayoutFunction)(child)
       }
 
-      if (Array.isArray(component.layout)) {
-        return (component.layout as any)
+      if (Array.isArray(Component.layout)) {
+        return (Component.layout as any)
           .concat(child)
           .reverse()
           .reduce((children: any, Layout: any) => createElement(Layout, { children, ...props }))
@@ -123,7 +123,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
       PageContext.Provider,
       { value: current.page },
       renderChildren({
-        component: current.component,
+        Component: current.component,
         key: current.key,
         props: current.page.props,
       }),
