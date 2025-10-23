@@ -448,6 +448,16 @@ export type PrefetchOptions = {
   cacheTags: string | string[]
 }
 
+export type InertiaAppConfig = {
+  form: {
+    recentlySuccessfulDuration: number
+  }
+  prefetch: {
+    cacheFor: CacheForOption | CacheForOption[]
+  }
+  visitOptions?: (href: string, options: VisitOptions) => VisitOptions
+}
+
 export interface LinkComponentBaseProps
   extends Partial<
     Pick<

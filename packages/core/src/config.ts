@@ -1,5 +1,5 @@
 import { get, set } from 'lodash-es'
-import { CacheForOption, VisitOptions } from './types'
+import { InertiaAppConfig } from './types'
 
 // Generate all possible nested paths
 type ConfigKeys<T> = T extends Function
@@ -30,15 +30,15 @@ export class Config<TConfig extends {} = {}> {
     this.config = initialConfig
   }
 
-  public extend<TExtension extends {}>(defaults?: Partial<TExtension>): Config<TConfig & TExtension> {
+  public extend<TExtension extends {}>(defaults?: TExtension): Config<TConfig & TExtension> {
     if (defaults) {
-      this.mergeConfig(defaults as Partial<TConfig & TExtension>)
+      this.mergeConfig(defaults as TConfig & TExtension)
     }
 
     return this as unknown as Config<TConfig & TExtension>
   }
 
-  public mergeConfig(newConfig: Partial<TConfig>): void {
+  public mergeConfig(newConfig: TConfig): void {
     this.config = { ...this.config, ...newConfig }
   }
 
@@ -51,15 +51,7 @@ export class Config<TConfig extends {} = {}> {
   }
 }
 
-export const config = new Config<{
-  form: {
-    recentlySuccessfulDuration: number
-  }
-  prefetch: {
-    cacheFor: CacheForOption | CacheForOption[]
-  }
-  visitOptions?: (href: string, options: VisitOptions) => VisitOptions
-}>({
+export const config = new Config<InertiaAppConfig>({
   form: {
     recentlySuccessfulDuration: 2_000,
   },
