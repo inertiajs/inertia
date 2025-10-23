@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { VisitOptions } from '@inertiajs/core'
 import { config, Link, useForm, usePage } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
 
 const page = usePage()
 const form = useForm({})
@@ -10,17 +9,15 @@ const submit = () => {
   form.post(page.url)
 }
 
-onMounted(() => {
-  config.set('form.recentlySuccessfulDuration', 1000)
-  config.set('prefetch.cacheFor', '2s')
+config.set('form.recentlySuccessfulDuration', 1000)
+config.set('prefetch.cacheFor', '2s')
 
-  config.set('visitOptions', (href: string, options: VisitOptions) => {
-    if (href !== '/dump/post') {
-      return {}
-    }
+config.set('visitOptions', (href: string, options: VisitOptions) => {
+  if (href !== '/dump/post') {
+    return {}
+  }
 
-    return { headers: { ...options.headers, 'X-From-Callback': 'bar' } }
-  })
+  return { headers: { ...options.headers, 'X-From-Callback': 'bar' } }
 })
 </script>
 
