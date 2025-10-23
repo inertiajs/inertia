@@ -9,8 +9,10 @@ export default () => {
     form.post(page.url)
   }
 
-  config.set('form.recentlySuccessfulDuration', 1000)
-  config.set('prefetch.cacheFor', '2s')
+  config.set({
+    'form.recentlySuccessfulDuration': 1000,
+    'prefetch.cacheFor': '2s',
+  })
 
   config.set('visitOptions', (href: string, options: VisitOptions) => {
     if (href !== '/dump/post') {

@@ -1,4 +1,4 @@
-import { get, set } from 'lodash-es'
+import { get, has, set } from 'lodash-es'
 import { InertiaAppConfig } from './types'
 
 // Generate all possible nested paths
@@ -23,16 +23,22 @@ type ConfigValue<T, K extends ConfigKeys<T>> = K extends `${infer P}.${infer Res
     ? T[K]
     : never
 
-export class Config<TConfig extends {} = {}> {
-  protected config: TConfig
+// Type for setting multiple config values at once
+type ConfigSetObject<T> = {
+  [K in ConfigKeys<T>]?: ConfigValue<T, K>
+}
 
-  public constructor(initialConfig: TConfig) {
-    this.config = initialConfig
+export class Config<TConfig extends {} = {}> {
+  protected config: Partial<TConfig> = {}
+  protected defaults: TConfig
+
+  public constructor(defaults: TConfig) {
+    this.defaults = defaults
   }
 
   public extend<TExtension extends {}>(defaults?: TExtension): Config<TConfig & TExtension> {
     if (defaults) {
-      this.mergeConfig(defaults as TConfig & TExtension)
+      this.defaults = { ...this.defaults, ...defaults } as TConfig & TExtension
     }
 
     return this as unknown as Config<TConfig & TExtension>
@@ -43,11 +49,20 @@ export class Config<TConfig extends {} = {}> {
   }
 
   public get<K extends ConfigKeys<TConfig>>(key: K): ConfigValue<TConfig, K> {
-    return get(this.config, key) as ConfigValue<TConfig, K>
+    return (has(this.config, key) ? get(this.config, key) : get(this.defaults, key)) as ConfigValue<TConfig, K>
   }
 
-  public set<K extends ConfigKeys<TConfig>>(key: K, value: ConfigValue<TConfig, K>): void {
-    set(this.config, key, value)
+  public set<K extends ConfigKeys<TConfig>>(
+    keyOrValues: K | Partial<ConfigSetObject<TConfig>>,
+    value?: ConfigValue<TConfig, K>,
+  ): void {
+    if (typeof keyOrValues === 'string') {
+      set(this.config, keyOrValues, value)
+    } else {
+      Object.entries(keyOrValues).forEach(([key, val]) => {
+        set(this.config, key, val)
+      })
+    }
   }
 }
 
