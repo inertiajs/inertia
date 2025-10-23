@@ -28,9 +28,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<HTMLElement, SharedProps>,
   void,
   VueInertiaAppConfig
-> & {
-  config?: Partial<VueInertiaAppConfig>
-}
+>
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
@@ -40,7 +38,6 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueInertiaAppConfig
 > & {
   render: typeof renderToString
-  config?: Partial<VueInertiaAppConfig>
 }
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
@@ -57,9 +54,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
-  config: userConfig = {},
+  defaults = {},
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
-  config.mergeConfig(userConfig)
+  config.mergeConfig(defaults)
 
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)

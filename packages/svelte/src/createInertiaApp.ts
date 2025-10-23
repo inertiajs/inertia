@@ -26,9 +26,7 @@ type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsF
   SetupOptions<SharedProps>,
   SvelteRenderResult | void,
   SvelteInertiaAppConfig
-> & {
-  config?: Partial<SvelteInertiaAppConfig>
-}
+>
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
@@ -36,9 +34,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   setup,
   progress = {},
   page,
-  config: userConfig = {},
+  defaults = {},
 }: InertiaAppOptions<SharedProps>): InertiaAppResponse {
-  config.mergeConfig(userConfig)
+  config.mergeConfig(defaults)
 
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
