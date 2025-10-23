@@ -19,6 +19,7 @@ import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { writable, type Writable } from 'svelte/store'
+import { config } from '.'
 
 type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
 
@@ -215,7 +216,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           this.clearErrors()
           setFormState('wasSuccessful', true)
           setFormState('recentlySuccessful', true)
-          recentlySuccessfulTimeoutId = setTimeout(() => setFormState('recentlySuccessful', false), 2000)
+          recentlySuccessfulTimeoutId = setTimeout(
+            () => setFormState('recentlySuccessful', false),
+            config.get('form.recentlySuccessfulDuration'),
+          )
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 

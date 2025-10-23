@@ -52,11 +52,17 @@ export class Config<TConfig extends {} = {}> {
 }
 
 export const config = new Config<{
+  form: {
+    recentlySuccessfulDuration: number
+  }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
   }
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }>({
+  form: {
+    recentlySuccessfulDuration: 2_000,
+  },
   prefetch: {
     cacheFor: 30_000,
   },
