@@ -444,6 +444,12 @@ export class Router {
       options.method = options.method ?? urlMethodPair.method
     }
 
+    const defaultVisitOptionsCallback = config.get('visitOptions')
+
+    const configuredOptions = defaultVisitOptionsCallback
+      ? defaultVisitOptionsCallback(href.toString(), cloneDeep(options)) || {}
+      : {}
+
     const mergedOptions: Visit = {
       method: 'get',
       data: {},
@@ -464,6 +470,7 @@ export class Router {
       prefetch: false,
       invalidateCacheTags: [],
       ...options,
+      ...configuredOptions,
     }
 
     const [url, _data] = transformUrlAndData(
