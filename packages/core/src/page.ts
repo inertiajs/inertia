@@ -181,16 +181,18 @@ class CurrentPage {
     preserveState: boolean
     viewTransition: Visit['viewTransition']
   }): Promise<unknown> {
+    const doSwap = () => this.swapComponent({ component, page, preserveState })
+
     if (!viewTransition || !document?.startViewTransition) {
-      return this.swapComponent({ component, page, preserveState })
+      return doSwap()
     }
 
-    return new Promise((resolve) => {
-      const transition = document.startViewTransition(() => {
-        this.swapComponent({ component, page, preserveState }).then(resolve)
-      })
+    const viewTransitionCallback = typeof viewTransition === 'boolean' ? () => null : viewTransition
 
-      typeof viewTransition === 'function' && viewTransition(transition)
+    return new Promise((resolve) => {
+      const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
+
+      viewTransitionCallback(transitionResult)
     })
   }
 
