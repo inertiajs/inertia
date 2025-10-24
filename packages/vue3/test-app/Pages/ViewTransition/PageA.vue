@@ -10,17 +10,9 @@ const transitionWithBoolean = () => {
 const transitionWithCallback = () => {
   router.visit('/view-transition/page-b', {
     viewTransition: (viewTransition) => {
-      viewTransition.ready.then(() => {
-        console.log('ready')
-      })
-
-      viewTransition.updateCallbackDone.then(() => {
-        console.log('updateCallbackDone')
-      })
-
-      viewTransition.finished.then(() => {
-        console.log('finished')
-      })
+      viewTransition.ready.then(() => console.log('ready'))
+      viewTransition.updateCallbackDone.then(() => console.log('updateCallbackDone'))
+      viewTransition.finished.then(() => console.log('finished'))
     },
   })
 }
