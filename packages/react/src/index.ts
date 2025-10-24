@@ -9,7 +9,6 @@ export { default as Form } from './Form'
 export { default as Head } from './Head'
 export { default as InfiniteScroll } from './InfiniteScroll'
 export { InertiaLinkProps, default as Link } from './Link'
-export * from './types'
 export {
   InertiaFormProps,
   SetDataAction,
