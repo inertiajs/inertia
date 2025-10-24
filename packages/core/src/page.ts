@@ -78,6 +78,11 @@ class CurrentPage {
       }).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
+        if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
+          // Don't use view transition if the page stays the same and there are (new) errors...
+          viewTransition = false
+        }
+
         this.page = page
         this.cleared = false
 
