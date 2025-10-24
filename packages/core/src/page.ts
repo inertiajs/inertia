@@ -78,10 +78,6 @@ class CurrentPage {
       }).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
-        if (preserveState || !isNewComponent) {
-          viewTransition = false
-        }
-
         this.page = page
         this.cleared = false
 
