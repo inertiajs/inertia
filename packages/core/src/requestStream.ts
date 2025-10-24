@@ -34,6 +34,17 @@ export class RequestStream {
     })
   }
 
+  public cancelNonPrefetchInFlight(): void {
+    // Cancel only non-prefetch requests (deferred props, regular visits)
+    // Prefetch requests populate the cache and are safe to continue even after navigation
+    // Note: We don't clear this.requests = [] because cancelled requests will remove
+    // themselves via the filter in send() when their promise resolves
+    const requestsToCancel = [...this.requests].filter((request) => !request.isPrefetch())
+    requestsToCancel.forEach((request) => {
+      request.cancel({ cancelled: true })
+    })
+  }
+
   protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean): void {
     if (!this.shouldCancel(force)) {
       return

@@ -46,4 +46,26 @@ const handleOnBeforeClick = () => {
   <Link href="/deferred-props/page-1">Navigate Away</Link>
 
   <button @click="handleOnBeforeClick">Navigate with onBefore</button>
+
+  <button @click="router.reload({ except: ['stats'] })">Reload with except</button>
+
+  <button @click="router.visit('/deferred-props/rapid-navigation/b', { only: ['users'] })">Visit B with only</button>
+
+  <button @click="router.visit(`/deferred-props/rapid-navigation/${filter}`)">Re-visit same URL</button>
+
+  <button @click="router.reload()">Plain reload</button>
+
+  <button @click="router.reload({ only: ['users'], except: ['stats'] })">Reload with only and except</button>
+
+  <button @click="router.visit('/deferred-props/rapid-navigation/b', { except: ['stats'] })">
+    Visit B with except
+  </button>
+
+  <button @click="router.visit('/deferred-props/rapid-navigation/b', { only: ['users'], except: ['stats'] })">
+    Visit B with only and except
+  </button>
+
+  <button @click="router.prefetch('/deferred-props/rapid-navigation/b')">Prefetch Filter B</button>
+
+  <button @click="router.prefetch('/deferred-props/page-1')">Prefetch Page 1</button>
 </template>

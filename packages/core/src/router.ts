@@ -35,7 +35,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { isUrlMethodPair, transformUrlAndData } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -181,13 +181,15 @@ export class Router {
       return
     }
 
-    // Cancel in-flight async (deferred) requests when starting a new main visit
+    // Cancel in-flight async (deferred) requests when navigating to a different URL
     // This prevents stale deferred prop data from appearing after rapid navigation
-    const isDeferredRequest =
-      visit.only && Array.isArray(visit.only) && visit.only.length > 0 && visit.except.length === 0
+    // We only cancel if the URL is changing - stays on same page (reloads, partial updates) are allowed
+    const isSameUrl = !currentPage.isCleared() && isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))
 
-    if (!isDeferredRequest) {
-      this.asyncRequestStream.cancelInFlight()
+    if (!isSameUrl) {
+      // Only cancel non-prefetch requests (deferred props)
+      // Prefetch requests populate cache and are safe to continue
+      this.asyncRequestStream.cancelNonPrefetchInFlight()
     }
 
     const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
