@@ -16,7 +16,10 @@ export class Scroll {
   }
 
   public static reset(): void {
-    if (typeof window !== 'undefined') {
+    const anchorHash = typeof window !== 'undefined' ? window.location.hash : null
+
+    if (!anchorHash) {
+      // Reset the document scroll position if there is no hash.
       window.scrollTo(0, 0)
     }
 
@@ -31,15 +34,31 @@ export class Scroll {
 
     this.save()
 
-    if (window.location.hash) {
+    if (anchorHash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
       // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => document.getElementById(window.location.hash.slice(1))?.scrollIntoView())
+      setTimeout(() => {
+        const anchorElement = document.getElementById(anchorHash.slice(1))
+        anchorElement ? anchorElement.scrollIntoView() : window.scrollTo(0, 0)
+      })
     }
   }
 
   public static restore(scrollRegions: ScrollRegion[]): void {
-    this.restoreDocument()
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      this.restoreDocument()
+      this.restoreScrollRegions(scrollRegions)
+    })
+  }
+
+  public static restoreScrollRegions(scrollRegions: ScrollRegion[]): void {
+    if (typeof window === 'undefined') {
+      return
+    }
 
     this.regions().forEach((region: Element, index: number) => {
       const scrollPosition = scrollRegions[index]
@@ -59,10 +78,7 @@ export class Scroll {
 
   public static restoreDocument(): void {
     const scrollPosition = history.getDocumentScrollPosition()
-
-    if (typeof window !== 'undefined') {
-      window.scrollTo(scrollPosition.left, scrollPosition.top)
-    }
+    window.scrollTo(scrollPosition.left, scrollPosition.top)
   }
 
   public static onScroll(event: Event): void {

@@ -3,14 +3,15 @@ import esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 
 const watch = process.argv.slice(1).includes('--watch')
+const withDeps = process.argv.slice(1).includes('--with-deps')
 
 const config = {
   bundle: true,
-  minify: true,
-  sourcemap: true,
+  minify: false,
+  sourcemap: withDeps ? false : true,
   target: 'es2020',
   plugins: [
-    nodeExternalsPlugin(),
+    ...(withDeps ? [] : [nodeExternalsPlugin()]),
     {
       name: 'inertia',
       setup(build) {
@@ -41,6 +42,6 @@ builds.forEach(async (build) => {
   } else {
     await context.rebuild()
     context.dispose()
-    console.log(`Built ${build.entryPoints} (${build.format})…`)
+    console.log(`Built ${build.entryPoints} (${build.format}) ${withDeps ? '(with-deps)' : ''}…`)
   }
 })

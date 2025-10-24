@@ -6,7 +6,7 @@ const Users = ({ users }) => {
     <>
       <Head title="Users" />
       <h1 className="text-3xl">Users</h1>
-      <div className="mt-6 w-full max-w-2xl overflow-hidden rounded border shadow-sm">
+      <div className="shadow-xs mt-6 w-full max-w-2xl overflow-hidden rounded-sm border border-gray-200">
         <table className="w-full text-left">
           <thead>
             <tr>
@@ -17,7 +17,7 @@ const Users = ({ users }) => {
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} className="border-t">
+              <tr key={user.id} className="border-t border-gray-200">
                 <td className="px-4 py-2">{user.id}</td>
                 <td className="px-4 py-2">{user.name}</td>
                 <td className="px-4 py-2">{user.email}</td>

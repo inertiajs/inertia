@@ -105,7 +105,7 @@
 <TestGrid>
   <TestGridItem class="space-y-4">
     <p>Trigger an async reload that takes a moment and immediately programmatically visit another page</p>
-    <button class="rounded bg-green-600 px-4 py-2 text-white" on:click={simulateConflict}>Reload → Visit</button>
+    <button class="rounded-sm bg-green-600 px-4 py-2 text-white" on:click={simulateConflict}>Reload → Visit</button>
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
@@ -132,22 +132,26 @@
 
     <p>Reload should still happen but won't re-direct back to the reloaded component, we should respect the visit</p>
 
-    <button on:click={triggerVisitThenReload} class="rounded bg-green-600 px-4 py-2 text-white">Visit → Reload</button>
+    <button on:click={triggerVisitThenReload} class="rounded-sm bg-green-600 px-4 py-2 text-white"
+      >Visit → Reload</button
+    >
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Simply trigger a 4 second reload so you can navigate or do whatever you'd like during it.</p>
-    <button on:click={triggerLongReload} class="rounded bg-green-600 px-4 py-2 text-white">Trigger Long Reload</button>
+    <button on:click={triggerLongReload} class="rounded-sm bg-green-600 px-4 py-2 text-white"
+      >Trigger Long Reload</button
+    >
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Trigger an automatic cancellation from the token.</p>
-    <button on:click={triggerCancel} class="rounded bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
+    <button on:click={triggerCancel} class="rounded-sm bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Trigger an automatic cancellation from the token after finishing request.</p>
-    <button on:click={triggerCancelAfterFinish} class="rounded bg-green-600 px-4 py-2 text-white">
+    <button on:click={triggerCancelAfterFinish} class="rounded-sm bg-green-600 px-4 py-2 text-white">
       Trigger Cancel After Finish
     </button>
   </TestGridItem>

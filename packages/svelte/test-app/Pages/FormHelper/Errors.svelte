@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
   const form = useForm({
@@ -28,6 +28,14 @@
 
   const setError = () => {
     $form.setError('handle', 'Manually set Handle error')
+  }
+
+  const resetAndClearErrors = () => {
+    $form.resetAndClearErrors()
+  }
+
+  const resetHandle = () => {
+    $form.resetAndClearErrors('handle')
   }
 </script>
 
@@ -60,6 +68,8 @@
   <button on:click={clearError} class="clear-one">Clear one error</button>
   <button on:click={setErrors} class="set">Set errors</button>
   <button on:click={setError} class="set-one">Set one error</button>
+  <button on:click={resetAndClearErrors} class="reset-all">Reset all</button>
+  <button on:click={resetHandle} class="reset-handle">Reset handle</button>
 
   <span class="errors-status">Form has {$form.hasErrors ? '' : 'no '}errors</span>
 </div>

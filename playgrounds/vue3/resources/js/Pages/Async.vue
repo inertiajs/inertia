@@ -112,7 +112,7 @@ watch(reloadCount, () => {
   <TestGrid>
     <TestGridItem class="space-y-4">
       <p>Trigger an async reload that takes a moment and immediately programatically visit another page</p>
-      <button @click="simulateConflict" class="rounded bg-green-600 px-4 py-2 text-white">Reload → Visit</button>
+      <button @click="simulateConflict" class="rounded-sm bg-green-600 px-4 py-2 text-white">Reload → Visit</button>
     </TestGridItem>
 
     <TestGridItem class="space-y-4">
@@ -139,22 +139,26 @@ watch(reloadCount, () => {
 
       <p>Reload should still happen but won't re-direct back to the reloaded component, we should respect the visit</p>
 
-      <button @click="triggerVisitThenReload" class="rounded bg-green-600 px-4 py-2 text-white">Visit → Reload</button>
+      <button @click="triggerVisitThenReload" class="rounded-sm bg-green-600 px-4 py-2 text-white">
+        Visit → Reload
+      </button>
     </TestGridItem>
 
     <TestGridItem class="space-y-4">
       <p>Simply trigger a 4 second reload so you can navigate or do whatever you'd like during it.</p>
-      <button @click="triggerLongReload" class="rounded bg-green-600 px-4 py-2 text-white">Trigger Long Reload</button>
+      <button @click="triggerLongReload" class="rounded-sm bg-green-600 px-4 py-2 text-white">
+        Trigger Long Reload
+      </button>
     </TestGridItem>
 
     <TestGridItem class="space-y-4">
       <p>Trigger an automatic cancellation from the token.</p>
-      <button @click="triggerCancel" class="rounded bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
+      <button @click="triggerCancel" class="rounded-sm bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
     </TestGridItem>
 
     <TestGridItem class="space-y-4">
       <p>Trigger an automatic cancellation from the token after finishing request.</p>
-      <button @click="triggerCancelAfterFinish" class="rounded bg-green-600 px-4 py-2 text-white">
+      <button @click="triggerCancelAfterFinish" class="rounded-sm bg-green-600 px-4 py-2 text-white">
         Trigger Cancel After Finish
       </button>
     </TestGridItem>

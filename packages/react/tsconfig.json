@@ -6,10 +6,10 @@
 
     "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "target": "ES2020",
-    "types": ["node"],
 
     "declaration": true,
     "declarationDir": "types",
+    "emitDeclarationOnly": true,
 
     "module": "ES2020",
     "moduleResolution": "Node",
@@ -22,7 +22,7 @@
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "removeComments": true,
-    "typeRoots": ["./node_modules/@types"]
-    // "strict": true
+    "typeRoots": ["./node_modules/@types"],
+    "strict": true
   }
 }

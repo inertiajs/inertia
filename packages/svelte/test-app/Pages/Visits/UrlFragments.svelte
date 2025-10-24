@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
 
   let documentScrollTop = 0
@@ -41,14 +41,15 @@
   <span class="text">This is the page that demonstrates url fragment behaviour using manual visits</span>
   <div style="width: 200vw; height: 200vh; margin-top: 50vh">
     <!-- prettier-ignore -->
+    <button on:click={handleScrollEvent}>Update scroll positions</button>
     <div class="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
-    <a href="#" on:click={basicVisit} class="basic">Basic visit</a>
-    <a href="#" on:click={fragmentVisit} class="fragment">Fragment visit</a>
-    <a href="#" on:click={nonExistentFragmentVisit} class="non-existent-fragment">Non-existent fragment visit</a>
+    <a href={'#'} on:click={basicVisit} class="basic">Basic visit</a>
+    <a href={'#'} on:click={fragmentVisit} class="fragment">Fragment visit</a>
+    <a href={'#'} on:click={nonExistentFragmentVisit} class="non-existent-fragment">Non-existent fragment visit</a>
 
-    <a href="#" on:click={basicGetVisit} class="basic-get">Basic GET visit</a>
-    <a href="#" on:click={fragmentGetVisit} class="fragment-get">Fragment GET visit</a>
-    <a href="#" on:click={nonExistentFragmentGetVisit} class="non-existent-fragment-get"
+    <a href={'#'} on:click={basicGetVisit} class="basic-get">Basic GET visit</a>
+    <a href={'#'} on:click={fragmentGetVisit} class="fragment-get">Fragment GET visit</a>
+    <a href={'#'} on:click={nonExistentFragmentGetVisit} class="non-existent-fragment-get"
       >Non-existent fragment GET visit</a
     >
 

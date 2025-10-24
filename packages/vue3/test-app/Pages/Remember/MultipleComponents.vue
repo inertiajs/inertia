@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import ComponentA from '@/Pages/Remember/Components/ComponentA.vue'
 import ComponentB from '@/Pages/Remember/Components/ComponentB.vue'
 import { Link, useRemember } from '@inertiajs/vue3'

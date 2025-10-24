@@ -1,51 +1,35 @@
 import {
+  ActiveVisit,
   CacheForOption,
-  FormDataConvertible,
+  CancelTokenCallback,
+  GlobalEventCallback,
+  isUrlMethodPair,
+  LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
-  PreserveStateOption,
-  Progress,
   router,
   shouldIntercept,
+  shouldNavigate,
 } from '@inertiajs/core'
-import { computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { config } from '.'
 
-export interface InertiaLinkProps {
-  as?: string
-  data?: Record<string, FormDataConvertible>
-  href: string | { url: string; method: Method }
-  method?: Method
-  headers?: Record<string, string>
+const noop = () => {}
+
+export interface InertiaLinkProps extends LinkComponentBaseProps {
+  as?: string | Component
   onClick?: (event: MouseEvent) => void
-  preserveScroll?: PreserveStateOption
-  preserveState?: PreserveStateOption
-  replace?: boolean
-  only?: string[]
-  except?: string[]
-  onCancelToken?: (cancelToken: import('axios').CancelTokenSource) => void
-  onBefore?: () => void
-  onStart?: (visit: PendingVisit) => void
-  onProgress?: (progress: Progress) => void
-  onFinish?: (visit: PendingVisit) => void
-  onCancel?: () => void
-  onSuccess?: () => void
-  onError?: () => void
-  queryStringArrayFormat?: 'brackets' | 'indices'
-  async?: boolean
-  prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-  cacheFor?: CacheForOption | CacheForOption[]
 }
 
 type InertiaLink = DefineComponent<InertiaLinkProps>
 
-// @ts-ignore
 const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
     as: {
-      type: String,
+      type: [String, Object] as PropType<string | Component>,
       default: 'a',
     },
     data: {
@@ -54,7 +38,7 @@ const Link: InertiaLink = defineComponent({
     },
     href: {
       type: [String, Object] as PropType<InertiaLinkProps['href']>,
-      required: true,
+      default: '',
     },
     method: {
       type: String as PropType<Method>,
@@ -71,6 +55,10 @@ const Link: InertiaLink = defineComponent({
     preserveState: {
       type: Boolean,
       default: null,
+    },
+    preserveUrl: {
+      type: Boolean,
+      default: false,
     },
     only: {
       type: Array<string>,
@@ -101,43 +89,55 @@ const Link: InertiaLink = defineComponent({
       default: 0,
     },
     onStart: {
-      type: Function as PropType<(visit: PendingVisit) => void>,
-      default: (_visit: PendingVisit) => {},
+      type: Function as PropType<GlobalEventCallback<'start'>>,
+      default: noop,
     },
     onProgress: {
-      type: Function as PropType<(progress: Progress) => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'progress'>>,
+      default: noop,
     },
     onFinish: {
-      type: Function as PropType<(visit: PendingVisit) => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'finish'>>,
+      default: noop,
     },
     onBefore: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'before'>>,
+      default: noop,
     },
     onCancel: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'cancel'>>,
+      default: noop,
     },
     onSuccess: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'success'>>,
+      default: noop,
     },
     onError: {
-      type: Function as PropType<() => void>,
-      default: () => {},
+      type: Function as PropType<GlobalEventCallback<'error'>>,
+      default: noop,
     },
     onCancelToken: {
-      type: Function as PropType<(cancelToken: import('axios').CancelTokenSource) => void>,
-      default: () => {},
+      type: Function as PropType<CancelTokenCallback>,
+      default: noop,
+    },
+    onPrefetching: {
+      type: Function as PropType<GlobalEventCallback<'prefetching'>>,
+      default: noop,
+    },
+    onPrefetched: {
+      type: Function as PropType<GlobalEventCallback<'prefetched'>>,
+      default: noop,
+    },
+    cacheTags: {
+      type: [String, Array] as PropType<string | string[]>,
+      default: () => [],
     },
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
-    const hoverTimeout = ref(null)
+    const hoverTimeout = ref<ReturnType<typeof setTimeout>>()
 
-    const prefetchModes: LinkPrefetchOption[] = (() => {
+    const prefetchModes = computed<LinkPrefetchOption[]>(() => {
       if (props.prefetch === true) {
         return ['hover']
       }
@@ -150,27 +150,27 @@ const Link: InertiaLink = defineComponent({
         return props.prefetch
       }
 
-      return [props.prefetch]
-    })()
+      return [props.prefetch] as LinkPrefetchOption[]
+    })
 
-    const cacheForValue = (() => {
+    const cacheForValue = computed(() => {
       if (props.cacheFor !== 0) {
         // If they've provided a value, respect it
         return props.cacheFor
       }
 
-      if (prefetchModes.length === 1 && prefetchModes[0] === 'click') {
+      if (prefetchModes.value.length === 1 && prefetchModes.value[0] === 'click') {
         // If they've only provided a prefetch mode of 'click',
         // we should only prefetch for the next request but not keep it around
         return 0
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
-    })()
+      return config.get('prefetch.cacheFor')
+    })
 
     onMounted(() => {
-      if (prefetchModes.includes('mount')) {
+      if (prefetchModes.value.includes('mount')) {
         prefetch()
       }
     })
@@ -179,63 +179,91 @@ const Link: InertiaLink = defineComponent({
       clearTimeout(hoverTimeout.value)
     })
 
-    const method = typeof props.href === 'object' ? props.href.method : (props.method.toLowerCase() as Method)
-    const as = method !== 'get' ? 'button' : props.as.toLowerCase()
+    const method = computed(() =>
+      isUrlMethodPair(props.href) ? props.href.method : ((props.method ?? 'get').toLowerCase() as Method),
+    )
+    const as = computed(() => {
+      if (typeof props.as !== 'string' || props.as.toLowerCase() !== 'a') {
+        // Custom component or element
+        return props.as
+      }
+
+      return method.value !== 'get' ? 'button' : props.as.toLowerCase()
+    })
     const mergeDataArray = computed(() =>
       mergeDataIntoQueryString(
-        method,
-        typeof props.href === 'object' ? props.href.url : props.href || '',
-        props.data,
+        method.value,
+        isUrlMethodPair(props.href) ? props.href.url : (props.href as string),
+        props.data || {},
         props.queryStringArrayFormat,
       ),
     )
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
 
-    const elProps = computed(() => ({
-      a: { href: href.value },
-      button: { type: 'button' },
-    }))
+    const elProps = computed(() => {
+      if (as.value === 'button') {
+        return { type: 'button' }
+      }
 
-    const baseParams = {
+      if (as.value === 'a' || typeof as.value !== 'string') {
+        return { href: href.value }
+      }
+
+      return {}
+    })
+
+    const baseParams = computed(() => ({
       data: data.value,
-      method: method,
+      method: method.value,
       replace: props.replace,
       preserveScroll: props.preserveScroll,
-      preserveState: props.preserveState ?? method !== 'get',
+      preserveState: props.preserveState ?? method.value !== 'get',
+      preserveUrl: props.preserveUrl,
       only: props.only,
       except: props.except,
       headers: props.headers,
       async: props.async,
-    }
+    }))
 
-    const visitParams = {
-      ...baseParams,
+    const visitParams = computed(() => ({
+      ...baseParams.value,
       onCancelToken: props.onCancelToken,
       onBefore: props.onBefore,
-      onStart: (event) => {
+      onStart: (visit: PendingVisit) => {
         inFlightCount.value++
-        props.onStart(event)
+        props.onStart?.(visit)
       },
       onProgress: props.onProgress,
-      onFinish: (event) => {
+      onFinish: (visit: ActiveVisit) => {
         inFlightCount.value--
-        props.onFinish(event)
+        props.onFinish?.(visit)
       },
       onCancel: props.onCancel,
       onSuccess: props.onSuccess,
       onError: props.onError,
-    }
+    }))
 
     const prefetch = () => {
-      router.prefetch(href.value, baseParams, { cacheFor: cacheForValue })
+      router.prefetch(
+        href.value,
+        {
+          ...baseParams.value,
+          onPrefetching: props.onPrefetching,
+          onPrefetched: props.onPrefetched,
+        },
+        {
+          cacheFor: cacheForValue.value,
+          cacheTags: props.cacheTags,
+        },
+      )
     }
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
-          router.visit(href.value, visitParams)
+          router.visit(href.value, visitParams.value)
         }
       },
     }
@@ -253,19 +281,31 @@ const Link: InertiaLink = defineComponent({
     }
 
     const prefetchClickEvents = {
-      onMousedown: (event) => {
+      onMousedown: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           prefetch()
         }
       },
-      onMouseup: (event) => {
-        event.preventDefault()
-        router.visit(href.value, visitParams)
+      onKeydown: (event: KeyboardEvent) => {
+        if (shouldNavigate(event)) {
+          event.preventDefault()
+          prefetch()
+        }
       },
-      onClick: (event) => {
+      onMouseup: (event: MouseEvent) => {
+        event.preventDefault()
+        router.visit(href.value, visitParams.value)
+      },
+      onKeyup: (event: KeyboardEvent) => {
+        if (shouldNavigate(event)) {
+          event.preventDefault()
+          router.visit(href.value, visitParams.value)
+        }
+      },
+      onClick: (event: MouseEvent) => {
         if (shouldIntercept(event)) {
-          // Let the mouseup event handle the visit
+          // Let the mouseup/keyup event handle the visit
           event.preventDefault()
         }
       },
@@ -273,17 +313,17 @@ const Link: InertiaLink = defineComponent({
 
     return () => {
       return h(
-        as,
+        as.value as string | Component,
         {
           ...attrs,
-          ...(elProps.value[as] || {}),
+          ...elProps.value,
           'data-loading': inFlightCount.value > 0 ? '' : undefined,
           ...(() => {
-            if (prefetchModes.includes('hover')) {
+            if (prefetchModes.value.includes('hover')) {
               return prefetchHoverEvents
             }
 
-            if (prefetchModes.includes('click')) {
+            if (prefetchModes.value.includes('click')) {
               return prefetchClickEvents
             }
 

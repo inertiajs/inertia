@@ -9,6 +9,7 @@
 
     "declaration": true,
     "declarationDir": "types",
+    "emitDeclarationOnly": true,
 
     "module": "ES2020",
     "moduleResolution": "Node",
@@ -23,6 +24,5 @@
     "typeRoots": ["./node_modules/@types"],
     "strict": true,
     "skipLibCheck": true
-  },
-  "exclude": ["tests", "vitest.config.ts"]
+  }
 }

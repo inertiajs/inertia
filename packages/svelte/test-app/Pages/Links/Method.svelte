@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 </script>
 
@@ -11,5 +11,7 @@
   <button use:inertia={{ method: 'patch', href: '/dump/patch' }} class="patch">PATCH Link</button>
   <button use:inertia={{ method: 'delete', href: '/dump/delete' }} class="delete">DELETE Link</button>
   <button use:inertia={{ href: { url: '/dump/post', method: 'post' } }}>OBJECT Link</button>
-  <button use:inertia={{ href: { url: '/dump/post', method: 'post' }, method: 'put' }}>OBJECT METHOD OVERRIDE Link</button>
+  <button use:inertia={{ href: { url: '/dump/post', method: 'post' }, method: 'put' }}
+    >OBJECT METHOD OVERRIDE Link</button
+  >
 </div>

@@ -1,9 +1,22 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo
-  export let bar
-  export let baz
+  interface ComponentProps {
+    foo: {
+      data: { id: number; name: string }[]
+      companies: { id: number; name: string }[]
+      teams: { id: number; name: string }[]
+      page: number
+      per_page: number
+      meta: { label: string }
+    }
+    bar: number[]
+    baz: number[]
+  }
+
+  export let foo: ComponentProps['foo']
+  export let bar: ComponentProps['bar']
+  export let baz: ComponentProps['baz']
 
   let page = foo.page
 
@@ -14,13 +27,14 @@
       },
       only: ['foo', 'baz'],
       onSuccess(visit) {
-        page = visit.props.foo.page
+        // TODO: Refactor 'unknown' and make Page<ComponentProps> work
+        page = (visit.props as unknown as { foo: { page: number } }).foo.page
       },
     })
   }
 
   const getFresh = () => {
-    page = 0;
+    page = 0
     router.reload({
       reset: ['foo', 'baz'],
     })

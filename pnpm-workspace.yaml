@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+  - packages/*/test-app
+  - playgrounds/*
+  - tests/app
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - esbuild

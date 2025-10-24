@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
@@ -47,6 +47,7 @@ const nonExistentFragmentGetVisit = () => {
   <div>
     <span class="text">This is the page that demonstrates url fragment behaviour using manual visits</span>
     <div style="width: 200vw; height: 200vh; margin-top: 50vh">
+      <button @click="handleScrollEvent">Update scroll positions</button>
       <!-- prettier-ignore -->
       <div class="document-position">Document scroll position is {{ documentScrollLeft }} & {{ documentScrollTop }}</div>
       <a href="#" @click="basicVisit" class="basic">Basic visit</a>

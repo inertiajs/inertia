@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import Queue from './queue'
@@ -50,16 +51,15 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
-        const doPush = () => {
-          this.doPushState({ page: data }, page.url)
-          cb && cb()
-        }
+        const doPush = () => this.doPushState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          setTimeout(doPush)
-        } else {
-          doPush()
+          return new Promise((resolve) => {
+            setTimeout(() => doPush().then(resolve))
+          })
         }
+
+        return doPush()
       })
     })
   }
@@ -107,12 +107,14 @@ class History {
           return
         }
 
-        this.doReplaceState(
-          {
-            page: window.history.state.page,
-            scrollRegions,
-          }
-        )
+        if (isEqual(this.getScrollRegions(), scrollRegions)) {
+          return
+        }
+
+        return this.doReplaceState({
+          page: window.history.state.page,
+          scrollRegions,
+        })
       })
     })
   }
@@ -124,12 +126,14 @@ class History {
           return
         }
 
-        this.doReplaceState(
-          {
-            page: window.history.state.page,
-            documentScrollPosition: scrollRegion,
-          }
-        )
+        if (isEqual(this.getDocumentScrollPosition(), scrollRegion)) {
+          return
+        }
+
+        return this.doReplaceState({
+          page: window.history.state.page,
+          documentScrollPosition: scrollRegion,
+        })
       })
     })
   }
@@ -160,16 +164,15 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
-        const doReplace = () => {
-          this.doReplaceState({ page: data }, page.url)
-          cb && cb()
-        }
+        const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          setTimeout(doReplace)
-        } else {
-          doReplace()
+          return new Promise((resolve) => {
+            setTimeout(() => doReplace().then(resolve))
+          })
         }
+
+        return doReplace()
       })
     })
   }
@@ -181,15 +184,17 @@ class History {
       documentScrollPosition?: ScrollRegion
     },
     url?: string,
-  ): void {
-    window.history.replaceState(
-      {
-        ...data,
-        scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-        documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-      },
-      '',
-      url,
+  ): Promise<void> {
+    return Promise.resolve().then(() =>
+      window.history.replaceState(
+        {
+          ...data,
+          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+        },
+        '',
+        url,
+      ),
     )
   }
 
@@ -200,8 +205,8 @@ class History {
       documentScrollPosition?: ScrollRegion
     },
     url: string,
-  ): void {
-    window.history.pushState(data, '', url)
+  ): Promise<void> {
+    return Promise.resolve().then(() => window.history.pushState(data, '', url))
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
@@ -212,6 +217,12 @@ class History {
     if (this.current[key] !== undefined) {
       delete this.current[key]
       this.replaceState(this.current as Page)
+    }
+  }
+
+  public clearInitialState(key: keyof Page) {
+    if (this.initialState && this.initialState[key] !== undefined) {
+      delete this.initialState[key]
     }
   }
 

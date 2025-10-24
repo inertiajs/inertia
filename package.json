@@ -1,26 +1,44 @@
 {
   "name": "inertia",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "playgrounds/*"
-  ],
+  "type": "module",
   "scripts": {
-    "test:react": "cd tests && PACKAGE=react npx playwright test",
-    "test:react:watch": "cd packages/react/test-app && npm run watch",
-    "test:svelte": "cd tests && PACKAGE=svelte npx playwright test",
-    "test:svelte:watch": "cd packages/svelte/test-app && npm run watch",
-    "test:vue": "cd tests && PACKAGE=vue3 npx playwright test",
-    "test:vue:watch": "cd packages/vue3/test-app && npm run watch",
-    "build:all": "cd packages/core && npm run build && cd ../react && npm run build && cd ../vue3 && npm run build && cd ../svelte && npm run build"
+    "build:all": "pnpm -r --filter './packages/*' build",
+    "dev": "pnpx concurrently -c \"#b794f4,#61dafb,#d43008,#32a06f\" \"pnpm dev:core\" \"pnpm dev:react\" \"pnpm dev:svelte\" \"pnpm dev:vue\" --names=core,react,svelte,vue",
+    "dev:core": "cd packages/core && pnpm run dev",
+    "dev:vue": "cd packages/vue3 && pnpm run dev",
+    "dev:react": "cd packages/react && pnpm run dev",
+    "dev:svelte": "cd packages/svelte && pnpm run dev",
+    "dev:test-app": "pnpx concurrently -c \"#61dafb,#d43008,#32a06f\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
+    "dev:test-app:react": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:svelte": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:vue": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
+    "es2020-check": "pnpm -r --filter './packages/*' es2020-check",
+    "lint:test-app": "pnpm -r --filter './packages/*/test-app' lint",
+    "lint:test-app:react": "cd packages/react/test-app && pnpm run lint",
+    "lint:test-app:svelte": "cd packages/svelte/test-app && pnpm run lint",
+    "lint:test-app:vue": "cd packages/vue3/test-app && pnpm run lint",
+    "type-check:test-app": "pnpm -r --filter './packages/*/test-app' type-check",
+    "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
+    "type-check:test-app:svelte": "cd packages/svelte/test-app && pnpm run type-check",
+    "type-check:test-app:vue": "cd packages/vue3/test-app && pnpm run type-check",
+    "test:react": "PACKAGE=react playwright test",
+    "test:svelte": "PACKAGE=svelte playwright test",
+    "test:vue": "PACKAGE=vue3 playwright test",
+    "playground:react": "cd playgrounds/react && ./init.sh && composer run dev",
+    "playground:svelte4": "cd playgrounds/svelte4 && ./init.sh && composer run dev",
+    "playground:svelte5": "cd playgrounds/svelte5 && ./init.sh && composer run dev",
+    "playground:vue": "cd playgrounds/vue3 && ./init.sh && composer run dev",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "prettier": "^3.2.5",
-    "prettier-plugin-organize-imports": "^4.1.0",
-    "prettier-plugin-svelte": "^3.2.3",
-    "prettier-plugin-tailwindcss": "^0.6.9"
+    "@playwright/test": "^1.56.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "prettier-plugin-svelte": "^3.4.0",
+    "prettier-plugin-tailwindcss": "^0.6.14"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.28.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.52.5"
   }
 }

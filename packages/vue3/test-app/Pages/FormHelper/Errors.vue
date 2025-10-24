@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
 const form = useForm({
   name: 'foo',
@@ -28,6 +28,14 @@ const setErrors = () => {
 const setError = () => {
   form.setError('handle', 'Manually set Handle error')
 }
+
+const resetAndClearErrors = () => {
+  form.resetAndClearErrors()
+}
+
+const resetHandle = () => {
+  form.resetAndClearErrors('handle')
+}
 </script>
 
 <template>
@@ -54,6 +62,8 @@ const setError = () => {
     <button @click="clearError" class="clear-one">Clear one error</button>
     <button @click="setErrors" class="set">Set errors</button>
     <button @click="setError" class="set-one">Set one error</button>
+    <button @click="resetAndClearErrors" class="reset-all">Reset all</button>
+    <button @click="resetHandle" class="reset-handle">Reset handle</button>
 
     <span class="errors-status">Form has {{ form.hasErrors ? '' : 'no ' }}errors</span>
   </div>

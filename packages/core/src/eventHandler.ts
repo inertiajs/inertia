@@ -1,6 +1,7 @@
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { router } from './index'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
@@ -9,7 +10,7 @@ import { hrefToUrl } from './url'
 class EventHandler {
   protected internalListeners: {
     event: InternalEvent
-    listener: VoidFunction
+    listener: (...args: any[]) => void
   }[] = []
 
   public init() {
@@ -38,7 +39,7 @@ class EventHandler {
     return this.registerListener(`inertia:${type}`, listener)
   }
 
-  public on(event: InternalEvent, callback: VoidFunction): VoidFunction {
+  public on(event: InternalEvent, callback: (...args: any[]) => void): VoidFunction {
     this.internalListeners.push({ event, listener: callback })
 
     return () => {
@@ -54,8 +55,10 @@ class EventHandler {
     this.fireInternalEvent('missingHistoryItem')
   }
 
-  public fireInternalEvent(event: InternalEvent): void {
-    this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
+  public fireInternalEvent(event: InternalEvent, ...args: any[]): void {
+    this.internalListeners
+      .filter((listener) => listener.event === event)
+      .forEach((listener) => listener.listener(...args))
   }
 
   protected registerListener(type: string, listener: EventListener): VoidFunction {
@@ -89,10 +92,11 @@ class EventHandler {
           return
         }
 
+        // Cancel ongoing requests
+        router.cancelAll()
+
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          window.requestAnimationFrame(() => {
-            Scroll.restore(history.getScrollRegions())
-          })
+          Scroll.restore(history.getScrollRegions())
           fireNavigateEvent(currentPage.get())
         })
       })

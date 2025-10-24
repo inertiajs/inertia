@@ -16,9 +16,21 @@ module.exports = {
         .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
         .join(''),
       props: {},
+      // TODO: url should be req.originalUrl as that includes the query string
       url: req.path,
       version: null,
       ...data,
+    }
+
+    if (data.component.startsWith('InfiniteScroll')) {
+      // Support absolute URL format for testing URL preservation
+      if (req.query.absolutePageUrl) {
+        const protocol = req.protocol
+        const host = req.get('host')
+        data.url = `${protocol}://${host}${req.originalUrl}`
+      } else {
+        data.url = req.originalUrl
+      }
     }
 
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''
