@@ -456,7 +456,11 @@ export type InertiaAppConfig = {
   form: {
     recentlySuccessfulDuration: number
   }
+  // experimental: {
+  //   /* not guaranteed */
+  // }
   future: {
+    /* planned defaults */
     preserveEqualProps: boolean
   }
   prefetch: {

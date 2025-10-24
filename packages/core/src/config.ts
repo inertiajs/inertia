@@ -70,10 +70,10 @@ export const config = new Config<InertiaAppConfig>({
   form: {
     recentlySuccessfulDuration: 2_000,
   },
-  prefetch: {
-    cacheFor: 30_000,
-  },
   future: {
     preserveEqualProps: false,
+  },
+  prefetch: {
+    cacheFor: 30_000,
   },
 })
