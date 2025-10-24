@@ -179,6 +179,7 @@ export class Response {
       replace: this.requestParams.all().replace,
       preserveScroll: this.requestParams.all().preserveScroll as boolean,
       preserveState: this.requestParams.all().preserveState as boolean,
+      viewTransition: this.requestParams.all().viewTransition,
     })
   }
 

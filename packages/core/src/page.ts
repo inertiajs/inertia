@@ -2,7 +2,7 @@ import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams } from './types'
+import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
@@ -36,10 +36,12 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
+      viewTransition = false,
     }: {
       replace?: boolean
       preserveScroll?: boolean
       preserveState?: boolean
+      viewTransition?: Visit['viewTransition']
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -76,6 +78,11 @@ class CurrentPage {
       }).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
+        if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
+          // Don't use view transition if the page stays the same and there are (new) errors...
+          viewTransition = false
+        }
+
         this.page = page
         this.cleared = false
 
@@ -89,7 +96,12 @@ class CurrentPage {
 
         this.isFirstPageLoad = false
 
-        return this.swap({ component, page, preserveState }).then(() => {
+        return this.swap({
+          component,
+          page,
+          preserveState,
+          viewTransition,
+        }).then(() => {
           if (preserveScroll) {
             // Scroll regions must be explicitly restored since the DOM elements are destroyed
             // and recreated during the component 'swap'. Document scroll is naturally
@@ -129,7 +141,7 @@ class CurrentPage {
       this.page = page
       this.cleared = false
       history.setCurrent(page)
-      return this.swap({ component, page, preserveState })
+      return this.swap({ component, page, preserveState, viewTransition: false })
     })
   }
 
@@ -163,12 +175,26 @@ class CurrentPage {
     component,
     page,
     preserveState,
+    viewTransition,
   }: {
     component: Component
     page: Page
     preserveState: boolean
+    viewTransition: Visit['viewTransition']
   }): Promise<unknown> {
-    return this.swapComponent({ component, page, preserveState })
+    const doSwap = () => this.swapComponent({ component, page, preserveState })
+
+    if (!viewTransition || !document?.startViewTransition) {
+      return doSwap()
+    }
+
+    const viewTransitionCallback = typeof viewTransition === 'boolean' ? () => null : viewTransition
+
+    return new Promise((resolve) => {
+      const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
+
+      viewTransitionCallback(transitionResult)
+    })
   }
 
   public resolve(component: string): Promise<Component> {
