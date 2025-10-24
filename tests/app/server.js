@@ -1157,6 +1157,13 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
   )
 })
 
+app.post('/view-transition/form-errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ViewTransition/FormErrors',
+    props: { errors: { name: 'The name field is required.' } },
+  }),
+)
+
 app.all('*', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

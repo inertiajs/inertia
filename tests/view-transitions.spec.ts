@@ -28,3 +28,15 @@ test('calls viewTransition callbacks when using callback function', async ({ pag
   await page.waitForEvent('console', (msg) => msg.text() === 'finished')
   await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
 })
+
+test('does not use view transition when same page returns with validation errors', async ({ page }) => {
+  consoleMessages.listen(page)
+
+  await page.goto('/view-transition/form-errors')
+  await page.getByRole('button', { name: 'Submit with View Transition' }).click()
+  await expect(page.getByText('The name field is required.')).toBeVisible()
+
+  await page.waitForTimeout(500)
+
+  await expect(consoleMessages.messages).toEqual([])
+})
