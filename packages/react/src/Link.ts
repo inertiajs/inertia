@@ -12,6 +12,7 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { config } from '.'
 
 const noop = () => undefined
 
@@ -152,7 +153,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     }, [cacheFor, prefetchModes])
 
     const doPrefetch = useMemo(() => {

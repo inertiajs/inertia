@@ -1,5 +1,6 @@
 import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
+import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { history } from './history'
@@ -295,7 +296,7 @@ export class Router {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
         {
-          cacheFor: 30_000,
+          cacheFor: config.get('prefetch.cacheFor'),
           cacheTags: [],
           ...prefetchOptions,
         },
@@ -443,6 +444,12 @@ export class Router {
       options.method = options.method ?? urlMethodPair.method
     }
 
+    const defaultVisitOptionsCallback = config.get('visitOptions')
+
+    const configuredOptions = defaultVisitOptionsCallback
+      ? defaultVisitOptionsCallback(href.toString(), cloneDeep(options)) || {}
+      : {}
+
     const mergedOptions: Visit = {
       method: 'get',
       data: {},
@@ -463,6 +470,7 @@ export class Router {
       prefetch: false,
       invalidateCacheTags: [],
       ...options,
+      ...configuredOptions,
     }
 
     const [url, _data] = transformUrlAndData(

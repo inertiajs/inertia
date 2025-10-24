@@ -388,10 +388,11 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  defaults?: Partial<InertiaAppConfig & TAdditionalInertiaAppConfig>
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -399,7 +400,8 @@ export interface CreateInertiaAppOptionsForCSR<
   TComponentResolver,
   TSetupOptions,
   TSetupReturn,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  TAdditionalInertiaAppConfig,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   page?: Page<SharedProps>
   progress?:
@@ -418,7 +420,8 @@ export interface CreateInertiaAppOptionsForSSR<
   TComponentResolver,
   TSetupOptions,
   TSetupReturn,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn> {
+  TAdditionalInertiaAppConfig,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined
@@ -441,11 +444,22 @@ export type HeadManager = {
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
-export type CacheForOption = number | string
+export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd'
+export type CacheForOption = number | `${number}${TimeUnit}` | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
   cacheTags: string | string[]
+}
+
+export type InertiaAppConfig = {
+  form: {
+    recentlySuccessfulDuration: number
+  }
+  prefetch: {
+    cacheFor: CacheForOption | CacheForOption[]
+  }
+  visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
 export interface LinkComponentBaseProps

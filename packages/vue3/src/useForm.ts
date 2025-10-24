@@ -14,6 +14,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { reactive, watch } from 'vue'
+import { config } from '.'
 
 type FormOptions = Omit<VisitOptions, 'data'>
 type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
@@ -198,7 +199,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           this.clearErrors()
           this.wasSuccessful = true
           this.recentlySuccessful = true
-          recentlySuccessfulTimeoutId = setTimeout(() => (this.recentlySuccessful = false), 2000)
+          recentlySuccessfulTimeoutId = setTimeout(
+            () => (this.recentlySuccessful = false),
+            config.get('form.recentlySuccessfulDuration'),
+          )
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 

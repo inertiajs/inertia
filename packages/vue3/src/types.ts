@@ -3,6 +3,7 @@ import { DefineComponent } from 'vue'
 import useForm from './useForm'
 
 export type VuePageHandlerArgs = Parameters<PageHandler<DefineComponent>>[0]
+export type VueInertiaAppConfig = {}
 
 declare module '@inertiajs/core' {
   export interface Router {
