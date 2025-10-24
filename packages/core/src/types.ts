@@ -205,7 +205,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   reset: string[]
   preserveUrl: boolean
   invalidateCacheTags: string | string[]
-  viewTransition: boolean
+  viewTransition: boolean | ((viewTransition: ViewTransition) => void)
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {

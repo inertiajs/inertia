@@ -2,7 +2,7 @@ import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams } from './types'
+import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
@@ -41,7 +41,7 @@ class CurrentPage {
       replace?: boolean
       preserveScroll?: boolean
       preserveState?: boolean
-      viewTransition?: boolean
+      viewTransition?: Visit['viewTransition']
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -179,16 +179,18 @@ class CurrentPage {
     component: Component
     page: Page
     preserveState: boolean
-    viewTransition: boolean
+    viewTransition: Visit['viewTransition']
   }): Promise<unknown> {
     if (!viewTransition || !document?.startViewTransition) {
       return this.swapComponent({ component, page, preserveState })
     }
 
     return new Promise((resolve) => {
-      document.startViewTransition(() => {
+      const transition = document.startViewTransition(() => {
         this.swapComponent({ component, page, preserveState }).then(resolve)
       })
+
+      typeof viewTransition === 'function' && viewTransition(transition)
     })
   }
 

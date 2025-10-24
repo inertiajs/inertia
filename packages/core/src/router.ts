@@ -469,6 +469,7 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       invalidateCacheTags: [],
+      viewTransition: false,
       ...options,
       ...configuredOptions,
     }
