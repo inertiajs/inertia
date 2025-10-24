@@ -22,8 +22,8 @@
     <input id="name" bind:value={$form.name} type="text" name="name" />
   </label>
 
-  {#if $form.errors.name }
-    <p class="name_error">{$form.errors.name }</p>
+  {#if $form.errors.name}
+    <p class="name_error">{$form.errors.name}</p>
   {/if}
 
   <button class="submit" on:click={submit}>Submit with View Transition</button>
