@@ -456,10 +456,12 @@ export type InertiaAppConfig = {
   form: {
     recentlySuccessfulDuration: number
   }
+  future: {
+    preserveEqualProps: boolean
+  }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
   }
-  preserveEqualProps: boolean
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 

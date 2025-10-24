@@ -14,7 +14,7 @@ export default ({ nestedA, nestedB }: { nestedA: { count: number }; nestedB: { d
   }, [nestedB])
 
   function enable() {
-    config.set('preserveEqualProps', true)
+    config.set('future.preserveEqualProps', true)
   }
 
   return (

@@ -229,7 +229,7 @@ export class Response {
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
-    if (pageResponse.component !== currentPage.get().component || config.get('preserveEqualProps') !== true) {
+    if (pageResponse.component !== currentPage.get().component || config.get('future.preserveEqualProps') !== true) {
       return
     }
 

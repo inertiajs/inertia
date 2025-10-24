@@ -21,7 +21,7 @@
   }
 
   function enable() {
-    config.set('preserveEqualProps', true)
+    config.set('future.preserveEqualProps', true)
   }
 </script>
 
