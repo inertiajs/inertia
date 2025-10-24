@@ -759,6 +759,14 @@ app.get('/remember/users/:id/edit', (req, res) => {
   })
 })
 
+app.get('/preserve-equal-props', (req, res) => {
+  inertia.render(req, res, {
+    component: 'PreserveEqualProps',
+    props: { nestedA: { count: 1 }, nestedB: { date: Date.now() } },
+  })
+})
+app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserve-equal-props'))
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
