@@ -14,6 +14,7 @@ type TestConfig = {
       value: string
     }
   }
+  optional?: boolean
 }
 
 function createConfig(): Config<TestConfig> {
@@ -72,30 +73,24 @@ test.describe('config.ts', () => {
       expect(config.get('prefetch.cacheTags')).toEqual([])
     })
 
-    test('merges shallowly and can be combined with set', () => {
+    test('replaces the entire config', () => {
       const config = createConfig()
 
-      config.mergeConfig({
-        form: {
-          recentlySuccessfulDuration: 3_000,
-        },
+      config.set({
+        'form.recentlySuccessfulDuration': 3_000,
+        'prefetch.cacheFor': 60_000,
       })
 
-      expect(config.get('form.recentlySuccessfulDuration')).toBe(3_000)
-      expect(config.get('prefetch.cacheFor')).toBe(30_000)
-
-      config.mergeConfig({
+      config.replace({
         prefetch: {
-          cacheFor: 60_000,
-          cacheTags: [],
+          cacheFor: 120_000,
+          cacheTags: ['tag1', 'tag2'],
         },
       })
 
-      expect(config.get('prefetch.cacheFor')).toBe(60_000)
-      expect(config.get('prefetch.cacheTags')).toEqual([])
-
-      config.set('prefetch.cacheTags', ['new-tag'])
-      expect(config.get('prefetch.cacheTags')).toEqual(['new-tag'])
+      expect(config.get('form.recentlySuccessfulDuration')).toBe(2_000)
+      expect(config.get('prefetch.cacheFor')).toBe(120_000)
+      expect(config.get('prefetch.cacheTags')).toEqual(['tag1', 'tag2'])
     })
 
     test('extends type and defaults without overriding user config', () => {
@@ -120,6 +115,21 @@ test.describe('config.ts', () => {
 
       expect(extended.get('base.value')).toBe(5)
       expect(extended.get('extended.value')).toBe('test')
+    })
+
+    test('returns undefined for invalid keys', () => {
+      const config = createConfig()
+
+      // @ts-expect-error - Testing invalid key
+      expect(config.get('nonexistent')).toBeUndefined()
+      // @ts-expect-error - Testing invalid nested key
+      expect(config.get('form.nonexistent')).toBeUndefined()
+    })
+
+    test('returns undefined for optional keys not set', () => {
+      const config = createConfig()
+
+      expect(config.get('optional')).toBeUndefined()
     })
   })
 })

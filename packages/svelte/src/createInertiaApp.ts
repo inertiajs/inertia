@@ -36,7 +36,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   page,
   defaults = {},
 }: InertiaAppOptions<SharedProps>): InertiaAppResponse {
-  config.mergeConfig(defaults)
+  config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)

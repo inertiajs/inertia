@@ -1,6 +1,6 @@
 import { Router } from './router'
 
-export { Config, config } from './config'
+export { config } from './config'
 export { getScrollableParent } from './domUtils'
 export { objectToFormData } from './formData'
 export { formDataToObject } from './formObject'

@@ -23,7 +23,7 @@ type ConfigValue<T, K extends ConfigKeys<T>> = K extends `${infer P}.${infer Res
     ? T[K]
     : never
 
-// Type for setting multiple config values at once
+// Helper type for setting multiple config values with an object
 type ConfigSetObject<T> = {
   [K in ConfigKeys<T>]?: ConfigValue<T, K>
 }
@@ -44,8 +44,8 @@ export class Config<TConfig extends {} = {}> {
     return this as unknown as Config<TConfig & TExtension>
   }
 
-  public mergeConfig(newConfig: Partial<TConfig>): void {
-    this.config = { ...this.config, ...newConfig }
+  public replace(newConfig: Partial<TConfig>): void {
+    this.config = newConfig
   }
 
   public get<K extends ConfigKeys<TConfig>>(key: K): ConfigValue<TConfig, K> {
