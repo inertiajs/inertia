@@ -733,6 +733,40 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/rapid-navigation/:filter?', (req, res) => {
+  const filter = req.params.filter || 'none'
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  if (!requestedProps) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/RapidNavigation',
+      deferredProps: {
+        group1: ['users'],
+        group2: ['stats'],
+        group3: ['activity'],
+      },
+      props: {
+        filter,
+      },
+    })
+  }
+
+  // Simulate slow deferred prop loading (600ms)
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/RapidNavigation',
+        props: {
+          filter,
+          users: requestedProps.includes('users') ? { text: `users data for ${filter}` } : undefined,
+          stats: requestedProps.includes('stats') ? { text: `stats data for ${filter}` } : undefined,
+          activity: requestedProps.includes('activity') ? { text: `activity data for ${filter}` } : undefined,
+        },
+      }),
+    600,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
