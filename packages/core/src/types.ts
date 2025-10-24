@@ -459,6 +459,7 @@ export type InertiaAppConfig = {
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
   }
+  preserveEqualProps: boolean
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 

@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react'
+import { config, Link } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 
 export default ({ nestedA, nestedB }: { nestedA: { count: number }; nestedB: { date: number } }) => {
@@ -13,16 +13,21 @@ export default ({ nestedA, nestedB }: { nestedA: { count: number }; nestedB: { d
     setEffectBCount((count) => count + 1)
   }, [nestedB])
 
+  function enable() {
+    config.set('preserveEqualProps', true)
+  }
+
   return (
     <div>
       <h1>Preserve Equal Props</h1>
-      <p>Count A: {nestedA.count}</p>
-      <p>Date B: {nestedB.date}</p>
-      <p>Effect A Count: {effectACount}</p>
-      <p>Effect B Count: {effectBCount}</p>
+      <p id="count-a">Count A: {nestedA.count}</p>
+      <p id="date-b">Date B: {nestedB.date}</p>
+      <p id="effect-a">Effect A Count: {effectACount}</p>
+      <p id="effect-b">Effect B Count: {effectBCount}</p>
       <Link method="post" href="/preserve-equal-props/back">
         Submit and redirect back
       </Link>
+      <button onClick={enable}>Enable</button>
     </div>
   )
 }

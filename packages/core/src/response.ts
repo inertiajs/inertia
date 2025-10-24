@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import { get, isEqual, set } from 'lodash-es'
-import { router } from '.'
+import { config, router } from '.'
 import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
@@ -163,8 +163,8 @@ export class Response {
       return Promise.resolve()
     }
 
-    this.preserveEqualProps(pageResponse)
     this.mergeProps(pageResponse)
+    this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
 
@@ -229,6 +229,10 @@ export class Response {
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
+    if (pageResponse.component !== currentPage.get().component || config.get('preserveEqualProps') !== true) {
+      return
+    }
+
     const currentPageProps = currentPage.get().props
 
     Object.entries(pageResponse.props).forEach(([key, value]) => {
