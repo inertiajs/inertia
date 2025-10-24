@@ -15,6 +15,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { config } from '.'
 import { useIsomorphicLayoutEffect } from './react'
 import useRemember from './useRemember'
 
@@ -154,7 +155,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
               if (isMounted.current) {
                 setRecentlySuccessful(false)
               }
-            }, 2000)
+            }, config.get('form.recentlySuccessfulDuration'))
           }
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null

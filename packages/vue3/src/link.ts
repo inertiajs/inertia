@@ -14,6 +14,7 @@ import {
   shouldNavigate,
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { config } from '.'
 
 const noop = () => {}
 
@@ -165,7 +166,7 @@ const Link: InertiaLink = defineComponent({
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     })
 
     onMounted(() => {

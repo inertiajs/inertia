@@ -13,6 +13,7 @@ import {
   type VisitOptions,
 } from '@inertiajs/core'
 import type { ActionReturn } from 'svelte/action'
+import { config } from '.'
 
 type ActionEventHandlers = {
   [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
@@ -133,7 +134,7 @@ function link(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     })()
 
     cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
