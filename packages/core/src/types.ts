@@ -122,6 +122,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  viewTransition: boolean
 }
 
 export type GlobalEventsMap = {

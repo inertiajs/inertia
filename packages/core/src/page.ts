@@ -40,7 +40,8 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
+      viewTransition = false,
+    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState' | 'viewTransition'>> = {},
   ): Promise<void> {
     this.componentId = {}
 
@@ -66,6 +67,10 @@ class CurrentPage {
       }).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
+        if (preserveState || !isNewComponent) {
+          viewTransition = false
+        }
+
         this.page = page
         this.cleared = false
 
@@ -79,7 +84,12 @@ class CurrentPage {
 
         this.isFirstPageLoad = false
 
-        return this.swap({ component, page, preserveState }).then(() => {
+        return this.swap({
+          component,
+          page,
+          preserveState,
+          viewTransition,
+        }).then(() => {
           if (!preserveScroll) {
             Scroll.reset()
           }
@@ -106,7 +116,7 @@ class CurrentPage {
       this.page = page
       this.cleared = false
       history.setCurrent(page)
-      return this.swap({ component, page, preserveState })
+      return this.swap({ component, page, preserveState, viewTransition: false })
     })
   }
 
@@ -140,12 +150,22 @@ class CurrentPage {
     component,
     page,
     preserveState,
+    viewTransition,
   }: {
     component: Component
     page: Page
     preserveState: PreserveStateOption
+    viewTransition: boolean
   }): Promise<unknown> {
-    return this.swapComponent({ component, page, preserveState })
+    if (!viewTransition || !document?.startViewTransition) {
+      return this.swapComponent({ component, page, preserveState })
+    }
+
+    return new Promise((resolve) => {
+      document.startViewTransition(() => {
+        this.swapComponent({ component, page, preserveState }).then(resolve)
+      })
+    })
   }
 
   public resolve(component: string): Promise<Component> {
