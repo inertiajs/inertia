@@ -10,7 +10,7 @@
   let previousNestedA: { count: number } = nestedA
   let previousNestedB: { date: number } = nestedB
 
-   $: if (nestedA !== previousNestedA) {
+  $: if (nestedA !== previousNestedA) {
     effectACount = effectACount + 1
     previousNestedA = nestedA
   }
@@ -31,8 +31,6 @@
   <p id="date-b">Date B: {nestedB.date}</p>
   <p id="effect-a">Effect A Count: {effectACount}</p>
   <p id="effect-b">Effect B Count: {effectBCount}</p>
-  <Link method="post"  href="/preserve-equal-props/back">
-    Submit and redirect back
-  </Link>
+  <Link method="post" href="/preserve-equal-props/back">Submit and redirect back</Link>
   <button on:click={enable}>Enable</button>
 </div>
