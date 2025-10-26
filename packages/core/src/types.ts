@@ -124,6 +124,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   props: PageProps &
     SharedProps & {
       errors: Errors & ErrorBag
+      routeParams: Record<string, string>
       deferred?: Record<string, VisitOptions['only']>
     }
   url: string

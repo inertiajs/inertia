@@ -151,3 +151,7 @@ export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageP
     encryptHistory: computed(() => page.value?.encryptHistory),
   }) as Page<TPageProps>
 }
+
+export function useParams<T extends Record<string, any> = Record<string, string>>() {
+  return computed<T>(() => page.value?.props?.routeParams as T)
+}

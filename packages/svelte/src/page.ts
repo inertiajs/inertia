@@ -16,3 +16,7 @@ export default { subscribe }
 export function usePage<TPageProps extends PageProps = PageProps>(): Readable<SveltePage<TPageProps>> {
   return derived({ subscribe }, ($page) => $page as SveltePage<TPageProps>)
 }
+
+export function useParams<T extends Record<string, string> = Record<string, string>>(): Readable<T> {
+  return derived<Readable<SveltePage>, T>({ subscribe }, ($page) => $page.props?.routeParams as T)
+}

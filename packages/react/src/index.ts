@@ -18,6 +18,7 @@ export {
   default as useForm,
 } from './useForm'
 export { default as usePage } from './usePage'
+export { default as useParams } from './useParams'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'
 export { default as useRemember } from './useRemember'
