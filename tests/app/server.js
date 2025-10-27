@@ -166,6 +166,31 @@ app.get('/client-side-visit/props', (req, res) =>
   }),
 )
 
+app.get('/visits/proxy', (req, res) => {
+  const timeout = req.headers['x-inertia-partial-data'] ? 250 : 0
+  const statuses = ['pending', 'running', 'success', 'failed', 'canceled']
+
+  const sites = [1, 2, 3, 4, 5].map(function (id) {
+    const site = { id }
+
+    site.latestDeployment = { id: id * 10, statuses: [statuses[id % statuses.length]] }
+
+    return site
+  })
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Visits/Proxy',
+        props: req.headers['x-inertia-partial-data'] === 'sites' ? { sites } : { foo: new Date().toISOString() },
+        deferredProps: req.headers['x-inertia-partial-data'] ? {} : { default: ['sites'] },
+      }),
+    timeout,
+  )
+})
+
+app.post('/visits/proxy', (req, res) => res.redirect(303, '/visits/proxy'))
+
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/PartialReloads',
