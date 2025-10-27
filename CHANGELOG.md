@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.11...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.12...master)
 
 - Nothing yet
+
+## [v2.2.12](https://github.com/inertiajs/inertia/compare/v2.2.11...v2.2.12) - 2025-10-27
+
+### What's Changed
+
+* Clone page props before writing it to the browser's history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2662
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.11...v2.2.12
 
 ## [v2.2.11](https://github.com/inertiajs/inertia/compare/v2.2.10...v2.2.11) - 2025-10-24
 
