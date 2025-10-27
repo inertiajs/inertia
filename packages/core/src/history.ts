@@ -65,6 +65,7 @@ class History {
   }
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
+    // We clone the props to make sure we're not serializing any reactive data that might have sneaked in...
     const pageCloned = {
       ...page,
       props: cloneDeep(page.props),
