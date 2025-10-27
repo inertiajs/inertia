@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash-es'
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
@@ -73,16 +72,8 @@ class CurrentPage {
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       return new Promise((resolve) => {
-        const pageData = {
-          ...page,
-          props: cloneDeep(page.props),
-        }
-
-        replace ? history.replaceState(pageData, () => resolve(null)) : history.pushState(pageData, () => resolve(null))
+        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
       }).then(() => {
-        const pageFromHistory = window.history.state?.page
-        console.log({ pageFromHistory })
-
         const isNewComponent = !this.isTheSame(page)
 
         this.page = page

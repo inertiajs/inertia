@@ -1016,7 +1016,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
   await expect(dump.form).toEqual({})
 })
 
-test('vue proxies synced back to the core adapater are not stored in history state', async ({ page }) => {
+test('vue proxies synced back to the core adapter are not stored in history state', async ({ page }) => {
   test.skip(process.env.PACKAGE !== 'vue3', 'Vue 3 specific test')
 
   pageLoads.watch(page)

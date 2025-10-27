@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash-es'
+import { cloneDeep, isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import Queue from './queue'
@@ -65,8 +65,13 @@ class History {
   }
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
+    const pageCloned = {
+      ...page,
+      props: cloneDeep(page.props),
+    }
+
     return new Promise((resolve) => {
-      return page.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
+      return page.encryptHistory ? encryptHistory(pageCloned).then(resolve) : resolve(pageCloned)
     })
   }
 
