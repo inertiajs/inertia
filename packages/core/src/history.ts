@@ -69,8 +69,8 @@ class History {
       structuredClone(page.props)
       return page
     } catch {
-      // We only want to clone the props if they are not serializable by structuredClone
-      // as that is an indicator the props are also not serializable for history storage.
+      // Props contain non-serializable data (e.g., Proxies, functions).
+      // Clone them to ensure they can be safely stored in browser history.
       return {
         ...page,
         props: cloneDeep(page.props),
