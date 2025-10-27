@@ -64,15 +64,25 @@ class History {
     })
   }
 
-  protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
-    // We clone the props to make sure we're not serializing any reactive data that might have sneaked in...
-    const pageCloned = {
-      ...page,
-      props: cloneDeep(page.props),
+  protected clonePageProps(page: Page): Page {
+    try {
+      structuredClone(page.props)
+      return page
+    } catch {
+      // We only want to clone the props if they are not serializable by structuredClone
+      // as that is an indicator the props are also not serializable for history storage.
+      return {
+        ...page,
+        props: cloneDeep(page.props),
+      }
     }
+  }
+
+  protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
+    const pageWithClonedProps = this.clonePageProps(page)
 
     return new Promise((resolve) => {
-      return page.encryptHistory ? encryptHistory(pageCloned).then(resolve) : resolve(pageCloned)
+      return page.encryptHistory ? encryptHistory(pageWithClonedProps).then(resolve) : resolve(pageWithClonedProps)
     })
   }
 
