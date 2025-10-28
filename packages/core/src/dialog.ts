@@ -77,16 +77,14 @@ export default {
   },
 
   hide(): void {
-    if (this.dialog) {
-      this.dialog.removeEventListener('click', this.boundClickHandler)
-      this.dialog.removeEventListener('cancel', this.boundCancelHandler)
-      this.dialog.removeEventListener('close', this.boundCloseHandler)
-    }
+    this.dialog.removeEventListener('click', this.boundClickHandler)
+    this.dialog.removeEventListener('cancel', this.boundCancelHandler)
+    this.dialog.removeEventListener('close', this.boundCloseHandler)
 
-    this.dialogStyleElement?.remove()
+    this.dialogStyleElement.remove()
     this.dialogStyleElement = null
 
-    this.dialog?.remove()
+    this.dialog.remove()
     this.dialog = null
 
     this.iframe = null
