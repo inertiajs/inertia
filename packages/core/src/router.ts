@@ -249,6 +249,7 @@ export class Router {
       async: true,
       showProgress: false,
       prefetch: true,
+      viewTransition: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -390,7 +391,7 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const { onError, onFinish, onSuccess, ...pageParams } = params
+    const { viewTransition, onError, onFinish, onSuccess, ...pageParams } = params
 
     const page = {
       ...current,
@@ -406,6 +407,7 @@ export class Router {
         replace,
         preserveScroll,
         preserveState,
+        viewTransition,
       })
       .then(() => {
         const errors = currentPage.get().props.errors || {}
@@ -428,6 +430,7 @@ export class Router {
         async: true,
         showProgress: false,
         prefetch: true,
+        viewTransition: false,
       }),
       ...this.getVisitEvents(options),
     }
@@ -469,6 +472,7 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       invalidateCacheTags: [],
+      viewTransition: false,
       ...options,
       ...configuredOptions,
     }
