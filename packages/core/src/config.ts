@@ -72,6 +72,7 @@ export const config = new Config<InertiaAppConfig>({
   },
   future: {
     preserveEqualProps: false,
+    useDataSetInHeadManager: false,
   },
   prefetch: {
     cacheFor: 30_000,
