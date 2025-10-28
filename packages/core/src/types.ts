@@ -464,8 +464,9 @@ export type InertiaAppConfig = {
   // }
   future: {
     /* planned defaults */
-    preserveEqualProps: boolean
-    useDataInertiaHeadAttribute: boolean
+    preserveEqualProps?: boolean
+    useDataInertiaHeadAttribute?: boolean
+    useDialogForErrorModal?: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]

@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import { get, isEqual, set } from 'lodash-es'
 import { config, router } from '.'
+import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
@@ -109,7 +110,7 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return modal.show(response.data)
+      return config.get('future.useDialogForErrorModal') ? dialog.show(response.data) : modal.show(response.data)
     }
   }
 
