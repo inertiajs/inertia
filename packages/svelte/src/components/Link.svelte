@@ -1,11 +1,11 @@
 <script lang="ts">
   import { isUrlMethodPair } from '@inertiajs/core'
-  import type { LinkComponentBaseProps, FormDataConvertible } from '@inertiajs/core'
+  import type { LinkComponentBaseProps } from '@inertiajs/core'
   import { inertia } from '../index'
 
   export let href: LinkComponentBaseProps['href'] = ''
   export let as: keyof HTMLElementTagNameMap = 'a'
-  export let data: Record<string, FormDataConvertible> = {}
+  export let data: LinkComponentBaseProps['data'] = {}
   export let method: LinkComponentBaseProps['method'] = 'get'
   export let replace: LinkComponentBaseProps['replace'] = false
   export let preserveScroll: LinkComponentBaseProps['preserveScroll'] = false
