@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
+  import { inertia, router } from '@inertiajs/svelte'
 
   const transitionWithBoolean = () => {
     router.visit('/view-transition/page-b', {
@@ -22,3 +22,13 @@
 
 <button on:click={transitionWithBoolean}>Transition with boolean</button>
 <button on:click={transitionWithCallback}>Transition with callback</button>
+<a
+  href="/view-transition/page-b"
+  use:inertia={{
+    viewTransition: (viewTransition) => {
+      viewTransition.ready.then(() => console.log('ready'))
+      viewTransition.updateCallbackDone.then(() => console.log('updateCallbackDone'))
+      viewTransition.finished.then(() => console.log('finished'))
+    },
+  }}>Link to Page B</a
+>

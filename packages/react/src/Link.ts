@@ -56,6 +56,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       prefetch = false,
       cacheFor = 0,
       cacheTags = [],
+      viewTransition = false,
       ...props
     },
     ref,
@@ -103,6 +104,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const visitParams = useMemo<VisitOptions>(
       () => ({
         ...baseParams,
+        viewTransition,
         onCancelToken,
         onBefore,
         onStart(visit: PendingVisit) {
@@ -118,7 +120,18 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         onSuccess,
         onError,
       }),
-      [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
+      [
+        baseParams,
+        viewTransition,
+        onCancelToken,
+        onBefore,
+        onStart,
+        onProgress,
+        onFinish,
+        onCancel,
+        onSuccess,
+        onError,
+      ],
     )
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(

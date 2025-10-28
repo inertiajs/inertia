@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react'
+import { Link, router } from '@inertiajs/react'
 
 export default () => {
   const transitionWithBoolean = () => {
@@ -23,6 +23,16 @@ export default () => {
 
       <button onClick={transitionWithBoolean}>Transition with boolean</button>
       <button onClick={transitionWithCallback}>Transition with callback</button>
+      <Link
+        href="/view-transition/page-b"
+        viewTransition={(viewTransition) => {
+          viewTransition.ready.then(() => console.log('ready'))
+          viewTransition.updateCallbackDone.then(() => console.log('updateCallbackDone'))
+          viewTransition.finished.then(() => console.log('finished'))
+        }}
+      >
+        Link to Page B
+      </Link>
     </div>
   )
 }

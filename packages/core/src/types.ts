@@ -485,6 +485,7 @@ export interface LinkComponentBaseProps
       | 'headers'
       | 'queryStringArrayFormat'
       | 'async'
+      | 'viewTransition'
     > &
       VisitCallbacks & {
         href: string | UrlMethodPair

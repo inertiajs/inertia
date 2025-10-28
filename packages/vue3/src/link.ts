@@ -132,6 +132,10 @@ const Link: InertiaLink = defineComponent({
       type: [String, Array] as PropType<string | string[]>,
       default: () => [],
     },
+    viewTransition: {
+      type: [Boolean, Object] as PropType<InertiaLinkProps['viewTransition']>,
+      default: false,
+    },
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
@@ -228,6 +232,7 @@ const Link: InertiaLink = defineComponent({
 
     const visitParams = computed(() => ({
       ...baseParams.value,
+      viewTransition: props.viewTransition,
       onCancelToken: props.onCancelToken,
       onBefore: props.onBefore,
       onStart: (visit: PendingVisit) => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 const transitionWithBoolean = () => {
   router.visit('/view-transition/page-b', {
@@ -23,4 +23,15 @@ const transitionWithCallback = () => {
 
   <button @click="transitionWithBoolean">Transition with boolean</button>
   <button @click="transitionWithCallback">Transition with callback</button>
+  <Link
+    href="/view-transition/page-b"
+    :view-transition="
+      (viewTransition: ViewTransition) => {
+        viewTransition.ready.then(() => console.log('ready'))
+        viewTransition.updateCallbackDone.then(() => console.log('updateCallbackDone'))
+        viewTransition.finished.then(() => console.log('finished'))
+      }
+    "
+    >Link to Page B</Link
+  >
 </template>
