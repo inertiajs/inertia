@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.13...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.14...master)
 
 - Nothing yet
+
+## [v2.2.14](https://github.com/inertiajs/inertia/compare/v2.2.13...v2.2.14) - 2025-10-28
+
+### What's Changed
+
+* TS cleanup for `<Link>` component + View Transition prop in Svelte by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2667
+* Improve support for `any` as form data value by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2668
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.13...v2.2.14
 
 ## [v2.2.13](https://github.com/inertiajs/inertia/compare/v2.2.12...v2.2.13) - 2025-10-28
 
