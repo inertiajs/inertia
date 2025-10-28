@@ -14,6 +14,10 @@
     "dev:test-app:svelte": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
     "dev:test-app:vue": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
     "es2020-check": "pnpm -r --filter './packages/*' es2020-check",
+    "lint:test-app": "pnpm -r --filter './packages/*/test-app' lint",
+    "lint:test-app:react": "cd packages/react/test-app && pnpm run lint",
+    "lint:test-app:svelte": "cd packages/svelte/test-app && pnpm run lint",
+    "lint:test-app:vue": "cd packages/vue3/test-app && pnpm run lint",
     "type-check:test-app": "pnpm -r --filter './packages/*/test-app' type-check",
     "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
     "type-check:test-app:svelte": "cd packages/svelte/test-app && pnpm run type-check",
@@ -28,13 +32,13 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@playwright/test": "^1.55.1",
+    "@playwright/test": "^1.56.1",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-svelte": "^3.4.0",
     "prettier-plugin-tailwindcss": "^0.6.14"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.52.2"
+    "@rollup/rollup-linux-x64-gnu": "^4.52.5"
   }
 }

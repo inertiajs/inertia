@@ -21,5 +21,7 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
 }
 
 export default function ValidationKey() {
+  validation(() => ({ name: 'Validation error' }))
+
   return <div>{/* ValidationKey component */}</div>
 }

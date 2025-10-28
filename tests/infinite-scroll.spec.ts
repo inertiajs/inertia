@@ -1,5 +1,5 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import { requests } from './support'
+import { consoleMessages, requests } from './support'
 
 function infiniteScrollRequests() {
   return requests.requests.filter((req) => {
@@ -37,10 +37,10 @@ async function getUserIdsFromDOM(page: Page) {
 }
 
 // Helper function to check URL updates
-async function expectQueryString(page: any, expectedPage: string) {
+async function expectQueryString(page: Page, expectedPage: string) {
   if (expectedPage === '1') {
     // Page 1 removes the page param entirely
-    await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 800 })
+    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 800 })
     const currentUrl = await page.url()
     expect(currentUrl).not.toContain('page=')
   } else {
@@ -278,6 +278,45 @@ test.describe('Automatic page loading', () => {
     // expect both ?users1=2 and users2=2 in URL
     expect(page.url()).toContain('users1=2')
     expect(page.url()).toContain('users2=2')
+  })
+
+  test('it handles dual sibling InfiniteScroll with manual mode and query string updates', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/dual-sibling')
+
+    await expect(page.getByText('User 1', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('User 15').first()).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true }).last()).toBeVisible()
+    await expect(page.getByText('User 15').last()).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await page.getByRole('button', { name: 'Load More Users 1' }).click()
+    await expect(page.getByText('User 16').first()).toBeVisible()
+    await expect(page.getByText('User 30').first()).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load More Users 2' }).click()
+    await expect(page.getByText('User 16').last()).toBeVisible()
+    await expect(page.getByText('User 30').last()).toBeVisible()
+
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForFunction(
+      () => window.location.search.includes('users1=2') && window.location.search.includes('users2=2'),
+      {},
+      { timeout: 1000 },
+    )
+    expect(page.url()).toContain('users1=2')
+    expect(page.url()).toContain('users2=2')
+
+    await scrollToTop(page)
+    await page.waitForFunction(
+      () => !window.location.search.includes('users1=') && !window.location.search.includes('users2='),
+      {},
+      { timeout: 1000 },
+    )
+    expect(page.url()).not.toContain('users1=')
+    expect(page.url()).not.toContain('users2=')
   })
 })
 
@@ -1185,6 +1224,62 @@ test.describe('URL query string management', () => {
     await page.waitForTimeout(250)
     expect(page.url()).toContain('page=2')
   })
+
+  test('it preserves relative URL format when updating query string', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/update-query-string')
+
+    // Verify we start with a relative URL
+    const initialUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(initialUrl).toBe('/infinite-scroll/update-query-string')
+    expect(initialUrl).not.toContain('http')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading...')).toBeHidden()
+
+    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    await expectQueryString(page, '2')
+
+    // Verify the internal Inertia page URL is still relative
+    const updatedUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(updatedUrl).toContain('page=2')
+    expect(updatedUrl).not.toContain('http')
+    expect(updatedUrl).toMatch(/^\/infinite-scroll/)
+  })
+
+  test('it preserves absolute URL format when updating query string', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/update-query-string?absolutePageUrl=1')
+
+    // Verify we start with an absolute URL
+    const initialUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(initialUrl).toContain('http://localhost')
+    expect(initialUrl).toContain('/infinite-scroll/update-query-string')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading...')).toBeHidden()
+
+    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    await expectQueryString(page, '2')
+
+    // Verify the internal Inertia page URL is still absolute
+    const updatedUrl = await page.evaluate(() => window.testing.pageUrl)
+    expect(updatedUrl).toContain('page=2')
+    expect(updatedUrl).toContain('http://localhost')
+    expect(updatedUrl).toContain('/infinite-scroll/update-query-string')
+  })
 })
 
 test.describe('Scroll position preservation', () => {
@@ -1490,6 +1585,25 @@ test.describe('Scrollable container support', () => {
     const afterScreenshot = await screenshotter(page)
 
     expect(afterScreenshot).toEqual(beforeScreenshot)
+  })
+
+  test('it does not treat overflow-x: hidden as a scroll container', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 400 })
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/overflow-x')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    expect(infiniteScrollRequests().length).toBe(1)
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await page.waitForTimeout(1000)
+
+    await expect(page.getByText('User 31')).toBeHidden()
   })
 })
 
@@ -1811,6 +1925,7 @@ Object.entries({
     test('it keeps the existing query parameters intact when updating the page param', async ({ page }) => {
       requests.listen(page)
       await page.goto(path)
+      await page.setViewportSize({ width: 1200, height: 400 })
 
       await page.getByRole('link', { name: 'N-Z' }).first().click()
 
@@ -1877,6 +1992,8 @@ Object.entries({
     test('it resets the page and filter params when searching for a user', async ({ page }) => {
       requests.listen(page)
       await page.goto(path)
+      await page.setViewportSize({ width: 1200, height: 400 })
+
       await page.getByRole('link', { name: 'N-Z' }).first().click()
       await expect(page.getByText('Niko Christiansen Jr.')).toBeVisible()
       await expect(page.getByText('Current filter: n-z').first()).toBeVisible()
@@ -1956,28 +2073,107 @@ Object.entries({
   })
 })
 
-test('it can reload unrelated props without affecting infinite scroll', async ({ page }) => {
-  await page.goto('/infinite-scroll/reload-unrelated')
+test.describe('Router', () => {
+  test('it can reload unrelated props without affecting infinite scroll', async ({ page }) => {
+    await page.goto('/infinite-scroll/reload-unrelated')
 
-  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
-  await expect(page.getByText('User 15')).toBeVisible()
-  await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
 
-  const initialTime = await page.locator('#time-display').textContent()
+    const initialTime = await page.locator('#time-display').textContent()
 
-  await page.locator('#reload-button').click()
+    await page.locator('#reload-button').click()
 
-  // Wait for reload to complete and verify timestamp changed
-  await page.waitForTimeout(300)
-  const updatedTime = await page.locator('#time-display').textContent()
-  expect(updatedTime).not.toBe(initialTime)
+    // Wait for reload to complete and verify timestamp changed
+    await page.waitForTimeout(300)
+    const updatedTime = await page.locator('#time-display').textContent()
+    expect(updatedTime).not.toBe(initialTime)
 
-  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
-  await expect(page.getByText('User 15')).toBeVisible()
-  await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
 
-  await scrollToBottom(page)
-  await expect(page.getByText('User 16')).toBeVisible()
-  await expect(page.getByText('User 30')).toBeVisible()
-  await expect(page.getByText('User 31')).toBeHidden()
+    await scrollToBottom(page)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
+
+  test('it can prefetch a page with scroll props', async ({ page }) => {
+    await page.goto('/infinite-scroll')
+
+    const prefetchPromise = page.waitForResponse('/infinite-scroll-with-link')
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).hover()
+    await page.waitForTimeout(75)
+    await prefetchPromise
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).click()
+    await page.waitForURL('/infinite-scroll-with-link')
+    await expect(requests.requests.length).toBe(0)
+
+    // Verify infinite scroll works - check initial users
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForTimeout(300)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+
+    await scrollToTop(page)
+    await page.waitForTimeout(100)
+    await page.getByRole('link', { name: 'Go back to Links' }).click()
+    await page.waitForURL('/infinite-scroll')
+
+    // Click the link again, should behave the same
+    const prefetchPromise2 = page.waitForResponse('/infinite-scroll-with-link')
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).hover()
+    await page.waitForTimeout(75)
+    await prefetchPromise2
+
+    requests.listen(page)
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink (Prefetch)' }).click()
+    await page.waitForURL('/infinite-scroll-with-link')
+    await expect(requests.requests.length).toBe(0)
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await scrollToBottom(page)
+    await page.waitForTimeout(300)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
+
+  test('it can navigate rapidly between pages with infinite scroll without errors', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/infinite-scroll')
+
+    // Navigate back and forth 10 times rapidly
+    for (let i = 0; i < 20; i++) {
+      await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true }).click()
+      expect(consoleMessages.errors).toHaveLength(0)
+      await page.getByRole('link', { name: 'Go back to Links' }).click()
+      expect(consoleMessages.errors).toHaveLength(0)
+    }
+
+    await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true }).click()
+
+    // Check if the infinite scroll content is still functional
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await scrollToBottom(page)
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
 })

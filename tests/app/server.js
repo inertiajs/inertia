@@ -131,6 +131,16 @@ app.get('/links/cancel-sync-request/:page', (req, res) => {
     page == 3 ? 500 : 0,
   )
 })
+app.get('/links/scroll-region-list', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Links/ScrollRegionList',
+    props: { user_id: req.query.user_id },
+    url: req.originalUrl,
+  }),
+)
+app.get('/links/scroll-region-list/user/:id', (req, res) =>
+  res.redirect(303, `/links/scroll-region-list?user_id=${req.params.id}`),
+)
 
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
@@ -155,6 +165,31 @@ app.get('/client-side-visit/props', (req, res) =>
     },
   }),
 )
+
+app.get('/visits/proxy', (req, res) => {
+  const timeout = req.headers['x-inertia-partial-data'] ? 250 : 0
+  const statuses = ['pending', 'running', 'success', 'failed', 'canceled']
+
+  const sites = [1, 2, 3, 4, 5].map(function (id) {
+    const site = { id }
+
+    site.latestDeployment = { id: id * 10, statuses: [statuses[id % statuses.length]] }
+
+    return site
+  })
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Visits/Proxy',
+        props: req.headers['x-inertia-partial-data'] === 'sites' ? { sites } : { foo: new Date().toISOString() },
+        deferredProps: req.headers['x-inertia-partial-data'] ? {} : { default: ['sites'] },
+      }),
+    timeout,
+  )
+})
+
+app.post('/visits/proxy', (req, res) => res.redirect(303, '/visits/proxy'))
 
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
@@ -727,6 +762,36 @@ app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
 
+app.get('/remember/users', (req, res) => {
+  const users = [
+    { id: 1, name: 'User One', email: 'user1@example.com' },
+    { id: 2, name: 'User Two', email: 'user2@example.com' },
+    { id: 3, name: 'User Three', email: 'user3@example.com' },
+  ]
+  inertia.render(req, res, { component: 'FormHelper/RememberIndex', props: { users } })
+})
+
+app.get('/remember/users/:id/edit', (req, res) => {
+  const users = {
+    1: { id: 1, name: 'User One', email: 'user1@example.com' },
+    2: { id: 2, name: 'User Two', email: 'user2@example.com' },
+    3: { id: 3, name: 'User Three', email: 'user3@example.com' },
+  }
+  const user = users[req.params.id]
+  inertia.render(req, res, {
+    component: 'FormHelper/RememberEdit',
+    props: { user },
+  })
+})
+
+app.get('/preserve-equal-props', (req, res) => {
+  inertia.render(req, res, {
+    component: 'PreserveEqualProps',
+    props: { nestedA: { count: 1 }, nestedB: { date: Date.now() } },
+  })
+})
+app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserve-equal-props'))
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
@@ -902,6 +967,10 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
   )
 }
 
+app.get('/infinite-scroll', (req, res) => inertia.render(req, res, { component: 'InfiniteScroll/Links' }))
+app.get('/infinite-scroll-with-link', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/InfiniteScrollWithLink'),
+)
 app.get('/infinite-scroll/manual', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Manual'))
 app.get('/infinite-scroll/manual-after', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/ManualAfter', 60))
 app.get('/infinite-scroll/remember-state', (req, res) =>
@@ -933,6 +1002,9 @@ app.get('/infinite-scroll/data-table', (req, res) =>
 )
 app.get('/infinite-scroll/horizontal-scroll', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/HorizontalScroll'),
+)
+app.get('/infinite-scroll/overflow-x', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/OverflowX', 150, false, 15),
 )
 app.get('/infinite-scroll/empty', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Empty', 0))
 app.get('/infinite-scroll/custom-triggers-ref', (req, res) =>
@@ -1017,6 +1089,51 @@ app.get('/infinite-scroll/dual-containers', (req, res) => {
     partialReload ? 250 : 0,
   )
 })
+app.get('/infinite-scroll/dual-sibling', (req, res) => {
+  const users1Page = req.query.users1 ? parseInt(req.query.users1) : 1
+  const users2Page = req.query.users2 ? parseInt(req.query.users2) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+
+  const { paginated: users1Paginated, scrollProp: users1ScrollProp } = paginateUsers(
+    users1Page,
+    15,
+    40,
+    false,
+    'users1',
+  )
+  const { paginated: users2Paginated, scrollProp: users2ScrollProp } = paginateUsers(
+    users2Page,
+    15,
+    60,
+    false,
+    'users2',
+  )
+
+  const props = {}
+  const scrollProps = {}
+
+  if (!partialReload || req.headers['x-inertia-partial-data']?.includes('users1')) {
+    props.users1 = users1Paginated
+    scrollProps.users1 = users1ScrollProp
+  }
+
+  if (!partialReload || req.headers['x-inertia-partial-data']?.includes('users2')) {
+    props.users2 = users2Paginated
+    scrollProps.users2 = users2ScrollProp
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/DualSibling',
+        props,
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users1.data', 'users2.data'],
+        scrollProps,
+      }),
+    partialReload ? 250 : 0,
+  )
+})
 
 function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) {}
 
@@ -1065,7 +1182,20 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
   )
 })
 
+app.post('/view-transition/form-errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ViewTransition/FormErrors',
+    props: { errors: { name: 'The name field is required.' } },
+  }),
+)
+
 app.all('*', (req, res) => inertia.render(req, res))
+
+// Send errors to the console (instead of crashing the server)
+app.use((err, req, res, next) => {
+  console.error('❌ Express Error:', err)
+  res.status(500).send('Internal Server Error')
+})
 
 const adapterPorts = {
   vue3: 13715,

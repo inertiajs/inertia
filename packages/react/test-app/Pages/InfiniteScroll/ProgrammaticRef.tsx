@@ -1,33 +1,33 @@
 import { InfiniteScrollRef } from '@inertiajs/core'
 import { InfiniteScroll } from '@inertiajs/react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import UserCard, { User } from './UserCard'
 
 export default ({ users }: { users: { data: User[] } }) => {
-  const infRef = useRef<InfiniteScrollRef>(null)
+  const [infRef, setInfRef] = useState<InfiniteScrollRef | null>(null)
   const [hasPrevious, setHasMoreBefore] = useState(false)
   const [hasNext, setHasMoreAfter] = useState(false)
 
-  const updateStates = () => {
-    setHasMoreBefore(infRef.current?.hasPrevious() || false)
-    setHasMoreAfter(infRef.current?.hasNext() || false)
-  }
+  const updateStates = useCallback(() => {
+    setHasMoreBefore(infRef?.hasPrevious() || false)
+    setHasMoreAfter(infRef?.hasNext() || false)
+  }, [infRef])
 
   const fetchNext = () => {
-    if (infRef.current) {
-      infRef.current.fetchNext({ onFinish: updateStates })
+    if (infRef) {
+      infRef.fetchNext({ onFinish: updateStates })
     }
   }
 
   const fetchPrevious = () => {
-    if (infRef.current) {
-      infRef.current.fetchPrevious({ onFinish: updateStates })
+    if (infRef) {
+      infRef.fetchPrevious({ onFinish: updateStates })
     }
   }
 
   useEffect(() => {
     updateStates()
-  }, [infRef.current])
+  }, [infRef, updateStates])
 
   return (
     <div>
@@ -44,7 +44,7 @@ export default ({ users }: { users: { data: User[] } }) => {
       </div>
 
       <InfiniteScroll
-        ref={infRef}
+        ref={setInfRef}
         data="users"
         style={{ display: 'grid', gap: '20px' }}
         manual

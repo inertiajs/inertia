@@ -7,9 +7,9 @@ import type { MulterFile } from '../types'
 const props = defineProps<{
   headers: Record<string, string>
   method: Method
-  form: Record<string, any> | undefined
+  form: Record<string, unknown> | undefined
   files: MulterFile[] | object
-  query: Record<string, any>
+  query: Record<string, unknown>
   url: string
 }>()
 
