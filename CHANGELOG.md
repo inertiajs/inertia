@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.12...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.13...master)
 
 - Nothing yet
+
+## [v2.2.13](https://github.com/inertiajs/inertia/compare/v2.2.12...v2.2.13) - 2025-10-28
+
+### What's Changed
+
+* Support for View Transitions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2658
+* Opt-in to using `data-inertia` attribute in `<Head>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2663
+* Opt-in to using `<dialog>` for error modals by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2664
+* feat: give access to underlying data as object and as form data object by [@MeiKatz](https://github.com/MeiKatz) in https://github.com/inertiajs/inertia/pull/2605
+
+### New Contributors
+
+* [@MeiKatz](https://github.com/MeiKatz) made their first contribution in https://github.com/inertiajs/inertia/pull/2605
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.12...v2.2.13
 
 ## [v2.2.12](https://github.com/inertiajs/inertia/compare/v2.2.11...v2.2.12) - 2025-10-27
 
