@@ -108,7 +108,13 @@ function link(
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, cacheTags: cacheTagValues = [], ...params }: ActionParameters) {
+  function update({
+    cacheFor = 0,
+    prefetch = false,
+    cacheTags: cacheTagValues = [],
+    viewTransition = false,
+    ...params
+  }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -161,6 +167,7 @@ function link(
 
     visitParams = {
       ...baseParams,
+      viewTransition,
       onStart: (visit) => {
         inFlightCount++
         updateNodeAttributes()

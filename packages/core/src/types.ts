@@ -155,6 +155,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
   errorBag?: string | null
+  viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onSuccess?: (page: Page) => void
@@ -205,6 +206,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   reset: string[]
   preserveUrl: boolean
   invalidateCacheTags: string | string[]
+  viewTransition: boolean | ((viewTransition: ViewTransition) => void)
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -484,6 +486,7 @@ export interface LinkComponentBaseProps
       | 'headers'
       | 'queryStringArrayFormat'
       | 'async'
+      | 'viewTransition'
     > &
       VisitCallbacks & {
         href: string | UrlMethodPair
