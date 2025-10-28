@@ -9,7 +9,7 @@
 
   function testGetFormData(getFormData: () => FormData) {
     const formData = getFormData()
-    const entries: Record<string, any> = formData.entries()
+    const entries = formData.entries()
 
     console.log('getFormData entries:', entries)
   }
