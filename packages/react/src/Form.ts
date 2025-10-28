@@ -185,6 +185,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       reset,
       submit,
       defaults,
+      getData,
+      getFormData,
     })
 
     useImperativeHandle(ref, exposed, [form, isDirty, submit])
