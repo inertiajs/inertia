@@ -758,6 +758,34 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/with-query-params', (req, res) => {
+  const filter = req.query.filter || 'none'
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  if (!requestedProps) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithQueryParams',
+      deferredProps: {
+        default: ['users'],
+      },
+      props: {
+        filter,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithQueryParams',
+        props: {
+          users: requestedProps.includes('users') ? { text: `users data for ${filter}` } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
