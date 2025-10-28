@@ -438,6 +438,7 @@ export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   createProvider: () => {
+    preferredAttribute: () => 'data-inertia' | 'inertia'
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
     disconnect: () => void
@@ -464,6 +465,7 @@ export type InertiaAppConfig = {
   future: {
     /* planned defaults */
     preserveEqualProps: boolean
+    useDataInertiaHeadAttribute: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]

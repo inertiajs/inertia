@@ -58,6 +58,7 @@ module.exports = {
       fs
         .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
         .toString()
+        .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
         .replace("'{{ placeholder }}'", JSON.stringify(data)),
     )
   },
