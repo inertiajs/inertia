@@ -572,6 +572,8 @@ export type FormComponentMethods = {
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
+  getData: () => Record<string, FormDataConvertible>
+  getFormData: () => FormData
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>

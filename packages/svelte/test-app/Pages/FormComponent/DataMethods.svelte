@@ -1,0 +1,28 @@
+<script lang="ts">
+  import type { FormDataConvertible } from '@inertiajs/core'
+  import { Form } from '@inertiajs/svelte'
+
+  function testGetData(getData: () => Record<string, FormDataConvertible>) {
+    const data = getData()
+    console.log('getData result:', data)
+  }
+
+  function testGetFormData(getFormData: () => FormData) {
+    const formData = getFormData()
+    const entries: Record<string, any> = formData.entries()
+
+    console.log('getFormData entries:', entries)
+  }
+</script>
+
+<div>
+  <h1>Test getData() and getFormData() Methods</h1>
+
+  <Form let:getData let:getFormData>
+    <input type="text" id="name" name="name" />
+
+    <button type="button" on:click={() => testGetData(getData)}> Test getData() </button>
+
+    <button type="button" on:click={() => testGetFormData(getFormData)}> Test getFormData() </button>
+  </Form>
+</div>
