@@ -10,7 +10,7 @@ export default ({ dialog }: { dialog: boolean }) => {
   }
 
   if (dialog) {
-    config.set('future.useDialogElementInModal', true)
+    config.set('future.useDialogForErrorModal', true)
   }
 
   return (

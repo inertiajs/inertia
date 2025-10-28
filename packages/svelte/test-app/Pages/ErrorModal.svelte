@@ -12,7 +12,7 @@
   }
 
   if (dialog) {
-    config.set('future.useDialogElementInModal', true)
+    config.set('future.useDialogForErrorModal', true)
   }
 </script>
 

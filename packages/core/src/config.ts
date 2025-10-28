@@ -72,7 +72,7 @@ export const config = new Config<InertiaAppConfig>({
   },
   future: {
     preserveEqualProps: false,
-    useDialogElementInModal: false,
+    useDialogForErrorModal: false,
   },
   prefetch: {
     cacheFor: 30_000,

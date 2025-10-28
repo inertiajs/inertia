@@ -110,7 +110,7 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return config.get('future.useDialogElementInModal') ? dialog.show(response.data) : modal.show(response.data)
+      return config.get('future.useDialogForErrorModal') ? dialog.show(response.data) : modal.show(response.data)
     }
   }
 
