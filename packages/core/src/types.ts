@@ -438,6 +438,7 @@ export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   createProvider: () => {
+    preferredAttribute: () => 'data-inertia' | 'inertia'
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
     disconnect: () => void
