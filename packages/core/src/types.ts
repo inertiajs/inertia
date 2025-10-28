@@ -57,22 +57,27 @@ export type FormDataType<T extends object> = {
     : never
 }
 
+// Note: `0 extends 1 & T` detects `any` type to prevent infinite recursion.
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
   : T extends Array<unknown>
     ? number extends T['length']
-      ? `${number}` | `${number}.${FormDataKeys<T[number]>}`
+      ? `${number}` | (0 extends 1 & T[number] ? never : `${number}.${FormDataKeys<T[number]>}`)
       :
           | Extract<keyof T, `${number}`>
           | {
-              [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
+              [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key & string]
+                ? never
+                : `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
             }[Extract<keyof T, `${number}`>]
     : string extends keyof T
       ? string
       :
           | Extract<keyof T, string>
           | {
-              [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
+              [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
+                ? never
+                : `${Key}.${FormDataKeys<T[Key]> & string}`
             }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
