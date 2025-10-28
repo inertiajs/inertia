@@ -5,7 +5,8 @@ export default {
   dialogStyleElement: null as HTMLStyleElement | null,
   iframe: null as HTMLIFrameElement | null,
   boundClickHandler: null as ((event: MouseEvent) => void) | null,
-  boundEscapeHandler: null as ((event: KeyboardEvent) => void) | null,
+  boundCancelHandler: null as (() => void) | null,
+  boundCloseHandler: null as (() => void) | null,
 
   show(html: Record<string, unknown> | string): void {
     const { iframe, page } = modal.createIframeAndPage(html)
@@ -31,6 +32,9 @@ export default {
       dialog#inertia-error-dialog::backdrop {
         background-color: rgba(0, 0, 0, 0.6);
       }
+      dialog#inertia-error-dialog:focus {
+        outline: none;
+      }
     `
     document.head.appendChild(this.dialogStyleElement)
 
@@ -39,25 +43,29 @@ export default {
     // Create bound handlers once for proper cleanup
     this.boundClickHandler = (event: MouseEvent) => {
       if (event.target === this.dialog) {
-        this.hide()
+        this.dialog.close()
       }
     }
 
-    this.boundEscapeHandler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        this.hide()
-      }
+    this.boundCancelHandler = () => {
+      this.dialog.close()
+    }
+
+    this.boundCloseHandler = () => {
+      this.hide()
     }
 
     // Add event listeners
     this.dialog.addEventListener('click', this.boundClickHandler)
-    this.iframe.addEventListener('load', () => {
-      iframe.contentWindow?.document.addEventListener('keydown', this.boundEscapeHandler)
-    })
+    this.dialog.addEventListener('cancel', this.boundCancelHandler)
+    this.dialog.addEventListener('close', this.boundCloseHandler)
 
     this.dialog.appendChild(iframe)
     document.body.prepend(this.dialog)
     this.dialog.showModal()
+
+    // Focus the dialog so the 'Escape' key works immediately
+    this.dialog.focus()
 
     if (!iframe.contentWindow) {
       throw new Error('iframe not yet ready.')
@@ -69,17 +77,21 @@ export default {
   },
 
   hide(): void {
-    this.dialog.removeEventListener('click', this.boundClickHandler)
-    this.iframe.contentWindow.document.removeEventListener('keydown', this.boundEscapeHandler)
+    if (this.dialog) {
+      this.dialog.removeEventListener('click', this.boundClickHandler)
+      this.dialog.removeEventListener('cancel', this.boundCancelHandler)
+      this.dialog.removeEventListener('close', this.boundCloseHandler)
+    }
 
-    this.dialogStyleElement.remove()
+    this.dialogStyleElement?.remove()
     this.dialogStyleElement = null
 
-    this.dialog.remove()
+    this.dialog?.remove()
     this.dialog = null
 
     this.iframe = null
     this.boundClickHandler = null
-    this.boundEscapeHandler = null
+    this.boundCancelHandler = null
+    this.boundCloseHandler = null
   },
 }
