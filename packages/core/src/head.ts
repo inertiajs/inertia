@@ -3,7 +3,7 @@ import debounce from './debounce'
 
 const Renderer = {
   preferredAttribute(): 'data-inertia' | 'inertia' {
-    return config.get('future.useDataSetInHeadManager') ? 'data-inertia' : 'inertia'
+    return config.get('future.useDataInertiaHeadAttribute') ? 'data-inertia' : 'inertia'
   },
 
   buildDOMElement(tag: string): ChildNode {

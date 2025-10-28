@@ -1,7 +1,7 @@
 import { config, Head } from '@inertiajs/react'
 
 export default () => {
-  config.set('future.useDataSetInHeadManager', true)
+  config.set('future.useDataInertiaHeadAttribute', true)
 
   return (
     <>
