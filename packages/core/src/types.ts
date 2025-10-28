@@ -57,6 +57,7 @@ export type FormDataType<T extends object> = {
     : never
 }
 
+// Note: `0 extends 1 & T` detects `any` type to prevent infinite recursion.
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
   : T extends Array<unknown>
