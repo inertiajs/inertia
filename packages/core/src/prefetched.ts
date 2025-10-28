@@ -252,6 +252,7 @@ class PrefetchedRequests {
         'onCancelToken',
         'onPrefetching',
         'async',
+        'viewTransition',
       ],
     )
   }

@@ -235,7 +235,7 @@ export class Router {
 
   public prefetch(
     href: string | URL | UrlMethodPair,
-    options: Omit<VisitOptions, 'viewTransition'> = {},
+    options: VisitOptions = {},
     prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
     const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
@@ -249,6 +249,7 @@ export class Router {
       async: true,
       showProgress: false,
       prefetch: true,
+      viewTransition: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -429,6 +430,7 @@ export class Router {
         async: true,
         showProgress: false,
         prefetch: true,
+        viewTransition: false,
       }),
       ...this.getVisitEvents(options),
     }
