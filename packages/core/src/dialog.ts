@@ -4,9 +4,6 @@ export default {
   dialog: null as HTMLDialogElement | null,
   dialogStyleElement: null as HTMLStyleElement | null,
   iframe: null as HTMLIFrameElement | null,
-  boundClickHandler: null as ((event: MouseEvent) => void) | null,
-  boundCancelHandler: null as (() => void) | null,
-  boundCloseHandler: null as (() => void) | null,
 
   show(html: Record<string, unknown> | string): void {
     const { iframe, page } = modal.createIframeAndPage(html)
@@ -40,25 +37,22 @@ export default {
 
     this.iframe = iframe
 
-    // Create bound handlers once for proper cleanup
-    this.boundClickHandler = (event: MouseEvent) => {
+    // Add event listeners
+    this.dialog.addEventListener('click', (event: MouseEvent) => {
       if (event.target === this.dialog) {
         this.dialog.close()
       }
-    }
+    })
 
-    this.boundCancelHandler = () => {
-      this.dialog.close()
-    }
+    this.dialog.addEventListener('close', () => {
+      this.dialogStyleElement?.remove()
+      this.dialogStyleElement = null
 
-    this.boundCloseHandler = () => {
-      this.hide()
-    }
+      this.dialog?.remove()
+      this.dialog = null
 
-    // Add event listeners
-    this.dialog.addEventListener('click', this.boundClickHandler)
-    this.dialog.addEventListener('cancel', this.boundCancelHandler)
-    this.dialog.addEventListener('close', this.boundCloseHandler)
+      this.iframe = null
+    })
 
     this.dialog.appendChild(iframe)
     document.body.prepend(this.dialog)
@@ -74,22 +68,5 @@ export default {
     iframe.contentWindow.document.open()
     iframe.contentWindow.document.write(page.outerHTML)
     iframe.contentWindow.document.close()
-  },
-
-  hide(): void {
-    this.dialog.removeEventListener('click', this.boundClickHandler)
-    this.dialog.removeEventListener('cancel', this.boundCancelHandler)
-    this.dialog.removeEventListener('close', this.boundCloseHandler)
-
-    this.dialogStyleElement.remove()
-    this.dialogStyleElement = null
-
-    this.dialog.remove()
-    this.dialog = null
-
-    this.iframe = null
-    this.boundClickHandler = null
-    this.boundCancelHandler = null
-    this.boundCloseHandler = null
   },
 }
