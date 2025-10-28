@@ -69,6 +69,9 @@ app.get('/links/partial-reloads', (req, res) =>
     },
   }),
 )
+app.all('/error-modal', (req, res) =>
+  inertia.render(req, res, { component: 'ErrorModal', props: { dialog: !!req.query.dialog } }),
+)
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )
