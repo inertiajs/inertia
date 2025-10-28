@@ -155,6 +155,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
   errorBag?: string | null
+  viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onSuccess?: (page: Page) => void

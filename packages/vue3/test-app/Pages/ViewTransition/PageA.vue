@@ -16,6 +16,19 @@ const transitionWithCallback = () => {
     },
   })
 }
+
+const clientSideReplace = () => {
+  router.replace({
+    url: '/view-transition/page-b',
+    component: 'ViewTransition/PageB',
+    props: {},
+    viewTransition: (viewTransition) => {
+      viewTransition.ready.then(() => console.log('ready'))
+      viewTransition.updateCallbackDone.then(() => console.log('updateCallbackDone'))
+      viewTransition.finished.then(() => console.log('finished'))
+    },
+  })
+}
 </script>
 
 <template>
@@ -23,6 +36,7 @@ const transitionWithCallback = () => {
 
   <button @click="transitionWithBoolean">Transition with boolean</button>
   <button @click="transitionWithCallback">Transition with callback</button>
+  <button @click="clientSideReplace">Client-side replace</button>
   <Link
     href="/view-transition/page-b"
     :view-transition="
