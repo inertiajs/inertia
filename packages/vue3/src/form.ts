@@ -12,7 +12,19 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, h, InjectionKey, inject, onBeforeUnmount, onMounted, PropType, provide, ref, SlotsType } from 'vue'
+import {
+  computed,
+  defineComponent,
+  h,
+  inject,
+  InjectionKey,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  provide,
+  ref,
+  SlotsType,
+} from 'vue'
 import useForm from './useForm'
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
