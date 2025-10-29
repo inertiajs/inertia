@@ -38,9 +38,9 @@ const Defer = ({
         </div>
 
         <div className="w-1/2 rounded-sm border border-gray-200 p-4">
-          {/* <Suspense fallback={<p>Loading Food...</p>}>
-            <DeferredFood />
-          </Suspense> */}
+          <Deferred data="users">
+            {({ loading }) => (loading ? <p>Loading Users (with callback)...</p> : <DeferredUsers />)}
+          </Deferred>
         </div>
 
         <div className="w-1/2 rounded-sm border border-gray-200 p-4">

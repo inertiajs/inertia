@@ -634,6 +634,30 @@ app.get('/deferred-props/page-1', (req, res) => {
   )
 })
 
+app.get('/deferred-props/with-callback', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithCallback',
+      deferredProps: {
+        default: ['foo', 'bar'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithCallback',
+        props: {
+          foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
+          bar: req.headers['x-inertia-partial-data']?.includes('bar') ? { text: 'bar value' } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
 app.get('/deferred-props/with-partial-reload/:mode', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {

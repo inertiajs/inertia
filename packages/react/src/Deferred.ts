@@ -14,8 +14,8 @@ const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boole
 }
 
 interface DeferredProps {
-  children: ReactNode | (() => ReactNode)
-  fallback: ReactNode | (() => ReactNode)
+  children: ReactNode | ((props: {loading: boolean}) => ReactNode)
+  fallback?: ReactNode | (() => ReactNode)
   data: string | string[]
 }
 
@@ -47,11 +47,11 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
     setLoaded(keys.every((key) => pageProps[key] !== undefined))
   }, [pageProps, keys])
 
-  if (loaded) {
-    return typeof children === 'function' ? children() : children
+  if (! loaded && fallback) {
+    return typeof fallback === 'function' ? fallback() : fallback
   }
 
-  return typeof fallback === 'function' ? fallback() : fallback
+  return typeof children === 'function' ? children({ loading: !loaded }) : children
 }
 
 Deferred.displayName = 'InertiaDeferred'

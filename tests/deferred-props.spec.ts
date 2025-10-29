@@ -197,3 +197,17 @@ test('load deferred props with partial reload on mount', async ({ page }) => {
   await expect(page.getByText('foo value')).toBeVisible()
   await expect(page.getByText('bar value')).toBeVisible()
 })
+
+test('load deferred props with callback', async ({ page }) => {
+  await page.goto('/deferred-props/with-callback')
+
+  await expect(page.getByText('Loading foo (callback)...')).toBeVisible()
+  await expect(page.getByText('Loading bar (callback)...')).toBeVisible()
+
+  await page.waitForResponse(page.url())
+
+  await expect(page.getByText('Loading foo (callback)...')).not.toBeVisible()
+  await expect(page.getByText('Loading bar (callback)...')).not.toBeVisible()
+  await expect(page.getByText('foo value')).toBeVisible()
+  await expect(page.getByText('bar value')).toBeVisible()
+})
