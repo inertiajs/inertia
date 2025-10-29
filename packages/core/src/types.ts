@@ -77,7 +77,13 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
           | {
               [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
                 ? never
-                : `${Key}.${FormDataKeys<T[Key]> & string}`
+                : T[Key] extends FormDataConvertibleValue
+                  ? never
+                  : T[Key] extends any[]
+                    ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                    : T[Key] extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                      : never
             }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
