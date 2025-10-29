@@ -10,11 +10,12 @@ export default defineComponent({
   },
   render() {
     const keys = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]
+    const loaded = keys.every((key) => this.$page.props[key] !== undefined)
 
-    if (!this.$slots.fallback) {
-      throw new Error('`<Deferred>` requires a `<template #fallback>` slot')
+    if (! loaded && this.$slots.fallback) {
+      return this.$slots.fallback()
     }
 
-    return keys.every((key) => this.$page.props[key] !== undefined) ? this.$slots.default?.() : this.$slots.fallback()
+    return this.$slots.default?.({ loading: !loaded })
   },
 })
