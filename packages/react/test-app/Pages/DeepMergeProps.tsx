@@ -24,7 +24,7 @@ export default ({ bar, foo, baz }: PageProps) => {
 
   const getFresh = () => {
     setPage(0)
-    router.reload({
+    router.visit('/deep-merge-props', {
       reset: ['foo', 'baz'],
     })
   }

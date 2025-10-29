@@ -26,7 +26,7 @@ export default ({ bar, foo, baz }: PageProps) => {
   const [page, setPage] = useState(foo.page)
 
   const reloadIt = () => {
-    router.reload({
+    router.visit('/match-props-on-key', {
       data: {
         page,
       },
@@ -39,7 +39,7 @@ export default ({ bar, foo, baz }: PageProps) => {
 
   const getFresh = () => {
     setPage(0)
-    router.reload({
+    router.visit('/match-props-on-key', {
       reset: ['foo', 'baz'],
     })
   }

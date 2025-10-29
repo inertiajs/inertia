@@ -441,7 +441,7 @@ test.describe('Form Component', () => {
       expect(scrollBefore).toBeGreaterThan(0)
 
       await page.getByRole('button', { name: 'Submit' }).click()
-      await page.waitForURL('/article')
+      await page.waitForURL(/\/article/)
 
       const scrollAfter = await page.evaluate(() => window.scrollY)
       // TODO: why is this not exactly 100?
