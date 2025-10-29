@@ -12,7 +12,7 @@ export default defineComponent({
     const keys = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]
     const loaded = keys.every((key) => this.$page.props[key] !== undefined)
 
-    if (! loaded && this.$slots.fallback) {
+    if (!loaded && this.$slots.fallback) {
       return this.$slots.fallback()
     }
 
