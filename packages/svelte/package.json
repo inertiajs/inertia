@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "2.2.7",
+  "version": "2.2.14",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -35,7 +35,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm package && publint",
+    "build": "pnpm package && svelte-check --tsconfig ./tsconfig.json && publint",
     "build:with-deps": "svelte-kit sync && vite build --config vite-with-deps.config.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

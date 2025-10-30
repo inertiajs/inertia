@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "2.2.7",
+  "version": "2.2.14",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [

@@ -9,6 +9,7 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {
+    "@inertiajs/core": "workspace:*",
     "@inertiajs/svelte": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tailwindcss/vite": "^4.1.16",

@@ -1,3 +1,4 @@
+import { cloneDeep, isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import Queue from './queue'
@@ -63,9 +64,25 @@ class History {
     })
   }
 
+  protected clonePageProps(page: Page): Page {
+    try {
+      structuredClone(page.props)
+      return page
+    } catch {
+      // Props contain non-serializable data (e.g., Proxies, functions).
+      // Clone them to ensure they can be safely stored in browser history.
+      return {
+        ...page,
+        props: cloneDeep(page.props),
+      }
+    }
+  }
+
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
+    const pageWithClonedProps = this.clonePageProps(page)
+
     return new Promise((resolve) => {
-      return page.encryptHistory ? encryptHistory(page).then(resolve) : resolve(page)
+      return page.encryptHistory ? encryptHistory(pageWithClonedProps).then(resolve) : resolve(pageWithClonedProps)
     })
   }
 
@@ -106,6 +123,10 @@ class History {
           return
         }
 
+        if (isEqual(this.getScrollRegions(), scrollRegions)) {
+          return
+        }
+
         return this.doReplaceState({
           page: window.history.state.page,
           scrollRegions,
@@ -118,6 +139,10 @@ class History {
     queue.add(() => {
       return Promise.resolve().then(() => {
         if (!window.history.state?.page) {
+          return
+        }
+
+        if (isEqual(this.getDocumentScrollPosition(), scrollRegion)) {
           return
         }
 

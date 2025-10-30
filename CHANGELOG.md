@@ -7,9 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.7...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.14...master)
 
 - Nothing yet
+
+## [v2.2.14](https://github.com/inertiajs/inertia/compare/v2.2.13...v2.2.14) - 2025-10-28
+
+### What's Changed
+
+* TS cleanup for `<Link>` component + View Transition prop in Svelte by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2667
+* Improve support for `any` as form data value by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2668
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.13...v2.2.14
+
+## [v2.2.13](https://github.com/inertiajs/inertia/compare/v2.2.12...v2.2.13) - 2025-10-28
+
+### What's Changed
+
+* Support for View Transitions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2658
+* Opt-in to using `data-inertia` attribute in `<Head>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2663
+* Opt-in to using `<dialog>` for error modals by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2664
+* feat: give access to underlying data as object and as form data object by [@MeiKatz](https://github.com/MeiKatz) in https://github.com/inertiajs/inertia/pull/2605
+
+### New Contributors
+
+* [@MeiKatz](https://github.com/MeiKatz) made their first contribution in https://github.com/inertiajs/inertia/pull/2605
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.12...v2.2.13
+
+## [v2.2.12](https://github.com/inertiajs/inertia/compare/v2.2.11...v2.2.12) - 2025-10-27
+
+### What's Changed
+
+* Clone page props before writing it to the browser's history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2662
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.11...v2.2.12
+
+## [v2.2.11](https://github.com/inertiajs/inertia/compare/v2.2.10...v2.2.11) - 2025-10-24
+
+### What's Changed
+
+* Configure global defaults and update during runtime by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2655
+* Stabilize prop references when visiting the same page by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2657
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.10...v2.2.11
+
+## [v2.2.10](https://github.com/inertiajs/inertia/compare/v2.2.9...v2.2.10) - 2025-10-23
+
+### What's Changed
+
+* Restore uppercase `Component` object key in React's `App.ts` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2654
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.9...v2.2.10
+
+## [v2.2.9](https://github.com/inertiajs/inertia/compare/v2.2.8...v2.2.9) - 2025-10-21
+
+### What's Changed
+
+* Use local `@inertiajs/core` in Playgrounds + dependencies bump by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2633
+* Introduce types for Head Manager by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2634
+* Fix resolving `preserveScroll` and `preserveState` in Client Side Visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2635
+* Support for type-hinting shared Page Props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2636
+* Add `globals.d.ts` file to Playgrounds by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2637
+* Remove wrong `shouldIntercept()` call in `keydown` event handler in `<Link>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2638
+* Introduce `CancelToken` and `CancelTokenCallback` types to replace Axios imports by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2639
+* Internal TypeScript improvements by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2640
+* Tests and TS improvements for the `<Head>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2641
+* Make `data` prop of `<InfiniteScroll>` required by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2642
+* TS fixes in Vue adapter for `useRemember` and `remember` mixin by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2643
+* Bump vite from 5.4.20 to 5.4.21 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2647
+* TypeScript improvements to `createInertiaApp()` and unifying it across adapters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2648
+* ESLint check for test-apps by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2560
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.8...v2.2.9
+
+## [v2.2.8](https://github.com/inertiajs/inertia/compare/v2.2.7...v2.2.8) - 2025-10-09
+
+### What's Changed
+
+* Prevent false positives in `getScrollableParent()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2626
+* Restore scroll regions after navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2627
+* Prevent replacing history state when scroll regions are unchanged to fix popstate behavior in WebKit by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2629
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.7...v2.2.8
 
 ## [v2.2.7](https://github.com/inertiajs/inertia/compare/v2.2.6...v2.2.7) - 2025-10-07
 

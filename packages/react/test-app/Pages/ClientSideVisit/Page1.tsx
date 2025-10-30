@@ -11,6 +11,7 @@ export default ({ foo, bar }: PageProps) => {
   const [errors, setErrors] = useState(0)
   const [finished, setFinished] = useState(0)
   const [success, setSuccess] = useState(0)
+  const [random] = useState(Math.random())
 
   const bagErrors = () => {
     router.replace({
@@ -46,6 +47,13 @@ export default ({ foo, bar }: PageProps) => {
     })
   }
 
+  const replaceAndPreserveStateWithErrors = (errors = {}) => {
+    router.replace({
+      preserveState: 'errors',
+      props: (props: PageProps) => ({ ...props, errors }),
+    })
+  }
+
   const push = () => {
     router.push({
       url: '/client-side-visit-2',
@@ -59,12 +67,17 @@ export default ({ foo, bar }: PageProps) => {
       <div>{foo}</div>
       <div>{bar}</div>
       <button onClick={replace}>Replace</button>
+      <button onClick={() => replaceAndPreserveStateWithErrors({ name: 'Field is required' })}>
+        Replace with errors
+      </button>
+      <button onClick={() => replaceAndPreserveStateWithErrors()}>Replace without errors</button>
       <button onClick={push}>Push</button>
       <button onClick={defaultErrors}>Errors (default)</button>
       <button onClick={bagErrors}>Errors (bag)</button>
       <div>Errors: {errors}</div>
       <div>Finished: {finished}</div>
       <div>Success: {success}</div>
+      <div id="random">Random: {random}</div>
     </div>
   )
 }

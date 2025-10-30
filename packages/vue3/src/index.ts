@@ -1,3 +1,6 @@
+import { config as coreConfig } from '@inertiajs/core'
+import { VueInertiaAppConfig } from './types'
+
 export { progress, router } from '@inertiajs/core'
 export { usePage } from './app'
 export { default as createInertiaApp } from './createInertiaApp'
@@ -12,3 +15,5 @@ export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'
 export { default as useRemember } from './useRemember'
 export { default as WhenVisible } from './whenVisible'
+
+export const config = coreConfig.extend<VueInertiaAppConfig>({})

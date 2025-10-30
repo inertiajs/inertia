@@ -1,5 +1,5 @@
 import test, { expect, Page } from '@playwright/test'
-import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
+import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
   test.describe('Elements', () => {
@@ -1982,6 +1982,29 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Submit' }).click()
       const dump = await shouldBeDumpPage(page, 'post')
       expect(dump.form).toEqual({ child: 'A' })
+    })
+  })
+
+  test.describe('getData and getFormData methods', () => {
+    test.beforeEach(async ({ page }) => {
+      consoleMessages.listen(page)
+      await page.goto('/form-component/data-methods')
+    })
+
+    test('getData returns form data as object', async ({ page }) => {
+      await page.fill('#name', 'John Doe')
+      await page.getByRole('button', { name: 'Test getData()' }).click()
+
+      const result = consoleMessages.messages.find((msg) => msg.includes('getData result:'))
+      expect(result).toBe('getData result: {name: John Doe}')
+    })
+
+    test('getFormData returns FormData instance', async ({ page }) => {
+      await page.fill('#name', 'Jane Doe')
+      await page.getByRole('button', { name: 'Test getFormData()' }).click()
+
+      const formDataMessage = consoleMessages.messages.find((msg) => msg.includes('getFormData entries:'))
+      expect(formDataMessage).toBe('getFormData entries: {name: Jane Doe}')
     })
   })
 })

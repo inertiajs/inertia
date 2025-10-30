@@ -70,6 +70,9 @@ app.get('/links/partial-reloads', (req, res) =>
     },
   }),
 )
+app.all('/error-modal', (req, res) =>
+  inertia.render(req, res, { component: 'ErrorModal', props: { dialog: !!req.query.dialog } }),
+)
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )
@@ -132,6 +135,16 @@ app.get('/links/cancel-sync-request/:page', (req, res) => {
     page == 3 ? 500 : 0,
   )
 })
+app.get('/links/scroll-region-list', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Links/ScrollRegionList',
+    props: { user_id: req.query.user_id },
+    url: req.originalUrl,
+  }),
+)
+app.get('/links/scroll-region-list/user/:id', (req, res) =>
+  res.redirect(303, `/links/scroll-region-list?user_id=${req.params.id}`),
+)
 
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
@@ -156,6 +169,31 @@ app.get('/client-side-visit/props', (req, res) =>
     },
   }),
 )
+
+app.get('/visits/proxy', (req, res) => {
+  const timeout = req.headers['x-inertia-partial-data'] ? 250 : 0
+  const statuses = ['pending', 'running', 'success', 'failed', 'canceled']
+
+  const sites = [1, 2, 3, 4, 5].map(function (id) {
+    const site = { id }
+
+    site.latestDeployment = { id: id * 10, statuses: [statuses[id % statuses.length]] }
+
+    return site
+  })
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Visits/Proxy',
+        props: req.headers['x-inertia-partial-data'] === 'sites' ? { sites } : { foo: new Date().toISOString() },
+        deferredProps: req.headers['x-inertia-partial-data'] ? {} : { default: ['sites'] },
+      }),
+    timeout,
+  )
+})
+
+app.post('/visits/proxy', (req, res) => res.redirect(303, '/visits/proxy'))
 
 app.get('/visits/partial-reloads', (req, res) =>
   inertia.render(req, res, {
@@ -750,6 +788,14 @@ app.get('/remember/users/:id/edit', (req, res) => {
   })
 })
 
+app.get('/preserve-equal-props', (req, res) => {
+  inertia.render(req, res, {
+    component: 'PreserveEqualProps',
+    props: { nestedA: { count: 1 }, nestedB: { date: Date.now() } },
+  })
+})
+app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserve-equal-props'))
+
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
@@ -1123,6 +1169,9 @@ app.get('/infinite-scroll/data-table', (req, res) =>
 app.get('/infinite-scroll/horizontal-scroll', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/HorizontalScroll'),
 )
+app.get('/infinite-scroll/overflow-x', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/OverflowX', 150, false, 15),
+)
 app.get('/infinite-scroll/empty', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Empty', 0))
 app.get('/infinite-scroll/custom-triggers-ref', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/CustomTriggersRef'),
@@ -1298,6 +1347,13 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
     partialReload ? 250 : 0,
   )
 })
+
+app.post('/view-transition/form-errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ViewTransition/FormErrors',
+    props: { errors: { name: 'The name field is required.' } },
+  }),
+)
 
 app.all('*', (req, res) => inertia.render(req, res))
 

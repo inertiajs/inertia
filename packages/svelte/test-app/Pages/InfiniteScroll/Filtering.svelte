@@ -43,6 +43,7 @@
             }
           : { replace: true },
       )
+      // eslint-disable-next-line svelte/infinite-reactive-loop
       previousSearch = $form.search
     }, 250)
   }

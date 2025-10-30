@@ -6,6 +6,7 @@
     "build": "vue-tsc && vite build && vite build --ssr"
   },
   "devDependencies": {
+    "@inertiajs/core": "workspace:*",
     "@inertiajs/vue3": "workspace:*",
     "@laravel/stream-vue": "^0.3.9",
     "@tailwindcss/typography": "^0.5.19",

@@ -81,7 +81,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     ref,
   ) => {
     const form = useForm<Record<string, any>>({})
-    const formElement = useRef<HTMLFormElement>(null)
+    const formElement = useRef<HTMLFormElement>(undefined)
 
     const resolvedMethod = useMemo(() => {
       return isUrlMethodPair(action) ? action.method : (method.toLowerCase() as Method)
@@ -141,7 +141,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
-      formEvents.forEach((e) => formElement.current.addEventListener(e, updateDirtyState))
+      formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
 
       // Initialize validator
       const newValidator = createValidator(
@@ -192,11 +192,11 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [validateTimeout, validator])
 
     const reset = (...fields: string[]) => {
-      resetFormFields(formElement.current, defaultData.current, fields)
-
-      if (validator) {
-        validator.reset(...fields)
+      if (formElement.current) {
+        resetFormFields(formElement.current, defaultData.current, fields)
       }
+
+      validator!.reset(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -286,6 +286,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       reset,
       submit,
       defaults,
+      getData,
+      getFormData,
 
       // Precognition
       validating,

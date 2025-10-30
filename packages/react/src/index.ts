@@ -1,4 +1,5 @@
-import { progress as Progress, router as Router } from '@inertiajs/core'
+import { config as coreConfig, progress as Progress, router as Router } from '@inertiajs/core'
+import { ReactInertiaAppConfig } from './types'
 
 export const progress = Progress
 export const router = Router
@@ -21,3 +22,5 @@ export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'
 export { default as useRemember } from './useRemember'
 export { default as WhenVisible } from './WhenVisible'
+
+export const config = coreConfig.extend<ReactInertiaAppConfig>()

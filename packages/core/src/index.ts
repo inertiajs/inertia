@@ -1,5 +1,7 @@
+import { Config } from './config'
 import { Router } from './router'
 
+export { config } from './config'
 export { getScrollableParent } from './domUtils'
 export { hasFiles } from './files'
 export { objectToFormData } from './formData'
@@ -18,6 +20,6 @@ export {
   urlToString,
   urlWithoutHash,
 } from './url'
-export { type Router }
+export { type Config, type Router }
 
 export const router = new Router()
