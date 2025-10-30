@@ -83,5 +83,3 @@ export const config = new Config<InertiaAppConfig>({
     cacheFor: 30_000,
   },
 })
-
-// const _delay = config.get('prefetch.hoverDelay')
