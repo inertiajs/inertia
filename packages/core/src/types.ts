@@ -57,34 +57,56 @@ export type FormDataType<T extends object> = {
     : never
 }
 
-// Note: `0 extends 1 & T` detects `any` type to prevent infinite recursion.
+/**
+ * Uses `0 extends 1 & T` to detect `any` type and prevent infinite recursion.
+ */
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
-  : T extends Array<unknown>
-    ? number extends T['length']
-      ? `${number}` | (0 extends 1 & T[number] ? never : `${number}.${FormDataKeys<T[number]>}`)
-      :
-          | Extract<keyof T, `${number}`>
-          | {
-              [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key & string]
-                ? never
-                : `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
-            }[Extract<keyof T, `${number}`>]
-    : string extends keyof T
-      ? string
-      :
-          | Extract<keyof T, string>
-          | {
-              [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
-                ? never
-                : T[Key] extends FormDataConvertibleValue
-                  ? never
-                  : T[Key] extends any[]
-                    ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                    : T[Key] extends Record<string, any>
-                      ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                      : never
-            }[Extract<keyof T, string>]
+  : T extends unknown[]
+    ? ArrayFormDataKeys<T>
+    : T extends Record<string, unknown>
+      ? ObjectFormDataKeys<T>
+      : never
+
+/**
+ * Helper type for array form data keys
+ */
+type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
+  ? // Dynamic array
+    | `${number}`
+      | (0 extends 1 & T[number]
+          ? never
+          : T[number] extends FormDataConvertibleValue
+            ? never
+            : `${number}.${FormDataKeys<T[number]>}`)
+  : // Tuple with known length
+    | Extract<keyof T, `${number}`>
+      | {
+          [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
+            ? never
+            : T[Key] extends FormDataConvertibleValue
+              ? never
+              : `${Key & string}.${FormDataKeys<T[Key & string] & string>}`
+        }[Extract<keyof T, `${number}`>]
+
+/**
+ * Helper type for object form data keys
+ */
+type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyof T
+  ? string
+  :
+      | Extract<keyof T, string>
+      | {
+          [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
+            ? never
+            : T[Key] extends FormDataConvertibleValue
+              ? never
+              : T[Key] extends any[]
+                ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                : T[Key] extends Record<string, any>
+                  ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                  : never
+        }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
   [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
