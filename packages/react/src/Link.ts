@@ -211,7 +211,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseEnter: () => {
         hoverTimeout.current = window.setTimeout(() => {
           doPrefetch()
-        }, 75)
+        }, config.get('prefetch.hoverDelay'))
       },
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)

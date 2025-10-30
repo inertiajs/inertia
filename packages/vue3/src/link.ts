@@ -274,7 +274,7 @@ const Link: InertiaLink = defineComponent({
       onMouseenter: () => {
         hoverTimeout.value = setTimeout(() => {
           prefetch()
-        }, 75)
+        }, config.get('prefetch.hoverDelay'))
       },
       onMouseleave: () => {
         clearTimeout(hoverTimeout.value)
