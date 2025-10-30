@@ -423,11 +423,15 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
+type FirstLevelOptional<T> = {
+  [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
+}
+
 interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
-  defaults?: Partial<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -497,9 +501,9 @@ export type InertiaAppConfig = {
   // }
   future: {
     /* planned defaults */
-    preserveEqualProps?: boolean
-    useDataInertiaHeadAttribute?: boolean
-    useDialogForErrorModal?: boolean
+    preserveEqualProps: boolean
+    useDataInertiaHeadAttribute: boolean
+    useDialogForErrorModal: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
