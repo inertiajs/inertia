@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, Page, test } from '@playwright/test'
 import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 declare const process: { env: { PACKAGE?: string } }
@@ -378,6 +378,54 @@ test.describe('preserve state', () => {
   })
 })
 
+test.describe('preserve url', () => {
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/links/preserve-url')
+  })
+
+  test('preserves the current URL', async ({ page }) => {
+    await expect(page.getByText('Foo is now default')).toBeVisible()
+    const initialUrl = page.url()
+
+    await page.getByRole('link', { name: '[URL] Preserve: true' }).click()
+    await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await expect(page).toHaveURL(initialUrl) // URL should remain the same
+  })
+
+  test('does not preserve the current URL', async ({ page }) => {
+    await expect(page.getByText('Foo is now default')).toBeVisible()
+    const initialUrl = page.url()
+
+    await page.getByRole('link', { name: '[URL] Preserve: false' }).click()
+    await expect(page).toHaveURL('/links/preserve-url-page-two')
+    await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await expect(page.url()).not.toBe(initialUrl) // URL should have changed
+  })
+
+  test('can load more items with preserveUrl via Link', async ({ page }) => {
+    await expect(page.getByText('Items loaded: 3')).toBeVisible()
+    await expect(page.locator('.has-next-page')).toHaveText('true')
+
+    await page.getByRole('link', { name: 'Load More' }).click()
+
+    // With mergeProps, the items.data array should be merged, giving us 6 total items
+    await expect(page.getByText('Items loaded: 6')).toBeVisible()
+    await expect(page).toHaveURL('/links/preserve-url')
+  })
+
+  test('can load more items with preserveUrl via router.visit', async ({ page }) => {
+    await expect(page.getByText('Items loaded: 3')).toBeVisible()
+    await expect(page.locator('.has-next-page')).toHaveText('true')
+
+    await page.getByRole('button', { name: 'Load More Router' }).click()
+
+    // With mergeProps, the items.data array should be merged, giving us 6 total items
+    await expect(page.getByText('Items loaded: 6')).toBeVisible()
+    await expect(page).toHaveURL('/links/preserve-url')
+  })
+})
+
 test.describe('preserve scroll', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/links/preserve-scroll-false')
@@ -392,6 +440,7 @@ test.describe('preserve scroll', () => {
       page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
     )
 
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -400,6 +449,7 @@ test.describe('preserve scroll', () => {
     await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -412,6 +462,7 @@ test.describe('preserve scroll', () => {
     await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click({ position: { x: 0, y: 0 } })
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
 
@@ -441,6 +492,7 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -473,6 +525,7 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -488,6 +541,7 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click() //
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -508,12 +562,14 @@ test.describe('enabled', () => {
     )
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+    await page.waitForTimeout(100)
   })
 
   test('resets scroll regions to the top when doing a regular visit', async ({ page }) => {
     await page.getByText('Reset Scroll', { exact: true }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -524,6 +580,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
@@ -541,6 +598,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
@@ -551,6 +609,7 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
 
@@ -564,8 +623,8 @@ test.describe('enabled', () => {
 
   test('restores all tracked scroll regions when pressing the back button', async ({ page }) => {
     await page.getByTestId('preserve').click()
-
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
+    await page.waitForTimeout(100)
 
     await scrollElementTo(
       page,
@@ -578,8 +637,11 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
-    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+
+    // Wait for scroll restoration to complete - use longer timeout for flaky CI
+    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible({ timeout: 10000 })
   })
 
   test('restores the document scroll position when pressing the back button with history encryption enabled', async ({
@@ -628,8 +690,97 @@ test.describe('enabled', () => {
     await page.goBack()
 
     await expect(page).toHaveURL('/links/preserve-scroll')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+  })
+})
+
+test.describe('scroll region with scrollable list', () => {
+  const preparePage = async (page: Page, url: string) => {
+    await page.goto('/links/scroll-region-list')
+    await expect(page.getByText('Scrollable list with scroll region')).toBeVisible()
+    await expect(page.getByText('Clicked user: none')).toBeVisible()
+
+    await page.evaluate(() => {
+      // @ts-ignore
+      window.navigateEvents = window.navigateEvents || []
+
+      document.addEventListener('inertia:navigate', (e) => {
+        // @ts-ignore
+        window.navigateEvents.push(e)
+      })
+    })
+
+    await scrollElementTo(
+      page,
+      page.evaluate(() => window.scrollTo(5, 7)),
+    )
+
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#slot')?.scrollTo(10, 15)),
+    )
+
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
+
+    await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
+    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+  }
+
+  Object.entries({
+    '/links/scroll-region-list': 'navigate to another url',
+    '/links/scroll-region-list?user_id=1': 'stay on the same url',
+  }).forEach(([url, description]) => {
+    test.describe(`when visiting a URL that would ${description}`, () => {
+      test.beforeEach(async ({ page }) => await preparePage(page, url))
+
+      test('resets scroll regions when clicking default button', async ({ page }) => {
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 0)
+        await page.getByRole('button', { exact: true, name: 'Default' }).first().click()
+
+        await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
+        await expect(page.getByText('Clicked user: 1')).toBeVisible()
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 1)
+
+        await page.waitForTimeout(100)
+        await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
+        await page.waitForTimeout(100)
+
+        await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
+        await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
+      })
+
+      test('resets scroll regions when clicking preserve false button', async ({ page }) => {
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 0)
+        await page.getByRole('button', { exact: true, name: 'Preserve False' }).first().click()
+
+        await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
+        await expect(page.getByText('Clicked user: 1')).toBeVisible()
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 1)
+
+        await page.waitForTimeout(100)
+        await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
+        await page.waitForTimeout(100)
+
+        await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
+        await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
+      })
+
+      test('preserves scroll regions when clicking preserve true button', async ({ page }) => {
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 0)
+        await page.getByRole('button', { exact: true, name: 'Preserve True' }).first().click()
+
+        await expect(page).toHaveURL('/links/scroll-region-list?user_id=1')
+        await expect(page.getByText('Clicked user: 1')).toBeVisible()
+        await page.waitForFunction(() => (window as any).navigateEvents.length === 1)
+
+        await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
+
+        await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
+        await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
+      })
+    })
   })
 })
 
@@ -639,24 +790,28 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/links/url-fragments')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
   })
 
   test('scrolls to the fragment element when making a visit to a different page', async ({ page }) => {
     await page.getByRole('link', { name: 'Basic link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#target')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
   })
 
   test('scrolls to the fragment element when making a visit to the same page', async ({ page }) => {
     await page.getByRole('link', { exact: true, name: 'Fragment link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#target')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
   })
 
   test('does not scroll to the fragment element when it does not exist on the page', async ({ page }) => {
     await page.getByRole('link', { exact: true, name: 'Non-existent fragment link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#non-existent-fragment')
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
   })
 })

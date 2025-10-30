@@ -4,13 +4,14 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import {
+import React, {
   createElement,
   FormEvent,
   forwardRef,
@@ -22,6 +23,11 @@ import {
   useState,
 } from 'react'
 import useForm from './useForm'
+
+// Polyfill for startTransition to support React 16.9+
+const deferStateUpdate = (callback: () => void) => {
+  typeof React.startTransition === 'function' ? React.startTransition(callback) : setTimeout(callback, 0)
+}
 
 type ComponentProps = (FormComponentProps &
   Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
@@ -64,10 +70,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     ref,
   ) => {
     const form = useForm<Record<string, any>>({})
-    const formElement = useRef<HTMLFormElement>(null)
+    const formElement = useRef<HTMLFormElement>(undefined)
 
     const resolvedMethod = useMemo(() => {
-      return typeof action === 'object' ? action.method : (method.toLowerCase() as Method)
+      return isUrlMethodPair(action) ? action.method : (method.toLowerCase() as Method)
     }, [action, method])
 
     const [isDirty, setIsDirty] = useState(false)
@@ -81,20 +87,24 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
     const updateDirtyState = (event: Event) =>
-      setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current)))
+      deferStateUpdate(() =>
+        setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
+      )
 
     useEffect(() => {
       defaultData.current = getFormData()
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
-      formEvents.forEach((e) => formElement.current.addEventListener(e, updateDirtyState))
+      formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
 
       return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
     }, [])
 
     const reset = (...fields: string[]) => {
-      resetFormFields(formElement.current, defaultData.current, fields)
+      if (formElement.current) {
+        resetFormFields(formElement.current, defaultData.current, fields)
+      }
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -117,7 +127,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const submit = () => {
       const [url, _data] = mergeDataIntoQueryString(
         resolvedMethod,
-        typeof action === 'object' ? action.url : action,
+        isUrlMethodPair(action) ? action.url : action,
         getData(),
         queryStringArrayFormat,
       )
@@ -175,6 +185,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       reset,
       submit,
       defaults,
+      getData,
+      getFormData,
     })
 
     useImperativeHandle(ref, exposed, [form, isDirty, submit])
@@ -184,7 +196,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       {
         ...props,
         ref: formElement,
-        action: typeof action === 'object' ? action.url : action,
+        action: isUrlMethodPair(action) ? action.url : action,
         method: resolvedMethod,
         onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault()

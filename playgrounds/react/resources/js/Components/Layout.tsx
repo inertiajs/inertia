@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react'
 
-export default function Layout({ children }) {
-  const { appName } = usePage<{ appName: string }>().props
+export default function Layout({ children, padding = true }: { children: React.ReactNode; padding?: boolean }) {
+  const { appName } = usePage().props
 
   return (
     <>
@@ -31,11 +31,23 @@ export default function Layout({ children }) {
         <Link href="/poll" className="hover:underline">
           Poll
         </Link>
+        <Link href="/chat" className="hover:underline">
+          Chat
+        </Link>
+        <Link href="/photo-grid" className="hover:underline">
+          Photo Grid
+        </Link>
+        <Link href="/photo-grid/horizontal" className="hover:underline">
+          Photo Row
+        </Link>
+        <Link href="/data-table" className="hover:underline">
+          Data Table
+        </Link>
         <Link href="/logout" method="post" className="hover:underline">
           Logout
         </Link>
       </nav>
-      <main className="px-10 py-8">{children}</main>
+      <main className={padding ? 'px-10 py-8' : ''}>{children}</main>
     </>
   )
 }

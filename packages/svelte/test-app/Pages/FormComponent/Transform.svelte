@@ -4,8 +4,8 @@
 
   let transformType = 'none'
 
-  $: getTransform = () => {
-    switch (transformType) {
+  const getTransform = (type: string) => {
+    switch (type) {
       case 'uppercase':
         return (data: Record<string, FormDataConvertible>) => ({
           ...data,
@@ -20,6 +20,8 @@
         return (data: Record<string, FormDataConvertible>) => data
     }
   }
+
+  $: transform = getTransform(transformType)
 </script>
 
 <div>
@@ -33,7 +35,7 @@
 
   <div>Current transform: {transformType}</div>
 
-  <Form action="/dump/post" method="post" transform={getTransform()}>
+  <Form action="/dump/post" method="post" {transform}>
     <div>
       <input type="text" name="name" placeholder="Name" value="John Doe" />
     </div>

@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export default function Wayfinder() {
   const [isPrefetched, setIsPrefetched] = useState(false)
@@ -13,10 +13,10 @@ export default function Wayfinder() {
     method: 'get',
   })
 
-  const checkStatus = () => {
+  const checkStatus = useCallback(() => {
     setIsPrefetched(!!router.getCached(wayfinderUrl()))
     setIsPrefetching(!!router.getPrefetching(wayfinderUrl()))
-  }
+  }, [])
 
   const testPrefetch = () => {
     router.prefetch(wayfinderUrl(), {
@@ -42,7 +42,7 @@ export default function Wayfinder() {
 
   useEffect(() => {
     checkStatus()
-  }, [])
+  }, [checkStatus])
 
   return (
     <div>

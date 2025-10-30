@@ -45,7 +45,20 @@ export class Scroll {
   }
 
   public static restore(scrollRegions: ScrollRegion[]): void {
-    this.restoreDocument()
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      this.restoreDocument()
+      this.restoreScrollRegions(scrollRegions)
+    })
+  }
+
+  public static restoreScrollRegions(scrollRegions: ScrollRegion[]): void {
+    if (typeof window === 'undefined') {
+      return
+    }
 
     this.regions().forEach((region: Element, index: number) => {
       const scrollPosition = scrollRegions[index]
@@ -65,10 +78,7 @@ export class Scroll {
 
   public static restoreDocument(): void {
     const scrollPosition = history.getDocumentScrollPosition()
-
-    if (typeof window !== 'undefined') {
-      window.scrollTo(scrollPosition.left, scrollPosition.top)
-    }
+    window.scrollTo(scrollPosition.left, scrollPosition.top)
   }
 
   public static onScroll(event: Event): void {
