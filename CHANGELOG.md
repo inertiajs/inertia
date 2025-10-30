@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.14...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.15...master)
 
 - Nothing yet
+
+## [v2.2.15](https://github.com/inertiajs/inertia/compare/v2.2.14...v2.2.15) - 2025-10-30
+
+### What's Changed
+
+* TS Fix for circularly references in form data  by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2673
+* Improve TS for config defaults by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2674
+* [v2.x] feat: allow adding type to `router.restore` by [@peaklabs-dev](https://github.com/peaklabs-dev) in https://github.com/inertiajs/inertia/pull/2545
+* Configurable prefetch hover delay by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2675
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.14...v2.2.15
 
 ## [v2.2.14](https://github.com/inertiajs/inertia/compare/v2.2.13...v2.2.14) - 2025-10-28
 
