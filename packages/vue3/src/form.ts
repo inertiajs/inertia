@@ -198,9 +198,9 @@ const Form = defineComponent({
         .on('errorsChanged', () => {
           form.clearErrors()
 
-          const errors = simpleValidationErrors
-            ? toSimpleValidationErrors(newValidator.errors())
-            : newValidator.errors()
+          const errors = props.simpleValidationErrors
+            ? toSimpleValidationErrors(validator.errors())
+            : validator.errors()
 
           form.setError(errors as Errors)
 
