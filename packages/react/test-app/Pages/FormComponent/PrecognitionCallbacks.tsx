@@ -5,13 +5,6 @@ export default () => {
   const [successCalled, setSuccessCalled] = useState(false)
   const [errorCalled, setErrorCalled] = useState(false)
   const [finishCalled, setFinishCalled] = useState(false)
-  const [exceptionCaught, setExceptionCaught] = useState(false)
-  const [exceptionMessage, setExceptionMessage] = useState('')
-
-  const handleException = (error: Error) => {
-    setExceptionCaught(true)
-    setExceptionMessage(error.message || 'Unknown error')
-  }
 
   return (
     <div>

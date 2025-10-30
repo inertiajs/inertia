@@ -34,8 +34,8 @@ import { Form } from '@inertiajs/vue3'
 
       <button type="button" @click="validate()">Validate All Touched</button>
       <button type="button" @click="validate('name')">Validate Name</button>
-      <button type="button" @click="validate(['name', 'email'])">Validate Name and Email</button>
-      <button type="button" @click="touch(['name', 'email'])">Touch Name and Email</button>
+      <button type="button" @click="validate({ only: ['name', 'email'] })">Validate Name and Email</button>
+      <button type="button" @click="touch('name', 'email')">Touch Name and Email</button>
       <button
         type="button"
         @click="

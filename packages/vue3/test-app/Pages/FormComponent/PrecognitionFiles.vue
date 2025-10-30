@@ -14,7 +14,7 @@ const validateFilesEnabled = ref(false)
       method="post"
       :validate-timeout="100"
       :validate-files="validateFilesEnabled"
-      #default="{ invalid, errors, validate, valid, validating, touch }"
+      #default="{ invalid, errors, validate, valid, validating }"
     >
       <div>
         <input name="name" placeholder="Name" @blur="validate('name')" />
@@ -38,7 +38,7 @@ const validateFilesEnabled = ref(false)
         Toggle Validate Files ({{ validateFilesEnabled ? 'enabled' : 'disabled' }})
       </button>
 
-      <button type="button" @click="validate(['name', 'avatar'])">Validate Both</button>
+      <button type="button" @click="validate({ only: ['name', 'avatar'] })">Validate Both</button>
     </Form>
   </div>
 </template>

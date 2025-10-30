@@ -161,9 +161,7 @@
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
 
-    if (validator) {
-      validator.reset(...fields)
-    }
+    validator!.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
@@ -203,15 +201,11 @@
     value?: unknown,
     config?: ValidationConfig,
   ) {
-    if (validator) {
-      return validator.validate(input, value, config)
-    }
+    return validator!.validate(input, value, config)
   }
 
   export function touch(...fields: string[]) {
-    if (validator) {
-      validator.touch(fields)
-    }
+    validator!.touch(fields)
   }
 
   export function touched(field?: string): boolean {
@@ -227,6 +221,7 @@
   }
 
   export function invalid(field: string): boolean {
+    // @ts-expect-error
     return $form.errors[field] !== undefined
   }
 

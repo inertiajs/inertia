@@ -588,7 +588,7 @@ export type FormComponentMethods = {
   valid: (field: string) => boolean
   invalid: (field: string) => boolean
   validate: Validator['validate']
-  touch: (field: string | string[]) => void
+  touch: (...fields: string[]) => void
   touched(field?: string): boolean
 }
 

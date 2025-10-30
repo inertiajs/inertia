@@ -30,10 +30,10 @@ export default () => {
             <button type="button" onClick={() => validate('name')}>
               Validate Name
             </button>
-            <button type="button" onClick={() => validate(['name', 'email'])}>
+            <button type="button" onClick={() => validate({ only: ['name', 'email'] })}>
               Validate Name and Email
             </button>
-            <button type="button" onClick={() => touch(['name', 'email'])}>
+            <button type="button" onClick={() => touch('name', 'email')}>
               Touch Name and Email
             </button>
             <button

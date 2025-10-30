@@ -17,7 +17,6 @@
     let:validate
     let:valid
     let:validating
-    let:touch
   >
     <div>
       <input name="name" placeholder="Name" on:blur={() => validate('name')} />
@@ -47,6 +46,6 @@
       Toggle Validate Files ({validateFilesEnabled ? 'enabled' : 'disabled'})
     </button>
 
-    <button type="button" on:click={() => validate(['name', 'avatar'])}>Validate Both</button>
+    <button type="button" on:click={() => validate({ only: ['name', 'avatar'] })}>Validate Both</button>
   </Form>
 </div>

@@ -5,13 +5,6 @@ import { ref } from 'vue'
 const successCalled = ref(false)
 const errorCalled = ref(false)
 const finishCalled = ref(false)
-const exceptionCaught = ref(false)
-const exceptionMessage = ref('')
-
-const handleException = (error: Error) => {
-  exceptionCaught.value = true
-  exceptionMessage.value = error.message || 'Unknown error'
-}
 </script>
 
 <template>

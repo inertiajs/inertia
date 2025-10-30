@@ -41,8 +41,8 @@
 
     <button type="button" on:click={() => validate()}>Validate All Touched</button>
     <button type="button" on:click={() => validate('name')}>Validate Name</button>
-    <button type="button" on:click={() => validate(['name', 'email'])}>Validate Name and Email</button>
-    <button type="button" on:click={() => touch(['name', 'email'])}>Touch Name and Email</button>
+    <button type="button" on:click={() => validate({ only: ['name', 'email'] })}>Validate Name and Email</button>
+    <button type="button" on:click={() => touch('name', 'email')}>Touch Name and Email</button>
     <button
       type="button"
       on:click={() => {

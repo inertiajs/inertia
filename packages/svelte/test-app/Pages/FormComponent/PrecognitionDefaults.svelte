@@ -1,7 +1,8 @@
 <script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
 
-  let formRef: any
+  let formRef: FormComponentMethods | null = null
 
   const handleSetDefaults = () => {
     formRef?.defaults()

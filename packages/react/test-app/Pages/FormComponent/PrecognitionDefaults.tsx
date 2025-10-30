@@ -1,8 +1,9 @@
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
 import { useRef } from 'react'
 
 export default function PrecognitionDefaults() {
-  const formRef = useRef<any>(null)
+  const formRef = useRef<FormComponentRef>(null)
 
   const handleSetDefaults = () => {
     formRef.current?.defaults()

@@ -3,8 +3,8 @@ import { Form } from '@inertiajs/vue3'
 import { isEqual } from 'lodash-es'
 
 const handleBeforeValidation = (
-  newRequest: { data: Record<string, any>; touched: string[] },
-  oldRequest: { data: Record<string, any>; touched: string[] },
+  newRequest: { data: Record<string, unknown>; touched: string[] },
+  oldRequest: { data: Record<string, unknown>; touched: string[] },
 ) => {
   const payloadIsCorrect =
     isEqual(newRequest, { data: { name: 'block' }, touched: ['name'] }) &&
@@ -35,7 +35,7 @@ const handleBeforeValidation = (
           name="name"
           @change="
             validate('name', {
-              onBefore: handleBeforeValidation,
+              onBeforeValidation: handleBeforeValidation,
             })
           "
         />

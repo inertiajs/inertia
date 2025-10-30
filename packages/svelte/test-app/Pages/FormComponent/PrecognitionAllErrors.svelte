@@ -21,7 +21,7 @@
       {#if invalid('name')}
         <div>
           {#if Array.isArray(errors.name)}
-            {#each errors.name as error, index}
+            {#each errors.name as error, index (index)}
               <p id="name-error-{index}">{error}</p>
             {/each}
           {:else}
@@ -39,7 +39,7 @@
       {#if invalid('email')}
         <div>
           {#if Array.isArray(errors.email)}
-            {#each errors.email as error, index}
+            {#each errors.email as error, index (index)}
               <p id="email-error-{index}">{error}</p>
             {/each}
           {:else}

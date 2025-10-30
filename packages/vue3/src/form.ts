@@ -158,7 +158,7 @@ const Form = defineComponent({
     const valid = ref<string[]>([])
     const touched = ref<string[]>([])
 
-    let validator: Validator = null
+    let validator: Validator
 
     const clearErrors = (...names: string[]) => {
       form.clearErrors(...names)

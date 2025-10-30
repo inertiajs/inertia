@@ -14,7 +14,7 @@ export default () => {
         validateTimeout={100}
         validateFiles={validateFilesEnabled}
       >
-        {({ invalid, errors, validate, valid, validating, touch }) => (
+        {({ invalid, errors, validate, valid, validating }) => (
           <>
             <div>
               <input name="name" placeholder="Name" onBlur={() => validate('name')} />
@@ -34,7 +34,7 @@ export default () => {
               Toggle Validate Files ({validateFilesEnabled ? 'enabled' : 'disabled'})
             </button>
 
-            <button type="button" onClick={() => validate(['name', 'avatar'])}>
+            <button type="button" onClick={() => validate({ only: ['name', 'avatar'] })}>
               Validate Both
             </button>
           </>

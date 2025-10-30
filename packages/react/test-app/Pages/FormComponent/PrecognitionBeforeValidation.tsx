@@ -3,8 +3,8 @@ import { isEqual } from 'lodash-es'
 
 export default function PrecognitionBefore() {
   const handleBeforeValidation = (
-    newRequest: { data: Record<string, any>; touched: string[] },
-    oldRequest: { data: Record<string, any>; touched: string[] },
+    newRequest: { data: Record<string, unknown>; touched: string[] },
+    oldRequest: { data: Record<string, unknown>; touched: string[] },
   ) => {
     const payloadIsCorrect =
       isEqual(newRequest, { data: { name: 'block' }, touched: ['name'] }) &&
@@ -29,11 +29,11 @@ export default function PrecognitionBefore() {
               <input
                 id="name"
                 name="name"
-                onChange={(e) => {
+                onChange={() =>
                   validate('name', {
-                    onBefore: handleBeforeValidation,
+                    onBeforeValidation: handleBeforeValidation,
                   })
-                }}
+                }
               />
               {invalid('name') && <p className="error">{errors.name}</p>}
             </div>

@@ -4,13 +4,6 @@
   let successCalled = false
   let errorCalled = false
   let finishCalled = false
-  let exceptionCaught = false
-  let exceptionMessage = ''
-
-  const handleException = (error: Error) => {
-    exceptionCaught = true
-    exceptionMessage = error.message || 'Unknown error'
-  }
 </script>
 
 <div>

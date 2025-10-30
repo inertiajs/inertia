@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-const formRef = ref()
+const formRef = ref<FormComponentRef>()
 
 const handleSetDefaults = () => {
-  formRef.value.defaults()
+  formRef.value!.defaults()
 }
 </script>
 

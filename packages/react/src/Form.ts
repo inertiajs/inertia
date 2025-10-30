@@ -259,9 +259,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const touch = (...fields: string[]) => {
-      if (validator) {
-        validator.touch(fields)
-      }
+      validator!.touch(fields)
     }
 
     const isTouched = (field?: string): boolean => {
@@ -294,7 +292,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       valid: (field: string) => valid.includes(field),
       invalid: (field: string) => form.errors[field] !== undefined,
       validate: (input?: string | NamedInputEvent | ValidationConfig, value?: unknown, config?: ValidationConfig) =>
-        validator?.validate(input, value, config),
+        validator!.validate(input, value, config),
       touch,
       touched: isTouched,
     })
