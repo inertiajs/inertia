@@ -91,8 +91,10 @@ function link(
       }
     },
     mouseup: (event: MouseEvent) => {
-      event.preventDefault()
-      router.visit(href, visitParams)
+      if (shouldIntercept(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
     },
     keyup: (event: KeyboardEvent) => {
       if (shouldNavigate(event)) {
