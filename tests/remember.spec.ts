@@ -387,4 +387,32 @@ test.describe('Remember (local state caching)', () => {
       await expect(page.locator('.remember_error')).not.toBeVisible()
     })
   })
+
+  test('restore without types', async ({ page }) => {
+    await page.goto('remember/router')
+
+    await expect(page.getByText('Foo: -')).toBeVisible()
+    await expect(page.getByText('Bar: 0')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Remember' }).click()
+    await page.waitForTimeout(100) // Wait for remember to complete
+    await page.getByRole('button', { name: 'Restore', exact: true }).click()
+
+    await expect(page.getByText('Foo: foo')).toBeVisible()
+    await expect(page.getByText('Bar: 42')).toBeVisible()
+  })
+
+  test('restore with types', async ({ page }) => {
+    await page.goto('remember/router')
+
+    await expect(page.getByText('Foo: -')).toBeVisible()
+    await expect(page.getByText('Bar: 0')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Remember' }).click()
+    await page.waitForTimeout(100) // Wait for remember to complete
+    await page.getByRole('button', { name: 'Restore Typed' }).click()
+
+    await expect(page.getByText('Foo: foo')).toBeVisible()
+    await expect(page.getByText('Bar: 42')).toBeVisible()
+  })
 })
