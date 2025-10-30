@@ -198,11 +198,11 @@ const Form = defineComponent({
         .on('errorsChanged', () => {
           form.clearErrors()
 
-          form.setError(
-            (props.simpleValidationErrors
-              ? toSimpleValidationErrors(validator.errors())
-              : validator.errors()) as Errors,
-          )
+          const errors = simpleValidationErrors
+            ? toSimpleValidationErrors(newValidator.errors())
+            : newValidator.errors()
+
+          form.setError(errors as Errors)
 
           valid.value = validator.valid()
         })
@@ -334,6 +334,9 @@ const Form = defineComponent({
       get recentlySuccessful() {
         return form.recentlySuccessful
       },
+      get validator() {
+        return validator
+      },
       get validating() {
         return validating.value
       },
@@ -354,8 +357,8 @@ const Form = defineComponent({
       valid: (field: string) => valid.value.includes(field),
       invalid: (field: string) => form.errors[field] !== undefined,
       validate: (input?: string | NamedInputEvent | ValidationConfig, value?: unknown, config?: ValidationConfig) =>
-        validator!.validate(input, value, config),
-      touch: (...fields: string[]) => validator!.touch(fields),
+        validator.validate(input, value, config),
+      touch: (...fields: string[]) => validator.touch(fields),
       touched: isTouched,
     }
 

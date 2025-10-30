@@ -59,7 +59,7 @@
   let validating = false
   let validFields: string[] = []
   let touchedFields: string[] = []
-  let validator: Validator | null = null
+  let validator: Validator
 
   $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
   $: _action = isUrlMethodPair(action) ? action.url : (action as string)
@@ -168,12 +168,10 @@
     // @ts-expect-error
     $form.clearErrors(...fields)
 
-    if (validator) {
-      if (fields.length === 0) {
-        validator.setErrors({})
-      } else {
-        fields.forEach(validator.forgetError)
-      }
+    if (fields.length === 0) {
+      validator!.setErrors({})
+    } else {
+      fields.forEach(validator!.forgetError)
     }
   }
 
@@ -249,10 +247,8 @@
         touchedFields = validator!.touched()
       })
       .on('errorsChanged', () => {
-        // Clear form errors first
         $form.clearErrors()
 
-        // Set new errors
         const errors = simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : validator!.errors()
 
         $form.setError(errors as Errors)
@@ -271,9 +267,7 @@
   })
 
   $: {
-    if (validator) {
-      validator.setTimeout(validateTimeout!)
-    }
+    validator!.setTimeout(validateTimeout!)
   }
 
   $: slotErrors = $form.errors as Errors
@@ -310,6 +304,7 @@
     {reset}
     {getData}
     {getFormData}
+    {validator}
     {validating}
     {validate}
     {touch}

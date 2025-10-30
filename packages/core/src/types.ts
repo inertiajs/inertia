@@ -602,6 +602,7 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validator: Validator
   validating: boolean
 }
 

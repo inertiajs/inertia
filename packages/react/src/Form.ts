@@ -94,7 +94,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const [valid, setValid] = useState<string[]>([])
     const [touched, setTouched] = useState<string[]>([])
 
-    const [validator, setValidator] = useState<Validator | null>(null)
+    const [validator, setValidator] = useState<Validator>()
 
     const getFormData = (): FormData => new FormData(formElement.current)
 
@@ -120,12 +120,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const clearErrors = (...names: string[]) => {
       form.clearErrors(...names)
 
-      if (validator) {
-        if (names.length === 0) {
-          validator.setErrors({})
-        } else {
-          names.forEach(validator.forgetError)
-        }
+      if (names.length === 0) {
+        validator!.setErrors({})
+      } else {
+        names.forEach(validator!.forgetError)
       }
 
       return form
@@ -163,11 +161,11 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         .on('errorsChanged', () => {
           form.clearErrors()
 
-          form.setError(
-            (simpleValidationErrors
-              ? toSimpleValidationErrors(newValidator.errors())
-              : newValidator.errors()) as Errors,
-          )
+          const errors = simpleValidationErrors
+            ? toSimpleValidationErrors(newValidator.errors())
+            : newValidator.errors()
+
+          form.setError(errors as Errors)
 
           setValid(newValidator.valid())
         })
@@ -186,9 +184,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [])
 
     useEffect(() => {
-      if (validator) {
-        validator.setTimeout(validateTimeout)
-      }
+      validator!.setTimeout(validateTimeout)
     }, [validateTimeout, validator])
 
     const reset = (...fields: string[]) => {
@@ -288,6 +284,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       getFormData,
 
       // Precognition
+      validator: validator!,
       validating,
       valid: (field: string) => valid.includes(field),
       invalid: (field: string) => form.errors[field] !== undefined,
