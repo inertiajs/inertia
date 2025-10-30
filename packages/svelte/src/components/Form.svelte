@@ -267,7 +267,7 @@
   })
 
   $: {
-    validator!.setTimeout(validateTimeout!)
+    validator?.setTimeout(validateTimeout!)
   }
 
   $: slotErrors = $form.errors as Errors

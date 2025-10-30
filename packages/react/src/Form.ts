@@ -184,7 +184,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [])
 
     useEffect(() => {
-      validator!.setTimeout(validateTimeout)
+      validator?.setTimeout(validateTimeout)
     }, [validateTimeout, validator])
 
     const reset = (...fields: string[]) => {
