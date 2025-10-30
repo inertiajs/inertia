@@ -72,7 +72,7 @@ function link(
   }
 
   const prefetchHoverEvents: ActionEventHandlers = {
-    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), 75)),
+    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), config.get('prefetch.hoverDelay'))),
     mouseleave: () => clearTimeout(hoverTimeout),
     click: regularEvents.click,
   }

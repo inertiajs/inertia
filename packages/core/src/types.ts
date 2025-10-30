@@ -507,6 +507,7 @@ export type InertiaAppConfig = {
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
+    hoverDelay: number
   }
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
