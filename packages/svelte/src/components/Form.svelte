@@ -6,11 +6,16 @@
     type Errors,
     type FormComponentProps,
     type FormDataConvertible,
-    type FormComponentValidateOptions,
     type VisitOptions,
     isUrlMethodPair,
-    usePrecognition,
   } from '@inertiajs/core'
+  import {
+    createValidator,
+    toSimpleValidationErrors,
+    type NamedInputEvent,
+    type ValidationConfig,
+    type Validator,
+  } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
@@ -51,18 +56,9 @@
   let defaultData: FormData = new FormData()
 
   let validating = false
-  let validated: string[] = []
+  let validFields: string[] = []
   let touchedFields: string[] = []
-
-  const validator = usePrecognition({
-    timeout: validateTimeout,
-    onStart: () => {
-      validating = true
-    },
-    onFinish: () => {
-      validating = false
-    },
-  })
+  let validator: Validator | null = null
 
   $: _method = isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method'])
   $: _action = isUrlMethodPair(action) ? action.url : action
@@ -84,6 +80,11 @@
 
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
+  }
+
+  function getTransformedData(): Record<string, FormDataConvertible> {
+    const [_url, data] = getUrlAndData()
+    return transform!(data)
   }
 
   export function submit() {
@@ -156,33 +157,29 @@
     }
   }
 
-  function updateDataOnValidator() {
-    try {
-      // This might fail if the component is already unmounted but this function
-      // is called after navigating away after a form submission.
-      validator.setOldData(transform(getData()))
-    } catch {}
-  }
-
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
-    updateDataOnValidator()
 
-    if (fields.length === 0) {
-      touchedFields = []
-    } else {
-      touchedFields = touchedFields.filter((field) => !fields.includes(field))
+    if (validator) {
+      validator.reset(...fields)
     }
   }
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
+
+    if (validator) {
+      if (fields.length === 0) {
+        validator.setErrors({})
+      } else {
+        fields.forEach(validator.forgetError)
+      }
+    }
   }
 
   export function resetAndClearErrors(...fields: string[]) {
-    // @ts-expect-error
-    $form.clearErrors(...fields)
+    clearErrors(...fields)
     reset(...fields)
   }
 
@@ -198,72 +195,22 @@
   export function defaults() {
     defaultData = getFormData()
     isDirty = false
-    updateDataOnValidator()
   }
 
   export function validate(
-    only?: string | string[] | FormComponentValidateOptions,
-    maybeOptions?: FormComponentValidateOptions,
+    input?: string | NamedInputEvent | ValidationConfig,
+    value?: unknown,
+    config?: ValidationConfig,
   ) {
-    let fields: string[]
-    let options: FormComponentValidateOptions = {}
-
-    if (typeof only === 'object' && !Array.isArray(only)) {
-      // Called as validate({ only: [...], onSuccess, onError, onFinish })
-      const onlyFields = only.only
-      fields = onlyFields === undefined ? touchedFields : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
-      options = only
-    } else {
-      // Called as validate('field') or validate(['field1', 'field2']) or validate('field', {options})
-      fields = only === undefined ? touchedFields : Array.isArray(only) ? only : [only]
-      options = maybeOptions || {}
+    if (validator) {
+      return validator.validate(input, value, config)
     }
-
-    // We're not using the data object from this method as it might be empty
-    // on GET requests, and we still want to pass a data object to the
-    // validator so it knows the current state of the form.
-    const [url] = getUrlAndData()
-
-    validator.validate({
-      url,
-      method: _method,
-      data: transform(getData()),
-      only: fields,
-      errorBag,
-      headers,
-      simpleValidationErrors,
-      onBefore: options.onBefore,
-      onPrecognitionSuccess: () => {
-        validated = [...validated, ...fields]
-        clearErrors(...fields)
-        options.onSuccess?.()
-      },
-      onValidationError: (errors) => {
-        validated = [...validated, ...fields]
-
-        const validFields = fields.filter((field) => errors[field] === undefined)
-
-        if (validFields.length) {
-          clearErrors(...validFields)
-        }
-
-        // Merge current errors with new errors
-        const mergedErrors = { ...$form.errors, ...errors }
-        setError(mergedErrors)
-        options.onError?.(errors)
-      },
-      onException: options.onException,
-      onFinish: () => {
-        options.onFinish?.()
-      },
-    })
   }
 
-  export function touch(field: string | string[]) {
-    const fields = Array.isArray(field) ? field : [field]
-
-    // Use Set to avoid duplicates
-    touchedFields = [...new Set([...touchedFields, ...fields])]
+  export function touch(...fields: string[]) {
+    if (validator) {
+      validator.touch(fields)
+    }
   }
 
   export function touched(field?: string): boolean {
@@ -275,13 +222,12 @@
   }
 
   export function valid(field: string): boolean {
-    return validated.includes(field) && $form.errors[field] === undefined
+    return validFields.includes(field)
   }
 
   export function invalid(field: string): boolean {
     return $form.errors[field] !== undefined
   }
-
 
   onMount(() => {
     defaultData = getFormData()
@@ -289,22 +235,55 @@
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
-    updateDataOnValidator()
-    validator.validateFiles(validateFiles)
-    validator.setTimeout(validateTimeout)
+    // Initialize validator
+    validator = createValidator(
+      (client) =>
+        client[_method!](getUrlAndData()[0], getTransformedData(), {
+          headers,
+        }),
+      getTransformedData(),
+    )
+      .on('validatingChanged', () => {
+        validating = validator!.validating()
+      })
+      .on('validatedChanged', () => {
+        validFields = validator!.valid()
+      })
+      .on('touchedChanged', () => {
+        touchedFields = validator!.touched()
+      })
+      .on('errorsChanged', () => {
+        // Clear form errors first
+        $form.clearErrors()
+
+        // Set new errors
+        const errors = simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : validator!.errors()
+
+        $form.setError(errors as Errors)
+        validFields = validator!.valid()
+      })
+
+    validator.setTimeout(validateTimeout!)
+
+    if (validateFiles) {
+      validator.validateFiles()
+    }
 
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
 
-  $: validator.validateFiles(validateFiles)
-  $: validator.setTimeout(validateTimeout)
+  $: {
+    if (validator) {
+      validator.setTimeout(validateTimeout!)
+    }
+  }
 
   $: slotErrors = $form.errors as Errors
 
   // Create reactive slot props that update when state changes
-  $: validMethod = (field: string) => validated.includes(field) && slotErrors[field] === undefined
+  $: validMethod = (field: string) => validFields.includes(field)
   $: invalidMethod = (field: string) => slotErrors[field] !== undefined
   $: touchedMethod = (field?: string) =>
     typeof field === 'string' ? touchedFields.includes(field) : touchedFields.length > 0

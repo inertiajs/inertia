@@ -61,7 +61,7 @@
         errorCalled = false
         finishCalled = false
         validate({
-          onError: () => {
+          onValidationError: () => {
             errorCalled = true
           },
           onFinish: () => {

@@ -182,7 +182,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       return () => {
         formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
-        newValidator?.reset()
       }
     }, [])
 
