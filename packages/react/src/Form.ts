@@ -1,17 +1,23 @@
 import {
+  Errors,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
-  FormComponentValidateOptions,
   FormDataConvertible,
   formDataToObject,
   isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
-  usePrecognition,
   VisitOptions,
 } from '@inertiajs/core'
+import {
+  createValidator,
+  NamedInputEvent,
+  toSimpleValidationErrors,
+  ValidationConfig,
+  Validator,
+} from 'laravel-precognition'
 import { isEqual } from 'lodash-es'
 import React, {
   createElement,
@@ -85,18 +91,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const defaultData = useRef<FormData>(new FormData())
 
     const [validating, setValidating] = useState(false)
-    const [validated, setValidated] = useState<string[]>([])
+    const [valid, setValid] = useState<string[]>([])
     const [touched, setTouched] = useState<string[]>([])
 
-    const validator = useMemo(
-      () =>
-        usePrecognition({
-          timeout: validateTimeout,
-          onStart: () => setValidating(true),
-          onFinish: () => setValidating(false),
-        }),
-      [],
-    )
+    const [validator, setValidator] = useState<Validator | null>(null)
 
     const getFormData = (): FormData => new FormData(formElement.current)
 
@@ -119,6 +117,25 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
       )
 
+    const clearErrors = (...names: string[]) => {
+      form.clearErrors(...names)
+
+      if (validator) {
+        if (names.length === 0) {
+          validator.setErrors({})
+        } else {
+          names.forEach(validator.forgetError)
+        }
+      }
+
+      return form
+    }
+
+    const getTransformedData = (): Record<string, FormDataConvertible> => {
+      const [_url, data] = getUrlAndData()
+      return transform(data)
+    }
+
     useEffect(() => {
       defaultData.current = getFormData()
 
@@ -126,42 +143,65 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       formEvents.forEach((e) => formElement.current.addEventListener(e, updateDirtyState))
 
-      return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+      // Initialize validator
+      const newValidator = createValidator(
+        (client) =>
+          client[resolvedMethod](getUrlAndData()[0], getTransformedData(), {
+            headers,
+          }),
+        getTransformedData(),
+      )
+        .on('validatingChanged', () => {
+          setValidating(newValidator.validating())
+        })
+        .on('validatedChanged', () => {
+          setValid(newValidator.valid())
+        })
+        .on('touchedChanged', () => {
+          setTouched(newValidator.touched())
+        })
+        .on('errorsChanged', () => {
+          form.clearErrors()
+
+          form.setError(
+            (simpleValidationErrors
+              ? toSimpleValidationErrors(newValidator.errors())
+              : newValidator.errors()) as Errors,
+          )
+
+          setValid(newValidator.valid())
+        })
+
+      newValidator.setTimeout(validateTimeout)
+
+      if (validateFiles) {
+        newValidator.validateFiles()
+      }
+
+      setValidator(newValidator)
+
+      return () => {
+        formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+        newValidator?.reset()
+      }
     }, [])
 
     useEffect(() => {
-      validator.validateFiles(validateFiles)
-    }, [validateFiles, validator])
-
-    useEffect(() => {
-      validator.setTimeout(validateTimeout)
+      if (validator) {
+        validator.setTimeout(validateTimeout)
+      }
     }, [validateTimeout, validator])
-
-    useEffect(() => {
-      updateDataOnValidator()
-    }, [])
-
-    const updateDataOnValidator = () => {
-      try {
-        // This might fail if the component is already unmounted but this function
-        // is called after navigating away after a form submission.
-        validator.setOldData(transform(getData()))
-      } catch {}
-    }
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.current, defaultData.current, fields)
-      updateDataOnValidator()
 
-      if (fields.length === 0) {
-        setTouched([])
-      } else {
-        setTouched((prev) => prev.filter((field) => !fields.includes(field)))
+      if (validator) {
+        validator.reset(...fields)
       }
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      form.clearErrors(...fields)
+      clearErrors(...fields)
       reset(...fields)
     }
 
@@ -217,70 +257,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const defaults = () => {
       defaultData.current = getFormData()
       setIsDirty(false)
-      updateDataOnValidator()
     }
 
-    const validate = (
-      only?: string | string[] | FormComponentValidateOptions,
-      maybeOptions?: FormComponentValidateOptions,
-    ) => {
-      let fields: string[]
-      let options: FormComponentValidateOptions = {}
-
-      if (typeof only === 'object' && !Array.isArray(only)) {
-        // Called as validate({ only: [...], onSuccess, onError, onFinish })
-        const onlyFields = only.only
-        fields = onlyFields === undefined ? touched : Array.isArray(onlyFields) ? onlyFields : [onlyFields]
-        options = only
-      } else {
-        // Called as validate('field') or validate(['field1', 'field2']) or validate('field', {options})
-        fields = only === undefined ? touched : Array.isArray(only) ? only : [only]
-        options = maybeOptions || {}
+    const touch = (...fields: string[]) => {
+      if (validator) {
+        validator.touch(fields)
       }
-
-      // We're not using the data object from this method as it might be empty
-      // on GET requests, and we still want to pass a data object to the
-      // validator so it knows the current state of the form.
-      const [url] = getUrlAndData()
-
-      validator.validate({
-        url,
-        method: resolvedMethod,
-        data: transform(getData()),
-        only: fields,
-        errorBag,
-        headers,
-        simpleValidationErrors,
-        onBefore: options.onBefore,
-        onPrecognitionSuccess: () => {
-          setValidated((prev) => [...prev, ...fields])
-          form.clearErrors(...fields)
-          options.onSuccess?.()
-        },
-        onValidationError: (errors) => {
-          setValidated((prev) => [...prev, ...fields])
-
-          const validFields = fields.filter((field) => errors[field] === undefined)
-
-          if (validFields.length) {
-            form.clearErrors(...validFields)
-          }
-
-          form.setError({ ...form.errors, ...errors })
-          options.onError?.(errors)
-        },
-        onException: options.onException,
-        onFinish: () => {
-          options.onFinish?.()
-        },
-      })
-    }
-
-    const touch = (field: string | string[]) => {
-      const fields = Array.isArray(field) ? field : [field]
-
-      // Use Set to avoid duplicates
-      setTouched((prev) => [...new Set([...prev, ...fields])])
     }
 
     const isTouched = (field?: string): boolean => {
@@ -299,7 +281,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       wasSuccessful: form.wasSuccessful,
       recentlySuccessful: form.recentlySuccessful,
       isDirty,
-      clearErrors: form.clearErrors,
+      clearErrors,
       resetAndClearErrors,
       setError: form.setError,
       reset,
@@ -308,24 +290,15 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       // Precognition
       validating,
-      valid: (field: string) => validated.includes(field) && form.errors[field] === undefined,
+      valid: (field: string) => valid.includes(field),
       invalid: (field: string) => form.errors[field] !== undefined,
-      validate,
+      validate: (input?: string | NamedInputEvent | ValidationConfig, value?: unknown, config?: ValidationConfig) =>
+        validator?.validate(input, value, config),
       touch,
       touched: isTouched,
     })
 
-    useImperativeHandle(ref, exposed, [
-      form,
-      isDirty,
-      submit,
-      validating,
-      validated,
-      touched,
-      validate,
-      touch,
-      validator,
-    ])
+    useImperativeHandle(ref, exposed, [form, isDirty, submit, validating, valid, touched, touch, validator])
 
     return createElement(
       'form',
