@@ -24,24 +24,5 @@ import { Form } from '@inertiajs/vue3'
 
       <button type="submit">Submit</button>
     </Form>
-
-    <hr />
-
-    <h2>Manual Cancel Test</h2>
-    <Form
-      action="/form-component/precognition?slow=1"
-      method="post"
-      :validate-timeout="5000"
-      #default="{ validate, cancelValidation, validating }"
-    >
-      <div>
-        <input id="manual-cancel-name-input" name="name" placeholder="Name" @blur="validate('name')" />
-      </div>
-
-      <p v-if="validating" class="validating">Validating...</p>
-
-      <button type="button" @click="cancelValidation">Cancel Validation</button>
-      <button type="submit">Submit</button>
-    </Form>
   </div>
 </template>

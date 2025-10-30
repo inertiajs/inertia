@@ -42,8 +42,10 @@
         errorCalled = false
         finishCalled = false
         validate({
-          onSuccess: () => {
+          onPrecognitionSuccess: () => {
             successCalled = true
+          },
+          onFinish: () => {
             finishCalled = true
           },
         })
@@ -61,6 +63,8 @@
         validate({
           onError: () => {
             errorCalled = true
+          },
+          onFinish: () => {
             finishCalled = true
           },
         })
@@ -68,34 +72,5 @@
     >
       Validate with onError
     </button>
-  </Form>
-
-  <hr />
-
-  <h2>Exception Test</h2>
-  <Form action="/form-component/precognition-exception" method="post" let:validate let:validating>
-    <div>
-      <input id="name-input" name="name" placeholder="Name" />
-    </div>
-
-    {#if validating}
-      <p class="validating">Validating...</p>
-    {/if}
-    {#if exceptionCaught}
-      <p class="exception-caught">Exception caught: {exceptionMessage}</p>
-    {/if}
-
-    <!-- This will trigger a validation request to a non-existent endpoint -->
-    <button
-      type="button"
-      on:click={() =>
-        validate('name', {
-          onException: handleException,
-        })}
-    >
-      Validate with Exception Handler
-    </button>
-
-    <button type="submit">Submit</button>
   </Form>
 </div>

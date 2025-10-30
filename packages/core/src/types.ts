@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { Validator } from 'laravel-precognition'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -482,20 +483,6 @@ export type FormComponentProps = Partial<
   simpleValidationErrors?: boolean
 }
 
-type RevalidatePayload = {
-  data: RequestData
-  touched: string[]
-}
-
-export type FormComponentValidateOptions = {
-  only?: string | string[]
-  onBefore?: (newRequest: RevalidatePayload, oldRequest: RevalidatePayload) => boolean | undefined
-  onSuccess?: () => void
-  onError?: (errors: Errors) => void
-  onFinish?: () => void
-  onException?: (error: Error) => void
-}
-
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
@@ -506,13 +493,9 @@ export type FormComponentMethods = {
   defaults: () => void
   valid: (field: string) => boolean
   invalid: (field: string) => boolean
-  validate: (
-    only?: string | string[] | FormComponentValidateOptions,
-    maybeOptions?: FormComponentValidateOptions,
-  ) => void
+  validate: Validator['validate']
   touch: (field: string | string[]) => void
   touched(field?: string): boolean
-  cancelValidation: () => void
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>

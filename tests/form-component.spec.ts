@@ -1746,7 +1746,7 @@ test.describe('Form Component', () => {
       await expect(page.locator('#any-touched')).toHaveText('Form has touched fields')
     })
 
-    test('validate with specific field works independently of touched state', async ({ page }) => {
+    test('validating a specific field also validates previously touched inputs', async ({ page }) => {
       await page.goto('/form-component/precognition-methods')
 
       await page.fill('input[name="name"]', 'ab')
@@ -1758,7 +1758,7 @@ test.describe('Form Component', () => {
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
-      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
     })
 
     test('validate with array of fields validates multiple fields', async ({ page }) => {
@@ -1803,23 +1803,6 @@ test.describe('Form Component', () => {
       await page.waitForTimeout(500)
 
       await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
-      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
-    })
-
-    test('touching one field and validating another does not validate the touched field', async ({ page }) => {
-      await page.goto('/form-component/precognition-methods')
-
-      await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
-
-      await page.fill('input[name="email"]', 'x')
-
-      await page.getByRole('button', { name: 'Validate Name', exact: true }).click()
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
     })
 
@@ -1923,21 +1906,6 @@ test.describe('Form Component', () => {
       }
     })
 
-    test('onException handles non-422 errors during validation', async ({ page }) => {
-      await page.goto('/form-component/precognition-callbacks')
-
-      await page.fill('#name-input', 'John')
-
-      // Trigger validation that will return 500 error
-      await page.click('button:has-text("Validate with Exception Handler")')
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Exception should be caught and displayed
-      await expect(page.getByText(/Exception caught:/)).toBeVisible()
-    })
-
     test('sends custom headers with validation requests', async ({ page }) => {
       await page.goto('/form-component/precognition-headers')
 
@@ -1971,24 +1939,6 @@ test.describe('Form Component', () => {
       // One cancelled, one 422 response
       expect(requests.failed).toHaveLength(1)
       expect(requests.responses).toHaveLength(1)
-
-      const cancelledRequestError = await requests.failed[0].failure()?.errorText
-      expect(cancelledRequestError).toBe('net::ERR_ABORTED')
-    })
-
-    test('cancelValidation() cancels in-flight validation and resets validating state', async ({ page }) => {
-      await page.goto('/form-component/precognition-cancel')
-
-      requests.listenForFailed(page)
-
-      await page.fill('#manual-cancel-name-input', 'ab')
-      await page.locator('#manual-cancel-name-input').blur()
-      await expect(page.getByText('Validating...')).toBeVisible()
-
-      await page.getByText('Cancel Validation').click()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-      await page.waitForTimeout(100)
-      expect(requests.failed).toHaveLength(1)
 
       const cancelledRequestError = await requests.failed[0].failure()?.errorText
       expect(cancelledRequestError).toBe('net::ERR_ABORTED')

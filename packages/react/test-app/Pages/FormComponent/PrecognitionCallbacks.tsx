@@ -37,8 +37,10 @@ export default () => {
                 setErrorCalled(false)
                 setFinishCalled(false)
                 validate({
-                  onSuccess: () => {
+                  onPrecognitionSuccess: () => {
                     setSuccessCalled(true)
+                  },
+                  onFinish: () => {
                     setFinishCalled(true)
                   },
                 })
@@ -54,8 +56,10 @@ export default () => {
                 setErrorCalled(false)
                 setFinishCalled(false)
                 validate({
-                  onError: () => {
+                  onValidationError: () => {
                     setErrorCalled(true)
+                  },
+                  onFinish: () => {
                     setFinishCalled(true)
                   },
                 })
@@ -63,36 +67,6 @@ export default () => {
             >
               Validate with onError
             </button>
-          </>
-        )}
-      </Form>
-
-      <hr />
-
-      <h2>Exception Test</h2>
-      <Form action="/form-component/precognition-exception" method="post">
-        {({ validate, validating }) => (
-          <>
-            <div>
-              <input id="name-input" name="name" placeholder="Name" />
-            </div>
-
-            {validating && <p className="validating">Validating...</p>}
-            {exceptionCaught && <p className="exception-caught">Exception caught: {exceptionMessage}</p>}
-
-            {/* This will trigger a validation request to a non-existent endpoint */}
-            <button
-              type="button"
-              onClick={() =>
-                validate('name', {
-                  onException: handleException,
-                })
-              }
-            >
-              Validate with Exception Handler
-            </button>
-
-            <button type="submit">Submit</button>
           </>
         )}
       </Form>

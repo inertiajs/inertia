@@ -45,17 +45,17 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.43.2",
+    "@sveltejs/kit": "^2.48.3",
     "@sveltejs/package": "^2.5.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "axios": "^1.12.2",
-    "es-check": "^9.3.1",
+    "axios": "^1.13.1",
+    "es-check": "^9.4.4",
     "publint": "^0.2.12",
     "svelte": "^4.2.20",
-    "svelte-check": "^4.3.2",
+    "svelte-check": "^4.3.3",
     "tslib": "^2.8.1",
-    "typescript": "^5.9.2",
-    "vite": "^5.4.20"
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
   },
   "peerDependencies": {
     "svelte": "^4.0.0 || ^5.0.0"
@@ -63,6 +63,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
+    "laravel-precognition": "^0.7.3",
     "lodash-es": "^4.17.21"
   }
 }

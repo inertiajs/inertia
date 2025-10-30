@@ -282,10 +282,6 @@
     return $form.errors[field] !== undefined
   }
 
-  export function cancelValidation() {
-    validator.cancelAll()
-    validating = false
-  }
 
   onMount(() => {
     defaultData = getFormData()
@@ -343,6 +339,5 @@
     touched={touchedMethod}
     valid={validMethod}
     invalid={invalidMethod}
-    {cancelValidation}
   />
 </form>

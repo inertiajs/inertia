@@ -313,10 +313,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       validate,
       touch,
       touched: isTouched,
-      cancelValidation: () => {
-        validator.cancelAll()
-        setValidating(false)
-      },
     })
 
     useImperativeHandle(ref, exposed, [

@@ -38,7 +38,7 @@ const handleException = (error: Error) => {
               errorCalled = false
               finishCalled = false
               validate({
-                onSuccess: () => {
+                onPrecognitionSuccess: () => {
                   successCalled = true
                 },
                 onFinish: () => {
@@ -59,7 +59,7 @@ const handleException = (error: Error) => {
               errorCalled = false
               finishCalled = false
               validate({
-                onError: () => {
+                onValidationError: () => {
                   errorCalled = true
                 },
                 onFinish: () => {
@@ -72,32 +72,6 @@ const handleException = (error: Error) => {
           Validate with onError
         </button>
       </template>
-    </Form>
-
-    <hr />
-
-    <h2>Exception Test</h2>
-    <Form action="/form-component/precognition-exception" method="post" #default="{ validate, validating }">
-      <div>
-        <input id="name-input" name="name" placeholder="Name" />
-      </div>
-
-      <p v-if="validating" class="validating">Validating...</p>
-      <p v-if="exceptionCaught" class="exception-caught">Exception caught: {{ exceptionMessage }}</p>
-
-      <!-- This will trigger a validation request to a non-existent endpoint -->
-      <button
-        type="button"
-        @click="
-          validate('name', {
-            onException: handleException,
-          })
-        "
-      >
-        Validate with Exception Handler
-      </button>
-
-      <button type="submit">Submit</button>
     </Form>
   </div>
 </template>
