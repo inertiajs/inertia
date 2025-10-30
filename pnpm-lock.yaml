@@ -64,6 +64,9 @@ importers:
       esbuild-node-externals:
         specifier: ^1.18.0
         version: 1.18.0(esbuild@0.25.11)
+      laravel-precognition:
+        specifier: ^0.7.3
+        version: 0.7.3
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
