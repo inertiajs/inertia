@@ -1,5 +1,4 @@
-import { AxiosProgressEvent, AxiosResponse } from 'axios'
-import { Validator } from 'laravel-precognition'
+import { AxiosError, AxiosProgressEvent, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -575,6 +574,31 @@ export type FormComponentProps = Partial<
   simpleValidationErrors?: boolean
 }
 
+interface RevalidatePayload {
+  data: Record<string, unknown> | null
+  touched: Array<string>
+}
+
+export type AxiosStatusHandler = (response: AxiosResponse, axiosError?: AxiosError) => unknown
+
+type PrecognitionValidationConfig = AxiosRequestConfig & {
+  precognitive?: boolean
+  only?: Iterable<string> | ArrayLike<string>
+  fingerprint?: string | null
+  onBefore?: () => boolean | undefined
+  onStart?: () => void
+  onSuccess?: (response: AxiosResponse) => unknown
+  onPrecognitionSuccess?: (response: AxiosResponse) => unknown
+  onValidationError?: AxiosStatusHandler
+  onUnauthorized?: AxiosStatusHandler
+  onForbidden?: AxiosStatusHandler
+  onNotFound?: AxiosStatusHandler
+  onConflict?: AxiosStatusHandler
+  onLocked?: AxiosStatusHandler
+  onFinish?: () => void
+  onBeforeValidation?: (newRequest: RevalidatePayload, oldRequest: RevalidatePayload) => boolean | undefined
+}
+
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
@@ -587,7 +611,7 @@ export type FormComponentMethods = {
   getFormData: () => FormData
   valid: (field: string) => boolean
   invalid: (field: string) => boolean
-  validate: Validator['validate']
+  validate(input?: string | PrecognitionValidationConfig, value?: unknown, config?: PrecognitionValidationConfig): void
   touch: (...fields: string[]) => void
   touched(field?: string): boolean
 }
