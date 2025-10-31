@@ -14,6 +14,7 @@
     <div  style="grid-column: 1 / -1; text-align: center; padding: 20px">Loading more users...</div>
   {/snippet}
 
+  <!-- eslint-disable svelte/no-useless-children-snippet -->
   {#snippet children()}
   
       {#each users.data as user (user.id)}
@@ -21,4 +22,5 @@
       {/each}
     
   {/snippet}
+	<!-- eslint-enable svelte/no-useless-children-snippet -->
 </InfiniteScroll>
