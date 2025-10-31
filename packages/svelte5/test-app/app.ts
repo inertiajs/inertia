@@ -20,7 +20,7 @@ createInertiaApp({
     return pages[`./Pages/${name}.svelte`] as ResolvedComponent
   },
   setup({ el, App, props }) {
-    return mount(App as any, { target: el!, props })
+    mount(App, { target: el!, props })
   },
   ...(withAppDefaults && {
     defaults: {
