@@ -1,41 +1,48 @@
 <script module lang="ts">
   import type { ComponentResolver, ResolvedComponent } from '../types'
-  import { type Page } from '@inertiajs/core'
+  import { type Page, type PageProps } from '@inertiajs/core'
 
-  export interface InertiaAppProps {
+  export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
     initialComponent: ResolvedComponent
-    initialPage: Page
+    initialPage: Page<SharedProps>
     resolveComponent: ComponentResolver
   }
 </script>
 
 <script lang="ts">
   import type { LayoutType, LayoutResolver } from '../types'
-  import { router, type PageProps } from '@inertiajs/core'
+  import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
-  import { setPage } from '../page'
+  import { setPage } from '../page.svelte'
 
-  const { initialComponent, initialPage, resolveComponent }: InertiaAppProps = $props()
+  interface Props {
+    initialComponent: InertiaAppProps['initialComponent'];
+    initialPage: InertiaAppProps['initialPage'];
+    resolveComponent: InertiaAppProps['resolveComponent'];
+  }
+
+  const { initialComponent, initialPage, resolveComponent }: Props = $props()
 
   let component = $state(initialComponent)
   let key = $state<number | null>(null)
   let page = $state(initialPage)
-  let renderProps = $derived(resolveRenderProps(component, page, key))
+  let renderProps = $derived.by<RenderProps>(() => resolveRenderProps(component, page, key))
 
   // Reactively update the global page state when local page state changes
-  $effect(() => {
+  $effect.pre(() => {
     setPage(page)
   })
 
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
-    router.init({
+    router.init<ResolvedComponent>({
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
-        component = args.component as ResolvedComponent
+        component = args.component
         page = args.page
+
         key = args.preserveState ? key : Date.now()
       },
     })
