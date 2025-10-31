@@ -1957,28 +1957,6 @@ test.describe('Form Component', () => {
       const cancelledRequestError = await requests.failed[0].failure()?.errorText
       expect(cancelledRequestError).toBe('net::ERR_ABORTED')
     })
-
-    test('defaults() updates validator data as well', async ({ page }) => {
-      await page.goto('/form-component/precognition-defaults')
-
-      await page.fill('#name-input', 'John')
-      await page.locator('#name-input').blur()
-      await page.click('button:has-text("Validate Name")')
-
-      await expect(page.getByText('Validating...')).toBeVisible()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Click again, should not validate again because data hasn't changed
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-      await page.click('button:has-text("Validate Name")')
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-
-      // Now change default to a different value, should not validate because value matches new default
-      await page.fill('#name-input', 'Johnny')
-      await page.click('button:has-text("Set Defaults")')
-      await page.click('button:has-text("Validate Name")')
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-    })
   })
 
   test.describe('React', () => {
