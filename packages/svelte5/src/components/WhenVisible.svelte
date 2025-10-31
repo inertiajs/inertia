@@ -2,28 +2,30 @@
   import { router, type ReloadOptions } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
 
-  const {
+  interface Props {
+    data?: string | string[];
+    params?: ReloadOptions;
+    buffer?: number;
+    as?: keyof HTMLElementTagNameMap;
+    always?: boolean;
+    children?: import('svelte').Snippet;
+    fallback?: import('svelte').Snippet;
+  }
+
+  let {
     data = '',
     params = {},
     buffer = 0,
     as = 'div',
     always = false,
     children,
-    fallback,
-  }: {
-    data?: string | string[]
-    params?: ReloadOptions
-    buffer?: number
-    as?: keyof HTMLElementTagNameMap
-    always?: boolean
-    children?: any
-    fallback?: any
-  } = $props()
+    fallback
+  }: Props = $props();
 
   let loaded = $state(false)
-  let fetching = $state(false)
-  let el = $state<HTMLElement>()
-  let observer = $state<IntersectionObserver | null>(null)
+  let fetching = false
+  let el: HTMLElement = $state(null!)
+  let observer: IntersectionObserver | null = null
 
   onMount(() => {
     if (!el) {
