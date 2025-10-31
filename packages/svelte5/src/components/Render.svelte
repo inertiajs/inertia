@@ -1,17 +1,17 @@
 <script module lang="ts">
   import type { PageProps } from '@inertiajs/core'
-  import type { ComponentType } from 'svelte'
+  import type { Component } from 'svelte'
 
   export type RenderProps = {
-    component: ComponentType
+    component: Component
     props?: PageProps
     children?: RenderProps[]
     key?: number | null
   }
 
   export type RenderFunction = {
-    (component: ComponentType, props?: PageProps, children?: RenderProps[], key?: number | null): RenderProps
-    (component: ComponentType, children?: RenderProps[], key?: number | null): RenderProps
+    (component: Component, props?: PageProps, children?: RenderProps[], key?: number | null): RenderProps
+    (component: Component, children?: RenderProps[], key?: number | null): RenderProps
   }
 
   export const h: RenderFunction = (component, propsOrChildren, childrenOrKey, key: number | null = null) => {
@@ -44,12 +44,7 @@
     props = {},
     children = [],
     key = null,
-  }: {
-    component: ComponentType
-    props?: PageProps
-    children?: RenderProps[]
-    key?: number | null
-  } = $props()
+  }: RenderProps = $props()
 </script>
 
 {#if component}
@@ -59,15 +54,15 @@
   while the layout components are persisted across page changes. -->
   {#key children?.length === 0 ? key : null}
     {#if children.length > 0}
-      {@const Component = component}
-      <Component {...props}>
+      {@const SvelteComponent = component}
+      <SvelteComponent {...props}>
         {#each children as child}
           <Render {...child} />
         {/each}
-      </Component>
+      </SvelteComponent>
     {:else}
-      {@const Component = component}
-      <Component {...props} />
+      {@const SvelteComponent_1 = component}
+      <SvelteComponent_1 {...props} />
     {/if}
   {/key}
 {/if}
