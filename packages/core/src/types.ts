@@ -111,8 +111,7 @@ export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
 export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
-export type RequestData = Record<string, FormDataConvertible>
-export type RequestPayload = RequestData | FormData
+export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
 export interface PageProps {
   [key: string]: unknown
