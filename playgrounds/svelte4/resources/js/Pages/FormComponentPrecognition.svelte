@@ -22,7 +22,7 @@
       finish: false,
     }
 
-    validate('name', {
+    validate({
       onPrecognitionSuccess: () => (callbacks.success = true),
       onValidationError: () => (callbacks.error = true),
       onFinish: () => (callbacks.finish = true),

@@ -17,7 +17,7 @@ const FormComponentPrecognition = () => {
       finish: false,
     })
 
-    validate('name', {
+    validate({
       onPrecognitionSuccess: () => setCallbacks((prev) => ({ ...prev, success: true })),
       onValidationError: () => setCallbacks((prev) => ({ ...prev, error: true })),
       onFinish: () => setCallbacks((prev) => ({ ...prev, finish: true })),

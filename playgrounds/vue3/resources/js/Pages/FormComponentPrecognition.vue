@@ -21,7 +21,7 @@ const validateWithCallbacks = (validate: FormComponentMethods['validate']) => {
     finish: false,
   }
 
-  validate('name', {
+  validate({
     onPrecognitionSuccess: () => (callbacks.value.success = true),
     onValidationError: () => (callbacks.value.error = true),
     onFinish: () => (callbacks.value.finish = true),
