@@ -2,7 +2,12 @@
   import { Deferred, router } from '@inertiajs/svelte5'
   import { onMount } from 'svelte'
 
-  const { foo, bar }: { foo?: { text: string }; bar?: { text: string } } = $props()
+  interface Props {
+    foo: { text: string } | undefined;
+    bar: { text: string } | undefined;
+  }
+
+  let { foo, bar }: Props = $props();
 
   onMount(() => {
     router.reload({
@@ -12,15 +17,19 @@
 </script>
 
 <Deferred data="foo">
-  <div>{foo?.text}</div>
   {#snippet fallback()}
-    <div>Loading foo...</div>
+  
+      <div>Loading foo...</div>
+    
   {/snippet}
+  <div>{foo?.text}</div>
 </Deferred>
 
 <Deferred data="bar">
-  <div>{bar?.text}</div>
   {#snippet fallback()}
-    <div>Loading bar...</div>
+  
+      <div>Loading bar...</div>
+    
   {/snippet}
+  <div>{bar?.text}</div>
 </Deferred>

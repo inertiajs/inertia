@@ -1,13 +1,13 @@
 <script lang="ts">
   import { inertia, useForm } from '@inertiajs/svelte5'
 
-  let untracked = ''
+  let untracked = $state('')
 
-  const form = useForm({
+  const form = $state(useForm({
     name: 'foo',
     handle: 'example',
     remember: false,
-  })
+  }))
 
   const submit = () => {
     form.post('/remember/form-helper/default')
@@ -41,7 +41,7 @@
     <input type="text" id="untracked" name="untracked" bind:value={untracked} />
   </label>
 
-  <button on:click={submit} class="submit">Submit form</button>
+  <button onclick={submit} class="submit">Submit form</button>
 
   <a href="/dump/get" use:inertia class="link">Navigate away</a>
 </div>

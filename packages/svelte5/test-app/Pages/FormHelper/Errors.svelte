@@ -1,11 +1,11 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte5'
 
-  const form = useForm({
+  const form = $state(useForm({
     name: 'foo',
     handle: 'example',
     remember: false,
-  })
+  }))
 
   const submit = () => {
     form.post('/form-helper/errors')
@@ -31,13 +31,11 @@
   }
 
   const resetAndClearErrors = () => {
-    form.reset()
-    form.clearErrors()
+    form.resetAndClearErrors()
   }
 
   const resetHandle = () => {
-    form.reset('handle')
-    form.clearErrors('handle')
+    form.resetAndClearErrors('handle')
   }
 </script>
 
@@ -64,14 +62,14 @@
     <span class="remember_error">{form.errors.remember}</span>
   {/if}
 
-  <button on:click={submit} class="submit">Submit form</button>
+  <button onclick={submit} class="submit">Submit form</button>
 
-  <button on:click={clearErrors} class="clear">Clear all errors</button>
-  <button on:click={clearError} class="clear-one">Clear one error</button>
-  <button on:click={setErrors} class="set">Set errors</button>
-  <button on:click={setError} class="set-one">Set one error</button>
-  <button on:click={resetAndClearErrors} class="reset-all">Reset all</button>
-  <button on:click={resetHandle} class="reset-handle">Reset handle</button>
+  <button onclick={clearErrors} class="clear">Clear all errors</button>
+  <button onclick={clearError} class="clear-one">Clear one error</button>
+  <button onclick={setErrors} class="set">Set errors</button>
+  <button onclick={setError} class="set-one">Set one error</button>
+  <button onclick={resetAndClearErrors} class="reset-all">Reset all</button>
+  <button onclick={resetHandle} class="reset-handle">Reset handle</button>
 
   <span class="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
 </div>

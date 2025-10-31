@@ -1,14 +1,14 @@
 <script lang="ts">
   import { page, useForm } from '@inertiajs/svelte5'
 
-  const form = useForm({
+  const form = $state(useForm({
     name: 'foo',
     handle: 'example',
     remember: false,
-  })
+  }))
 
   const submit = () => {
-    form.post($page.url)
+    form.post(page.url)
   }
 
   const submitAndReset = () => {
@@ -64,15 +64,15 @@
     <span class="remember_error">{form.errors.remember}</span>
   {/if}
 
-  <button on:click={submit} class="submit">Submit form</button>
-  <button on:click={submitAndReset} class="submit">Submit form and reset</button>
+  <button onclick={submit} class="submit">Submit form</button>
+  <button onclick={submitAndReset} class="submit">Submit form and reset</button>
 
-  <button on:click={resetAll} class="reset">Reset all data</button>
-  <button on:click={resetOne} class="reset-one">Reset one field</button>
+  <button onclick={resetAll} class="reset">Reset all data</button>
+  <button onclick={resetOne} class="reset-one">Reset one field</button>
 
-  <button on:click={reassign} class="reassign">Reassign current as defaults</button>
-  <button on:click={reassignObject} class="reassign-object">Reassign default values</button>
-  <button on:click={reassignSingle} class="reassign-single">Reassign single default</button>
+  <button onclick={reassign} class="reassign">Reassign current as defaults</button>
+  <button onclick={reassignObject} class="reassign-object">Reassign default values</button>
+  <button onclick={reassignSingle} class="reassign-single">Reassign single default</button>
 
   <span class="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
 </div>

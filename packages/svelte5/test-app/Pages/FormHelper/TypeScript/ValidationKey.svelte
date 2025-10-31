@@ -19,3 +19,5 @@
     return { filterAndMap, unique }
   }
 </script>
+
+<button onclick={() => validation(() => ({ name: 'Validation error' }))}> Handle </button>

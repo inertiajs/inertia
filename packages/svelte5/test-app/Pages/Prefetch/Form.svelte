@@ -16,7 +16,7 @@
   <p>
     Random Value: <span class="random-value">{page.props.randomValue}</span>
   </p>
-  <button on:click={submitToSame}>Submit to Same URL</button>
-  <button on:click={submitToOther}>Submit to Other URL</button>
+  <button onclick={submitToSame}>Submit to Same URL</button>
+  <button onclick={submitToOther}>Submit to Other URL</button>
   <Link href="/prefetch/test-page">Back to Test Page</Link>
 </div>

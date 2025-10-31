@@ -3,7 +3,7 @@
   import { Form } from '@inertiajs/svelte5'
 
   // Svelte Form component ref exposes only methods via bind:this
-  let formRef: FormComponentMethods | null = null
+  let formRef: FormComponentMethods | null = $state(null)
 
   function submitProgrammatically() {
     formRef?.submit()
@@ -33,9 +33,9 @@
 <div>
   <h1>Form Ref Test</h1>
 
-  <Form bind:this={formRef} action="/dump/post" method="post">
+  <Form bind:this={formRef} action="/dump/post" method="post"   >
     {#snippet children({ isDirty, errors, hasErrors })}
-      <!-- State display for testing -->
+        <!-- State display for testing -->
       <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
       {#if hasErrors}
         <div>Form has errors</div>
@@ -55,15 +55,15 @@
       <div>
         <button type="submit">Submit via Form</button>
       </div>
-    {/snippet}
-  </Form>
+          {/snippet}
+    </Form>
 
   <div>
-    <button on:click={submitProgrammatically}> Submit Programmatically </button>
-    <button on:click={resetForm}> Reset Form </button>
-    <button on:click={resetNameField}> Reset Name Field </button>
-    <button on:click={clearAllErrors}> Clear Errors </button>
-    <button on:click={setTestError}> Set Test Error </button>
-    <button on:click={setCurrentAsDefaults}> Set Current as Defaults </button>
+    <button onclick={submitProgrammatically}> Submit Programmatically </button>
+    <button onclick={resetForm}> Reset Form </button>
+    <button onclick={resetNameField}> Reset Name Field </button>
+    <button onclick={clearAllErrors}> Clear Errors </button>
+    <button onclick={setTestError}> Set Test Error </button>
+    <button onclick={setCurrentAsDefaults}> Set Current as Defaults </button>
   </div>
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Link, Form } from '@inertiajs/svelte5'
 
-  const { lastLoaded, propType } = $props()
+  let { lastLoaded, propType } = $props();
 </script>
 
 <div>

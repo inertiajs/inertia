@@ -1,11 +1,11 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import NestedLayout from '@/Layouts/NestedLayout.svelte'
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
-  import type { ComponentType } from 'svelte'
+  import type { Component } from 'svelte'
 
   export const layout = (
-    h: (component: ComponentType, children: ComponentType[]) => ComponentType,
-    page: ComponentType,
+    h: (component: Component, children: Component[]) => Component,
+    page: Component,
   ) => {
     return h(SiteLayout, [h(NestedLayout, [page])])
   }

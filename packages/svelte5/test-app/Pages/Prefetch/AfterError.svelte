@@ -11,6 +11,6 @@
 </script>
 
 <div>
-  <button on:click={prefetchPage}>Prefetch Page</button>
-  <button on:click={visitPage}>Visit Page</button>
+  <button onclick={prefetchPage}>Prefetch Page</button>
+  <button onclick={visitPage}>Visit Page</button>
 </div>

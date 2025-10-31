@@ -7,7 +7,7 @@
     remember: false,
   })
 
-  let untracked = ''
+  let untracked = $state('')
 
   const submit = () => {
     form.post('/remember/form-helper/remember')
@@ -45,8 +45,8 @@
     <input type="text" id="untracked" name="untracked" bind:value={untracked} />
   </label>
 
-  <button on:click={submit} class="submit">Submit form</button>
-  <button on:click={reset} class="reset-one">Reset one field & error</button>
+  <button onclick={submit} class="submit">Submit form</button>
+  <button onclick={reset} class="reset-one">Reset one field & error</button>
 
   <a href="/dump/get" use:inertia class="link">Navigate away</a>
 </div>

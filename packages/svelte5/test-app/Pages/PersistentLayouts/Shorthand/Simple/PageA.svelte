@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
 
   export const layout = SiteLayout
@@ -7,12 +7,7 @@
 <script lang="ts">
   import { inertia, page } from '@inertiajs/svelte5'
 
-  // Update props reactively when page changes
-  $effect(() => {
-    if (typeof window !== 'undefined') {
-      window._inertia_page_props = $page.props
-    }
-  })
+  window._inertia_page_props = page.props
 </script>
 
 <div>

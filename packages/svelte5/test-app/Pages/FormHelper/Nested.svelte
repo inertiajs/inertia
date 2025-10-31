@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte5'
 
-  const form = useForm({
+  const form = $state(useForm({
     name: 'foo',
     address: {
       street: '123 Main St',
@@ -15,7 +15,7 @@
       },
     },
     checked: ['foo', 'bar'],
-  })
+  }))
 
   const submit = () => {
     form.submit('post', '/dump/post')
@@ -68,5 +68,5 @@
     v0.3
     <input type="checkbox" id="tag-2" value="v0.3" bind:group={form.organization.repo.tags} />
   </label>
-  <button on:click={submit} class="submit">Submit form</button>
+  <button onclick={submit} class="submit">Submit form</button>
 </div>

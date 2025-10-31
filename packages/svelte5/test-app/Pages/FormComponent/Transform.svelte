@@ -2,10 +2,10 @@
   import { Form } from '@inertiajs/svelte5'
   import type { FormDataConvertible } from '@inertiajs/core'
 
-  let transformType = 'none'
+  let transformType = $state('none')
 
-  $: getTransform = () => {
-    switch (transformType) {
+  const getTransform = (type: string) => {
+    switch (type) {
       case 'uppercase':
         return (data: Record<string, FormDataConvertible>) => ({
           ...data,
@@ -20,20 +20,22 @@
         return (data: Record<string, FormDataConvertible>) => data
     }
   }
+
+  let transform = $derived(getTransform(transformType))
 </script>
 
 <div>
   <h1>Transform Function</h1>
 
   <div>
-    <button on:click={() => (transformType = 'none')}>None</button>
-    <button on:click={() => (transformType = 'uppercase')}>Uppercase</button>
-    <button on:click={() => (transformType = 'format')}>Format</button>
+    <button onclick={() => (transformType = 'none')}>None</button>
+    <button onclick={() => (transformType = 'uppercase')}>Uppercase</button>
+    <button onclick={() => (transformType = 'format')}>Format</button>
   </div>
 
   <div>Current transform: {transformType}</div>
 
-  <Form action="/dump/post" method="post" transform={getTransform()}>
+  <Form action="/dump/post" method="post" {transform}>
     <div>
       <input type="text" name="name" placeholder="Name" value="John Doe" />
     </div>

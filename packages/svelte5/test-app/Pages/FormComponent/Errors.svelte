@@ -1,10 +1,18 @@
 <script lang="ts">
   import { Form } from '@inertiajs/svelte5'
 
-  let errorBag: string | null = null
+  let errorBag: string | null = $state(null)
 </script>
 
-<Form action={errorBag ? '/form-component/errors/bag' : '/form-component/errors'} method="post" {errorBag}>
+<Form
+  action={errorBag ? '/form-component/errors/bag' : '/form-component/errors'}
+  method="post"
+  {errorBag}
+  
+  
+  
+  
+>
   {#snippet children({ errors, hasErrors, setError, clearErrors })}
     <h1>Form Errors</h1>
 
@@ -29,7 +37,7 @@
     <div>
       <button
         type="button"
-        on:click={() =>
+        onclick={() =>
           setError({
             name: 'The name field is required.',
             handle: 'The handle field is invalid.',
@@ -37,9 +45,9 @@
       >
         Set Errors
       </button>
-      <button type="button" on:click={() => clearErrors()}>Clear Errors</button>
-      <button type="button" on:click={() => clearErrors('name')}>Clear Name Error</button>
-      <button type="button" on:click={() => (errorBag = 'bag')}>Use Error Bag</button>
+      <button type="button" onclick={() => clearErrors()}>Clear Errors</button>
+      <button type="button" onclick={() => clearErrors('name')}>Clear Name Error</button>
+      <button type="button" onclick={() => (errorBag = 'bag')}>Use Error Bag</button>
     </div>
 
     <button type="submit">Submit</button>

@@ -1,17 +1,15 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  const {
-    foo,
-    bar,
-    baz,
-  }: {
-    foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
-    bar: number[]
-    baz: number[]
-  } = $props()
+  interface Props {
+    foo: { page: number; data: number[]; per_page: number; meta: { label: string } };
+    bar: number[];
+    baz: number[];
+  }
 
-  let page = $state(foo.page)
+  let { foo, bar, baz }: Props = $props();
+
+  let page = foo.page
 
   const reloadIt = () => {
     router.reload({
@@ -39,5 +37,5 @@
 <div>foo.page is {foo.page}</div>
 <div>foo.per_page is {foo.per_page}</div>
 <div>foo.meta.label is {foo.meta.label}</div>
-<button on:click={reloadIt}>Reload</button>
-<button on:click={getFresh}>Get Fresh</button>
+<button onclick={reloadIt}>Reload</button>
+<button onclick={getFresh}>Get Fresh</button>

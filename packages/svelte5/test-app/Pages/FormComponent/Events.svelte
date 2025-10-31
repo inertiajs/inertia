@@ -1,17 +1,17 @@
 <script lang="ts">
   import { Form } from '@inertiajs/svelte5'
 
-  let events: string[] = []
-  let cancelInOnBefore = false
-  let shouldFail = false
-  let shouldDelay = false
+  let events: string[] = $state([])
+  let cancelInOnBefore = $state(false)
+  let shouldFail = $state(false)
+  let shouldDelay = $state(false)
   let cancelToken: { cancel: () => void } | null = null
 
   function log(eventName: string) {
     events = [...events, eventName]
   }
 
-  $: action = (() => {
+  let action = $derived((() => {
     if (shouldFail) {
       return '/form-component/events/errors'
     }
@@ -21,7 +21,7 @@
     }
 
     return '/form-component/events/success'
-  })()
+  })())
 
   function onBefore() {
     log('onBefore')
@@ -80,6 +80,10 @@
   {onSuccess}
   {onError}
   {onCancelToken}
+  
+  
+  
+  
 >
   {#snippet children({ processing, progress, wasSuccessful, recentlySuccessful })}
     <h1>Form Events & State</h1>
@@ -111,10 +115,10 @@
     </div>
 
     <div>
-      <button type="button" on:click={() => (cancelInOnBefore = true)}>Cancel in onBefore</button>
-      <button type="button" on:click={() => (shouldFail = true)}>Fail Request</button>
-      <button type="button" on:click={() => (shouldDelay = true)}>Should Delay</button>
-      <button type="button" on:click={cancelVisit}>Cancel Visit</button>
+      <button type="button" onclick={() => (cancelInOnBefore = true)}>Cancel in onBefore</button>
+      <button type="button" onclick={() => (shouldFail = true)}>Fail Request</button>
+      <button type="button" onclick={() => (shouldDelay = true)}>Should Delay</button>
+      <button type="button" onclick={cancelVisit}>Cancel Visit</button>
       <button type="submit">Submit</button>
     </div>
   {/snippet}

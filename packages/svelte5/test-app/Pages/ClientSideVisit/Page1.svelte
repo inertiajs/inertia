@@ -7,11 +7,17 @@
     bar: string
   }
 
-  const { foo, bar }: { foo: string; bar: string } = $props()
+  interface Props {
+    foo: string;
+    bar: string;
+  }
+
+  let { foo, bar }: Props = $props();
 
   let errors = $state(0)
   let finished = $state(0)
   let success = $state(0)
+  let random = Math.random()
 
   const bagErrors = () => {
     router.replace({
@@ -47,6 +53,13 @@
     })
   }
 
+  const replaceAndPreserveStateWithErrors = (errors = {}) => {
+    router.replace({
+      preserveState: 'errors',
+      props: (props: PageProps) => ({ ...props, errors }),
+    })
+  }
+
   const push = () => {
     router.push({
       url: '/client-side-visit-2',
@@ -59,11 +72,16 @@
 <div>
   <div>{foo}</div>
   <div>{bar}</div>
-  <button on:click={replace}>Replace</button>
-  <button on:click={push}>Push</button>
-  <button on:click={defaultErrors}>Errors (default)</button>
-  <button on:click={bagErrors}>Errors (bag)</button>
+  <button onclick={replace}>Replace</button>
+  <button onclick={() => replaceAndPreserveStateWithErrors({ name: 'Field is required' })}>
+    Replace with errors
+  </button>
+  <button onclick={() => replaceAndPreserveStateWithErrors()}>Replace without errors</button>
+  <button onclick={push}>Push</button>
+  <button onclick={defaultErrors}>Errors (default)</button>
+  <button onclick={bagErrors}>Errors (bag)</button>
   <div>Errors: {errors}</div>
   <div>Finished: {finished}</div>
   <div>Success: {success}</div>
+  <div id="random">Random: {random}</div>
 </div>

@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   declare global {
     interface Window {
       events: string[]
@@ -8,6 +8,8 @@
 </script>
 
 <script lang="ts">
+  import { preventDefault } from 'svelte/legacy';
+
   import { page, useForm } from '@inertiajs/svelte5'
   import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
   import type { CancelTokenSource } from 'axios'
@@ -15,10 +17,10 @@
   window.events = []
   window.data = []
 
-  const form = useForm({
+  const form = $state(useForm({
     name: 'foo',
     remember: false,
-  })
+  }))
 
   const pushEvent = (message: string) => {
     window.events.push(message)
@@ -122,7 +124,7 @@
   const onBeforeVisitCancelled = () => {
     form.post('/sleep', {
       ...callbacks({
-        onBefore: (visit: ActiveVisit) => {
+        onBefore: () => {
           pushEvent('onBefore')
           return false
         },
@@ -186,7 +188,7 @@
   const onSuccessPromiseVisit = () => {
     form.post('/dump/post', {
       ...callbacks({
-        onSuccess: (page: Page) => {
+        onSuccess: () => {
           pushEvent('onSuccess')
 
           setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
@@ -199,7 +201,7 @@
   const onSuccessResetValue = () => {
     form.post(page.url, {
       ...callbacks({
-        onSuccess: (page: Page) => {
+        onSuccess: () => {
           form.reset()
         },
       }),
@@ -220,7 +222,7 @@
   const onErrorPromiseVisit = () => {
     form.post('/form-helper/events/errors', {
       ...callbacks({
-        onError: (errors: Errors) => {
+        onError: () => {
           pushEvent('onError')
 
           setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
@@ -389,30 +391,30 @@
 </script>
 
 <div>
-  <button on:click|preventDefault={submit} class="submit">Submit form</button>
+  <button onclick={preventDefault(submit)} class="submit">Submit form</button>
 
-  <button on:click|preventDefault={successfulRequest} class="successful-request">Successful request</button>
-  <button on:click|preventDefault={cancelledVisit} class="cancel">Cancellable Visit</button>
+  <button onclick={preventDefault(successfulRequest)} class="successful-request">Successful request</button>
+  <button onclick={preventDefault(cancelledVisit)} class="cancel">Cancellable Visit</button>
 
-  <button on:click|preventDefault={onBeforeVisit} class="before">onBefore</button>
-  <button on:click|preventDefault={onBeforeVisitCancelled} class="before-cancel">onBefore cancellation</button>
-  <button on:click|preventDefault={onStartVisit} class="start">onStart</button>
-  <button on:click|preventDefault={onProgressVisit} class="progress">onProgress</button>
+  <button onclick={preventDefault(onBeforeVisit)} class="before">onBefore</button>
+  <button onclick={preventDefault(onBeforeVisitCancelled)} class="before-cancel">onBefore cancellation</button>
+  <button onclick={preventDefault(onStartVisit)} class="start">onStart</button>
+  <button onclick={preventDefault(onProgressVisit)} class="progress">onProgress</button>
 
-  <button on:click|preventDefault={onSuccessVisit} class="success">onSuccess</button>
-  <button on:click|preventDefault={onSuccessProgress} class="success-progress">onSuccess progress property</button>
-  <button on:click|preventDefault={onSuccessProcessing} class="success-processing">onSuccess resets processing</button>
-  <button on:click|preventDefault={onSuccessResetErrors} class="success-reset-errors">onSuccess resets errors</button>
-  <button on:click|preventDefault={onSuccessPromiseVisit} class="success-promise">onSuccess promise</button>
-  <button on:click|preventDefault={onSuccessResetValue} class="success-reset-value">onSuccess resets value</button>
+  <button onclick={preventDefault(onSuccessVisit)} class="success">onSuccess</button>
+  <button onclick={preventDefault(onSuccessProgress)} class="success-progress">onSuccess progress property</button>
+  <button onclick={preventDefault(onSuccessProcessing)} class="success-processing">onSuccess resets processing</button>
+  <button onclick={preventDefault(onSuccessResetErrors)} class="success-reset-errors">onSuccess resets errors</button>
+  <button onclick={preventDefault(onSuccessPromiseVisit)} class="success-promise">onSuccess promise</button>
+  <button onclick={preventDefault(onSuccessResetValue)} class="success-reset-value">onSuccess resets value</button>
 
-  <button on:click|preventDefault={onErrorVisit} class="error">onError</button>
-  <button on:click|preventDefault={onErrorProgress} class="error-progress">onError progress property</button>
-  <button on:click|preventDefault={onErrorProcessing} class="error-processing">onError resets processing</button>
-  <button on:click|preventDefault={errorsSetOnError} class="errors-set-on-error">Errors set on error</button>
-  <button on:click|preventDefault={onErrorPromiseVisit} class="error-promise">onError promise</button>
+  <button onclick={preventDefault(onErrorVisit)} class="error">onError</button>
+  <button onclick={preventDefault(onErrorProgress)} class="error-progress">onError progress property</button>
+  <button onclick={preventDefault(onErrorProcessing)} class="error-processing">onError resets processing</button>
+  <button onclick={preventDefault(errorsSetOnError)} class="errors-set-on-error">Errors set on error</button>
+  <button onclick={preventDefault(onErrorPromiseVisit)} class="error-promise">onError promise</button>
 
-  <button on:click|preventDefault={progressNoFiles} class="no-progress">progress no files</button>
+  <button onclick={preventDefault(progressNoFiles)} class="no-progress">progress no files</button>
 
   <span class="success-status">Form was {form.wasSuccessful ? '' : 'not '}successful</span>
   <span class="recently-status">Form was {form.recentlySuccessful ? '' : 'not '}recently successful</span>

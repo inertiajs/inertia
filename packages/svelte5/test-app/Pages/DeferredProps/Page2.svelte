@@ -1,26 +1,31 @@
 <script lang="ts">
   import { Deferred } from '@inertiajs/svelte5'
 
-  const { baz, qux }: { baz?: string; qux?: string } = $props()
+  interface Props {
+    baz: string | undefined;
+    qux: string | undefined;
+  }
+
+  let { baz, qux }: Props = $props();
 </script>
 
 <Deferred data="baz">
-  {baz}
   {#snippet fallback()}
-    <div>Loading baz...</div>
+    <div >Loading baz...</div>
   {/snippet}
+  {baz}
 </Deferred>
 
 <Deferred data="qux">
-  {qux}
   {#snippet fallback()}
-    <div>Loading qux...</div>
+    <div >Loading qux...</div>
   {/snippet}
+  {qux}
 </Deferred>
 
 <Deferred data={['baz', 'qux']}>
-  both {baz} and {qux}
   {#snippet fallback()}
-    <div>Loading baz and qux...</div>
+    <div >Loading baz and qux...</div>
   {/snippet}
+  both {baz} and {qux}
 </Deferred>

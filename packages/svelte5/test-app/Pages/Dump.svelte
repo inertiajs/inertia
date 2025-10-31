@@ -3,21 +3,16 @@
   import type { Method } from '@inertiajs/core'
   import type { MulterFile } from '../types'
 
-  const {
-    headers,
-    method,
-    form,
-    files = {},
-    url,
-    query,
-  }: {
-    headers: Record<string, string>
-    method: Method
-    form: Record<string, unknown>
-    files?: MulterFile[] | object
-    url: string
-    query: Record<string, unknown>
-  } = $props()
+  interface Props {
+    headers: Record<string, string>;
+    method: Method;
+    form: Record<string, unknown>;
+    files: MulterFile[] | object;
+    url: string;
+    query: Record<string, unknown>;
+  }
+
+  let { headers, method, form, files = {}, url, query }: Props = $props();
 
   const dump = {
     headers,
@@ -26,10 +21,9 @@
     files,
     query,
     url,
-    $page: page,
+    page: page,
   }
 
-  // Set window dump for testing
   $effect(() => {
     window._inertia_request_dump = dump
   })

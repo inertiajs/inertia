@@ -2,7 +2,7 @@
   import { Form } from '@inertiajs/svelte5'
 </script>
 
-<Form method="post" action="/form-component/set-defaults-on-success" setDefaultsOnSuccess>
+<Form method="post" action="/form-component/set-defaults-on-success" setDefaultsOnSuccess  >
   {#snippet children({ isDirty, errors })}
     <p id="dirty-status">{isDirty ? 'Form is dirty' : 'Form is clean'}</p>
 

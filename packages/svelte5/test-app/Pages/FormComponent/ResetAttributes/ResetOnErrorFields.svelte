@@ -2,7 +2,7 @@
   import { Form } from '@inertiajs/svelte5'
 </script>
 
-<Form method="post" action="/form-component/reset-on-error-fields" resetOnError={['name']}>
+<Form method="post" action="/form-component/reset-on-error-fields" resetOnError={['name']} >
   {#snippet children({ errors })}
     <div>
       <label for="name">Name</label>

@@ -1,8 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { page } from '@inertiajs/svelte5'
+  interface Props {
+    children?: import('svelte').Snippet;
+  }
 
-  const { children } = $props()
+  let { children }: Props = $props();
   let createdAt = $state<number | null>(null)
 
   onMount(() => {
@@ -13,7 +16,7 @@
   // Update props reactively when page changes
   $effect(() => {
     if (typeof window !== 'undefined') {
-      window._inertia_nested_layout_props = $page.props
+      window._inertia_nested_layout_props = page.props
     }
   })
 </script>

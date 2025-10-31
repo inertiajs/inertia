@@ -1,24 +1,28 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte5'
 
-  const {
-    foo,
-    bar,
-    baz,
-  }: {
+  interface ComponentProps {
     foo: {
+      data: { id: number; name: string }[]
+      companies: { id: number; name: string }[]
+      teams: { id: number; name: string }[]
       page: number
-      data: Array<{ name: string }>
-      companies: Array<{ name: string }>
-      teams: Array<{ name: string }>
       per_page: number
       meta: { label: string }
     }
     bar: number[]
     baz: number[]
-  } = $props()
+  }
 
-  let page = $state(foo.page)
+  interface Props {
+    foo: ComponentProps['foo'];
+    bar: ComponentProps['bar'];
+    baz: ComponentProps['baz'];
+  }
+
+  let { foo, bar, baz }: Props = $props();
+
+  let page = foo.page
 
   const reloadIt = () => {
     router.reload({
@@ -27,8 +31,8 @@
       },
       only: ['foo', 'baz'],
       onSuccess(visit) {
-        // TODO: Refactor 'any' to a more specific type
-        page = (visit.props as any as { foo: { page: number } }).foo.page
+        // TODO: Refactor 'unknown' and make Page<ComponentProps> work
+        page = (visit.props as unknown as { foo: { page: number } }).foo.page
       },
     })
   }
@@ -55,5 +59,5 @@
 <div>foo.page is {foo.page}</div>
 <div>foo.per_page is {foo.per_page}</div>
 <div>foo.meta.label is {foo.meta.label}</div>
-<button on:click={reloadIt}>Reload</button>
-<button on:click={getFresh}>Get Fresh</button>
+<button onclick={reloadIt}>Reload</button>
+<button onclick={getFresh}>Get Fresh</button>

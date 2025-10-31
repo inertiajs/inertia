@@ -4,12 +4,12 @@
 
   interface ClientForm {
     name: string
-    [key: string]: any
+    [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
-  const form = useForm<ClientForm>({
+  const form = $state(useForm<ClientForm>({
     name: '',
-  })
+  }))
 
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement
@@ -18,4 +18,4 @@
   }
 </script>
 
-<input name="name" type="text" value={form.name} on:input={handleChange} />
+<input name="name" type="text" value={form.name} oninput={handleChange} />

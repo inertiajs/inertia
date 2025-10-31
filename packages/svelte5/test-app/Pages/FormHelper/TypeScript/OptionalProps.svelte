@@ -8,13 +8,13 @@
     remember: boolean
   }
 
-  const {
-    user = null,
-  }: {
+  interface Props {
     user?: {
-      username?: string | null
-    } | null
-  } = $props()
+    username?: string | null
+  } | null;
+  }
+
+  let { user = null }: Props = $props();
 
   useForm<LoginData>({
     username: user?.username ?? '',
