@@ -256,10 +256,10 @@
       {#if callbacks.success || callbacks.error || callbacks.finish}
         <div class="rounded bg-gray-100 p-3">
           {#if callbacks.success}
-            <p class="text-sm text-green-600">onSuccess called!</p>
+            <p class="text-sm text-green-600">onPrecognitionSuccess called!</p>
           {/if}
           {#if callbacks.error}
-            <p class="text-sm text-red-600">onError called!</p>
+            <p class="text-sm text-red-600">onValidationError called!</p>
           {/if}
           {#if callbacks.finish}
             <p class="text-sm text-blue-600">onFinish called!</p>

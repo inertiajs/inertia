@@ -209,8 +209,8 @@ const validateTimeout = ref(1500)
           <p v-if="validating" class="text-sm text-blue-600">Validating...</p>
 
           <div v-if="callbacks.success || callbacks.error || callbacks.finish" class="rounded bg-gray-100 p-3">
-            <p v-if="callbacks.success" class="text-sm text-green-600">onSuccess called!</p>
-            <p v-if="callbacks.error" class="text-sm text-red-600">onError called!</p>
+            <p v-if="callbacks.success" class="text-sm text-green-600">onPrecognitionSuccess called!</p>
+            <p v-if="callbacks.error" class="text-sm text-red-600">onValidationError called!</p>
             <p v-if="callbacks.finish" class="text-sm text-blue-600">onFinish called!</p>
             <p v-if="callbacks.exception" class="text-sm text-orange-600">
               onException: {{ callbacks.exceptionMessage }}

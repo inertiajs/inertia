@@ -245,8 +245,8 @@ const FormComponentPrecognition = () => {
 
                 {(callbacks.success || callbacks.error || callbacks.finish) && (
                   <div className="rounded bg-gray-100 p-3">
-                    {callbacks.success && <p className="text-sm text-green-600">onSuccess called!</p>}
-                    {callbacks.error && <p className="text-sm text-red-600">onError called!</p>}
+                    {callbacks.success && <p className="text-sm text-green-600">onPrecognitionSuccess called!</p>}
+                    {callbacks.error && <p className="text-sm text-red-600">onValidationError called!</p>}
                     {callbacks.finish && <p className="text-sm text-blue-600">onFinish called!</p>}
                     {callbacks.exception && (
                       <p className="text-sm text-orange-600">onException: {callbacks.exceptionMessage}</p>

@@ -8,7 +8,7 @@ export default () => {
 
   return (
     <div>
-      <h1>Form Precognition Callbacks &amp; Exceptions</h1>
+      <h1>Form Precognition Callbacks</h1>
 
       <h2>Callbacks Test</h2>
       <Form action="/form-component/precognition" method="post" validateTimeout={100}>
@@ -19,8 +19,8 @@ export default () => {
             </div>
 
             {validating && <p>Validating...</p>}
-            {successCalled && <p>onSuccess called!</p>}
-            {errorCalled && <p>onError called!</p>}
+            {successCalled && <p>onPrecognitionSuccess called!</p>}
+            {errorCalled && <p>onValidationError called!</p>}
             {finishCalled && <p>onFinish called!</p>}
 
             <button
@@ -33,22 +33,6 @@ export default () => {
                   onPrecognitionSuccess: () => {
                     setSuccessCalled(true)
                   },
-                  onFinish: () => {
-                    setFinishCalled(true)
-                  },
-                })
-              }}
-            >
-              Validate with onSuccess
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSuccessCalled(false)
-                setErrorCalled(false)
-                setFinishCalled(false)
-                validate({
                   onValidationError: () => {
                     setErrorCalled(true)
                   },
@@ -58,7 +42,7 @@ export default () => {
                 })
               }}
             >
-              Validate with onError
+              Validate
             </button>
           </>
         )}

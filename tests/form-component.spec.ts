@@ -1688,17 +1688,14 @@ test.describe('Form Component', () => {
     test('touch with array marks multiple fields as touched', async ({ page }) => {
       await page.goto('/form-component/precognition-methods')
 
-      await page.fill('input[name="name"]', 'ab')
-      await page.fill('input[name="email"]', 'x')
-
       await page.getByRole('button', { name: 'Touch Name and Email' }).click()
       await page.getByRole('button', { name: 'Validate All Touched' }).click()
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
-      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+      await expect(page.getByText('The name field is required.')).toBeVisible()
+      await expect(page.getByText('The email field is required.')).toBeVisible()
     })
 
     test('touch deduplicates fields when called multiple times', async ({ page }) => {
@@ -1777,16 +1774,13 @@ test.describe('Form Component', () => {
     test('validate with array of fields validates multiple fields', async ({ page }) => {
       await page.goto('/form-component/precognition-methods')
 
-      await page.fill('input[name="name"]', 'ab')
-      await page.fill('input[name="email"]', 'x')
-
       await page.getByRole('button', { name: 'Validate Name and Email' }).click()
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
-      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+      await expect(page.getByText('The name field is required.')).toBeVisible()
+      await expect(page.getByText('The email field is required.')).toBeVisible()
     })
 
     test('reset with array removes multiple fields from touched', async ({ page }) => {
@@ -1807,6 +1801,13 @@ test.describe('Form Component', () => {
       await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
 
       await page.getByRole('button', { name: 'Reset Name and Email' }).click()
+
+      await expect(page.locator('input[name="name"]')).toHaveValue('')
+      await expect(page.locator('input[name="email"]')).toHaveValue('')
+
+      await expect(page.getByText('Name is not touched')).toBeVisible()
+      await expect(page.getByText('Email is not touched')).toBeVisible()
+      await expect(page.getByText('Form has no touched fields')).toBeVisible()
 
       await page.fill('input[name="name"]', 'abc')
       await page.fill('input[name="email"]', 'test@example.com')
@@ -1879,31 +1880,31 @@ test.describe('Form Component', () => {
       await expect(page.getByText('Name is valid!')).toBeVisible()
     })
 
-    test('calls onSuccess and onFinish callbacks when validation succeeds', async ({ page }) => {
+    test('calls onPrecognitionSuccess and onFinish callbacks when validation succeeds', async ({ page }) => {
       await page.goto('/form-component/precognition-callbacks')
 
       await page.fill('input[name="name"]', 'John Doe')
-      await page.click('button:has-text("Validate with onSuccess")')
+      await page.click('button:has-text("Validate")')
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      await expect(page.getByText('onSuccess called!')).toBeVisible()
-      await expect(page.getByText('onError called!')).not.toBeVisible()
+      await expect(page.getByText('onPrecognitionSuccess called!')).toBeVisible()
+      await expect(page.getByText('onValidationError called!')).not.toBeVisible()
       await expect(page.getByText('onFinish called!')).toBeVisible()
     })
 
-    test('calls onError and onFinish callbacks when validation fails', async ({ page }) => {
+    test('calls onValidationError and onFinish callbacks when validation fails', async ({ page }) => {
       await page.goto('/form-component/precognition-callbacks')
 
       await page.fill('input[name="name"]', 'ab')
-      await page.click('button:has-text("Validate with onError")')
+      await page.click('button:has-text("Validate")')
 
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
-      await expect(page.getByText('onSuccess called!')).not.toBeVisible()
-      await expect(page.getByText('onError called!')).toBeVisible()
+      await expect(page.getByText('onPrecognitionSuccess called!')).not.toBeVisible()
+      await expect(page.getByText('onValidationError called!')).toBeVisible()
       await expect(page.getByText('onFinish called!')).toBeVisible()
     })
 

@@ -9,7 +9,7 @@ const finishCalled = ref(false)
 
 <template>
   <div>
-    <h1>Form Precognition Callbacks & Exceptions</h1>
+    <h1>Form Precognition Callbacks</h1>
 
     <h2>Callbacks Test</h2>
     <Form action="/form-component/precognition" method="post" :validateTimeout="100">
@@ -19,8 +19,8 @@ const finishCalled = ref(false)
         </div>
 
         <p v-if="validating">Validating...</p>
-        <p v-if="successCalled">onSuccess called!</p>
-        <p v-if="errorCalled">onError called!</p>
+        <p v-if="successCalled">onPrecognitionSuccess called!</p>
+        <p v-if="errorCalled">onValidationError called!</p>
         <p v-if="finishCalled">onFinish called!</p>
 
         <button
@@ -34,24 +34,6 @@ const finishCalled = ref(false)
                 onPrecognitionSuccess: () => {
                   successCalled = true
                 },
-                onFinish: () => {
-                  finishCalled = true
-                },
-              })
-            }
-          "
-        >
-          Validate with onSuccess
-        </button>
-
-        <button
-          type="button"
-          @click="
-            () => {
-              successCalled = false
-              errorCalled = false
-              finishCalled = false
-              validate({
                 onValidationError: () => {
                   errorCalled = true
                 },
@@ -62,7 +44,7 @@ const finishCalled = ref(false)
             }
           "
         >
-          Validate with onError
+          Validate
         </button>
       </template>
     </Form>

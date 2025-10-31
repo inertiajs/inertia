@@ -7,7 +7,7 @@
 </script>
 
 <div>
-  <h1>Form Precognition Callbacks &amp; Exceptions</h1>
+  <h1>Form Precognition Callbacks</h1>
 
   <h2>Callbacks Test</h2>
   <Form action="/form-component/precognition" method="post" validateTimeout={100} let:validate let:validating let:touch>
@@ -19,10 +19,10 @@
       <p>Validating...</p>
     {/if}
     {#if successCalled}
-      <p>onSuccess called!</p>
+      <p>onPrecognitionSuccess called!</p>
     {/if}
     {#if errorCalled}
-      <p>onError called!</p>
+      <p>onValidationError called!</p>
     {/if}
     {#if finishCalled}
       <p>onFinish called!</p>
@@ -38,22 +38,6 @@
           onPrecognitionSuccess: () => {
             successCalled = true
           },
-          onFinish: () => {
-            finishCalled = true
-          },
-        })
-      }}
-    >
-      Validate with onSuccess
-    </button>
-
-    <button
-      type="button"
-      on:click={() => {
-        successCalled = false
-        errorCalled = false
-        finishCalled = false
-        validate({
           onValidationError: () => {
             errorCalled = true
           },
@@ -63,7 +47,7 @@
         })
       }}
     >
-      Validate with onError
+      Validate
     </button>
   </Form>
 </div>
