@@ -1,16 +1,31 @@
 <script lang="ts">
   import { isUrlMethodPair } from '@inertiajs/core'
-  import type {
-    CacheForOption,
-    FormDataConvertible,
-    LinkPrefetchOption,
-    Method,
-    PreserveStateOption,
-    UrlMethodPair,
-  } from '@inertiajs/core'
+  import type { LinkComponentBaseProps } from '@inertiajs/core'
   import { inertia } from '../index'
 
-  const {
+  interface Props {
+    href?: LinkComponentBaseProps['href'];
+    as?: keyof HTMLElementTagNameMap;
+    data?: LinkComponentBaseProps['data'];
+    method?: LinkComponentBaseProps['method'];
+    replace?: LinkComponentBaseProps['replace'];
+    preserveScroll?: LinkComponentBaseProps['preserveScroll'];
+    preserveState?: LinkComponentBaseProps['preserveState'] | null;
+    preserveUrl?: LinkComponentBaseProps['preserveUrl'];
+    only?: LinkComponentBaseProps['only'];
+    except?: LinkComponentBaseProps['except'];
+    headers?: LinkComponentBaseProps['headers'];
+    queryStringArrayFormat?: LinkComponentBaseProps['queryStringArrayFormat'];
+    async?: LinkComponentBaseProps['async'];
+    prefetch?: LinkComponentBaseProps['prefetch'];
+    cacheFor?: LinkComponentBaseProps['cacheFor'];
+    cacheTags?: LinkComponentBaseProps['cacheTags'];
+    viewTransition?: LinkComponentBaseProps['viewTransition'];
+    children?: import('svelte').Snippet;
+    [key: string]: any
+  }
+
+  let {
     href = '',
     as = 'a',
     data = {},
@@ -18,6 +33,7 @@
     replace = false,
     preserveScroll = false,
     preserveState = null,
+    preserveUrl = false,
     only = [],
     except = [],
     headers = {},
@@ -26,81 +42,23 @@
     prefetch = false,
     cacheFor = 0,
     cacheTags = [],
+    viewTransition = false,
     children,
-    // Extract event handlers with new Svelte 5 syntax
-    onfocus,
-    onblur,
-    onclick,
-    ondblclick,
-    onmousedown,
-    onmousemove,
-    onmouseout,
-    onmouseover,
-    onmouseup,
-    onbefore,
-    onstart,
-    onprogress,
-    onfinish,
-    oncancel,
-    onsuccess,
-    onerror,
-    onprefetching,
-    onprefetched,
-    'oncancel-token': oncanceltoken,
-    ...restProps
-  }: {
-    href?: string | UrlMethodPair
-    as?: keyof HTMLElementTagNameMap
-    data?: Record<string, FormDataConvertible>
-    method?: Method
-    replace?: boolean
-    preserveScroll?: PreserveStateOption
-    preserveState?: PreserveStateOption | null
-    only?: string[]
-    except?: string[]
-    headers?: Record<string, string>
-    queryStringArrayFormat?: 'brackets' | 'indices'
-    async?: boolean
-    prefetch?: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-    cacheFor?: CacheForOption | CacheForOption[]
-    cacheTags?: string | string[]
-    children?: any
-    // Event handler types
-    onfocus?: (event: FocusEvent) => void
-    onblur?: (event: FocusEvent) => void
-    onclick?: (event: MouseEvent) => void
-    ondblclick?: (event: MouseEvent) => void
-    onmousedown?: (event: MouseEvent) => void
-    onmousemove?: (event: MouseEvent) => void
-    onmouseout?: (event: MouseEvent) => void
-    onmouseover?: (event: MouseEvent) => void
-    onmouseup?: (event: MouseEvent) => void
-    onbefore?: (event: any) => void
-    onstart?: (event: any) => void
-    onprogress?: (event: any) => void
-    onfinish?: (event: any) => void
-    oncancel?: (event: any) => void
-    onsuccess?: (event: any) => void
-    onerror?: (event: any) => void
-    onprefetching?: (event: any) => void
-    onprefetched?: (event: any) => void
-    'oncancel-token'?: (event: any) => void
-    [key: string]: any
-  } = $props()
+    ...rest
+  }: Props = $props();
 
-  const _method = $derived(isUrlMethodPair(href) ? href.method : method)
-  const _href = $derived(isUrlMethodPair(href) ? href.url : href)
+  let _method = $derived(isUrlMethodPair(href) ? href.method : method)
+  let _href = $derived(isUrlMethodPair(href) ? href.url : href)
 
-  const asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())
-  const elProps = $derived(
-    {
+  let asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())
+  let elProps =
+    $derived({
       a: { href: _href },
       button: { type: 'button' },
-    }[asProp] || {},
-  )
+    }[asProp] || {})
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <svelte:element
   this={asProp}
   use:inertia={{
@@ -110,6 +68,7 @@
     replace,
     preserveScroll,
     preserveState: preserveState ?? _method !== 'get',
+    preserveUrl,
     only,
     except,
     headers,
@@ -118,28 +77,10 @@
     prefetch,
     cacheFor,
     cacheTags,
+    viewTransition,
   }}
-  {...restProps}
+  {...rest}
   {...elProps}
-  {onfocus}
-  {onblur}
-  {onclick}
-  {ondblclick}
-  {onmousedown}
-  {onmousemove}
-  {onmouseout}
-  {onmouseover}
-  {onmouseup}
-  oncancel-token={oncanceltoken}
-  {onbefore}
-  {onstart}
-  {onprogress}
-  {onfinish}
-  {oncancel}
-  {onsuccess}
-  {onerror}
-  {onprefetching}
-  {onprefetched}
 >
   {@render children?.()}
 </svelte:element>
