@@ -1,7 +1,10 @@
+import type { VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte5'
 import { mount } from 'svelte'
 
 window.testing = { Inertia: router }
+
+const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
 createInertiaApp({
   page: window.initialPage,
@@ -14,9 +17,16 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
-    return pages[`./Pages/${name}.svelte`]
+    return pages[`./Pages/${name}.svelte`] as ResolvedComponent
   },
   setup({ el, App, props }) {
     return mount(App as any, { target: el!, props })
   },
+  ...(withAppDefaults && {
+    defaults: {
+      visitOptions: (href: string, options: VisitOptions) => {
+        return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }
+      },
+    },
+  }),
 })
