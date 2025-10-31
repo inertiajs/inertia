@@ -1,6 +1,5 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy, onMount } from 'svelte'
 
   interface Props {
     data?: string | string[]
@@ -16,14 +15,9 @@
 
   let loaded = $state(false)
   let fetching = false
-  let el: HTMLElement = $state(null!)
   let observer: IntersectionObserver | null = null
 
-  onMount(() => {
-    if (!el) {
-      return
-    }
-
+  function attachObserver(el: HTMLElement) {
     observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) {
@@ -61,11 +55,12 @@
     )
 
     observer.observe(el)
-  })
 
-  onDestroy(() => {
-    observer?.disconnect()
-  })
+    // Clean up will run like onDestroy
+    return () => {
+      observer?.disconnect()
+    }
+  }
 
   function getReloadParams(): Partial<ReloadOptions> {
     if (data !== '') {
@@ -83,7 +78,7 @@
 </script>
 
 {#if always || !loaded}
-  <svelte:element this={as} bind:this={el} />
+  <svelte:element this={as} {@attach attachObserver} />
 {/if}
 
 {#if loaded}
