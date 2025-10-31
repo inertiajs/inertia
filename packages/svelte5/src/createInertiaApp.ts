@@ -1,41 +1,40 @@
-import { router, setupProgress, type InertiaAppResponse, type Page } from '@inertiajs/core'
+import { router, setupProgress, type CreateInertiaAppOptionsForCSR, type InertiaAppResponse, type PageProps } from '@inertiajs/core'
 import { escape } from 'lodash-es'
-import type { ComponentType } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
-import type { ComponentResolver } from './types'
+import { config } from './index'
+import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
 
-type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
-type AppComponent = ComponentType<App> & { render: (props: InertiaAppProps) => SvelteRenderResult }
+type SvelteRenderResult = { body: string; head: string; css?: { code: string } }
 
-interface CreateInertiaAppProps {
-  id?: string
-  resolve: ComponentResolver
-  setup: (props: {
-    el: HTMLElement | null
-    App: AppComponent
-    props: InertiaAppProps
-  }) => void | App | SvelteRenderResult
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
-  page?: Page
+type SetupOptions<SharedProps extends PageProps> = {
+  el: HTMLElement | null
+  App: typeof App
+  props: InertiaAppProps<SharedProps>
 }
 
-export default async function createInertiaApp({
+// Svelte doesn't use CreateInertiaAppOptionsForSSR as it doesn't pass a
+// 'render' function, it calls it directly in the setup() method...
+type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<SharedProps>,
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
+>
+
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
   setup,
   progress = {},
   page,
-}: CreateInertiaAppProps): InertiaAppResponse {
+  defaults = {},
+}: InertiaAppOptions<SharedProps>): InertiaAppResponse {
+  config.replace(defaults)
+
   const isServer = typeof window === 'undefined'
   const el = isServer ? null : document.getElementById(id)
-  const initialPage: Page = page || JSON.parse(el?.dataset.page || '{}')
+  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
   const [initialComponent] = await Promise.all([
@@ -43,24 +42,24 @@ export default async function createInertiaApp({
     router.decryptHistory().catch(() => {}),
   ])
 
-  const props: InertiaAppProps = { initialPage, initialComponent, resolveComponent }
+  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent }
 
   const svelteApp = setup({
     el,
-    App: App as unknown as AppComponent,
+    App,
     props,
   })
 
-  if (isServer) {
-    const { html, head, css } = svelteApp as SvelteRenderResult
+  if (isServer && svelteApp) {
+    const { body, head, css } = svelteApp
 
     return {
-      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
 
-  if (progress) {
+  if (!isServer && progress) {
     setupProgress(progress)
   }
 }
