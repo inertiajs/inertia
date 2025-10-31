@@ -39,7 +39,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   qsArrayFormat: 'indices' | 'brackets' = 'brackets',
 ): [string, MergeDataIntoQueryStringDataReturnType<T>] {
   const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
-  const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
+  const hasHost = urlHasProtocol(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/') || href.toString() === ''
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
@@ -89,4 +89,16 @@ export const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location)
 
 export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
   return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
+}
+
+export function urlHasProtocol(url: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+}
+
+export function urlToString(url: URL | string, absolute: boolean): string {
+  const urlObj = typeof url === 'string' ? hrefToUrl(url) : url
+
+  return absolute
+    ? `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
+    : `${urlObj.pathname}${urlObj.search}${urlObj.hash}`
 }

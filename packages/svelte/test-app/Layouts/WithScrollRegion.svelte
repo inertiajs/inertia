@@ -1,13 +1,3 @@
-<script context="module" lang="ts">
-  declare global {
-    namespace svelteHTML {
-      interface HTMLAttributes {
-        'scroll-region'?: boolean | '' | undefined
-      }
-    }
-  }
-</script>
-
 <script lang="ts">
   let slot: HTMLDivElement
   let documentScrollTop = 0
@@ -27,6 +17,7 @@
 
 <div style="width: 200vw">
   <span class="layout-text">With scroll regions</span>
+  <button on:click={handleScrollEvent}>Update scroll positions</button>
   <div class="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
   <div style="height: 200vh">
     <span class="slot-position">Slot scroll position is {slotScrollLeft} & {slotScrollTop}</span>

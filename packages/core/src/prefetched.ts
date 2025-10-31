@@ -241,6 +241,7 @@ class PrefetchedRequests {
         'replace',
         'prefetch',
         'onBefore',
+        'onBeforeUpdate',
         'onStart',
         'onProgress',
         'onFinish',
@@ -251,6 +252,7 @@ class PrefetchedRequests {
         'onCancelToken',
         'onPrefetching',
         'async',
+        'viewTransition',
       ],
     )
   }

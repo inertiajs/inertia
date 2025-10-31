@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -154,6 +156,7 @@ Route::get('/async', function () {
     ]);
 });
 
+// @deprecated - We now have a InfiniteScroll component and Inertia::scroll() method...
 Route::get('/infinite-scroll', function () {
     $page = request()->integer('page', 1);
     $perPage = 25;
@@ -392,4 +395,64 @@ Route::post('/form-component', function () {
     }
 
     return back();
+});
+
+Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(250_000);
+    }
+
+    $perPage = 24;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $photos = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'url' => "https://picsum.photos/id/{$i}/300/300",
+        ])
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos->values(),
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia($horizontal ? 'PhotoHorizontal' : 'PhotoGrid', [
+        'photos' => Inertia::scroll($photos),
+    ]);
+});
+
+Route::get('/data-table', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(500_000);
+    }
+
+    $perPage = 200;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $users = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'name' => "User {$i}",
+        ])
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos->values(),
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia('DataTable', [
+        'users' => Inertia::scroll($users),
+    ]);
 });

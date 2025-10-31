@@ -1,4 +1,6 @@
-import { hideProgress, revealProgress } from '.'
+import { cloneDeep, get, set } from 'lodash-es'
+import { progress } from '.'
+import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { history } from './history'
@@ -7,6 +9,7 @@ import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
 import { Request } from './request'
+import { RequestParams } from './requestParams'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
@@ -46,7 +49,11 @@ export class Router {
     interruptible: false,
   })
 
-  public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
+  public init<ComponentType = Component>({
+    initialPage,
+    resolveComponent,
+    swapComponent,
+  }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,
@@ -128,8 +135,8 @@ export class Router {
     history.remember(data, key)
   }
 
-  public restore(key = 'default'): unknown {
-    return history.restore(key)
+  public restore<T = unknown>(key = 'default'): T | undefined {
+    return history.restore(key) as T | undefined
   }
 
   public on<TEventName extends GlobalEventNames>(
@@ -192,10 +199,10 @@ export class Router {
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
-      revealProgress(prefetched.inFlight)
+      progress.reveal(prefetched.inFlight)
       prefetchedRequests.use(prefetched, requestParams)
     } else {
-      revealProgress(true)
+      progress.reveal(true)
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
@@ -242,6 +249,7 @@ export class Router {
       async: true,
       showProgress: false,
       prefetch: true,
+      viewTransition: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -259,7 +267,7 @@ export class Router {
       return
     }
 
-    hideProgress()
+    progress.hide()
 
     this.asyncRequestStream.interruptInFlight()
 
@@ -289,7 +297,7 @@ export class Router {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
         {
-          cacheFor: 30_000,
+          cacheFor: config.get('prefetch.cacheFor'),
           cacheTags: [],
           ...prefetchOptions,
         },
@@ -313,6 +321,63 @@ export class Router {
     this.clientVisit(params, { replace: true })
   }
 
+  public replaceProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | ((oldValue: unknown, props: TProps) => unknown),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replace({
+      preserveScroll: true,
+      preserveState: true,
+      props(currentProps) {
+        const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
+
+        return set(cloneDeep(currentProps), name, newValue)
+      },
+      ...(options || {}),
+    })
+  }
+
+  public appendToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [...(currentValue as unknown[]), newValue]
+      },
+      options,
+    )
+  }
+
+  public prependToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [newValue, ...(currentValue as unknown[])]
+      },
+      options,
+    )
+  }
+
   public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params)
   }
@@ -326,21 +391,24 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const { onError, onFinish, onSuccess, ...pageParams } = params
+    const { viewTransition, onError, onFinish, onSuccess, ...pageParams } = params
+
+    const page = {
+      ...current,
+      ...pageParams,
+      props: props as Page['props'],
+    }
+
+    const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
+    const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
     currentPage
-      .set(
-        {
-          ...current,
-          ...pageParams,
-          props: props as Page['props'],
-        },
-        {
-          replace,
-          preserveScroll: params.preserveScroll,
-          preserveState: params.preserveState,
-        },
-      )
+      .set(page, {
+        replace,
+        preserveScroll,
+        preserveState,
+        viewTransition,
+      })
       .then(() => {
         const errors = currentPage.get().props.errors || {}
 
@@ -362,6 +430,7 @@ export class Router {
         async: true,
         showProgress: false,
         prefetch: true,
+        viewTransition: false,
       }),
       ...this.getVisitEvents(options),
     }
@@ -377,6 +446,12 @@ export class Router {
       href = urlMethodPair.url
       options.method = options.method ?? urlMethodPair.method
     }
+
+    const defaultVisitOptionsCallback = config.get('visitOptions')
+
+    const configuredOptions = defaultVisitOptionsCallback
+      ? defaultVisitOptionsCallback(href.toString(), cloneDeep(options)) || {}
+      : {}
 
     const mergedOptions: Visit = {
       method: 'get',
@@ -397,7 +472,9 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       invalidateCacheTags: [],
+      viewTransition: false,
       ...options,
+      ...configuredOptions,
     }
 
     const [url, _data] = transformUrlAndData(
@@ -429,6 +506,7 @@ export class Router {
     return {
       onCancelToken: options.onCancelToken || (() => {}),
       onBefore: options.onBefore || (() => {}),
+      onBeforeUpdate: options.onBeforeUpdate || (() => {}),
       onStart: options.onStart || (() => {}),
       onProgress: options.onProgress || (() => {}),
       onFinish: options.onFinish || (() => {}),

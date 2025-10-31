@@ -25,13 +25,13 @@ defineProps({
 
 declare global {
   interface Window {
-    componentEvents: Array<{ eventName: string; data: any; timestamp: number }>
+    componentEvents: Array<{ eventName: string; data: unknown; timestamp: number }>
   }
 }
 
 window.componentEvents = []
 
-const trackEvent = (eventName: string, data: any = null) => {
+const trackEvent = (eventName: string, data: unknown = null) => {
   window.componentEvents.push({ eventName, data, timestamp: Date.now() })
 }
 
