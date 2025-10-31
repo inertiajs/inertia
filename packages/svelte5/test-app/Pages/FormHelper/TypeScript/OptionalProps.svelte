@@ -10,11 +10,11 @@
 
   interface Props {
     user?: {
-    username?: string | null
-  } | null;
+      username?: string | null
+    } | null
   }
 
-  let { user = null }: Props = $props();
+  let { user = null }: Props = $props()
 
   useForm<LoginData>({
     username: user?.username ?? '',

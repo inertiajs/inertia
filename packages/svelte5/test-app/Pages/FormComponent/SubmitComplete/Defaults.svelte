@@ -5,9 +5,9 @@
 <div>
   <h1>OnSubmitComplete Defaults Test</h1>
 
-  <Form method="post"   onSubmitComplete={(props) => props.defaults()}>
+  <Form method="post" onSubmitComplete={(props) => props.defaults()}>
     {#snippet children({ errors, isDirty })}
-        <div>
+      <div>
         <p id="dirty-status">{isDirty ? 'Form is dirty' : 'Form is clean'}</p>
       </div>
 
@@ -28,6 +28,6 @@
       <div>
         <button type="submit">Submit</button>
       </div>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 </div>

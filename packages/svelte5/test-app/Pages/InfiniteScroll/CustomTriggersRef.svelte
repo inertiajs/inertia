@@ -3,10 +3,10 @@
   import { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 
   let tableHeader: HTMLTableSectionElement = $state(null!)
   let tableFooter: HTMLTableSectionElement = $state(null!)
@@ -21,10 +21,11 @@
     startElement={() => tableHeader}
     endElement={() => tableFooter}
     itemsElement={() => tableBody}
-    
   >
     {#snippet children({ loading })}
-        <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
+      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+        Spacer
+      </div>
 
       <table style="width: 100%; border-collapse: collapse">
         <thead bind:this={tableHeader} style="padding: 10px">
@@ -58,7 +59,9 @@
         </tfoot>
       </table>
 
-      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
-          {/snippet}
-    </InfiniteScroll>
+      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+        Spacer
+      </div>
+    {/snippet}
+  </InfiniteScroll>
 </div>

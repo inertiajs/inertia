@@ -3,14 +3,14 @@
 
   interface Props {
     mixed: {
-    name: string
-    users: string[]
-    chat: { data: number[] }
-    post: { id: number; comments: { allowed: boolean; data: string[] } }
-  };
+      name: string
+      users: string[]
+      chat: { data: number[] }
+      post: { id: number; comments: { allowed: boolean; data: string[] } }
+    }
   }
 
-  let { mixed }: Props = $props();
+  let { mixed }: Props = $props()
 
   const reload = () => {
     router.reload({

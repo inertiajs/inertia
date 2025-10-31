@@ -39,12 +39,7 @@
 <script lang="ts">
   import Render from './Render.svelte'
 
-  const {
-    component,
-    props = {},
-    children = [],
-    key = null,
-  }: RenderProps = $props()
+  const { component, props = {}, children = [], key = null }: RenderProps = $props()
 </script>
 
 {#if component}

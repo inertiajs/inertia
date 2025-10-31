@@ -12,12 +12,12 @@
   }
 
   interface Props_1 {
-    items?: string[];
-    tags?: Tag[];
-    user?: User | undefined;
-    count?: number;
-    singleValue?: string | string[] | undefined;
-    undefinedValue?: string | string[] | undefined;
+    items?: string[]
+    tags?: Tag[]
+    user?: User | undefined
+    count?: number
+    singleValue?: string | string[] | undefined
+    undefinedValue?: string | string[] | undefined
   }
 
   let {
@@ -26,8 +26,8 @@
     user = undefined,
     count = 0,
     singleValue = undefined,
-    undefinedValue = undefined
-  }: Props_1 = $props();
+    undefinedValue = undefined,
+  }: Props_1 = $props()
 
   const replacePropString = () => {
     router.replaceProp('user.name', 'Jane Smith')

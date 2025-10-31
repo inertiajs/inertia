@@ -2,7 +2,7 @@
   import { Form } from '@inertiajs/svelte5'
 </script>
 
-<Form action="/dump/post" method="post" >
+<Form action="/dump/post" method="post">
   {#snippet children({ isDirty })}
     <h1>Form Elements</h1>
 

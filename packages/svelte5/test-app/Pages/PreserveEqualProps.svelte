@@ -3,11 +3,11 @@
   import { untrack } from 'svelte'
 
   interface Props {
-    nestedA: { count: number };
-    nestedB: { date: number };
+    nestedA: { count: number }
+    nestedB: { date: number }
   }
 
-  let { nestedA, nestedB }: Props = $props();
+  let { nestedA, nestedB }: Props = $props()
 
   let effectACount = $state(0)
   let effectBCount = $state(0)
@@ -22,7 +22,7 @@
         previousNestedA = nestedA
       })
     }
-  });
+  })
 
   $effect(() => {
     if (nestedB !== previousNestedB) {

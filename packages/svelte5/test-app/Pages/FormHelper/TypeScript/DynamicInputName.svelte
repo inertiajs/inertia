@@ -7,9 +7,11 @@
     [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
-  const form = $state(useForm<ClientForm>({
-    name: '',
-  }))
+  const form = $state(
+    useForm<ClientForm>({
+      name: '',
+    }),
+  )
 
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement

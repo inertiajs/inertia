@@ -10,23 +10,23 @@
   import { onDestroy, onMount } from 'svelte'
 
   interface Props {
-    data: InfiniteScrollComponentBaseProps['data'];
-    buffer?: InfiniteScrollComponentBaseProps['buffer'];
-    as?: InfiniteScrollComponentBaseProps['as'];
-    manual?: InfiniteScrollComponentBaseProps['manual'];
-    manualAfter?: InfiniteScrollComponentBaseProps['manualAfter'];
-    preserveUrl?: InfiniteScrollComponentBaseProps['preserveUrl'];
-    reverse?: InfiniteScrollComponentBaseProps['reverse'];
-    autoScroll?: InfiniteScrollComponentBaseProps['autoScroll'];
-    startElement?: string | (() => HTMLElement | null) | null;
-    endElement?: string | (() => HTMLElement | null) | null;
-    itemsElement?: string | (() => HTMLElement | null) | null;
-    onlyNext?: boolean;
-    onlyPrevious?: boolean;
-    previous?: import('svelte').Snippet<[any]>;
-    loading?: import('svelte').Snippet<[any]>;
-    next?: import('svelte').Snippet<[any]>;
-    children?: import('svelte').Snippet<[any]>;
+    data: InfiniteScrollComponentBaseProps['data']
+    buffer?: InfiniteScrollComponentBaseProps['buffer']
+    as?: InfiniteScrollComponentBaseProps['as']
+    manual?: InfiniteScrollComponentBaseProps['manual']
+    manualAfter?: InfiniteScrollComponentBaseProps['manualAfter']
+    preserveUrl?: InfiniteScrollComponentBaseProps['preserveUrl']
+    reverse?: InfiniteScrollComponentBaseProps['reverse']
+    autoScroll?: InfiniteScrollComponentBaseProps['autoScroll']
+    startElement?: string | (() => HTMLElement | null) | null
+    endElement?: string | (() => HTMLElement | null) | null
+    itemsElement?: string | (() => HTMLElement | null) | null
+    onlyNext?: boolean
+    onlyPrevious?: boolean
+    previous?: import('svelte').Snippet<[any]>
+    loading?: import('svelte').Snippet<[any]>
+    next?: import('svelte').Snippet<[any]>
+    children?: import('svelte').Snippet<[any]>
     [key: string]: any
   }
 
@@ -49,7 +49,7 @@
     next,
     children,
     ...rest
-  }: Props = $props();
+  }: Props = $props()
 
   let itemsElementRef: HTMLElement = $state(null!)
   let startElementRef: HTMLElement = $state(null!)
@@ -57,11 +57,6 @@
   let loadingPrevious = $state(false)
   let loadingNext = $state(false)
   let requestCount = $state(0)
-
-
-
-
-
 
   let infiniteScrollInstance: UseInfiniteScrollProps = $state(null!)
 
@@ -166,9 +161,6 @@
     }
   }
 
-
-
-
   onDestroy(() => infiniteScrollInstance?.flush())
   let resolvedItemsElement = $derived(resolveHTMLElement(itemsElement, itemsElementRef))
   let scrollableParent = $derived(resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null)
@@ -210,49 +202,41 @@
     autoLoad
       ? infiniteScrollInstance?.elementManager.enableTriggers()
       : infiniteScrollInstance?.elementManager.disableTriggers()
-  });
+  })
 </script>
 
 {#if !startElement && !reverse}
   <div bind:this={startElementRef}>
-    {#if previous}{@render previous({ exposedPrevious, ...exposedPrevious, })}{:else}
-      {#if loadingPrevious}
-        {@render loading?.({ exposedPrevious, ...exposedPrevious, })}
-      {/if}
+    {#if previous}{@render previous({ exposedPrevious, ...exposedPrevious })}{:else if loadingPrevious}
+      {@render loading?.({ exposedPrevious, ...exposedPrevious })}
     {/if}
   </div>
 {/if}
 
 {#if !endElement && reverse}
   <div bind:this={endElementRef}>
-    {#if next}{@render next({ exposedNext, ...exposedNext, })}{:else}
-      {#if loadingNext}
-        {@render loading?.({ exposedNext, ...exposedNext, })}
-      {/if}
+    {#if next}{@render next({ exposedNext, ...exposedNext })}{:else if loadingNext}
+      {@render loading?.({ exposedNext, ...exposedNext })}
     {/if}
   </div>
 {/if}
 
 <svelte:element this={as} bind:this={itemsElementRef} {...rest}>
-  {@render children?.({ exposedSlot, ...exposedSlot, })}
+  {@render children?.({ exposedSlot, ...exposedSlot })}
 </svelte:element>
 
 {#if !startElement && reverse}
   <div bind:this={startElementRef}>
-    {#if previous}{@render previous({ exposedPrevious, ...exposedPrevious, })}{:else}
-      {#if loadingPrevious}
-        {@render loading?.({ exposedPrevious, ...exposedPrevious, })}
-      {/if}
+    {#if previous}{@render previous({ exposedPrevious, ...exposedPrevious })}{:else if loadingPrevious}
+      {@render loading?.({ exposedPrevious, ...exposedPrevious })}
     {/if}
   </div>
 {/if}
 
 {#if !endElement && !reverse}
   <div bind:this={endElementRef}>
-    {#if next}{@render next({ exposedNext, ...exposedNext, })}{:else}
-      {#if loadingNext}
-        {@render loading?.({ exposedNext, ...exposedNext, })}
-      {/if}
+    {#if next}{@render next({ exposedNext, ...exposedNext })}{:else if loadingNext}
+      {@render loading?.({ exposedNext, ...exposedNext })}
     {/if}
   </div>
 {/if}

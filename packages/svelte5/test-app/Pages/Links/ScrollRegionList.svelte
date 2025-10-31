@@ -7,10 +7,10 @@
   import type { VisitHelperOptions } from '@inertiajs/core'
 
   interface Props {
-    user_id?: number | undefined;
+    user_id?: number | undefined
   }
 
-  let { user_id = undefined }: Props = $props();
+  let { user_id = undefined }: Props = $props()
 
   const users = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `User ${i + 1}` }))
 

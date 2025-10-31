@@ -2,13 +2,15 @@
   import { router } from '@inertiajs/svelte5'
 
   interface Props {
-    users?: { data: { id: number; name: string }[]; meta: { page: number; perPage: number } };
+    users?: { data: { id: number; name: string }[]; meta: { page: number; perPage: number } }
   }
 
-  let { users = {
-    data: [],
-    meta: { page: 1, perPage: 10 },
-  } }: Props = $props();
+  let {
+    users = {
+      data: [],
+      meta: { page: 1, perPage: 10 },
+    },
+  }: Props = $props()
 
   const loadMore = () => {
     router.reload({

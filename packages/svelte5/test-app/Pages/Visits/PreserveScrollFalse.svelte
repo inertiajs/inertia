@@ -18,7 +18,7 @@
 
   const preserveFalse = (e: Event) => {
     e.preventDefault()
-    
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'bar' },
     })
@@ -26,7 +26,7 @@
 
   const preserveCallback = (e: Event) => {
     e.preventDefault()
-    
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'baz' },
       preserveScroll: (page) => {
@@ -39,7 +39,7 @@
 
   const preserveCallbackFalse = (e: Event) => {
     e.preventDefault()
-    
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'foo' },
       preserveScroll: (page) => {
@@ -52,7 +52,7 @@
 
   const preserveGet = (e: Event) => {
     e.preventDefault()
-    
+
     router.get(
       '/visits/preserve-scroll-false-page-two',
       {
@@ -66,7 +66,7 @@
 
   const preserveGetFalse = (e: Event) => {
     e.preventDefault()
-    
+
     router.get('/visits/preserve-scroll-false-page-two', {
       foo: 'baz',
     })

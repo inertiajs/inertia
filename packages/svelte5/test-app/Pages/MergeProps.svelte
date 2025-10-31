@@ -2,11 +2,11 @@
   import { router } from '@inertiajs/svelte5'
 
   interface Props {
-    foo?: number[];
-    bar?: number[];
+    foo?: number[]
+    bar?: number[]
   }
 
-  let { foo = [], bar = [] }: Props = $props();
+  let { foo = [], bar = [] }: Props = $props()
 
   const reloadIt = () => {
     router.reload({

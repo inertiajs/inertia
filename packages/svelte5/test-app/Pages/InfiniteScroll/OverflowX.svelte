@@ -3,10 +3,10 @@
   import type { User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 </script>
 
 <div style="overflow-x: hidden">

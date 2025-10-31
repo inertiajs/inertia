@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy';
+  import { preventDefault } from 'svelte/legacy'
 
   import { page, useForm } from '@inertiajs/svelte5'
   import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
@@ -17,10 +17,12 @@
   window.events = []
   window.data = []
 
-  const form = $state(useForm({
-    name: 'foo',
-    remember: false,
-  }))
+  const form = $state(
+    useForm({
+      name: 'foo',
+      remember: false,
+    }),
+  )
 
   const pushEvent = (message: string) => {
     window.events.push(message)

@@ -2,10 +2,10 @@
   import { onMount } from 'svelte'
   import { page } from '@inertiajs/svelte5'
   interface Props {
-    children?: import('svelte').Snippet;
+    children?: import('svelte').Snippet
   }
 
-  let { children }: Props = $props();
+  let { children }: Props = $props()
 
   let createdAt: number | null = $state(null)
 

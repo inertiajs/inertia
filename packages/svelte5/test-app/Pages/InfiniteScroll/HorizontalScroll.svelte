@@ -3,22 +3,21 @@
   import { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 </script>
 
 <div style="height: 120px; overflow-x: scroll; display: flex; width: 100vw">
   <InfiniteScroll data="users" style="display: flex; gap: 20px; height: 120px">
     {#snippet loading()}
-        <div
-        
+      <div
         style="min-width: 150px; height: 100px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; margin-left: 20px; margin-right: 20px"
       >
         Loading...
       </div>
-      {/snippet}
+    {/snippet}
 
     {#each users.data as user (user.id)}
       <div

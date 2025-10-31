@@ -4,12 +4,12 @@
 
   interface Props {
     form: InertiaForm<{
-    name: string
-    email?: string
-  }>;
+      name: string
+      email?: string
+    }>
   }
 
-  let { form }: Props = $props();
+  let { form }: Props = $props()
 </script>
 
 <p>Name: {form.name}</p>

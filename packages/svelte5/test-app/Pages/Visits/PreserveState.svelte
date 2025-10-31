@@ -102,9 +102,7 @@
   <a href={'#'} onclick={preserve} class="preserve">[State] Preserve visit: true</a>
   <a href={'#'} onclick={preserveFalse} class="preserve-false">[State] Preserve visit: false</a>
   <a href={'#'} onclick={preserveCallback} class="preserve-callback">[State] Preserve Callback: true</a>
-  <a href={'#'} onclick={preserveCallbackFalse} class="preserve-callback-false"
-    >[State] Preserve Callback: false</a
-  >
+  <a href={'#'} onclick={preserveCallbackFalse} class="preserve-callback-false">[State] Preserve Callback: false</a>
   <a href={'#'} onclick={preserveGet} class="preserve-get">[State] Preserve GET: true</a>
   <a href={'#'} onclick={preserveGetFalse} class="preserve-get-false">[State] Preserve GET: false</a>
 </div>

@@ -2,16 +2,16 @@
   import { router, Link } from '@inertiajs/svelte5'
 
   interface Props {
-    foo?: string;
-    items?: 
-    | {
-        data: string[]
-        next_page_url?: string
-      }
-    | undefined;
+    foo?: string
+    items?:
+      | {
+          data: string[]
+          next_page_url?: string
+        }
+      | undefined
   }
 
-  let { foo = 'default', items = undefined }: Props = $props();
+  let { foo = 'default', items = undefined }: Props = $props()
 
   const loadMore = () => {
     if (items?.next_page_url) {

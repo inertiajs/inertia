@@ -1,9 +1,9 @@
 <script lang="ts">
   interface Props {
-    baz: string;
+    baz: string
   }
 
-  let { baz }: Props = $props();
+  let { baz }: Props = $props()
 </script>
 
 <div>{baz}</div>

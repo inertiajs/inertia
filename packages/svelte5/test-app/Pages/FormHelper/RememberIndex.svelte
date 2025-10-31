@@ -8,10 +8,10 @@
   }
 
   interface Props {
-    users: User[];
+    users: User[]
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 </script>
 
 <div>

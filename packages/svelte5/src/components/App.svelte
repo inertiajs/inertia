@@ -16,9 +16,9 @@
   import { setPage } from '../page.svelte'
 
   interface Props {
-    initialComponent: InertiaAppProps['initialComponent'];
-    initialPage: InertiaAppProps['initialPage'];
-    resolveComponent: InertiaAppProps['resolveComponent'];
+    initialComponent: InertiaAppProps['initialComponent']
+    initialPage: InertiaAppProps['initialPage']
+    resolveComponent: InertiaAppProps['resolveComponent']
   }
 
   const { initialComponent, initialPage, resolveComponent }: Props = $props()

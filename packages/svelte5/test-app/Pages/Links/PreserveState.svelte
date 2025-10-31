@@ -8,10 +8,10 @@
   import type { Page } from '@inertiajs/core'
 
   interface Props {
-    foo?: string;
+    foo?: string
   }
 
-  let { foo = 'default' }: Props = $props();
+  let { foo = 'default' }: Props = $props()
 
   const preserveCallback = (page: Page) => {
     alert(page)

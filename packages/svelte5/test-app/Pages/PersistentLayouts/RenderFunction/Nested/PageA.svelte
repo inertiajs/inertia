@@ -3,10 +3,7 @@
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
   import type { Component } from 'svelte'
 
-  export const layout = (
-    h: (component: Component, children: Component[]) => Component,
-    page: Component,
-  ) => {
+  export const layout = (h: (component: Component, children: Component[]) => Component, page: Component) => {
     return h(SiteLayout, [h(NestedLayout, [page])])
   }
 </script>

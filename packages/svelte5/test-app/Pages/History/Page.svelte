@@ -1,7 +1,7 @@
 <script lang="ts">
   import { inertia, router } from '@inertiajs/svelte5'
 
-  let { pageNumber, multiByte } = $props();
+  let { pageNumber, multiByte } = $props()
 </script>
 
 <a href="/history/1" use:inertia>Page 1</a>

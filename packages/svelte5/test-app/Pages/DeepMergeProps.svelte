@@ -2,12 +2,12 @@
   import { router } from '@inertiajs/svelte5'
 
   interface Props {
-    foo: { page: number; data: number[]; per_page: number; meta: { label: string } };
-    bar: number[];
-    baz: number[];
+    foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
+    bar: number[]
+    baz: number[]
   }
 
-  let { foo, bar, baz }: Props = $props();
+  let { foo, bar, baz }: Props = $props()
 
   let page = foo.page
 

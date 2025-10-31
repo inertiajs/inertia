@@ -3,11 +3,11 @@
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {
-    users1: { data: User[] };
-    users2: { data: User[] };
+    users1: { data: User[] }
+    users2: { data: User[] }
   }
 
-  let { users1, users2 }: Props = $props();
+  let { users1, users2 }: Props = $props()
 </script>
 
 <div style="padding: 20px">
@@ -23,12 +23,12 @@
         {/each}
 
         {#snippet next({ exposedNext })}
-                <div   style="text-align: center; padding: 20px">
+          <div style="text-align: center; padding: 20px">
             <button onclick={exposedNext.fetch} disabled={exposedNext.loading}>
               {exposedNext.loading ? 'Loading...' : 'Load More Users 1'}
             </button>
           </div>
-              {/snippet}
+        {/snippet}
       </InfiniteScroll>
     </div>
 
@@ -40,12 +40,12 @@
         {/each}
 
         {#snippet next({ exposedNext })}
-                <div   style="text-align: center; padding: 20px">
+          <div style="text-align: center; padding: 20px">
             <button onclick={exposedNext.fetch} disabled={exposedNext.loading}>
               {exposedNext.loading ? 'Loading...' : 'Load More Users 2'}
             </button>
           </div>
-              {/snippet}
+        {/snippet}
       </InfiniteScroll>
     </div>
   </div>

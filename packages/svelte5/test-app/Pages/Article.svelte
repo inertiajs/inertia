@@ -7,10 +7,10 @@
   }
 
   interface Props {
-    scrollLog?: number[];
+    scrollLog?: number[]
   }
 
-  let { scrollLog = $bindable([]) }: Props = $props();
+  let { scrollLog = $bindable([]) }: Props = $props()
 
   const handleScrollEvent = () => {
     scrollLog = [...scrollLog, document.documentElement.scrollTop]

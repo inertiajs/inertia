@@ -3,24 +3,20 @@
   import { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 </script>
 
 <div style="padding: 20px">
   <h1>Custom Triggers with Selectors Test</h1>
 
-  <InfiniteScroll
-    data="users"
-    itemsElement="#table-body"
-    startElement="#table-header"
-    endElement="#table-footer"
-    
-  >
+  <InfiniteScroll data="users" itemsElement="#table-body" startElement="#table-header" endElement="#table-footer">
     {#snippet children({ loading })}
-        <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
+      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+        Spacer
+      </div>
 
       <table style="width: 100%; border-collapse: collapse">
         <thead id="table-header" style="padding: 12px">
@@ -54,7 +50,9 @@
         </tfoot>
       </table>
 
-      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
-          {/snippet}
-    </InfiniteScroll>
+      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+        Spacer
+      </div>
+    {/snippet}
+  </InfiniteScroll>
 </div>

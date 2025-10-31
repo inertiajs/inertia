@@ -2,10 +2,10 @@
   import { config, router } from '@inertiajs/svelte5'
 
   interface Props {
-    dialog?: boolean;
+    dialog?: boolean
   }
 
-  let { dialog = false }: Props = $props();
+  let { dialog = false }: Props = $props()
 
   const invalidVisit = () => {
     router.post('/non-inertia')

@@ -1,4 +1,10 @@
-import { router, setupProgress, type CreateInertiaAppOptionsForCSR, type InertiaAppResponse, type PageProps } from '@inertiajs/core'
+import {
+  router,
+  setupProgress,
+  type CreateInertiaAppOptionsForCSR,
+  type InertiaAppResponse,
+  type PageProps,
+} from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'

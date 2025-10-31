@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useRemember } from '@inertiajs/svelte5'
 
-  let { ...rest } = $props();
+  let { ...rest } = $props()
 
   let untracked = $state('')
 

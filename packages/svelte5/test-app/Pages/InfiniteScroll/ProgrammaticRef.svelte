@@ -4,10 +4,10 @@
   import UserCard, { type User } from './UserCard.svelte'
   import type { InfiniteScrollRef } from '@inertiajs/core'
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 
   // Use the actual component type like Form component does
   let infRef: InfiniteScrollRef | null = $state(null)
@@ -45,8 +45,8 @@
 
   <InfiniteScroll data="users" style="display: grid; gap: 20px" manual bind:this={infRef}>
     {#snippet loading()}
-        <div  style="text-align: center; padding: 20px">Loading...</div>
-      {/snippet}
+      <div style="text-align: center; padding: 20px">Loading...</div>
+    {/snippet}
 
     {#each users.data as user (user.id)}
       <UserCard {user} />

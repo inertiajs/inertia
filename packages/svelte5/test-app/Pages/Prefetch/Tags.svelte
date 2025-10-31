@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { createBubbler, preventDefault } from 'svelte/legacy';
+  import { createBubbler, preventDefault } from 'svelte/legacy'
 
-  const bubble = createBubbler();
+  const bubble = createBubbler()
   import { inertia, router, useForm } from '@inertiajs/svelte5'
   interface Props {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    pageNumber: any;
+    pageNumber: any
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    lastLoaded: any;
-    propType: string;
+    lastLoaded: any
+    propType: string
   }
 
-  let { pageNumber, lastLoaded, propType }: Props = $props();
+  let { pageNumber, lastLoaded, propType }: Props = $props()
 
   const form = useForm({
     name: '',

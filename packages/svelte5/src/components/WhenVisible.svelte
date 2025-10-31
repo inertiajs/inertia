@@ -3,24 +3,16 @@
   import { onDestroy, onMount } from 'svelte'
 
   interface Props {
-    data?: string | string[];
-    params?: ReloadOptions;
-    buffer?: number;
-    as?: keyof HTMLElementTagNameMap;
-    always?: boolean;
-    children?: import('svelte').Snippet;
-    fallback?: import('svelte').Snippet;
+    data?: string | string[]
+    params?: ReloadOptions
+    buffer?: number
+    as?: keyof HTMLElementTagNameMap
+    always?: boolean
+    children?: import('svelte').Snippet
+    fallback?: import('svelte').Snippet
   }
 
-  let {
-    data = '',
-    params = {},
-    buffer = 0,
-    as = 'div',
-    always = false,
-    children,
-    fallback
-  }: Props = $props();
+  let { data = '', params = {}, buffer = 0, as = 'div', always = false, children, fallback }: Props = $props()
 
   let loaded = $state(false)
   let fetching = false

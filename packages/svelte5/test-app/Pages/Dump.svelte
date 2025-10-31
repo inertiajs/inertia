@@ -4,15 +4,15 @@
   import type { MulterFile } from '../types'
 
   interface Props {
-    headers: Record<string, string>;
-    method: Method;
-    form: Record<string, unknown>;
-    files: MulterFile[] | object;
-    url: string;
-    query: Record<string, unknown>;
+    headers: Record<string, string>
+    method: Method
+    form: Record<string, unknown>
+    files: MulterFile[] | object
+    url: string
+    query: Record<string, unknown>
   }
 
-  let { headers, method, form, files = {}, url, query }: Props = $props();
+  let { headers, method, form, files = {}, url, query }: Props = $props()
 
   const dump = {
     headers,

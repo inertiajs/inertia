@@ -4,24 +4,21 @@
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
-    preserveState: boolean;
-    filter?: string | undefined;
-    search?: string | undefined;
+    users: { data: User[] }
+    preserveState: boolean
+    filter?: string | undefined
+    search?: string | undefined
   }
 
-  let {
-    users,
-    preserveState,
-    filter = undefined,
-    search = undefined
-  }: Props = $props();
+  let { users, preserveState, filter = undefined, search = undefined }: Props = $props()
 
-  const form = $state(useForm({
-    filter: undefined,
-    page: undefined,
-    search: search,
-  }))
+  const form = $state(
+    useForm({
+      filter: undefined,
+      page: undefined,
+      search: search,
+    }),
+  )
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined = $state()
   let previousSearch = $state(search)
@@ -40,7 +37,7 @@
         if (timeoutId) {
           clearTimeout(timeoutId)
         }
-  
+
         // Set new timeout for debounced search
         timeoutId = setTimeout(() => {
           form.get(
@@ -59,7 +56,7 @@
         }, 250)
       })
     }
-  });
+  })
 </script>
 
 <div>
@@ -74,8 +71,8 @@
 
   <InfiniteScroll data="users" style="display: grid; gap: 20px">
     {#snippet loading()}
-        <div  style="text-align: center; padding: 20px">Loading...</div>
-      {/snippet}
+      <div style="text-align: center; padding: 20px">Loading...</div>
+    {/snippet}
 
     {#each users.data as user (user.id)}
       <UserCard {user} />

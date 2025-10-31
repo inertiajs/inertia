@@ -2,27 +2,23 @@
   import { Deferred, inertia } from '@inertiajs/svelte5'
 
   interface Props {
-    foo: { text: string } | undefined;
-    bar: { text: string } | undefined;
+    foo: { text: string } | undefined
+    bar: { text: string } | undefined
   }
 
-  let { foo, bar }: Props = $props();
+  let { foo, bar }: Props = $props()
 </script>
 
 <Deferred data="foo">
   {#snippet fallback()}
-  
-      <div>Loading foo...</div>
-    
+    <div>Loading foo...</div>
   {/snippet}
   {foo?.text}
 </Deferred>
 
 <Deferred data="bar">
   {#snippet fallback()}
-  
-      <div>Loading bar...</div>
-    
+    <div>Loading bar...</div>
   {/snippet}
   {bar?.text}
 </Deferred>

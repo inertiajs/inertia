@@ -17,29 +17,29 @@
   const noop = () => undefined
 
   interface Props {
-    action?: FormComponentProps['action'];
-    method?: FormComponentProps['method'];
-    headers?: FormComponentProps['headers'];
-    queryStringArrayFormat?: FormComponentProps['queryStringArrayFormat'];
-    errorBag?: FormComponentProps['errorBag'];
-    showProgress?: FormComponentProps['showProgress'];
-    transform?: FormComponentProps['transform'];
-    options?: FormComponentProps['options'];
-    onCancelToken?: FormComponentProps['onCancelToken'];
-    onBefore?: FormComponentProps['onBefore'];
-    onStart?: FormComponentProps['onStart'];
-    onProgress?: FormComponentProps['onProgress'];
-    onFinish?: FormComponentProps['onFinish'];
-    onCancel?: FormComponentProps['onCancel'];
-    onSuccess?: FormComponentProps['onSuccess'];
-    onError?: FormComponentProps['onError'];
-    onSubmitComplete?: FormComponentProps['onSubmitComplete'];
-    disableWhileProcessing?: boolean;
-    invalidateCacheTags?: FormComponentProps['invalidateCacheTags'];
-    resetOnError?: FormComponentProps['resetOnError'];
-    resetOnSuccess?: FormComponentProps['resetOnSuccess'];
-    setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess'];
-    children?: import('svelte').Snippet<[any]>;
+    action?: FormComponentProps['action']
+    method?: FormComponentProps['method']
+    headers?: FormComponentProps['headers']
+    queryStringArrayFormat?: FormComponentProps['queryStringArrayFormat']
+    errorBag?: FormComponentProps['errorBag']
+    showProgress?: FormComponentProps['showProgress']
+    transform?: FormComponentProps['transform']
+    options?: FormComponentProps['options']
+    onCancelToken?: FormComponentProps['onCancelToken']
+    onBefore?: FormComponentProps['onBefore']
+    onStart?: FormComponentProps['onStart']
+    onProgress?: FormComponentProps['onProgress']
+    onFinish?: FormComponentProps['onFinish']
+    onCancel?: FormComponentProps['onCancel']
+    onSuccess?: FormComponentProps['onSuccess']
+    onError?: FormComponentProps['onError']
+    onSubmitComplete?: FormComponentProps['onSubmitComplete']
+    disableWhileProcessing?: boolean
+    invalidateCacheTags?: FormComponentProps['invalidateCacheTags']
+    resetOnError?: FormComponentProps['resetOnError']
+    resetOnSuccess?: FormComponentProps['resetOnSuccess']
+    setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess']
+    children?: import('svelte').Snippet<[any]>
     [key: string]: any
   }
 
@@ -68,7 +68,7 @@
     setDefaultsOnSuccess = false,
     children,
     ...rest
-  }: Props = $props();
+  }: Props = $props()
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -231,6 +231,6 @@
     submit,
     defaults,
     getData,
-    getFormData
+    getFormData,
   })}
 </form>

@@ -4,24 +4,24 @@
   import { inertia } from '../index'
 
   interface Props {
-    href?: LinkComponentBaseProps['href'];
-    as?: keyof HTMLElementTagNameMap;
-    data?: LinkComponentBaseProps['data'];
-    method?: LinkComponentBaseProps['method'];
-    replace?: LinkComponentBaseProps['replace'];
-    preserveScroll?: LinkComponentBaseProps['preserveScroll'];
-    preserveState?: LinkComponentBaseProps['preserveState'] | null;
-    preserveUrl?: LinkComponentBaseProps['preserveUrl'];
-    only?: LinkComponentBaseProps['only'];
-    except?: LinkComponentBaseProps['except'];
-    headers?: LinkComponentBaseProps['headers'];
-    queryStringArrayFormat?: LinkComponentBaseProps['queryStringArrayFormat'];
-    async?: LinkComponentBaseProps['async'];
-    prefetch?: LinkComponentBaseProps['prefetch'];
-    cacheFor?: LinkComponentBaseProps['cacheFor'];
-    cacheTags?: LinkComponentBaseProps['cacheTags'];
-    viewTransition?: LinkComponentBaseProps['viewTransition'];
-    children?: import('svelte').Snippet;
+    href?: LinkComponentBaseProps['href']
+    as?: keyof HTMLElementTagNameMap
+    data?: LinkComponentBaseProps['data']
+    method?: LinkComponentBaseProps['method']
+    replace?: LinkComponentBaseProps['replace']
+    preserveScroll?: LinkComponentBaseProps['preserveScroll']
+    preserveState?: LinkComponentBaseProps['preserveState'] | null
+    preserveUrl?: LinkComponentBaseProps['preserveUrl']
+    only?: LinkComponentBaseProps['only']
+    except?: LinkComponentBaseProps['except']
+    headers?: LinkComponentBaseProps['headers']
+    queryStringArrayFormat?: LinkComponentBaseProps['queryStringArrayFormat']
+    async?: LinkComponentBaseProps['async']
+    prefetch?: LinkComponentBaseProps['prefetch']
+    cacheFor?: LinkComponentBaseProps['cacheFor']
+    cacheTags?: LinkComponentBaseProps['cacheTags']
+    viewTransition?: LinkComponentBaseProps['viewTransition']
+    children?: import('svelte').Snippet
     [key: string]: any
   }
 
@@ -45,17 +45,18 @@
     viewTransition = false,
     children,
     ...rest
-  }: Props = $props();
+  }: Props = $props()
 
   let _method = $derived(isUrlMethodPair(href) ? href.method : method)
   let _href = $derived(isUrlMethodPair(href) ? href.url : href)
 
   let asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())
-  let elProps =
-    $derived({
+  let elProps = $derived(
+    {
       a: { href: _href },
       button: { type: 'button' },
-    }[asProp] || {})
+    }[asProp] || {},
+  )
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

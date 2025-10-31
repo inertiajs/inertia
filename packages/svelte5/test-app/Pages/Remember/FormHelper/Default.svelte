@@ -3,11 +3,13 @@
 
   let untracked = $state('')
 
-  const form = $state(useForm({
-    name: 'foo',
-    handle: 'example',
-    remember: false,
-  }))
+  const form = $state(
+    useForm({
+      name: 'foo',
+      handle: 'example',
+      remember: false,
+    }),
+  )
 
   const submit = () => {
     form.post('/remember/form-helper/default')

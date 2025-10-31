@@ -7,10 +7,10 @@
 
 <script lang="ts">
   interface Props {
-    user: User;
+    user: User
   }
 
-  let { user }: Props = $props();
+  let { user }: Props = $props()
 </script>
 
 <div

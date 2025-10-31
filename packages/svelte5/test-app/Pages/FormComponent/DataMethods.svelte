@@ -17,13 +17,13 @@
 <div>
   <h1>Test getData() and getFormData() Methods</h1>
 
-  <Form  >
+  <Form>
     {#snippet children({ getData, getFormData })}
-        <input type="text" id="name" name="name" />
+      <input type="text" id="name" name="name" />
 
       <button type="button" onclick={() => testGetData(getData)}> Test getData() </button>
 
       <button type="button" onclick={() => testGetFormData(getFormData)}> Test getFormData() </button>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 </div>

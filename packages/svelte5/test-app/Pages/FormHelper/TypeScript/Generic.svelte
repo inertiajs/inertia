@@ -4,10 +4,10 @@
   import type { InertiaForm } from '@inertiajs/svelte5'
 
   interface Props {
-    form: InertiaForm<TFormData>;
+    form: InertiaForm<TFormData>
   }
 
-  let { form }: Props = $props();
+  let { form }: Props = $props()
 </script>
 
 <div>{form}</div>

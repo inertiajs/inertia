@@ -218,7 +218,7 @@
 
   const cancelVisit = (e: Event) => {
     e.preventDefault()
-    
+
     router.on('cancel', (event) => {
       internalAlert('Inertia.on(cancel)')
       internalAlert(event)
@@ -534,14 +534,11 @@
 <div>
   <!-- Listeners -->
   <a href={'#'} onclick={withoutEventListeners} class="without-listeners">Basic Visit</a>
-  <a href={'#'} onclick={removeInertiaListener} class="remove-inertia-listener"
-    >Remove Inertia Listener</a
-  >
+  <a href={'#'} onclick={removeInertiaListener} class="remove-inertia-listener">Remove Inertia Listener</a>
 
   <!-- Events: Before -->
   <a href={'#'} onclick={beforeVisit} class="before">Before Event</a>
-  <a href={'#'} onclick={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a
-  >
+  <a href={'#'} onclick={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a>
   <button
     use:inertia={{ href: page.url, method: 'post' }}
     onbefore={(event) => internalAlert('linkOnBefore', event.detail.visit)}
@@ -593,9 +590,7 @@
 
   <!-- Events: Progress -->
   <a href={'#'} onclick={progressVisit} class="progress">Progress Event</a>
-  <a href={'#'} onclick={progressNoFilesVisit} class="progress-no-files"
-    >Missing Progress Event (no files)</a
-  >
+  <a href={'#'} onclick={progressNoFilesVisit} class="progress-no-files">Missing Progress Event (no files)</a>
   <button
     use:inertia={{ href: page.url, method: 'post', data: payloadWithFile }}
     onprogress={handleProgress}
@@ -610,9 +605,7 @@
 
   <!-- Events: Error -->
   <a href={'#'} onclick={errorVisit} class="error">Error Event</a>
-  <a href={'#'} onclick={errorPromiseVisit} class="error-promise"
-    >Error Event (delaying onFinish w/ Promise)</a
-  >
+  <a href={'#'} onclick={errorPromiseVisit} class="error-promise">Error Event (delaying onFinish w/ Promise)</a>
   <button
     use:inertia={{ href: '/events/errors', method: 'post' }}
     onerror={handleError}
@@ -629,9 +622,7 @@
 
   <!-- Events: Success -->
   <a href={'#'} onclick={successVisit} class="success">Success Event</a>
-  <a href={'#'} onclick={successPromiseVisit} class="success-promise"
-    >Success Event (delaying onFinish w/ Promise)</a
-  >
+  <a href={'#'} onclick={successPromiseVisit} class="success-promise">Success Event (delaying onFinish w/ Promise)</a>
   <button
     use:inertia={{ href: page.url, method: 'post' }}
     onerror={() => internalAlert('This listener should not have been called')}

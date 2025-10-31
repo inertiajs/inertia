@@ -11,17 +11,19 @@
     events = [...events, eventName]
   }
 
-  let action = $derived((() => {
-    if (shouldFail) {
-      return '/form-component/events/errors'
-    }
+  let action = $derived(
+    (() => {
+      if (shouldFail) {
+        return '/form-component/events/errors'
+      }
 
-    if (shouldDelay) {
-      return '/form-component/events/delay'
-    }
+      if (shouldDelay) {
+        return '/form-component/events/delay'
+      }
 
-    return '/form-component/events/success'
-  })())
+      return '/form-component/events/success'
+    })(),
+  )
 
   function onBefore() {
     log('onBefore')
@@ -80,10 +82,6 @@
   {onSuccess}
   {onError}
   {onCancelToken}
-  
-  
-  
-  
 >
   {#snippet children({ processing, progress, wasSuccessful, recentlySuccessful })}
     <h1>Form Events & State</h1>

@@ -2,63 +2,47 @@
   import { Deferred, inertia } from '@inertiajs/svelte5'
 
   interface Props {
-    foo: { text: string } | undefined;
-    bar: { text: string } | undefined;
-    baz: { text: string } | undefined;
-    qux: { text: string } | undefined;
-    quux: { text: string } | undefined;
+    foo: { text: string } | undefined
+    bar: { text: string } | undefined
+    baz: { text: string } | undefined
+    qux: { text: string } | undefined
+    quux: { text: string } | undefined
   }
 
-  let {
-    foo,
-    bar,
-    baz,
-    qux,
-    quux
-  }: Props = $props();
+  let { foo, bar, baz, qux, quux }: Props = $props()
 </script>
 
 <Deferred data="foo">
   {#snippet fallback()}
-  
-      <div>Loading foo...</div>
-    
+    <div>Loading foo...</div>
   {/snippet}
   {foo?.text}
 </Deferred>
 
 <Deferred data="bar">
   {#snippet fallback()}
-  
-      <div>Loading bar...</div>
-    
+    <div>Loading bar...</div>
   {/snippet}
   {bar?.text}
 </Deferred>
 
 <Deferred data="baz">
   {#snippet fallback()}
-  
-      <div>Loading baz...</div>
-    
+    <div>Loading baz...</div>
   {/snippet}
   {baz?.text}
 </Deferred>
 
 <Deferred data="qux">
   {#snippet fallback()}
-  
-      <div>Loading qux...</div>
-    
+    <div>Loading qux...</div>
   {/snippet}
   {qux?.text}
 </Deferred>
 
 <Deferred data="quux">
   {#snippet fallback()}
-  
-      <div>Loading quux...</div>
-    
+    <div>Loading quux...</div>
   {/snippet}
   {quux?.text}
 </Deferred>

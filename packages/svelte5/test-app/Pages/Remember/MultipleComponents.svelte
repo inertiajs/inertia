@@ -5,10 +5,12 @@
 
   let untracked = $state('')
 
-  const form = $state(useRemember({
-    name: '',
-    remember: false,
-  }))
+  const form = $state(
+    useRemember({
+      name: '',
+      remember: false,
+    }),
+  )
 </script>
 
 <div>

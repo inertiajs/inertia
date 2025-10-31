@@ -3,11 +3,11 @@
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
-    time: number;
+    users: { data: User[] }
+    time: number
   }
 
-  let { users, time }: Props = $props();
+  let { users, time }: Props = $props()
 
   const reloadTime = () => {
     router.reload({ only: ['time'] })

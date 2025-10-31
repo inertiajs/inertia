@@ -3,10 +3,10 @@
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 </script>
 
 <div style="padding: 20px">
@@ -20,8 +20,8 @@
   >
     <InfiniteScroll data="users" style="display: grid; gap: 10px">
       {#snippet loading()}
-            <div  style="text-align: center; padding: 20px; color: #666">Loading more users...</div>
-          {/snippet}
+        <div style="text-align: center; padding: 20px; color: #666">Loading more users...</div>
+      {/snippet}
 
       {#each users.data as user (user.id)}
         <UserCard {user} />

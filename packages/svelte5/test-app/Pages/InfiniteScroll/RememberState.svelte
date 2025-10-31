@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy';
+  import { preventDefault } from 'svelte/legacy'
 
   import { InfiniteScroll, Link, router } from '@inertiajs/svelte5'
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 
   function prependUser(id: number) {
     router.prependToProp('users.data', { id, name: `User ${id}` })
@@ -29,7 +29,7 @@
   {/each}
 
   {#snippet next({ loading, manualMode, fetch })}
-    <div    >
+    <div>
       {#if loading}
         <p>Loading...</p>
       {/if}

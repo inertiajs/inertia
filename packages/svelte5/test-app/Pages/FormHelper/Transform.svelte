@@ -1,10 +1,12 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte5'
 
-  const form = $state(useForm({
-    name: 'foo',
-    remember: false,
-  }))
+  const form = $state(
+    useForm({
+      name: 'foo',
+      remember: false,
+    }),
+  )
 
   const postForm = () => {
     form

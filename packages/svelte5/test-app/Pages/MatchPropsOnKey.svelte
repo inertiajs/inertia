@@ -15,12 +15,12 @@
   }
 
   interface Props {
-    foo: ComponentProps['foo'];
-    bar: ComponentProps['bar'];
-    baz: ComponentProps['baz'];
+    foo: ComponentProps['foo']
+    bar: ComponentProps['bar']
+    baz: ComponentProps['baz']
   }
 
-  let { foo, bar, baz }: Props = $props();
+  let { foo, bar, baz }: Props = $props()
 
   let page = foo.page
 

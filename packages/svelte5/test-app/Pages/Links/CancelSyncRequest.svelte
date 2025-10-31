@@ -2,10 +2,10 @@
   import { Link } from '@inertiajs/svelte5'
 
   interface Props {
-    page: number;
+    page: number
   }
 
-  let { page }: Props = $props();
+  let { page }: Props = $props()
 </script>
 
 <h1 style="font-size: 40px;">

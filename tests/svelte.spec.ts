@@ -2,10 +2,7 @@ import { expect, test } from '@playwright/test'
 import { consoleMessages } from './support'
 
 test.beforeEach(async ({ page }) => {
-  test.skip(
-    process.env.PACKAGE !== 'svelte' || process.env.PACKAGE !== 'svelte5',
-    'Svelte-only test',
-  )
+  test.skip(process.env.PACKAGE !== 'svelte' || process.env.PACKAGE !== 'svelte5', 'Svelte-only test')
 })
 
 test('props and page store are in sync', async ({ page }) => {

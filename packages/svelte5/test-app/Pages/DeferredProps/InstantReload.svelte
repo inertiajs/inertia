@@ -3,11 +3,11 @@
   import { onMount } from 'svelte'
 
   interface Props {
-    foo: { text: string } | undefined;
-    bar: { text: string } | undefined;
+    foo: { text: string } | undefined
+    bar: { text: string } | undefined
   }
 
-  let { foo, bar }: Props = $props();
+  let { foo, bar }: Props = $props()
 
   onMount(() => {
     router.reload({
@@ -18,18 +18,14 @@
 
 <Deferred data="foo">
   {#snippet fallback()}
-  
-      <div>Loading foo...</div>
-    
+    <div>Loading foo...</div>
   {/snippet}
   <div>{foo?.text}</div>
 </Deferred>
 
 <Deferred data="bar">
   {#snippet fallback()}
-  
-      <div>Loading bar...</div>
-    
+    <div>Loading bar...</div>
   {/snippet}
   <div>{bar?.text}</div>
 </Deferred>

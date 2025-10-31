@@ -6,7 +6,7 @@
     foo: string
   }
 
-  let { foo } = $props();
+  let { foo } = $props()
 
   const form = $state(useForm({ foo }))
 
@@ -22,13 +22,13 @@
 
   $effect(() => {
     console.log('[reactive expression] foo prop is', foo)
-  });
+  })
   $effect(() => {
     console.log('[reactive expression] page.props.foo is', page.props.foo)
-  });
+  })
   $effect(() => {
     console.log('[reactive expression] sveltePage.props.foo is', sveltePage.props.foo)
-  });
+  })
 
   onMount(() => {
     console.log('[onMount] foo prop is', foo)

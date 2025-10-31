@@ -3,12 +3,12 @@
   import { page } from '../index'
 
   interface Props {
-    data: string | string[];
-    fallback?: import('svelte').Snippet;
-    children?: import('svelte').Snippet;
+    data: string | string[]
+    fallback?: import('svelte').Snippet
+    children?: import('svelte').Snippet
   }
 
-  let { data, fallback, children }: Props = $props();
+  let { data, fallback, children }: Props = $props()
 
   const keys = Array.isArray(data) ? data : [data]
   let loaded = $state(false)

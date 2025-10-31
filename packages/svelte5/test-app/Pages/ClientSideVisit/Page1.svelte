@@ -8,11 +8,11 @@
   }
 
   interface Props {
-    foo: string;
-    bar: string;
+    foo: string
+    bar: string
   }
 
-  let { foo, bar }: Props = $props();
+  let { foo, bar }: Props = $props()
 
   let errors = $state(0)
   let finished = $state(0)

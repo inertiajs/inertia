@@ -1,12 +1,7 @@
 <script lang="ts">
   import { inertia } from '@inertiajs/svelte5'
 
-  let {
-    foo = 0,
-    bar,
-    baz,
-    headers
-  } = $props();
+  let { foo = 0, bar, baz, headers } = $props()
 </script>
 
 <div>

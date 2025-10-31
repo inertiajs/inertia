@@ -3,15 +3,15 @@
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {
-    users: { data: User[] };
+    users: { data: User[] }
   }
 
-  let { users }: Props = $props();
+  let { users }: Props = $props()
 </script>
 
 <InfiniteScroll data="users" style="display: grid; gap: 20px" manual>
   {#snippet previous({ hasMore, loading, fetch })}
-    <div    >
+    <div>
       <p>Has more previous items: {hasMore}</p>
       <button onclick={fetch}>
         {loading ? 'Loading previous items...' : 'Load previous items'}
@@ -24,7 +24,7 @@
   {/each}
 
   {#snippet next({ hasMore, loading, fetch })}
-    <div    >
+    <div>
       <p>Has more next items: {hasMore}</p>
       <button onclick={fetch}>
         {loading ? 'Loading next items...' : 'Load next items'}

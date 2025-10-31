@@ -32,6 +32,6 @@
       postTitles,
       flashMessage,
       userNames,
-    });
-  });
+    })
+  })
 </script>

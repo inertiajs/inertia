@@ -33,9 +33,9 @@
 <div>
   <h1>Form Ref Test</h1>
 
-  <Form bind:this={formRef} action="/dump/post" method="post"   >
+  <Form bind:this={formRef} action="/dump/post" method="post">
     {#snippet children({ isDirty, errors, hasErrors })}
-        <!-- State display for testing -->
+      <!-- State display for testing -->
       <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
       {#if hasErrors}
         <div>Form has errors</div>
@@ -55,8 +55,8 @@
       <div>
         <button type="submit">Submit via Form</button>
       </div>
-          {/snippet}
-    </Form>
+    {/snippet}
+  </Form>
 
   <div>
     <button onclick={submitProgrammatically}> Submit Programmatically </button>

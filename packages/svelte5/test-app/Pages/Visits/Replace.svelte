@@ -31,7 +31,7 @@
 
   const replaceGetFalse = (e: Event) => {
     e.preventDefault()
-    
+
     router.get(
       '/dump/get',
       {},
