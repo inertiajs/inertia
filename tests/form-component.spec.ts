@@ -1436,6 +1436,19 @@ test.describe('Form Component', () => {
       await page.goto('/form-component/precognition')
     })
 
+    test('does not validate when field is untouched', async ({ page }) => {
+      await page.locator('input[name="name"]').focus()
+      await page.waitForTimeout(100)
+      await page.locator('input[name="name"]').blur()
+
+      for (let i = 0; i < 5; i++) {
+        await expect(page.getByText('Validating...')).not.toBeVisible()
+        await page.waitForTimeout(50)
+      }
+
+      await expect(page.getByText('The name field is required.')).not.toBeVisible()
+    })
+
     test('shows validation error when field is invalid', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()

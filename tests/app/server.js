@@ -996,7 +996,7 @@ app.post('/form-component/precognition', (req, res) => {
 
       return res.status(204).header('Precognition-Success', 'true').send()
     },
-    !!req.query['slow'] ? 2000 : 500,
+    !!req.query['slow'] ? 2000 : 250,
   )
 })
 
@@ -1039,7 +1039,7 @@ app.post('/form-component/precognition-array-errors', (req, res) => {
     }
 
     return res.status(204).header('Precognition-Success', 'true').send()
-  }, 500)
+  }, 250)
 })
 
 app.post('/form-component/precognition-files', upload.any(), (req, res) => {
@@ -1078,7 +1078,7 @@ app.post('/form-component/precognition-files', upload.any(), (req, res) => {
     }
 
     return res.status(204).header('Precognition-Success', 'true').send()
-  }, 500)
+  }, 250)
 })
 
 app.post('/form-component/precognition-headers', (req, res) => {
@@ -1104,13 +1104,7 @@ app.post('/form-component/precognition-headers', (req, res) => {
     }
 
     return res.status(204).header('Precognition-Success', 'true').send()
-  }, 500)
-})
-
-app.post('/form-component/precognition-exception', (req, res) => {
-  setTimeout(() => {
-    res.status(500).json({ message: 'Internal server error' })
-  }, 500)
+  }, 250)
 })
 
 //

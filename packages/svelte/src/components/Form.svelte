@@ -12,12 +12,13 @@
   } from '@inertiajs/core'
   import {
     createValidator,
+    resolveName,
     toSimpleValidationErrors,
     type NamedInputEvent,
     type ValidationConfig,
     type Validator,
   } from 'laravel-precognition'
-  import { isEqual } from 'lodash-es'
+  import { get, isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 
@@ -194,12 +195,19 @@
     isDirty = false
   }
 
-  export function validate(
-    input?: string | NamedInputEvent | ValidationConfig,
-    value?: unknown,
-    config?: ValidationConfig,
-  ) {
-    return validator!.validate(input, value, config)
+  export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
+    if (typeof field === 'object' && !('target' in field)) {
+      config = field
+      field = undefined
+    }
+
+    if (typeof field === 'undefined') {
+      validator!.validate(config)
+    } else {
+      field = resolveName(field)
+
+      validator!.validate(field, get(getTransformedData(), field), config)
+    }
   }
 
   export function touch(...fields: string[]) {

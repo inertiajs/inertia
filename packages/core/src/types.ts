@@ -1,5 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
-import { Validator } from 'laravel-precognition'
+import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -587,7 +587,7 @@ export type FormComponentMethods = {
   getFormData: () => FormData
   valid: (field: string) => boolean
   invalid: (field: string) => boolean
-  validate: Validator['validate']
+  validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig): void
   touch: (...fields: string[]) => void
   touched(field?: string): boolean
 }

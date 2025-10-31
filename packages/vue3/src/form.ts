@@ -14,11 +14,12 @@ import {
 import {
   createValidator,
   NamedInputEvent,
+  resolveName,
   toSimpleValidationErrors,
   ValidationConfig,
   Validator,
 } from 'laravel-precognition'
-import { isEqual } from 'lodash-es'
+import { get, isEqual } from 'lodash-es'
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType, watch } from 'vue'
 import useForm from './useForm'
 
@@ -217,6 +218,21 @@ const Form = defineComponent({
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
 
+    const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
+      if (typeof field === 'object' && !('target' in field)) {
+        config = field
+        field = undefined
+      }
+
+      if (typeof field === 'undefined') {
+        validator.validate(config)
+      } else {
+        field = resolveName(field)
+
+        validator.validate(field, get(getTransformedData(), field), config)
+      }
+    }
+
     // watch(
     //   () => props.validateFiles,
     //   (value) => validator.validateFiles(value),
@@ -356,8 +372,7 @@ const Form = defineComponent({
       // Precognition
       valid: (field: string) => valid.value.includes(field),
       invalid: (field: string) => form.errors[field] !== undefined,
-      validate: (input?: string | NamedInputEvent | ValidationConfig, value?: unknown, config?: ValidationConfig) =>
-        validator.validate(input, value, config),
+      validate,
       touch: (...fields: string[]) => validator.touch(fields),
       touched: isTouched,
     }

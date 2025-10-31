@@ -14,11 +14,12 @@ import {
 import {
   createValidator,
   NamedInputEvent,
+  resolveName,
   toSimpleValidationErrors,
   ValidationConfig,
   Validator,
 } from 'laravel-precognition'
-import { isEqual } from 'lodash-es'
+import { get, isEqual } from 'lodash-es'
 import React, {
   createElement,
   FormEvent,
@@ -183,6 +184,21 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       }
     }, [])
 
+    const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
+      if (typeof field === 'object' && !('target' in field)) {
+        config = field
+        field = undefined
+      }
+
+      if (typeof field === 'undefined') {
+        validator!.validate(config)
+      } else {
+        field = resolveName(field)
+
+        validator!.validate(field, get(getTransformedData(), field), config)
+      }
+    }
+
     useEffect(() => {
       validator?.setTimeout(validateTimeout)
     }, [validateTimeout, validator])
@@ -288,8 +304,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       validating,
       valid: (field: string) => valid.includes(field),
       invalid: (field: string) => form.errors[field] !== undefined,
-      validate: (input?: string | NamedInputEvent | ValidationConfig, value?: unknown, config?: ValidationConfig) =>
-        validator!.validate(input, value, config),
+      validate,
       touch,
       touched: isTouched,
     })
