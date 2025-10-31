@@ -17,7 +17,7 @@ const page = $state<SveltePage>({
 } as SveltePage)
 
 export function setPage(newPage: SveltePage) {
-  Object.assign(page, $state.snapshot(newPage))
+  Object.assign(page, newPage)
 }
 
 export function usePage<
