@@ -1,3 +1,4 @@
+import { FormComponentMethods } from '@inertiajs/core'
 import { Form, Head } from '@inertiajs/react'
 import { useState } from 'react'
 import Layout from '../Components/Layout'
@@ -7,26 +8,22 @@ const FormComponentPrecognition = () => {
     success: false,
     error: false,
     finish: false,
-    exception: false,
-    exceptionMessage: '',
   })
 
-  const validateWithCallbacks = (validate) => {
+  const validateWithCallbacks = (validate: FormComponentMethods['validate']) => {
     setCallbacks({
       success: false,
       error: false,
       finish: false,
-      exception: false,
-      exceptionMessage: '',
     })
 
     validate('name', {
-      onSuccess: () => setCallbacks((prev) => ({ ...prev, success: true })),
-      onError: () => setCallbacks((prev) => ({ ...prev, error: true })),
+      onPrecognitionSuccess: () => setCallbacks((prev) => ({ ...prev, success: true })),
+      onValidationError: () => setCallbacks((prev) => ({ ...prev, error: true })),
       onFinish: () => setCallbacks((prev) => ({ ...prev, finish: true })),
-      onBefore: (newReq, oldReq) => {
+      onBeforeValidation: (newReq, oldReq) => {
         // Prevent validation if name is 'block'
-        if (newReq.data.name === 'block') {
+        if (newReq.data?.name === 'block') {
           alert('Validation blocked by onBefore!')
           return false
         }
@@ -248,9 +245,6 @@ const FormComponentPrecognition = () => {
                     {callbacks.success && <p className="text-sm text-green-600">onPrecognitionSuccess called!</p>}
                     {callbacks.error && <p className="text-sm text-red-600">onValidationError called!</p>}
                     {callbacks.finish && <p className="text-sm text-blue-600">onFinish called!</p>}
-                    {callbacks.exception && (
-                      <p className="text-sm text-orange-600">onException: {callbacks.exceptionMessage}</p>
-                    )}
                   </div>
                 )}
 

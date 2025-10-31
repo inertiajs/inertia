@@ -3,6 +3,8 @@
 </script>
 
 <script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
+
   import { Form } from '@inertiajs/svelte'
 
   export let appName
@@ -11,26 +13,22 @@
     success: false,
     error: false,
     finish: false,
-    exception: false,
-    exceptionMessage: '',
   }
 
-  const validateWithCallbacks = (validate) => {
+  const validateWithCallbacks = (validate: FormComponentMethods['validate']) => {
     callbacks = {
       success: false,
       error: false,
       finish: false,
-      exception: false,
-      exceptionMessage: '',
     }
 
     validate('name', {
-      onSuccess: () => (callbacks.success = true),
-      onError: () => (callbacks.error = true),
+      onPrecognitionSuccess: () => (callbacks.success = true),
+      onValidationError: () => (callbacks.error = true),
       onFinish: () => (callbacks.finish = true),
-      onBefore: (newReq, oldReq) => {
+      onBeforeValidation: (newReq, oldReq) => {
         // Prevent validation if name is 'block'
-        if (newReq.data.name === 'block') {
+        if (newReq.data?.name === 'block') {
           alert('Validation blocked by onBefore!')
           return false
         }
@@ -263,9 +261,6 @@
           {/if}
           {#if callbacks.finish}
             <p class="text-sm text-blue-600">onFinish called!</p>
-          {/if}
-          {#if callbacks.exception}
-            <p class="text-sm text-orange-600">onException: {callbacks.exceptionMessage}</p>
           {/if}
         </div>
       {/if}

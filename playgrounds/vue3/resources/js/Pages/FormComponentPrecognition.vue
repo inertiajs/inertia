@@ -1,4 +1,5 @@
 <script lang="ts">
+import { FormComponentMethods } from '@inertiajs/core'
 import Layout from '../Components/Layout.vue'
 export default { layout: Layout }
 </script>
@@ -11,26 +12,22 @@ const callbacks = ref({
   success: false,
   error: false,
   finish: false,
-  exception: false,
-  exceptionMessage: '',
 })
 
-const validateWithCallbacks = (validate) => {
+const validateWithCallbacks = (validate: FormComponentMethods['validate']) => {
   callbacks.value = {
     success: false,
     error: false,
     finish: false,
-    exception: false,
-    exceptionMessage: '',
   }
 
   validate('name', {
-    onSuccess: () => (callbacks.value.success = true),
-    onError: () => (callbacks.value.error = true),
+    onPrecognitionSuccess: () => (callbacks.value.success = true),
+    onValidationError: () => (callbacks.value.error = true),
     onFinish: () => (callbacks.value.finish = true),
-    onBefore: (newReq, oldReq) => {
+    onBeforeValidation: (newReq, oldReq) => {
       // Prevent validation if name is 'block'
-      if (newReq.data.name === 'block') {
+      if (newReq.data?.name === 'block') {
         alert('Validation blocked by onBefore!')
         return false
       }
@@ -212,9 +209,6 @@ const validateTimeout = ref(1500)
             <p v-if="callbacks.success" class="text-sm text-green-600">onPrecognitionSuccess called!</p>
             <p v-if="callbacks.error" class="text-sm text-red-600">onValidationError called!</p>
             <p v-if="callbacks.finish" class="text-sm text-blue-600">onFinish called!</p>
-            <p v-if="callbacks.exception" class="text-sm text-orange-600">
-              onException: {{ callbacks.exceptionMessage }}
-            </p>
           </div>
 
           <div class="flex flex-wrap gap-2">
