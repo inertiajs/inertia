@@ -52,6 +52,7 @@
    * Resolves the render props for the current page component, including layouts.
    */
   function resolveRenderProps(component: ResolvedComponent, page: Page, key: number | null = null): RenderProps {
+    // If the component does not exists, it will throw on component.default and component.layout here
     const child = h(component.default, page.props, [], key)
     const layout = component.layout
 
