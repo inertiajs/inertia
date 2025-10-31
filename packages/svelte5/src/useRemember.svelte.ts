@@ -5,7 +5,7 @@ export default function useRemember<State extends object>(initialState: State, k
   const state = $state(restored !== undefined ? restored : initialState)
 
   $effect(() => {
-    router.remember(state, key)
+    router.remember($state.snapshot(state), key)
   })
 
   return state
