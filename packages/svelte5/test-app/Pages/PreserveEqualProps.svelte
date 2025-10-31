@@ -7,25 +7,15 @@
     nestedB: { date: number };
   }
 
-  let propies = $props();
-  let { nestedA, nestedB }: Props = $derived($state.snapshot(propies));
+  let { nestedA, nestedB }: Props = $props();
 
   let effectACount = $state(0)
   let effectBCount = $state(0)
 
-  // Store the actual REFERENCES, not snapshots
-  let previousNestedA = nestedA
-  let previousNestedB = nestedB
+  let previousNestedA = $state(nestedA)
+  let previousNestedB = $state(nestedB)
 
   $effect(() => {
-    ;[propies]
-    untrack(() => {
-      console.log(propies, JSON.stringify(propies))
-    })
-  })
-
-  $effect(() => {
-    // Check if the REFERENCE changed
     if (nestedA !== previousNestedA) {
       untrack(() => {
         effectACount++
@@ -35,7 +25,6 @@
   });
 
   $effect(() => {
-    // Check if the REFERENCE changed
     if (nestedB !== previousNestedB) {
       untrack(() => {
         effectBCount++
