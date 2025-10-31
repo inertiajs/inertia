@@ -1,10 +1,10 @@
 <script lang="ts">
-import { FormComponentMethods } from '@inertiajs/core'
 import Layout from '../Components/Layout.vue'
 export default { layout: Layout }
 </script>
 
 <script setup lang="ts">
+import { FormComponentMethods } from '@inertiajs/core'
 import { Form, Head } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
