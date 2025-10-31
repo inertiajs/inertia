@@ -5,18 +5,46 @@
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type Method,
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
   } from '@inertiajs/core'
-  import useForm from '../useForm'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
+  import useForm from '../useForm.svelte'
 
   const noop = () => undefined
 
-  const {
-    action = '',
+  interface Props {
+    action?: FormComponentProps['action'];
+    method?: FormComponentProps['method'];
+    headers?: FormComponentProps['headers'];
+    queryStringArrayFormat?: FormComponentProps['queryStringArrayFormat'];
+    errorBag?: FormComponentProps['errorBag'];
+    showProgress?: FormComponentProps['showProgress'];
+    transform?: FormComponentProps['transform'];
+    options?: FormComponentProps['options'];
+    onCancelToken?: FormComponentProps['onCancelToken'];
+    onBefore?: FormComponentProps['onBefore'];
+    onStart?: FormComponentProps['onStart'];
+    onProgress?: FormComponentProps['onProgress'];
+    onFinish?: FormComponentProps['onFinish'];
+    onCancel?: FormComponentProps['onCancel'];
+    onSuccess?: FormComponentProps['onSuccess'];
+    onError?: FormComponentProps['onError'];
+    onSubmitComplete?: FormComponentProps['onSubmitComplete'];
+    disableWhileProcessing?: boolean;
+    invalidateCacheTags?: FormComponentProps['invalidateCacheTags'];
+    resetOnError?: FormComponentProps['resetOnError'];
+    resetOnSuccess?: FormComponentProps['resetOnSuccess'];
+    setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess'];
+    children?: import('svelte').Snippet<[any]>;
+    [key: string]: any
+  }
+
+  let {
+    action = $bindable(''),
     method = 'get',
     headers = {},
     queryStringArrayFormat = 'brackets',
@@ -39,45 +67,18 @@
     resetOnSuccess = false,
     setDefaultsOnSuccess = false,
     children,
-    ...restProps
-  }: {
-    action?: FormComponentProps['action']
-    method?: FormComponentProps['method']
-    headers?: FormComponentProps['headers']
-    queryStringArrayFormat?: FormComponentProps['queryStringArrayFormat']
-    errorBag?: FormComponentProps['errorBag']
-    showProgress?: FormComponentProps['showProgress']
-    transform?: FormComponentProps['transform']
-    options?: FormComponentProps['options']
-    onCancelToken?: FormComponentProps['onCancelToken']
-    onBefore?: FormComponentProps['onBefore']
-    onStart?: FormComponentProps['onStart']
-    onProgress?: FormComponentProps['onProgress']
-    onFinish?: FormComponentProps['onFinish']
-    onCancel?: FormComponentProps['onCancel']
-    onSuccess?: FormComponentProps['onSuccess']
-    onError?: FormComponentProps['onError']
-    onSubmitComplete?: FormComponentProps['onSubmitComplete']
-    disableWhileProcessing?: boolean
-    invalidateCacheTags?: FormComponentProps['invalidateCacheTags']
-    resetOnError?: FormComponentProps['resetOnError']
-    resetOnSuccess?: FormComponentProps['resetOnSuccess']
-    setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess']
-    children?: any
-    [key: string]: any
-  } = $props()
+    ...rest
+  }: Props = $props();
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
   const form = useForm({})
-  let formElement: HTMLFormElement
+  let formElement: HTMLFormElement = $state(null!)
   let isDirty = $state(false)
   let defaultData: FormData = new FormData()
 
-  const _method = $derived(
-    isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method']),
-  )
-  const _action = $derived(isUrlMethodPair(action) ? action.url : action)
+  const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
+  const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
 
   function getFormData(): FormData {
     return new FormData(formElement)
@@ -148,7 +149,7 @@
       ...options,
     }
 
-    form.transform(() => transform(_data)).submit(_method, url, submitOptions)
+    form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
   }
 
   function handleSubmit(event: Event) {
@@ -169,16 +170,19 @@
   }
 
   export function clearErrors(...fields: string[]) {
+    // @ts-expect-error
     form.clearErrors(...fields)
   }
 
   export function resetAndClearErrors(...fields: string[]) {
+    // @ts-expect-error
     form.clearErrors(...fields)
     reset(...fields)
   }
 
   export function setError(field: string | object, value?: string) {
     if (typeof field === 'string') {
+      // @ts-expect-error
       form.setError(field, value)
     } else {
       form.setError(field)
@@ -203,13 +207,14 @@
   const slotErrors = $derived(form.errors as Errors)
 </script>
 
+{/* @ts-expect-error method type does not match here*/ null}
 <form
   bind:this={formElement}
   action={_action}
   method={_method}
   onsubmit={handleSubmit}
   onreset={handleReset}
-  {...restProps}
+  {...rest}
   inert={disableWhileProcessing && form.processing ? true : undefined}
 >
   {@render children?.({
@@ -219,12 +224,13 @@
     progress: form.progress,
     wasSuccessful: form.wasSuccessful,
     recentlySuccessful: form.recentlySuccessful,
-    isDirty,
     clearErrors,
+    resetAndClearErrors,
     setError,
-    reset,
-    defaults,
+    isDirty,
     submit,
-    data: form,
+    defaults,
+    getData,
+    getFormData
   })}
 </form>
