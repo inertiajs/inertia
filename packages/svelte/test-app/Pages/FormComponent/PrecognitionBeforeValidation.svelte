@@ -3,15 +3,15 @@
   import { Form } from '@inertiajs/svelte'
 
   const handleBeforeValidation = (
-    newRequest: { data: Record<string, unknown>; touched: string[] },
-    oldRequest: { data: Record<string, unknown>; touched: string[] },
+    newRequest: { data: Record<string, unknown> | null; touched: string[] },
+    oldRequest: { data: Record<string, unknown> | null; touched: string[] },
   ) => {
     const payloadIsCorrect =
       isEqual(newRequest, { data: { name: 'block' }, touched: ['name'] }) &&
       isEqual(oldRequest, { data: {}, touched: [] })
 
     // Block validation if name is "block"
-    if (payloadIsCorrect && newRequest.data.name === 'block') {
+    if (payloadIsCorrect && newRequest.data?.name === 'block') {
       return false
     }
 
