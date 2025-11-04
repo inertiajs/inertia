@@ -16,11 +16,20 @@
   let previousNestedB = $state(nestedB)
 
   $effect(() => {
-    if (nestedA !== previousNestedA) {
-      untrack(() => {
-        effectACount++
-        previousNestedA = nestedA
-      })
+    const preserve = untrack(() => config.get('future.preserveEqualProps'))
+
+    // Even when `preserveEqualProps` is enabled, Svelte will wrap incoming props
+    // in a new reactive Proxy on each update. That means the reference to `nestedA`
+    // changes every time, regardless of whether the underlying object from Inertia
+    // was preserved or not. To avoid false positives, we compare by value when
+    // `preserveEqualProps` is enabled, and by reference otherwise.
+    const isDifferent = preserve
+      ? (a: any, b: any) => JSON.stringify(a) !== JSON.stringify(b)
+      : (a: any, b: any) => a !== b
+
+    if (isDifferent(nestedA, previousNestedA)) {
+      effectACount++
+      previousNestedA = preserve ? structuredClone(nestedA) : nestedA
     }
   })
 
