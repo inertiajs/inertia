@@ -2,7 +2,10 @@
 import { useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
-const form = useForm({
+const form = useForm<{
+  name: string
+  avatar: File | null
+}>({
   name: '',
   avatar: null,
 })
@@ -28,7 +31,12 @@ watch(validateFiles, (enabled) => {
     </div>
 
     <div>
-      <input type="file" name="avatar" id="avatar" @change="(e) => (form.avatar = e.target.files[0])" />
+      <input
+        type="file"
+        name="avatar"
+        id="avatar"
+        @change="(e) => (form.avatar = (e.target as HTMLInputElement).files?.[0] || null)"
+      />
       <p v-if="form.invalid('avatar')">
         {{ form.errors.avatar }}
       </p>
