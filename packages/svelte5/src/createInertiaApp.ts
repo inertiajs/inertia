@@ -50,7 +50,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent }
 
-  const svelteApp = setup({
+  const svelteApp = await setup({
     el,
     App,
     props,
