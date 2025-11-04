@@ -1,9 +1,10 @@
 import { Page, PageProps, SharedPageProps } from '@inertiajs/core'
-import { use } from 'react'
+import React from 'react'
 import PageContext from './PageContext'
 
 export default function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageProps & SharedPageProps> {
-  const page = use(PageContext)
+  // backwards compatibility for React <19
+  const page = typeof React.use === "function" ? React.use(PageContext) : React.useContext(PageContext);
 
   if (!page) {
     throw new Error('usePage must be used within the Inertia component')
