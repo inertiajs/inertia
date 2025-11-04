@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -601,6 +602,9 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  validateFiles?: boolean
+  validateTimeout?: number
+  simpleValidationErrors?: boolean
 }
 
 export type FormComponentMethods = {
@@ -613,6 +617,11 @@ export type FormComponentMethods = {
   defaults: () => void
   getData: () => Record<string, FormDataConvertible>
   getFormData: () => FormData
+  valid: (field: string) => boolean
+  invalid: (field: string) => boolean
+  validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig): void
+  touch: (...fields: string[]) => void
+  touched(field?: string): boolean
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
@@ -625,6 +634,8 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validator: Validator
+  validating: boolean
 }
 
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState

@@ -11,8 +11,16 @@ import {
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
-import { isEqual } from 'lodash-es'
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
+import {
+  createValidator,
+  NamedInputEvent,
+  resolveName,
+  toSimpleValidationErrors,
+  ValidationConfig,
+  Validator,
+} from 'laravel-precognition'
+import { get, isEqual } from 'lodash-es'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType, watch } from 'vue'
 import useForm from './useForm'
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
@@ -113,6 +121,18 @@ const Form = defineComponent({
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
+    validateFiles: {
+      type: Boolean as PropType<FormComponentProps['validateFiles']>,
+      default: false,
+    },
+    validateTimeout: {
+      type: Number as PropType<FormComponentProps['validateTimeout']>,
+      default: 1500,
+    },
+    simpleValidationErrors: {
+      type: Boolean as PropType<FormComponentProps['simpleValidationErrors']>,
+      default: true,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
@@ -135,10 +155,93 @@ const Form = defineComponent({
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
+    const validating = ref(false)
+    const valid = ref<string[]>([])
+    const touched = ref<string[]>([])
+
+    let validator: Validator
+
+    const clearErrors = (...names: string[]) => {
+      form.clearErrors(...names)
+
+      if (names.length === 0) {
+        validator.setErrors({})
+      } else {
+        names.forEach(validator.forgetError)
+      }
+
+      return form
+    }
+
+    const getTransformedData = (): Record<string, FormDataConvertible> => {
+      const [_url, data] = getUrlAndData()
+
+      return props.transform(data)
+    }
+
     onMounted(() => {
+      validator = createValidator(
+        (client) =>
+          client[method.value](getUrlAndData()[0], getTransformedData(), {
+            headers: props.headers,
+          }),
+        getTransformedData(),
+      )
+        .on('validatingChanged', () => {
+          validating.value = validator.validating()
+        })
+        .on('validatedChanged', () => {
+          valid.value = validator.valid()
+        })
+        .on('touchedChanged', () => {
+          touched.value = validator.touched()
+        })
+        .on('errorsChanged', () => {
+          form.clearErrors()
+
+          const errors = props.simpleValidationErrors
+            ? toSimpleValidationErrors(validator.errors())
+            : validator.errors()
+
+          form.setError(errors as Errors)
+
+          valid.value = validator.valid()
+        })
+
+      validator.setTimeout(props.validateTimeout)
+
+      if (props.validateFiles) {
+        validator.validateFiles()
+      }
+
       defaultData.value = getFormData()
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
+
+    const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
+      if (typeof field === 'object' && !('target' in field)) {
+        config = field
+        field = undefined
+      }
+
+      if (typeof field === 'undefined') {
+        validator.validate(config)
+      } else {
+        field = resolveName(field)
+
+        validator.validate(field, get(getTransformedData(), field), config)
+      }
+    }
+
+    // watch(
+    //   () => props.validateFiles,
+    //   (value) => validator.validateFiles(value),
+    // )
+
+    watch(
+      () => props.validateTimeout,
+      (value) => validator.setTimeout(value),
+    )
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
@@ -149,14 +252,16 @@ const Form = defineComponent({
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
-    const submit = () => {
-      const [action, data] = mergeDataIntoQueryString(
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
         method.value,
         isUrlMethodPair(props.action) ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )
+    }
 
+    const submit = () => {
       const maybeReset = (resetOption: boolean | string[]) => {
         if (!resetOption) {
           return
@@ -196,22 +301,34 @@ const Form = defineComponent({
         ...props.options,
       }
 
+      const [url, data] = getUrlAndData()
+
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
+      form.transform(() => props.transform(data)).submit(method.value, url, submitOptions)
     }
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
+
+      validator.reset(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      form.clearErrors(...fields)
+      clearErrors(...fields)
       reset(...fields)
     }
 
     const defaults = () => {
       defaultData.value = getFormData()
       isDirty.value = false
+    }
+
+    const isTouched = (field?: string): boolean => {
+      if (typeof field === 'string') {
+        return touched.value.includes(field)
+      }
+
+      return touched.value.length > 0
     }
 
     const exposed = {
@@ -233,7 +350,13 @@ const Form = defineComponent({
       get recentlySuccessful() {
         return form.recentlySuccessful
       },
-      clearErrors: (...fields: string[]) => form.clearErrors(...fields),
+      get validator() {
+        return validator
+      },
+      get validating() {
+        return validating.value
+      },
+      clearErrors,
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
         form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
@@ -245,6 +368,13 @@ const Form = defineComponent({
       defaults,
       getData,
       getFormData,
+
+      // Precognition
+      valid: (field: string) => valid.value.includes(field),
+      invalid: (field: string) => form.errors[field] !== undefined,
+      validate,
+      touch: (...fields: string[]) => validator.touch(fields),
+      touched: isTouched,
     }
 
     expose<FormComponentRef>(exposed)

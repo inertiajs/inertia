@@ -1,4 +1,5 @@
 import {
+  Errors,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
@@ -10,7 +11,15 @@ import {
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
-import { isEqual } from 'lodash-es'
+import {
+  createValidator,
+  NamedInputEvent,
+  resolveName,
+  toSimpleValidationErrors,
+  ValidationConfig,
+  Validator,
+} from 'laravel-precognition'
+import { get, isEqual } from 'lodash-es'
 import React, {
   createElement,
   FormEvent,
@@ -64,6 +73,9 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       resetOnSuccess = false,
       setDefaultsOnSuccess = false,
       invalidateCacheTags = [],
+      validateFiles = false,
+      validateTimeout = 1500,
+      simpleValidationErrors = true,
       children,
       ...props
     },
@@ -79,6 +91,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
 
+    const [validating, setValidating] = useState(false)
+    const [valid, setValid] = useState<string[]>([])
+    const [touched, setTouched] = useState<string[]>([])
+
+    const [validator, setValidator] = useState<Validator>()
+
     const getFormData = (): FormData => new FormData(formElement.current)
 
     // Convert the FormData to an object because we can't compare two FormData
@@ -86,10 +104,36 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
+        resolvedMethod,
+        isUrlMethodPair(action) ? action.url : action,
+        getData(),
+        queryStringArrayFormat,
+      )
+    }
+
     const updateDirtyState = (event: Event) =>
       deferStateUpdate(() =>
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
       )
+
+    const clearErrors = (...names: string[]) => {
+      form.clearErrors(...names)
+
+      if (names.length === 0) {
+        validator!.setErrors({})
+      } else {
+        names.forEach(validator!.forgetError)
+      }
+
+      return form
+    }
+
+    const getTransformedData = (): Record<string, FormDataConvertible> => {
+      const [_url, data] = getUrlAndData()
+      return transform(data)
+    }
 
     useEffect(() => {
       defaultData.current = getFormData()
@@ -98,17 +142,77 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
 
-      return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+      // Initialize validator
+      const newValidator = createValidator(
+        (client) =>
+          client[resolvedMethod](getUrlAndData()[0], getTransformedData(), {
+            headers,
+          }),
+        getTransformedData(),
+      )
+        .on('validatingChanged', () => {
+          setValidating(newValidator.validating())
+        })
+        .on('validatedChanged', () => {
+          setValid(newValidator.valid())
+        })
+        .on('touchedChanged', () => {
+          setTouched(newValidator.touched())
+        })
+        .on('errorsChanged', () => {
+          form.clearErrors()
+
+          const errors = simpleValidationErrors
+            ? toSimpleValidationErrors(newValidator.errors())
+            : newValidator.errors()
+
+          form.setError(errors as Errors)
+
+          setValid(newValidator.valid())
+        })
+
+      newValidator.setTimeout(validateTimeout)
+
+      if (validateFiles) {
+        newValidator.validateFiles()
+      }
+
+      setValidator(newValidator)
+
+      return () => {
+        formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+      }
     }, [])
+
+    const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
+      if (typeof field === 'object' && !('target' in field)) {
+        config = field
+        field = undefined
+      }
+
+      if (typeof field === 'undefined') {
+        validator!.validate(config)
+      } else {
+        field = resolveName(field)
+
+        validator!.validate(field, get(getTransformedData(), field), config)
+      }
+    }
+
+    useEffect(() => {
+      validator?.setTimeout(validateTimeout)
+    }, [validateTimeout, validator])
 
     const reset = (...fields: string[]) => {
       if (formElement.current) {
         resetFormFields(formElement.current, defaultData.current, fields)
       }
+
+      validator!.reset(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      form.clearErrors(...fields)
+      clearErrors(...fields)
       reset(...fields)
     }
 
@@ -125,12 +229,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const submit = () => {
-      const [url, _data] = mergeDataIntoQueryString(
-        resolvedMethod,
-        isUrlMethodPair(action) ? action.url : action,
-        getData(),
-        queryStringArrayFormat,
-      )
+      const [url, _data] = getUrlAndData()
 
       const submitOptions: FormSubmitOptions = {
         headers,
@@ -171,6 +270,18 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setIsDirty(false)
     }
 
+    const touch = (...fields: string[]) => {
+      validator!.touch(fields)
+    }
+
+    const isTouched = (field?: string): boolean => {
+      if (typeof field === 'string') {
+        return touched.includes(field)
+      }
+
+      return touched.length > 0
+    }
+
     const exposed = () => ({
       errors: form.errors,
       hasErrors: form.hasErrors,
@@ -179,7 +290,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       wasSuccessful: form.wasSuccessful,
       recentlySuccessful: form.recentlySuccessful,
       isDirty,
-      clearErrors: form.clearErrors,
+      clearErrors,
       resetAndClearErrors,
       setError: form.setError,
       reset,
@@ -187,9 +298,18 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       defaults,
       getData,
       getFormData,
+
+      // Precognition
+      validator: validator!,
+      validating,
+      valid: (field: string) => valid.includes(field),
+      invalid: (field: string) => form.errors[field] !== undefined,
+      validate,
+      touch,
+      touched: isTouched,
     })
 
-    useImperativeHandle(ref, exposed, [form, isDirty, submit])
+    useImperativeHandle(ref, exposed, [form, isDirty, submit, validating, valid, touched, touch, validator])
 
     return createElement(
       'form',

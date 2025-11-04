@@ -10,7 +10,15 @@
     type VisitOptions,
     isUrlMethodPair,
   } from '@inertiajs/core'
-  import { isEqual } from 'lodash-es'
+  import {
+    createValidator,
+    resolveName,
+    toSimpleValidationErrors,
+    type NamedInputEvent,
+    type ValidationConfig,
+    type Validator,
+  } from 'laravel-precognition'
+  import { get, isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 
@@ -38,6 +46,9 @@
   export let resetOnError: FormComponentProps['resetOnError'] = false
   export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
+  export let validateFiles: FormComponentProps['validateFiles'] = false
+  export let validateTimeout: FormComponentProps['validateTimeout'] = 1500
+  export let simpleValidationErrors: FormComponentProps['simpleValidationErrors'] = true
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -45,6 +56,11 @@
   let formElement: HTMLFormElement
   let isDirty = false
   let defaultData: FormData = new FormData()
+
+  let validating = false
+  let validFields: string[] = []
+  let touchedFields: string[] = []
+  let validator: Validator
 
   $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
   $: _action = isUrlMethodPair(action) ? action.url : (action as string)
@@ -60,12 +76,21 @@
     return formDataToObject(getFormData())
   }
 
+  function getUrlAndData(): [string, Record<string, FormDataConvertible>] {
+    return mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+  }
+
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
+  function getTransformedData(): Record<string, FormDataConvertible> {
+    const [_url, data] = getUrlAndData()
+    return transform!(data)
+  }
+
   export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+    const [url, _data] = getUrlAndData()
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -136,16 +161,23 @@
 
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
+
+    validator!.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
+
+    if (fields.length === 0) {
+      validator!.setErrors({})
+    } else {
+      fields.forEach(validator!.forgetError)
+    }
   }
 
   export function resetAndClearErrors(...fields: string[]) {
-    // @ts-expect-error
-    $form.clearErrors(...fields)
+    clearErrors(...fields)
     reset(...fields)
   }
 
@@ -163,17 +195,96 @@
     isDirty = false
   }
 
+  export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
+    if (typeof field === 'object' && !('target' in field)) {
+      config = field
+      field = undefined
+    }
+
+    if (typeof field === 'undefined') {
+      validator!.validate(config)
+    } else {
+      field = resolveName(field)
+
+      validator!.validate(field, get(getTransformedData(), field), config)
+    }
+  }
+
+  export function touch(...fields: string[]) {
+    validator!.touch(fields)
+  }
+
+  export function touched(field?: string): boolean {
+    if (typeof field === 'string') {
+      return touchedFields.includes(field)
+    }
+
+    return touchedFields.length > 0
+  }
+
+  export function valid(field: string): boolean {
+    return validFields.includes(field)
+  }
+
+  export function invalid(field: string): boolean {
+    // @ts-expect-error
+    return $form.errors[field] !== undefined
+  }
+
   onMount(() => {
     defaultData = getFormData()
 
     const formEvents = ['input', 'change', 'reset']
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
+    // Initialize validator
+    validator = createValidator(
+      (client) =>
+        client[_method!](getUrlAndData()[0], getTransformedData(), {
+          headers,
+        }),
+      getTransformedData(),
+    )
+      .on('validatingChanged', () => {
+        validating = validator!.validating()
+      })
+      .on('validatedChanged', () => {
+        validFields = validator!.valid()
+      })
+      .on('touchedChanged', () => {
+        touchedFields = validator!.touched()
+      })
+      .on('errorsChanged', () => {
+        $form.clearErrors()
+
+        const errors = simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : validator!.errors()
+
+        $form.setError(errors as Errors)
+        validFields = validator!.valid()
+      })
+
+    validator.setTimeout(validateTimeout!)
+
+    if (validateFiles) {
+      validator.validateFiles()
+    }
+
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+
+  $: {
+    validator?.setTimeout(validateTimeout!)
+  }
+
   $: slotErrors = $form.errors as Errors
+
+  // Create reactive slot props that update when state changes
+  $: validMethod = (field: string) => validFields.includes(field)
+  $: invalidMethod = (field: string) => slotErrors[field] !== undefined
+  $: touchedMethod = (field?: string) =>
+    typeof field === 'string' ? touchedFields.includes(field) : touchedFields.length > 0
 </script>
 
 <form
@@ -198,7 +309,15 @@
     {isDirty}
     {submit}
     {defaults}
+    {reset}
     {getData}
     {getFormData}
+    {validator}
+    {validating}
+    {validate}
+    {touch}
+    touched={touchedMethod}
+    valid={validMethod}
+    invalid={invalidMethod}
   />
 </form>
