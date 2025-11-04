@@ -18,6 +18,7 @@
     "lint:test-app": "pnpm -r --filter './packages/*/test-app' lint",
     "lint:test-app:react": "cd packages/react/test-app && pnpm run lint",
     "lint:test-app:svelte": "cd packages/svelte/test-app && pnpm run lint",
+    "lint:test-app:svelte5": "cd packages/svelte5/test-app && pnpm run lint",
     "lint:test-app:vue": "cd packages/vue3/test-app && pnpm run lint",
     "type-check:test-app": "pnpm -r --filter './packages/*/test-app' type-check",
     "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
