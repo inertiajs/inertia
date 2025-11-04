@@ -1,10 +1,10 @@
 import test, { expect } from '@playwright/test'
-import { requests } from './support'
+import { requests, shouldBeDumpPage } from './support'
 
 const integrations = ['form-helper']
 
 integrations.forEach((integration) => {
-  test.skip(process.env.PACKAGE !== 'vue', '[WIP] Only for Vue')
+  test.skip(process.env.PACKAGE !== 'vue3', '[WIP] Only for Vue')
 
   test.describe(integration === 'form-helper' ? 'Form Helper' : 'Form Component', () => {
     test.describe('Precognition', () => {
@@ -532,6 +532,85 @@ integrations.forEach((integration) => {
 
         const cancelledRequestError = await requests.failed[0].failure()?.errorText
         expect(cancelledRequestError).toBe('net::ERR_ABORTED')
+      })
+    })
+  })
+
+  test.describe('Form Helper', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/' + integration + '/precognition/instantiate')
+    })
+
+    const variants = {
+      default: 'withPrecognition() with strings',
+      dynamic: 'withPrecognition() with callbacks',
+      wayfinder: 'withPrecognition() with Wayfinder',
+      dynamicWayfinder: 'withPrecognition() with a Wayfinder callback',
+      legacy: 'legacy useForm() from Precognition package with strings',
+      legacyDynamic: 'legacy useForm() from Precognition package with callbacks',
+      legacyWayfinder: 'legacy useForm() from Precognition package with Wayfinder',
+      legacyDynamicWayfinder: 'legacy useForm() from Precognition package with a Wayfinder callback',
+    }
+
+    Object.entries(variants).forEach(([key, description]) => {
+      test.describe('instantiate using ' + description, () => {
+        test('validates form data using the precognition endpoint', async ({ page }) => {
+          await page.selectOption('select', key)
+          await page.getByRole('button', { name: 'Validate' }).click()
+          await expect(page.getByText('Validating...')).toBeVisible()
+          await expect(page.getByText('Validating...')).not.toBeVisible()
+          await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+        })
+
+        test('submits to the precognition endpoint when no arguments are given', async ({ page }) => {
+          await page.selectOption('select', key)
+          await page.getByRole('button', { name: 'Submit without args' }).click()
+
+          await expect(page).toHaveURL('/precognition/default')
+
+          // @ts-ignore
+          const dump = await page.evaluate(() => window._inertia_request_dump)
+          await expect(dump).not.toBeNull()
+
+          await expect(dump.method).toEqual('post')
+          await expect(dump.headers['precognition']).toBeUndefined()
+          await expect(dump.form).toEqual({
+            name: 'a',
+          })
+        })
+
+        test('submits to another endpoint using method + url arguments', async ({ page }) => {
+          await page.selectOption('select', key)
+          await page.getByRole('button', { name: 'Submit with args' }).click()
+
+          const dump = await shouldBeDumpPage(page, 'patch')
+          await expect(dump.headers['precognition']).toBeUndefined()
+          await expect(dump.form).toEqual({
+            name: 'a',
+          })
+        })
+
+        test('submits to another endpoint using wayfinder-shaped argument', async ({ page }) => {
+          await page.selectOption('select', key)
+          await page.getByRole('button', { name: 'Submit with Wayfinder' }).click()
+
+          const dump = await shouldBeDumpPage(page, 'post')
+          await expect(dump.headers['precognition']).toBeUndefined()
+          await expect(dump.form).toEqual({
+            name: 'a',
+          })
+        })
+
+        test('submits to another endpoint using the form.[method](url) syntax', async ({ page }) => {
+          await page.selectOption('select', key)
+          await page.getByRole('button', { name: 'Submit with method' }).click()
+
+          const dump = await shouldBeDumpPage(page, 'put')
+          await expect(dump.headers['precognition']).toBeUndefined()
+          await expect(dump.form).toEqual({
+            name: 'a',
+          })
+        })
       })
     })
   })
