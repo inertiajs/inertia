@@ -2,9 +2,12 @@
   import { config, Link } from '@inertiajs/svelte5'
   import { untrack } from 'svelte'
 
+  type NestedA = { count: number }
+  type NestedB = { date: number }
+
   interface Props {
-    nestedA: { count: number }
-    nestedB: { date: number }
+    nestedA: NestedA
+    nestedB: NestedB
   }
 
   let { nestedA, nestedB }: Props = $props()
@@ -24,8 +27,8 @@
     // was preserved or not. To avoid false positives, we compare by value when
     // `preserveEqualProps` is enabled, and by reference otherwise.
     const isDifferent = preserve
-      ? (a: any, b: any) => JSON.stringify(a) !== JSON.stringify(b)
-      : (a: any, b: any) => a !== b
+      ? (a: NestedA, b: NestedA) => JSON.stringify(a) !== JSON.stringify(b)
+      : (a: NestedA, b: NestedA) => a !== b
 
     if (isDifferent(nestedA, previousNestedA)) {
       effectACount++
