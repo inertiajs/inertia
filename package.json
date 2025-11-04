@@ -12,6 +12,7 @@
     "dev:test-app": "pnpx concurrently -c \"#61dafb,#d43008,#32a06f\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
     "dev:test-app:react": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
     "dev:test-app:svelte": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:svelte5": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=svelte5 pnpm serve:watch\" \"cd packages/svelte5/test-app && pnpm run dev\" --names=server,vite",
     "dev:test-app:vue": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
     "es2020-check": "pnpm -r --filter './packages/*' es2020-check",
     "lint:test-app": "pnpm -r --filter './packages/*/test-app' lint",
