@@ -54,9 +54,9 @@
   "devDependencies": {
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "axios": "^1.12.2",
+    "axios": "^1.13.1",
     "es-check": "^9.4.4",
-    "esbuild": "^0.25.11",
+    "esbuild": "^0.25.12",
     "esbuild-node-externals": "^1.18.0",
     "react": "^19.2.0",
     "typescript": "^5.9.3"
@@ -67,6 +67,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
+    "laravel-precognition": "^0.7.3",
     "lodash-es": "^4.17.21"
   }
 }

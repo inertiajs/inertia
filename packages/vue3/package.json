@@ -51,10 +51,10 @@
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
-    "@types/node": "^22.18.12",
-    "axios": "^1.12.2",
+    "@types/node": "^22.19.0",
+    "axios": "^1.13.1",
     "es-check": "^9.4.4",
-    "esbuild": "^0.25.11",
+    "esbuild": "^0.25.12",
     "esbuild-node-externals": "^1.18.0",
     "typescript": "^5.9.3",
     "vue": "^3.5.22"
@@ -65,6 +65,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
+    "laravel-precognition": "^0.7.3",
     "lodash-es": "^4.17.21"
   }
 }

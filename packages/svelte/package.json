@@ -45,10 +45,10 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.47.2",
+    "@sveltejs/kit": "^2.48.4",
     "@sveltejs/package": "^2.5.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "axios": "^1.12.2",
+    "axios": "^1.13.1",
     "es-check": "^9.4.4",
     "publint": "^0.2.12",
     "svelte": "^4.2.20",
@@ -63,6 +63,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
+    "laravel-precognition": "^0.7.3",
     "lodash-es": "^4.17.21"
   }
 }
