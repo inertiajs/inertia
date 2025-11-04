@@ -14,10 +14,7 @@ const form = useForm<{
 
 const validateFiles = ref(false)
 
-watch(validateFiles, (enabled) => {
-  enabled ? form.validateFiles() : form.withoutFileValidation()
-  console.log(`File validation ${enabled ? 'enabled' : 'disabled'}`)
-})
+watch(validateFiles, (enabled) => (enabled ? form.validateFiles() : form.withoutFileValidation()))
 </script>
 
 <template>
