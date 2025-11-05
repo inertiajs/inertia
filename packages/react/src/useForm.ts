@@ -11,8 +11,22 @@ import {
   RequestPayload,
   router,
   UrlMethodPair,
+  UseFormArguments,
+  UseFormSubmitArguments,
+  UseFormSubmitOptions,
+  UseFormTransformCallback,
+  UseFormUtils,
+  UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
+import {
+  createValidator,
+  NamedInputEvent,
+  resolveName,
+  toSimpleValidationErrors,
+  ValidationConfig,
+  Validator,
+} from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { config } from '.'
@@ -29,9 +43,9 @@ export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TFor
   SetDataByMethod<TForm> &
   SetDataByKeyValuePair<TForm>
 
-type FormOptions = Omit<VisitOptions, 'data'>
-type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
-type TransformCallback<TForm> = (data: TForm) => object
+type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
+  only?: TKeys[]
+}
 
 export interface InertiaFormProps<TForm extends object> {
   data: TForm
@@ -43,7 +57,7 @@ export interface InertiaFormProps<TForm extends object> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   setData: SetDataAction<TForm>
-  transform: (callback: TransformCallback<TForm>) => void
+  transform: (callback: UseFormTransformCallback<TForm>) => void
   setDefaults(): void
   setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
   setDefaults(fields: Partial<TForm>): void
@@ -52,30 +66,60 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
   setError(errors: FormDataErrors<TForm>): void
-  submit: (...args: SubmitArgs) => void
-  get: (url: string, options?: FormOptions) => void
-  patch: (url: string, options?: FormOptions) => void
-  post: (url: string, options?: FormOptions) => void
-  put: (url: string, options?: FormOptions) => void
-  delete: (url: string, options?: FormOptions) => void
+  submit: (...args: UseFormSubmitArguments) => void
+  get: (url: string, options?: UseFormSubmitOptions) => void
+  patch: (url: string, options?: UseFormSubmitOptions) => void
+  post: (url: string, options?: UseFormSubmitOptions) => void
+  put: (url: string, options?: UseFormSubmitOptions) => void
+  delete: (url: string, options?: UseFormSubmitOptions) => void
   cancel: () => void
+  withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormProps<TForm>
 }
+
+export interface InertiaFormValidationProps<TForm extends object> {
+  invalid<K extends FormDataKeys<TForm>>(field: K): boolean
+  setValidationTimeout(duration: number): InertiaPrecognitiveFormProps<TForm>
+  touch<K extends FormDataKeys<TForm>>(...fields: K[]): InertiaPrecognitiveFormProps<TForm>
+  touched<K extends FormDataKeys<TForm>>(field?: K): boolean
+  valid<K extends FormDataKeys<TForm>>(field: K): boolean
+  validate<K extends FormDataKeys<TForm>>(
+    field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
+    config?: PrecognitionValidationConfig<K>,
+  ): InertiaPrecognitiveFormProps<TForm>
+  validateFiles(): InertiaPrecognitiveFormProps<TForm>
+  validating: boolean
+  validator: () => Validator
+  withFullErrors(): InertiaPrecognitiveFormProps<TForm>
+  withoutFileValidation(): InertiaPrecognitiveFormProps<TForm>
+}
+
+export type InertiaForm<TForm extends object> = InertiaFormProps<TForm>
+export type InertiaPrecognitiveFormProps<TForm extends object> = InertiaFormProps<TForm> &
+  InertiaFormValidationProps<TForm>
+
 export default function useForm<TForm extends FormDataType<TForm>>(
-  initialValues?: TForm | (() => TForm),
-): InertiaFormProps<TForm>
+  method: Method | (() => Method),
+  url: string | (() => string),
+  data: TForm | (() => TForm),
+): InertiaPrecognitiveFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  urlMethodPair: UrlMethodPair | (() => UrlMethodPair),
+  data: TForm | (() => TForm),
+): InertiaPrecognitiveFormProps<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
-  initialValues?: TForm | (() => TForm),
+  data: TForm | (() => TForm),
 ): InertiaFormProps<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
-  rememberKeyOrInitialValues?: string | TForm | (() => TForm),
-  maybeInitialValues?: TForm | (() => TForm),
-): InertiaFormProps<TForm> {
+  data: TForm | (() => TForm),
+): InertiaFormProps<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  ...args: UseFormArguments<TForm>
+): InertiaFormProps<TForm> | InertiaPrecognitiveFormProps<TForm> {
   const isMounted = useRef(false)
-  const rememberKey = typeof rememberKeyOrInitialValues === 'string' ? rememberKeyOrInitialValues : null
-  const [defaults, setDefaults] = useState(
-    (typeof rememberKeyOrInitialValues === 'string' ? maybeInitialValues : rememberKeyOrInitialValues) || ({} as TForm),
-  )
+  let { rememberKey, data: initialData, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
+
+  const [defaults, setDefaults] = useState(typeof initialData === 'function' ? cloneDeep(initialData()) : cloneDeep(initialData))
   const cancelToken = useRef<CancelToken | null>(null)
   const recentlySuccessfulTimeoutId = useRef<number>(undefined)
   const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
@@ -87,8 +131,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [progress, setProgress] = useState<Progress | null>(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  const transform = useRef<TransformCallback<TForm>>((data) => data)
+  const transform = useRef<UseFormTransformCallback<TForm>>((data) => data)
   const isDirty = useMemo(() => !isEqual(data, defaults), [data, defaults])
+
+  // Precognition state - always initialized
+  const validatorRef = useRef<Validator | null>(null)
+  const [validating, setValidating] = useState(false)
+  const [touchedFields, setTouchedFields] = useState<string[]>([])
+  const [validFields, setValidFields] = useState<string[]>([])
+  const simpleValidationErrorsRef = useRef(true)
+  const precognitionEndpointRef = useRef(precognitionEndpoint)
 
   useEffect(() => {
     isMounted.current = true
@@ -102,12 +154,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const setDefaultsCalledInOnSuccess = useRef(false)
 
   const submit = useCallback(
-    (...args: SubmitArgs) => {
-      const objectPassed = args[0] !== null && typeof args[0] === 'object'
-
-      const method = objectPassed ? args[0].method : (args[0] as Method)
-      const url = objectPassed ? args[0].url : (args[1] as string)
-      const options = (objectPassed ? args[1] : args[2]) ?? {}
+    (...args: UseFormSubmitArguments) => {
+      const { method, url, options } = UseFormUtils.parseSubmitArguments(args, precognitionEndpointRef.current)
 
       setDefaultsCalledInOnSuccess.current = false
 
@@ -288,6 +336,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             ),
         )
       }
+
+      validatorRef.current?.reset(...fields)
     },
     [setData, defaults],
   )
@@ -300,6 +350,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           ...(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
         }
         setHasErrors(Object.keys(newErrors).length > 0)
+
+        validatorRef.current?.setErrors(newErrors as Errors)
+
         return newErrors
       })
     },
@@ -317,6 +370,15 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           {},
         )
         setHasErrors(Object.keys(newErrors).length > 0)
+
+        if (validatorRef.current) {
+          if (fields.length === 0) {
+            validatorRef.current.setErrors({})
+          } else {
+            fields.forEach(field => validatorRef.current?.forgetError(field))
+          }
+        }
+
         return newErrors as FormDataErrors<TForm>
       })
     },
@@ -348,11 +410,62 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   }, [])
 
-  const transformFunction = useCallback((callback: TransformCallback<TForm>) => {
+  const transformFunction = useCallback((callback: UseFormTransformCallback<TForm>) => {
     transform.current = callback
   }, [])
 
-  return {
+  // Precognition methods
+  const withPrecognitionInternal = useCallback(
+    (...args: UseFormWithPrecognitionArguments) => {
+      precognitionEndpointRef.current = UseFormUtils.createWayfinderCallback(...args)
+
+      if (!validatorRef.current) {
+        const validator = createValidator((client) => {
+          const { method, url } = precognitionEndpointRef.current!()
+          // Get the current data from the ref, not the closure
+          const currentData = dataRef.current
+          const transformedData = transform.current(currentData) as Record<string, unknown>
+          return client[method](url, transformedData)
+        }, defaults)
+
+        validatorRef.current = validator
+
+        validator
+          .on('validatingChanged', () => {
+            if (isMounted.current) {
+              setValidating(validator.validating())
+            }
+          })
+          .on('validatedChanged', () => {
+            if (isMounted.current) {
+              setValidFields(validator.valid())
+            }
+          })
+          .on('touchedChanged', () => {
+            if (isMounted.current) {
+              setTouchedFields(validator.touched())
+            }
+          })
+          .on('errorsChanged', () => {
+            if (isMounted.current) {
+              const validationErrors = simpleValidationErrorsRef.current
+                ? toSimpleValidationErrors(validator.errors())
+                : validator.errors()
+
+              setErrors(validationErrors as FormDataErrors<TForm>)
+              setHasErrors(Object.keys(validationErrors).length > 0)
+              setValidFields(validator.valid())
+            }
+          })
+      }
+    },
+    [data, defaults],
+  )
+
+  const validatorFn = useCallback(() => validatorRef.current!, [])
+
+  // Build base form properties
+  const baseForm = {
     data,
     setData: setDataFunction,
     isDirty,
@@ -376,4 +489,81 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     delete: deleteMethod,
     cancel,
   }
+
+  // Create withPrecognition method that returns a precognitive form
+  const withPrecognition = (...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveFormProps<TForm> => {
+    withPrecognitionInternal(...args)
+
+    // Create precognitive form with all validation methods
+    const precognitiveForm: any = {
+      ...baseForm,
+      // Precognition state
+      validating,
+      validator: validatorFn,
+      valid: (field: string) => validFields.includes(field),
+      invalid: (field: string) => field in errors,
+      touched: (field?: string): boolean => {
+        return typeof field === 'string'
+          ? touchedFields.includes(field)
+          : touchedFields.length > 0
+      },
+    }
+
+    // Add precognition methods
+    precognitiveForm.withPrecognition = withPrecognition
+    precognitiveForm.withFullErrors = () => {
+      simpleValidationErrorsRef.current = false
+      return precognitiveForm
+    }
+    precognitiveForm.setValidationTimeout = (duration: number) => {
+      validatorRef.current?.setTimeout(duration)
+      return precognitiveForm
+    }
+    precognitiveForm.validateFiles = () => {
+      validatorRef.current?.validateFiles()
+      return precognitiveForm
+    }
+    precognitiveForm.withoutFileValidation = () => {
+      // @ts-expect-error - Not released yet...
+      validatorRef.current?.withoutFileValidation()
+      return precognitiveForm
+    }
+    precognitiveForm.touch = (...fields: string[]) => {
+      validatorRef.current?.touch(fields)
+      return precognitiveForm
+    }
+    precognitiveForm.validate = (
+      field?: string | NamedInputEvent | ValidationConfig,
+      config?: ValidationConfig
+    ) => {
+      if (!validatorRef.current) return precognitiveForm
+
+      // Handle config object passed as first argument
+      if (typeof field === 'object' && !('target' in field)) {
+        config = field
+        field = undefined
+      }
+
+      if (field === undefined) {
+        validatorRef.current.validate(config)
+      } else {
+        const fieldName = resolveName(field)
+        const currentData = dataRef.current
+        const transformedData = transform.current(currentData) as Record<string, unknown>
+        validatorRef.current.validate(fieldName, get(transformedData, fieldName), config)
+      }
+
+      return precognitiveForm
+    }
+
+    return precognitiveForm as InertiaPrecognitiveFormProps<TForm>
+  }
+
+  // Regular form only has basic props + withPrecognition method
+  const form = {
+    ...baseForm,
+    withPrecognition,
+  } as InertiaFormProps<TForm>
+
+  return precognitionEndpointRef.current ? form.withPrecognition(precognitionEndpointRef.current) : form
 }
