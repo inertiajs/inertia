@@ -116,7 +116,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(data: TForm |
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaForm<TForm> | InertiaPrecognitiveForm<TForm> {
-  let { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArgs<TForm>(...args)
+  let { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
 
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
@@ -316,7 +316,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     submit(...args: UseFormSubmitArguments) {
-      const { method, url, options } = UseFormUtils.parseSubmitArgs(args, precognitionEndpoint)
+      const { method, url, options } = UseFormUtils.parseSubmitArguments(args, precognitionEndpoint)
 
       defaultsCalledInOnSuccess = false
 
