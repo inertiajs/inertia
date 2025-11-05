@@ -87,6 +87,13 @@ interface PrecognitionInternalState {
   __valid: string[]
 }
 
+// Internal state for remember/restore functionality
+interface RememberInternalState<TForm extends object> {
+  __rememberable: boolean
+  __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
+  __restore: (restored: { data: TForm; errors: FormDataErrors<TForm> }) => void
+}
+
 export type InertiaForm<TForm extends object> = TForm & InertiaFormProps<TForm>
 export type InertiaPrecognitiveForm<TForm extends object> = TForm &
   InertiaFormProps<TForm> &
@@ -526,9 +533,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     form,
     (newValue) => {
       // Vue's reactive() returns a type that matches our interface at runtime
-      const formValue = newValue as any as InertiaForm<TForm> & {
-        __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
-      }
+      const formValue = newValue as any as InertiaForm<TForm> & RememberInternalState<TForm>
       formValue.isDirty = !isEqual(formValue.data(), defaults)
       if (rememberKey) {
         router.remember(cloneDeep(formValue.__remember()), rememberKey)
