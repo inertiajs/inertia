@@ -12,6 +12,8 @@ import {
   RequestPayload,
   router,
   UrlMethodPair,
+  UseFormArguments,
+  UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
 import {
@@ -100,70 +102,6 @@ export type InertiaPrecognitiveForm<TForm extends object> = TForm &
   InertiaFormValidationProps<TForm> &
   PrecognitionInternalState
 
-type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
-type UseFormPrecognitionArguments<TForm> =
-  | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
-  | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
-type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
-
-const normalizeWayfinderArgsToCallback =
-  (
-    ...args: [UrlMethodPair | (() => UrlMethodPair)] | [Method | (() => Method), string | (() => string)]
-  ): (() => UrlMethodPair) =>
-  () => {
-    if (args.length === 2) {
-      return {
-        method: typeof args[0] === 'function' ? args[0]() : args[0],
-        url: typeof args[1] === 'function' ? args[1]() : args[1],
-      }
-    }
-
-    return typeof args[0] === 'function' ? args[0]() : args[0]
-  }
-
-const parseUseFormArgs = <TForm extends FormDataType<TForm>>(
-  ...args: UseFormArguments<TForm>
-): {
-  rememberKey: string | null
-  data: TForm | (() => TForm)
-  precognitionEndpoint: (() => UrlMethodPair) | null
-} => {
-  // Pattern 1: [data: TForm | (() => TForm)]
-  if (args.length === 1) {
-    return {
-      rememberKey: null,
-      data: args[0] as TForm | (() => TForm),
-      precognitionEndpoint: null,
-    }
-  }
-
-  // Pattern 2 & 3: Two arguments - need to distinguish by first arg type
-  if (args.length === 2) {
-    if (typeof args[0] === 'string') {
-      // Pattern 2: [rememberKey: string, data: TForm | (() => TForm)]
-      return {
-        rememberKey: args[0],
-        data: args[1] as TForm | (() => TForm),
-        precognitionEndpoint: null,
-      }
-    } else {
-      // Pattern 3: [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
-      return {
-        rememberKey: null,
-        data: args[1] as TForm | (() => TForm),
-        precognitionEndpoint: normalizeWayfinderArgsToCallback(args[0]),
-      }
-    }
-  }
-
-  // Pattern 4: [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
-  return {
-    rememberKey: null,
-    data: args[2] as TForm | (() => TForm),
-    precognitionEndpoint: normalizeWayfinderArgsToCallback(args[0], args[1]),
-  }
-}
-
 export default function useForm<TForm extends FormDataType<TForm>>(
   method: Method | (() => Method),
   url: string | (() => string),
@@ -181,7 +119,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(data: TForm |
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaForm<TForm> | InertiaPrecognitiveForm<TForm> {
-  let { rememberKey, data, precognitionEndpoint } = parseUseFormArgs<TForm>(...args)
+  let { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArgs<TForm>(...args)
 
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
@@ -222,7 +160,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     wasSuccessful: false,
     recentlySuccessful: false,
     withPrecognition(...args: WithPrecognitionArgs): InertiaPrecognitiveForm<TForm> {
-      precognitionEndpoint = normalizeWayfinderArgsToCallback(...args)
+      precognitionEndpoint = UseFormUtils.normalizeWayfinderArgsToCallback(...args)
 
       // Type assertion helper for accessing precognition state
       // We're dynamically adding precognition properties to 'this', so we assert the type

@@ -583,6 +583,12 @@ export type ProgressSettings = {
 
 export type UrlMethodPair = { url: string; method: Method }
 
+type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormPrecognitionArguments<TForm> =
+  | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
+  | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
+export type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
+
 export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
