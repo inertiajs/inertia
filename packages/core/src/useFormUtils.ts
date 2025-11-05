@@ -8,30 +8,29 @@ import {
 } from './types'
 import { isUrlMethodPair } from './url'
 
-/**
- * Helpers for parsing useForm() arguments and submission parameters.
- */
 export class UseFormUtils {
   /**
-   * Converts Wayfinder arguments into a callback function.
+   * Creates a callback that returns a UrlMethodPair.
    *
-   * Accepts either a Wayfinder object or separate method/url arguments,
-   * and returns a function that evaluates them at submission time.
+   * createWayfinderCallback(urlMethodPair)
+   * createWayfinderCallback(method, url)
+   * createWayfinderCallback(() => urlMethodPair)
+   * createWayfinderCallback(() => method, () => url)
    */
-  public static normalizeWayfinderArgsToCallback(
+  public static createWayfinderCallback(
     ...args: [UrlMethodPair | (() => UrlMethodPair)] | [Method | (() => Method), string | (() => string)]
   ): () => UrlMethodPair {
     return () => {
-      // Separate method and url - reconstruct wayfinder object
-      if (args.length === 2) {
-        return {
-          method: typeof args[0] === 'function' ? args[0]() : args[0],
-          url: typeof args[1] === 'function' ? args[1]() : args[1],
-        }
+      if (args.length === 1) {
+        // Wayfinder object, return as-is or call function...
+        return isUrlMethodPair(args[0]) ? args[0] : args[0]()
       }
 
-      // Wayfinder object - return as-is or call function
-      return typeof args[0] === 'function' ? args[0]() : args[0]
+      // Separate method and url, reconstruct Wayfinder object...
+      return {
+        method: typeof args[0] === 'function' ? args[0]() : args[0],
+        url: typeof args[1] === 'function' ? args[1]() : args[1],
+      }
     }
   }
 
@@ -51,8 +50,8 @@ export class UseFormUtils {
     data: TForm | (() => TForm)
     precognitionEndpoint: (() => UrlMethodPair) | null
   } {
-    // Basic form: useForm(data)
     if (args.length === 1) {
+      // Basic form: useForm(data)
       return {
         rememberKey: null,
         data: args[0],
@@ -74,7 +73,7 @@ export class UseFormUtils {
       return {
         rememberKey: null,
         data: args[1],
-        precognitionEndpoint: this.normalizeWayfinderArgsToCallback(args[0]),
+        precognitionEndpoint: this.createWayfinderCallback(args[0]),
       }
     }
 
@@ -82,7 +81,7 @@ export class UseFormUtils {
     return {
       rememberKey: null,
       data: args[2],
-      precognitionEndpoint: this.normalizeWayfinderArgsToCallback(args[0], args[1]),
+      precognitionEndpoint: this.createWayfinderCallback(args[0], args[1]),
     }
   }
 
@@ -101,17 +100,17 @@ export class UseFormUtils {
     args: UseFormSubmitArguments,
     precognitionEndpoint: (() => UrlMethodPair) | null,
   ): { method: Method; url: string; options: UseFormSubmitOptions } {
-    // Explicit method and url provided
     if (args.length === 3 || (args.length === 2 && typeof args[0] === 'string')) {
+      // Explicit method and url provided...
       return { method: args[0], url: args[1], options: args[2] ?? {} }
     }
 
-    // Wayfinder object provided
     if (isUrlMethodPair(args[0])) {
+      // Wayfinder object provided...
       return { ...args[0], options: (args[1] as UseFormSubmitOptions) ?? {} }
     }
 
-    // Use Precognition endpoint with optional options
+    // Use Precognition endpoint with optional options...
     return { ...precognitionEndpoint!(), options: (args[0] as UseFormSubmitOptions) ?? {} }
   }
 }

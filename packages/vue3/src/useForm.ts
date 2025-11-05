@@ -142,7 +142,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     wasSuccessful: false,
     recentlySuccessful: false,
     withPrecognition(...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveForm<TForm> {
-      precognitionEndpoint = UseFormUtils.normalizeWayfinderArgsToCallback(...args)
+      precognitionEndpoint = UseFormUtils.createWayfinderCallback(...args)
 
       // Type assertion helper for accessing precognition state
       // We're dynamically adding precognition properties to 'this', so we assert the type
