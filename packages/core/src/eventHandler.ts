@@ -100,8 +100,8 @@ class EventHandler {
           fireNavigateEvent(currentPage.get())
         })
 
-        const {url, ...pageWithoutUrl} = currentPage.get()
-        history.replaceState({...pageWithoutUrl} as Page)
+        const { url, ...pageWithoutUrl } = currentPage.get()
+        history.replaceState({ ...pageWithoutUrl } as Page)
       })
       .catch(() => {
         this.onMissingHistoryItem()
