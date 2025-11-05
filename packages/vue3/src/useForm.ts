@@ -80,24 +80,21 @@ export interface InertiaFormValidationProps<TForm extends object> {
   withoutFileValidation(): this
 }
 
-// Internal state for precognition validation
-interface PrecognitionInternalState {
+interface InternalPrecognitionState {
   __touched: string[]
   __valid: string[]
 }
 
-// Internal state for remember/restore functionality
-interface RememberInternalState<TForm extends object> {
+interface InternalRememberState<TForm extends object> {
   __rememberable: boolean
   __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
   __restore: (restored: { data: TForm; errors: FormDataErrors<TForm> }) => void
 }
 
 export type InertiaForm<TForm extends object> = TForm & InertiaFormProps<TForm>
-export type InertiaPrecognitiveForm<TForm extends object> = TForm &
-  InertiaFormProps<TForm> &
+export type InertiaPrecognitiveForm<TForm extends object> = InertiaForm<TForm> &
   InertiaFormValidationProps<TForm> &
-  PrecognitionInternalState
+  InternalPrecognitionState
 
 export default function useForm<TForm extends FormDataType<TForm>>(
   method: Method | (() => Method),
@@ -132,7 +129,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   // overriding user's custom defaults with automatic behavior.
   let defaultsCalledInOnSuccess = false
 
-  const form = reactive({
+  const form = reactive<InertiaForm<TForm>>({
     ...(restored ? restored.data : cloneDeep(defaults)),
     isDirty: false,
     errors: (restored ? restored.errors : {}) as FormDataErrors<TForm>,
@@ -148,14 +145,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       // We're dynamically adding precognition properties to 'this', so we assert the type
       const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
-      // Track whether to use simple validation errors (single string per field vs array)
       let simpleValidationErrors = true
 
-      // Create validator - precognitionEndpoint is guaranteed to exist at this point
-      const endpointCallback = precognitionEndpoint!
-
       const validator = createValidator((client) => {
-        const { method, url } = endpointCallback()
+        const { method, url } = precognitionEndpoint!()
         const transformedData = transform(this.data()) as Record<string, unknown>
 
         return client[method](url, transformedData)
@@ -163,7 +156,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       validatorRef = validator
 
-      // Set up validator event handlers to sync state with form
       validator
         .on('validatingChanged', () => {
           formWithPrecognition.validating = validator.validating()
@@ -259,7 +251,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    reset(...fields: string[]) {
+    reset(...fields: FormDataKeys<TForm>[]) {
       const resolvedData = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(defaults)
       const clonedData = cloneDeep(resolvedData)
       if (fields.length === 0) {
@@ -310,7 +302,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       return this
     },
-    resetAndClearErrors(...fields: string[]) {
+    resetAndClearErrors(...fields: FormDataKeys<TForm>[]) {
       this.reset(...fields)
       this.clearErrors(...fields)
       return this
@@ -439,12 +431,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   })
 
   watch(
-    form as any as InertiaForm<TForm> & RememberInternalState<TForm>,
+    form as any as InertiaForm<TForm> & InternalRememberState<TForm>,
     (newValue) => {
-      const formValue = newValue
-      formValue.isDirty = !isEqual(formValue.data(), defaults)
+      newValue.isDirty = !isEqual(newValue.data(), defaults)
       if (rememberKey) {
-        router.remember(cloneDeep(formValue.__remember()), rememberKey)
+        router.remember(cloneDeep(newValue.__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },
