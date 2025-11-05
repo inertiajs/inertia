@@ -81,10 +81,17 @@ export interface InertiaFormValidationProps<TForm extends object> {
   withoutFileValidation(): this
 }
 
+// Internal state for precognition validation
+interface PrecognitionInternalState {
+  __touched: string[]
+  __valid: string[]
+}
+
 export type InertiaForm<TForm extends object> = TForm & InertiaFormProps<TForm>
 export type InertiaPrecognitiveForm<TForm extends object> = TForm &
   InertiaFormProps<TForm> &
-  InertiaFormValidationProps<TForm>
+  InertiaFormValidationProps<TForm> &
+  PrecognitionInternalState
 
 type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
 type UseFormPrecognitionArguments<TForm> =
@@ -207,10 +214,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     progress: null as Progress | null,
     wasSuccessful: false,
     recentlySuccessful: false,
-    withPrecognition(...args: WithPrecognitionArgs) {
+    withPrecognition(...args: WithPrecognitionArgs): InertiaPrecognitiveForm<TForm> {
       precognitionEndpoint = normalizeWayfinderArgsToCallback(...args)
 
       let simpleValidationErrors = true
+
+      // Type assertion helper for accessing precognition state
+      // We're dynamically adding precognition properties to 'this', so we assert the type
+      const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
       validator = createValidator((client) => {
         const { method, url } = precognitionEndpoint!()
@@ -220,84 +231,88 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return client[method](url, transformedData)
       }, defaults)
         .on('validatingChanged', () => {
-          ;(this as any).validating = validator!.validating()
+          formWithPrecognition.validating = validator!.validating()
         })
         .on('validatedChanged', () => {
-          ;(this as any).__valid = validator!.valid()
+          formWithPrecognition.__valid = validator!.valid()
         })
         .on('touchedChanged', () => {
-          ;(this as any).__touched = validator!.touched()
+          formWithPrecognition.__touched = validator!.touched()
         })
         .on('errorsChanged', () => {
           this.errors = {} as FormDataErrors<TForm>
 
           this.setError(
-            simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : (validator!.errors() as any),
+            simpleValidationErrors
+              ? (toSimpleValidationErrors(validator!.errors()) as FormDataErrors<TForm>)
+              : (validator!.errors() as FormDataErrors<TForm>),
           )
-          ;(this as any).__valid = validator!.valid()
+          formWithPrecognition.__valid = validator!.valid()
         })
 
-      Object.assign(this, {
-        __touched: [],
-        __valid: [],
-        validator: () => validator!,
-        validating: false,
-        setValidationTimeout: (duration: number) => {
-          validator!.setTimeout(duration)
+      // Initialize precognition state and methods using direct property assignments
+      formWithPrecognition.__touched = []
+      formWithPrecognition.__valid = []
+      formWithPrecognition.validator = () => validator!
+      formWithPrecognition.validating = false
+      formWithPrecognition.setValidationTimeout = (duration: number) => {
+        validator!.setTimeout(duration)
 
-          return this
-        },
-        validateFiles: () => {
-          validator!.validateFiles()
+        return formWithPrecognition
+      }
+      formWithPrecognition.validateFiles = () => {
+        validator!.validateFiles()
 
-          return this
-        },
-        withFullErrors: () => {
-          simpleValidationErrors = false
+        return formWithPrecognition
+      }
+      formWithPrecognition.withFullErrors = () => {
+        simpleValidationErrors = false
 
-          return this
-        },
-        withoutFileValidation: () => {
-          // @ts-expect-error - Not released yet...
-          validator!.withoutFileValidation()
+        return formWithPrecognition
+      }
+      formWithPrecognition.withoutFileValidation = () => {
+        // @ts-expect-error - Not released yet...
+        validator!.withoutFileValidation()
 
-          return this
-        },
-        valid: (field: string) => (this as any).__valid.includes(field),
-        invalid: (field: string) => (this.errors as any)[field] !== undefined,
-        validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
-          if (typeof field === 'object' && !('target' in field)) {
-            config = field
-            field = undefined
-          }
+        return formWithPrecognition
+      }
+      formWithPrecognition.valid = (field: string) => formWithPrecognition.__valid.includes(field)
+      formWithPrecognition.invalid = (field: string) => field in this.errors
+      formWithPrecognition.validate = (
+        field?: string | NamedInputEvent | ValidationConfig,
+        config?: ValidationConfig,
+      ) => {
+        if (typeof field === 'object' && !('target' in field)) {
+          config = field
+          field = undefined
+        }
 
-          if (typeof field === 'undefined') {
-            validator!.validate(config)
-          } else {
-            field = resolveName(field)
+        if (typeof field === 'undefined') {
+          validator!.validate(config)
+        } else {
+          field = resolveName(field)
 
-            const transformedData = transform(this.data()) as Record<string, unknown>
+          const transformedData = transform(this.data()) as Record<string, unknown>
 
-            validator!.validate(field, get(transformedData, field), config)
-          }
+          validator!.validate(field, get(transformedData, field), config)
+        }
 
-          return this
-        },
-        touch: (...fields: string[]) => {
-          validator!.touch(fields)
+        return formWithPrecognition
+      }
+      formWithPrecognition.touch = (...fields: string[]) => {
+        validator!.touch(fields)
 
-          return this
-        },
-        touched: (field?: string): boolean => {
-          if (typeof field === 'string') {
-            return (this as any).__touched.includes(field)
-          }
+        return formWithPrecognition
+      }
+      formWithPrecognition.touched = (field?: string): boolean => {
+        if (typeof field === 'string') {
+          return formWithPrecognition.__touched.includes(field)
+        }
 
-          return (this as any).__touched.length > 0
-        },
-      })
+        return formWithPrecognition.__touched.length > 0
+      }
 
-      return this
+      return formWithPrecognition
     },
     data() {
       return (Object.keys(defaults) as Array<FormDataKeys<TForm>>).reduce((carry, key) => {
@@ -354,8 +369,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       this.hasErrors = Object.keys(this.errors).length > 0
 
-      // @ts-expect-error - validator may be null
-      validator?.setErrors(errors)
+      validator?.setErrors(errors as Errors)
 
       return this
     },
@@ -511,13 +525,20 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   watch(
     form,
     (newValue) => {
-      ;(form as any).isDirty = !isEqual((form as any).data(), defaults)
+      // Vue's reactive() returns a type that matches our interface at runtime
+      const formValue = newValue as any as InertiaForm<TForm> & {
+        __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
+      }
+      formValue.isDirty = !isEqual(formValue.data(), defaults)
       if (rememberKey) {
-        router.remember(cloneDeep((newValue as any).__remember()), rememberKey)
+        router.remember(cloneDeep(formValue.__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },
   )
 
-  return precognitionEndpoint ? (form as any).withPrecognition(precognitionEndpoint) : (form as any)
+  // Vue's reactive() wrapper matches our interface at runtime
+  const typedForm = form as any as InertiaForm<TForm>
+
+  return precognitionEndpoint ? typedForm.withPrecognition(precognitionEndpoint) : typedForm
 }
