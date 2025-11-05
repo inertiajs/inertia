@@ -99,6 +99,9 @@ class EventHandler {
           Scroll.restore(history.getScrollRegions())
           fireNavigateEvent(currentPage.get())
         })
+
+        const {url, ...pageWithoutUrl} = currentPage.get()
+        history.replaceState({...pageWithoutUrl})
       })
       .catch(() => {
         this.onMissingHistoryItem()
