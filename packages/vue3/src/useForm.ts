@@ -91,25 +91,13 @@ type UseFormPrecognitionArguments<TForm> =
   | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
 type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
 
-export default function useForm<TForm extends FormDataType<TForm>>(
-  method: Method | (() => Method),
-  url: string | (() => string),
-  data: TForm | (() => TForm),
-): InertiaPrecognitiveForm<TForm>
-export default function useForm<TForm extends FormDataType<TForm>>(
-  urlMethodPair: UrlMethodPair | (() => UrlMethodPair),
-  data: TForm | (() => TForm),
-): InertiaPrecognitiveForm<TForm>
-export default function useForm<TForm extends FormDataType<TForm>>(
-  rememberKey: string,
-  data: TForm | (() => TForm),
-): InertiaForm<TForm>
-export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
-//
-
-export default function useForm<TForm extends FormDataType<TForm>>(
+const parseFormArgs = <TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
-): InertiaForm<TForm> | InertiaPrecognitiveForm<TForm> {
+): {
+  rememberKey: string | null
+  data: any
+  precognitionEndpoint: (() => UrlMethodPair) | null
+} => {
   let precognitionEndpoint: (() => UrlMethodPair) | null = null
 
   const rememberKeyOrData = args[0]
@@ -137,6 +125,30 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
     data = args[1]
   }
+
+  return { rememberKey, data, precognitionEndpoint }
+}
+
+export default function useForm<TForm extends FormDataType<TForm>>(
+  method: Method | (() => Method),
+  url: string | (() => string),
+  data: TForm | (() => TForm),
+): InertiaPrecognitiveForm<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  urlMethodPair: UrlMethodPair | (() => UrlMethodPair),
+  data: TForm | (() => TForm),
+): InertiaPrecognitiveForm<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  rememberKey: string,
+  data: TForm | (() => TForm),
+): InertiaForm<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
+//
+
+export default function useForm<TForm extends FormDataType<TForm>>(
+  ...args: UseFormArguments<TForm>
+): InertiaForm<TForm> | InertiaPrecognitiveForm<TForm> {
+  let { rememberKey, data, precognitionEndpoint } = parseFormArgs<TForm>(...args)
 
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
