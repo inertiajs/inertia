@@ -256,9 +256,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           formWithPrecognition.__touched = validatorRef.touched()
         })
         .on('errorsChanged', () => {
+          const validatorErrors = validatorRef.errors()
           const validationErrors = simpleValidationErrors
-            ? toSimpleValidationErrors(validatorRef.errors())
-            : validatorRef.errors()
+            ? toSimpleValidationErrors(validatorErrors)
+            : validatorErrors
 
           // Clear existing errors and set new validation errors
           this.errors = {} as FormDataErrors<TForm>
