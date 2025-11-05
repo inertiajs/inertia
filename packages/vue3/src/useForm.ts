@@ -1,5 +1,6 @@
 import {
   CancelToken,
+  Errors,
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
@@ -91,42 +92,62 @@ type UseFormPrecognitionArguments<TForm> =
   | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
 type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
 
-const parseFormArgs = <TForm extends FormDataType<TForm>>(
+const normalizeWayfinderArgsToCallback =
+  (
+    ...args: [UrlMethodPair | (() => UrlMethodPair)] | [Method | (() => Method), string | (() => string)]
+  ): (() => UrlMethodPair) =>
+  () => {
+    if (args.length === 2) {
+      return {
+        method: typeof args[0] === 'function' ? args[0]() : args[0],
+        url: typeof args[1] === 'function' ? args[1]() : args[1],
+      }
+    }
+
+    return typeof args[0] === 'function' ? args[0]() : args[0]
+  }
+
+const parseUseFormArgs = <TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): {
   rememberKey: string | null
-  data: any
+  data: TForm | (() => TForm)
   precognitionEndpoint: (() => UrlMethodPair) | null
 } => {
-  let precognitionEndpoint: (() => UrlMethodPair) | null = null
-
-  const rememberKeyOrData = args[0]
-  const maybeData = args[1]
-  const rememberKey = typeof args[0] === 'string' ? args[0] : null
-  let data = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
-
-  if (args.length === 3) {
-    precognitionEndpoint = () => ({
-      method: typeof args[0] === 'function' ? args[0]() : args[0],
-      url: typeof args[1] === 'function' ? args[1]() : args[1],
-    })
-
-    data = args[2]
-  }
-
-  if (args.length === 2 && typeof args[0] !== 'string') {
-    precognitionEndpoint = () => {
-      if (typeof args[0] === 'function') {
-        return args[0]()
-      }
-
-      return args[0] as UrlMethodPair
+  // Pattern 1: [data: TForm | (() => TForm)]
+  if (args.length === 1) {
+    return {
+      rememberKey: null,
+      data: args[0] as TForm | (() => TForm),
+      precognitionEndpoint: null,
     }
-
-    data = args[1]
   }
 
-  return { rememberKey, data, precognitionEndpoint }
+  // Pattern 2 & 3: Two arguments - need to distinguish by first arg type
+  if (args.length === 2) {
+    if (typeof args[0] === 'string') {
+      // Pattern 2: [rememberKey: string, data: TForm | (() => TForm)]
+      return {
+        rememberKey: args[0],
+        data: args[1] as TForm | (() => TForm),
+        precognitionEndpoint: null,
+      }
+    } else {
+      // Pattern 3: [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
+      return {
+        rememberKey: null,
+        data: args[1] as TForm | (() => TForm),
+        precognitionEndpoint: normalizeWayfinderArgsToCallback(args[0]),
+      }
+    }
+  }
+
+  // Pattern 4: [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
+  return {
+    rememberKey: null,
+    data: args[2] as TForm | (() => TForm),
+    precognitionEndpoint: normalizeWayfinderArgsToCallback(args[0], args[1]),
+  }
 }
 
 export default function useForm<TForm extends FormDataType<TForm>>(
@@ -143,12 +164,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   data: TForm | (() => TForm),
 ): InertiaForm<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaForm<TForm>
-//
-
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaForm<TForm> | InertiaPrecognitiveForm<TForm> {
-  let { rememberKey, data, precognitionEndpoint } = parseFormArgs<TForm>(...args)
+  let { rememberKey, data, precognitionEndpoint } = parseUseFormArgs<TForm>(...args)
 
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> })
@@ -185,20 +204,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     errors: (restored ? restored.errors : {}) as FormDataErrors<TForm>,
     hasErrors: false,
     processing: false,
-    progress: null,
+    progress: null as Progress | null,
     wasSuccessful: false,
     recentlySuccessful: false,
     withPrecognition(...args: WithPrecognitionArgs) {
-      precognitionEndpoint = () => {
-        if (args.length === 2) {
-          return {
-            method: typeof args[0] === 'function' ? args[0]() : args[0],
-            url: typeof args[1] === 'function' ? args[1]() : args[1],
-          }
-        }
-
-        return typeof args[0] === 'function' ? args[0]() : args[0]
-      }
+      precognitionEndpoint = normalizeWayfinderArgsToCallback(...args)
 
       let simpleValidationErrors = true
 
@@ -210,20 +220,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return client[method](url, transformedData)
       }, defaults)
         .on('validatingChanged', () => {
-          this.validating = validator!.validating()
+          ;(this as any).validating = validator!.validating()
         })
         .on('validatedChanged', () => {
-          this.__valid = validator!.valid()
+          ;(this as any).__valid = validator!.valid()
         })
         .on('touchedChanged', () => {
-          this.__touched = validator!.touched()
+          ;(this as any).__touched = validator!.touched()
         })
         .on('errorsChanged', () => {
-          this.errors = {}
+          this.errors = {} as FormDataErrors<TForm>
 
-          this.setError(simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : validator!.errors())
-
-          this.__valid = validator!.valid()
+          this.setError(
+            simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : (validator!.errors() as any),
+          )
+          ;(this as any).__valid = validator!.valid()
         })
 
       Object.assign(this, {
@@ -252,8 +263,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           return this
         },
-        valid: (field: string) => this.__valid.includes(field),
-        invalid: (field: string) => this.errors[field] !== undefined,
+        valid: (field: string) => (this as any).__valid.includes(field),
+        invalid: (field: string) => (this.errors as any)[field] !== undefined,
         validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
           if (typeof field === 'object' && !('target' in field)) {
             config = field
@@ -279,10 +290,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
         touched: (field?: string): boolean => {
           if (typeof field === 'string') {
-            return this.__touched.includes(field)
+            return (this as any).__touched.includes(field)
           }
 
-          return this.__touched.length > 0
+          return (this as any).__touched.length > 0
         },
       })
 
@@ -352,9 +363,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       this.errors = Object.keys(this.errors).reduce(
         (carry, field) => ({
           ...carry,
-          ...(fields.length > 0 && !fields.includes(field) ? { [field]: this.errors[field] } : {}),
+          ...(fields.length > 0 && !fields.includes(field) ? { [field]: (this.errors as Errors)[field] } : {}),
         }),
-        {},
+        {} as FormDataErrors<TForm>,
       )
 
       this.hasErrors = Object.keys(this.errors).length > 0
@@ -405,7 +416,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onProgress: (event) => {
-          this.progress = event
+          this.progress = event ?? null
 
           if (options.onProgress) {
             return options.onProgress(event)
@@ -434,7 +445,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         onError: (errors) => {
           this.processing = false
           this.progress = null
-          this.clearErrors().setError(errors)
+          this.clearErrors().setError(errors as FormDataErrors<TForm>)
 
           if (options.onError) {
             return options.onError(errors)
@@ -500,13 +511,13 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   watch(
     form,
     (newValue) => {
-      form.isDirty = !isEqual(form.data(), defaults)
+      ;(form as any).isDirty = !isEqual((form as any).data(), defaults)
       if (rememberKey) {
-        router.remember(cloneDeep(newValue.__remember()), rememberKey)
+        router.remember(cloneDeep((newValue as any).__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },
   )
 
-  return precognitionEndpoint ? form.withPrecognition(precognitionEndpoint) : form
+  return precognitionEndpoint ? (form as any).withPrecognition(precognitionEndpoint) : (form as any)
 }
