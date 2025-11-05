@@ -1,4 +1,5 @@
-import { FormDataType, Method, UrlMethodPair, UseFormArguments } from './types'
+import { FormDataType, Method, UrlMethodPair, UseFormArguments, UseFormSubmitOptions, UseFormSubmitArguments } from './types'
+import { isUrlMethodPair } from './url'
 
 export class UseFormUtils {
   public static normalizeWayfinderArgsToCallback(
@@ -57,5 +58,23 @@ export class UseFormUtils {
       data: args[2] as TForm | (() => TForm),
       precognitionEndpoint: this.normalizeWayfinderArgsToCallback(args[0], args[1]),
     }
+  }
+
+  public static parseSubmitArgs(
+    args: UseFormSubmitArguments,
+    precognitionEndpoint: (() => UrlMethodPair) | null,
+  ): { method: Method; url: string; options: UseFormSubmitOptions } {
+    if (args.length === 3 || (args.length === 2 && typeof args[0] === 'string')) {
+      // All arguments passed, or method + url
+      return { method: args[0], url: args[1], options: args[2] ?? {} }
+    }
+
+    if (isUrlMethodPair(args[0])) {
+      // Wayfinder + optional options
+      return { ...args[0], options: (args[1] ?? {}) as UseFormSubmitOptions }
+    }
+
+    // No arguments, or only options passed, use precognition endpoint...
+    return { ...precognitionEndpoint!(), options: (args[0] ?? {}) as UseFormSubmitOptions }
   }
 }

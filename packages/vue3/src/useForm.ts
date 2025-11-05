@@ -6,14 +6,17 @@ import {
   FormDataKeys,
   FormDataType,
   FormDataValues,
-  isUrlMethodPair,
   Method,
   Progress,
   RequestPayload,
   router,
   UrlMethodPair,
   UseFormArguments,
+  UseFormSubmitArguments,
+  UseFormSubmitOptions,
+  UseFormTransformCallback,
   UseFormUtils,
+  UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
 import {
@@ -28,12 +31,6 @@ import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { reactive, watch } from 'vue'
 import { config } from '.'
 
-type FormOptions = Omit<VisitOptions, 'data'>
-type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?] | [FormOptions?]
-type TransformCallback<TForm> = (data: TForm) => object
-
-type WithPrecognitionArgs = [Method | (() => Method), string | (() => string)] | [UrlMethodPair | (() => UrlMethodPair)]
-
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
   errors: FormDataErrors<TForm>
@@ -43,7 +40,7 @@ export interface InertiaFormProps<TForm extends object> {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   data(): TForm
-  transform(callback: TransformCallback<TForm>): this
+  transform(callback: UseFormTransformCallback<TForm>): this
   defaults(): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
   defaults(fields: Partial<TForm>): this
@@ -52,14 +49,14 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
-  submit: (...args: SubmitArgs) => void
-  get(url: string, options?: FormOptions): void
-  post(url: string, options?: FormOptions): void
-  put(url: string, options?: FormOptions): void
-  patch(url: string, options?: FormOptions): void
-  delete(url: string, options?: FormOptions): void
+  submit: (...args: UseFormSubmitArguments) => void
+  get(url: string, options?: UseFormSubmitOptions): void
+  post(url: string, options?: UseFormSubmitOptions): void
+  put(url: string, options?: UseFormSubmitOptions): void
+  patch(url: string, options?: UseFormSubmitOptions): void
+  delete(url: string, options?: UseFormSubmitOptions): void
   cancel(): void
-  withPrecognition(...args: WithPrecognitionArgs): InertiaPrecognitiveForm<TForm>
+  withPrecognition(...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveForm<TForm>
 }
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
@@ -127,24 +124,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let defaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
   let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout>
-  let transform: TransformCallback<TForm> = (data) => data
+  let transform: UseFormTransformCallback<TForm> = (data) => data
 
   let validatorRef: Validator | null = null
-
-  const parseSubmitArgs = (args: SubmitArgs): { method: Method; url: string; options: FormOptions } => {
-    if (args.length === 3 || (args.length === 2 && typeof args[0] === 'string')) {
-      // All arguments passed, or method + url
-      return { method: args[0], url: args[1], options: args[2] ?? {} }
-    }
-
-    if (isUrlMethodPair(args[0])) {
-      // Wayfinder + optional options
-      return { ...args[0], options: (args[1] ?? {}) as FormOptions }
-    }
-
-    // No arguments, or only options passed, use precognition endpoint...
-    return { ...precognitionEndpoint!(), options: (args[0] ?? {}) as FormOptions }
-  }
 
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
@@ -159,7 +141,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     progress: null as Progress | null,
     wasSuccessful: false,
     recentlySuccessful: false,
-    withPrecognition(...args: WithPrecognitionArgs): InertiaPrecognitiveForm<TForm> {
+    withPrecognition(...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveForm<TForm> {
       precognitionEndpoint = UseFormUtils.normalizeWayfinderArgsToCallback(...args)
 
       // Type assertion helper for accessing precognition state
@@ -253,7 +235,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return set(carry, key, get(this, key))
       }, {} as Partial<TForm>) as TForm
     },
-    transform(callback: TransformCallback<TForm>) {
+    transform(callback: UseFormTransformCallback<TForm>) {
       transform = callback
 
       return this
@@ -333,8 +315,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       this.clearErrors(...fields)
       return this
     },
-    submit(...args: SubmitArgs) {
-      const { method, url, options } = parseSubmitArgs(args)
+    submit(...args: UseFormSubmitArguments) {
+      const { method, url, options } = UseFormUtils.parseSubmitArgs(args, precognitionEndpoint)
 
       defaultsCalledInOnSuccess = false
 
