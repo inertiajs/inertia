@@ -441,17 +441,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   watch(
     form as any as InertiaForm<TForm> & RememberInternalState<TForm>,
     (newValue) => {
-      newValue.isDirty = !isEqual(newValue.data(), defaults)
+      const formValue = newValue
+      formValue.isDirty = !isEqual(formValue.data(), defaults)
       if (rememberKey) {
-        router.remember(cloneDeep(newValue.__remember()), rememberKey)
+        router.remember(cloneDeep(formValue.__remember()), rememberKey)
       }
     },
     { immediate: true, deep: true },
   )
-
-  if (!precognitionEndpoint) {
-    return form
-  }
 
   // Vue's reactive() wrapper matches our interface at runtime
   const typedForm = form as any as InertiaForm<TForm>
