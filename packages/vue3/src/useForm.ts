@@ -224,98 +224,109 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     withPrecognition(...args: WithPrecognitionArgs): InertiaPrecognitiveForm<TForm> {
       precognitionEndpoint = normalizeWayfinderArgsToCallback(...args)
 
-      let simpleValidationErrors = true
-
       // Type assertion helper for accessing precognition state
       // We're dynamically adding precognition properties to 'this', so we assert the type
       const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
-      validator = createValidator((client) => {
-        const { method, url } = precognitionEndpoint!()
+      // Track whether to use simple validation errors (single string per field vs array)
+      let simpleValidationErrors = true
 
+      // Create validator - precognitionEndpoint is guaranteed to exist at this point
+      const endpointCallback = precognitionEndpoint!
+
+      validator = createValidator((client) => {
+        const { method, url } = endpointCallback()
         const transformedData = transform(this.data()) as Record<string, unknown>
 
         return client[method](url, transformedData)
       }, defaults)
+
+      // Store validator reference for type safety - after assignment, it's guaranteed to exist
+      const validatorRef = validator
+
+      // Set up validator event handlers to sync state with form
+      validator
         .on('validatingChanged', () => {
-          formWithPrecognition.validating = validator!.validating()
+          formWithPrecognition.validating = validatorRef.validating()
         })
         .on('validatedChanged', () => {
-          formWithPrecognition.__valid = validator!.valid()
+          formWithPrecognition.__valid = validatorRef.valid()
         })
         .on('touchedChanged', () => {
-          formWithPrecognition.__touched = validator!.touched()
+          formWithPrecognition.__touched = validatorRef.touched()
         })
         .on('errorsChanged', () => {
-          this.errors = {} as FormDataErrors<TForm>
+          const validationErrors = simpleValidationErrors
+            ? toSimpleValidationErrors(validatorRef.errors())
+            : validatorRef.errors()
 
-          this.setError(
-            simpleValidationErrors
-              ? (toSimpleValidationErrors(validator!.errors()) as FormDataErrors<TForm>)
-              : (validator!.errors() as FormDataErrors<TForm>),
-          )
-          formWithPrecognition.__valid = validator!.valid()
+          // Clear existing errors and set new validation errors
+          this.errors = {} as FormDataErrors<TForm>
+          this.setError(validationErrors as FormDataErrors<TForm>)
+          // Update valid state after errors change
+          formWithPrecognition.__valid = validatorRef.valid()
         })
 
-      // Initialize precognition state and methods using direct property assignments
+      // Initialize precognition state
       formWithPrecognition.__touched = []
       formWithPrecognition.__valid = []
-      formWithPrecognition.validator = () => validator!
       formWithPrecognition.validating = false
+      formWithPrecognition.validator = () => validatorRef
+
+      // Bind precognition methods - all return 'this' for method chaining
       formWithPrecognition.setValidationTimeout = (duration: number) => {
-        validator!.setTimeout(duration)
-
+        validatorRef.setTimeout(duration)
         return formWithPrecognition
       }
+
       formWithPrecognition.validateFiles = () => {
-        validator!.validateFiles()
-
+        validatorRef.validateFiles()
         return formWithPrecognition
       }
+
       formWithPrecognition.withFullErrors = () => {
         simpleValidationErrors = false
-
         return formWithPrecognition
       }
+
       formWithPrecognition.withoutFileValidation = () => {
         // @ts-expect-error - Not released yet...
-        validator!.withoutFileValidation()
-
+        validatorRef.withoutFileValidation()
         return formWithPrecognition
       }
+
       formWithPrecognition.valid = (field: string) => formWithPrecognition.__valid.includes(field)
       formWithPrecognition.invalid = (field: string) => field in this.errors
       formWithPrecognition.validate = (
         field?: string | NamedInputEvent | ValidationConfig,
         config?: ValidationConfig,
       ) => {
+        // Handle config object passed as first argument
         if (typeof field === 'object' && !('target' in field)) {
           config = field
           field = undefined
         }
 
-        if (typeof field === 'undefined') {
-          validator!.validate(config)
+        if (field === undefined) {
+          validatorRef.validate(config)
         } else {
-          field = resolveName(field)
-
+          const fieldName = resolveName(field)
           const transformedData = transform(this.data()) as Record<string, unknown>
-
-          validator!.validate(field, get(transformedData, field), config)
+          validatorRef.validate(fieldName, get(transformedData, fieldName), config)
         }
 
         return formWithPrecognition
       }
-      formWithPrecognition.touch = (...fields: string[]) => {
-        validator!.touch(fields)
 
+      formWithPrecognition.touch = (...fields: string[]) => {
+        validatorRef.touch(fields)
         return formWithPrecognition
       }
+
       formWithPrecognition.touched = (field?: string): boolean => {
         if (typeof field === 'string') {
           return formWithPrecognition.__touched.includes(field)
         }
-
         return formWithPrecognition.__touched.length > 0
       }
 
