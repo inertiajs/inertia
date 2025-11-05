@@ -1,7 +1,7 @@
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
-import { router } from './index'
+import { Page, router } from './index'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
@@ -101,7 +101,7 @@ class EventHandler {
         })
 
         const {url, ...pageWithoutUrl} = currentPage.get()
-        history.replaceState({...pageWithoutUrl})
+        history.replaceState({...pageWithoutUrl} as Page)
       })
       .catch(() => {
         this.onMissingHistoryItem()
