@@ -4,8 +4,6 @@ import { requests, shouldBeDumpPage } from './support'
 const integrations = ['form-helper']
 
 integrations.forEach((integration) => {
-  test.skip(process.env.PACKAGE === 'Svelte', '[WIP]')
-
   test.describe(integration === 'form-helper' ? 'Form Helper' : 'Form Component', () => {
     test.describe('Precognition', () => {
       test.beforeEach(async ({ page }) => {

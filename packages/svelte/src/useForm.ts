@@ -13,19 +13,30 @@ import type {
   Progress,
   RequestPayload,
   UrlMethodPair,
+  UseFormArguments,
+  UseFormSubmitArguments,
+  UseFormSubmitOptions,
+  UseFormTransformCallback,
+  UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
-import { router } from '@inertiajs/core'
+import { router, UseFormUtils } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
+import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import { createValidator, resolveName, toSimpleValidationErrors } from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
-import { writable, type Writable } from 'svelte/store'
+import { get as getStore, writable, type Writable } from 'svelte/store'
 import { config } from '.'
 
 type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
+type InertiaPrecognitiveFormStore<TForm extends object> = Writable<InertiaPrecognitiveForm<TForm>> &
+  InertiaPrecognitiveForm<TForm>
 
-type FormOptions = Omit<VisitOptions, 'data'>
-type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
 type TransformCallback<TForm> = (data: TForm) => object
+
+type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
+  only?: TKeys[]
+}
 
 export interface InertiaFormProps<TForm extends object> {
   isDirty: boolean
@@ -38,7 +49,7 @@ export interface InertiaFormProps<TForm extends object> {
   setStore(data: TForm): void
   setStore<T extends FormDataKeys<TForm>>(key: T, value: FormDataValues<TForm, T>): void
   data(): TForm
-  transform(callback: TransformCallback<TForm>): this
+  transform(callback: UseFormTransformCallback<TForm>): this
   defaults(): this
   defaults(fields: Partial<TForm>): this
   defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
@@ -47,39 +58,78 @@ export interface InertiaFormProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
-  submit: (...args: SubmitArgs) => void
-  get(url: string, options?: FormOptions): void
-  post(url: string, options?: FormOptions): void
-  put(url: string, options?: FormOptions): void
-  patch(url: string, options?: FormOptions): void
-  delete(url: string, options?: FormOptions): void
+  submit: (...args: UseFormSubmitArguments) => void
+  get(url: string, options?: UseFormSubmitOptions): void
+  post(url: string, options?: UseFormSubmitOptions): void
+  put(url: string, options?: UseFormSubmitOptions): void
+  patch(url: string, options?: UseFormSubmitOptions): void
+  delete(url: string, options?: UseFormSubmitOptions): void
   cancel(): void
+  withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveForm<TForm>
+}
+
+export interface InertiaFormValidationProps<TForm extends object> {
+  invalid<K extends FormDataKeys<TForm>>(field: K): boolean
+  setValidationTimeout(duration: number): this
+  touch<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  touched<K extends FormDataKeys<TForm>>(field?: K): boolean
+  valid<K extends FormDataKeys<TForm>>(field: K): boolean
+  validate<K extends FormDataKeys<TForm>>(
+    field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
+    config?: PrecognitionValidationConfig<K>,
+  ): this
+  validateFiles(): this
+  validating: boolean
+  validator: () => Validator
+  withFullErrors(): this
+  withoutFileValidation(): this
+}
+
+interface InternalPrecognitionState {
+  __touched: string[]
+  __valid: string[]
 }
 
 export type InertiaForm<TForm extends object> = InertiaFormProps<TForm> & TForm
+export type InertiaPrecognitiveForm<TForm extends object> = InertiaForm<TForm> &
+  InertiaFormValidationProps<TForm> &
+  InternalPrecognitionState
 
-export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaFormStore<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  method: Method | (() => Method),
+  url: string | (() => string),
+  data: TForm | (() => TForm),
+): InertiaPrecognitiveFormStore<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  urlMethodPair: UrlMethodPair | (() => UrlMethodPair),
+  data: TForm | (() => TForm),
+): InertiaPrecognitiveFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
   data: TForm | (() => TForm),
 ): InertiaFormStore<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
-  rememberKeyOrData: string | TForm | (() => TForm),
-  maybeData?: TForm | (() => TForm),
-): InertiaFormStore<TForm> {
-  const rememberKey = typeof rememberKeyOrData === 'string' ? rememberKeyOrData : null
-  const inputData = (typeof rememberKeyOrData === 'string' ? maybeData : rememberKeyOrData) ?? {}
-  const data: TForm = typeof inputData === 'function' ? inputData() : (inputData as TForm)
+  ...args: UseFormArguments<TForm>
+): InertiaFormStore<TForm> | InertiaPrecognitiveFormStore<TForm> {
+  const parsedArgs = UseFormUtils.parseUseFormArguments<TForm>(...args)
+  const { rememberKey, data: initialData } = parsedArgs
+  let precognitionEndpoint = parsedArgs.precognitionEndpoint
+
+  const data: TForm = typeof initialData === 'function' ? initialData() : (initialData as TForm)
   const restored = rememberKey
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
     : null
   let defaults = cloneDeep(data)
   let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
-  let transform = (data: TForm) => data as object
+  let transform: UseFormTransformCallback<TForm> = (data) => data as object
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
   let defaultsCalledInOnSuccess = false
+
+  // Precognition state
+  let validatorRef: Validator | null = null
 
   // Internal helper to update form state properties
   const setFormState = <K extends keyof InertiaFormProps<TForm>>(key: K, value: InertiaFormProps<TForm>[K]) => {
@@ -124,26 +174,36 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     reset(...fields: Array<FormDataKeys<TForm>>) {
-      const clonedData = cloneDeep(defaults)
+      const resolvedData = cloneDeep(defaults)
+
       if (fields.length === 0) {
-        this.setStore(clonedData)
+        // Reset all fields to defaults - use Object.assign to maintain reactivity
+        Object.assign(this, resolvedData)
+        store.set({ ...getStore(store), ...resolvedData })
       } else {
-        this.setStore(
-          fields
-            .filter((key) => has(clonedData, key))
-            .reduce((carry, key) => {
-              return set(carry, key, get(clonedData, key))
-            }, {} as TForm),
-        )
+        // Reset specific fields to defaults
+        fields
+          .filter((key) => has(resolvedData, key))
+          .forEach((key) => {
+            const value = get(resolvedData, key)
+            ;(this as any)[key] = value
+            store.update((currentStore) => ({ ...currentStore, [key]: value }))
+          })
       }
+
+      validatorRef?.reset(...fields)
 
       return this
     },
     setError(fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
+      const errors = typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields
+
       setFormState('errors', {
         ...this.errors,
-        ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
+        ...errors,
       })
+
+      validatorRef?.setErrors(errors as Errors)
 
       return this
     },
@@ -158,6 +218,15 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           {},
         ) as FormDataErrors<TForm>,
       )
+
+      if (validatorRef) {
+        if (fields.length === 0) {
+          validatorRef.setErrors({})
+        } else {
+          fields.forEach(validatorRef.forgetError)
+        }
+      }
+
       return this
     },
     resetAndClearErrors(...fields: Array<FormDataKeys<TForm>>) {
@@ -165,12 +234,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       this.clearErrors(...fields)
       return this
     },
-    submit(...args: SubmitArgs) {
-      const objectPassed = args[0] !== null && typeof args[0] === 'object'
-
-      const method = objectPassed ? args[0].method : args[0]
-      const url = objectPassed ? args[0].url : args[1]
-      const options = (objectPassed ? args[1] : args[2]) ?? {}
+    submit(...args: UseFormSubmitArguments) {
+      const { method, url, options } = UseFormUtils.parseSubmitArguments(args, precognitionEndpoint)
 
       defaultsCalledInOnSuccess = false
 
@@ -284,7 +349,204 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     cancel() {
       cancelToken?.cancel()
     },
-  } as InertiaForm<TForm>)
+  } as any)
+
+  // Add withPrecognition method directly to the store object
+  ;(store as any).withPrecognition = (
+    ...args: UseFormWithPrecognitionArguments
+  ): InertiaPrecognitiveFormStore<TForm> => {
+    precognitionEndpoint = UseFormUtils.createWayfinderCallback(...args)
+
+    let simpleValidationErrors = true
+
+    if (!validatorRef) {
+
+      const validator = createValidator((client) => {
+        const { method, url } = precognitionEndpoint!()
+        const currentForm = getStore(store)
+        const transformedData = transform(currentForm.data()) as Record<string, unknown>
+        return client[method](url, transformedData)
+      }, defaults)
+
+      validatorRef = validator
+
+      // Add all validation properties and methods to the store value for $form access
+      store.update((form) => ({
+        ...form,
+        __touched: [],
+        __valid: [],
+        validating: false,
+        // Validation checking methods
+        valid: (field: string) => {
+          const currentStore = getStore(store)
+          return (currentStore as any).__valid?.includes(field) || false
+        },
+        invalid: (field: string) => {
+          const currentStore = getStore(store)
+          return field in (currentStore.errors || {})
+        },
+        touched: (field?: string): boolean => {
+          const currentStore = getStore(store)
+          const touched = (currentStore as any).__touched || []
+          return typeof field === 'string' ? touched.includes(field) : touched.length > 0
+        },
+        // Validation action methods
+        validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
+          // Handle config object passed as first argument
+          if (typeof field === 'object' && !('target' in field)) {
+            config = field
+            field = undefined
+          }
+
+          if (field === undefined) {
+            validatorRef!.validate(config)
+          } else {
+            const fieldName = resolveName(field)
+            const currentForm = getStore(store)
+            const transformedData = transform(currentForm.data()) as Record<string, unknown>
+            validatorRef!.validate(fieldName, get(transformedData, fieldName), config)
+          }
+
+          return getStore(store)
+        },
+        validator: () => validatorRef!,
+        setValidationTimeout: (duration: number) => {
+          validatorRef!.setTimeout(duration)
+          return getStore(store)
+        },
+        validateFiles: () => {
+          validatorRef!.validateFiles()
+          return getStore(store)
+        },
+        withoutFileValidation: () => {
+          try {
+            if (typeof (validatorRef as any).withoutFileValidation === 'function') {
+              ;(validatorRef as any).withoutFileValidation()
+            }
+          } catch (error) {
+            console.warn('withoutFileValidation method not available')
+          }
+          return getStore(store)
+        },
+        touch: (...fields: string[]) => {
+          validatorRef!.touch(fields)
+          return getStore(store)
+        },
+        withFullErrors: () => {
+          simpleValidationErrors = false
+          return getStore(store)
+        },
+      }))
+
+      validator
+        .on('validatingChanged', () => {
+          store.update((form) => ({ ...form, validating: validator.validating() }))
+        })
+        .on('validatedChanged', () => {
+          store.update((form) => ({ ...form, __valid: validator.valid() }))
+        })
+        .on('touchedChanged', () => {
+          store.update((form) => ({ ...form, __touched: validator.touched() }))
+        })
+        .on('errorsChanged', () => {
+          const validationErrors = simpleValidationErrors
+            ? toSimpleValidationErrors(validator.errors())
+            : validator.errors()
+
+          store.update((form) => ({
+            ...form,
+            errors: {} as FormDataErrors<TForm>,
+          }))
+
+          getStore(store).setError(validationErrors as FormDataErrors<TForm>)
+          store.update((form) => ({ ...form, __valid: validator.valid() }))
+        })
+
+    }
+
+    // Add chaining methods to the store object EVERY time withPrecognition is called
+    // This ensures they're always available for chaining
+    const storeValue = getStore(store)
+
+    // Precognition chaining methods
+    ;(store as any).setValidationTimeout = (duration: number) => {
+      validatorRef!.setTimeout(duration)
+      return store
+    }
+    ;(store as any).validateFiles = () => {
+      validatorRef!.validateFiles()
+      return store
+    }
+    ;(store as any).withoutFileValidation = () => {
+      try {
+        if (typeof (validatorRef as any).withoutFileValidation === 'function') {
+          ;(validatorRef as any).withoutFileValidation()
+        }
+      } catch (error) {
+        console.warn('withoutFileValidation method not available')
+      }
+      return store
+    }
+    ;(store as any).touch = (...fields: string[]) => {
+      validatorRef!.touch(fields)
+      return store
+    }
+    ;(store as any).withFullErrors = () => {
+      simpleValidationErrors = false
+      return store
+    }
+    ;(store as any).validate = (...fields: string[]) => {
+      validatorRef!.validate(...fields)
+      return store
+    }
+
+    // Base form methods for chaining compatibility AND direct access
+    ;(store as any).transform = (callback: TransformCallback<TForm>) => {
+      transform = callback
+      return store
+    }
+    ;(store as any).defaults = (fieldOrFields?: any, maybeValue?: any) => {
+      storeValue.defaults(fieldOrFields, maybeValue)
+      return store
+    }
+    ;(store as any).reset = (...fields: any[]) => {
+      storeValue.reset(...(fields as FormDataKeys<TForm>[]))
+      return store
+    }
+    ;(store as any).clearErrors = (...fields: any[]) => {
+      storeValue.clearErrors(...(fields as FormDataKeys<TForm>[]))
+      return store
+    }
+    ;(store as any).setError = (fieldOrFields: any, maybeValue?: any) => {
+      storeValue.setError(fieldOrFields, maybeValue)
+      return store
+    }
+
+    // ADD ALL SUBMISSION METHODS TO STORE OBJECT!
+    ;(store as any).submit = (...args: any[]) => {
+      (storeValue.submit as any)(...args)
+    }
+    ;(store as any).get = (url: string, options?: any) => {
+      storeValue.get(url, options)
+    }
+    ;(store as any).post = (url: string, options?: any) => {
+      storeValue.post(url, options)
+    }
+    ;(store as any).put = (url: string, options?: any) => {
+      storeValue.put(url, options)
+    }
+    ;(store as any).patch = (url: string, options?: any) => {
+      storeValue.patch(url, options)
+    }
+    ;(store as any).delete = (url: string, options?: any) => {
+      storeValue.delete(url, options)
+    }
+    ;(store as any).cancel = () => {
+      storeValue.cancel()
+    }
+
+    return store as any as InertiaPrecognitiveFormStore<TForm>
+  }
 
   store.subscribe((form) => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
@@ -301,5 +563,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   })
 
-  return store as InertiaFormStore<TForm>
+  // If legacy precognition patterns were used, automatically call withPrecognition
+  // This matches React/Vue behavior exactly
+  return precognitionEndpoint
+    ? (store as any).withPrecognition(precognitionEndpoint)
+    : (store as InertiaFormStore<TForm>)
 }
