@@ -423,6 +423,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return value
     }
 
+    // Helper to create delegating methods that forward calls to store value methods
+    const delegateToStoreValue = (methodName: string) => {
+      return (...args: any[]) => {
+        const storeValue = getStore(store)
+        return (storeValue as any)[methodName](...args)
+      }
+    }
+
     // Add ONLY the new validation methods plus transform override for proper chaining
     Object.assign(store, {
       setValidationTimeout: (duration: number) =>
@@ -486,31 +494,13 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const currentStore = getStore(store)
         return (currentStore as any).validating || false
       },
-      // Override submit and HTTP methods to ensure proper context in precognitive store
-      submit: (...args: any[]) => {
-        const storeValue = getStore(store)
-        ;(storeValue.submit as any)(...args)
-      },
-      get: (url: string, options?: any) => {
-        const storeValue = getStore(store)
-        storeValue.get(url, options)
-      },
-      post: (url: string, options?: any) => {
-        const storeValue = getStore(store)
-        storeValue.post(url, options)
-      },
-      put: (url: string, options?: any) => {
-        const storeValue = getStore(store)
-        storeValue.put(url, options)
-      },
-      patch: (url: string, options?: any) => {
-        const storeValue = getStore(store)
-        storeValue.patch(url, options)
-      },
-      delete: (url: string, options?: any) => {
-        const storeValue = getStore(store)
-        storeValue.delete(url, options)
-      },
+      // Delegate HTTP methods to store value methods (no duplication - just delegation)
+      submit: delegateToStoreValue('submit'),
+      get: delegateToStoreValue('get'),
+      post: delegateToStoreValue('post'),
+      put: delegateToStoreValue('put'),
+      patch: delegateToStoreValue('patch'),
+      delete: delegateToStoreValue('delete'),
     })
 
     // Add action methods to store value for $form reactive access
