@@ -17,8 +17,7 @@
       on:blur={() =>
         $form.validate('name', {
           headers: { 'X-Custom-Header': 'custom-value' },
-        })
-      }
+        })}
     />
     {#if $form.invalid('name')}
       <p>

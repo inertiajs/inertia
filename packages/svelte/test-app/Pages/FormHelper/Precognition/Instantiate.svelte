@@ -80,4 +80,6 @@
 <button on:click={() => submitWithWayfinder($formName)}>Submit with Wayfinder</button>
 
 {#if $currentFormStore && $currentFormStore.validating}<p>Validating...</p>{/if}
-{#if $currentFormStore && $currentFormStore.errors && $currentFormStore.errors.name}<p>{$currentFormStore.errors.name}</p>{/if}
+{#if $currentFormStore && $currentFormStore.errors && $currentFormStore.errors.name}<p>
+    {$currentFormStore.errors.name}
+  </p>{/if}

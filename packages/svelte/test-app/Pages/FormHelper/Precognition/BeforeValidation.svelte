@@ -34,8 +34,7 @@
       on:blur={() =>
         $form.validate('name', {
           onBeforeValidation: handleBeforeValidation,
-        })
-      }
+        })}
     />
     {#if $form.invalid('name')}
       <p>

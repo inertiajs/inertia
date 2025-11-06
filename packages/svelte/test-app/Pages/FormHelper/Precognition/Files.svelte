@@ -40,12 +40,7 @@
   </div>
 
   <div>
-    <input
-      type="file"
-      name="avatar"
-      id="avatar"
-      on:change={handleFileChange}
-    />
+    <input type="file" name="avatar" id="avatar" on:change={handleFileChange} />
     {#if $form.invalid('avatar')}
       <p>
         {$form.errors.avatar}
@@ -56,7 +51,7 @@
 
   {#if $form.validating}<p>Validating...</p>{/if}
 
-  <button type="button" on:click={() => validateFiles = !validateFiles}>
+  <button type="button" on:click={() => (validateFiles = !validateFiles)}>
     Toggle Validate Files ({validateFiles ? 'enabled' : 'disabled'})
   </button>
 
