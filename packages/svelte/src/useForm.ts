@@ -172,21 +172,17 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     reset(...fields: Array<FormDataKeys<TForm>>) {
-      const resolvedData = cloneDeep(defaults)
-
+      const clonedData = cloneDeep(defaults)
       if (fields.length === 0) {
-        // Reset all fields to defaults - use Object.assign to maintain reactivity
-        Object.assign(this, resolvedData)
-        store.set({ ...getStore(store), ...resolvedData })
+        this.setStore(clonedData)
       } else {
-        // Reset specific fields to defaults
-        fields
-          .filter((key) => has(resolvedData, key))
-          .forEach((key) => {
-            const value = get(resolvedData, key)
-            ;(this as any)[key] = value
-            store.update((currentStore) => ({ ...currentStore, [key]: value }))
-          })
+        this.setStore(
+          fields
+            .filter((key) => has(clonedData, key))
+            .reduce((carry, key) => {
+              return set(carry, key, get(clonedData, key))
+            }, {} as TForm),
+        )
       }
 
       validatorRef?.reset(...fields)
@@ -454,8 +450,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   })
 
-  // If legacy precognition patterns were used, automatically call withPrecognition
-  // This matches React/Vue behavior exactly
   return precognitionEndpoint
     ? (store as any).withPrecognition(precognitionEndpoint)
     : (store as InertiaFormStore<TForm>)
