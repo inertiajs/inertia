@@ -202,6 +202,25 @@ test.describe('Form Component', () => {
       await expect(page.locator('#error_name')).toHaveText('Some name error')
       await expect(page.locator('#error_handle')).toHaveText('The Handle was invalid')
     })
+
+    test('keep the initial value on errors', async ({ page }) => {
+      pageLoads.watch(page, 2)
+
+      await page.goto('/form-component/default-value')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await page.fill('#name', 'Jane Doe')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('The name must be at least 10 characters.')
+      await expect(page.locator('#name')).toHaveValue('Jane Doe')
+
+      await page.fill('#name', 'Jonathan Doe')
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await page.waitForURL('/')
+    })
   })
 
   test.describe('Reset Attributes', () => {
