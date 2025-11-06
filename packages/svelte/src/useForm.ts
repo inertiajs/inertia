@@ -349,175 +349,111 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     cancel() {
       cancelToken?.cancel()
     },
-  } as any)
+    withPrecognition(...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveFormStore<TForm> {
+      precognitionEndpoint = UseFormUtils.createWayfinderCallback(...args)
 
-  // Add withPrecognition method directly to the store object
-  ;(store as any).withPrecognition = (
-    ...args: UseFormWithPrecognitionArguments
-  ): InertiaPrecognitiveFormStore<TForm> => {
-    precognitionEndpoint = UseFormUtils.createWayfinderCallback(...args)
+      let simpleValidationErrors = true
 
-    let simpleValidationErrors = true
-
-    if (!validatorRef) {
-      const validator = createValidator((client) => {
-        const { method, url } = precognitionEndpoint!()
-        const currentForm = getStore(store)
-        const transformedData = transform(currentForm.data()) as Record<string, unknown>
-        return client[method](url, transformedData)
-      }, defaults)
-
-      validatorRef = validator
-
-      // Add validation properties and READ-ONLY methods to the store value for $form reactive access
-      store.update((form) => ({
-        ...form,
-        __touched: [],
-        __valid: [],
-        validating: false,
-        // Read-only validation checking methods (no state mutation)
-        valid: (field: string) => {
-          const currentStore = getStore(store)
-          return (currentStore as any).__valid?.includes(field) || false
-        },
-        invalid: (field: string) => {
-          const currentStore = getStore(store)
-          return field in (currentStore.errors || {})
-        },
-        touched: (field?: string): boolean => {
-          const currentStore = getStore(store)
-          const touched = (currentStore as any).__touched || []
-          return typeof field === 'string' ? touched.includes(field) : touched.length > 0
-        },
-        validator: () => validatorRef!,
-      }))
-
-      validator
-        .on('validatingChanged', () => {
-          store.update((form) => ({ ...form, validating: validator.validating() }))
-        })
-        .on('validatedChanged', () => {
-          store.update((form) => ({ ...form, __valid: validator.valid() }))
-        })
-        .on('touchedChanged', () => {
-          store.update((form) => ({ ...form, __touched: validator.touched() }))
-        })
-        .on('errorsChanged', () => {
-          const validationErrors = simpleValidationErrors
-            ? toSimpleValidationErrors(validator.errors())
-            : validator.errors()
-
-          store.update((form) => ({
-            ...form,
-            errors: {} as FormDataErrors<TForm>,
-          }))
-
-          getStore(store).setError(validationErrors as FormDataErrors<TForm>)
-          store.update((form) => ({ ...form, __valid: validator.valid() }))
-        })
-    }
-
-    // Helper function for method chaining
-    const tap = <T>(value: T, callback: (value: T) => unknown): T => {
-      callback(value)
-      return value
-    }
-
-    // Add ONLY the new validation methods plus transform override for proper chaining
-    Object.assign(store, {
-      setValidationTimeout: (duration: number) =>
-        tap(store, () => validatorRef!.setTimeout(duration)),
-      validateFiles: () =>
-        tap(store, () => validatorRef!.validateFiles()),
-      withoutFileValidation: () =>
-        tap(store, () => {
-          try {
-            if (typeof (validatorRef as any).withoutFileValidation === 'function') {
-              ;(validatorRef as any).withoutFileValidation()
-            }
-          } catch (error) {
-            console.warn('withoutFileValidation method not available')
-          }
-        }),
-      withFullErrors: () =>
-        tap(store, () => simpleValidationErrors = false),
-      // Override transform to return precognitive store for proper chaining
-      transform: (callback: TransformCallback<TForm>) => {
-        transform = callback
-        return store
-      },
-      // Add validation action methods to store object for direct calls (not just reactive access)
-      touch: (...fields: string[]) =>
-        tap(store, () => validatorRef!.touch(fields)),
-      validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
-        // Handle config object passed as first argument
-        if (typeof field === 'object' && !('target' in field)) {
-          config = field
-          field = undefined
-        }
-
-        if (field === undefined) {
-          validatorRef!.validate(config)
-        } else {
-          const fieldName = resolveName(field)
+      if (!validatorRef) {
+        const validator = createValidator((client) => {
+          const { method, url } = precognitionEndpoint!()
           const currentForm = getStore(store)
           const transformedData = transform(currentForm.data()) as Record<string, unknown>
-          validatorRef!.validate(fieldName, get(transformedData, fieldName), config)
-        }
+          return client[method](url, transformedData)
+        }, defaults)
 
-        return store
-      },
-      // Add validation read-only properties for direct access
-      valid: (field: string) => {
+        validatorRef = validator
+
+        // Add validation properties to the store value for $form reactive access
+        store.update((form) => ({
+          ...form,
+          __touched: [],
+          __valid: [],
+          validating: false,
+          validator: () => validatorRef!,
+        }))
+
+        validator
+          .on('validatingChanged', () => {
+            store.update((form) => ({ ...form, validating: validator.validating() }))
+          })
+          .on('validatedChanged', () => {
+            store.update((form) => ({ ...form, __valid: validator.valid() }))
+          })
+          .on('touchedChanged', () => {
+            store.update((form) => ({ ...form, __touched: validator.touched() }))
+          })
+          .on('errorsChanged', () => {
+            const validationErrors = simpleValidationErrors
+              ? toSimpleValidationErrors(validator.errors())
+              : validator.errors()
+
+            store.update((form) => ({
+              ...form,
+              errors: {} as FormDataErrors<TForm>,
+            }))
+
+            getStore(store).setError(validationErrors as FormDataErrors<TForm>)
+            store.update((form) => ({ ...form, __valid: validator.valid() }))
+          })
+      }
+
+      // Helper function for method chaining
+      const tap = <T>(value: T, callback: (value: T) => unknown): T => {
+        callback(value)
+        return value
+      }
+
+      // Define validation methods once (no duplication!)
+      const validMethod = (field: string) => {
         const currentStore = getStore(store)
         return (currentStore as any).__valid?.includes(field) || false
-      },
-      invalid: (field: string) => {
+      }
+
+      const invalidMethod = (field: string) => {
         const currentStore = getStore(store)
         return field in (currentStore.errors || {})
-      },
-      touched: (field?: string): boolean => {
+      }
+
+      const touchedMethod = (field?: string): boolean => {
         const currentStore = getStore(store)
         const touched = (currentStore as any).__touched || []
         return typeof field === 'string' ? touched.includes(field) : touched.length > 0
-      },
-      validator: () => validatorRef!,
-      get validating() {
-        const currentStore = getStore(store)
-        return (currentStore as any).validating || false
-      },
-    })
+      }
 
-    // Add action methods to store value for $form reactive access
-    store.update((form) => ({
-      ...form,
-      validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
-        // Handle config object passed as first argument
-        if (typeof field === 'object' && !('target' in field)) {
-          config = field
-          field = undefined
+      const touchMethod =
+        (returnValue: any) =>
+        (...fields: string[]) => {
+          validatorRef!.touch(fields)
+          return returnValue
         }
 
-        if (field === undefined) {
-          validatorRef!.validate(config)
-        } else {
-          const fieldName = resolveName(field)
-          const currentForm = getStore(store)
-          const transformedData = transform(currentForm.data()) as Record<string, unknown>
-          validatorRef!.validate(fieldName, get(transformedData, fieldName), config)
+      const validateMethod =
+        (returnValue: any) => (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
+          // Handle config object passed as first argument
+          if (typeof field === 'object' && !('target' in field)) {
+            config = field
+            field = undefined
+          }
+
+          if (field === undefined) {
+            validatorRef!.validate(config)
+          } else {
+            const fieldName = resolveName(field)
+            const currentForm = getStore(store)
+            const transformedData = transform(currentForm.data()) as Record<string, unknown>
+            validatorRef!.validate(fieldName, get(transformedData, fieldName), config)
+          }
+
+          return returnValue
         }
 
-        return getStore(store)
-      },
-      touch: (...fields: string[]) => {
-        validatorRef!.touch(fields)
-        return getStore(store)
-      },
-      validateFiles: () => {
+      const validateFilesMethod = (returnValue: any) => () => {
         validatorRef!.validateFiles()
-        return getStore(store)
-      },
-      withoutFileValidation: () => {
+        return returnValue
+      }
+
+      const withoutFileValidationMethod = (returnValue: any) => () => {
         try {
           if (typeof (validatorRef as any).withoutFileValidation === 'function') {
             ;(validatorRef as any).withoutFileValidation()
@@ -525,12 +461,37 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         } catch (error) {
           console.warn('withoutFileValidation method not available')
         }
-        return getStore(store)
-      },
-    }))
+        return returnValue
+      }
 
-    return store as any as InertiaPrecognitiveFormStore<TForm>
-  }
+      // Add validation methods to store object for direct calls
+      Object.assign(store, {
+        setValidationTimeout: (duration: number) => tap(store, () => validatorRef!.setTimeout(duration)),
+        validateFiles: validateFilesMethod(store),
+        withoutFileValidation: withoutFileValidationMethod(store),
+        withFullErrors: () => tap(store, () => (simpleValidationErrors = false)),
+        // Override transform to return precognitive store for proper chaining
+        transform: (callback: TransformCallback<TForm>) => {
+          transform = callback
+          return store
+        },
+        touch: touchMethod(store),
+        validate: validateMethod(store),
+        valid: validMethod,
+        invalid: invalidMethod,
+        touched: touchedMethod,
+        validator: () => validatorRef!,
+        get validating() {
+          const currentStore = getStore(store)
+          return (currentStore as any).validating || false
+        },
+      })
+
+      return store as any as InertiaPrecognitiveFormStore<TForm>
+    },
+  } as any)
+
+  // Add withPrecognition method directly to the store object
 
   store.subscribe((form) => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
