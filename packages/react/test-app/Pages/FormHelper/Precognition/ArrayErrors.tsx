@@ -18,9 +18,7 @@ export default () => {
           onChange={(e) => form.setData('name', e.target.value)}
           onBlur={() => form.validate('name')}
         />
-        {form.invalid('name') && (
-          <p>{form.errors.name}</p>
-        )}
+        {form.invalid('name') && <p>{form.errors.name}</p>}
         {form.valid('name') && <p>Name is valid!</p>}
       </div>
 
@@ -32,9 +30,7 @@ export default () => {
           onChange={(e) => form.setData('email', e.target.value)}
           onBlur={() => form.validate('email')}
         />
-        {form.invalid('email') && (
-          <p>{form.errors.email}</p>
-        )}
+        {form.invalid('email') && <p>{form.errors.email}</p>}
         {form.valid('email') && <p>Email is valid!</p>}
       </div>
 

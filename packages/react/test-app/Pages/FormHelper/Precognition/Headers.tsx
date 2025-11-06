@@ -21,9 +21,7 @@ export default () => {
             })
           }
         />
-        {form.invalid('name') && (
-          <p>{form.errors.name}</p>
-        )}
+        {form.invalid('name') && <p>{form.errors.name}</p>}
         {form.valid('name') && <p>Name is valid!</p>}
       </div>
 
