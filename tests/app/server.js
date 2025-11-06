@@ -805,6 +805,27 @@ app.post('/json', (req, res) => res.json({ foo: 'bar' }))
 app.get('/form-component/child-component', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
 )
+
+let defaultValueForErrors = {}
+
+app.get('/form-component/default-value', (req, res) => {
+  const errors = { ...defaultValueForErrors }
+  defaultValueForErrors = {}
+
+  return inertia.render(req, res, {
+    component: 'FormComponent/DefaultValue',
+    props: { user: { name: 'John Doe' }, errors },
+  })
+})
+app.patch('/form-component/default-value', (req, res) => {
+  if (!req.body.name || req.body.name.length < 10) {
+    defaultValueForErrors = { 'user.name': 'The name must be at least 10 characters.' }
+    return res.redirect(303, '/form-component/default-value')
+  }
+
+  return res.redirect(303, '/')
+})
+
 app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
 app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>
