@@ -36,24 +36,29 @@
   $: currentFormStore = forms[$formName]
 
   const validateForm = (formName: keyof typeof forms) => {
-    forms[formName].touch('name')
-    forms[formName].validate()
+    const form = forms[formName]
+    $form.touch('name')
+    $form.validate()
   }
 
   const submitWithoutArgs = (formName: keyof typeof forms) => {
-    forms[formName].submit()
+    const form = forms[formName]
+    $form.submit()
   }
 
   const submitWithArgs = (formName: keyof typeof forms) => {
-    forms[formName].submit('patch', '/dump/patch')
+    const form = forms[formName]
+    $form.submit('patch', '/dump/patch')
   }
 
   const submitWithMethod = (formName: keyof typeof forms) => {
-    forms[formName].put('/dump/put')
+    const form = forms[formName]
+    $form.put('/dump/put')
   }
 
   const submitWithWayfinder = (formName: keyof typeof forms) => {
-    forms[formName].submit({ url: '/dump/post', method: 'post' })
+    const form = forms[formName]
+    $form.submit({ url: '/dump/post', method: 'post' })
   }
 </script>
 
