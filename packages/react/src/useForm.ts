@@ -516,20 +516,23 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
 
     // Create precognitive form with all validation methods
-    return Object.assign(form, {
+    const precognitiveForm = Object.assign(form, {
       validating,
       validator: () => validatorRef.current!,
       valid,
       invalid,
       touched,
       // @ts-expect-error - Not released yet... )
-      withoutFileValidation: () => tap(form, () => validatorRef.current?.withoutFileValidation()),
-      touch: (...fields: string[]) => tap(form, () => validatorRef.current?.touch(fields)),
-      withFullErrors: () => tap(form, () => (simpleValidationErrors.current = false)),
-      setValidationTimeout: (duration: number) => tap(form, () => validatorRef.current?.setTimeout(duration)),
-      validateFiles: () => tap(form, () => validatorRef.current?.validateFiles()),
+      withoutFileValidation: () => tap(precognitiveForm, () => validatorRef.current?.withoutFileValidation()),
+      touch: (...fields: string[]) => tap(precognitiveForm, () => validatorRef.current?.touch(fields)),
+      withFullErrors: () => tap(precognitiveForm, () => (simpleValidationErrors.current = false)),
+      setValidationTimeout: (duration: number) =>
+        tap(precognitiveForm, () => validatorRef.current?.setTimeout(duration)),
+      validateFiles: () => tap(precognitiveForm, () => validatorRef.current?.validateFiles()),
       validate,
-    })
+    }) as InertiaPrecognitiveFormProps<TForm>
+
+    return precognitiveForm
   }
 
   form.withPrecognition = withPrecognition
