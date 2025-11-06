@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Method, UrlMethodPair } from '@inertiajs/core'
   import { useForm } from '@inertiajs/svelte'
-  import { derived, get, writable } from 'svelte/store'
+  import { get, writable } from 'svelte/store'
 
   const wayfinderUrl = (): UrlMethodPair => ({
     url: '/precognition/default',
