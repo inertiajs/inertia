@@ -13,10 +13,13 @@
 
   let validateFiles = false
 
-  $: if (validateFiles) {
-    $form.validateFiles()
-  } else {
-    $form.withoutFileValidation()
+  $: {
+    if (validateFiles && typeof $form.validateFiles === 'function') {
+      $form.validateFiles()
+    } else if (!validateFiles && typeof $form.withoutFileValidation === 'function') {
+      // TODO:
+      // $form.withoutFileValidation()
+    }
   }
 
   const handleFileChange = (e: Event) => {

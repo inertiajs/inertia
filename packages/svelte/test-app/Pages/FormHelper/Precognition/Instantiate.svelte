@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Method, UrlMethodPair } from '@inertiajs/core'
+  import type { Method, UrlMethodPair } from '@inertiajs/core'
   import { useForm } from '@inertiajs/svelte'
-  import { derived, writable } from 'svelte/store'
+  import { derived, get, writable } from 'svelte/store'
 
   const wayfinderUrl = (): UrlMethodPair => ({
     url: '/precognition/default',
@@ -37,28 +37,28 @@
 
   const validateForm = (formName: keyof typeof forms) => {
     const form = forms[formName]
-    $form.touch('name')
-    $form.validate()
+    get(form).touch('name')
+    get(form).validate()
   }
 
   const submitWithoutArgs = (formName: keyof typeof forms) => {
     const form = forms[formName]
-    $form.submit()
+    get(form).submit()
   }
 
   const submitWithArgs = (formName: keyof typeof forms) => {
     const form = forms[formName]
-    $form.submit('patch', '/dump/patch')
+    get(form).submit('patch', '/dump/patch')
   }
 
   const submitWithMethod = (formName: keyof typeof forms) => {
     const form = forms[formName]
-    $form.put('/dump/put')
+    get(form).put('/dump/put')
   }
 
   const submitWithWayfinder = (formName: keyof typeof forms) => {
     const form = forms[formName]
-    $form.submit({ url: '/dump/post', method: 'post' })
+    get(form).submit({ url: '/dump/post', method: 'post' })
   }
 </script>
 
