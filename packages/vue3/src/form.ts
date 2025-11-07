@@ -283,9 +283,6 @@ const Form = defineComponent({
       get recentlySuccessful() {
         return form.recentlySuccessful
       },
-      get validator() {
-        return form.validator()
-      },
       get validating() {
         return form.validating
       },
@@ -307,10 +304,9 @@ const Form = defineComponent({
       valid: form.valid,
       invalid: form.invalid,
       touched: form.touched,
-      setErrors: form.setErrors,
-      forgetError: form.forgetError,
       validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) =>
         form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, props.headers)),
+      validator: () => form.validator(),
     }
 
     expose<FormComponentRef>(exposed)

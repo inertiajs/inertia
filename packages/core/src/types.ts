@@ -639,6 +639,7 @@ export type FormComponentMethods = {
   validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig): void
   touch: (...fields: string[]) => void
   touched(field?: string): boolean
+  validator: () => Validator
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
@@ -651,7 +652,6 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
-  validator: Validator
   validating: boolean
 }
 

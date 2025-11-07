@@ -1,5 +1,4 @@
 import {
-  Errors,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
@@ -9,17 +8,11 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
-import {
-  createValidator,
-  NamedInputEvent,
-  resolveName,
-  toSimpleValidationErrors,
-  ValidationConfig,
-  Validator,
-} from 'laravel-precognition'
-import { get, isEqual } from 'lodash-es'
+import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
+import { isEqual } from 'lodash-es'
 import React, {
   createElement,
   FormEvent,
@@ -81,7 +74,24 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     },
     ref,
   ) => {
+    const getTransformedData = (): Record<string, FormDataConvertible> => {
+      const [_url, data] = getUrlAndData()
+      return transform(data)
+    }
+
     const form = useForm<Record<string, any>>({})
+      .withPrecognition(
+        () => resolvedMethod,
+        () => getUrlAndData()[0],
+      )
+      .setValidationTimeout(validateTimeout)
+
+    if (!simpleValidationErrors) {
+      form.withFullErrors()
+    }
+
+    form.transform(getTransformedData)
+
     const formElement = useRef<HTMLFormElement>(undefined)
 
     const resolvedMethod = useMemo(() => {
@@ -90,12 +100,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
-
-    const [validating, setValidating] = useState(false)
-    const [valid, setValid] = useState<string[]>([])
-    const [touched, setTouched] = useState<string[]>([])
-
-    const [validator, setValidator] = useState<Validator>()
 
     const getFormData = (): FormData => new FormData(formElement.current)
 
@@ -121,94 +125,31 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const clearErrors = (...names: string[]) => {
       form.clearErrors(...names)
 
-      if (names.length === 0) {
-        validator!.setErrors({})
-      } else {
-        names.forEach(validator!.forgetError)
-      }
-
       return form
-    }
-
-    const getTransformedData = (): Record<string, FormDataConvertible> => {
-      const [_url, data] = getUrlAndData()
-      return transform(data)
     }
 
     useEffect(() => {
       defaultData.current = getFormData()
 
+      form.setDefaults(getData())
+
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
       formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
-
-      // Initialize validator
-      const newValidator = createValidator(
-        (client) =>
-          client[resolvedMethod](getUrlAndData()[0], getTransformedData(), {
-            headers,
-          }),
-        getTransformedData(),
-      )
-        .on('validatingChanged', () => {
-          setValidating(newValidator.validating())
-        })
-        .on('validatedChanged', () => {
-          setValid(newValidator.valid())
-        })
-        .on('touchedChanged', () => {
-          setTouched(newValidator.touched())
-        })
-        .on('errorsChanged', () => {
-          form.clearErrors()
-
-          const errors = simpleValidationErrors
-            ? toSimpleValidationErrors(newValidator.errors())
-            : newValidator.errors()
-
-          form.setError(errors as Errors)
-
-          setValid(newValidator.valid())
-        })
-
-      newValidator.setTimeout(validateTimeout)
-
-      if (validateFiles) {
-        newValidator.validateFiles()
-      }
-
-      setValidator(newValidator)
 
       return () => {
         formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
       }
     }, [])
 
-    const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
-      if (typeof field === 'object' && !('target' in field)) {
-        config = field
-        field = undefined
-      }
-
-      if (typeof field === 'undefined') {
-        validator!.validate(config)
-      } else {
-        field = resolveName(field)
-
-        validator!.validate(field, get(getTransformedData(), field), config)
-      }
-    }
-
     useEffect(() => {
-      validator?.setTimeout(validateTimeout)
-    }, [validateTimeout, validator])
+      form.setValidationTimeout(validateTimeout)
+    }, [validateTimeout])
 
     const reset = (...fields: string[]) => {
       if (formElement.current) {
         resetFormFields(formElement.current, defaultData.current, fields)
       }
-
-      validator!.reset(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
@@ -261,25 +202,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         ...options,
       }
 
-      form.transform(() => transform(_data))
       form.submit(resolvedMethod, url, submitOptions)
     }
 
     const defaults = () => {
       defaultData.current = getFormData()
       setIsDirty(false)
-    }
-
-    const touch = (...fields: string[]) => {
-      validator!.touch(fields)
-    }
-
-    const isTouched = (field?: string): boolean => {
-      if (typeof field === 'string') {
-        return touched.includes(field)
-      }
-
-      return touched.length > 0
     }
 
     const exposed = () => ({
@@ -300,16 +228,17 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       getFormData,
 
       // Precognition
-      validator: validator!,
-      validating,
-      valid: (field: string) => valid.includes(field),
-      invalid: (field: string) => form.errors[field] !== undefined,
-      validate,
-      touch,
-      touched: isTouched,
+      validator: () => form.validator(),
+      validating: form.validating,
+      valid: form.valid,
+      invalid: form.invalid,
+      validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) =>
+        form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers)),
+      touch: form.touch,
+      touched: form.touched,
     })
 
-    useImperativeHandle(ref, exposed, [form, isDirty, submit, validating, valid, touched, touch, validator])
+    useImperativeHandle(ref, exposed, [form, isDirty, submit])
 
     return createElement(
       'form',
