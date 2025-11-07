@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
+import { NamedInputEvent } from 'laravel-precognition'
 
 const form = useForm({
   name: '',
@@ -33,8 +34,9 @@ const form = useForm({
         placeholder="Company"
         @focus="
           (e) => {
-            form.forgetError(e)
-            form.touch(e)
+            const event = e as any as NamedInputEvent // eslint-disable-line @typescript-eslint/no-explicit-any
+            form.forgetError(event)
+            form.touch(event)
           }
         "
         @blur="form.validate('company')"

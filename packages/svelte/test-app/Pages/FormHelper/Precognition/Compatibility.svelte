@@ -11,7 +11,7 @@
     .setValidationTimeout(100)
 
   const onCompanyFocus = (e: FocusEvent) => {
-    const event = e as any as NamedInputEvent
+    const event = e as any as NamedInputEvent // eslint-disable-line @typescript-eslint/no-explicit-any
     form.forgetError(event)
     form.touch(event)
   }

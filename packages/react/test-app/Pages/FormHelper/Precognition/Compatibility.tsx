@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react'
+import { NamedInputEvent } from 'laravel-precognition'
 
 export default () => {
   const form = useForm({
@@ -42,7 +43,11 @@ export default () => {
           value={form.data.company}
           name="company"
           placeholder="Company"
-          onFocus={(e) => form.forgetError(e) && form.touch(e)}
+          onFocus={(e) => {
+            const event = e as any as NamedInputEvent // eslint-disable-line @typescript-eslint/no-explicit-any
+            form.forgetError(event)
+            form.touch(event)
+          }}
           onChange={(e) => form.setData('company', e.target.value)}
           onBlur={() => form.validate('company')}
         />
