@@ -270,11 +270,11 @@
     {getData}
     {getFormData}
     {validator}
-    validating={$form.validating}
     {validate}
-    {valid}
-    {invalid}
-    {touched}
     {touch}
+    validating={$form.validating}
+    valid={$form.valid}
+    invalid={$form.invalid}
+    touched={$form.touched}
   />
 </form>
