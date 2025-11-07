@@ -303,17 +303,14 @@ const Form = defineComponent({
       getFormData,
 
       // Precognition
+      touch: form.touch,
       valid: form.valid,
       invalid: form.invalid,
-      validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
-        form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, props.headers))
-
-        return form
-      },
-      touch: form.touch,
       touched: form.touched,
       setErrors: form.setErrors,
       forgetError: form.forgetError,
+      validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) =>
+        form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, props.headers)),
     }
 
     expose<FormComponentRef>(exposed)
