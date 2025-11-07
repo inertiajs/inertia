@@ -66,7 +66,7 @@ type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
 export interface InertiaFormValidationProps<TForm extends object> {
   invalid<K extends FormDataKeys<TForm>>(field: K): boolean
   setValidationTimeout(duration: number): this
-  touch<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  touch<K extends FormDataKeys<TForm>>(field: K | NamedInputEvent | Array<K>, ...fields: K[]): this
   touched<K extends FormDataKeys<TForm>>(field?: K): boolean
   valid<K extends FormDataKeys<TForm>>(field: K): boolean
   validate<K extends FormDataKeys<TForm>>(
@@ -78,6 +78,9 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validator: () => Validator
   withFullErrors(): this
   withoutFileValidation(): this
+  // Backward compatibility for easy migration from the original Precognition libraries
+  setErrors(errors: FormDataErrors<TForm> | Record<string, string | string[]>): this
+  forgetError<K extends FormDataKeys<TForm> | NamedInputEvent>(field: K): this
 }
 
 interface InternalPrecognitionState {
@@ -146,7 +149,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
       let simpleValidationErrors = true
-
       const validator = createValidator((client) => {
         const { method, url } = precognitionEndpoint!()
         const transformedData = transform(this.data()) as Record<string, unknown>
@@ -196,7 +198,20 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         withoutFileValidation: () =>
           // @ts-expect-error - Not released yet...
           tap(formWithPrecognition, () => validator.withoutFileValidation()),
-        touch: (...fields: string[]) => tap(formWithPrecognition, () => validator.touch(fields)),
+        touch: (
+          field: FormDataKeys<TForm> | NamedInputEvent | Array<FormDataKeys<TForm>>,
+          ...fields: FormDataKeys<TForm>[]
+        ) => {
+          if (Array.isArray(field)) {
+            validator.touch(field)
+          } else if (typeof field === 'string') {
+            validator.touch([field, ...fields])
+          } else {
+            validator.touch(field)
+          }
+
+          return formWithPrecognition
+        },
         touched: (field?: string): boolean =>
           typeof field === 'string'
             ? formWithPrecognition.__touched.includes(field)
@@ -218,6 +233,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           return formWithPrecognition
         },
+        setErrors: (errors: FormDataErrors<TForm>) => tap(formWithPrecognition, () => this.setError(errors)),
+        forgetError: (field: FormDataKeys<TForm> | NamedInputEvent) =>
+          tap(formWithPrecognition, () =>
+            this.clearErrors(resolveName(field as string | NamedInputEvent) as FormDataKeys<TForm>),
+          ),
       })
 
       return formWithPrecognition

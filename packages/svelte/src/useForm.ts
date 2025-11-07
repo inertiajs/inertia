@@ -71,7 +71,7 @@ export interface InertiaFormProps<TForm extends object> {
 export interface InertiaFormValidationProps<TForm extends object> {
   invalid<K extends FormDataKeys<TForm>>(field: K): boolean
   setValidationTimeout(duration: number): this
-  touch<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  touch<K extends FormDataKeys<TForm>>(field: K | NamedInputEvent | Array<K>, ...fields: K[]): this
   touched<K extends FormDataKeys<TForm>>(field?: K): boolean
   valid<K extends FormDataKeys<TForm>>(field: K): boolean
   validate<K extends FormDataKeys<TForm>>(
@@ -83,6 +83,9 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validator: () => Validator
   withFullErrors(): this
   withoutFileValidation(): this
+  // Backward compatibility for easy migration from the original Precognition libraries
+  setErrors(errors: FormDataErrors<TForm> | Record<string, string | string[]>): this
+  forgetError<K extends FormDataKeys<TForm> | NamedInputEvent>(field: K): this
 }
 
 interface InternalPrecognitionState {
@@ -213,7 +216,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           return form
         },
-        touch: (...fields: string[]) => tap(formWithPrecognition(), () => validatorRef?.touch(fields)),
+        touch: (
+          field: FormDataKeys<TForm> | NamedInputEvent | Array<FormDataKeys<TForm>>,
+          ...fields: FormDataKeys<TForm>[]
+        ) => {
+          const form = formWithPrecognition()
+          if (Array.isArray(field)) {
+            validatorRef?.touch(field)
+          } else if (typeof field === 'string') {
+            validatorRef?.touch([field, ...fields])
+          } else {
+            validatorRef?.touch(field)
+          }
+
+          return form
+        },
         validateFiles: () => tap(formWithPrecognition(), () => validatorRef?.validateFiles()),
         setValidationTimeout: (duration: number) =>
           tap(formWithPrecognition(), () => validatorRef!.setTimeout(duration)),
@@ -227,6 +244,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
           return typeof field === 'string' ? touched.includes(field) : touched.length > 0
         },
+        setErrors: (errors: FormDataErrors<TForm>) =>
+          tap(formWithPrecognition(), () => {
+            const form = formWithPrecognition()
+            form.setError(errors)
+          }),
+        forgetError: (field: FormDataKeys<TForm> | NamedInputEvent) =>
+          tap(formWithPrecognition(), () => {
+            const form = formWithPrecognition()
+            form.clearErrors(resolveName(field as string | NamedInputEvent) as FormDataKeys<TForm>)
+          }),
       })
     })
 
