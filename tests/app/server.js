@@ -283,7 +283,11 @@ app.post('/form-helper/events/errors', (req, res) => {
   }, 250)
 })
 
-app.post('/precognition/default', (req, res) => {
+app.post('/precognition/default', upload.any(), (req, res) => {
+  if (!req.headers['precognition']) {
+    return renderDump(req, res)
+  }
+
   setTimeout(
     () => {
       const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
@@ -436,22 +440,20 @@ app.post('/precognition/headers', (req, res) => {
 })
 
 const methods = ['get', 'post', 'put', 'patch', 'delete']
+const renderDump = (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: {
+      headers: req.headers,
+      method: req.method?.toLowerCase(),
+      form: req.body,
+      query: req.query,
+      files: req.files,
+      url: req.originalUrl,
+    },
+  })
 
-methods.forEach((method) =>
-  app[method](`/dump/${method}`, upload.any(), (req, res) =>
-    inertia.render(req, res, {
-      component: 'Dump',
-      props: {
-        headers: req.headers,
-        method,
-        form: req.body,
-        query: req.query,
-        files: req.files,
-        url: req.originalUrl,
-      },
-    }),
-  ),
-)
+methods.forEach((method) => app[method](`/dump/${method}`, upload.any(), (req, res) => renderDump(req, res)))
 
 app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
   if (req.headers['x-inertia-partial-data']) {
