@@ -9,16 +9,10 @@
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
+    UseFormUtils,
   } from '@inertiajs/core'
-  import {
-    createValidator,
-    resolveName,
-    toSimpleValidationErrors,
-    type NamedInputEvent,
-    type ValidationConfig,
-    type Validator,
-  } from 'laravel-precognition'
-  import { get, isEqual } from 'lodash-es'
+  import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
+  import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 
@@ -52,15 +46,27 @@
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
+  function getTransformedData(): Record<string, FormDataConvertible> {
+    const [_url, data] = getUrlAndData()
+    return transform!(data)
+  }
+
   const form = useForm({})
+    .withPrecognition(
+      () => _method,
+      () => getUrlAndData()[0],
+    )
+    .setValidationTimeout(validateTimeout!)
+
+  if (!simpleValidationErrors) {
+    form.withFullErrors()
+  }
+
+  form.transform(getTransformedData)
+
   let formElement: HTMLFormElement
   let isDirty = false
   let defaultData: FormData = new FormData()
-
-  let validating = false
-  let validFields: string[] = []
-  let touchedFields: string[] = []
-  let validator: Validator
 
   $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
   $: _action = isUrlMethodPair(action) ? action.url : (action as string)
@@ -82,11 +88,6 @@
 
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
-  }
-
-  function getTransformedData(): Record<string, FormDataConvertible> {
-    const [_url, data] = getUrlAndData()
-    return transform!(data)
   }
 
   export function submit() {
@@ -161,19 +162,11 @@
 
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
-
-    validator!.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
     $form.clearErrors(...fields)
-
-    if (fields.length === 0) {
-      validator!.setErrors({})
-    } else {
-      fields.forEach(validator!.forgetError)
-    }
   }
 
   export function resetAndClearErrors(...fields: string[]) {
@@ -196,78 +189,42 @@
   }
 
   export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
-    if (typeof field === 'object' && !('target' in field)) {
-      config = field
-      field = undefined
-    }
-
-    if (typeof field === 'undefined') {
-      validator!.validate(config)
-    } else {
-      field = resolveName(field)
-
-      validator!.validate(field, get(getTransformedData(), field), config)
-    }
-  }
-
-  export function touch(...fields: string[]) {
-    validator!.touch(fields)
-  }
-
-  export function touched(field?: string): boolean {
-    if (typeof field === 'string') {
-      return touchedFields.includes(field)
-    }
-
-    return touchedFields.length > 0
-  }
-
-  export function valid(field: string): boolean {
-    return validFields.includes(field)
-  }
-
-  export function invalid(field: string): boolean {
     // @ts-expect-error
-    return $form.errors[field] !== undefined
+    return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
+  }
+
+  export function valid(field: string) {
+    // @ts-expect-error
+    return form.valid(field)
+  }
+
+  export function invalid(field: string) {
+    // @ts-expect-error
+    return form.invalid(field)
+  }
+
+  export function touch(field: string | NamedInputEvent | string[], ...fields: string[]) {
+    // @ts-expect-error
+    return form.touch(field, ...fields)
+  }
+
+  export function touched(field?: string) {
+    // @ts-expect-error
+    return form.touched(field)
+  }
+
+  export function validator(): Validator {
+    return form.validator()
   }
 
   onMount(() => {
     defaultData = getFormData()
 
+    form.defaults(getData())
+
     const formEvents = ['input', 'change', 'reset']
+
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
-
-    // Initialize validator
-    validator = createValidator(
-      (client) =>
-        client[_method!](getUrlAndData()[0], getTransformedData(), {
-          headers,
-        }),
-      getTransformedData(),
-    )
-      .on('validatingChanged', () => {
-        validating = validator!.validating()
-      })
-      .on('validatedChanged', () => {
-        validFields = validator!.valid()
-      })
-      .on('touchedChanged', () => {
-        touchedFields = validator!.touched()
-      })
-      .on('errorsChanged', () => {
-        $form.clearErrors()
-
-        const errors = simpleValidationErrors ? toSimpleValidationErrors(validator!.errors()) : validator!.errors()
-
-        $form.setError(errors as Errors)
-        validFields = validator!.valid()
-      })
-
-    validator.setTimeout(validateTimeout!)
-
-    if (validateFiles) {
-      validator.validateFiles()
-    }
 
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
@@ -275,16 +232,16 @@
   })
 
   $: {
-    validator?.setTimeout(validateTimeout!)
+    form.setValidationTimeout(validateTimeout!)
+    if (validateFiles) {
+      form.validateFiles()
+    } else {
+      // TODO: not released yet...
+      //  form.withoutFileValidation()
+    }
   }
 
   $: slotErrors = $form.errors as Errors
-
-  // Create reactive slot props that update when state changes
-  $: validMethod = (field: string) => validFields.includes(field)
-  $: invalidMethod = (field: string) => slotErrors[field] !== undefined
-  $: touchedMethod = (field?: string) =>
-    typeof field === 'string' ? touchedFields.includes(field) : touchedFields.length > 0
 </script>
 
 <form
@@ -313,11 +270,11 @@
     {getData}
     {getFormData}
     {validator}
-    {validating}
+    validating={$form.validating}
     {validate}
+    {valid}
+    {invalid}
+    {touched}
     {touch}
-    touched={touchedMethod}
-    valid={validMethod}
-    invalid={invalidMethod}
   />
 </form>
