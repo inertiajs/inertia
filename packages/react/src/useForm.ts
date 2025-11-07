@@ -44,7 +44,7 @@ export type SetDataAction<TForm extends Record<any, any>> = SetDataByObject<TFor
   SetDataByKeyValuePair<TForm>
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
-  only?: TKeys[]
+  only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
 }
 
 export interface InertiaFormProps<TForm extends object> {

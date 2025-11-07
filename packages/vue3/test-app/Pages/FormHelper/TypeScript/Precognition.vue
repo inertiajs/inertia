@@ -40,9 +40,15 @@ precognitionForm.valid('email')
 
 const nestedForm = useForm({ user: { name: '', company: '' } }).withPrecognition('post', '/precognition/nested')
 
+nestedForm.validate('user.name')
+nestedForm.validate({ only: ['user.name'] })
 nestedForm.valid('user.name')
 nestedForm.invalid('user.name')
 
+// @ts-expect-error - Field does not exist
+nestedForm.validate('user.email')
+// @ts-expect-error - Field does not exist
+nestedForm.validate({ only: ['user.email'] })
 // @ts-expect-error - Field does not exist
 nestedForm.valid('user.email')
 // @ts-expect-error - Field does not exist

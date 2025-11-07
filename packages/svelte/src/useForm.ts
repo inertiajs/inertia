@@ -35,7 +35,7 @@ type InertiaPrecognitiveFormStore<TForm extends object> = Writable<InertiaPrecog
 type TransformCallback<TForm> = (data: TForm) => object
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
-  only?: TKeys[]
+  only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
 }
 
 export interface InertiaFormProps<TForm extends object> {
