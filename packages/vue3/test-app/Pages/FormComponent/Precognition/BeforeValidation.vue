@@ -23,7 +23,7 @@ const handleBeforeValidation = (
     <h1>Precognition - onBefore</h1>
 
     <Form
-      action="/form-component/precognition"
+      action="/precognition/default"
       method="post"
       #default="{ errors, invalid, validate, validating }"
       :validate-timeout="100"

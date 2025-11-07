@@ -6,7 +6,7 @@
   <h1>Form Precognition - Touch, Reset & Validate</h1>
 
   <Form
-    action="/form-component/precognition"
+    action="/precognition/default"
     method="post"
     validateTimeout={100}
     let:invalid

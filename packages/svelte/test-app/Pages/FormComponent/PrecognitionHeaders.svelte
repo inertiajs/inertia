@@ -6,7 +6,7 @@
   <h1>Precognition - Custom Headers</h1>
 
   <Form
-    action="/form-component/precognition-headers"
+    action="/precognition/headers"
     method="post"
     headers={{ 'X-Custom-Header': 'custom-value' }}
     validateTimeout={100}

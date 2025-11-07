@@ -11,7 +11,7 @@ export default () => {
       <h1>Form Precognition Callbacks</h1>
 
       <h2>Callbacks Test</h2>
-      <Form action="/form-component/precognition" method="post" validateTimeout={100}>
+      <Form action="/precognition/default" method="post" validateTimeout={100}>
         {({ validate, validating, touch }) => (
           <>
             <div>

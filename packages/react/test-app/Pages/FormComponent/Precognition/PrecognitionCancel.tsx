@@ -6,7 +6,7 @@ export default () => {
       <h1>Precognition - Cancel Tests</h1>
 
       <h2>Auto Cancel Test</h2>
-      <Form action="/form-component/precognition?slow=1" method="post" validateTimeout={100}>
+      <Form action="/precognition?slow=1" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, validating }) => (
           <>
             <div>

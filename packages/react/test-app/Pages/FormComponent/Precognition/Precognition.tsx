@@ -3,9 +3,9 @@ import { Form } from '@inertiajs/react'
 export default () => {
   return (
     <div>
-      <h1>Form Precognition - Array Errors</h1>
+      <h1>Form Precognition</h1>
 
-      <Form action="/form-component/precognition-array-errors" method="post" validateTimeout={100}>
+      <Form action="/precognition/default" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, valid, validating }) => (
           <>
             <div>

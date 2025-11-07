@@ -69,7 +69,7 @@
     </div>
 
     <Form
-      action="/form-component/precognition"
+      action="/precognition/default"
       method="post"
       {validateFiles}
       {validateTimeout}
@@ -150,7 +150,7 @@
     <h3 class="mb-3 text-lg font-medium">Touch & Reset Methods</h3>
 
     <Form
-      action="/form-component/precognition"
+      action="/precognition/default"
       method="post"
       class="space-y-4"
       let:errors
@@ -224,7 +224,7 @@
     <h3 class="mb-3 text-lg font-medium">Validation Callbacks</h3>
 
     <Form
-      action="/form-component/precognition"
+      action="/precognition/default"
       method="post"
       class="space-y-4"
       let:errors

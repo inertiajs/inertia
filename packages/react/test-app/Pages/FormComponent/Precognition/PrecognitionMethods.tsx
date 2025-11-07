@@ -5,7 +5,7 @@ export default () => {
     <div>
       <h1>Form Precognition - Touch, Reset & Validate</h1>
 
-      <Form action="/form-component/precognition" method="post" validateTimeout={100}>
+      <Form action="/precognition/default" method="post" validateTimeout={100}>
         {({ invalid, errors, validate, touch, touched, validating, reset }) => (
           <>
             <div>

@@ -7,7 +7,7 @@ import { Form } from '@inertiajs/vue3'
     <h1>Form Precognition - Touch, Reset & Validate</h1>
 
     <Form
-      action="/form-component/precognition"
+      action="/precognition/default"
       method="post"
       :validate-timeout="100"
       #default="{ invalid, errors, validate, touch, touched, validating, reset }"

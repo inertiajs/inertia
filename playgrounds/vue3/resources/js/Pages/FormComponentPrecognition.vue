@@ -66,7 +66,7 @@ const validateTimeout = ref(1500)
       </div>
 
       <Form
-        action="/form-component/precognition"
+        action="/precognition/default"
         method="post"
         :validate-files="validateFiles"
         :validate-timeout="validateTimeout"
@@ -128,7 +128,7 @@ const validateTimeout = ref(1500)
       <h3 class="mb-3 text-lg font-medium">Touch & Reset Methods</h3>
 
       <Form
-        action="/form-component/precognition"
+        action="/precognition/default"
         method="post"
         #default="{ errors, invalid, validate, touch, touched, reset, validating }"
         class="space-y-4"
@@ -189,7 +189,7 @@ const validateTimeout = ref(1500)
     <div class="rounded border border-gray-200 bg-gray-50 p-4">
       <h3 class="mb-3 text-lg font-medium">Validation Callbacks</h3>
 
-      <Form action="/form-component/precognition" method="post" class="space-y-4">
+      <Form action="/precognition/default" method="post" class="space-y-4">
         <template #default="{ errors, invalid, validate, touch, validating }">
           <div>
             <label for="name3" class="block font-medium">Name</label>

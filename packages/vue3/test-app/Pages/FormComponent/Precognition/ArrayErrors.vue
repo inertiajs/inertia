@@ -4,10 +4,10 @@ import { Form } from '@inertiajs/vue3'
 
 <template>
   <div>
-    <h1>Form Precognition</h1>
+    <h1>Form Precognition - Array Errors</h1>
 
     <Form
-      action="/form-component/precognition"
+      action="/precognition/array-errors"
       method="post"
       :validate-timeout="100"
       #default="{ invalid, errors, validate, valid, validating }"

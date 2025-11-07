@@ -10,7 +10,7 @@ const validateFilesEnabled = ref(false)
     <h1>Form Precognition Files</h1>
 
     <Form
-      action="/form-component/precognition-files"
+      action="/precognition/files"
       method="post"
       :validate-timeout="100"
       :validate-files="validateFilesEnabled"

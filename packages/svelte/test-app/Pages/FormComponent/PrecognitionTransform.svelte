@@ -6,7 +6,7 @@
   <h1>Form Precognition Transform</h1>
 
   <Form
-    action="/form-component/precognition"
+    action="/precognition/default"
     method="post"
     validateTimeout={100}
     transform={(data) => ({ name: String(data.name || '').repeat(2) })}

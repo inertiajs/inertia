@@ -21,7 +21,7 @@ export default function PrecognitionBefore() {
     <div>
       <h1>Precognition - onBefore</h1>
 
-      <Form action="/form-component/precognition" method="post" validateTimeout={100}>
+      <Form action="/precognition/default" method="post" validateTimeout={100}>
         {({ errors, invalid, validate, validating }) => (
           <>
             <div>

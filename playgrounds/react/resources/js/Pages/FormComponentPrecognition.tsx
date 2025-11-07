@@ -71,7 +71,7 @@ const FormComponentPrecognition = () => {
           </div>
 
           <Form
-            action="/form-component/precognition"
+            action="/precognition/default"
             method="post"
             validateFiles={validateFiles}
             validateTimeout={validateTimeout}
@@ -144,7 +144,7 @@ const FormComponentPrecognition = () => {
         <div className="rounded border border-gray-200 bg-gray-50 p-4">
           <h3 className="mb-3 text-lg font-medium">Touch & Reset Methods</h3>
 
-          <Form action="/form-component/precognition" method="post" className="space-y-4">
+          <Form action="/precognition/default" method="post" className="space-y-4">
             {({ errors, invalid, validate, touch, touched, reset, validating }) => (
               <>
                 <div>
@@ -221,7 +221,7 @@ const FormComponentPrecognition = () => {
         <div className="rounded border border-gray-200 bg-gray-50 p-4">
           <h3 className="mb-3 text-lg font-medium">Validation Callbacks</h3>
 
-          <Form action="/form-component/precognition" method="post" className="space-y-4">
+          <Form action="/precognition/default" method="post" className="space-y-4">
             {({ errors, invalid, validate, touch, validating }) => (
               <>
                 <div>

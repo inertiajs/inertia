@@ -1,26 +1,25 @@
 import { Form } from '@inertiajs/react'
 
-export default function PrecognitionHeaders() {
+export default () => {
   return (
     <div>
-      <h1>Precognition - Custom Headers</h1>
+      <h1>Form Precognition Transform</h1>
 
       <Form
-        action="/form-component/precognition-headers"
+        action="/precognition/default"
         method="post"
-        headers={{ 'X-Custom-Header': 'custom-value' }}
         validateTimeout={100}
+        transform={(data) => ({ name: String(data.name || '').repeat(2) })}
       >
-        {({ invalid, errors, validate, validating }) => (
+        {({ invalid, errors, validate, valid, validating }) => (
           <>
             <div>
               <input name="name" placeholder="Name" onBlur={() => validate('name')} />
               {invalid('name') && <p>{errors.name}</p>}
+              {valid('name') && <p>Name is valid!</p>}
             </div>
 
             {validating && <p>Validating...</p>}
-
-            <button type="submit">Submit</button>
           </>
         )}
       </Form>

@@ -6,7 +6,7 @@
   <h1>Form Precognition - All Errors</h1>
 
   <Form
-    action="/form-component/precognition-array-errors"
+    action="/precognition/array-errors"
     method="post"
     validateTimeout={100}
     simpleValidationErrors={false}

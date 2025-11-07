@@ -8,7 +8,7 @@
   <h1>Form Precognition Files</h1>
 
   <Form
-    action="/form-component/precognition-files"
+    action="/precognition/files"
     method="post"
     validateTimeout={100}
     validateFiles={validateFilesEnabled}

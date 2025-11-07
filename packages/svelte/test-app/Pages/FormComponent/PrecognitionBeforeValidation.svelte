@@ -23,7 +23,7 @@
   <h1>Precognition - onBefore</h1>
 
   <Form
-    action="/form-component/precognition"
+    action="/precognition/default"
     method="post"
     let:errors
     let:invalid

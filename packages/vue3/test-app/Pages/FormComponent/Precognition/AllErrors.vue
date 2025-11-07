@@ -7,7 +7,7 @@ import { Form } from '@inertiajs/vue3'
     <h1>Form Precognition - All Errors</h1>
 
     <Form
-      action="/form-component/precognition-array-errors"
+      action="/precognition/array-errors"
       method="post"
       :validate-timeout="100"
       :simple-validation-errors="false"
