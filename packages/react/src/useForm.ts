@@ -79,7 +79,10 @@ export interface InertiaFormProps<TForm extends object> {
 export interface InertiaFormValidationProps<TForm extends object> {
   invalid<K extends FormDataKeys<TForm>>(field: K): boolean
   setValidationTimeout(duration: number): InertiaPrecognitiveFormProps<TForm>
-  touch<K extends FormDataKeys<TForm>>(...fields: K[]): InertiaPrecognitiveFormProps<TForm>
+  touch<K extends FormDataKeys<TForm>>(
+    field: K | NamedInputEvent | Array<K>,
+    ...fields: K[]
+  ): InertiaPrecognitiveFormProps<TForm>
   touched<K extends FormDataKeys<TForm>>(field?: K): boolean
   valid<K extends FormDataKeys<TForm>>(field: K): boolean
   validate<K extends FormDataKeys<TForm>>(
@@ -91,6 +94,9 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validator: () => Validator
   withFullErrors(): InertiaPrecognitiveFormProps<TForm>
   withoutFileValidation(): InertiaPrecognitiveFormProps<TForm>
+  // Backward compatibility for easy migration from the original Precognition libraries
+  setErrors(errors: FormDataErrors<TForm>): InertiaPrecognitiveFormProps<TForm>
+  forgetError<K extends FormDataKeys<TForm> | NamedInputEvent>(field: K): InertiaPrecognitiveFormProps<TForm>
 }
 
 export type InertiaForm<TForm extends object> = InertiaFormProps<TForm>
@@ -524,12 +530,30 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       touched,
       // @ts-expect-error - Not released yet... )
       withoutFileValidation: () => tap(precognitiveForm, () => validatorRef.current?.withoutFileValidation()),
-      touch: (...fields: string[]) => tap(precognitiveForm, () => validatorRef.current?.touch(fields)),
+      touch: (
+        field: FormDataKeys<TForm> | NamedInputEvent | Array<FormDataKeys<TForm>>,
+        ...fields: FormDataKeys<TForm>[]
+      ) => {
+        if (Array.isArray(field)) {
+          validatorRef.current?.touch(field)
+        } else if (typeof field === 'string') {
+          validatorRef.current?.touch([field, ...fields])
+        } else {
+          validatorRef.current?.touch(field)
+        }
+
+        return precognitiveForm
+      },
       withFullErrors: () => tap(precognitiveForm, () => (simpleValidationErrors.current = false)),
       setValidationTimeout: (duration: number) =>
         tap(precognitiveForm, () => validatorRef.current?.setTimeout(duration)),
       validateFiles: () => tap(precognitiveForm, () => validatorRef.current?.validateFiles()),
       validate,
+      setErrors: (errors: FormDataErrors<TForm>) => tap(precognitiveForm, () => form.setError(errors)),
+      forgetError: (field: FormDataKeys<TForm> | NamedInputEvent) =>
+        tap(precognitiveForm, () =>
+          form.clearErrors(resolveName(field as string | NamedInputEvent) as FormDataKeys<TForm>),
+        ),
     }) as InertiaPrecognitiveFormProps<TForm>
 
     return precognitiveForm

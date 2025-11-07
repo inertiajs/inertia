@@ -531,6 +531,73 @@ integrations.forEach((integration) => {
         const cancelledRequestError = await requests.failed[0].failure()?.errorText
         expect(cancelledRequestError).toBe('net::ERR_ABORTED')
       })
+
+      test.describe('Backward compatibility', () => {
+        test.beforeEach(async ({ page }) => {
+          await page.goto('/' + integration + '/precognition/compatibility')
+        })
+
+        test('setErrors() alias sets multiple errors correctly', async ({ page }) => {
+          await page.click('#test-setErrors')
+
+          await expect(page.locator('#name-error')).toHaveText('setErrors test')
+          await expect(page.locator('#email-error')).toHaveText('setErrors email test')
+          await expect(page.locator('#company-error')).toHaveText('setErrors company test')
+        })
+
+        test('forgetError() alias clears single error correctly', async ({ page }) => {
+          await page.click('#test-setErrors')
+          await expect(page.locator('#name-error')).toHaveText('setErrors test')
+          await expect(page.locator('#email-error')).toHaveText('setErrors email test')
+          await expect(page.locator('#company-error')).toHaveText('setErrors company test')
+
+          await page.click('#test-forgetError')
+
+          await expect(page.locator('#name-error')).not.toBeVisible()
+          await expect(page.locator('#email-error')).toHaveText('setErrors email test')
+          await expect(page.locator('#company-error')).toHaveText('setErrors company test')
+        })
+
+        test('touch() accepts array parameters (original API)', async ({ page }) => {
+          await expect(page.locator('#touched-name')).toHaveText('Name touched: no')
+          await expect(page.locator('#touched-email')).toHaveText('Email touched: no')
+          await expect(page.locator('#touched-company')).toHaveText('Company touched: no')
+          await expect(page.locator('#touched-any')).toHaveText('Any touched: no')
+
+          await page.click('#test-touch-array')
+
+          // Name + email fields should now be touched
+          await expect(page.locator('#touched-name')).toHaveText('Name touched: yes')
+          await expect(page.locator('#touched-email')).toHaveText('Email touched: yes')
+          await expect(page.locator('#touched-company')).toHaveText('Company touched: no')
+          await expect(page.locator('#touched-any')).toHaveText('Any touched: yes')
+        })
+
+        test('touch() accepts spread parameters (new API)', async ({ page }) => {
+          await expect(page.locator('#touched-name')).toHaveText('Name touched: no')
+          await expect(page.locator('#touched-email')).toHaveText('Email touched: no')
+          await expect(page.locator('#touched-company')).toHaveText('Company touched: no')
+          await expect(page.locator('#touched-any')).toHaveText('Any touched: no')
+
+          await page.click('#test-touch-spread')
+
+          await expect(page.locator('#touched-name')).toHaveText('Name touched: yes')
+          await expect(page.locator('#touched-email')).toHaveText('Email touched: yes')
+          await expect(page.locator('#touched-company')).toHaveText('Company touched: no')
+          await expect(page.locator('#touched-any')).toHaveText('Any touched: yes')
+        })
+
+        test('forgetError() and touch() accept a NamedInputEvent', async ({ page }) => {
+          await page.click('#test-setErrors')
+          await expect(page.locator('#company-error')).toHaveText('setErrors company test')
+          await expect(page.locator('#touched-company')).toHaveText('Company touched: no')
+
+          await page.focus('input[name="company"]')
+
+          await expect(page.locator('#company-error')).not.toBeVisible()
+          await expect(page.locator('#touched-company')).toHaveText('Company touched: yes')
+        })
+      })
     })
   })
 
