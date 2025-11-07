@@ -12,7 +12,6 @@ app.use(bodyParser.json({ extended: true }))
 const upload = multer()
 
 const adapters = ['react', 'svelte', 'vue3']
-const runsInCI = !!process.env.CI
 
 if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
