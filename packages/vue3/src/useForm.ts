@@ -60,7 +60,7 @@ export interface InertiaFormProps<TForm extends object> {
 }
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
-  only?: TKeys[]
+  only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
 }
 
 export interface InertiaFormValidationProps<TForm extends object> {
