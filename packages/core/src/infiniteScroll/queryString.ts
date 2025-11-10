@@ -85,7 +85,7 @@ export const useInfiniteScrollQueryString = (options: {
     const pageMap = new Map<string, number>()
     const elements = [...itemsElement.children] as HTMLElement[]
 
-    getElementsInViewportFromCollection(itemElement, elements).forEach((element) => {
+    getElementsInViewportFromCollection(elements, itemElement).forEach((element) => {
       const page = getPageFromElement(element) ?? '1'
 
       if (pageMap.has(page)) {

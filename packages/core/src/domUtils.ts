@@ -73,9 +73,13 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
 }
 
 export const getElementsInViewportFromCollection = (
-  referenceElement: HTMLElement,
   elements: HTMLElement[],
+  referenceElement?: HTMLElement,
 ): HTMLElement[] => {
+  if (!referenceElement) {
+    return elements.filter((element) => elementInViewport(element))
+  }
+
   const referenceIndex = elements.indexOf(referenceElement)
   const upwardElements: HTMLElement[] = []
   const downwardElements: HTMLElement[] = []
