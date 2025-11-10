@@ -65,7 +65,7 @@ test.describe('Form Component', () => {
           size: 15,
         },
         {
-          fieldname: 'documents[0]',
+          fieldname: 'documents[]',
           originalname: 'doc1.pdf',
           mimetype: 'application/pdf',
           buffer: { type: 'Buffer', data: expect.any(Array) },
@@ -73,7 +73,7 @@ test.describe('Form Component', () => {
           size: 15,
         },
         {
-          fieldname: 'documents[1]',
+          fieldname: 'documents[]',
           originalname: 'doc2.pdf',
           mimetype: 'application/pdf',
           buffer: { type: 'Buffer', data: expect.any(Array) },
@@ -94,7 +94,9 @@ test.describe('Form Component', () => {
         token: 'abc123',
         age: '30',
         user: { address: { street: '123 Main St' } },
-        items: [{ name: 'Item 1' }, { name: 'Item 2' }],
+        // Express doesn't support brackets format by default
+        // items: [{ name: 'Item 1' }, { name: 'Item 2' }],
+        'items[][name]': ['Item 1', 'Item 2'],
       })
     })
 
