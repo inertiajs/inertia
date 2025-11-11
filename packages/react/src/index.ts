@@ -9,6 +9,7 @@ export { default as Form } from './Form'
 export { default as Head } from './Head'
 export { default as InfiniteScroll } from './InfiniteScroll'
 export { InertiaLinkProps, default as Link } from './Link'
+export { ReactComponent as ResolvedComponent } from './types'
 export {
   InertiaFormProps,
   SetDataAction,
