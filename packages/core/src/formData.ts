@@ -1,4 +1,4 @@
-import type { FormDataConvertible, StringArrayFormatOption } from './types'
+import type { FormDataConvertible, QueryStringArrayFormatOption } from './types'
 
 export const isFormData = (value: any): value is FormData => value instanceof FormData
 
@@ -6,35 +6,28 @@ export function objectToFormData(
   source: Record<string, FormDataConvertible>,
   form: FormData = new FormData(),
   parentKey: string | null = null,
-  queryStringArrayFormat: StringArrayFormatOption = 'brackets',
+  queryStringArrayFormat: QueryStringArrayFormatOption = 'brackets',
 ): FormData {
   source = source || {}
 
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
-      append(form, composeObjectKey(parentKey, key), source[key], queryStringArrayFormat)
+      append(form, composeKey(parentKey, key, 'indices'), source[key], queryStringArrayFormat)
     }
   }
 
   return form
 }
 
-function composeKey(parent: string | null, key: string, format: StringArrayFormatOption): string {
-  if (!parent) return key
-
-  switch (format) {
-    case 'brackets':
-      return `${parent}[]`
-    case 'indices':
-      return `${parent}[${key}]`
+function composeKey(parent: string | null, key: string, format: QueryStringArrayFormatOption): string {
+  if (!parent) {
+    return key
   }
+
+  return format === 'brackets' ? `${parent}[]` : `${parent}[${key}]`
 }
 
-function composeObjectKey(parent: string | null, key: string): string {
-  return composeKey(parent, key, 'indices')
-}
-
-function append(form: FormData, key: string, value: FormDataConvertible, format: StringArrayFormatOption): void {
+function append(form: FormData, key: string, value: FormDataConvertible, format: QueryStringArrayFormatOption): void {
   if (Array.isArray(value)) {
     return Array.from(value.keys()).forEach((index) =>
       append(form, composeKey(key, index.toString(), format), value[index], format),

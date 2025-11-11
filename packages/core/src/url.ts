@@ -4,8 +4,8 @@ import { isFormData, objectToFormData } from './formData'
 import type {
   FormDataConvertible,
   Method,
+  QueryStringArrayFormatOption,
   RequestPayload,
-  StringArrayFormatOption,
   UrlMethodPair,
   VisitOptions,
 } from './types'
@@ -43,7 +43,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   method: Method,
   href: URL | string,
   data: T,
-  qsArrayFormat: StringArrayFormatOption = 'brackets',
+  qsArrayFormat: QueryStringArrayFormatOption = 'brackets',
 ): [string, MergeDataIntoQueryStringDataReturnType<T>] {
   const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
   const hasHost = urlHasProtocol(href.toString())
