@@ -349,6 +349,5 @@ test.describe('formObject.ts', () => {
       expect(Array.isArray(result.tags)).toBe(true)
       expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
     })
-
   })
 })
