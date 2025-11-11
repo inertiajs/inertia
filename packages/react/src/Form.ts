@@ -150,6 +150,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       if (formElement.current) {
         resetFormFields(formElement.current, defaultData.current, fields)
       }
+
+      form.reset(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {

@@ -7,7 +7,7 @@
 
   <h2>Auto Cancel Test</h2>
   <Form
-    action="/precognition?slow=1"
+    action="/precognition/default?slow=1"
     method="post"
     validateTimeout={100}
     let:invalid

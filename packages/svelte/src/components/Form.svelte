@@ -162,6 +162,8 @@
 
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
+
+    form.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
