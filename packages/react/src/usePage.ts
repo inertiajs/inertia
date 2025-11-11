@@ -3,7 +3,7 @@ import React from 'react'
 import PageContext from './PageContext'
 
 export default function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageProps & SharedPageProps> {
-  // backwards compatibility for React <19
+  // React.use() was introduced in React 19, fallback to React.useContext() for earlier versions
   const page = typeof React.use === 'function' ? React.use(PageContext) : React.useContext(PageContext)
 
   if (!page) {
