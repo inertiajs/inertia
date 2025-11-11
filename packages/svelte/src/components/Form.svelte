@@ -51,7 +51,7 @@
     return transform!(data)
   }
 
-  const form = useForm({})
+  const form = useForm<Record<string, any>>({})
     .withPrecognition(
       () => _method,
       () => getUrlAndData()[0],
@@ -167,7 +167,6 @@
   }
 
   export function clearErrors(...fields: string[]) {
-    // @ts-expect-error
     $form.clearErrors(...fields)
   }
 
@@ -176,13 +175,8 @@
     reset(...fields)
   }
 
-  export function setError(field: string | object, value?: string) {
-    if (typeof field === 'string') {
-      // @ts-expect-error
-      $form.setError(field, value)
-    } else {
-      $form.setError(field)
-    }
+  export function setError(fieldOrFields: string | Record<string, string>, maybeValue?: string) {
+    $form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
   }
 
   export function defaults() {
@@ -191,27 +185,22 @@
   }
 
   export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
-    // @ts-expect-error
     return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
   }
 
   export function valid(field: string) {
-    // @ts-expect-error
     return form.valid(field)
   }
 
   export function invalid(field: string) {
-    // @ts-expect-error
     return form.invalid(field)
   }
 
   export function touch(field: string | NamedInputEvent | string[], ...fields: string[]) {
-    // @ts-expect-error
     return form.touch(field, ...fields)
   }
 
   export function touched(field?: string) {
-    // @ts-expect-error
     return form.touched(field)
   }
 
