@@ -350,5 +350,35 @@ test.describe('formObject.ts', () => {
       expect(Array.isArray(result.tags)).toBe(true)
       expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
     })
+
+    test('handles mixed empty bracket and explicit index notation - explicit indices first', () => {
+      const formData = makeFormData([
+        ['tags[2]', 'tag1'],
+        ['tags[3]', 'tag2'],
+        ['tags[]', 'tag3'],
+        ['tags[]', 'tag4'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.tags)).toBe(true)
+      expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
+    })
+
+    test('handles mixed empty bracket and explicit index notation - mixed', () => {
+      const formData = makeFormData([
+        ['tags[2]', 'tag1'],
+        ['tags[3]', 'tag2'],
+        ['tags[]', 'tag3'],
+        ['tags[]', 'tag4'],
+        ['tags[4]', 'tag5'],
+        ['tags[5]', 'tag6'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.tags)).toBe(true)
+      expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6'])
+    })
   })
 })

@@ -153,6 +153,14 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
 
       if (Array.isArray(existing)) {
         existing.push(value)
+      } else if (existing && typeof existing === 'object' && !isFile(existing)) {
+        // If existing is an object with numeric keys, convert to array (treating indices as relative)
+        const numericKeys = Object.keys(existing)
+          .filter((k) => /^\d+$/.test(k))
+          .map(Number)
+          .sort((a, b) => a - b)
+
+        set(form, arrayPath, numericKeys.length > 0 ? [...numericKeys.map((k) => existing[k]), value] : [value])
       } else {
         set(form, arrayPath, [value])
       }
