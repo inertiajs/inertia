@@ -1046,6 +1046,9 @@ app.get('/infinite-scroll/programmatic-ref', (req, res) =>
 app.get('/infinite-scroll/short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
 )
+app.get('/infinite-scroll/invisible-first-child', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
+)
 app.get('/infinite-scroll/reload-unrelated', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']

@@ -27,10 +27,7 @@ export const useInfiniteScrollPreservation = (options: {
 
       // Find the first visible element to use as a reference point
       // This element will help us calculate how much the content shifted after the update
-      const visibleElements = getElementsInViewportFromCollection(
-        itemsElement.firstElementChild as HTMLElement,
-        [...itemsElement.children] as HTMLElement[],
-      )
+      const visibleElements = getElementsInViewportFromCollection([...itemsElement.children] as HTMLElement[])
 
       if (visibleElements.length > 0) {
         referenceElement = visibleElements[0]

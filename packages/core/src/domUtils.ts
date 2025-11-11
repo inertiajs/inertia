@@ -1,4 +1,9 @@
 const elementInViewport = (el: HTMLElement) => {
+  if (el.offsetParent === null) {
+    // Element is not participating in layout (e.g., display: none)
+    return false
+  }
+
   const rect = el.getBoundingClientRect()
 
   // We check both vertically and horizontally for containers that scroll in either direction
@@ -73,9 +78,13 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
 }
 
 export const getElementsInViewportFromCollection = (
-  referenceElement: HTMLElement,
   elements: HTMLElement[],
+  referenceElement?: HTMLElement,
 ): HTMLElement[] => {
+  if (!referenceElement) {
+    return elements.filter((element) => elementInViewport(element))
+  }
+
   const referenceIndex = elements.indexOf(referenceElement)
   const upwardElements: HTMLElement[] = []
   const downwardElements: HTMLElement[] = []
