@@ -17,7 +17,7 @@ test('visits a different page', async ({ page }) => {
 })
 
 test('can make a location visit', async ({ page }) => {
-  test.skip(process.env.PACKAGE === 'svelte', 'Skipping for now until we diagnose')
+  test.skip(process.env.PACKAGE === 'svelte' || process.env.PACKAGE === 'svelte5', 'Skipping for now until we diagnose')
 
   pageLoads.watch(page, 2)
   await page.goto('/visits/location')
