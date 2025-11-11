@@ -260,15 +260,16 @@ test.describe('formObject.ts', () => {
 
       const result = formDataToObject(formData)
 
-      // Should create an object, not an array
       expect(Array.isArray(result.fields.entries)).toBe(false)
       expect(typeof result.fields.entries).toBe('object')
 
-      // Both numeric and string keys should be accessible
+      expect(Object.keys(result.fields.entries)).toHaveLength(2)
+
       expect(result.fields.entries['100']).toEqual({
         name: 'John Doe',
         email: 'john@example.com',
       })
+
       expect(result.fields.entries['new:1']).toEqual({
         name: 'Jane Smith',
         email: 'jane@example.com',
@@ -298,15 +299,15 @@ test.describe('formObject.ts', () => {
 
       const result = formDataToObject(formData)
 
-      // Should create an object, not a sparse array
       expect(Array.isArray(result.items)).toBe(false)
       expect(typeof result.items).toBe('object')
+      expect(Object.keys(result.items)).toHaveLength(3)
       expect(result.items['0']).toEqual({ name: 'First' })
       expect(result.items['5']).toEqual({ name: 'Sixth' })
       expect(result.items['10']).toEqual({ name: 'Eleventh' })
     })
 
-    test('creates objects when mixing numeric and string keys at any level', () => {
+    test('creates objects when mixing numeric and string keys', () => {
       const formData = makeFormData([
         ['users[123][name]', 'User 123'],
         ['users[admin][name]', 'Admin User'],
@@ -315,9 +316,9 @@ test.describe('formObject.ts', () => {
 
       const result = formDataToObject(formData)
 
-      // Should create an object due to mixed key types
       expect(Array.isArray(result.users)).toBe(false)
       expect(typeof result.users).toBe('object')
+      expect(Object.keys(result.users)).toHaveLength(3)
       expect(result.users['123']).toEqual({ name: 'User 123' })
       expect(result.users['admin']).toEqual({ name: 'Admin User' })
       expect(result.users['0']).toEqual({ name: 'User 0' })
@@ -325,8 +326,8 @@ test.describe('formObject.ts', () => {
 
     test('handles explicit indexed arrays correctly', () => {
       const formData = makeFormData([
-        ['emails[0]', 'first@example.com'],
         ['emails[1]', 'second@example.com'],
+        ['emails[0]', 'first@example.com'],
         ['emails[2]', 'third@example.com'],
       ])
 

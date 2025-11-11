@@ -8,12 +8,13 @@ const formRef = ref<FormComponentRef | null>(null)
 
 <template>
   <div>
-    <h1>Mixed Key Serialization Bug</h1>
+    <h1>Mixed Key Serialization</h1>
 
     <Form ref="formRef" action="/dump/post" method="post">
       <div>
         <input type="text" name="fields[entries][100][name]" placeholder="Name for ID 100" value="John Doe" />
       </div>
+
       <div>
         <input
           type="email"
@@ -22,9 +23,11 @@ const formRef = ref<FormComponentRef | null>(null)
           value="john@example.com"
         />
       </div>
+
       <div>
         <input type="text" name="fields[entries][new:1][name]" placeholder="Name for new entry" value="Jane Smith" />
       </div>
+
       <div>
         <input
           type="email"
