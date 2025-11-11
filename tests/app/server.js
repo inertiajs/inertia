@@ -357,6 +357,16 @@ app.get('/prefetch/wayfinder', (req, res) => {
   })
 })
 
+app.get('/prefetch/preserve-state', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/PreserveState',
+    props: {
+      page: parseInt(req.query.page || '1'),
+      timestamp: Date.now(),
+    },
+  })
+})
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
