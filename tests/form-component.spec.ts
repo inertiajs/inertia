@@ -1490,4 +1490,33 @@ test.describe('Form Component', () => {
       expect(formDataMessage).toBe('getFormData entries: {name: Jane Doe}')
     })
   })
+
+  test.describe('Mixed Key Serialization', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/mixed-key-serialization')
+    })
+
+    test('submits form with mixed numeric and string keys as objects', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit' }).first().click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(Array.isArray(dump.form.fields?.entries)).toBe(false)
+      expect(typeof dump.form.fields?.entries).toBe('object')
+
+      const entryKeys = Object.keys(dump.form.fields.entries)
+      expect(entryKeys).toEqual(['100', 'new:1'])
+
+      expect(dump.form.fields.entries['100']).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+
+      expect(dump.form.fields.entries['new:1']).toEqual({
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+      })
+    })
+  })
 })
