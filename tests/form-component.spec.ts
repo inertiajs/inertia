@@ -1490,4 +1490,58 @@ test.describe('Form Component', () => {
       expect(formDataMessage).toBe('getFormData entries: {name: Jane Doe}')
     })
   })
+
+  test.describe('Mixed Key Serialization', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/mixed-key-serialization')
+    })
+
+    test('submits form with mixed numeric and string keys as objects', async ({ page }) => {
+      // Submit the form directly
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      // Verify the form was submitted correctly
+      expect(dump.method).toBe('post')
+
+      // After the fix: entries should be an object, not an array
+      expect(Array.isArray(dump.form.fields?.entries)).toBe(false)
+      expect(typeof dump.form.fields?.entries).toBe('object')
+
+      // Both numeric and string keys should be accessible as object properties
+      expect(dump.form.fields.entries['100']).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+
+      expect(dump.form.fields.entries['new:1']).toEqual({
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+      })
+
+      // Verify no array-like properties exist
+      expect(dump.form.fields.entries.length).toBeUndefined()
+    })
+
+    test('handles large numeric keys without creating sparse arrays', async ({ page }) => {
+      // This test specifically verifies that the large numeric key (100)
+      // doesn't result in a sparse array with 578721 length
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      // The entries field should be a clean object, not a massive sparse array
+      expect(Array.isArray(dump.form.fields.entries)).toBe(false)
+
+      // Should only contain the actual keys we set, no sparse array elements
+      const entryKeys = Object.keys(dump.form.fields.entries)
+      expect(entryKeys).toEqual(['100', 'new:1'])
+
+      // Verify the large numeric key works as an object property
+      expect(dump.form.fields.entries['100']).toBeDefined()
+      expect(dump.form.fields.entries['100'].name).toBe('John Doe')
+    })
+  })
 })
