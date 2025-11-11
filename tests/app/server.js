@@ -7,8 +7,12 @@ const { showServerStatus } = require('./server-status')
 const { getUserNames, paginateUsers } = require('./eloquent')
 
 const app = express()
+
+// Express v5 defaults to 'simple' query parser, but tests expect 'extended' behavior from < v5
+app.set('query parser', 'extended')
+
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json({ extended: true }))
+app.use(bodyParser.json())
 const upload = multer()
 
 const adapters = ['react', 'svelte', 'vue3']
