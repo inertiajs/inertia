@@ -1,4 +1,9 @@
 const elementInViewport = (el: HTMLElement) => {
+  if (el.offsetParent === null) {
+    // Element is not participating in layout (e.g., display: none)
+    return false
+  }
+
   const rect = el.getBoundingClientRect()
 
   // We check both vertically and horizontally for containers that scroll in either direction

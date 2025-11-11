@@ -1406,6 +1406,24 @@ test.describe('Scroll position preservation', () => {
 
     expect(afterScreenshot).toEqual(beforeScreenshot)
   })
+
+  test('it maintains scroll position when first child element is invisible', async ({ page }) => {
+    await page.goto('/infinite-scroll/invisible-first-child?page=2')
+
+    // Verify the invisible element exists but is not visible
+    const hiddenElement = await page.locator('text="Hidden first element"')
+    await expect(hiddenElement).toBeAttached()
+    await expect(hiddenElement).toBeHidden()
+
+    // Page 1 loads immediately since the start trigger is visible
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+    // Make sure the browser didn't scroll to the top...
+    const scrollY = await page.evaluate(() => window.scrollY)
+    expect(scrollY).toBeGreaterThan(100 * 15)
+  })
 })
 
 test.describe('Scrollable container support', () => {
