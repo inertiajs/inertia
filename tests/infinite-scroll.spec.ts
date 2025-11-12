@@ -20,8 +20,10 @@ async function scrollToBottom(page: Page) {
 }
 
 async function smoothScrollTo(page: any, targetY: number) {
+  const isWebKit = page.context().browser().browserType().name() === 'webkit'
+
   await page.evaluate((top: number) => window.scrollTo({ top, behavior: 'smooth' }), targetY)
-  await page.waitForTimeout(150)
+  await page.waitForTimeout(isWebKit ? 300 : 150)
 }
 
 async function getUserIdsFromDOM(page: Page) {
