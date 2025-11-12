@@ -8,6 +8,7 @@ jobs:
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
+        browser: ['chromium', 'webkit']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,14 +37,14 @@ jobs:
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run lint
 
       - name: Install Playwright Browsers
-        run: pnpm playwright install chromium
+        run: pnpm playwright install ${{ matrix.browser }}
 
       - name: Run Playwright Tests
-        run: pnpm test:${{ matrix.adapter }}
+        run: pnpm test:${{ matrix.adapter }} --project ${{ matrix.browser }}
 
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-${{ matrix.browser }}
           path: test-results
