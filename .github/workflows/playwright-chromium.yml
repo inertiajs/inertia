@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   test-chromium:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: Chromium (${{ matrix.adapter }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
