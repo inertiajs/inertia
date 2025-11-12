@@ -1,10 +1,10 @@
-name: Playwright Tests
+name: Playwright Tests on WebKit
 on: [push, pull_request]
 jobs:
-  test:
+  test-webkit:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     timeout-minutes: 15
-    runs-on: macos-26
+    runs-on: macos-15-intel
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']

@@ -53,7 +53,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: runsInCI ? 2 : 0,
   /* 3 threads seems to be the sweet spot on CI */
-  workers: runsInCI ? 3 : undefined,
+  workers: runsInCI ? 4 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   //   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
