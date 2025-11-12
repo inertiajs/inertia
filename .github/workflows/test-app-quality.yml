@@ -4,11 +4,10 @@ jobs:
   test:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     timeout-minutes: 15
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
-        browser: ['webkit']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,26 +34,3 @@ jobs:
 
       - name: ESLint test-app
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run lint
-
-      - name: Install Playwright Browsers
-        run: pnpm playwright install ${{ matrix.browser }}
-        if: matrix.browser == 'chromium'
-
-      - name: Install Playwright Browsers with deps
-        run: pnpm playwright install ${{ matrix.browser }} --with-deps
-        if: matrix.browser == 'webkit'
-
-      - name: Run Playwright Tests
-        if: matrix.browser == 'chromium'
-        run: pnpm test:${{ matrix.adapter }}
-
-      - name: Run Playwright Tests
-        if: matrix.browser == 'webkit'
-        run: pnpm test:${{ matrix.adapter }} -g "form helper|form component|infinite" --webkit
-
-      - name: Upload failure screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-${{ matrix.browser }}
-          path: test-results
