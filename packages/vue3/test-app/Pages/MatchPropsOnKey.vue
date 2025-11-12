@@ -21,7 +21,7 @@ const props = defineProps<ComponentProps>()
 const page = ref(props.foo.page)
 
 const reloadIt = () => {
-  router.reload({
+  router.visit('/match-props-on-key', {
     data: {
       page: page.value,
     },
@@ -36,7 +36,7 @@ const reloadIt = () => {
 
 const getFresh = () => {
   page.value = 0
-  router.reload({
+  router.visit('/match-props-on-key', {
     reset: ['foo', 'baz'],
   })
 }

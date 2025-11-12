@@ -29,7 +29,7 @@ test('can deep merge props', async ({ page }) => {
   await expect(page.getByText('foo.per_page is 5')).toBeVisible()
   await expect(page.getByText('foo.meta.label is third')).toBeVisible()
 
-  await clickAndWaitForResponse(page, 'Get Fresh', null, 'button')
+  await clickAndWaitForResponse(page, 'Get Fresh', '/deep-merge-props', 'button')
 
   await expect(page.getByText('bar count is 5')).toBeVisible()
   await expect(page.getByText('baz count is 5')).toBeVisible()
