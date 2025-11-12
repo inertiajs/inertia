@@ -8,10 +8,12 @@ declare const process: {
     CI?: boolean
     PACKAGE?: 'vue3' | 'react' | 'svelte'
   }
+  platform: string
 }
 
 const adapter = process.env.PACKAGE || 'vue3'
 const runsInCI = !!process.env.CI
+const runsOnMac = process.platform === 'darwin'
 
 const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
 const url = `http://localhost:${adapterPorts[adapter]}`
@@ -52,8 +54,8 @@ export default defineConfig({
   forbidOnly: !!runsInCI,
   /* Retry on CI only */
   retries: runsInCI ? 2 : 0,
-  /* 3 threads seems to be the sweet spot on CI */
-  workers: runsInCI ? 2 : undefined,
+  /* The GitHub Action runner has 4 cores on Ubuntu and 3 cores on macOS, we need one core for the server */
+  workers: runsInCI ? (runsOnMac ? 2 : 3) : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   //   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
