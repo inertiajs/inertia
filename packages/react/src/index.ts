@@ -3,6 +3,7 @@ import { ReactInertiaAppConfig } from './types'
 
 export const progress = Progress
 export const router = Router
+export { default as App } from './App'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
 export { default as Form } from './Form'
