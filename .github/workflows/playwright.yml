@@ -37,7 +37,7 @@ jobs:
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run lint
 
       - name: Install Playwright Browsers
-        run: pnpm playwright install ${{ matrix.browser }}
+        run: pnpm playwright install ${{ matrix.browser }} --with-deps
 
       - name: Run Playwright Tests
         run: pnpm test:${{ matrix.adapter }} --project ${{ matrix.browser }}
