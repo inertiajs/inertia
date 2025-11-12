@@ -20,10 +20,21 @@ async function scrollToBottom(page: Page) {
 }
 
 async function smoothScrollTo(page: any, targetY: number) {
-  const isWebKit = page.context().browser().browserType().name() === 'webkit'
+  // The { behavior: 'smooth' } option has different implementation across browsers, so we do our
+  // own 'smooth' scroll by scrolling halfway first, then to the target after a short delay...
+  await page.evaluate((top: number) => {
+    const current = window.scrollY
 
-  await page.evaluate((top: number) => window.scrollTo({ top, behavior: 'smooth' }), targetY)
-  await page.waitForTimeout(isWebKit ? 300 : 150)
+    if (top > current) {
+      window.scrollTo(0, current + (top - current) / 2)
+    } else {
+      window.scrollTo(0, current - (current - top) / 2)
+    }
+
+    setTimeout(() => window.scrollTo(0, top), 10)
+  }, targetY)
+
+  await page.waitForTimeout(20)
 }
 
 async function getUserIdsFromDOM(page: Page) {
@@ -1919,7 +1930,7 @@ Object.entries({
       await expect(infiniteScrollRequests().length).toBe(1)
 
       // Scroll up to thead to trigger loading page 1
-      await page.evaluate(() => window.scrollTo(0, 500))
+      await page.evaluate(() => window.scrollTo(0, 300))
 
       await expect(page.getByText('User 15')).toBeVisible()
       await expect(page.getByText('User 1', { exact: true })).toBeVisible()
