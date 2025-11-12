@@ -50,7 +50,7 @@ jobs:
 
       - name: Run Playwright Tests
         if: matrix.browser == 'webkit'
-        run: pnpm test:${{ matrix.adapter }} -g "form helper" --webkit
+        run: pnpm test:${{ matrix.adapter }} -g "form helper|form component|infinite" --webkit
 
       - name: Upload failure screenshots
         if: failure()
