@@ -49,8 +49,8 @@ test('props and page store are in sync', async ({ page }) => {
   await expect(consoleMessages.messages[10]).toBe('[onMount] $sveltePage.props.foo is bar')
   await expect(await page.locator('#input').inputValue()).toEqual('bar')
 
-  await page.getByRole('link', { name: 'Baz' }).click()
   consoleMessages.messages = []
+  await page.getByRole('link', { name: 'Baz' }).click()
 
   await expect(page.getByText('foo prop is baz')).toBeVisible()
   await expect(page.getByText('$page.props.foo is baz')).toBeVisible()
@@ -70,10 +70,10 @@ test('props and page store are in sync', async ({ page }) => {
   await expect(consoleMessages.messages[10]).toBe('[onMount] $sveltePage.props.foo is baz')
   await expect(await page.locator('#input').inputValue()).toEqual('baz')
 
+  consoleMessages.messages = []
+
   await page.getByRole('link', { name: 'Home' }).click()
   await page.waitForURL('/')
-
-  consoleMessages.messages = []
 
   await page.goBack()
   await page.waitForURL('/svelte/props-and-page-store')
