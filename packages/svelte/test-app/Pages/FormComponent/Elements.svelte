@@ -1,8 +1,11 @@
-<script>
+<script lang="ts">
   import { Form } from '@inertiajs/svelte'
+  import type { QueryStringArrayFormatOption } from '@inertiajs/core'
+
+  export let queryStringArrayFormat: QueryStringArrayFormatOption
 </script>
 
-<Form action="/dump/post" method="post" let:isDirty>
+<Form action="/dump/post" method="post" let:isDirty {queryStringArrayFormat}>
   <h1>Form Elements</h1>
 
   <div>

@@ -840,7 +840,14 @@ app.patch('/form-component/default-value', (req, res) => {
   return res.redirect(303, '/')
 })
 
-app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
+app.get('/form-component/elements', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Elements',
+    props: {
+      queryStringArrayFormat: req.query.queryStringArrayFormat || 'brackets',
+    },
+  }),
+)
 app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>
   inertia.render(req, res, {
