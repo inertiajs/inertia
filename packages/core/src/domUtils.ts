@@ -114,3 +114,13 @@ export const getElementsInViewportFromCollection = (
   // Reverse upward elements to maintain DOM order, then append downward elements
   return [...upwardElements.reverse(), ...downwardElements]
 }
+
+export const requestAnimationFrame = (cb: () => void, times: number = 1): void => {
+  window.requestAnimationFrame(() => {
+    if (times > 1) {
+      requestAnimationFrame(cb, times - 1)
+    } else {
+      cb()
+    }
+  })
+}

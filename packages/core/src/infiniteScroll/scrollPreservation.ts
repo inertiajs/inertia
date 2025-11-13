@@ -81,7 +81,7 @@ export const useInfiniteScrollPreservation = (options: {
         restored = true
       }
 
-      restore()
+      window.requestAnimationFrame(restore)
     }
 
     return {

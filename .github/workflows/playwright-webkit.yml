@@ -1,0 +1,45 @@
+name: Playwright Tests on WebKit
+on: [push, pull_request]
+jobs:
+  test-webkit:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: WebKit (${{ matrix.adapter }} - shard ${{ matrix.shard }} of 4)
+    timeout-minutes: 15
+    runs-on: macos-15
+    strategy:
+      matrix:
+        adapter: ['vue', 'react', 'svelte']
+        shard: ['1', '2', '3', '4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Inertia
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
+
+      - name: Install Playwright Browsers
+        run: pnpm playwright install webkit
+
+      - name: Run Playwright Tests
+        run: pnpm test:${{ matrix.adapter }} --webkit --shard=${{ matrix.shard }}/4
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-webkit-shard-${{ matrix.shard }}
+          path: test-results

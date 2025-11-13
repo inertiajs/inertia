@@ -20,8 +20,43 @@ async function scrollToBottom(page: Page) {
 }
 
 async function smoothScrollTo(page: any, targetY: number) {
-  await page.evaluate((top: number) => window.scrollTo({ top, behavior: 'smooth' }), targetY)
-  await page.waitForTimeout(150)
+  // The { behavior: 'smooth' } option has different implementation across browsers, so we do our
+  // own 'smooth' scroll by scrolling halfway first, then to the target after a short delay...
+  await page.evaluate((top: number) => {
+    const current = window.scrollY
+
+    if (top > current) {
+      window.scrollTo(0, current + (top - current) / 2)
+    } else {
+      window.scrollTo(0, current - (current - top) / 2)
+    }
+
+    setTimeout(() => window.scrollTo(0, top), 10)
+  }, targetY)
+
+  await page.waitForTimeout(20)
+}
+
+async function scrollElementSmoothTo(element: Locator, targetY: number) {
+  // Same as smoothScrollTo but for a specific element
+  await element.evaluate((el, top) => {
+    const current = el.scrollTop
+
+    if (top > current) {
+      el.scrollTo(0, current + (top - current) / 2)
+    } else {
+      el.scrollTo(0, current - (current - top) / 2)
+    }
+    setTimeout(() => el.scrollTo(0, top), 10)
+  }, targetY)
+
+  await element.page().waitForTimeout(20)
+}
+
+async function scrollElementToBottom(element: Locator) {
+  const height = await element.evaluate((el) => el.scrollHeight)
+
+  return scrollElementSmoothTo(element, height)
 }
 
 async function getUserIdsFromDOM(page: Page) {
@@ -230,9 +265,7 @@ test.describe('Automatic page loading', () => {
     expect(page.url()).not.toContain('users2=')
 
     // Scroll first container to load page 2 of users1
-    await container1.evaluate((container) => {
-      container.scrollTop = container.scrollHeight
-    })
+    await scrollElementSmoothTo(container1, 10000)
 
     await expect(container1.getByText('User 16')).toBeVisible()
     await expect(container1.getByText('User 30')).toBeVisible()
@@ -242,7 +275,8 @@ test.describe('Automatic page loading', () => {
     await expect(container2.getByText('User 16')).toBeHidden()
 
     // Scroll to bottom of first container to check URL synchronization
-    await container1.evaluate((container) => (container.scrollTop = container.scrollHeight - 500))
+    const currentHeightContainer1 = await container1.evaluate((container) => container.scrollHeight)
+    await scrollElementSmoothTo(container1, currentHeightContainer1 - 500)
     await page.waitForFunction(
       () => window.location.search.includes('users1=2'),
       {},
@@ -256,7 +290,7 @@ test.describe('Automatic page loading', () => {
     expect(page.url()).not.toContain('users2=')
 
     // Scroll second container to load page 2 of users2
-    await container2.evaluate((container) => (container.scrollTop = container.scrollHeight))
+    await scrollElementToBottom(container2)
 
     await expect(container1.getByText('User 16')).toBeVisible()
     await expect(container1.getByText('User 30')).toBeVisible()
@@ -266,7 +300,8 @@ test.describe('Automatic page loading', () => {
     await expect(container2.getByText('User 31')).toBeHidden()
 
     // Scroll to bottom of second container to check URL synchronization
-    await container2.evaluate((container) => (container.scrollTop = container.scrollHeight - 500))
+    const currentHeightContainer2 = await container2.evaluate((container) => container.scrollHeight)
+    await scrollElementSmoothTo(container2, currentHeightContainer2 - 500)
     await page.waitForFunction(
       () => window.location.search.includes('users2=2'),
       {},
@@ -1136,7 +1171,6 @@ test.describe('URL query string management', () => {
   })
 
   test('it updates the URL to reflect the most visible page during scrolling', async ({ page }) => {
-    test.setTimeout(20_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/update-query-string')
 
@@ -1448,9 +1482,7 @@ test.describe('Scrollable container support', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Scroll within the container (not the page) to load page 3
-    await scrollContainer.evaluate((container) => {
-      container.scrollTop = container.scrollHeight
-    })
+    await scrollElementToBottom(scrollContainer)
     await expect(page.getByText('Loading more users...')).toBeVisible()
 
     await expect(page.getByText('User 31')).toBeVisible()
@@ -1465,7 +1497,6 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it updates query parameters based on visible content within a scrollable container', async ({ page }) => {
-    test.setTimeout(20_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/scroll-container')
 
@@ -1480,18 +1511,14 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 15')).toBeVisible()
 
     // Scroll container to load page 2
-    await scrollContainer.evaluate((container) => {
-      container.scrollTop = container.scrollHeight
-    })
+    await scrollElementToBottom(scrollContainer)
     await expect(page.getByText('Loading more users...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
     // Scroll container again to load page 3
-    await scrollContainer.evaluate((container) => {
-      container.scrollTop = container.scrollHeight
-    })
+    await scrollElementToBottom(scrollContainer)
     await expect(page.getByText('Loading more users...')).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
@@ -1552,7 +1579,6 @@ test.describe('Scrollable container support', () => {
   }
 
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
-    test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
     const scrollContainer = await page.locator('[data-testid="scroll-container"]')
@@ -1562,9 +1588,7 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 16')).toBeVisible()
 
     // Scroll container to top to trigger loading page 1
-    await scrollContainer.evaluate((container) => {
-      container.scrollTop = 0
-    })
+    await scrollElementSmoothTo(scrollContainer, 0)
 
     const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '16')
     const beforeScreenshot = await screenshotter(page)
@@ -1578,7 +1602,6 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
-    test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container')
 
     const scrollContainer = await page.locator('[data-testid="scroll-container"]')
@@ -1588,9 +1611,7 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 15')).toBeVisible()
 
     // Scroll down within container to see User 15 and trigger loading page 2
-    await scrollContainer.evaluate((container) => {
-      container.scrollTop = container.scrollHeight
-    })
+    await scrollElementToBottom(scrollContainer)
 
     const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '15')
     const beforeScreenshot = await screenshotter(page)
@@ -1917,7 +1938,7 @@ Object.entries({
       await expect(infiniteScrollRequests().length).toBe(1)
 
       // Scroll up to thead to trigger loading page 1
-      await page.evaluate(() => window.scrollTo(0, 500))
+      await page.evaluate(() => window.scrollTo(0, 300))
 
       await expect(page.getByText('User 15')).toBeVisible()
       await expect(page.getByText('User 1', { exact: true })).toBeVisible()

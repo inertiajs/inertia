@@ -166,6 +166,11 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 })
 
 test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({ page }) => {
+  // Skip on WebKit
+  if (page.context().browser().browserType().name() === 'webkit') {
+    return test.skip('Bug in Playwright + WebKit causing the context menu to stick around')
+  }
+
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
   const prefetch4 = page.waitForResponse('prefetch/4')
