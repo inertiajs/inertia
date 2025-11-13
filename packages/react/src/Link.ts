@@ -233,8 +233,10 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         }
       },
       onMouseUp: (event: React.MouseEvent) => {
-        event.preventDefault()
-        router.visit(url, visitParams)
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(url, visitParams)
+        }
       },
       onKeyUp: (event: React.KeyboardEvent) => {
         if (shouldNavigate(event)) {

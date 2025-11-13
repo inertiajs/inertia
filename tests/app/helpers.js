@@ -51,10 +51,10 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
-      return res.json(data)
+      return res.status(200).json(data)
     }
 
-    return res.send(
+    return res.status(200).send(
       fs
         .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
         .toString()

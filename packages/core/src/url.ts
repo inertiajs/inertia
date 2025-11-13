@@ -1,7 +1,14 @@
 import * as qs from 'qs'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import { FormDataConvertible, Method, RequestPayload, UrlMethodPair, VisitOptions } from './types'
+import type {
+  FormDataConvertible,
+  Method,
+  QueryStringArrayFormatOption,
+  RequestPayload,
+  UrlMethodPair,
+  VisitOptions,
+} from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
@@ -17,7 +24,7 @@ export const transformUrlAndData = (
   let url = typeof href === 'string' ? hrefToUrl(href) : href
 
   if ((hasFiles(data) || forceFormData) && !isFormData(data)) {
-    data = objectToFormData(data)
+    data = objectToFormData(data, new FormData(), null, queryStringArrayFormat)
   }
 
   if (isFormData(data)) {
@@ -36,7 +43,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   method: Method,
   href: URL | string,
   data: T,
-  qsArrayFormat: 'indices' | 'brackets' = 'brackets',
+  qsArrayFormat: QueryStringArrayFormatOption = 'brackets',
 ): [string, MergeDataIntoQueryStringDataReturnType<T>] {
   const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
   const hasHost = urlHasProtocol(href.toString())

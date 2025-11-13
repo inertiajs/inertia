@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Form } from '@inertiajs/svelte'
-  import type { Method } from '@inertiajs/core'
+  import type { Method, QueryStringArrayFormatOption } from '@inertiajs/core'
   import Article from '../Article.svelte'
 
   let only: string[] = []
@@ -11,7 +11,7 @@
   let preserveScroll = false
   let preserveState = false
   let preserveUrl = false
-  let queryStringArrayFormat: 'indices' | 'brackets' | undefined = undefined
+  let queryStringArrayFormat: QueryStringArrayFormatOption | undefined = undefined
 
   function setOnly() {
     only = ['users']
