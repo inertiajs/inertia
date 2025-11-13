@@ -1171,7 +1171,6 @@ test.describe('URL query string management', () => {
   })
 
   test('it updates the URL to reflect the most visible page during scrolling', async ({ page }) => {
-    test.setTimeout(20_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/update-query-string')
 
@@ -1498,7 +1497,6 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it updates query parameters based on visible content within a scrollable container', async ({ page }) => {
-    test.setTimeout(20_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/scroll-container')
 
@@ -1581,7 +1579,6 @@ test.describe('Scrollable container support', () => {
   }
 
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
-    test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
     const scrollContainer = await page.locator('[data-testid="scroll-container"]')
@@ -1605,7 +1602,6 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
-    test.setTimeout(20_000)
     await page.goto('/infinite-scroll/scroll-container')
 
     const scrollContainer = await page.locator('[data-testid="scroll-container"]')
