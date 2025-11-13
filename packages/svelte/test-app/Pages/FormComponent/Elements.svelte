@@ -2,7 +2,7 @@
   import { Form } from '@inertiajs/svelte'
 </script>
 
-<Form action="/dump/post" method="post" let:isDirty>
+<Form action="/dump/post" method="post" let:isDirty queryStringArrayFormat="indices">
   <h1>Form Elements</h1>
 
   <div>

@@ -2,7 +2,7 @@ import { Form } from '@inertiajs/react'
 
 export default () => {
   return (
-    <Form action="/dump/post" method="post">
+    <Form action="/dump/post" method="post" queryStringArrayFormat="indices">
       {({ isDirty }) => (
         <>
           <h1>Form Elements</h1>
