@@ -255,8 +255,12 @@ const Form = defineComponent({
       form.reset(...fields)
     }
 
-    const resetAndClearErrors = (...fields: string[]) => {
+    const clearErrors = (...fields: string[]) => {
       form.clearErrors(...fields)
+    }
+
+    const resetAndClearErrors = (...fields: string[]) => {
+      clearErrors(...fields)
       reset(...fields)
     }
 
@@ -287,7 +291,7 @@ const Form = defineComponent({
       get validating() {
         return form.validating
       },
-      clearErrors: form.clearErrors,
+      clearErrors,
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
         form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
