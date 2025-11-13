@@ -81,6 +81,17 @@ defineProps<{
         </div>
       </Deferred>
     </TestGridItem>
+
+    <TestGridItem>
+      <Deferred data="users">
+        <template #default="{ loading }">
+          <p v-if="loading">Loading Users (with callback)...</p>
+          <div v-else v-for="user in users">
+            <p>#{{ user.id }}: {{ user.name }} ({{ user.email }})</p>
+          </div>
+        </template>
+      </Deferred>
+    </TestGridItem>
   </TestGrid>
 
   <div class="mt-72">

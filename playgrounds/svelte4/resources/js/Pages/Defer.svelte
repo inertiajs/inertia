@@ -101,6 +101,20 @@
       </div>
     </Deferred>
   </TestGridItem>
+
+  <TestGridItem>
+    <Deferred data="users" let:loading>
+      {#if loading}
+        <p>Loading Users (callback)...</p>
+      {:else}
+        <div>
+          {#each users as user (user.id)}
+            <p>#{user.id}: {user.name} ({user.email})</p>
+          {/each}
+        </div>
+      {/if}
+    </Deferred>
+  </TestGridItem>
 </TestGrid>
 
 <div class="mt-72">

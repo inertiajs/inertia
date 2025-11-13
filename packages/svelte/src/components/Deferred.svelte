@@ -21,14 +21,10 @@
       unsubscribe()
     })
   }
-
-  if (!$$slots.fallback) {
-    throw new Error('`<Deferred>` requires a `<svelte:fragment slot="fallback">` slot')
-  }
 </script>
 
-{#if loaded}
-  <slot />
-{:else}
+{#if !loaded && $$slots.fallback}
   <slot name="fallback" />
+{:else}
+  <slot loading={!loaded} />
 {/if}
