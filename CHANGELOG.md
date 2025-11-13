@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.15...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.16...master)
 
 - Nothing yet
+
+## [v2.2.16](https://github.com/inertiajs/inertia/compare/v2.2.15...v2.2.16) - 2025-11-13
+
+### What's Changed
+
+* Added test for `defaultValue` in Form component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2685
+* Prevent navigation on right-click on `<Link>` with `prefetch="click"` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2676
+* Export page component type for React adapter by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2691
+* Switch `useContext` to `use` in `usePage()` hook by [@HichemTab-tech](https://github.com/HichemTab-tech) in https://github.com/inertiajs/inertia/pull/2680
+* Improve serialization in `formDataToObject()` when mixing numeric and non-numeric object keys by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2692
+* Fix `InfiniteScroll` scroll preservation by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2689
+* Export Inertia `App` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2695
+* Ignore `preserveScroll` and `preserveState` when finding cached response by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2694
+* Upgrade Express server for test apps to v5 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2693
+* Add WebKit browser testing to CI with Safari compatibility fixes by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2696
+* Bump symfony/http-foundation from 7.3.4 to 7.3.7 in /playgrounds/vue3 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2697
+* Fix array keys misalignment in form data and query by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2690
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.15...v2.2.16
 
 ## [v2.2.15](https://github.com/inertiajs/inertia/compare/v2.2.14...v2.2.15) - 2025-10-30
 

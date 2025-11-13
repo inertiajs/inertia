@@ -1,8 +1,9 @@
+import { QueryStringArrayFormatOption } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
 
-export default () => {
+export default ({ queryStringArrayFormat }: { queryStringArrayFormat: QueryStringArrayFormatOption }) => {
   return (
-    <Form action="/dump/post" method="post">
+    <Form action="/dump/post" method="post" queryStringArrayFormat={queryStringArrayFormat}>
       {({ isDirty }) => (
         <>
           <h1>Form Elements</h1>

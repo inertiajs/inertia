@@ -217,6 +217,7 @@ const Form = defineComponent({
 
       const submitOptions: FormSubmitOptions = {
         headers: props.headers,
+        queryStringArrayFormat: props.queryStringArrayFormat,
         errorBag: props.errorBag,
         showProgress: props.showProgress,
         invalidateCacheTags: props.invalidateCacheTags,

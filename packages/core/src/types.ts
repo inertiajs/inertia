@@ -209,6 +209,8 @@ export type PageHandler<ComponentType = Component> = ({
 
 export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
+export type QueryStringArrayFormatOption = 'indices' | 'brackets'
+
 export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
@@ -232,7 +234,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
-  queryStringArrayFormat: 'indices' | 'brackets'
+  queryStringArrayFormat: QueryStringArrayFormatOption
   async: boolean
   showProgress: boolean
   prefetch: boolean

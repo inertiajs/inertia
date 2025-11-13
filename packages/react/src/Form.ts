@@ -176,6 +176,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
       const submitOptions: FormSubmitOptions = {
         headers,
+        queryStringArrayFormat,
         errorBag,
         showProgress,
         invalidateCacheTags,
