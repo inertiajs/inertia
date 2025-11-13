@@ -74,11 +74,18 @@ test.describe('Progress Component', () => {
     const duringFinish = await getProgressPercent(bar)
     await expect(duringFinish).toBeGreaterThan(-75)
 
-    await page.waitForTimeout(250)
+    await page.waitForFunction(() => {
+      const bar = document.querySelector('#nprogress .bar') as HTMLElement
+      const transform = bar?.style.transform
+
+      const match = transform?.match(/translate3d\((-?\d+(?:\.\d+)?)%/)
+
+      return match && Math.abs(parseFloat(match[1])) < 1
+    })
+
     const at100 = await getProgressPercent(bar)
     await expect(at100).toBeCloseTo(0, 1)
 
-    await page.waitForTimeout(500)
     await expect(bar).not.toBeVisible()
   })
 

@@ -52,12 +52,12 @@
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
-    "@types/react": "^19.2.2",
+    "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.2",
-    "axios": "^1.12.2",
+    "axios": "^1.13.2",
     "es-check": "^9.4.4",
-    "esbuild": "^0.25.11",
-    "esbuild-node-externals": "^1.18.0",
+    "esbuild": "^0.25.12",
+    "esbuild-node-externals": "^1.19.1",
     "react": "^19.2.0",
     "typescript": "^5.9.3"
   },

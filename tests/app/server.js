@@ -7,8 +7,12 @@ const { showServerStatus } = require('./server-status')
 const { getUserNames, paginateUsers } = require('./eloquent')
 
 const app = express()
+
+// Express v5 defaults to 'simple' query parser, but tests expect 'extended' behavior from < v5
+app.set('query parser', 'extended')
+
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json({ extended: true }))
+app.use(bodyParser.json())
 const upload = multer()
 
 const adapters = ['react', 'svelte', 'vue3']
@@ -18,7 +22,7 @@ if (!adapters.includes(inertia.package)) {
 }
 
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
-app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
+app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
 
 // Intercepts all .js assets (including files loaded via code splitting)
 app.get(/.*\.js$/, (req, res) =>
@@ -29,7 +33,7 @@ app.get(/.*\.js$/, (req, res) =>
  * Used for testing the Inertia plugin is registered.
  * @see plugin.test.js
  */
-app.get('/plugin/*', (req, res) =>
+app.get('/plugin/*enabled', (req, res) =>
   inertia.render(req, res, {
     component: 'Home',
     props: {
@@ -357,6 +361,16 @@ app.get('/prefetch/wayfinder', (req, res) => {
   })
 })
 
+app.get('/prefetch/preserve-state', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/PreserveState',
+    props: {
+      page: parseInt(req.query.page || '1'),
+      timestamp: Date.now(),
+    },
+  })
+})
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
@@ -385,7 +399,7 @@ app.get('/prefetch/swr/:pageNumber', (req, res) => {
   }
 })
 
-app.get('/prefetch/tags/:pageNumber/:propType?', (req, res) => {
+app.get('/prefetch/tags/:pageNumber{/:propType}', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Tags',
     props: {
@@ -800,7 +814,7 @@ app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
-app.post('/json', (req, res) => res.json({ foo: 'bar' }))
+app.post('/json', (req, res) => res.status(200).json({ foo: 'bar' }))
 
 app.get('/form-component/child-component', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
@@ -962,7 +976,7 @@ app.post('/form-component/url/with/segements', async (req, res) =>
 app.get('/form-component/submit-complete/redirect', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
 )
-app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect(303, '/'))
 app.post('/form-component/wayfinder', (req, res) => {
   inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
 })
@@ -1045,6 +1059,9 @@ app.get('/infinite-scroll/programmatic-ref', (req, res) =>
 )
 app.get('/infinite-scroll/short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
+)
+app.get('/infinite-scroll/invisible-first-child', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
 )
 app.get('/infinite-scroll/reload-unrelated', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
@@ -1213,7 +1230,7 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
-app.all('*', (req, res) => inertia.render(req, res))
+app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
 app.use((err, req, res, next) => {
