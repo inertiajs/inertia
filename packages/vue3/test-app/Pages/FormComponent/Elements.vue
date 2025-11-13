@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { QueryStringArrayFormatOption } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
+
+defineProps<{
+  queryStringArrayFormat: QueryStringArrayFormatOption
+}>()
 </script>
 
 <template>
-  <Form action="/dump/post" method="post" v-slot="{ isDirty }" query-string-array-format="indices">
+  <Form action="/dump/post" method="post" v-slot="{ isDirty }" :queryStringArrayFormat>
     <h1>Form Elements</h1>
     <div>Form is <span v-if="isDirty">dirty</span><span v-else>clean</span></div>
 
