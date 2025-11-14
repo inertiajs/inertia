@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy, onMount, tick } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { usePage } from '../page'
 
   export let data: string | string[] = ''
