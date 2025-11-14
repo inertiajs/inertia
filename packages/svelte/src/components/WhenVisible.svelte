@@ -1,6 +1,7 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount, tick } from 'svelte'
+  import { usePage } from '../page'
 
   export let data: string | string[] = ''
   export let params: ReloadOptions = {}
@@ -13,10 +14,23 @@
   let el: HTMLElement
   let observer: IntersectionObserver | null = null
 
-  onMount(() => {
-    if (!el) {
-      return
+  const page = usePage()
+
+  // Watch for page prop changes and reset loaded state when data becomes undefined
+  $: {
+    const propValue = $page.props[data as string]
+
+    if (propValue === undefined) {
+      loaded = false
     }
+  }
+
+  $: if (el) {
+    registerObserver()
+  }
+
+  function registerObserver() {
+    observer?.disconnect()
 
     observer = new IntersectionObserver(
       (entries) => {
@@ -24,11 +38,11 @@
           return
         }
 
-        if (!always) {
-          observer?.disconnect()
+        if (fetching) {
+          return
         }
 
-        if (fetching) {
+        if (!always && loaded) {
           return
         }
 
@@ -46,6 +60,10 @@
             loaded = true
             fetching = false
             reloadParams.onFinish?.(event)
+
+            if (!always) {
+              observer?.disconnect()
+            }
           },
         })
       },
@@ -55,7 +73,7 @@
     )
 
     observer.observe(el)
-  })
+  }
 
   onDestroy(() => {
     observer?.disconnect()

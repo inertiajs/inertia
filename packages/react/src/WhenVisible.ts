@@ -25,11 +25,9 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   const page = usePage()
 
   useEffect(() => {
-    if (page.props[data as string] !== undefined) {
-      return
+    if (page.props[data as string] === undefined) {
+      setLoaded(false)
     }
-
-    setLoaded(false)
   }, [page.props[data as string]])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
