@@ -824,6 +824,42 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/partial-reloads', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/PartialReloads',
+      deferredProps: {
+        default: ['foo', 'bar'],
+      },
+      props: {},
+    })
+  }
+
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const props = {}
+
+  if (requestedProps.includes('foo')) {
+    props.foo = {
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  if (requestedProps.includes('bar')) {
+    props.bar = {
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/PartialReloads',
+        props: props,
+      }),
+    500,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
