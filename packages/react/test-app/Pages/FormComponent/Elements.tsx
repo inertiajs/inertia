@@ -10,7 +10,7 @@ export default ({
     queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat
 
   if (queryStringArrayFormat === 'force-brackets') {
-    config.set('form.forceIndicesKeysInFormData', false)
+    config.set('form.forceIndicesArrayFormatInFormData', false)
   }
 
   return (

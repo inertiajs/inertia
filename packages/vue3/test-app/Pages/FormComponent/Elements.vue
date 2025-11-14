@@ -9,7 +9,7 @@ const props = defineProps<{
 const format = props.queryStringArrayFormat === 'force-brackets' ? 'brackets' : props.queryStringArrayFormat
 
 if (props.queryStringArrayFormat === 'force-brackets') {
-  config.set('form.forceIndicesKeysInFormData', false)
+  config.set('form.forceIndicesArrayFormatInFormData', false)
 }
 </script>
 

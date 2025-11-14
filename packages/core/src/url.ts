@@ -25,7 +25,7 @@ export const transformUrlAndData = (
   let url = typeof href === 'string' ? hrefToUrl(href) : href
 
   if ((hasFiles(data) || forceFormData) && !isFormData(data)) {
-    if (config.get('form.forceIndicesKeysInFormData')) {
+    if (config.get('form.forceIndicesArrayFormatInFormData')) {
       queryStringArrayFormat = 'indices'
     }
 

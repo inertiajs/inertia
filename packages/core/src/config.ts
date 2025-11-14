@@ -73,7 +73,7 @@ export class Config<TConfig extends {} = {}> {
 export const config = new Config<InertiaAppConfig>({
   form: {
     recentlySuccessfulDuration: 2_000,
-    forceIndicesKeysInFormData: true,
+    forceIndicesArrayFormatInFormData: true,
   },
   future: {
     preserveEqualProps: false,

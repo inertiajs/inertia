@@ -313,7 +313,7 @@ test.describe('url.ts', () => {
     })
 
     test('can opt-out of forcing indices notation when converting arrays to FormData by default', () => {
-      config.set('form.forceIndicesKeysInFormData', false)
+      config.set('form.forceIndicesArrayFormatInFormData', false)
 
       const [url, data] = transformUrlAndData(
         'https://example.com/submit',
