@@ -25,10 +25,18 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   const page = usePage()
 
   useEffect(() => {
-    if (page.props[data as string] === undefined) {
-      setLoaded(false)
+    if (Array.isArray(data)) {
+      // For arrays, reset loaded if any prop becomes undefined
+      if (data.some((key) => page.props[key] === undefined)) {
+        setLoaded(false)
+      }
+    } else if (data) {
+      // For single prop, reset loaded if prop becomes undefined
+      if (page.props[data] === undefined) {
+        setLoaded(false)
+      }
     }
-  }, [page.props[data as string]])
+  }, [data, ...(Array.isArray(data) ? data.map((key) => page.props[key]) : [page.props[data!]])])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
     if (data) {

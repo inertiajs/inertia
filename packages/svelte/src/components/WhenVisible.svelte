@@ -18,9 +18,12 @@
 
   // Watch for page prop changes and reset loaded state when data becomes undefined
   $: {
-    const propValue = $page.props[data as string]
-
-    if (propValue === undefined) {
+    if (Array.isArray(data)) {
+      // For arrays, reset loaded if any prop becomes undefined
+      if (data.some((key) => $page.props[key] === undefined)) {
+        loaded = false
+      }
+    } else if ($page.props[data as string] === undefined) {
       loaded = false
     }
   }
