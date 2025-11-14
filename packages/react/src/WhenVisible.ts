@@ -1,5 +1,6 @@
 import { ReloadOptions, router } from '@inertiajs/core'
 import { createElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import usePage from './usePage'
 
 interface WhenVisibleProps {
   children: ReactNode | (() => ReactNode)
@@ -17,9 +18,25 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   fallback = fallback ?? null
 
   const [loaded, setLoaded] = useState(false)
-  const hasFetched = useRef<boolean>(false)
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
+  const observer = useRef<IntersectionObserver | null>(null)
+
+  const page = usePage()
+
+  useEffect(() => {
+    if (Array.isArray(data)) {
+      // For arrays, reset loaded if any prop becomes undefined
+      if (data.some((key) => page.props[key] === undefined)) {
+        setLoaded(false)
+      }
+    } else if (data) {
+      // For single prop, reset loaded if prop becomes undefined
+      if (page.props[data] === undefined) {
+        setLoaded(false)
+      }
+    }
+  }, [data, ...(Array.isArray(data) ? data.map((key) => page.props[key]) : [page.props[data!]])])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
     if (data) {
@@ -35,26 +52,23 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     return params
   }, [params, data])
 
-  useEffect(() => {
-    if (!ref.current) {
-      return
-    }
+  const registerObserver = () => {
+    observer.current?.disconnect()
 
-    const observer = new IntersectionObserver(
+    observer.current = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) {
           return
-        }
-
-        if (!always && hasFetched.current) {
-          observer.disconnect()
         }
 
         if (fetching.current) {
           return
         }
 
-        hasFetched.current = true
+        if (!always && loaded) {
+          return
+        }
+
         fetching.current = true
 
         const reloadParams = getReloadParams()
@@ -71,7 +85,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
             reloadParams.onFinish?.(e)
 
             if (!always) {
-              observer.disconnect()
+              observer.current?.disconnect()
             }
           },
         })
@@ -81,12 +95,20 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
       },
     )
 
-    observer.observe(ref.current)
+    observer.current.observe(ref.current!)
+  }
+
+  useEffect(() => {
+    if (!ref.current) {
+      return
+    }
+
+    registerObserver()
 
     return () => {
-      observer.disconnect()
+      observer.current?.disconnect()
     }
-  }, [ref, getReloadParams, buffer])
+  }, [loaded, ref, getReloadParams, buffer])
 
   const resolveChildren = () => (typeof children === 'function' ? children() : children)
   const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)
