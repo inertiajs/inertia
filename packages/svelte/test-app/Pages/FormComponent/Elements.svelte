@@ -1,11 +1,17 @@
 <script lang="ts">
-  import { Form } from '@inertiajs/svelte'
+  import { config, Form } from '@inertiajs/svelte'
   import type { QueryStringArrayFormatOption } from '@inertiajs/core'
 
-  export let queryStringArrayFormat: QueryStringArrayFormatOption
+  export let queryStringArrayFormat: QueryStringArrayFormatOption | 'force-brackets'
+
+  const format = queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat
+
+  if (queryStringArrayFormat === 'force-brackets') {
+    config.set('form.forceIndicesKeysInFormData', false)
+  }
 </script>
 
-<Form action="/dump/post" method="post" let:isDirty {queryStringArrayFormat}>
+<Form action="/dump/post" method="post" let:isDirty queryStringArrayFormat={format}>
   <h1>Form Elements</h1>
 
   <div>

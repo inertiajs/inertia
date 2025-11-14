@@ -497,6 +497,7 @@ export type PrefetchOptions = {
 export type InertiaAppConfig = {
   form: {
     recentlySuccessfulDuration: number
+    forceIndicesKeysInFormData: boolean
   }
   // experimental: {
   //   /* not guaranteed */
