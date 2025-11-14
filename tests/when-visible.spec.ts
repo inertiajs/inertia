@@ -116,3 +116,41 @@ test('it will reload again when the prop value is set to undefined (e.g. page re
   await expect(page.getByText('Loading lazy data...')).not.toBeVisible()
   await expect(page.getByText('This is lazy loaded data!')).toBeVisible()
 })
+
+test('it handles array props correctly with router.reload()', async ({ page }) => {
+  await page.goto('/when-visible-array-reload')
+  requests.listen(page)
+
+  // Initial load - array data should be missing
+  await expect(page.getByText('First lazy data loaded!')).not.toBeVisible()
+  await expect(page.getByText('Second lazy data loaded!')).not.toBeVisible()
+
+  // Scroll to trigger the WhenVisible component
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+  await expect(page.getByText('Loading array data...')).toBeVisible()
+
+  // Wait for array data to load
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Loading array data...')).not.toBeVisible()
+  await expect(page.getByText('First lazy data loaded!')).toBeVisible()
+  await expect(page.getByText('Second lazy data loaded!')).toBeVisible()
+
+  await page.evaluate(() => (window as any).scrollTo(0, 0))
+
+  // Click the reload button to trigger the issue
+  await page.getByRole('button', { name: 'Reload Page' }).click()
+
+  // Array data should be missing again after reload
+  await expect(page.getByText('Loading array data...')).toBeVisible()
+  await expect(page.getByText('First lazy data loaded!')).not.toBeVisible()
+  await expect(page.getByText('Second lazy data loaded!')).not.toBeVisible()
+
+  // Scroll to trigger the WhenVisible component again
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+
+  // Wait for array data to load again
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Loading array data...')).not.toBeVisible()
+  await expect(page.getByText('First lazy data loaded!')).toBeVisible()
+  await expect(page.getByText('Second lazy data loaded!')).toBeVisible()
+})

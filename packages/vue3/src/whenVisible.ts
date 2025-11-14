@@ -38,9 +38,17 @@ export default defineComponent({
     const page = usePage()
 
     this.$watch(
-      () => page.props[this.data as string],
+      () => {
+        return Array.isArray(this.data)
+          ? this.data.map((data) => page.props[data as string])
+          : page.props[this.data as string]
+      },
       (value) => {
-        if (value !== undefined) {
+        if (Array.isArray(this.data)) {
+          if (this.data.every((data) => page.props[data as string] !== undefined)) {
+            return
+          }
+        } else if (value !== undefined) {
           return
         }
 
