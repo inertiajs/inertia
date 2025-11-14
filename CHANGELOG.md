@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.16...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.17...master)
 
 - Nothing yet
+
+## [v2.2.17](https://github.com/inertiajs/inertia/compare/v2.2.16...v2.2.17) - 2025-11-14
+
+### What's Changed
+
+* Reset `<WhenVisible>` loading state after a page reload by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2699
+* Add test for reloading deferred props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2698
+* Force `indices` array format when submitting data using `FormData` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2701
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.16...v2.2.17
 
 ## [v2.2.16](https://github.com/inertiajs/inertia/compare/v2.2.15...v2.2.16) - 2025-11-13
 
