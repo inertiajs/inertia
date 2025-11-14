@@ -1,9 +1,20 @@
 import { QueryStringArrayFormatOption } from '@inertiajs/core'
-import { Form } from '@inertiajs/react'
+import { config, Form } from '@inertiajs/react'
 
-export default ({ queryStringArrayFormat }: { queryStringArrayFormat: QueryStringArrayFormatOption }) => {
+export default ({
+  queryStringArrayFormat,
+}: {
+  queryStringArrayFormat: QueryStringArrayFormatOption | 'force-brackets'
+}) => {
+  const format: QueryStringArrayFormatOption =
+    queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat
+
+  if (queryStringArrayFormat === 'force-brackets') {
+    config.set('form.forceIndicesArrayFormatInFormData', false)
+  }
+
   return (
-    <Form action="/dump/post" method="post" queryStringArrayFormat={queryStringArrayFormat}>
+    <Form action="/dump/post" method="post" queryStringArrayFormat={format}>
       {({ isDirty }) => (
         <>
           <h1>Form Elements</h1>

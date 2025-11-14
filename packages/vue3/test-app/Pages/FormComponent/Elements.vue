@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { QueryStringArrayFormatOption } from '@inertiajs/core'
-import { Form } from '@inertiajs/vue3'
+import { config, Form } from '@inertiajs/vue3'
 
-defineProps<{
-  queryStringArrayFormat: QueryStringArrayFormatOption
+const props = defineProps<{
+  queryStringArrayFormat: QueryStringArrayFormatOption | 'force-brackets'
 }>()
+
+const format = props.queryStringArrayFormat === 'force-brackets' ? 'brackets' : props.queryStringArrayFormat
+
+if (props.queryStringArrayFormat === 'force-brackets') {
+  config.set('form.forceIndicesArrayFormatInFormData', false)
+}
 </script>
 
 <template>
-  <Form action="/dump/post" method="post" v-slot="{ isDirty }" :queryStringArrayFormat>
+  <Form action="/dump/post" method="post" v-slot="{ isDirty }" :queryStringArrayFormat="format">
     <h1>Form Elements</h1>
     <div>Form is <span v-if="isDirty">dirty</span><span v-else>clean</span></div>
 
