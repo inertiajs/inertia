@@ -68,7 +68,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       invalidateCacheTags = [],
       validateFiles = false,
       validateTimeout = 1500,
-      simpleValidationErrors = true,
+      arrayErrors = false,
       children,
       ...props
     },
@@ -86,8 +86,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       )
       .setValidationTimeout(validateTimeout)
 
-    if (!simpleValidationErrors) {
-      form.withFullErrors()
+    if (arrayErrors) {
+      form.withArrayErrors()
     }
 
     form.transform(getTransformedData)

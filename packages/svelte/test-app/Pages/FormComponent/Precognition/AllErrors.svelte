@@ -9,7 +9,7 @@
     action="/precognition/array-errors"
     method="post"
     validateTimeout={100}
-    simpleValidationErrors={false}
+    arrayErrors={true}
     let:invalid
     let:errors
     let:validate

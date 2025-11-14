@@ -170,7 +170,7 @@ integrations.forEach((integration) => {
       await expect(page.getByText('The name contains invalid characters.')).not.toBeVisible()
     })
 
-    test(prefix + 'shows all errors when simpleValidationErrors is false', async ({ page }) => {
+    test(prefix + 'shows all errors using array errors', async ({ page }) => {
       await page.goto('/' + integration + '/precognition/all-errors')
 
       await page.fill('input[name="name"]', 'ab')

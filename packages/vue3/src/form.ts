@@ -123,9 +123,9 @@ const Form = defineComponent({
       type: Number as PropType<FormComponentProps['validateTimeout']>,
       default: 1500,
     },
-    simpleValidationErrors: {
-      type: Boolean as PropType<FormComponentProps['simpleValidationErrors']>,
-      default: true,
+    arrayErrors: {
+      type: Boolean as PropType<FormComponentProps['arrayErrors']>,
+      default: false,
     },
   },
   setup(props, { slots, attrs, expose }) {
@@ -143,8 +143,8 @@ const Form = defineComponent({
       .transform(getTransformedData)
       .setValidationTimeout(props.validateTimeout)
 
-    if (!props.simpleValidationErrors) {
-      form.withFullErrors()
+    if (props.arrayErrors) {
+      form.withArrayErrors()
     }
 
     const formElement = ref()

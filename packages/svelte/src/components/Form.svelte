@@ -42,7 +42,7 @@
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
   export let validateFiles: FormComponentProps['validateFiles'] = false
   export let validateTimeout: FormComponentProps['validateTimeout'] = 1500
-  export let simpleValidationErrors: FormComponentProps['simpleValidationErrors'] = true
+  export let arrayErrors: FormComponentProps['arrayErrors'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -58,8 +58,8 @@
     )
     .setValidationTimeout(validateTimeout!)
 
-  if (!simpleValidationErrors) {
-    form.withFullErrors()
+  if (arrayErrors) {
+    form.withArrayErrors()
   }
 
   form.transform(getTransformedData)
