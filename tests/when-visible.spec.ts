@@ -1,11 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { requests } from './support'
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/when-visible')
-})
-
 test('it will wait to fire the reload until element is visible', async ({ page }) => {
+  await page.goto('/when-visible')
   requests.listen(page)
 
   await page.evaluate(() => (window as any).scrollTo(0, 1000))
@@ -84,4 +81,38 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await expect(page.getByText('Count is now 1')).toBeVisible()
   await page.waitForResponse(page.url() + '?count=1')
   await expect(page.getByText('Count is now 2')).toBeVisible()
+})
+
+test('it will reload again when the prop value is set to undefined (e.g. page reload)', async ({ page }) => {
+  await page.goto('/when-visible-reload')
+  requests.listen(page)
+
+  // Initial load - lazyData should be missing
+  await expect(page.getByText('This is lazy loaded data!')).not.toBeVisible()
+
+  // Scroll to trigger the WhenVisible component
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+  await expect(page.getByText('Loading lazy data...')).toBeVisible()
+
+  // Wait for lazy data to load
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Loading lazy data...')).not.toBeVisible()
+  await expect(page.getByText('This is lazy loaded data!')).toBeVisible()
+
+  await page.evaluate(() => (window as any).scrollTo(0, 0))
+
+  // Click the reload button to trigger the issue
+  await page.getByRole('button', { name: 'Reload Page' }).click()
+
+  // Lazily loaded data should be missing again after reload
+  await expect(page.getByText('Loading lazy data...')).toBeVisible()
+  await expect(page.getByText('This is lazy loaded data!')).not.toBeVisible()
+
+  // Scroll to trigger the WhenVisible component again
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+
+  // Wait for lazy data to load again
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Loading lazy data...')).not.toBeVisible()
+  await expect(page.getByText('This is lazy loaded data!')).toBeVisible()
 })

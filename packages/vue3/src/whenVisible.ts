@@ -1,5 +1,6 @@
 import { ReloadOptions, router } from '@inertiajs/core'
 import { defineComponent, h, PropType } from 'vue'
+import { usePage } from './app'
 
 export default defineComponent({
   name: 'WhenVisible',
@@ -33,46 +34,68 @@ export default defineComponent({
   unmounted() {
     this.observer?.disconnect()
   },
-  mounted() {
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0].isIntersecting) {
+  created() {
+    const page = usePage()
+
+    this.$watch(
+      () => page.props[this.data as string],
+      (value) => {
+        if (value !== undefined) {
           return
         }
 
-        if (!this.$props.always) {
-          this.observer?.disconnect()
-        }
-
-        if (this.fetching) {
-          return
-        }
-
-        this.fetching = true
-
-        const reloadParams = this.getReloadParams()
-
-        router.reload({
-          ...reloadParams,
-          onStart: (e) => {
-            this.fetching = true
-            reloadParams.onStart?.(e)
-          },
-          onFinish: (e) => {
-            this.loaded = true
-            this.fetching = false
-            reloadParams.onFinish?.(e)
-          },
-        })
+        this.loaded = false
+        this.$nextTick(this.registerObserver)
       },
-      {
-        rootMargin: `${this.$props.buffer}px`,
-      },
+      { immediate: true },
     )
-
-    this.observer.observe(this.$el.nextSibling)
   },
   methods: {
+    registerObserver() {
+      this.observer?.disconnect()
+
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries[0].isIntersecting) {
+            return
+          }
+
+          if (this.fetching) {
+            return
+          }
+
+          if (!this.always && this.loaded) {
+            return
+          }
+
+          this.fetching = true
+
+          const reloadParams = this.getReloadParams()
+
+          router.reload({
+            ...reloadParams,
+            onStart: (e) => {
+              this.fetching = true
+              reloadParams.onStart?.(e)
+            },
+            onFinish: (e) => {
+              this.loaded = true
+              this.fetching = false
+              reloadParams.onFinish?.(e)
+
+              if (!this.always) {
+                this.observer?.disconnect()
+              }
+            },
+          })
+        },
+        {
+          rootMargin: `${this.$props.buffer}px`,
+        },
+      )
+
+      this.observer.observe(this.$el.nextSibling)
+    },
     getReloadParams(): Partial<ReloadOptions> {
       if (this.$props.data) {
         return {
