@@ -446,6 +446,55 @@ app.get('/when-visible', (req, res) => {
   }
 })
 
+app.get('/when-visible-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleReload',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleReload',
+        props: {
+          lazyData: {
+            text: 'This is lazy loaded data!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/when-visible-array-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleArrayReload',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleArrayReload',
+        props: {
+          firstData: {
+            text: 'First lazy data loaded!',
+          },
+          secondData: {
+            text: 'Second lazy data loaded!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>
