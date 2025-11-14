@@ -7,7 +7,7 @@ export default () => {
   })
     .withPrecognition('post', '/precognition/array-errors')
     .setValidationTimeout(100)
-    .withFullErrors()
+    .withArrayErrors()
 
   return (
     <div>

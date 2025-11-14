@@ -599,6 +599,55 @@ app.get('/when-visible', (req, res) => {
   }
 })
 
+app.get('/when-visible-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleReload',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleReload',
+        props: {
+          lazyData: {
+            text: 'This is lazy loaded data!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/when-visible-array-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleArrayReload',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleArrayReload',
+        props: {
+          firstData: {
+            text: 'First lazy data loaded!',
+          },
+          secondData: {
+            text: 'Second lazy data loaded!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>
@@ -925,6 +974,42 @@ app.get('/deferred-props/instant-reload', (req, res) => {
         deferredProps: requestedProps ? {} : { default: ['bar'] },
       }),
     delay,
+  )
+})
+
+app.get('/deferred-props/partial-reloads', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/PartialReloads',
+      deferredProps: {
+        default: ['foo', 'bar'],
+      },
+      props: {},
+    })
+  }
+
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const props = {}
+
+  if (requestedProps.includes('foo')) {
+    props.foo = {
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  if (requestedProps.includes('bar')) {
+    props.bar = {
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/PartialReloads',
+        props: props,
+      }),
+    500,
   )
 })
 

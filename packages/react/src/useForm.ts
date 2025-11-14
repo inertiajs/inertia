@@ -92,7 +92,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validateFiles(): InertiaPrecognitiveFormProps<TForm>
   validating: boolean
   validator: () => Validator
-  withFullErrors(): InertiaPrecognitiveFormProps<TForm>
+  withArrayErrors(): InertiaPrecognitiveFormProps<TForm>
   withoutFileValidation(): InertiaPrecognitiveFormProps<TForm>
   // Backward compatibility for easy migration from the original Precognition libraries
   setErrors(errors: FormDataErrors<TForm>): InertiaPrecognitiveFormProps<TForm>
@@ -148,8 +148,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [validating, setValidating] = useState(false)
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
-  const simpleValidationErrors = useRef(true)
   const validatorDefaults = cloneDeep(defaults)
+  const arrayErrors = useRef(false)
 
   useEffect(() => {
     isMounted.current = true
@@ -524,9 +524,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           setTouchedFields(validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors = simpleValidationErrors.current
-            ? toSimpleValidationErrors(validator.errors())
-            : validator.errors()
+          const validationErrors = arrayErrors.current
+            ? validator.errors()
+            : toSimpleValidationErrors(validator.errors())
 
           setErrors(validationErrors as FormDataErrors<TForm>)
           setHasErrors(Object.keys(validationErrors).length > 0)
@@ -557,7 +557,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
         return precognitiveForm
       },
-      withFullErrors: () => tap(precognitiveForm, () => (simpleValidationErrors.current = false)),
+      withArrayErrors: () => tap(precognitiveForm, () => (arrayErrors.current = true)),
       setValidationTimeout: (duration: number) =>
         tap(precognitiveForm, () => validatorRef.current?.setTimeout(duration)),
       validateFiles: () => tap(precognitiveForm, () => validatorRef.current?.validateFiles()),

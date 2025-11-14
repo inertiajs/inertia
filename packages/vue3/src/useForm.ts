@@ -76,7 +76,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validateFiles(): this
   validating: boolean
   validator: () => Validator
-  withFullErrors(): this
+  withArrayErrors(): this
   withoutFileValidation(): this
   // Backward compatibility for easy migration from the original Precognition libraries
   setErrors(errors: FormDataErrors<TForm> | Record<string, string | string[]>): this
@@ -149,7 +149,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       // We're dynamically adding precognition properties to 'this', so we assert the type
       const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
-      let simpleValidationErrors = true
+      let arrayErrors = false
       const validator = createValidator((client) => {
         const { method, url } = precognitionEndpoint!()
         const transformedData = transform(this.data()) as Record<string, unknown>
@@ -170,9 +170,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           formWithPrecognition.__touched = validator.touched()
         })
         .on('errorsChanged', () => {
-          const validationErrors = simpleValidationErrors
-            ? toSimpleValidationErrors(validator.errors())
-            : validator.errors()
+          const validationErrors = arrayErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
 
           this.errors = {} as FormDataErrors<TForm>
 
@@ -191,7 +189,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         __valid: [],
         validating: false,
         validator: () => validator,
-        withFullErrors: () => tap(formWithPrecognition, () => (simpleValidationErrors = false)),
+        withArrayErrors: () => tap(formWithPrecognition, () => (arrayErrors = true)),
         valid: (field: string) => formWithPrecognition.__valid.includes(field),
         invalid: (field: string) => field in this.errors,
         setValidationTimeout: (duration: number) => tap(formWithPrecognition, () => validator.setTimeout(duration)),

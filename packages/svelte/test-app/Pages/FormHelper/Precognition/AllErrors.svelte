@@ -7,7 +7,7 @@
   })
     .withPrecognition('post', '/precognition/array-errors')
     .setValidationTimeout(100)
-    .withFullErrors()
+    .withArrayErrors()
 </script>
 
 <div>
