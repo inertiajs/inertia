@@ -10,5 +10,9 @@ export default defineConfig({
       '@': __dirname,
     },
   },
-  plugins: [vue()],
+  plugins: [
+    vue({
+      features: { prodDevtools: true },
+    }),
+  ],
 })

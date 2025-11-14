@@ -5,11 +5,18 @@ export default {
   tabWidth: 2,
   trailingComma: 'all',
   plugins: ['prettier-plugin-svelte', 'prettier-plugin-organize-imports', 'prettier-plugin-tailwindcss'],
+  endOfLine: 'lf',
   overrides: [
     {
       files: '*.svelte',
       options: {
         parser: 'svelte',
+      },
+    },
+    {
+      files: 'composer.json',
+      options: {
+        tabWidth: 4,
       },
     },
   ],

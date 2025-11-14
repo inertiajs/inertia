@@ -19,8 +19,8 @@ export default () => {
 
   return (
     <>
-      <h1 style={{ 'fontSize': '40px', }}>Article Header</h1>
-      <article style={{ 'fontSize': '20px', 'maxWidth': '500px' }}>
+      <h1 style={{ fontSize: '40px' }}>Article Header</h1>
+      <article style={{ fontSize: '20px', maxWidth: '500px' }}>
         <p>
           Sunt culpa sit sunt enim aliquip. Esse ea ea quis voluptate. Enim consectetur aliqua ex ex magna cupidatat id
           minim sit elit. Amet pariatur occaecat pariatur duis eiusmod dolore magna. Et commodo cupidatat in commodo
@@ -82,22 +82,29 @@ export default () => {
         </p>
         <h2 id="far-down">Far down</h2>
         <p>
-          Ex eiusmod id est laborum sunt ex ea aute adipisicing ad magna deserunt duis. Nostrud velit dolore id commodo quis
-          enim fugiat. Sint non quis consectetur voluptate aliqua dolore ad voluptate nulla. Irure sit reprehenderit sint
-          laboris non elit. Duis minim nisi esse dolor. Sit ex in consequat non occaecat commodo irure et. Commodo qui ipsum
-          Lorem magna consequat consequat et minim eiusmod Lorem eiusmod cupidatat voluptate.
+          Ex eiusmod id est laborum sunt ex ea aute adipisicing ad magna deserunt duis. Nostrud velit dolore id commodo
+          quis enim fugiat. Sint non quis consectetur voluptate aliqua dolore ad voluptate nulla. Irure sit
+          reprehenderit sint laboris non elit. Duis minim nisi esse dolor. Sit ex in consequat non occaecat commodo
+          irure et. Commodo qui ipsum Lorem magna consequat consequat et minim eiusmod Lorem eiusmod cupidatat
+          voluptate.
         </p>
       </article>
 
       <div className="document-position">Scroll log: {JSON.stringify(scrollLog)}</div>
 
-      <Link id="home" data-testid="home" href="/"> Home </Link>
+      <Link id="home" data-testid="home" href="/">
+        {' '}
+        Home{' '}
+      </Link>
 
-      <Link id="article-far-down" data-testid="article-far-down" href="/article#far-down"> Article Far Down </Link>
+      <Link id="article-far-down" data-testid="article-far-down" href="/article#far-down">
+        {' '}
+        Article Far Down{' '}
+      </Link>
 
       <button id="enable-smooth-scroll" data-testid="enable-smooth-scroll" onClick={enableSmoothScroll}>
         Enable Smooth Scroll
-      </button >
+      </button>
 
       <button id="clear-scroll-log" data-testid="clear-scroll-log" onClick={() => setScrollLog([])}>
         Clear Scroll Log

@@ -1,25 +1,29 @@
 import {
+  Errors,
   FormComponentProps,
   FormComponentRef,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
-import { isEqual } from 'es-toolkit'
-import { computed, defineComponent, DefineComponent, h, onBeforeUnmount, onMounted, PropType, ref } from 'vue'
+import { isEqual } from 'lodash-es'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
 import useForm from './useForm'
 
-type InertiaForm = DefineComponent<FormComponentProps>
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const noop = () => undefined
 
-const Form: InertiaForm = defineComponent({
+const Form = defineComponent({
   name: 'Form',
+  slots: Object as SlotsType<{
+    default: FormComponentSlotProps
+  }>,
   props: {
     action: {
       type: [String, Object] as PropType<FormComponentProps['action']>,
@@ -52,6 +56,18 @@ const Form: InertiaForm = defineComponent({
     options: {
       type: Object as PropType<FormComponentProps['options']>,
       default: () => ({}),
+    },
+    resetOnError: {
+      type: [Boolean, Array] as PropType<FormComponentProps['resetOnError']>,
+      default: false,
+    },
+    resetOnSuccess: {
+      type: [Boolean, Array] as PropType<FormComponentProps['resetOnSuccess']>,
+      default: false,
+    },
+    setDefaultsOnSuccess: {
+      type: Boolean as PropType<FormComponentProps['setDefaultsOnSuccess']>,
+      default: false,
     },
     onCancelToken: {
       type: Function as PropType<FormComponentProps['onCancelToken']>,
@@ -93,12 +109,16 @@ const Form: InertiaForm = defineComponent({
       type: Boolean,
       default: false,
     },
+    invalidateCacheTags: {
+      type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
+      default: () => [],
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const form = useForm<Record<string, any>>({})
     const formElement = ref()
     const method = computed(() =>
-      typeof props.action === 'object' ? props.action.method : (props.method.toLowerCase() as Method),
+      isUrlMethodPair(props.action) ? props.action.method : (props.method.toLowerCase() as Method),
     )
 
     // Can't use computed because FormData is not reactive
@@ -132,15 +152,29 @@ const Form: InertiaForm = defineComponent({
     const submit = () => {
       const [action, data] = mergeDataIntoQueryString(
         method.value,
-        typeof props.action === 'object' ? props.action.url : props.action,
+        isUrlMethodPair(props.action) ? props.action.url : props.action,
         getData(),
         props.queryStringArrayFormat,
       )
 
+      const maybeReset = (resetOption: boolean | string[]) => {
+        if (!resetOption) {
+          return
+        }
+
+        if (resetOption === true) {
+          reset()
+        } else if (resetOption.length > 0) {
+          reset(...resetOption)
+        }
+      }
+
       const submitOptions: FormSubmitOptions = {
         headers: props.headers,
+        queryStringArrayFormat: props.queryStringArrayFormat,
         errorBag: props.errorBag,
         showProgress: props.showProgress,
+        invalidateCacheTags: props.invalidateCacheTags,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,
         onStart: props.onStart,
@@ -148,10 +182,18 @@ const Form: InertiaForm = defineComponent({
         onFinish: props.onFinish,
         onCancel: props.onCancel,
         onSuccess: (...args) => {
-          props.onSuccess(...args)
-          props.onSubmitComplete(exposed)
+          props.onSuccess?.(...args)
+          props.onSubmitComplete?.(exposed)
+          maybeReset(props.resetOnSuccess)
+
+          if (props.setDefaultsOnSuccess === true) {
+            defaults()
+          }
         },
-        onError: props.onError,
+        onError: (...args) => {
+          props.onError?.(...args)
+          maybeReset(props.resetOnError)
+        },
         ...props.options,
       }
 
@@ -195,13 +237,15 @@ const Form: InertiaForm = defineComponent({
       clearErrors: (...fields: string[]) => form.clearErrors(...fields),
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
-        form.setError(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
+        form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
       get isDirty() {
         return isDirty.value
       },
       reset,
       submit,
       defaults,
+      getData,
+      getFormData,
     }
 
     expose<FormComponentRef>(exposed)
@@ -212,7 +256,7 @@ const Form: InertiaForm = defineComponent({
         {
           ...attrs,
           ref: formElement,
-          action: props.action,
+          action: isUrlMethodPair(props.action) ? props.action.url : props.action,
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
@@ -220,7 +264,7 @@ const Form: InertiaForm = defineComponent({
           },
           inert: props.disableWhileProcessing && form.processing,
         },
-        slots.default ? slots.default(<FormComponentSlotProps>exposed) : [],
+        slots.default ? slots.default(exposed) : [],
       )
     }
   },

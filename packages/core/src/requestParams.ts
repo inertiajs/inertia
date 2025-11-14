@@ -17,6 +17,7 @@ export class RequestParams {
     } else {
       const wrappedCallbacks: Record<keyof VisitCallbacks, () => any> = {
         onBefore: this.wrapCallback(params, 'onBefore'),
+        onBeforeUpdate: this.wrapCallback(params, 'onBeforeUpdate'),
         onStart: this.wrapCallback(params, 'onStart'),
         onProgress: this.wrapCallback(params, 'onProgress'),
         onFinish: this.wrapCallback(params, 'onFinish'),
@@ -137,8 +138,8 @@ export class RequestParams {
   }
 
   public setPreserveOptions(page: Page) {
-    this.params.preserveScroll = this.resolvePreserveOption(this.params.preserveScroll, page)
-    this.params.preserveState = this.resolvePreserveOption(this.params.preserveState, page)
+    this.params.preserveScroll = RequestParams.resolvePreserveOption(this.params.preserveScroll, page)
+    this.params.preserveState = RequestParams.resolvePreserveOption(this.params.preserveState, page)
   }
 
   public runCallbacks() {
@@ -168,7 +169,7 @@ export class RequestParams {
     this.callbacks.push({ name, args })
   }
 
-  protected resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
+  public static resolvePreserveOption(value: PreserveStateOption, page: Page): boolean {
     if (typeof value === 'function') {
       return value(page)
     }

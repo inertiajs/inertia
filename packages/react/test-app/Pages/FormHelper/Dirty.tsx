@@ -20,6 +20,18 @@ export default () => {
     form.setData('foo', [...form.data.foo, 'bar'])
   }
 
+  const submitAndSetDefaults = () => {
+    form.post('/form-helper/dirty/redirect-back', {
+      onSuccess: () => form.setDefaults(),
+    })
+  }
+
+  const submitAndSetCustomDefaults = () => {
+    form.post('/form-helper/dirty/redirect-back', {
+      onSuccess: () => form.setDefaults({ name: 'Custom Default', foo: [] }),
+    })
+  }
+
   return (
     <div>
       <div>Form is {form.isDirty ? 'dirty' : 'clean'}</div>
@@ -47,6 +59,14 @@ export default () => {
       </button>
 
       <button onClick={pushValue}>Push Value</button>
+
+      <button onClick={submitAndSetDefaults} className="submit-and-set-defaults">
+        Submit and setDefaults
+      </button>
+
+      <button onClick={submitAndSetCustomDefaults} className="submit-and-set-custom-defaults">
+        Submit and setDefaults custom
+      </button>
     </div>
   )
 }

@@ -2,26 +2,19 @@
 import { useForm } from '@inertiajs/react'
 
 interface ClientForm {
-    name: string;
-    [key: string]: any;
+  name: string
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export default function DynamicInputName() {
-	const { data, setData } = useForm<ClientForm>({
-		name: '',
-	});
+  const { data, setData } = useForm<ClientForm>({
+    name: '',
+  })
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-		const { name, value } = e.target as HTMLInputElement;
-		setData(name, value);
-	};
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target as HTMLInputElement
+    setData(name, value)
+  }
 
-	return (
-		<input
-			name="name"
-			type="text"
-			value={data.name}
-			onChange={handleChange}
-		/>
-	)
+  return <input name="name" type="text" value={data.name} onChange={handleChange} />
 }

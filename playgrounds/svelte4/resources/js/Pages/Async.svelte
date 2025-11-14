@@ -132,12 +132,16 @@
 
     <p>Reload should still happen but won't re-direct back to the reloaded component, we should respect the visit</p>
 
-    <button on:click={triggerVisitThenReload} class="rounded-sm bg-green-600 px-4 py-2 text-white">Visit → Reload</button>
+    <button on:click={triggerVisitThenReload} class="rounded-sm bg-green-600 px-4 py-2 text-white"
+      >Visit → Reload</button
+    >
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Simply trigger a 4 second reload so you can navigate or do whatever you'd like during it.</p>
-    <button on:click={triggerLongReload} class="rounded-sm bg-green-600 px-4 py-2 text-white">Trigger Long Reload</button>
+    <button on:click={triggerLongReload} class="rounded-sm bg-green-600 px-4 py-2 text-white"
+      >Trigger Long Reload</button
+    >
   </TestGridItem>
 
   <TestGridItem class="space-y-4">

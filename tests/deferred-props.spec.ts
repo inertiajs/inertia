@@ -168,3 +168,79 @@ test('it will not revert to fallback when fetching a url that is different than 
 
   await expect(page.getByText('John Doe')).toBeVisible()
 })
+
+test('load deferred props in multiple groups', async ({ page }) => {
+  const props = ['foo', 'bar', 'baz', 'qux', 'quux']
+
+  await page.goto('/deferred-props/many-groups')
+
+  for (const prop of props) {
+    await expect(page.getByText(`Loading ${prop}...`)).toBeVisible()
+  }
+
+  for (const prop of props) {
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === prop && response.status() === 200,
+    )
+  }
+
+  for (const prop of props) {
+    await expect(page.getByText(`${prop} value`)).toBeVisible()
+  }
+})
+
+test('load deferred props with partial reload on mount', async ({ page }) => {
+  await page.goto('/deferred-props/instant-reload')
+
+  await expect(page.getByText('Loading bar...')).toBeVisible()
+
+  await expect(page.getByText('foo value')).toBeVisible()
+  await expect(page.getByText('bar value')).toBeVisible()
+})
+
+test('can partial reload deferred props independently', async ({ page }) => {
+  await page.goto('/deferred-props/partial-reloads')
+
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+  await expect(page.getByText('Loading bar...')).toBeVisible()
+
+  await page.waitForResponse(page.url())
+
+  await expect(page.getByText('Loading foo...')).not.toBeVisible()
+  await expect(page.getByText('Loading bar...')).not.toBeVisible()
+
+  // Capture initial timestamps
+  const initialFooTimestamp = await page.locator('#foo-timestamp').textContent()
+  const initialBarTimestamp = await page.locator('#bar-timestamp').textContent()
+
+  expect(initialFooTimestamp).toBeTruthy()
+  expect(initialBarTimestamp).toBeTruthy()
+
+  const responsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+  )
+
+  await page.getByRole('button', { name: 'Reload foo only' }).click()
+  await responsePromise
+
+  // Check that only foo changed
+  const newFooTimestamp = await page.locator('#foo-timestamp').textContent()
+  const newBarTimestamp = await page.locator('#bar-timestamp').textContent()
+
+  expect(newFooTimestamp).not.toBe(initialFooTimestamp) // foo changed
+  expect(newBarTimestamp).toBe(initialBarTimestamp) // bar unchanged
+
+  const barResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'bar' && response.status() === 200,
+  )
+
+  await page.getByRole('button', { name: 'Reload bar only' }).click()
+  await barResponsePromise
+
+  // Check that only bar changed
+  const finalFooTimestamp = await page.locator('#foo-timestamp').textContent()
+  const finalBarTimestamp = await page.locator('#bar-timestamp').textContent()
+
+  expect(finalFooTimestamp).toBe(newFooTimestamp) // foo unchanged
+  expect(finalBarTimestamp).not.toBe(newBarTimestamp) // bar changed
+})

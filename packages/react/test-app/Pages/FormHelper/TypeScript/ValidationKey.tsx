@@ -8,7 +8,9 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
   const filterAndMap = (key: Key) => {
     const err = errors()
 
-    return (Object.keys(err).filter((k) => typeof key === 'string' && k.startsWith(key)) as [keyof ReturnType<typeof errors>]).map((k) => err[k])
+    return (
+      Object.keys(err).filter((k) => typeof key === 'string' && k.startsWith(key)) as [keyof ReturnType<typeof errors>]
+    ).map((k) => err[k])
   }
 
   const unique = (key: Key) => {
@@ -19,9 +21,7 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
 }
 
 export default function ValidationKey() {
-  return (
-    <div>
-      {/* ValidationKey component */}
-    </div>
-  )
+  validation(() => ({ name: 'Validation error' }))
+
+  return <div>{/* ValidationKey component */}</div>
 }

@@ -8,11 +8,12 @@ interface PageProps {
   bar: string
 }
 
-const props = defineProps<PageProps>()
+defineProps<PageProps>()
 
 const errors = ref(0)
 const finished = ref(0)
 const success = ref(0)
+const random = ref(Math.random())
 
 const bagErrors = () => {
   router.replace({
@@ -56,6 +57,13 @@ const replace = () => {
   })
 }
 
+const replaceAndPreserveStateWithErrors = (errors = {}) => {
+  router.replace({
+    preserveState: 'errors',
+    props: (props: PageProps) => ({ ...props, errors }),
+  })
+}
+
 const push = () => {
   router.push({
     url: '/client-side-visit-2',
@@ -71,10 +79,13 @@ const push = () => {
   <div>{{ foo }}</div>
   <div>{{ bar }}</div>
   <button @click="replace">Replace</button>
+  <button @click="() => replaceAndPreserveStateWithErrors({ name: 'Field is required' })">Replace with errors</button>
+  <button @click="() => replaceAndPreserveStateWithErrors()">Replace without errors</button>
   <button @click="push">Push</button>
   <button @click="defaultErrors">Errors (default)</button>
   <button @click="bagErrors">Errors (bag)</button>
   <div>Errors: {{ errors }}</div>
   <div>Finished: {{ finished }}</div>
   <div>Success: {{ success }}</div>
+  <div id="random">Random: {{ random }}</div>
 </template>

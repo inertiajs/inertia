@@ -1,17 +1,19 @@
 import {
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   router,
   shouldIntercept,
+  shouldNavigate,
   type CacheForOption,
-  type FormDataConvertible,
+  type CancelToken,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
 } from '@inertiajs/core'
-import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
+import { config } from '.'
 
 type ActionEventHandlers = {
   [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
@@ -21,19 +23,26 @@ interface ActionElement extends HTMLElement {
   href?: string
 }
 
-type ActionParameters = Omit<LinkComponentBaseProps, 'onCancelToken'> & Omit<VisitOptions, keyof LinkComponentBaseProps> & {
-  href?: string | { url: string; method: Method }
-}
+type ActionParameters = Omit<LinkComponentBaseProps, 'onCancelToken'> & Omit<VisitOptions, keyof LinkComponentBaseProps>
 
-type SelectedEventKeys = 'start' | 'progress' | 'finish' | 'before' | 'cancel' | 'success' | 'error' | 'prefetching' | 'prefetched'
+type SelectedEventKeys =
+  | 'start'
+  | 'progress'
+  | 'finish'
+  | 'before'
+  | 'cancel'
+  | 'success'
+  | 'error'
+  | 'prefetching'
+  | 'prefetched'
 type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
 type ActionAttributes = {
   [K in keyof SelectedGlobalEventsMap as `on:${K}` | `on${K}`]?: (
     event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
   ) => void
 } & {
-  'on:cancel-token'?: (event: CustomEvent<CancelTokenSource>) => void
-  oncanceltoken?: (event: CustomEvent<CancelTokenSource>) => void
+  'on:cancel-token'?: (event: CustomEvent<CancelToken>) => void
+  oncanceltoken?: (event: CustomEvent<CancelToken>) => void
 }
 
 function link(
@@ -46,6 +55,7 @@ function link(
   // Variables initialized and controlled by the "update" function
   let prefetchModes: LinkPrefetchOption[] = []
   let cacheForValue: CacheForOption | CacheForOption[]
+  let cacheTags: string[] = []
   let method: Method
   let href: string
   let data
@@ -53,7 +63,7 @@ function link(
   let visitParams: VisitOptions
 
   const regularEvents: ActionEventHandlers = {
-    click: (event) => {
+    click: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         event.preventDefault()
         router.visit(href, visitParams)
@@ -62,31 +72,51 @@ function link(
   }
 
   const prefetchHoverEvents: ActionEventHandlers = {
-    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), 75)),
+    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), config.get('prefetch.hoverDelay'))),
     mouseleave: () => clearTimeout(hoverTimeout),
     click: regularEvents.click,
   }
 
   const prefetchClickEvents: ActionEventHandlers = {
-    mousedown: (event) => {
+    mousedown: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         event.preventDefault()
         prefetch()
       }
     },
-    mouseup: (event) => {
-      event.preventDefault()
-      router.visit(href, visitParams)
+    keydown: (event: KeyboardEvent) => {
+      if (shouldNavigate(event)) {
+        event.preventDefault()
+        prefetch()
+      }
     },
-    click: (event) => {
+    mouseup: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
-        // Let the mouseup event handle the visit
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
+    },
+    keyup: (event: KeyboardEvent) => {
+      if (shouldNavigate(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
+    },
+    click: (event: MouseEvent) => {
+      if (shouldIntercept(event)) {
+        // Let the mouseup/keyup event handle the visit
         event.preventDefault()
       }
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, ...params }: ActionParameters) {
+  function update({
+    cacheFor = 0,
+    prefetch = false,
+    cacheTags: cacheTagValues = [],
+    viewTransition = false,
+    ...params
+  }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -112,10 +142,12 @@ function link(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     })()
 
-    method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
+    cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
+
+    method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
@@ -128,6 +160,7 @@ function link(
       replace: params.replace || false,
       preserveScroll: params.preserveScroll || false,
       preserveState: params.preserveState ?? method !== 'get',
+      preserveUrl: params.preserveUrl || false,
       only: params.only || [],
       except: params.except || [],
       headers: params.headers || {},
@@ -136,6 +169,7 @@ function link(
 
     visitParams = {
       ...baseParams,
+      viewTransition,
       onStart: (visit) => {
         inFlightCount++
         updateNodeAttributes()
@@ -166,18 +200,22 @@ function link(
   function hrefAndData(method: Method, params: ActionParameters) {
     return mergeDataIntoQueryString(
       method,
-      typeof params.href === 'object' ? params.href.url : node.href || params.href || '',
+      isUrlMethodPair(params.href) ? params.href.url : node.href || params.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
     )
   }
 
   function prefetch() {
-    router.prefetch(href, {
-      ...baseParams,
-      onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
-      onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
-    }, { cacheFor: cacheForValue })
+    router.prefetch(
+      href,
+      {
+        ...baseParams,
+        onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
+        onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),
+      },
+      { cacheFor: cacheForValue, cacheTags },
+    )
   }
 
   function updateNodeAttributes() {

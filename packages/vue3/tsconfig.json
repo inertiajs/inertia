@@ -10,18 +10,20 @@
 
     "declaration": true,
     "declarationDir": "types",
+    "emitDeclarationOnly": true,
 
     "module": "ES2020",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
 
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "removeComments": true,
-    "typeRoots": ["./node_modules/@types"]
-    // "strict": true
+    "typeRoots": ["./node_modules/@types"],
+    "strict": true
   }
 }

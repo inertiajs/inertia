@@ -1,6 +1,6 @@
 import { useForm, usePage } from '@inertiajs/react'
 
-export default ({ errors }: { errors?: { name?: string; handle?: string } }) => {
+export default () => {
   const form = useForm({
     name: 'foo',
     handle: 'example',
@@ -11,6 +11,12 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
 
   const submit = () => {
     form.post(page.url)
+  }
+
+  const submitAndReset = () => {
+    form.post('/form-helper/data/redirect-back', {
+      onSuccess: () => form.reset(),
+    })
   }
 
   const resetAll = () => {
@@ -71,6 +77,10 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
 
       <button onClick={submit} className="submit">
         Submit form
+      </button>
+
+      <button onClick={submitAndReset} className="submit">
+        Submit form and reset
       </button>
 
       <button onClick={resetAll} className="reset">

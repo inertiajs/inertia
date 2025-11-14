@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
+import type { Method, QueryStringArrayFormatOption } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
-import type { Method } from '@inertiajs/core'
+import { useMemo, useState } from 'react'
 import Article from './../Article'
 
 export default () => {
@@ -12,7 +12,9 @@ export default () => {
   const [preserveScroll, setPreserveScroll] = useState(false)
   const [preserveState, setPreserveState] = useState(false)
   const [preserveUrl, setPreserveUrl] = useState(false)
-  const [queryStringArrayFormat, setQueryStringArrayFormat] = useState<'indices' | 'brackets' | undefined>(undefined)
+  const [queryStringArrayFormat, setQueryStringArrayFormat] = useState<QueryStringArrayFormatOption | undefined>(
+    undefined,
+  )
 
   function setOnly() {
     setOnlyValues(['users'])
@@ -94,15 +96,33 @@ export default () => {
           </div>
 
           <div>
-            <button type="button" onClick={setOnly}>Set Only (users)</button>
-            <button type="button" onClick={setExcept}>Set Except (stats)</button>
-            <button type="button" onClick={setReset}>Set Reset (orders)</button>
-            <button type="button" onClick={() => setQueryStringArrayFormat('brackets')}>Use Brackets Format</button>
-            <button type="button" onClick={() => setQueryStringArrayFormat('indices')}>Use Indices Format</button>
-            <button type="button" onClick={enablePreserveScroll}>Enable Preserve Scroll</button>
-            <button type="button" onClick={enablePreserveState}>Enable Preserve State</button>
-            <button type="button" onClick={enablePreserveUrl}>Enable Preserve URL</button>
-            <button type="button" onClick={enableReplace}>Enable Replace</button>
+            <button type="button" onClick={setOnly}>
+              Set Only (users)
+            </button>
+            <button type="button" onClick={setExcept}>
+              Set Except (stats)
+            </button>
+            <button type="button" onClick={setReset}>
+              Set Reset (orders)
+            </button>
+            <button type="button" onClick={() => setQueryStringArrayFormat('brackets')}>
+              Use Brackets Format
+            </button>
+            <button type="button" onClick={() => setQueryStringArrayFormat('indices')}>
+              Use Indices Format
+            </button>
+            <button type="button" onClick={enablePreserveScroll}>
+              Enable Preserve Scroll
+            </button>
+            <button type="button" onClick={enablePreserveState}>
+              Enable Preserve State
+            </button>
+            <button type="button" onClick={enablePreserveUrl}>
+              Enable Preserve URL
+            </button>
+            <button type="button" onClick={enableReplace}>
+              Enable Replace
+            </button>
             <button type="submit">Submit</button>
           </div>
 

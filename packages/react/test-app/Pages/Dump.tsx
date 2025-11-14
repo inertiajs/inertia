@@ -1,24 +1,41 @@
-import { usePage } from '@inertiajs/react'
-import { useEffect } from 'react'
 import type { Method } from '@inertiajs/core'
+import { usePage } from '@inertiajs/react'
+import { useEffect, useMemo } from 'react'
 import type { MulterFile } from '../types'
 
-export default ({ headers, method, form, query, url, files }: { headers: Record<string, string>; method: Method; form: Record<string, unknown>; query: Record<string, unknown>; url: string; files: MulterFile[]|object }) => {
+export default ({
+  headers,
+  method,
+  form,
+  query,
+  url,
+  files,
+}: {
+  headers: Record<string, string>
+  method: Method
+  form: Record<string, unknown>
+  query: Record<string, unknown>
+  url: string
+  files: MulterFile[] | object
+}) => {
   const page = usePage()
 
-  const dump = {
-    headers,
-    method,
-    form,
-    files: files ? files : {},
-    query,
-    url,
-    $page: page,
-  }
+  const dump = useMemo(
+    () => ({
+      headers,
+      method,
+      form,
+      files: files ? files : {},
+      query,
+      url,
+      $page: page,
+    }),
+    [headers, method, form, files, query, url, page],
+  )
 
   useEffect(() => {
     window._inertia_request_dump = dump
-  }, [])
+  }, [dump])
 
   return (
     <div>

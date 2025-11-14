@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
 import WithoutScrollRegion from '../../Layouts/WithoutScrollRegion.vue'
-import type { Page } from '@inertiajs/core'
 
 defineOptions({
   layout: WithoutScrollRegion,

@@ -1,7 +1,15 @@
 import * as qs from 'qs'
+import { config } from './config'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import { FormDataConvertible, Method, RequestPayload, VisitOptions } from './types'
+import type {
+  FormDataConvertible,
+  Method,
+  QueryStringArrayFormatOption,
+  RequestPayload,
+  UrlMethodPair,
+  VisitOptions,
+} from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
@@ -17,7 +25,11 @@ export const transformUrlAndData = (
   let url = typeof href === 'string' ? hrefToUrl(href) : href
 
   if ((hasFiles(data) || forceFormData) && !isFormData(data)) {
-    data = objectToFormData(data)
+    if (config.get('form.forceIndicesArrayFormatInFormData')) {
+      queryStringArrayFormat = 'indices'
+    }
+
+    data = objectToFormData(data, new FormData(), null, queryStringArrayFormat)
   }
 
   if (isFormData(data)) {
@@ -36,10 +48,10 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   method: Method,
   href: URL | string,
   data: T,
-  qsArrayFormat: 'indices' | 'brackets' = 'brackets',
+  qsArrayFormat: QueryStringArrayFormatOption = 'brackets',
 ): [string, MergeDataIntoQueryStringDataReturnType<T>] {
   const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
-  const hasHost = /^[a-z][a-z0-9+.-]*:\/\//i.test(href.toString())
+  const hasHost = urlHasProtocol(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/') || href.toString() === ''
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
@@ -85,4 +97,20 @@ export const setHashIfSameUrl = (originUrl: URL | Location, destinationUrl: URL 
 
 export const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boolean => {
   return urlWithoutHash(url1).href === urlWithoutHash(url2).href
+}
+
+export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
+  return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
+}
+
+export function urlHasProtocol(url: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+}
+
+export function urlToString(url: URL | string, absolute: boolean): string {
+  const urlObj = typeof url === 'string' ? hrefToUrl(url) : url
+
+  return absolute
+    ? `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}${urlObj.search}${urlObj.hash}`
+    : `${urlObj.pathname}${urlObj.search}${urlObj.hash}`
 }

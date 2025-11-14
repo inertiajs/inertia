@@ -1,13 +1,13 @@
 name: Bug Report - React
-description: "Submit a React related issue."
+description: 'Submit a React related issue.'
 labels: [react]
 body:
   - type: markdown
     attributes:
-      value: "Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports."
+      value: 'Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.'
   - type: input
     attributes:
-      label: "@inertiajs/react Version"
+      label: '@inertiajs/react Version'
       description: Provide the version of `@inertiajs/react` you are using.
       placeholder: 2.0.0
     validations:

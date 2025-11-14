@@ -1,11 +1,10 @@
-import test, { expect } from '@playwright/test'
-import { pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
+import test, { expect, Page } from '@playwright/test'
+import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Form Component', () => {
   test.describe('Elements', () => {
     test.beforeEach(async ({ page }) => {
-      pageLoads.watch(page)
-      page.goto('/form-component/elements')
+      await page.goto('/form-component/elements')
     })
 
     test('can submit the form with the default values', async ({ page }) => {
@@ -26,75 +25,83 @@ test.describe('Form Component', () => {
       })
     })
 
-    test('can submit the form with filled values', async ({ page }) => {
-      await page.fill('#name', 'Joe')
-      await page.selectOption('#country', 'us')
-      await page.selectOption('#role', 'User')
-      await page.check('input[name="plan"][value="pro"]')
-      await page.check('#subscribe')
-      await page.check('input[name="interests[]"][value="sports"]')
-      await page.check('input[name="interests[]"][value="music"]')
-      await page.selectOption('#skills', ['vue', 'react'])
-      await page.setInputFiles('#avatar', {
-        name: 'avatar.jpg',
-        mimeType: 'image/jpeg',
-        buffer: Buffer.from('fake image data'),
-      })
-      await page.setInputFiles('#documents', [
-        { name: 'doc1.pdf', mimeType: 'application/pdf', buffer: Buffer.from('fake pdf data 1') },
-        { name: 'doc2.pdf', mimeType: 'application/pdf', buffer: Buffer.from('fake pdf data 2') },
-      ])
-      await page.fill('#bio', 'This is a bio.')
-      await page.fill('#age', '30')
-      await page.fill('#nested_street', '123 Main St')
-      await page.fill('#item_a', 'Item 1')
-      await page.fill('#item_b', 'Item 2')
+    const queryStringArrayFormats = ['brackets', 'indices', 'force-brackets']
 
-      await page.getByRole('button', { name: 'Submit' }).click()
-      const dump = await shouldBeDumpPage(page, 'post')
+    queryStringArrayFormats.forEach((format) => {
+      test('can submit the form with filled values using ' + format + ' format', async ({ page }) => {
+        await page.goto('/form-component/elements?queryStringArrayFormat=' + format)
 
-      await expect(dump.method).toEqual('post')
-      await expect(dump.query).toEqual({})
-      await expect(dump.files).toEqual([
-        {
-          fieldname: 'avatar',
-          originalname: 'avatar.jpg',
-          mimetype: 'image/jpeg',
-          buffer: { type: 'Buffer', data: expect.any(Array) },
-          encoding: '7bit',
-          size: 15,
-        },
-        {
-          fieldname: 'documents[0]',
-          originalname: 'doc1.pdf',
-          mimetype: 'application/pdf',
-          buffer: { type: 'Buffer', data: expect.any(Array) },
-          encoding: '7bit',
-          size: 15,
-        },
-        {
-          fieldname: 'documents[1]',
-          originalname: 'doc2.pdf',
-          mimetype: 'application/pdf',
-          buffer: { type: 'Buffer', data: expect.any(Array) },
-          encoding: '7bit',
-          size: 15,
-        },
-      ])
+        await page.fill('#name', 'Joe')
+        await page.selectOption('#country', 'us')
+        await page.selectOption('#role', 'User')
+        await page.check('input[name="plan"][value="pro"]')
+        await page.check('#subscribe')
+        await page.check('input[name="interests[]"][value="sports"]')
+        await page.check('input[name="interests[]"][value="music"]')
+        await page.selectOption('#skills', ['vue', 'react'])
+        await page.setInputFiles('#avatar', {
+          name: 'avatar.jpg',
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from('fake image data'),
+        })
+        await page.setInputFiles('#documents', [
+          { name: 'doc1.pdf', mimeType: 'application/pdf', buffer: Buffer.from('fake pdf data 1') },
+          { name: 'doc2.pdf', mimeType: 'application/pdf', buffer: Buffer.from('fake pdf data 2') },
+        ])
+        await page.fill('#bio', 'This is a bio.')
+        await page.fill('#age', '30')
+        await page.fill('#nested_street', '123 Main St')
+        await page.fill('#item_a', 'Item 1')
+        await page.fill('#item_b', 'Item 2')
 
-      await expect(dump.form).toEqual({
-        name: 'Joe',
-        country: 'us',
-        role: 'User',
-        plan: 'pro',
-        subscribe: 'yes',
-        interests: ['sports', 'music'],
-        skills: ['vue', 'react'],
-        bio: 'This is a bio.',
-        token: 'abc123',
-        age: '30',
-        user: { address: { street: '123 Main St' } },
-        items: [{ name: 'Item 1' }, { name: 'Item 2' }],
+        await page.getByRole('button', { name: 'Submit' }).click()
+        const dump = await shouldBeDumpPage(page, 'post')
+
+        await expect(dump.method).toEqual('post')
+        await expect(dump.query).toEqual({})
+        await expect(dump.files).toEqual([
+          {
+            fieldname: 'avatar',
+            originalname: 'avatar.jpg',
+            mimetype: 'image/jpeg',
+            buffer: { type: 'Buffer', data: expect.any(Array) },
+            encoding: '7bit',
+            size: 15,
+          },
+          {
+            fieldname: format === 'force-brackets' ? 'documents[]' : 'documents[0]',
+            originalname: 'doc1.pdf',
+            mimetype: 'application/pdf',
+            buffer: { type: 'Buffer', data: expect.any(Array) },
+            encoding: '7bit',
+            size: 15,
+          },
+          {
+            fieldname: format === 'force-brackets' ? 'documents[]' : 'documents[1]',
+            originalname: 'doc2.pdf',
+            mimetype: 'application/pdf',
+            buffer: { type: 'Buffer', data: expect.any(Array) },
+            encoding: '7bit',
+            size: 15,
+          },
+        ])
+
+        await expect(dump.form).toEqual({
+          name: 'Joe',
+          country: 'us',
+          role: 'User',
+          plan: 'pro',
+          subscribe: 'yes',
+          interests: ['sports', 'music'],
+          skills: ['vue', 'react'],
+          bio: 'This is a bio.',
+          token: 'abc123',
+          age: '30',
+          user: { address: { street: '123 Main St' } },
+          ...(format === 'force-brackets'
+            ? { 'items[][name]': ['Item 1', 'Item 2'] }
+            : { items: [{ name: 'Item 1' }, { name: 'Item 2' }] }),
+        })
       })
     })
 
@@ -202,6 +209,96 @@ test.describe('Form Component', () => {
       await expect(page.locator('#error_name')).toHaveText('Some name error')
       await expect(page.locator('#error_handle')).toHaveText('The Handle was invalid')
     })
+
+    test('keep the initial value on errors', async ({ page }) => {
+      pageLoads.watch(page, 2)
+
+      await page.goto('/form-component/default-value')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await page.fill('#name', 'Jane Doe')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('The name must be at least 10 characters.')
+      await expect(page.locator('#name')).toHaveValue('Jane Doe')
+
+      await page.fill('#name', 'Jonathan Doe')
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await page.waitForURL('/')
+    })
+  })
+
+  test.describe('Reset Attributes', () => {
+    test('resetOnError resets fields after error', async ({ page }) => {
+      await page.goto('/form-component/reset-on-error')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('Some name error')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+    })
+
+    test('resetOnError with specific fields only resets those fields', async ({ page }) => {
+      await page.goto('/form-component/reset-on-error-fields')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#error_name')).toHaveText('Some name error')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('changed@email.com')
+    })
+
+    test('resetOnSuccess resets fields after success', async ({ page }) => {
+      await page.goto('/form-component/reset-on-success')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@doe.biz')
+    })
+
+    test('resetOnSuccess with specific fields only resets those fields', async ({ page }) => {
+      await page.goto('/form-component/reset-on-success-fields')
+
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@email.com')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('changed@email.com')
+    })
+  })
+
+  test.describe('Set Defaults Attributes', () => {
+    test('setDefaultsOnSuccess updates defaults and clears dirty state', async ({ page }) => {
+      await page.goto('/form-component/set-defaults-on-success')
+
+      await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
+      await page.fill('#name', 'Jane Smith')
+      await page.fill('#email', 'jane@smith.com')
+      await expect(page.locator('#dirty-status')).toHaveText('Form is dirty')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#name')).toHaveValue('Jane Smith')
+      await expect(page.locator('#email')).toHaveValue('jane@smith.com')
+      await expect(page.locator('#dirty-status')).toHaveText('Form is clean')
+    })
   })
 
   test.describe('Events and State', () => {
@@ -210,27 +307,30 @@ test.describe('Form Component', () => {
       await page.goto('/form-component/events')
     })
 
+    const waitForEvents = async (page: Page, events: string[]) => {
+      await page.waitForFunction(async (expected) => {
+        return document.querySelector('#events')?.innerText === expected
+      }, events.join(','))
+    }
+
     test('fires events in order on success', async ({ page }) => {
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
     })
 
     test('fires events in order on error', async ({ page }) => {
       await page.getByRole('button', { name: 'Fail Request' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
     })
 
     test('fires only onBefore and onCancel when canceled via event cancellation', async ({ page }) => {
       await page.getByRole('button', { name: 'Cancel in onBefore' }).click()
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancel'])
+      await waitForEvents(page, ['onBefore', 'onCancel'])
     })
 
     test('fires onCancelToken and cancels the request via the token', async ({ page }) => {
@@ -238,8 +338,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Submit' }).click()
       await page.getByRole('button', { name: 'Cancel Visit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
     })
 
     test('fires onProgress during file upload', async ({ page }) => {
@@ -252,8 +351,7 @@ test.describe('Form Component', () => {
       await page.setInputFiles('#avatar', file)
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      const eventOrder = await page.locator('#events').innerText()
-      expect(eventOrder.split(',')).toContain('onProgress')
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onProgress'])
     })
 
     test('updates processing during request', async ({ page }) => {
@@ -1146,6 +1244,32 @@ test.describe('Form Component', () => {
       await expect(page.locator('#name')).toHaveValue('John Doe')
     })
 
+    test('can reset form using reset-type input element', async ({ page }) => {
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@example.com')
+
+      await expect(page.locator('#name')).toHaveValue('Changed Name')
+      await expect(page.locator('#email')).toHaveValue('changed@example.com')
+
+      await page.click('input[name="reset_input"]')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@example.com')
+    })
+
+    test('can reset form using reset-type button element', async ({ page }) => {
+      await page.fill('#name', 'Changed Name')
+      await page.fill('#email', 'changed@example.com')
+
+      await expect(page.locator('#name')).toHaveValue('Changed Name')
+      await expect(page.locator('#email')).toHaveValue('changed@example.com')
+
+      await page.click('button[name="reset_button"]')
+
+      await expect(page.locator('#name')).toHaveValue('John Doe')
+      await expect(page.locator('#email')).toHaveValue('john@example.com')
+    })
+
     test('multi-select reset behavior comprehensive test', async ({ page }) => {
       // Multi-select with no defaults resets to empty
       await page.selectOption('#languages', ['javascript', 'python'])
@@ -1277,6 +1401,129 @@ test.describe('Form Component', () => {
       await expect(page.locator('#years_2022')).toBeChecked() // This stays as original default
       const unchangedPorts = await getSelectedOptions(page, '#ports')
       expect(unchangedPorts).toEqual(['8080'])
+    })
+  })
+
+  test('it accepts wayfinder shaped objects as action', async ({ page }) => {
+    await page.goto('/form-component/wayfinder')
+
+    const form = page.locator('form')
+    await expect(form).toHaveAttribute('action', '/dump/post')
+    await expect(form).toHaveAttribute('method', 'post')
+
+    await page.getByRole('button', { name: 'Submit' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    expect(dump.method).toEqual('post')
+    expect(dump.form).toEqual({
+      name: 'John Doe',
+      active: 'true',
+    })
+  })
+
+  const cacheTagsPropTypes = ['string', 'array']
+
+  cacheTagsPropTypes.forEach((propType) => {
+    test(`invalidate prefetch cache using tags (using ${propType})`, async ({ page }) => {
+      await page.goto('/form-component/invalidate-tags/' + propType)
+
+      // Prefetch both pages
+      const prefetchUser = page.waitForResponse('/prefetch/tags/1')
+      await page.getByRole('link', { name: 'User Tagged Page' }).hover()
+      await prefetchUser
+
+      const prefetchProduct = page.waitForResponse('/prefetch/tags/2')
+      await page.getByRole('link', { name: 'Product Tagged Page' }).hover()
+      await prefetchProduct
+
+      // Submit form that invalidates 'user' tag
+      await page.fill('#form-name', 'Test User')
+      await page.click('#submit-invalidate-user')
+      await shouldBeDumpPage(page, 'post')
+
+      await page.goBack()
+
+      // User-tagged page should be invalidated and refetched
+      requests.listen(page)
+      await page.getByRole('link', { name: 'User Tagged Page' }).click()
+      await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+      await expect(page).toHaveURL('/prefetch/tags/1')
+
+      // Go back and check product page is still cached
+      await page.goBack()
+      requests.listen(page)
+      await page.getByRole('link', { name: 'Product Tagged Page' }).click()
+      await expect(requests.requests.length).toBe(0)
+    })
+  })
+
+  test.describe('React', () => {
+    test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
+
+    test('it preserves the internal state of child components', async ({ page }) => {
+      await page.goto('/form-component/child-component')
+
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await page.fill('#child', 'a')
+      await expect(page.locator('#child')).toHaveValue('A')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      const dump = await shouldBeDumpPage(page, 'post')
+      expect(dump.form).toEqual({ child: 'A' })
+    })
+  })
+
+  test.describe('getData and getFormData methods', () => {
+    test.beforeEach(async ({ page }) => {
+      consoleMessages.listen(page)
+      await page.goto('/form-component/data-methods')
+    })
+
+    test('getData returns form data as object', async ({ page }) => {
+      await page.fill('#name', 'John Doe')
+      await page.getByRole('button', { name: 'Test getData()' }).click()
+
+      const result = consoleMessages.messages.find((msg) => msg.includes('getData result:'))
+      expect(result).toBe('getData result: {name: John Doe}')
+    })
+
+    test('getFormData returns FormData instance', async ({ page }) => {
+      await page.fill('#name', 'Jane Doe')
+      await page.getByRole('button', { name: 'Test getFormData()' }).click()
+
+      const formDataMessage = consoleMessages.messages.find((msg) => msg.includes('getFormData entries:'))
+      expect(formDataMessage).toBe('getFormData entries: {name: Jane Doe}')
+    })
+  })
+
+  test.describe('Mixed Key Serialization', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-component/mixed-key-serialization')
+    })
+
+    test('submits form with mixed numeric and string keys as objects', async ({ page }) => {
+      await page.getByRole('button', { name: 'Submit' }).first().click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(Array.isArray(dump.form.fields?.entries)).toBe(false)
+      expect(typeof dump.form.fields?.entries).toBe('object')
+
+      const entryKeys = Object.keys(dump.form.fields.entries)
+      expect(entryKeys).toEqual(['100', 'new:1'])
+
+      expect(dump.form.fields.entries['100']).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+
+      expect(dump.form.fields.entries['new:1']).toEqual({
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+      })
     })
   })
 })

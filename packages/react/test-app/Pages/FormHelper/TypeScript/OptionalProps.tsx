@@ -2,15 +2,15 @@
 import { useForm } from '@inertiajs/react'
 
 interface LoginData {
-    username: string;
-    password: string;
-    remember: boolean;
+  username: string
+  password: string
+  remember: boolean
 }
 
 export default function OptionalProps({ user }: { user?: { username: string } }) {
   useForm<LoginData>({
-      username: user?.username ?? '',
-      password: '',
-      remember: true,
-  });
+    username: user?.username ?? '',
+    password: '',
+    remember: true,
+  })
 }

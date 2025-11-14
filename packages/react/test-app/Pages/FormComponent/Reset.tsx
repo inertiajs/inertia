@@ -1,3 +1,4 @@
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
 import { useRef } from 'react'
 
@@ -8,11 +9,10 @@ declare global {
 }
 
 export default function Reset() {
-  const formRef = useRef(null)
+  const formRef = useRef<FormComponentRef>(null)
 
   // Expose reset function to window for testing
   window.resetForm = (...fields: string[]) => {
-    // @ts-expect-error
     formRef.current?.reset(...fields)
   }
 
@@ -44,23 +44,41 @@ export default function Reset() {
 
       {/* Radio buttons with default checked */}
       <div>
-        <label><input type="radio" name="plan" id="plan_free" value="free" /> Free</label>
-        <label><input type="radio" name="plan" id="plan_pro" value="pro" defaultChecked /> Pro</label>
-        <label><input type="radio" name="plan" id="plan_enterprise" value="enterprise" /> Enterprise</label>
+        <label>
+          <input type="radio" name="plan" id="plan_free" value="free" /> Free
+        </label>
+        <label>
+          <input type="radio" name="plan" id="plan_pro" value="pro" defaultChecked /> Pro
+        </label>
+        <label>
+          <input type="radio" name="plan" id="plan_enterprise" value="enterprise" /> Enterprise
+        </label>
       </div>
 
       {/* Radio buttons without default */}
       <div>
-        <label><input type="radio" name="payment" id="payment_card" value="card" /> Card</label>
-        <label><input type="radio" name="payment" id="payment_bank" value="bank" /> Bank</label>
-        <label><input type="radio" name="payment" id="payment_paypal" value="paypal" /> PayPal</label>
+        <label>
+          <input type="radio" name="payment" id="payment_card" value="card" /> Card
+        </label>
+        <label>
+          <input type="radio" name="payment" id="payment_bank" value="bank" /> Bank
+        </label>
+        <label>
+          <input type="radio" name="payment" id="payment_paypal" value="paypal" /> PayPal
+        </label>
       </div>
 
       {/* Radio buttons designed to test multiple defaults edge case */}
       <div>
-        <label><input type="radio" name="priority" id="priority_low" value="low" defaultChecked /> Low</label>
-        <label><input type="radio" name="priority" id="priority_medium" value="medium" /> Medium</label>
-        <label><input type="radio" name="priority" id="priority_high" value="high" /> High</label>
+        <label>
+          <input type="radio" name="priority" id="priority_low" value="low" defaultChecked /> Low
+        </label>
+        <label>
+          <input type="radio" name="priority" id="priority_medium" value="medium" /> Medium
+        </label>
+        <label>
+          <input type="radio" name="priority" id="priority_high" value="high" /> High
+        </label>
       </div>
 
       {/* Checkboxes */}
@@ -80,10 +98,18 @@ export default function Reset() {
 
       {/* Checkbox (multiple) with some checked */}
       <div>
-        <label><input type="checkbox" name="interests[]" id="interests_sports" value="sports" defaultChecked /> Sports</label>
-        <label><input type="checkbox" name="interests[]" id="interests_music" value="music" /> Music</label>
-        <label><input type="checkbox" name="interests[]" id="interests_tech" value="tech" defaultChecked /> Tech</label>
-        <label><input type="checkbox" name="interests[]" id="interests_art" value="art" /> Art</label>
+        <label>
+          <input type="checkbox" name="interests[]" id="interests_sports" value="sports" defaultChecked /> Sports
+        </label>
+        <label>
+          <input type="checkbox" name="interests[]" id="interests_music" value="music" /> Music
+        </label>
+        <label>
+          <input type="checkbox" name="interests[]" id="interests_tech" value="tech" defaultChecked /> Tech
+        </label>
+        <label>
+          <input type="checkbox" name="interests[]" id="interests_art" value="art" /> Art
+        </label>
       </div>
 
       {/* Multiple Select Elements */}
@@ -147,6 +173,9 @@ export default function Reset() {
       <input type="button" name="button_input" value="Click me" />
       <input type="submit" name="submit_input" value="Submit Form" />
       <input type="reset" name="reset_input" value="Reset Form" />
+      <button type="reset" name="reset_button">
+        Reset Form
+      </button>
 
       {/* Dotted & Array Notation */}
       <h2>Dotted & Array Notation</h2>
@@ -160,14 +189,26 @@ export default function Reset() {
       {/* Numeric Values */}
       <h2>Numeric Values</h2>
       <div>
-        <label><input type="radio" name="rating" id="rating_1" value="1" defaultChecked /> 1 Star</label>
-        <label><input type="radio" name="rating" id="rating_2" value="2" /> 2 Stars</label>
-        <label><input type="radio" name="rating" id="rating_3" value="3" /> 3 Stars</label>
+        <label>
+          <input type="radio" name="rating" id="rating_1" value="1" defaultChecked /> 1 Star
+        </label>
+        <label>
+          <input type="radio" name="rating" id="rating_2" value="2" /> 2 Stars
+        </label>
+        <label>
+          <input type="radio" name="rating" id="rating_3" value="3" /> 3 Stars
+        </label>
       </div>
       <div>
-        <label><input type="checkbox" name="years[]" id="years_2020" value="2020" defaultChecked /> 2020</label>
-        <label><input type="checkbox" name="years[]" id="years_2021" value="2021" /> 2021</label>
-        <label><input type="checkbox" name="years[]" id="years_2022" value="2022" defaultChecked /> 2022</label>
+        <label>
+          <input type="checkbox" name="years[]" id="years_2020" value="2020" defaultChecked /> 2020
+        </label>
+        <label>
+          <input type="checkbox" name="years[]" id="years_2021" value="2021" /> 2021
+        </label>
+        <label>
+          <input type="checkbox" name="years[]" id="years_2022" value="2022" defaultChecked /> 2022
+        </label>
       </div>
       <select name="version" id="version" defaultValue="1">
         <option value="1">Version 1</option>

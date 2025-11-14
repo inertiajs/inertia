@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
+const props = defineProps<{
+  dialog: boolean
+}>()
+
+import { config, router } from '@inertiajs/vue3'
 
 const invalidVisit = () => {
   router.post('/non-inertia')
@@ -7,6 +11,10 @@ const invalidVisit = () => {
 
 const invalidVisitJson = () => {
   router.post('/json')
+}
+
+if (props.dialog) {
+  config.set('future.useDialogForErrorModal', true)
 }
 </script>
 

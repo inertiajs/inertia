@@ -1,7 +1,7 @@
+import type { Errors, Page, PendingVisit } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/react'
+import type { AxiosProgressEvent, CancelTokenSource } from 'axios'
 import { useEffect } from 'react'
-import type { PendingVisit, Page, Errors } from '@inertiajs/core'
-import type { CancelTokenSource } from 'axios'
 
 declare global {
   interface Window {
@@ -39,7 +39,7 @@ const callbacks = (overrides = {}) => ({
   ...overrides,
 })
 
-export default ({ errors }: { errors?: { name?: string; handle?: string } }) => {
+export default () => {
   const form = useForm({ name: 'foo', remember: false })
 
   const page = usePage()
@@ -70,9 +70,24 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
 
   const onSuccessResetErrors = () => {
     form.post('/form-helper/events/errors', {
-      onError: () => {
+      onError: (errors: Errors) => {
         pushEvent('onError')
-        form.post('/form-helper/events', callbacks())
+        form.post('/form-helper/events', {
+          ...callbacks({
+            onStart: () => {
+              pushEvent('onStart')
+              pushData('errors', errors)
+            },
+            onSuccess: () => {
+              pushEvent('onSuccess')
+              pushData('errors', form.errors)
+            },
+            onFinish: () => {
+              pushEvent('onFinish')
+              pushData('errors', form.errors)
+            },
+          }),
+        })
       },
     })
   }
@@ -95,7 +110,7 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
   const onBeforeVisitCancelled = () => {
     form.post('/sleep', {
       ...callbacks({
-        onBefore: (visit: PendingVisit) => {
+        onBefore: () => {
           pushEvent('onBefore')
           return false
         },
@@ -121,7 +136,7 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
 
     form.post('/dump/post', {
       ...callbacks({
-        onProgress: (event: any) => {
+        onProgress: (event: AxiosProgressEvent) => {
           pushEvent('onProgress')
           pushData('progressEvent', event)
         },
@@ -157,7 +172,7 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
   const onSuccessPromiseVisit = () => {
     form.post('/dump/post', {
       ...callbacks({
-        onSuccess: (page: Page) => {
+        onSuccess: () => {
           pushEvent('onSuccess')
           setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
           return new Promise((resolve) => setTimeout(resolve, 20))
@@ -180,7 +195,7 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
   const onErrorPromiseVisit = () => {
     form.post('/form-helper/events/errors', {
       ...callbacks({
-        onError: (errors: Errors) => {
+        onError: () => {
           pushEvent('onError')
           setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
           return new Promise((resolve) => setTimeout(resolve, 20))
@@ -196,7 +211,7 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
   const onSuccessResetValue = () => {
     form.post(page.url, {
       ...callbacks({
-        onSuccess: (page: Page) => {
+        onSuccess: () => {
           form.reset()
         },
       }),
@@ -269,7 +284,6 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
         onSuccess resets value
       </button>
 
-
       <button onClick={onErrorVisit} className="error">
         onError
       </button>
@@ -293,8 +307,18 @@ export default ({ errors }: { errors?: { name?: string; handle?: string } }) => 
       <span className="success-status">Form was {form.wasSuccessful ? '' : 'not '}successful</span>
       <span className="recently-status">Form was {form.recentlySuccessful ? '' : 'not '}recently successful</span>
 
-      <input type="text" className="name-input" value={form.data.name} onChange={e => form.setData('name', e.target.value)} />
-      <input type="checkbox" className="remember-input" checked={form.data.remember} onChange={e => form.setData('remember', e.target.checked)} />
+      <input
+        type="text"
+        className="name-input"
+        value={form.data.name}
+        onChange={(e) => form.setData('name', e.target.value)}
+      />
+      <input
+        type="checkbox"
+        className="remember-input"
+        checked={form.data.remember}
+        onChange={(e) => form.setData('remember', e.target.checked)}
+      />
     </div>
   )
 }

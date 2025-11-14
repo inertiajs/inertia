@@ -2,21 +2,12 @@ import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { Scroll } from './scroll'
-import {
-  Component,
-  Page,
-  PageEvent,
-  PageHandler,
-  PageResolver,
-  PreserveStateOption,
-  RouterInitParams,
-  VisitOptions,
-} from './types'
+import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
   protected page!: Page
-  protected swapComponent!: PageHandler
+  protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
   protected componentId = {}
   protected listeners: {
@@ -25,8 +16,13 @@ class CurrentPage {
   }[] = []
   protected isFirstPageLoad = true
   protected cleared = false
+  protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
 
-  public init({ initialPage, swapComponent, resolveComponent }: RouterInitParams) {
+  public init<ComponentType = Component>({
+    initialPage,
+    swapComponent,
+    resolveComponent,
+  }: RouterInitParams<ComponentType>) {
     this.page = initialPage
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
@@ -40,8 +36,22 @@ class CurrentPage {
       replace = false,
       preserveScroll = false,
       preserveState = false,
-    }: Partial<Pick<VisitOptions, 'replace' | 'preserveScroll' | 'preserveState'>> = {},
+      viewTransition = false,
+    }: {
+      replace?: boolean
+      preserveScroll?: boolean
+      preserveState?: boolean
+      viewTransition?: Visit['viewTransition']
+    } = {},
   ): Promise<void> {
+    if (Object.keys(page.deferredProps || {}).length) {
+      this.pendingDeferredProps = {
+        deferredProps: page.deferredProps,
+        component: page.component,
+        url: page.url,
+      }
+    }
+
     this.componentId = {}
 
     const componentId = this.componentId
@@ -58,13 +68,20 @@ class CurrentPage {
 
       page.rememberedState ??= {}
 
-      const location = typeof window !== 'undefined' ? window.location : new URL(page.url)
+      const isServer = typeof window === 'undefined'
+      const location = !isServer ? window.location : new URL(page.url)
+      const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       return new Promise((resolve) => {
         replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
       }).then(() => {
         const isNewComponent = !this.isTheSame(page)
+
+        if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
+          // Don't use view transition if the page stays the same and there are (new) errors...
+          viewTransition = false
+        }
 
         this.page = page
         this.cleared = false
@@ -79,12 +96,30 @@ class CurrentPage {
 
         this.isFirstPageLoad = false
 
-        return this.swap({ component, page, preserveState }).then(() => {
-          if (!preserveScroll) {
+        return this.swap({
+          component,
+          page,
+          preserveState,
+          viewTransition,
+        }).then(() => {
+          if (preserveScroll) {
+            // Scroll regions must be explicitly restored since the DOM elements are destroyed
+            // and recreated during the component 'swap'. Document scroll is naturally
+            // preserved as the document element itself persists across navigations.
+            window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
+          } else {
             Scroll.reset()
           }
 
-          eventHandler.fireInternalEvent('loadDeferredProps')
+          if (
+            this.pendingDeferredProps &&
+            this.pendingDeferredProps.component === page.component &&
+            this.pendingDeferredProps.url === page.url
+          ) {
+            eventHandler.fireInternalEvent('loadDeferredProps', this.pendingDeferredProps.deferredProps)
+          }
+
+          this.pendingDeferredProps = null
 
           if (!replace) {
             fireNavigateEvent(page)
@@ -99,14 +134,14 @@ class CurrentPage {
     {
       preserveState = false,
     }: {
-      preserveState?: PreserveStateOption
+      preserveState?: boolean
     } = {},
   ) {
     return this.resolve(page.component).then((component) => {
       this.page = page
       this.cleared = false
       history.setCurrent(page)
-      return this.swap({ component, page, preserveState })
+      return this.swap({ component, page, preserveState, viewTransition: false })
     })
   }
 
@@ -140,12 +175,26 @@ class CurrentPage {
     component,
     page,
     preserveState,
+    viewTransition,
   }: {
     component: Component
     page: Page
-    preserveState: PreserveStateOption
+    preserveState: boolean
+    viewTransition: Visit['viewTransition']
   }): Promise<unknown> {
-    return this.swapComponent({ component, page, preserveState })
+    const doSwap = () => this.swapComponent({ component, page, preserveState })
+
+    if (!viewTransition || !document?.startViewTransition) {
+      return doSwap()
+    }
+
+    const viewTransitionCallback = typeof viewTransition === 'boolean' ? () => null : viewTransition
+
+    return new Promise((resolve) => {
+      const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
+
+      viewTransitionCallback(transitionResult)
+    })
   }
 
   public resolve(component: string): Promise<Component> {

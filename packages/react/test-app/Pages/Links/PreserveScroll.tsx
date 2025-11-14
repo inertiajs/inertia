@@ -51,11 +51,7 @@ const PreserveScroll = ({ foo = 'default' }: { foo?: string }) => {
         Off-site link
       </a>
 
-      <Link
-        href="/article"
-        data-testid="article"
-        className="article"
-      >
+      <Link href="/article" data-testid="article" className="article">
         Article
       </Link>
     </div>

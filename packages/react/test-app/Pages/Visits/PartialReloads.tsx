@@ -1,12 +1,22 @@
 import { router, usePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 
-export default ({ foo = 0, bar, baz, headers }: { foo: number; bar: number; baz: number; headers: Record<string, string> }) => {
+export default ({
+  foo = 0,
+  bar,
+  baz,
+  headers,
+}: {
+  foo: number
+  bar: number
+  baz: number
+  headers: Record<string, string>
+}) => {
   const page = usePage()
 
   useEffect(() => {
     window._inertia_props = page.props
-  }, [])
+  }, [page.props])
 
   const partialReloadVisit = (e: React.MouseEvent) => {
     e.preventDefault()

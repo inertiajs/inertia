@@ -5,10 +5,12 @@
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type Method,
     type FormDataConvertible,
     type VisitOptions,
+    isUrlMethodPair,
   } from '@inertiajs/core'
-  import { isEqual } from 'es-toolkit'
+  import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 
@@ -32,6 +34,10 @@
   export let onError: FormComponentProps['onError'] = noop
   export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
   export let disableWhileProcessing: boolean = false
+  export let invalidateCacheTags: FormComponentProps['invalidateCacheTags'] = []
+  export let resetOnError: FormComponentProps['resetOnError'] = false
+  export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
+  export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
@@ -40,17 +46,17 @@
   let isDirty = false
   let defaultData: FormData = new FormData()
 
-  $: _method = typeof action === 'object' ? action.method : (method.toLowerCase() as FormComponentProps['method'])
-  $: _action = typeof action === 'object' ? action.url : action
+  $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
+  $: _action = isUrlMethodPair(action) ? action.url : (action as string)
 
-  function getFormData(): FormData {
+  export function getFormData(): FormData {
     return new FormData(formElement)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  function getData(): Record<string, FormDataConvertible> {
+  export function getData(): Record<string, FormDataConvertible> {
     return formDataToObject(getFormData())
   }
 
@@ -61,33 +67,59 @@
   export function submit() {
     const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
 
+    const maybeReset = (resetOption: boolean | string[] | undefined) => {
+      if (!resetOption) {
+        return
+      }
+
+      if (resetOption === true) {
+        reset()
+      } else if (resetOption.length > 0) {
+        reset(...resetOption)
+      }
+    }
+
     const submitOptions: FormSubmitOptions = {
       headers,
+      queryStringArrayFormat,
       errorBag,
       showProgress,
+      invalidateCacheTags,
       onCancelToken,
       onBefore,
       onStart,
       onProgress,
       onFinish,
       onCancel,
-      onSuccess: (...args) =>  {
+      onSuccess: (...args) => {
         if (onSuccess) {
-            onSuccess(...args)
+          onSuccess(...args)
         }
 
         if (onSubmitComplete) {
-            onSubmitComplete({
-                reset,
-                defaults,
-            })
+          onSubmitComplete({
+            reset,
+            defaults,
+          })
+        }
+
+        maybeReset(resetOnSuccess)
+
+        if (setDefaultsOnSuccess === true) {
+          defaults()
         }
       },
-      onError,
+      onError: (...args) => {
+        if (onError) {
+          onError(...args)
+        }
+
+        maybeReset(resetOnError)
+      },
       ...options,
     }
 
-    $form.transform(() => transform(_data)).submit(_method, url, submitOptions)
+    $form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
   }
 
   function handleSubmit(event: Event) {
@@ -95,10 +127,17 @@
     submit()
   }
 
+  function handleReset(event: Event) {
+    // Only intercept native reset events (from reset buttons/inputs)
+    if (event.isTrusted) {
+      event.preventDefault()
+      reset()
+    }
+  }
+
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
   }
-
 
   export function clearErrors(...fields: string[]) {
     // @ts-expect-error
@@ -142,7 +181,9 @@
   bind:this={formElement}
   action={_action}
   method={_method}
-  on:submit={handleSubmit} {...$$restProps}
+  on:submit={handleSubmit}
+  on:reset={handleReset}
+  {...$$restProps}
   inert={disableWhileProcessing && $form.processing ? true : undefined}
 >
   <slot
@@ -158,5 +199,7 @@
     {isDirty}
     {submit}
     {defaults}
+    {getData}
+    {getFormData}
   />
 </form>

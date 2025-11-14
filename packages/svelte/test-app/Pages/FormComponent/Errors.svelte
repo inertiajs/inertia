@@ -40,14 +40,13 @@
         setError({
           name: 'The name field is required.',
           handle: 'The handle field is invalid.',
-        })
-      }
+        })}
     >
       Set Errors
     </button>
     <button type="button" on:click={() => clearErrors()}>Clear Errors</button>
     <button type="button" on:click={() => clearErrors('name')}>Clear Name Error</button>
-    <button type="button" on:click={() => errorBag = 'bag'}>Use Error Bag</button>
+    <button type="button" on:click={() => (errorBag = 'bag')}>Use Error Bag</button>
   </div>
 
   <button type="submit">Submit</button>

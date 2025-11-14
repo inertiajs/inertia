@@ -34,7 +34,7 @@ export const decryptHistory = async (data: any): Promise<any> => {
   return await decryptData(iv, storedKey, data)
 }
 
-const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
+const encryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
   if (typeof window === 'undefined') {
     throw new Error('Unable to encrypt history')
   }
@@ -61,7 +61,7 @@ const encryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
   )
 }
 
-const decryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
+const decryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
   if (typeof window.crypto.subtle === 'undefined') {
     console.warn('Decryption is not supported in this environment. SSL is required.')
 
@@ -80,7 +80,7 @@ const decryptData = async (iv: Uint8Array, key: CryptoKey, data: any) => {
   return JSON.parse(new TextDecoder().decode(decrypted))
 }
 
-const getIv = () => {
+const getIv = (): BufferSource => {
   const ivString = SessionStorage.get(historySessionStorageKeys.iv)
 
   if (ivString) {
