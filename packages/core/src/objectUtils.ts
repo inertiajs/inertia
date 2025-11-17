@@ -1,4 +1,4 @@
-export const objectsAreEqual = <T>(
+export const objectsAreEqual = <T extends Record<string, any>>(
   obj1: T,
   obj2: T,
   excludeKeys: {
@@ -9,6 +9,7 @@ export const objectsAreEqual = <T>(
     return true
   }
 
+  // Check keys in obj1
   for (const key in obj1) {
     if (excludeKeys.includes(key)) {
       continue
@@ -19,6 +20,17 @@ export const objectsAreEqual = <T>(
     }
 
     if (!compareValues(obj1[key], obj2[key])) {
+      return false
+    }
+  }
+
+  // Check keys that exist in obj2 but not in obj1
+  for (const key in obj2) {
+    if (excludeKeys.includes(key)) {
+      continue
+    }
+
+    if (!(key in obj1)) {
       return false
     }
   }
