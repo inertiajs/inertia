@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { clickAndWaitForResponse } from './support'
+import { clickAndWaitForResponse, consoleMessages } from './support'
 
 test('can load deferred props', async ({ page }) => {
   await page.goto('/deferred-props/page-1')
@@ -243,4 +243,32 @@ test('can partial reload deferred props independently', async ({ page }) => {
 
   expect(finalFooTimestamp).toBe(newFooTimestamp) // foo unchanged
   expect(finalBarTimestamp).not.toBe(newBarTimestamp) // bar changed
+})
+
+test('prefetch works with deferred props without errors', async ({ page }) => {
+  consoleMessages.listen(page)
+  const prefetch = page.waitForResponse('/deferred-props/page-3')
+
+  await page.goto('/deferred-props/page-1')
+  await expect(page.getByRole('link', { name: 'Page 3' })).toBeVisible()
+
+  consoleMessages.errors = []
+
+  await page.getByRole('link', { name: 'Page 3' }).hover()
+  await prefetch
+
+  const deferred = page.waitForResponse(
+    (response) =>
+      response.url().includes('/deferred-props/page-3') && 'x-inertia-partial-data' in response.request().headers(),
+  )
+
+  await page.getByRole('link', { name: 'Page 3' }).click()
+  await page.waitForURL('/deferred-props/page-3')
+
+  await deferred
+
+  await expect(page.getByText('alpha value')).toBeVisible()
+  await expect(page.getByText('beta value')).toBeVisible()
+
+  expect(consoleMessages.errors).toHaveLength(0)
 })
