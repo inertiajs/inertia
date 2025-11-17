@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.17...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.18...master)
 
 - Nothing yet
+
+## [v2.2.18](https://github.com/inertiajs/inertia/compare/v2.2.17...v2.2.18) - 2025-11-17
+
+### What's Changed
+
+* Ensure `objectsAreEqual()` checks all keys in both objects by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2705
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.17...v2.2.18
 
 ## [v2.2.17](https://github.com/inertiajs/inertia/compare/v2.2.16...v2.2.17) - 2025-11-14
 
