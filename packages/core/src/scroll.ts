@@ -35,11 +35,12 @@ export class Scroll {
     this.save()
 
     if (anchorHash) {
-      // We're using a setTimeout() here as a workaround for a bug in the React adapter where the
-      // rendering isn't completing fast enough, causing the anchor link to not be scrolled to.
-      setTimeout(() => {
-        const anchorElement = document.getElementById(anchorHash.slice(1))
-        anchorElement ? anchorElement.scrollIntoView() : window.scrollTo(0, 0)
+      // Using double requestAnimationFrame to wait for the browser to complete the current render cycle
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          const anchorElement = document.getElementById(anchorHash.slice(1))
+          anchorElement ? anchorElement.scrollIntoView() : window.scrollTo(0, 0)
+        })
       })
     }
   }
