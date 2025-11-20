@@ -76,7 +76,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validateFiles(): this
   validating: boolean
   validator: () => Validator
-  withArrayErrors(): this
+  withAllErrors(): this
   withoutFileValidation(): this
   // Backward compatibility for easy migration from the original Precognition libraries
   setErrors(errors: FormDataErrors<TForm> | Record<string, string | string[]>): this
@@ -148,7 +148,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       // We're dynamically adding precognition properties to 'this', so we assert the type
       const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
-      let arrayErrors = false
+      let withAllErrors = false
       const validator = createValidator((client) => {
         const { method, url } = precognitionEndpoint!()
         const transformedData = transform(this.data()) as Record<string, unknown>
@@ -169,7 +169,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           formWithPrecognition.__touched = validator.touched()
         })
         .on('errorsChanged', () => {
-          const validationErrors = arrayErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
+          const validationErrors = withAllErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
 
           this.errors = {} as FormDataErrors<TForm>
 
@@ -188,7 +188,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         __valid: [],
         validating: false,
         validator: () => validator,
-        withArrayErrors: () => tap(formWithPrecognition, () => (arrayErrors = true)),
+        withAllErrors: () => tap(formWithPrecognition, () => (withAllErrors = true)),
         valid: (field: string) => formWithPrecognition.__valid.includes(field),
         invalid: (field: string) => field in this.errors,
         setValidationTimeout: (duration: number) => tap(formWithPrecognition, () => validator.setTimeout(duration)),

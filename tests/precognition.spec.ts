@@ -157,7 +157,7 @@ integrations.forEach((integration) => {
     })
 
     test(prefix + 'shows only first error when server returns errors as array', async ({ page }) => {
-      await page.goto('/' + integration + '/precognition/array-errors')
+      await page.goto('/' + integration + '/precognition/with-all-errors')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
@@ -171,7 +171,7 @@ integrations.forEach((integration) => {
     })
 
     test(prefix + 'shows all errors when simpleValidationErrors is false', async ({ page }) => {
-      await page.goto('/' + integration + '/precognition/all-errors')
+      await page.goto('/' + integration + '/precognition/with-all-errors')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()

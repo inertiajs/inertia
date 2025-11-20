@@ -81,7 +81,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validateFiles(): this
   validating: boolean
   validator: () => Validator
-  withArrayErrors(): this
+  withAllErrors(): this
   withoutFileValidation(): this
   // Backward compatibility for easy migration from the original Precognition libraries
   setErrors(errors: FormDataErrors<TForm> | Record<string, string | string[]>): this
@@ -144,7 +144,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     const formWithPrecognition = () =>
       getStore(store) as any as InertiaPrecognitiveForm<TForm> & InternalPrecognitionState
 
-    let arrayErrors = false
+    let withAllErrors = false
 
     if (!validatorRef) {
       const validator = createValidator((client) => {
@@ -167,7 +167,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           setFormState('__touched', validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors = arrayErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
+          const validationErrors = withAllErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
 
           setFormState('errors', {} as FormDataErrors<TForm>)
           formWithPrecognition().setError(validationErrors as FormDataErrors<TForm>)
@@ -232,7 +232,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         validateFiles: () => tap(formWithPrecognition(), () => validatorRef?.validateFiles()),
         setValidationTimeout: (duration: number) =>
           tap(formWithPrecognition(), () => validatorRef!.setTimeout(duration)),
-        withArrayErrors: () => tap(formWithPrecognition(), () => (arrayErrors = true)),
+        withAllErrors: () => tap(formWithPrecognition(), () => (withAllErrors = true)),
         // @ts-expect-error - Not released yet...
         withoutFileValidation: () => tap(formWithPrecognition(), () => validatorRef?.withoutFileValidation()),
         valid: (field: string) => formWithPrecognition().__valid.includes(field),
