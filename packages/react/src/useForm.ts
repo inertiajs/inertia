@@ -149,7 +149,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
   const validatorDefaults = cloneDeep(defaults)
-  const withArrayErrors = useRef(false)
+  const withAllErrors = useRef(false)
 
   useEffect(() => {
     isMounted.current = true
@@ -524,7 +524,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           setTouchedFields(validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors = withArrayErrors.current
+          const validationErrors = withAllErrors.current
             ? validator.errors()
             : toSimpleValidationErrors(validator.errors())
 
@@ -557,7 +557,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
         return precognitiveForm
       },
-      withAllErrors: () => tap(precognitiveForm, () => (withArrayErrors.current = true)),
+      withAllErrors: () => tap(precognitiveForm, () => (withAllErrors.current = true)),
       setValidationTimeout: (duration: number) =>
         tap(precognitiveForm, () => validatorRef.current?.setTimeout(duration)),
       validateFiles: () => tap(precognitiveForm, () => validatorRef.current?.validateFiles()),

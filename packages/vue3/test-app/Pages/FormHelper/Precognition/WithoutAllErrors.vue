@@ -5,7 +5,7 @@ const form = useForm({
   name: '',
   email: '',
 })
-  .withPrecognition('post', '/precognition/with-array-errors')
+  .withPrecognition('post', '/precognition/with-all-errors')
   .setValidationTimeout(100)
 </script>
 
