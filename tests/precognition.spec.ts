@@ -156,8 +156,8 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Name is valid!')).not.toBeVisible()
     })
 
-    test(prefix + 'shows only first error when server returns errors as array', async ({ page }) => {
-      await page.goto('/' + integration + '/precognition/with-array-errors')
+    test(prefix + 'maps the full array errors to the first one by default', async ({ page }) => {
+      await page.goto('/' + integration + '/precognition/without-all-errors')
 
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
