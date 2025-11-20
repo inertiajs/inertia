@@ -92,7 +92,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validateFiles(): InertiaPrecognitiveFormProps<TForm>
   validating: boolean
   validator: () => Validator
-  withArrayErrors(): InertiaPrecognitiveFormProps<TForm>
+  withAllErrors(): InertiaPrecognitiveFormProps<TForm>
   withoutFileValidation(): InertiaPrecognitiveFormProps<TForm>
   // Backward compatibility for easy migration from the original Precognition libraries
   setErrors(errors: FormDataErrors<TForm>): InertiaPrecognitiveFormProps<TForm>
@@ -149,7 +149,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
   const validatorDefaults = cloneDeep(defaults)
-  const arrayErrors = useRef(false)
+  const withArrayErrors = useRef(false)
 
   useEffect(() => {
     isMounted.current = true
@@ -524,7 +524,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           setTouchedFields(validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors = arrayErrors.current
+          const validationErrors = withArrayErrors.current
             ? validator.errors()
             : toSimpleValidationErrors(validator.errors())
 
@@ -557,7 +557,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
         return precognitiveForm
       },
-      withArrayErrors: () => tap(precognitiveForm, () => (arrayErrors.current = true)),
+      withAllErrors: () => tap(precognitiveForm, () => (withArrayErrors.current = true)),
       setValidationTimeout: (duration: number) =>
         tap(precognitiveForm, () => validatorRef.current?.setTimeout(duration)),
       validateFiles: () => tap(precognitiveForm, () => validatorRef.current?.validateFiles()),

@@ -335,7 +335,7 @@ app.post('/precognition/default', upload.any(), (req, res) => {
   )
 })
 
-app.post('/precognition/array-errors', (req, res) => {
+app.post('/precognition/with-array-errors', (req, res) => {
   setTimeout(() => {
     const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
     const name = req.body['name']

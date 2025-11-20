@@ -5,7 +5,7 @@ export default () => {
     name: '',
     email: '',
   })
-    .withPrecognition('post', '/precognition/array-errors')
+    .withPrecognition('post', '/precognition/with-array-errors')
     .setValidationTimeout(100)
 
   return (

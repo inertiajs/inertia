@@ -6,10 +6,10 @@
   <h1>Form Precognition - All Errors</h1>
 
   <Form
-    action="/precognition/array-errors"
+    action="/precognition/with-array-errors"
     method="post"
     validateTimeout={100}
-    arrayErrors={true}
+    withArrayErrors
     let:invalid
     let:errors
     let:validate
