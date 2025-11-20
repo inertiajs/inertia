@@ -12,12 +12,26 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
+import {
+  computed,
+  defineComponent,
+  h,
+  inject,
+  InjectionKey,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  provide,
+  ref,
+  SlotsType,
+} from 'vue'
 import useForm from './useForm'
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const noop = () => undefined
+
+export const FormContextKey: InjectionKey<FormComponentRef> = Symbol('InertiaForm')
 
 const Form = defineComponent({
   name: 'Form',
@@ -250,6 +264,8 @@ const Form = defineComponent({
 
     expose<FormComponentRef>(exposed)
 
+    provide(FormContextKey, exposed)
+
     return () => {
       return h(
         'form',
@@ -269,5 +285,9 @@ const Form = defineComponent({
     }
   },
 })
+
+export function useFormContext(): FormComponentRef | undefined {
+  return inject(FormContextKey)
+}
 
 export default Form
