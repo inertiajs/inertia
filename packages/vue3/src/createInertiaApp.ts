@@ -59,8 +59,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const el = isServer ? null : document.getElementById(id)
-  const elPage = isServer ? null : document.getElementById(id + '_page')
+  const elPage = isServer || !useScriptElementForInitialPage ? null : document.getElementById(id + '_page')
   const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
@@ -104,19 +105,31 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   if (isServer && render) {
+    const element = () => {
+      if (!useScriptElementForInitialPage) {
+        return h('div', {
+          id,
+          'data-page': JSON.stringify(initialPage),
+          innerHTML: vueApp ? render(vueApp) : '',
+        })
+      }
+
+      return [
+        h('script', {
+          id: id + '_page',
+          type: 'application/json',
+          innerHTML: JSON.stringify(initialPage),
+        }),
+        h('div', {
+          id,
+          innerHTML: vueApp ? render(vueApp) : '',
+        }),
+      ]
+    }
+
     const body = await render(
       createSSRApp({
-        render: () => [
-          h('script', {
-            id: id + '_page',
-            type: 'application/json',
-            innerHTML: JSON.stringify(initialPage),
-          }),
-          h('div', {
-            id,
-            innerHTML: vueApp ? render(vueApp) : '',
-          }),
-        ],
+        render: () => element(),
       }),
     )
 

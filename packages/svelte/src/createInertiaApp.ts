@@ -5,6 +5,7 @@ import {
   type InertiaAppResponse,
   type PageProps,
 } from '@inertiajs/core'
+import { escape } from 'lodash-es'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
 import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
@@ -38,8 +39,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const el = isServer ? null : document.getElementById(id)
-  const elPage = isServer ? null : document.getElementById(id + '_page')
+  const elPage = isServer || !useScriptElementForInitialPage ? null : document.getElementById(id + '_page')
   const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
@@ -59,7 +61,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const { html, head, css } = svelteApp
 
     return {
-      body: `<script type="application/json" id="${id}_page">${JSON.stringify(initialPage)}</script><div data-server-rendered="true" id="${id}">${html}</div>`,
+      body: useScriptElementForInitialPage
+        ? `<script type="application/json" id="${id}_page">${JSON.stringify(initialPage)}</script><div data-server-rendered="true" id="${id}">${html}</div>`
+        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
