@@ -1,3 +1,4 @@
+import { requestAnimationFrame } from './domUtils'
 import { useInfiniteScrollData } from './infiniteScroll/data'
 import { useInfiniteScrollElementManager } from './infiniteScroll/elements'
 import { useInfiniteScrollQueryString } from './infiniteScroll/queryString'
@@ -36,18 +37,18 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     onBeforeUpdate: elementManager.processManuallyAddedElements,
     // After successful request, tag new server content
     onCompletePreviousRequest: (loadedPage) => {
-      setTimeout(() => {
+      options.onCompletePreviousRequest()
+      requestAnimationFrame(() => {
         elementManager.processServerLoadedElements(loadedPage)
-        options.onCompletePreviousRequest()
-        window.queueMicrotask(elementManager.refreshTriggers)
-      })
+        elementManager.refreshTriggers()
+      }, 2)
     },
     onCompleteNextRequest: (loadedPage) => {
-      setTimeout(() => {
+      options.onCompleteNextRequest()
+      requestAnimationFrame(() => {
         elementManager.processServerLoadedElements(loadedPage)
-        options.onCompleteNextRequest()
-        window.queueMicrotask(elementManager.refreshTriggers)
-      })
+        elementManager.refreshTriggers()
+      }, 2)
     },
   })
 

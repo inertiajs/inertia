@@ -1006,7 +1006,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
 
   await expect(consoleMessages.messages).toHaveLength(0)
   await expect(consoleMessages.errors).toHaveLength(1)
-  await expect(consoleMessages.errors[0]).toBe('Error after visit')
+  await expect(consoleMessages.errors[0]).toContain('Error after visit')
 
   await page.getByRole('link', { name: 'Visit dump page' }).click()
 

@@ -296,8 +296,10 @@ const Link: InertiaLink = defineComponent({
         }
       },
       onMouseup: (event: MouseEvent) => {
-        event.preventDefault()
-        router.visit(href.value, visitParams.value)
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(href.value, visitParams.value)
+        }
       },
       onKeyup: (event: KeyboardEvent) => {
         if (shouldNavigate(event)) {
