@@ -45,11 +45,11 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.48.4",
+    "@sveltejs/kit": "^2.48.5",
     "@sveltejs/package": "^2.5.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "axios": "^1.13.2",
-    "es-check": "^9.4.4",
+    "es-check": "^9.4.5",
     "publint": "^0.2.12",
     "svelte": "^4.2.20",
     "svelte-check": "^4.3.4",
