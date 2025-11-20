@@ -28,6 +28,14 @@ const setTestError = () => {
 const setCurrentAsDefaults = () => {
   formRef.value?.defaults()
 }
+
+const callPrecognitionMethods = () => {
+  const validator = formRef.value?.validator()
+
+  if (validator && !formRef.value?.touched('company') && !formRef.value?.valid('company')) {
+    formRef.value?.validate({ only: ['company'] })
+  }
+}
 </script>
 
 <template>
@@ -60,6 +68,7 @@ const setCurrentAsDefaults = () => {
       <button @click="clearAllErrors">Clear Errors</button>
       <button @click="setTestError">Set Test Error</button>
       <button @click="setCurrentAsDefaults">Set Current as Defaults</button>
+      <button @click="callPrecognitionMethods">Call Precognition Methods</button>
     </div>
   </div>
 </template>

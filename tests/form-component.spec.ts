@@ -25,7 +25,7 @@ test.describe('Form Component', () => {
       })
     })
 
-    const queryStringArrayFormats = ['brackets', 'indices']
+    const queryStringArrayFormats = ['brackets', 'indices', 'force-brackets']
 
     queryStringArrayFormats.forEach((format) => {
       test('can submit the form with filled values using ' + format + ' format', async ({ page }) => {
@@ -69,7 +69,7 @@ test.describe('Form Component', () => {
             size: 15,
           },
           {
-            fieldname: format === 'brackets' ? 'documents[]' : 'documents[0]',
+            fieldname: format === 'force-brackets' ? 'documents[]' : 'documents[0]',
             originalname: 'doc1.pdf',
             mimetype: 'application/pdf',
             buffer: { type: 'Buffer', data: expect.any(Array) },
@@ -77,7 +77,7 @@ test.describe('Form Component', () => {
             size: 15,
           },
           {
-            fieldname: format === 'brackets' ? 'documents[]' : 'documents[1]',
+            fieldname: format === 'force-brackets' ? 'documents[]' : 'documents[1]',
             originalname: 'doc2.pdf',
             mimetype: 'application/pdf',
             buffer: { type: 'Buffer', data: expect.any(Array) },
@@ -98,7 +98,7 @@ test.describe('Form Component', () => {
           token: 'abc123',
           age: '30',
           user: { address: { street: '123 Main St' } },
-          ...(format === 'brackets'
+          ...(format === 'force-brackets'
             ? { 'items[][name]': ['Item 1', 'Item 2'] }
             : { items: [{ name: 'Item 1' }, { name: 'Item 2' }] }),
         })
@@ -938,6 +938,22 @@ test.describe('Form Component', () => {
 
       expect(await page.inputValue('input[name="name"]')).toBe('New Name')
       expect(await page.inputValue('input[name="email"]')).toBe('new@example.com')
+    })
+
+    test('the precognition methods are available via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+      requests.listen(page)
+
+      await page.click('button:has-text("Call Precognition Methods")')
+
+      await page.waitForTimeout(500) // Wait for request to be made
+
+      await expect(requests.requests).toHaveLength(1)
+
+      const request = requests.requests[0]
+
+      expect(request.method()).toBe('POST')
+      expect(request.headers()['precognition']).toBe('true')
     })
   })
 

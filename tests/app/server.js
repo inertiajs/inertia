@@ -935,6 +935,30 @@ app.get('/deferred-props/page-2', (req, res) => {
   }
 })
 
+app.get('/deferred-props/page-3', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/Page3',
+      deferredProps: {
+        default: ['alpha', 'beta'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/Page3',
+        props: {
+          alpha: req.headers['x-inertia-partial-data']?.includes('alpha') ? 'alpha value' : undefined,
+          beta: req.headers['x-inertia-partial-data']?.includes('beta') ? 'beta value' : undefined,
+        },
+      }),
+    500,
+  )
+})
+
 app.get('/deferred-props/many-groups', (req, res) => {
   const props = ['foo', 'bar', 'baz', 'qux', 'quux']
   const requestedProps = req.headers['x-inertia-partial-data']

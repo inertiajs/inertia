@@ -1,4 +1,5 @@
 import test, { expect } from '@playwright/test'
+import { config } from '../../packages/core/src/config'
 import { mergeDataIntoQueryString, transformUrlAndData } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
@@ -297,7 +298,23 @@ test.describe('url.ts', () => {
       expect(data).toEqual({ name: 'test' })
     })
 
-    test('uses bracket notation when converting arrays to FormData by default', () => {
+    test('forces indices notation when converting arrays to FormData by default', () => {
+      const [url, data] = transformUrlAndData(
+        'https://example.com/submit',
+        { tags: ['a', 'b'] },
+        'post',
+        true,
+        'brackets',
+      )
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).get('tags[0]')).toBe('a')
+      expect((data as FormData).get('tags[1]')).toBe('b')
+    })
+
+    test('can opt-out of forcing indices notation when converting arrays to FormData by default', () => {
+      config.set('form.forceIndicesArrayFormatInFormData', false)
+
       const [url, data] = transformUrlAndData(
         'https://example.com/submit',
         { tags: ['a', 'b'] },

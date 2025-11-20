@@ -1,3 +1,4 @@
+import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
 import {
   FormDataType,
   Method,
@@ -112,5 +113,35 @@ export class UseFormUtils {
 
     // Use Precognition endpoint with optional options...
     return { ...precognitionEndpoint!(), options: (args[0] as UseFormSubmitOptions) ?? {} }
+  }
+
+  /**
+   * Merges headers into the Precognition validate() arguments.
+   */
+  public static mergeHeadersForValidation(
+    field?: string | NamedInputEvent | ValidationConfig,
+    config?: ValidationConfig,
+    headers?: Record<string, string>,
+  ): [string | NamedInputEvent | ValidationConfig | undefined, ValidationConfig | undefined] {
+    const merge = (config: ValidationConfig): ValidationConfig => {
+      config.headers = {
+        ...(headers ?? {}),
+        ...(config.headers ?? {}),
+      }
+
+      return config
+    }
+
+    if (field && typeof field === 'object' && !('target' in field)) {
+      field = merge(field)
+    } else if (config && typeof config === 'object') {
+      config = merge(config)
+    } else if (typeof field === 'string') {
+      config = merge(config ?? {})
+    } else {
+      field = merge(field ?? {})
+    }
+
+    return [field, config]
   }
 }
