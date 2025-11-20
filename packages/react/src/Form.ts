@@ -68,7 +68,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       invalidateCacheTags = [],
       validateFiles = false,
       validateTimeout = 1500,
-      withArrayErrors = false,
+      withAllErrors = false,
       children,
       ...props
     },
@@ -86,7 +86,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       )
       .setValidationTimeout(validateTimeout)
 
-    if (withArrayErrors) {
+    if (withAllErrors) {
       form.withAllErrors()
     }
 
