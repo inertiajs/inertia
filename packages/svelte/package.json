@@ -63,6 +63,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
+    "laravel-precognition": "^0.7.3",
     "lodash-es": "^4.17.21"
   }
 }
