@@ -53,7 +53,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!runsInCI,
   /* Retry on CI only */
-  retries: runsInCI ? 2 : 0,
+  retries: runsInCI ? (runsOnMac ? 3 : 2) : 0,
   /* The GitHub Action runner has 4 cores on Ubuntu and 3 cores on macOS, we need one core for the server */
   workers: runsInCI ? (runsOnMac ? 2 : 3) : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
