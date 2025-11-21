@@ -20,7 +20,6 @@ inertia/
 │       └── test-app/  Vue 3 test application
 ├── playgrounds/       Full Laravel applications for manual testing
 │   ├── react/         Laravel + React
-│   ├── svelte4/       Laravel + Svelte 4
 │   ├── svelte5/       Laravel + Svelte 5
 │   └── vue3/          Laravel + Vue 3
 └── tests/             End-to-end tests and test server
@@ -235,7 +234,6 @@ Each playground has its own pnpm script:
 
 ```sh
 pnpm playground:react
-pnpm playground:svelte4
 pnpm playground:svelte5
 pnpm playground:vue
 ```
