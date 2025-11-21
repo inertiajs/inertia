@@ -1,4 +1,4 @@
-import { escape } from 'lodash-es'
+import { escape } from 'es-toolkit/compat'
 import { defineComponent, DefineComponent, VNode } from 'vue'
 
 export type InertiaHead = DefineComponent<{

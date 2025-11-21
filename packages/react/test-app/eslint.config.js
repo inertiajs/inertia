@@ -23,11 +23,11 @@ export default [
     ...react.configs.flat.recommended,
     ...react.configs.flat['jsx-runtime'],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
         ...globals.browser,
-        ...globals.es2020,
+        ...globals.es2022,
       },
     },
     rules: {

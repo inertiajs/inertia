@@ -11,7 +11,7 @@ import {
   resetFormFields,
   VisitOptions,
 } from '@inertiajs/core'
-import { isEqual } from 'lodash-es'
+import { isEqual } from 'es-toolkit/compat'
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
 import useForm from './useForm'
 

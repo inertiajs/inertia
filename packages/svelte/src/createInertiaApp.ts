@@ -5,7 +5,7 @@ import {
   type InertiaAppResponse,
   type PageProps,
 } from '@inertiajs/core'
-import { escape } from 'lodash-es'
+import { escape } from 'es-toolkit/compat'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
 import type { ComponentResolver, SvelteInertiaAppConfig } from './types'

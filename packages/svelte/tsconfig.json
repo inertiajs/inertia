@@ -12,7 +12,7 @@
     "declaration": true,
     "declarationDir": "dist",
 
-    "module": "ES2020",
+    "module": "ES2022",
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
 

@@ -10,7 +10,7 @@
     type VisitOptions,
     isUrlMethodPair,
   } from '@inertiajs/core'
-  import { isEqual } from 'lodash-es'
+  import { isEqual } from 'es-toolkit/compat'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
 

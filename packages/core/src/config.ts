@@ -1,4 +1,4 @@
-import { get, has, set } from 'lodash-es'
+import { get, has, set } from 'es-toolkit/compat'
 import { InertiaAppConfig } from './types'
 
 // Generate all possible nested paths

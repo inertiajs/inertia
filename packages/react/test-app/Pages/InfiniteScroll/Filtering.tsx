@@ -1,5 +1,5 @@
 import { InfiniteScroll, Link, useForm } from '@inertiajs/react'
-import { debounce } from 'lodash-es'
+import { debounce } from 'es-toolkit/compat'
 import { useEffect, useMemo } from 'react'
 import UserCard, { User } from './UserCard'
 

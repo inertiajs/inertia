@@ -1,4 +1,4 @@
-import { get, set } from 'lodash-es'
+import { get, set } from 'es-toolkit/compat'
 import { isFile } from './files'
 import { FormDataConvertible } from './types'
 

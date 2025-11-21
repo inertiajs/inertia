@@ -17,7 +17,7 @@ import type {
 } from '@inertiajs/core'
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
+import { cloneDeep, get, has, isEqual, set } from 'es-toolkit/compat'
 import { writable, type Writable } from 'svelte/store'
 import { config } from '.'
 

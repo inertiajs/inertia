@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios'
-import { get, isEqual, set } from 'lodash-es'
+import { get, isEqual, set } from 'es-toolkit/compat'
 import { config, router } from '.'
 import dialog from './dialog'
 import {

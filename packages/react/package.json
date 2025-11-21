@@ -49,7 +49,7 @@
     "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
     "dev:build": "./build.js --watch",
     "dev:types": "tsc --watch --preserveWatchOutput",
-    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
+    "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
     "@types/react": "^19.2.6",
@@ -66,7 +66,6 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "@types/lodash-es": "^4.17.12",
-    "lodash-es": "^4.17.21"
+    "es-toolkit": "^1.42.0"
   }
 }

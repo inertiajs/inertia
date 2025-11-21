@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual } from 'lodash-es'
+import { cloneDeep, isEqual } from 'es-toolkit/compat'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { page as currentPage } from './page'
 import Queue from './queue'

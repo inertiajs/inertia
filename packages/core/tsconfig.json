@@ -3,15 +3,15 @@
     "rootDir": "src",
     "noEmitOnError": true,
 
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
-    "target": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "target": "ES2022",
     "types": ["node"],
 
     "declaration": true,
     "declarationDir": "types",
     "emitDeclarationOnly": true,
 
-    "module": "ES2020",
+    "module": "ES2022",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,

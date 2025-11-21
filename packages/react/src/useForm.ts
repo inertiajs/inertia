@@ -13,7 +13,7 @@ import {
   UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
+import { cloneDeep, get, has, isEqual, set } from 'es-toolkit/compat'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { config } from '.'
 import { useIsomorphicLayoutEffect } from './react'

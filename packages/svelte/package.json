@@ -40,7 +40,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "dev": "pnpm package --watch",
-    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
+    "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
     "package": "svelte-kit sync && svelte-package --input src"
   },
   "devDependencies": {
@@ -62,7 +62,6 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
-    "@types/lodash-es": "^4.17.12",
-    "lodash-es": "^4.17.21"
+    "es-toolkit": "^1.42.0"
   }
 }

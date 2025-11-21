@@ -12,7 +12,7 @@ import {
   UrlMethodPair,
   VisitOptions,
 } from '@inertiajs/core'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
+import { cloneDeep, get, has, isEqual, set } from 'es-toolkit/compat'
 import { reactive, watch } from 'vue'
 import { config } from '.'
 

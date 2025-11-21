@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { InfiniteScroll, Link, useForm } from '@inertiajs/vue3'
-import { debounce } from 'lodash-es'
+import { debounce } from 'es-toolkit/compat'
 import { watch } from 'vue'
 import { User, default as UserCard } from './UserCard.vue'
 
