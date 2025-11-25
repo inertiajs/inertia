@@ -10,6 +10,7 @@ import {
 import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
+import { createVueApp } from './createVueApp'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
 
@@ -77,6 +78,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       titleCallback: title,
     }
 
+    if (!setup) {
+      return createVueApp(el, props)
+    }
+
     if (isServer) {
       const ssrSetup = setup as (options: SetupOptions<null, SharedProps>) => VueApp
 
@@ -109,6 +114,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           h('div', {
             id,
             'data-page': JSON.stringify(initialPage),
+            'data-server-rendered': 'true',
             innerHTML: vueApp ? render(vueApp) : '',
           }),
       }),

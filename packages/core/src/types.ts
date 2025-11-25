@@ -431,7 +431,7 @@ type FirstLevelOptional<T> = {
 
 interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
-  setup: (options: TSetupOptions) => TSetupReturn
+  setup?: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
 }

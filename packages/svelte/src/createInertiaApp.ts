@@ -7,6 +7,7 @@ import {
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import App, { type InertiaAppProps } from './components/App.svelte'
+import { createSvelteApp } from './createSvelteApp'
 import { config } from './index'
 import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
 
@@ -48,11 +49,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
-    return setup({
-      el,
-      App,
-      props: { initialPage, initialComponent, resolveComponent },
-    })
+    const props = { initialPage, initialComponent, resolveComponent }
+
+    return setup ? setup({ el, App, props }) : createSvelteApp(el, props)
   })
 
   if (isServer && svelteApp) {

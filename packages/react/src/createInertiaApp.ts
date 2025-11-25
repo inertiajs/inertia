@@ -10,6 +10,7 @@ import {
 import { ReactElement, createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App, { InertiaAppProps, type InertiaApp } from './App'
+import { createReactApp } from './createReactApp'
 import { config } from './index'
 import { ReactComponent, ReactInertiaAppConfig } from './types'
 
@@ -80,6 +81,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       titleCallback: title,
     }
 
+    if (!setup) {
+      return createReactApp(el, props)
+    }
+
     if (isServer) {
       const ssrSetup = setup as (options: SetupOptions<null, SharedProps>) => ReactElement
 
@@ -110,6 +115,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         {
           id,
           'data-page': JSON.stringify(initialPage),
+          'data-server-rendered': 'true',
         },
         reactApp as ReactElement,
       ),
