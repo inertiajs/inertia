@@ -101,11 +101,15 @@ type ObjectFormDataKeys<T extends object> = string extends keyof T
             ? never
             : T[Key] extends FormDataConvertibleValue
               ? never
-              : NonNullable<T[Key]> extends any[]
+              : T[Key] extends any[]
                 ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                : NonNullable<T[Key]> extends Record<string, any>
+                : T[Key] extends Record<string, any>
                   ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                  : never
+                  : Exclude<T[Key], null | undefined> extends any[]
+                    ? never
+                    : Exclude<T[Key], null | undefined> extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<Exclude<T[Key], null | undefined>> & string}`
+                      : never
         }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
