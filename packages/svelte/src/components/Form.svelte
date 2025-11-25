@@ -13,7 +13,7 @@
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
-  import { HTMLFormAttributes } from 'svelte/elements'
+  import type { HTMLFormAttributes } from 'svelte/elements'
 
   const noop = () => undefined
 
