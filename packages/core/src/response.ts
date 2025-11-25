@@ -165,6 +165,7 @@ export class Response {
     }
 
     this.mergeProps(pageResponse)
+    this.preserveOnceProps(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -228,6 +229,22 @@ export class Response {
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
+  }
+
+  protected preserveOnceProps(pageResponse: Page): void {
+    const onceProps = pageResponse.onceProps || []
+
+    onceProps.forEach((prop) => {
+      if (prop in pageResponse.props) {
+        return
+      }
+
+      const existingValue = currentPage.get().props[prop]
+
+      if (existingValue !== undefined) {
+        pageResponse.props[prop] = existingValue
+      }
+    })
   }
 
   protected preserveEqualProps(pageResponse: Page): void {

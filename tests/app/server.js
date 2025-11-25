@@ -1346,6 +1346,48 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
+const shouldResolveFooProp = (req) => {
+  if (!req.headers['x-inertia']) {
+    return true
+  }
+
+  if (req.headers['x-inertia-partial-data']?.includes('foo')) {
+    return true
+  }
+
+  const loadedOnceProps = req.headers['x-inertia-page-once-props']?.split(',') ?? []
+
+  return !loadedOnceProps.includes('foo')
+}
+
+app.get('/once-props/page-a', (req, res) => {
+  inertia.render(req, res, {
+    component: 'OnceProps/PageA',
+    props: {
+      foo: shouldResolveFooProp(req) ? 'foo-a-' + Date.now() : undefined,
+      bar: 'bar-a',
+    },
+    onceProps: ['foo'],
+  })
+})
+
+app.get('/once-props/page-b', (req, res) => {
+  inertia.render(req, res, {
+    component: 'OnceProps/PageB',
+    props: {
+      foo: shouldResolveFooProp(req) ? 'foo-b-' + Date.now() : undefined,
+      bar: 'bar-b',
+    },
+    onceProps: ['foo'],
+  })
+})
+
+app.get('/once-props/page-c', (req, res) => {
+  inertia.render(req, res, {
+    component: 'OnceProps/PageC',
+  })
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

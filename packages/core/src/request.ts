@@ -142,6 +142,12 @@ export class Request {
       headers['X-Inertia-Version'] = currentPage.get().version
     }
 
+    const onceProps = currentPage.get().onceProps || []
+
+    if (onceProps.length > 0) {
+      headers['X-Inertia-Page-Once-Props'] = onceProps.join(',')
+    }
+
     return headers
   }
 }
