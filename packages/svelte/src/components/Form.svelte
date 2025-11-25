@@ -13,6 +13,7 @@
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
+  import { HTMLFormAttributes } from 'svelte/elements'
 
   const noop = () => undefined
 
@@ -180,7 +181,7 @@
 <form
   bind:this={formElement}
   action={_action}
-  method={_method}
+  method={_method as HTMLFormAttributes['method']}
   on:submit={handleSubmit}
   on:reset={handleReset}
   {...$$restProps}

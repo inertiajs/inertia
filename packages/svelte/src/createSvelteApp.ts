@@ -1,8 +1,11 @@
-import { hydrate, mount, render } from 'svelte'
+import { hydrate, mount } from 'svelte'
+import { render } from 'svelte/server'
 import type { InertiaAppProps } from './components/App.svelte'
 import App from './components/App.svelte'
 
-export function createSvelteApp(el: HTMLElement | null, props: InertiaAppProps) {
+type SvelteApp = ReturnType<typeof render> | ReturnType<typeof mount> | ReturnType<typeof hydrate>
+
+export function createSvelteApp(el: HTMLElement | null, props: InertiaAppProps): SvelteApp {
   const isServer = typeof window === 'undefined'
 
   if (isServer) {
@@ -13,5 +16,5 @@ export function createSvelteApp(el: HTMLElement | null, props: InertiaAppProps) 
     return hydrate(App, { target: el, props })
   }
 
-  return mount(App, { target: el, props })
+  return mount(App, { target: el as HTMLElement, props })
 }
