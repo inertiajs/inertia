@@ -64,7 +64,7 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
   : T extends unknown[]
     ? ArrayFormDataKeys<T>
-    : T extends Record<string, unknown>
+    : T extends object
       ? ObjectFormDataKeys<T>
       : never
 
@@ -92,7 +92,7 @@ type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
 /**
  * Helper type for object form data keys
  */
-type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyof T
+type ObjectFormDataKeys<T extends object> = string extends keyof T
   ? string
   :
       | Extract<keyof T, string>
@@ -101,9 +101,9 @@ type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyo
             ? never
             : T[Key] extends FormDataConvertibleValue
               ? never
-              : T[Key] extends any[]
+              : NonNullable<T[Key]> extends any[]
                 ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                : T[Key] extends Record<string, any>
+                : NonNullable<T[Key]> extends Record<string, any>
                   ? `${Key}.${FormDataKeys<T[Key]> & string}`
                   : never
         }[Extract<keyof T, string>]
