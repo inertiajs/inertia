@@ -193,9 +193,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         invalid: (field: string) => field in this.errors,
         setValidationTimeout: (duration: number) => tap(formWithPrecognition, () => validator.setTimeout(duration)),
         validateFiles: () => tap(formWithPrecognition, () => validator.validateFiles()),
-        withoutFileValidation: () =>
-          // @ts-expect-error - Not released yet...
-          tap(formWithPrecognition, () => validator.withoutFileValidation()),
+        withoutFileValidation: () => tap(formWithPrecognition, () => validator.withoutFileValidation()),
         touch: (
           field: FormDataKeys<TForm> | NamedInputEvent | Array<FormDataKeys<TForm>>,
           ...fields: FormDataKeys<TForm>[]

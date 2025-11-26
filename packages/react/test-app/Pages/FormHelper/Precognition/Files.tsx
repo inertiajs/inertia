@@ -18,8 +18,7 @@ export default () => {
     if (validateFiles) {
       form.validateFiles()
     } else {
-      // TODO:
-      // form.withoutFileValidation()
+      form.withoutFileValidation()
     }
   }, [form, validateFiles])
 

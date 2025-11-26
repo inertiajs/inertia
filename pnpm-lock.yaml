@@ -37,8 +37,8 @@ importers:
         specifier: ^1.13.2
         version: 1.13.2
       laravel-precognition:
-        specifier: ^0.7.3
-        version: 0.7.3
+        specifier: 0.8.0
+        version: 0.8.0
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -80,8 +80,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^0.7.3
-        version: 0.7.3
+        specifier: 0.8.0
+        version: 0.8.0
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -178,8 +178,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^0.7.3
-        version: 0.7.3
+        specifier: 0.8.0
+        version: 0.8.0
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -279,8 +279,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^0.7.3
-        version: 0.7.3
+        specifier: 0.8.0
+        version: 0.8.0
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1743,9 +1743,6 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@1.13.1:
-    resolution: {integrity: sha512-hU4EGxxt+j7TQijx1oYdAjw4xuIp1wRQSsbMFwSthCWeBQur1eF+qJ5iQ5sN3Tw8YRzQNKb8jszgBdMDVqwJcw==}
-
   axios@1.13.2:
     resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
 
@@ -2737,8 +2734,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  laravel-precognition@0.7.3:
-    resolution: {integrity: sha512-Z97i35Q0wmsRC9WFUY2EmFS2W1F6FF/HakwZg6PqSaR9lHBgbdIs1YZpDlkChVkgcmmvbN19ujKss3ZqbjPM1g==}
+  laravel-precognition@0.8.0:
+    resolution: {integrity: sha512-wpnzUAGz43NM+vfu0WORUeGe/dWEFfhBTsH4MUA9QRcFNH8CVaB6lnmk5BU5DxfgEzk7QVwU6cCUYAEwsQLVsg==}
 
   laravel-vite-plugin@1.3.0:
     resolution: {integrity: sha512-P5qyG56YbYxM8OuYmK2OkhcKe0AksNVJUjq9LUZ5tOekU9fBn9LujYyctI4t9XoLjuMvHJXXpCoPntY1oKltuA==}
@@ -5123,14 +5120,6 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.13.1:
-    dependencies:
-      follow-redirects: 1.15.11
-      form-data: 4.0.5
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-
   axios@1.13.2:
     dependencies:
       follow-redirects: 1.15.11
@@ -6340,9 +6329,9 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@0.7.3:
+  laravel-precognition@0.8.0:
     dependencies:
-      axios: 1.13.1
+      axios: 1.13.2
       lodash-es: 4.17.21
     transitivePeerDependencies:
       - debug

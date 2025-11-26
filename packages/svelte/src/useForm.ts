@@ -233,7 +233,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         setValidationTimeout: (duration: number) =>
           tap(formWithPrecognition(), () => validatorRef!.setTimeout(duration)),
         withAllErrors: () => tap(formWithPrecognition(), () => (withAllErrors = true)),
-        // @ts-expect-error - Not released yet...
         withoutFileValidation: () => tap(formWithPrecognition(), () => validatorRef?.withoutFileValidation()),
         valid: (field: string) => formWithPrecognition().__valid.includes(field),
         invalid: (field: string) => field in formWithPrecognition().errors,
