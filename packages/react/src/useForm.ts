@@ -541,7 +541,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       valid,
       invalid,
       touched,
-      // @ts-expect-error - Not released yet... )
       withoutFileValidation: () => tap(precognitiveForm, () => validatorRef.current?.withoutFileValidation()),
       touch: (
         field: FormDataKeys<TForm> | NamedInputEvent | Array<FormDataKeys<TForm>>,

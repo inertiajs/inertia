@@ -17,8 +17,7 @@
     if (validateFiles && typeof $form.validateFiles === 'function') {
       $form.validateFiles()
     } else if (!validateFiles && typeof $form.withoutFileValidation === 'function') {
-      // TODO:
-      // $form.withoutFileValidation()
+      $form.withoutFileValidation()
     }
   }
 
