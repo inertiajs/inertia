@@ -1,4 +1,5 @@
 import * as qs from 'qs'
+import { config } from './config'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
 import type {
@@ -24,6 +25,10 @@ export const transformUrlAndData = (
   let url = typeof href === 'string' ? hrefToUrl(href) : href
 
   if ((hasFiles(data) || forceFormData) && !isFormData(data)) {
+    if (config.get('form.forceIndicesArrayFormatInFormData')) {
+      queryStringArrayFormat = 'indices'
+    }
+
     data = objectToFormData(data, new FormData(), null, queryStringArrayFormat)
   }
 
