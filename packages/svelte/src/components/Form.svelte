@@ -80,14 +80,14 @@
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
 
-  function getFormData(): FormData {
+  export function getFormData(): FormData {
     return new FormData(formElement)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  function getData(): Record<string, FormDataConvertible> {
+  export function getData(): Record<string, FormDataConvertible> {
     return formDataToObject(getFormData())
   }
 
