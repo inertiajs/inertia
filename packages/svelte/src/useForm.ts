@@ -131,7 +131,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   // Precognition state
   let validatorRef: Validator | null = null
-  let validatorDefaults: Partial<TForm> = defaults
 
   // Internal helper to update form state properties (handles both base form and precognition properties)
   let setFormState: <K extends string>(key: K, value: any) => void
@@ -153,7 +152,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const form = formWithPrecognition()
         const transformedData = transform(form.data()) as Record<string, unknown>
         return client[method](url, transformedData)
-      }, validatorDefaults)
+      }, cloneDeep(defaults))
 
       validatorRef = validator
 
@@ -293,12 +292,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             : Object.assign(cloneDeep(defaults), fieldOrFields)
       }
 
-      // clear all validation defaults...
-      Object.keys(validatorDefaults).forEach((key) => {
-        delete validatorDefaults[key as keyof TForm]
-      })
-
-      Object.assign(validatorDefaults, defaults)
+      validatorRef?.defaults(defaults)
 
       return this
     },

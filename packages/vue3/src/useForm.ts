@@ -127,7 +127,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let transform: UseFormTransformCallback<TForm> = (data) => data
 
   let validatorRef: Validator | null = null
-  const validatorDefaults = cloneDeep(defaults)
 
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
@@ -155,7 +154,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const transformedData = transform(this.data()) as Record<string, unknown>
 
         return client[method](url, transformedData)
-      }, validatorDefaults)
+      }, cloneDeep(defaults))
 
       validatorRef = validator
 
@@ -266,12 +265,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             : Object.assign({}, cloneDeep(defaults), fieldOrFields)
       }
 
-      // clear all validation defaults...
-      Object.keys(validatorDefaults).forEach((key) => {
-        delete validatorDefaults[key as keyof TForm]
-      })
-
-      Object.assign(validatorDefaults, defaults)
+      validatorRef?.defaults(defaults)
 
       return this
     },

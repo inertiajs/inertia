@@ -148,7 +148,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [validating, setValidating] = useState(false)
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
-  const validatorDefaults = cloneDeep(defaults)
   const withAllErrors = useRef(false)
 
   useEffect(() => {
@@ -317,12 +316,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         })
       }
 
-      // clear all validation defaults...
-      Object.keys(validatorDefaults).forEach((key) => {
-        delete validatorDefaults[key as keyof TForm]
-      })
-
-      Object.assign(validatorDefaults, newDefaults)
+      validatorRef.current?.defaults(newDefaults)
     },
     [setDefaults],
   )
@@ -509,7 +503,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const currentData = dataRef.current
         const transformedData = transform.current(currentData) as Record<string, unknown>
         return client[method](url, transformedData)
-      }, validatorDefaults)
+      }, cloneDeep(defaults))
 
       validatorRef.current = validator
 
