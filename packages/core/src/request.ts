@@ -138,11 +138,21 @@ export class Request {
       'X-Inertia': true,
     }
 
-    if (currentPage.get().version) {
-      headers['X-Inertia-Version'] = currentPage.get().version
+    const page = currentPage.get()
+
+    if (page.version) {
+      headers['X-Inertia-Version'] = page.version
     }
 
-    const onceProps = currentPage.get().onceProps || []
+    const onceProps = Object.keys(page.onceProps || {}).reduce((props: string[], key: string) => {
+      const onceProp = page.onceProps![key]
+
+      if (!onceProp.expiresAt || onceProp.expiresAt > Date.now()) {
+        props.push(key)
+      }
+
+      return props
+    }, [])
 
     if (onceProps.length > 0) {
       headers['X-Inertia-Page-Once-Props'] = onceProps.join(',')

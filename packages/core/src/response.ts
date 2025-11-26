@@ -232,17 +232,21 @@ export class Response {
   }
 
   protected preserveOnceProps(pageResponse: Page): void {
-    const onceProps = pageResponse.onceProps || []
+    const onceProps = pageResponse.onceProps || {}
 
-    onceProps.forEach((prop) => {
-      if (prop in pageResponse.props) {
+    Object.entries(onceProps).forEach(([key, onceProp]) => {
+      // Check if the current page has the same onceProp key
+      const existingOnceProp = currentPage.get().onceProps?.[key]
+
+      if (existingOnceProp === undefined) {
         return
       }
 
-      const existingValue = currentPage.get().props[prop]
+      const currentValue = currentPage.get().props[existingOnceProp.prop]
 
-      if (existingValue !== undefined) {
-        pageResponse.props[prop] = existingValue
+      if (pageResponse.props[onceProp.prop] === undefined) {
+        // Only preserve if no new value was provided for this prop
+        pageResponse.props[onceProp.prop] = currentValue
       }
     })
   }

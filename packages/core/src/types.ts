@@ -169,7 +169,13 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
-  onceProps?: string[]
+  onceProps?: Record<
+    string,
+    {
+      prop: keyof PageProps
+      expiresAt?: number
+    }
+  >
 
   /** @internal */
   rememberedState: Record<string, unknown>

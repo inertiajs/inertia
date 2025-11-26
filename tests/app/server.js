@@ -1367,7 +1367,7 @@ app.get('/once-props/page-a', (req, res) => {
       foo: shouldResolveFooProp(req) ? 'foo-a-' + Date.now() : undefined,
       bar: 'bar-a',
     },
-    onceProps: ['foo'],
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
   })
 })
 
@@ -1378,7 +1378,7 @@ app.get('/once-props/page-b', (req, res) => {
       foo: shouldResolveFooProp(req) ? 'foo-b-' + Date.now() : undefined,
       bar: 'bar-b',
     },
-    onceProps: ['foo'],
+    onceProps: { foo: { prop: 'foo', ttl: null } },
   })
 })
 
