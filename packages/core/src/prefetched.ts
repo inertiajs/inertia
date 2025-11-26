@@ -240,6 +240,8 @@ class PrefetchedRequests {
         'showProgress',
         'replace',
         'prefetch',
+        'preserveScroll',
+        'preserveState',
         'onBefore',
         'onBeforeUpdate',
         'onStart',

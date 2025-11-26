@@ -12,9 +12,13 @@
 <div style="padding: 20px">
   <h1>Custom Triggers with Selectors Test</h1>
 
-  <InfiniteScroll data="users" itemsElement="#table-body" startElement="#table-header" endElement="#table-footer">
+  <InfiniteScroll 
+    data="users"
+    itemsElement="#table-body"
+    startElement="#table-header"
+    endElement="#table-footer">
     {#snippet children({ loading })}
-      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+      <div style="height: 300px; width: 100%; text-align: center; line-height: 300px; border: 1px solid #ccc">
         Spacer
       </div>
 
@@ -50,7 +54,7 @@
         </tfoot>
       </table>
 
-      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+      <div style="height: 300px; width: 100%; text-align: center; line-height: 300px; border: 1px solid #ccc">
         Spacer
       </div>
     {/snippet}

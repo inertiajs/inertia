@@ -7,8 +7,12 @@ const { showServerStatus } = require('./server-status')
 const { getUserNames, paginateUsers } = require('./eloquent')
 
 const app = express()
+
+// Express v5 defaults to 'simple' query parser, but tests expect 'extended' behavior from < v5
+app.set('query parser', 'extended')
+
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json({ extended: true }))
+app.use(bodyParser.json())
 const upload = multer()
 
 const adapters = ['react', 'svelte', 'vue3']
@@ -18,7 +22,7 @@ if (!adapters.includes(inertia.package)) {
 }
 
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
-app.all('/non-inertia', (req, res) => res.send('This is a page that does not have the Inertia app loaded.'))
+app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
 
 // Intercepts all .js assets (including files loaded via code splitting)
 app.get(/.*\.js$/, (req, res) =>
@@ -29,7 +33,7 @@ app.get(/.*\.js$/, (req, res) =>
  * Used for testing the Inertia plugin is registered.
  * @see plugin.test.js
  */
-app.get('/plugin/*', (req, res) =>
+app.get('/plugin/*enabled', (req, res) =>
   inertia.render(req, res, {
     component: 'Home',
     props: {
@@ -357,6 +361,16 @@ app.get('/prefetch/wayfinder', (req, res) => {
   })
 })
 
+app.get('/prefetch/preserve-state', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Prefetch/PreserveState',
+    props: {
+      page: parseInt(req.query.page || '1'),
+      timestamp: Date.now(),
+    },
+  })
+})
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
@@ -385,7 +399,7 @@ app.get('/prefetch/swr/:pageNumber', (req, res) => {
   }
 })
 
-app.get('/prefetch/tags/:pageNumber/:propType?', (req, res) => {
+app.get('/prefetch/tags/:pageNumber{/:propType}', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Tags',
     props: {
@@ -427,6 +441,55 @@ app.get('/when-visible', (req, res) => {
 
   if (req.headers['x-inertia-partial-data'] || req.query.count) {
     setTimeout(page, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/when-visible-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleReload',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleReload',
+        props: {
+          lazyData: {
+            text: 'This is lazy loaded data!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/when-visible-array-reload', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleArrayReload',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleArrayReload',
+        props: {
+          firstData: {
+            text: 'First lazy data loaded!',
+          },
+          secondData: {
+            text: 'Second lazy data loaded!',
+          },
+        },
+      })
+    }, 250)
   } else {
     page()
   }
@@ -719,6 +782,30 @@ app.get('/deferred-props/page-2', (req, res) => {
   }
 })
 
+app.get('/deferred-props/page-3', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/Page3',
+      deferredProps: {
+        default: ['alpha', 'beta'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/Page3',
+        props: {
+          alpha: req.headers['x-inertia-partial-data']?.includes('alpha') ? 'alpha value' : undefined,
+          beta: req.headers['x-inertia-partial-data']?.includes('beta') ? 'beta value' : undefined,
+        },
+      }),
+    500,
+  )
+})
+
 app.get('/deferred-props/many-groups', (req, res) => {
   const props = ['foo', 'bar', 'baz', 'qux', 'quux']
   const requestedProps = req.headers['x-inertia-partial-data']
@@ -761,6 +848,42 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/partial-reloads', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/PartialReloads',
+      deferredProps: {
+        default: ['foo', 'bar'],
+      },
+      props: {},
+    })
+  }
+
+  const requestedProps = req.headers['x-inertia-partial-data']
+  const props = {}
+
+  if (requestedProps.includes('foo')) {
+    props.foo = {
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  if (requestedProps.includes('bar')) {
+    props.bar = {
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/PartialReloads',
+        props: props,
+      }),
+    500,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
@@ -800,12 +923,40 @@ app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
-app.post('/json', (req, res) => res.json({ foo: 'bar' }))
+app.post('/json', (req, res) => res.status(200).json({ foo: 'bar' }))
 
 app.get('/form-component/child-component', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
 )
-app.get('/form-component/elements', (req, res) => inertia.render(req, res, { component: 'FormComponent/Elements' }))
+
+let defaultValueForErrors = {}
+
+app.get('/form-component/default-value', (req, res) => {
+  const errors = { ...defaultValueForErrors }
+  defaultValueForErrors = {}
+
+  return inertia.render(req, res, {
+    component: 'FormComponent/DefaultValue',
+    props: { user: { name: 'John Doe' }, errors },
+  })
+})
+app.patch('/form-component/default-value', (req, res) => {
+  if (!req.body.name || req.body.name.length < 10) {
+    defaultValueForErrors = { 'user.name': 'The name must be at least 10 characters.' }
+    return res.redirect(303, '/form-component/default-value')
+  }
+
+  return res.redirect(303, '/')
+})
+
+app.get('/form-component/elements', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/Elements',
+    props: {
+      queryStringArrayFormat: req.query.queryStringArrayFormat || 'brackets',
+    },
+  }),
+)
 app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>
   inertia.render(req, res, {
@@ -941,7 +1092,7 @@ app.post('/form-component/url/with/segements', async (req, res) =>
 app.get('/form-component/submit-complete/redirect', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
 )
-app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect('/'))
+app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect(303, '/'))
 app.post('/form-component/wayfinder', (req, res) => {
   inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
 })
@@ -1024,6 +1175,9 @@ app.get('/infinite-scroll/programmatic-ref', (req, res) =>
 )
 app.get('/infinite-scroll/short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
+)
+app.get('/infinite-scroll/invisible-first-child', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
 )
 app.get('/infinite-scroll/reload-unrelated', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
@@ -1192,7 +1346,7 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
-app.all('*', (req, res) => inertia.render(req, res))
+app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
 app.use((err, req, res, next) => {
