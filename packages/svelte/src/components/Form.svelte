@@ -58,6 +58,10 @@
     )
     .setValidationTimeout(validateTimeout!)
 
+  if (validateFiles) {
+    form.validateFiles()
+  }
+
   if (withAllErrors) {
     form.withAllErrors()
   }
@@ -225,11 +229,11 @@
 
   $: {
     form.setValidationTimeout(validateTimeout!)
+
     if (validateFiles) {
       form.validateFiles()
     } else {
-      // TODO: not released yet...
-      //  form.withoutFileValidation()
+      form.withoutFileValidation()
     }
   }
 

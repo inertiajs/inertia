@@ -143,6 +143,10 @@ const Form = defineComponent({
       .transform(getTransformedData)
       .setValidationTimeout(props.validateTimeout)
 
+    if (props.validateFiles) {
+      form.validateFiles()
+    }
+
     if (props.withAllErrors) {
       form.withAllErrors()
     }
@@ -174,10 +178,10 @@ const Form = defineComponent({
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
 
-    // watch(
-    //   () => props.validateFiles,
-    //   (value) => validator.validateFiles(value),
-    // )
+    watch(
+      () => props.validateFiles,
+      (value) => (value ? form.validateFiles() : form.withoutFileValidation()),
+    )
 
     watch(
       () => props.validateTimeout,

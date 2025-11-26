@@ -86,6 +86,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       )
       .setValidationTimeout(validateTimeout)
 
+    if (validateFiles) {
+      form.validateFiles()
+    }
+
     if (withAllErrors) {
       form.withAllErrors()
     }
@@ -145,6 +149,14 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     useEffect(() => {
       form.setValidationTimeout(validateTimeout)
     }, [validateTimeout])
+
+    useEffect(() => {
+      if (validateFiles) {
+        form.validateFiles()
+      } else {
+        form.withoutFileValidation()
+      }
+    }, [validateFiles])
 
     const reset = (...fields: string[]) => {
       if (formElement.current) {
