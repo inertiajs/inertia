@@ -10,10 +10,7 @@ async function getInertiaHeadHTML(page: Page) {
 
 test.describe('Head component', () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(
-      process.env.PACKAGE === 'svelte' || process.env.PACKAGE === 'svelte5',
-      'Svelte adapter has no Head component',
-    )
+    test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')
   })
 
   test('replaces the original title element', async ({ page }) => {

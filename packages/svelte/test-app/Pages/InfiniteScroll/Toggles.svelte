@@ -2,11 +2,15 @@
   import { InfiniteScroll } from '@inertiajs/svelte'
   import UserCard, { type User } from './UserCard.svelte'
 
-  export let users: { data: User[] }
+  interface Props {
+    users: { data: User[] }
+  }
 
-  let manual = false
-  let preserveUrl = false
-  let triggerMode: 'onlyPrevious' | 'onlyNext' | 'both' = 'onlyNext'
+  let { users }: Props = $props()
+
+  let manual = $state(false)
+  let preserveUrl = $state(false)
+  let triggerMode: 'onlyPrevious' | 'onlyNext' | 'both' = $state('onlyNext')
 </script>
 
 <div>
@@ -45,7 +49,9 @@
     onlyNext={triggerMode === 'onlyNext'}
     onlyPrevious={triggerMode === 'onlyPrevious'}
   >
-    <div slot="loading" style="text-align: center; padding: 20px">Loading...</div>
+    {#snippet loading()}
+      <div style="text-align: center; padding: 20px">Loading...</div>
+    {/snippet}
 
     {#each users.data as user (user.id)}
       <UserCard {user} />

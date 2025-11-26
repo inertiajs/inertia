@@ -11,12 +11,23 @@
     age: number
   }
 
-  export let items: string[] = []
-  export let tags: Tag[] = []
-  export let user: User | undefined = undefined
-  export let count = 0
-  export let singleValue: string | string[] | undefined = undefined
-  export let undefinedValue: string | string[] | undefined = undefined
+  interface Props_1 {
+    items?: string[]
+    tags?: Tag[]
+    user?: User | undefined
+    count?: number
+    singleValue?: string | string[] | undefined
+    undefinedValue?: string | string[] | undefined
+  }
+
+  let {
+    items = [],
+    tags = [],
+    user = undefined,
+    count = 0,
+    singleValue = undefined,
+    undefinedValue = undefined,
+  }: Props_1 = $props()
 
   const replacePropString = () => {
     router.replaceProp('user.name', 'Jane Smith')
@@ -101,26 +112,26 @@
   <hr />
 
   <h2>Replace Prop Tests</h2>
-  <button on:click={replacePropString}>Replace user.name</button>
-  <button on:click={replacePropNumber}>Replace count</button>
-  <button on:click={replacePropFunction}>Replace count (function)</button>
+  <button onclick={replacePropString}>Replace user.name</button>
+  <button onclick={replacePropNumber}>Replace count</button>
+  <button onclick={replacePropFunction}>Replace count (function)</button>
 
   <h2>Append To Prop Tests</h2>
-  <button on:click={appendToPropArray}>Append to items (single)</button>
-  <button on:click={appendToPropMultiple}>Append to items (multiple)</button>
-  <button on:click={appendToPropFunction}>Append to tags (function)</button>
-  <button on:click={appendArrayToArray}>Append array to array (objects)</button>
+  <button onclick={appendToPropArray}>Append to items (single)</button>
+  <button onclick={appendToPropMultiple}>Append to items (multiple)</button>
+  <button onclick={appendToPropFunction}>Append to tags (function)</button>
+  <button onclick={appendArrayToArray}>Append array to array (objects)</button>
 
   <h2>Prepend To Prop Tests</h2>
-  <button on:click={prependToPropArray}>Prepend to items (single)</button>
-  <button on:click={prependToPropMultiple}>Prepend to items (multiple)</button>
-  <button on:click={prependToPropFunction}>Prepend to tags (function)</button>
+  <button onclick={prependToPropArray}>Prepend to items (single)</button>
+  <button onclick={prependToPropMultiple}>Prepend to items (multiple)</button>
+  <button onclick={prependToPropFunction}>Prepend to tags (function)</button>
 
   <h2>Edge Case Tests (mergeArrays behavior)</h2>
-  <button on:click={appendToNonArray}>Append to non-array (single + single)</button>
-  <button on:click={prependToNonArray}>Prepend to non-array (single + single)</button>
-  <button on:click={appendArrayToNonArray}>Append array to non-array (single + array)</button>
-  <button on:click={prependArrayToNonArray}>Prepend array to non-array (array + single)</button>
-  <button on:click={appendToUndefined}>Append to undefined</button>
-  <button on:click={prependToUndefined}>Prepend to undefined</button>
+  <button onclick={appendToNonArray}>Append to non-array (single + single)</button>
+  <button onclick={prependToNonArray}>Prepend to non-array (single + single)</button>
+  <button onclick={appendArrayToNonArray}>Append array to non-array (single + array)</button>
+  <button onclick={prependArrayToNonArray}>Prepend array to non-array (array + single)</button>
+  <button onclick={appendToUndefined}>Append to undefined</button>
+  <button onclick={prependToUndefined}>Prepend to undefined</button>
 </div>

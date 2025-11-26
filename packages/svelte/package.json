@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "2.2.15",
+  "version": "2.2.14",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -41,24 +41,25 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "dev": "pnpm package --watch",
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
-    "package": "svelte-kit sync && svelte-package --input src"
+    "package": "svelte-kit sync && svelte-package --input src",
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.47.2",
+    "@sveltejs/adapter-auto": "^7.0.0",
+    "@sveltejs/kit": "^2.48.4",
     "@sveltejs/package": "^2.5.4",
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "axios": "^1.12.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "axios": "^1.13.1",
     "es-check": "^9.4.4",
-    "publint": "^0.2.12",
-    "svelte": "^4.2.20",
+    "publint": "^0.3.15",
+    "svelte": "^5.43.2",
     "svelte-check": "^4.3.3",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21"
+    "vite": "^7.1.12"
   },
   "peerDependencies": {
-    "svelte": "^4.0.0 || ^5.0.0"
+    "svelte": "^5.0.0"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

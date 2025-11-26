@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   declare global {
     interface Window {
       resetForm: (...fields: string[]) => void
@@ -7,10 +7,10 @@
 </script>
 
 <script lang="ts">
-  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
+  import type { SvelteComponent } from 'svelte'
 
-  let formRef: FormComponentMethods | null = null
+  let formRef: SvelteComponent | null = $state(null)
 
   // Expose reset function to window for testing
   window.resetForm = (...fields: string[]) => {

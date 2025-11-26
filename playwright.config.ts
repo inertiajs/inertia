@@ -1,10 +1,10 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const adapter = process.env.PACKAGE || 'vue3'
-const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717, svelte5: 13718 }
+const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
 const url = `http://localhost:${adapterPorts[adapter]}`
 
-const adapters = ['react', 'svelte', 'vue3', 'svelte5']
+const adapters = ['react', 'svelte', 'vue3']
 
 if (!adapters.includes(adapter)) {
   throw new Error(`Invalid adapter package "${adapter}". Expected one of: ${adapters.join(', ')}.`)

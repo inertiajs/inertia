@@ -33,9 +33,9 @@
 
 <h1>Page A - View Transition Test</h1>
 
-<button on:click={transitionWithBoolean}>Transition with boolean</button>
-<button on:click={transitionWithCallback}>Transition with callback</button>
-<button on:click={clientSideReplace}>Client-side replace</button>
+<button onclick={transitionWithBoolean}>Transition with boolean</button>
+<button onclick={transitionWithCallback}>Transition with callback</button>
+<button onclick={clientSideReplace}>Client-side replace</button>
 <Link
   href="/view-transition/page-b"
   viewTransition={(viewTransition) => {

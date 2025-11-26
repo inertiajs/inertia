@@ -1,8 +1,17 @@
 <script lang="ts">
+  import { createBubbler, preventDefault } from 'svelte/legacy'
+
+  const bubble = createBubbler()
   import { inertia, router, useForm } from '@inertiajs/svelte'
-  export let pageNumber
-  export let lastLoaded
-  export let propType: string
+  interface Props {
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    pageNumber: any
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    lastLoaded: any
+    propType: string
+  }
+
+  let { pageNumber, lastLoaded, propType }: Props = $props()
 
   const form = useForm({
     name: '',
@@ -31,7 +40,7 @@
   }
 
   function submitWithUserInvalidation() {
-    $form.post('/dump/post', {
+    form.post('/dump/post', {
       invalidateCacheTags: propType === 'string' ? 'user' : ['user'],
     })
   }
@@ -56,16 +65,16 @@
     <a href="/prefetch/tags/6" use:inertia={{ prefetch: 'hover' }}> Untagged Page 6 </a>
   </div>
   <div id="controls">
-    <button id="flush-user" on:click={flushUserTags}> Flush User Tags </button>
-    <button id="flush-user-product" on:click={flushUserProductTags}> Flush User + Product Tags </button>
-    <button id="programmatic-prefetch" on:click={programmaticPrefetch}> Programmatic Prefetch </button>
+    <button id="flush-user" onclick={flushUserTags}> Flush User Tags </button>
+    <button id="flush-user-product" onclick={flushUserProductTags}> Flush User + Product Tags </button>
+    <button id="programmatic-prefetch" onclick={programmaticPrefetch}> Programmatic Prefetch </button>
   </div>
 
   <div id="form-section">
     <h3>Form Test</h3>
-    <form on:submit|preventDefault>
-      <input id="form-name" bind:value={$form.name} type="text" placeholder="Enter name" />
-      <button id="submit-invalidate-user" on:click={submitWithUserInvalidation}> Submit (Invalidate User) </button>
+    <form onsubmit={preventDefault(bubble('submit'))}>
+      <input id="form-name" bind:value={form.name} type="text" placeholder="Enter name" />
+      <button id="submit-invalidate-user" onclick={submitWithUserInvalidation}> Submit (Invalidate User) </button>
     </form>
   </div>
 

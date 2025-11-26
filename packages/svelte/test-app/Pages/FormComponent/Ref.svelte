@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
+  import type { SvelteComponent } from 'svelte'
 
   // Svelte Form component ref exposes only methods via bind:this
-  let formRef: FormComponentMethods | null = null
+  let formRef: SvelteComponent | null = $state(null)
 
   function submitProgrammatically() {
     formRef?.submit()
@@ -33,35 +33,37 @@
 <div>
   <h1>Form Ref Test</h1>
 
-  <Form bind:this={formRef} action="/dump/post" method="post" let:isDirty let:errors let:hasErrors>
-    <!-- State display for testing -->
-    <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
-    {#if hasErrors}
-      <div>Form has errors</div>
-    {/if}
-    {#if errors.name}
-      <div id="error_name">{errors.name}</div>
-    {/if}
+  <Form bind:this={formRef} action="/dump/post" method="post">
+    {#snippet children({ isDirty, errors, hasErrors })}
+      <!-- State display for testing -->
+      <div>Form is {isDirty ? 'dirty' : 'clean'}</div>
+      {#if hasErrors}
+        <div>Form has errors</div>
+      {/if}
+      {#if errors.name}
+        <div id="error_name">{errors.name}</div>
+      {/if}
 
-    <div>
-      <input type="text" name="name" placeholder="Name" value="John Doe" />
-    </div>
+      <div>
+        <input type="text" name="name" placeholder="Name" value="John Doe" />
+      </div>
 
-    <div>
-      <input type="email" name="email" placeholder="Email" value="john@example.com" />
-    </div>
+      <div>
+        <input type="email" name="email" placeholder="Email" value="john@example.com" />
+      </div>
 
-    <div>
-      <button type="submit">Submit via Form</button>
-    </div>
+      <div>
+        <button type="submit">Submit via Form</button>
+      </div>
+    {/snippet}
   </Form>
 
   <div>
-    <button on:click={submitProgrammatically}> Submit Programmatically </button>
-    <button on:click={resetForm}> Reset Form </button>
-    <button on:click={resetNameField}> Reset Name Field </button>
-    <button on:click={clearAllErrors}> Clear Errors </button>
-    <button on:click={setTestError}> Set Test Error </button>
-    <button on:click={setCurrentAsDefaults}> Set Current as Defaults </button>
+    <button onclick={submitProgrammatically}> Submit Programmatically </button>
+    <button onclick={resetForm}> Reset Form </button>
+    <button onclick={resetNameField}> Reset Name Field </button>
+    <button onclick={clearAllErrors}> Clear Errors </button>
+    <button onclick={setTestError}> Set Test Error </button>
+    <button onclick={setCurrentAsDefaults}> Set Current as Defaults </button>
   </div>
 </div>

@@ -1,17 +1,17 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import type { PageProps } from '@inertiajs/core'
-  import type { ComponentType } from 'svelte'
+  import type { Component } from 'svelte'
 
   export type RenderProps = {
-    component: ComponentType
+    component: Component
     props?: PageProps
     children?: RenderProps[]
     key?: number | null
   }
 
   export type RenderFunction = {
-    (component: ComponentType, props?: PageProps, children?: RenderProps[], key?: number | null): RenderProps
-    (component: ComponentType, children?: RenderProps[], key?: number | null): RenderProps
+    (component: Component, props?: PageProps, children?: RenderProps[], key?: number | null): RenderProps
+    (component: Component, children?: RenderProps[], key?: number | null): RenderProps
   }
 
   export const h: RenderFunction = (component, propsOrChildren, childrenOrKey, key: number | null = null) => {
@@ -37,10 +37,9 @@
 </script>
 
 <script lang="ts">
-  export let component: ComponentType
-  export let props: PageProps = {}
-  export let children: RenderProps[] = []
-  export let key: number | null = null
+  import Render from './Render.svelte'
+
+  const { component, props = {}, children = [], key = null }: RenderProps = $props()
 </script>
 
 {#if component}
@@ -50,13 +49,15 @@
   while the layout components are persisted across page changes. -->
   {#key children?.length === 0 ? key : null}
     {#if children.length > 0}
-      <svelte:component this={component} {...props}>
+      {@const SvelteComponent = component}
+      <SvelteComponent {...props}>
         {#each children as child}
-          <svelte:self {...child} />
+          <Render {...child} />
         {/each}
-      </svelte:component>
+      </SvelteComponent>
     {:else}
-      <svelte:component this={component} {...props} />
+      {@const SvelteComponent_1 = component}
+      <SvelteComponent_1 {...props} />
     {/if}
   {/key}
 {/if}

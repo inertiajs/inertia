@@ -1,9 +1,9 @@
 <script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 
-  let name = ''
-  let remember = false
-  let untracked = ''
+  let name = $state('')
+  let remember = $state(false)
+  let untracked = $state('')
 </script>
 
 <div>

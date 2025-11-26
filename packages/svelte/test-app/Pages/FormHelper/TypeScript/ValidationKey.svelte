@@ -20,4 +20,4 @@
   }
 </script>
 
-<button on:click={() => validation(() => ({ name: 'Validation error' }))}> Handle </button>
+<button onclick={() => validation(() => ({ name: 'Validation error' }))}> Handle </button>

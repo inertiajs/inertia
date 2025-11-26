@@ -1,9 +1,14 @@
 <script lang="ts">
-  let slot: HTMLDivElement
-  let documentScrollTop = 0
-  let documentScrollLeft = 0
-  let slotScrollTop = 0
-  let slotScrollLeft = 0
+  interface Props {
+    children?: import('svelte').Snippet
+  }
+
+  let { children }: Props = $props()
+  let slot: HTMLDivElement = $state(null!)
+  let documentScrollTop = $state(0)
+  let documentScrollLeft = $state(0)
+  let slotScrollTop = $state(0)
+  let slotScrollLeft = $state(0)
 
   const handleScrollEvent = () => {
     documentScrollTop = document.documentElement.scrollTop
@@ -13,11 +18,11 @@
   }
 </script>
 
-<svelte:document on:scroll={handleScrollEvent} />
+<svelte:document onscroll={handleScrollEvent} />
 
 <div style="width: 200vw">
   <span class="layout-text">With scroll regions</span>
-  <button on:click={handleScrollEvent}>Update scroll positions</button>
+  <button onclick={handleScrollEvent}>Update scroll positions</button>
   <div class="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
   <div style="height: 200vh">
     <span class="slot-position">Slot scroll position is {slotScrollLeft} & {slotScrollTop}</span>
@@ -26,9 +31,9 @@
       id="slot"
       scroll-region
       style="height: 100px; width: 500px; overflow: scroll"
-      on:scroll={handleScrollEvent}
+      onscroll={handleScrollEvent}
     >
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 </div>

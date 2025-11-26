@@ -9,17 +9,17 @@
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@sveltejs/eslint-config": "^8.3.4",
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tsconfig/svelte": "^5.0.5",
     "eslint": "^9.38.0",
-    "eslint-plugin-svelte": "^3.12.5",
+    "eslint-plugin-svelte": "^3.13.0",
     "globals": "^16.4.0",
     "nodemon": "^3.1.10",
-    "svelte": "^4.2.20",
+    "svelte": "^5.43.2",
     "svelte-check": "^4.3.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
-    "vite": "^5.4.21"
+    "vite": "^7.1.12"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

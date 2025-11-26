@@ -7,8 +7,8 @@
   <a
     href="/sleep"
     use:inertia
-    on:cancel={() => console.log('cancelled')}
-    on:start={() => console.log('started')}
+    oncancel={() => console.log('cancelled')}
+    onstart={() => console.log('started')}
     class="visit"
   >
     Link

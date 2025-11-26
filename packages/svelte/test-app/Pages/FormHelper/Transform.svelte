@@ -1,13 +1,15 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
-  const form = useForm({
-    name: 'foo',
-    remember: false,
-  })
+  const form = $state(
+    useForm({
+      name: 'foo',
+      remember: false,
+    }),
+  )
 
   const postForm = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         name: 'bar',
@@ -16,7 +18,7 @@
   }
 
   const putForm = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         name: 'baz',
@@ -25,7 +27,7 @@
   }
 
   const patchForm = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         name: 'foo',
@@ -34,7 +36,7 @@
   }
 
   const deleteForm = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         name: 'bar',
@@ -46,15 +48,15 @@
 <div>
   <label>
     Full Name
-    <input type="text" id="name" name="name" bind:value={$form.name} />
+    <input type="text" id="name" name="name" bind:value={form.name} />
   </label>
   <label>
     Remember Me
-    <input type="checkbox" id="remember" name="remember" bind:checked={$form.remember} />
+    <input type="checkbox" id="remember" name="remember" bind:checked={form.remember} />
   </label>
 
-  <button on:click={postForm} class="post">POST form</button>
-  <button on:click={putForm} class="put">PUT form</button>
-  <button on:click={patchForm} class="patch">PATCH form</button>
-  <button on:click={deleteForm} class="delete">DELETE form</button>
+  <button onclick={postForm} class="post">POST form</button>
+  <button onclick={putForm} class="put">PUT form</button>
+  <button onclick={patchForm} class="patch">PATCH form</button>
+  <button onclick={deleteForm} class="delete">DELETE form</button>
 </div>

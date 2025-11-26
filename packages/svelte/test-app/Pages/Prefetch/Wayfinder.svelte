@@ -2,8 +2,8 @@
   import { router } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 
-  let isPrefetched = false
-  let isPrefetching = false
+  let isPrefetched = $state(false)
+  let isPrefetching = $state(false)
 
   const wayfinderUrl = (): {
     url: string
@@ -51,7 +51,7 @@
     Is Prefetching: <span id="is-prefetching">{isPrefetching}</span>
   </p>
 
-  <button on:click={testPrefetch} id="test-prefetch">Test prefetch</button>
-  <button on:click={testFlush} id="test-flush">Test flush</button>
-  <button on:click={flushAll} id="flush-all">Flush all</button>
+  <button onclick={testPrefetch} id="test-prefetch">Test prefetch</button>
+  <button onclick={testFlush} id="test-flush">Test flush</button>
+  <button onclick={flushAll} id="flush-all">Flush all</button>
 </div>

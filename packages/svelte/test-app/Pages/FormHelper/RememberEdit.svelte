@@ -7,12 +7,18 @@
     email: string
   }
 
-  export let user: User
+  interface Props {
+    user: User
+  }
 
-  const form = useForm('EditUserForm', {
-    name: user.name,
-    email: user.email,
-  })
+  let { user }: Props = $props()
+
+  const form = $state(
+    useForm('EditUserForm', {
+      name: user.name,
+      email: user.email,
+    }),
+  )
 </script>
 
 <div>
@@ -20,11 +26,11 @@
   <form>
     <div>
       <label for="name">Name:</label>
-      <input id="name" type="text" bind:value={$form.name} />
+      <input id="name" type="text" bind:value={form.name} />
     </div>
     <div>
       <label for="email">Email:</label>
-      <input id="email" type="email" bind:value={$form.email} />
+      <input id="email" type="email" bind:value={form.email} />
     </div>
   </form>
 </div>
