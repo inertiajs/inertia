@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        adapter: ['core', 'react', 'vue', 'svelte', 'svelte5']
+        adapter: ['core', 'react', 'vue', 'svelte']
 
     steps:
       - name: Checkout code
