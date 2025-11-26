@@ -1,13 +1,6 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy } from 'svelte'
   import { usePage } from '../page.svelte'
-
-  export let data: string | string[] = ''
-  export let params: ReloadOptions = {}
-  export let buffer: number = 0
-  export let as: keyof HTMLElementTagNameMap = 'div'
-  export let always: boolean = false
 
   interface Props {
     data?: string | string[]
