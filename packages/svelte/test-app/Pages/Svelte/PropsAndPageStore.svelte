@@ -8,7 +8,7 @@
 
   let { foo } = $props()
 
-  const form = $state(useForm({ foo }))
+  const form = useForm({ foo })
 
   const pageProps: PageProps = {
     foo: page.props.foo,

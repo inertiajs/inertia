@@ -17,12 +17,10 @@
   window.events = []
   window.data = []
 
-  const form = $state(
-    useForm({
-      name: 'foo',
-      remember: false,
-    }),
-  )
+  const form = useForm({
+    name: 'foo',
+    remember: false,
+  })
 
   const pushEvent = (message: string) => {
     window.events.push(message)

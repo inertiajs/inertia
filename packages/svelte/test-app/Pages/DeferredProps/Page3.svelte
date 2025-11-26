@@ -1,8 +1,12 @@
 <script lang="ts">
   import { Deferred } from '@inertiajs/svelte'
 
-  export let alpha: string | undefined
-  export let beta: string | undefined
+  interface Props {
+    alpha: string | undefined
+    beta: string | undefined
+  }
+
+  let { alpha, beta }: Props = $props()
 </script>
 
 <Deferred data="alpha">

@@ -13,12 +13,10 @@
 
   let { user }: Props = $props()
 
-  const form = $state(
-    useForm('EditUserForm', {
-      name: user.name,
-      email: user.email,
-    }),
-  )
+  const form = useForm('EditUserForm', {
+    name: user.name,
+    email: user.email,
+  })
 </script>
 
 <div>

@@ -1,8 +1,12 @@
 <script lang="ts">
   import { Deferred, router } from '@inertiajs/svelte'
 
-  export let foo: { timestamp: string } | undefined
-  export let bar: { timestamp: string } | undefined
+  interface Props {
+    foo: { timestamp: string } | undefined
+    bar: { timestamp: string } | undefined
+  }
+
+  let { foo, bar }: Props = $props()
 
   const reloadOnlyFoo = () => {
     router.reload({
@@ -37,6 +41,6 @@
   <div id="bar-timestamp">{bar?.timestamp}</div>
 </Deferred>
 
-<button on:click={reloadOnlyFoo}>Reload foo only</button>
-<button on:click={reloadOnlyBar}>Reload bar only</button>
-<button on:click={reloadBoth}>Reload both</button>
+<button onclick={reloadOnlyFoo}>Reload foo only</button>
+<button onclick={reloadOnlyBar}>Reload bar only</button>
+<button onclick={reloadBoth}>Reload both</button>

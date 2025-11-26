@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
-  const form = $state(useForm({ name: '' }))
+  const form = useForm({ name: '' })
 
   const submit = () => {
     form.post('/view-transition/form-errors', {

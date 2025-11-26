@@ -1,12 +1,10 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
-  const form = $state(
-    useForm({
-      name: 'foo',
-      foo: [] as string[],
-    }),
-  )
+  const form = useForm({
+    name: 'foo',
+    foo: [] as string[],
+  })
 
   const submit = () => {
     form.post('')

@@ -2,7 +2,11 @@
   import { config, Form } from '@inertiajs/svelte'
   import type { QueryStringArrayFormatOption } from '@inertiajs/core'
 
-  export let queryStringArrayFormat: QueryStringArrayFormatOption | 'force-brackets'
+  interface Props {
+    queryStringArrayFormat: QueryStringArrayFormatOption | 'force-brackets'
+  }
+
+  let { queryStringArrayFormat }: Props = $props()
 
   const format = queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat
 

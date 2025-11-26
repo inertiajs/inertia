@@ -7,10 +7,10 @@
 </script>
 
 <script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
-  import type { SvelteComponent } from 'svelte'
 
-  let formRef: SvelteComponent | null = $state(null)
+  let formRef: FormComponentMethods = $state(null!)
 
   // Expose reset function to window for testing
   window.resetForm = (...fields: string[]) => {

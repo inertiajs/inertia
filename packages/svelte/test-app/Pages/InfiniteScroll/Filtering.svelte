@@ -12,13 +12,11 @@
 
   let { users, preserveState, filter = undefined, search = undefined }: Props = $props()
 
-  const form = $state(
-    useForm({
-      filter: undefined,
-      page: undefined,
-      search: search,
-    }),
-  )
+  const form = useForm({
+    filter: undefined,
+    page: undefined,
+    search: search,
+  })
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined = $state()
   let previousSearch = $state(search)

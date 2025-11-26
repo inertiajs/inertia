@@ -1,9 +1,9 @@
 <script lang="ts">
+  import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'
-  import type { SvelteComponent } from 'svelte'
 
   // Svelte Form component ref exposes only methods via bind:this
-  let formRef: SvelteComponent | null = $state(null)
+  let formRef: FormComponentMethods = $state(null!)
 
   function submitProgrammatically() {
     formRef?.submit()

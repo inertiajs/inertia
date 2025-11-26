@@ -1,23 +1,21 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
-  const form = $state(
-    useForm({
-      name: 'foo',
-      address: {
-        street: '123 Main St',
-        city: 'New York',
+  const form = useForm({
+    name: 'foo',
+    address: {
+      street: '123 Main St',
+      city: 'New York',
+    },
+    organization: {
+      name: 'Inertia',
+      repo: {
+        name: 'inertiajs/inertia',
+        tags: ['v0.1', 'v0.2'],
       },
-      organization: {
-        name: 'Inertia',
-        repo: {
-          name: 'inertiajs/inertia',
-          tags: ['v0.1', 'v0.2'],
-        },
-      },
-      checked: ['foo', 'bar'],
-    }),
-  )
+    },
+    checked: ['foo', 'bar'],
+  })
 
   const submit = () => {
     form.submit('post', '/dump/post')
