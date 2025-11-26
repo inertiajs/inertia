@@ -24,16 +24,16 @@
 </script>
 
 <Deferred data="foo">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading foo...</div>
-  </svelte:fragment>
+  {/snippet}
   <div id="foo-timestamp">{foo?.timestamp}</div>
 </Deferred>
 
 <Deferred data="bar">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading bar...</div>
-  </svelte:fragment>
+  {/snippet}
   <div id="bar-timestamp">{bar?.timestamp}</div>
 </Deferred>
 

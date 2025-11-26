@@ -6,11 +6,15 @@
 </script>
 
 <Deferred data="alpha">
-  <div slot="fallback">Loading alpha...</div>
+  {#snippet fallback()}
+    <div>Loading alpha...</div>
+  {/snippet}
   {alpha}
 </Deferred>
 
 <Deferred data="beta">
-  <div slot="fallback">Loading beta...</div>
+  {#snippet fallback()}
+    <div>Loading beta...</div>
+  {/snippet}
   {beta}
 </Deferred>
