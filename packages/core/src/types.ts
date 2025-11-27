@@ -9,6 +9,7 @@ declare module 'axios' {
 
 export type DefaultInertiaConfig = {
   errorValueType: string
+  sharedPageProps: PageProps
 }
 /**
  * Designed to allow overriding of some core types using TypeScript
@@ -20,6 +21,10 @@ export type DefaultInertiaConfig = {
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
+ *     sharedPageProps: {
+ *       auth: { user: User | null }
+ *       flash: { success?: string; error?: string }
+ *     }
  *   }
  * }
  * ```
@@ -29,6 +34,7 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
   ? InertiaConfig[Key]
   : DefaultInertiaConfig[Key]
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
+export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
 
 export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
@@ -51,23 +57,60 @@ export type FormDataType<T extends object> = {
     : never
 }
 
+/**
+ * Uses `0 extends 1 & T` to detect `any` type and prevent infinite recursion.
+ */
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
-  : T extends Array<unknown>
-    ? number extends T['length']
-      ? `${number}` | `${number}.${FormDataKeys<T[number]>}`
-      :
-          | Extract<keyof T, `${number}`>
-          | {
-              [Key in Extract<keyof T, `${number}`>]: `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
-            }[Extract<keyof T, `${number}`>]
-    : string extends keyof T
-      ? string
-      :
-          | Extract<keyof T, string>
-          | {
-              [Key in Extract<keyof T, string>]: `${Key}.${FormDataKeys<T[Key]> & string}`
-            }[Extract<keyof T, string>]
+  : T extends unknown[]
+    ? ArrayFormDataKeys<T>
+    : T extends object
+      ? ObjectFormDataKeys<T>
+      : never
+
+/**
+ * Helper type for array form data keys
+ */
+type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
+  ? // Dynamic array
+    | `${number}`
+      | (0 extends 1 & T[number]
+          ? never
+          : T[number] extends FormDataConvertibleValue
+            ? never
+            : `${number}.${FormDataKeys<T[number]>}`)
+  : // Tuple with known length
+    | Extract<keyof T, `${number}`>
+      | {
+          [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
+            ? never
+            : T[Key] extends FormDataConvertibleValue
+              ? never
+              : `${Key & string}.${FormDataKeys<T[Key & string] & string>}`
+        }[Extract<keyof T, `${number}`>]
+
+/**
+ * Helper type for object form data keys
+ */
+type ObjectFormDataKeys<T extends object> = string extends keyof T
+  ? string
+  :
+      | Extract<keyof T, string>
+      | {
+          [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
+            ? never
+            : T[Key] extends FormDataConvertibleValue
+              ? never
+              : T[Key] extends any[]
+                ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                : T[Key] extends Record<string, any>
+                  ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                  : Exclude<T[Key], null | undefined> extends any[]
+                    ? never
+                    : Exclude<T[Key], null | undefined> extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<Exclude<T[Key], null | undefined>> & string}`
+                      : never
+        }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
   [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
@@ -107,9 +150,9 @@ export interface PageProps {
 
 export type ScrollProp = {
   pageName: string
-  previousPage?: number | string
-  nextPage?: number | string
-  currentPage?: number | string
+  previousPage: number | string | null
+  nextPage: number | string | null
+  currentPage: number | string | null
   reset: boolean
 }
 
@@ -149,6 +192,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
   errorBag?: string | null
+  viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onSuccess?: (page: Page) => void
@@ -156,23 +200,31 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
 
 export type PageResolver = (name: string) => Component
 
-export type PageHandler = ({
+export type PageHandler<ComponentType = Component> = ({
   component,
   page,
   preserveState,
 }: {
-  component: Component
+  component: ComponentType
   page: Page
-  preserveState: PreserveStateOption
+  preserveState: boolean
 }) => Promise<unknown>
 
 export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
+
+export type QueryStringArrayFormatOption = 'indices' | 'brackets'
 
 export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
 }
+
+export type CancelToken = {
+  cancel: VoidFunction
+}
+
+export type CancelTokenCallback = (cancelToken: CancelToken) => void
 
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
@@ -185,7 +237,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
-  queryStringArrayFormat: 'indices' | 'brackets'
+  queryStringArrayFormat: QueryStringArrayFormatOption
   async: boolean
   showProgress: boolean
   prefetch: boolean
@@ -193,6 +245,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   reset: string[]
   preserveUrl: boolean
   invalidateCacheTags: string | string[]
+  viewTransition: boolean | ((viewTransition: ViewTransition) => void)
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -324,7 +377,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
 export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
-  onCancelToken: { ({ cancel }: { cancel: VoidFunction }): void }
+  onCancelToken: CancelTokenCallback
   onBefore: GlobalEventCallback<'before', T>
   onBeforeUpdate: GlobalEventCallback<'beforeUpdate', T>
   onStart: GlobalEventCallback<'start', T>
@@ -351,10 +404,10 @@ export type PollOptions = {
 
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
-export type RouterInitParams = {
+export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
-  swapComponent: PageHandler
+  swapComponent: PageHandler<ComponentType>
 }
 
 export type PendingVisitOptions = {
@@ -376,15 +429,94 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
-export type InertiaAppResponse = Promise<{ head: string[]; body: string } | void>
+type FirstLevelOptional<T> = {
+  [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
+}
+
+interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+  resolve: TComponentResolver
+  setup: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+}
+
+export interface CreateInertiaAppOptionsForCSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+  TAdditionalInertiaAppConfig,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+  id?: string
+  page?: Page<SharedProps>
+  progress?:
+    | false
+    | {
+        delay?: number
+        color?: string
+        includeCSS?: boolean
+        showSpinner?: boolean
+      }
+  render?: undefined
+}
+
+export interface CreateInertiaAppOptionsForSSR<
+  SharedProps extends PageProps,
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+  TAdditionalInertiaAppConfig,
+> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+  id?: undefined
+  page: Page<SharedProps>
+  progress?: undefined
+  render: unknown
+}
+
+export type InertiaAppSSRResponse = { head: string[]; body: string }
+export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
+
+export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerOnUpdateCallback = (elements: string[]) => void
+export type HeadManager = {
+  forceUpdate: () => void
+  createProvider: () => {
+    preferredAttribute: () => 'data-inertia' | 'inertia'
+    reconnect: () => void
+    update: HeadManagerOnUpdateCallback
+    disconnect: () => void
+  }
+}
 
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
-export type CacheForOption = number | string
+export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd'
+export type CacheForOption = number | `${number}${TimeUnit}` | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
   cacheTags: string | string[]
+}
+
+export type InertiaAppConfig = {
+  form: {
+    recentlySuccessfulDuration: number
+    forceIndicesArrayFormatInFormData: boolean
+  }
+  // experimental: {
+  //   /* not guaranteed */
+  // }
+  future: {
+    /* planned defaults */
+    preserveEqualProps: boolean
+    useDataInertiaHeadAttribute: boolean
+    useDialogForErrorModal: boolean
+  }
+  prefetch: {
+    cacheFor: CacheForOption | CacheForOption[]
+    hoverDelay: number
+  }
+  visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
 export interface LinkComponentBaseProps
@@ -402,10 +534,10 @@ export interface LinkComponentBaseProps
       | 'headers'
       | 'queryStringArrayFormat'
       | 'async'
+      | 'viewTransition'
     > &
-      Omit<VisitCallbacks, 'onCancelToken'> & {
+      VisitCallbacks & {
         href: string | UrlMethodPair
-        onCancelToken: (cancelToken: import('axios').CancelTokenSource) => void
         prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
         cacheFor: CacheForOption | CacheForOption[]
         cacheTags: string | string[]
@@ -481,17 +613,19 @@ export type FormComponentProps = Partial<
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
+  setError(field: string, value: ErrorValue): void
+  setError(errors: Record<string, ErrorValue>): void
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
+  getData: () => Record<string, FormDataConvertible>
+  getFormData: () => FormData
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
-  errors: Record<string, string>
+  errors: Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -527,7 +661,7 @@ export interface UseInfiniteScrollOptions {
 }
 
 export interface UseInfiniteScrollDataManager {
-  getLastLoadedPage: () => number | string | undefined
+  getLastLoadedPage: () => number | string | null
   getPageName: () => string
   getRequestCount: () => number
   hasPrevious: () => boolean
@@ -544,12 +678,13 @@ export interface UseInfiniteScrollElementManager {
   refreshTriggers: () => void
   flushAll: () => void
   processManuallyAddedElements: () => void
-  processServerLoadedElements: (loadedPage?: string | number | undefined) => void
+  processServerLoadedElements: (loadedPage: string | number | null) => void
 }
 
 export interface UseInfiniteScrollProps {
   dataManager: UseInfiniteScrollDataManager
   elementManager: UseInfiniteScrollElementManager
+  flush: () => void
 }
 
 export interface InfiniteScrollSlotProps {
@@ -578,7 +713,7 @@ export interface InfiniteScrollRef {
 }
 
 export interface InfiniteScrollComponentBaseProps {
-  data?: string
+  data: string
   buffer?: number
   as?: string
   manual?: boolean

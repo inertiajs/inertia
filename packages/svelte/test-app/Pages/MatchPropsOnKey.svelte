@@ -1,16 +1,22 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo: {
-    page: number
-    data: Array<{ name: string }>
-    companies: Array<{ name: string }>
-    teams: Array<{ name: string }>
-    per_page: number
-    meta: { label: string }
+  interface ComponentProps {
+    foo: {
+      data: { id: number; name: string }[]
+      companies: { id: number; name: string }[]
+      teams: { id: number; name: string }[]
+      page: number
+      per_page: number
+      meta: { label: string }
+    }
+    bar: number[]
+    baz: number[]
   }
-  export let bar: number[]
-  export let baz: number[]
+
+  export let foo: ComponentProps['foo']
+  export let bar: ComponentProps['bar']
+  export let baz: ComponentProps['baz']
 
   let page = foo.page
 
@@ -21,8 +27,8 @@
       },
       only: ['foo', 'baz'],
       onSuccess(visit) {
-        // TODO: Refactor 'any' to a more specific type
-        page = (visit.props as any as { foo: { page: number } }).foo.page
+        // TODO: Refactor 'unknown' and make Page<ComponentProps> work
+        page = (visit.props as unknown as { foo: { page: number } }).foo.page
       },
     })
   }

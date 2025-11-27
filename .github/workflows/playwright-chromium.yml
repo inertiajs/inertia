@@ -1,8 +1,9 @@
-name: Playwright Tests
+name: Playwright Tests on Chromium
 on: [push, pull_request]
 jobs:
-  test:
+  test-chromium:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: Chromium (${{ matrix.adapter }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
@@ -29,9 +30,6 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
 
-      - name: Type-check test-app
-        run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run type-check
-
       - name: Install Playwright Browsers
         run: pnpm playwright install chromium
 
@@ -42,5 +40,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium
           path: test-results

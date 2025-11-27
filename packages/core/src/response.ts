@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
-import { get, set } from 'lodash-es'
-import { router } from '.'
+import { get, isEqual, set } from 'lodash-es'
+import { config, router } from '.'
+import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
@@ -109,7 +110,7 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return modal.show(response.data)
+      return config.get('future.useDialogForErrorModal') ? dialog.show(response.data) : modal.show(response.data)
     }
   }
 
@@ -164,6 +165,8 @@ export class Response {
     }
 
     this.mergeProps(pageResponse)
+    this.preserveEqualProps(pageResponse)
+
     await this.setRememberedState(pageResponse)
 
     this.requestParams.setPreserveOptions(pageResponse)
@@ -175,8 +178,9 @@ export class Response {
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll,
-      preserveState: this.requestParams.all().preserveState,
+      preserveScroll: this.requestParams.all().preserveScroll as boolean,
+      preserveState: this.requestParams.all().preserveState as boolean,
+      viewTransition: this.requestParams.all().viewTransition,
     })
   }
 
@@ -224,6 +228,20 @@ export class Response {
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
+  }
+
+  protected preserveEqualProps(pageResponse: Page): void {
+    if (pageResponse.component !== currentPage.get().component || config.get('future.preserveEqualProps') !== true) {
+      return
+    }
+
+    const currentPageProps = currentPage.get().props
+
+    Object.entries(pageResponse.props).forEach(([key, value]) => {
+      if (isEqual(value, currentPageProps[key])) {
+        pageResponse.props[key] = currentPageProps[key]
+      }
+    })
   }
 
   protected mergeProps(pageResponse: Page): void {

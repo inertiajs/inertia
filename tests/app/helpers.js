@@ -23,7 +23,14 @@ module.exports = {
     }
 
     if (data.component.startsWith('InfiniteScroll')) {
-      data.url = req.originalUrl
+      // Support absolute URL format for testing URL preservation
+      if (req.query.absolutePageUrl) {
+        const protocol = req.protocol
+        const host = req.get('host')
+        data.url = `${protocol}://${host}${req.originalUrl}`
+      } else {
+        data.url = req.originalUrl
+      }
     }
 
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''
@@ -44,13 +51,14 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
-      return res.json(data)
+      return res.status(200).json(data)
     }
 
-    return res.send(
+    return res.status(200).send(
       fs
         .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
         .toString()
+        .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
         .replace("'{{ placeholder }}'", JSON.stringify(data)),
     )
   },

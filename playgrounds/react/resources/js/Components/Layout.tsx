@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react'
 
 export default function Layout({ children, padding = true }: { children: React.ReactNode; padding?: boolean }) {
-  const { appName } = usePage<{ appName: string }>().props
+  const { appName } = usePage().props
 
   return (
     <>

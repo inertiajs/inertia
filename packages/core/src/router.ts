@@ -1,5 +1,6 @@
 import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
+import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent } from './events'
 import { history } from './history'
@@ -8,6 +9,7 @@ import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
 import { Request } from './request'
+import { RequestParams } from './requestParams'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
@@ -47,7 +49,11 @@ export class Router {
     interruptible: false,
   })
 
-  public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
+  public init<ComponentType = Component>({
+    initialPage,
+    resolveComponent,
+    swapComponent,
+  }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,
@@ -129,8 +135,8 @@ export class Router {
     history.remember(data, key)
   }
 
-  public restore(key = 'default'): unknown {
-    return history.restore(key)
+  public restore<T = unknown>(key = 'default'): T | undefined {
+    return history.restore(key) as T | undefined
   }
 
   public on<TEventName extends GlobalEventNames>(
@@ -243,6 +249,7 @@ export class Router {
       async: true,
       showProgress: false,
       prefetch: true,
+      viewTransition: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -290,7 +297,7 @@ export class Router {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
         {
-          cacheFor: 30_000,
+          cacheFor: config.get('prefetch.cacheFor'),
           cacheTags: [],
           ...prefetchOptions,
         },
@@ -384,21 +391,24 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const { onError, onFinish, onSuccess, ...pageParams } = params
+    const { viewTransition, onError, onFinish, onSuccess, ...pageParams } = params
+
+    const page = {
+      ...current,
+      ...pageParams,
+      props: props as Page['props'],
+    }
+
+    const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
+    const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
     currentPage
-      .set(
-        {
-          ...current,
-          ...pageParams,
-          props: props as Page['props'],
-        },
-        {
-          replace,
-          preserveScroll: params.preserveScroll,
-          preserveState: params.preserveState,
-        },
-      )
+      .set(page, {
+        replace,
+        preserveScroll,
+        preserveState,
+        viewTransition,
+      })
       .then(() => {
         const errors = currentPage.get().props.errors || {}
 
@@ -420,6 +430,7 @@ export class Router {
         async: true,
         showProgress: false,
         prefetch: true,
+        viewTransition: false,
       }),
       ...this.getVisitEvents(options),
     }
@@ -435,6 +446,12 @@ export class Router {
       href = urlMethodPair.url
       options.method = options.method ?? urlMethodPair.method
     }
+
+    const defaultVisitOptionsCallback = config.get('visitOptions')
+
+    const configuredOptions = defaultVisitOptionsCallback
+      ? defaultVisitOptionsCallback(href.toString(), cloneDeep(options)) || {}
+      : {}
 
     const mergedOptions: Visit = {
       method: 'get',
@@ -455,7 +472,9 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       invalidateCacheTags: [],
+      viewTransition: false,
       ...options,
+      ...configuredOptions,
     }
 
     const [url, _data] = transformUrlAndData(

@@ -16,7 +16,13 @@ interface FooProps {
   }
 }
 
-export default ({ bar, foo, baz }: { bar: number[]; foo: FooProps; baz: number[] }) => {
+interface PageProps {
+  bar: number[]
+  foo: FooProps
+  baz: number[]
+}
+
+export default ({ bar, foo, baz }: PageProps) => {
   const [page, setPage] = useState(foo.page)
 
   const reloadIt = () => {
@@ -25,9 +31,8 @@ export default ({ bar, foo, baz }: { bar: number[]; foo: FooProps; baz: number[]
         page,
       },
       only: ['foo', 'baz'],
-      onSuccess(visit) {
-        // TODO: Refactor 'any' to a more specific type
-        setPage((visit.props as any).foo.page)
+      onSuccess(page) {
+        setPage((page.props as unknown as PageProps).foo.page)
       },
     })
   }

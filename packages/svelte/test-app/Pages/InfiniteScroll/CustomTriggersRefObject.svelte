@@ -17,9 +17,9 @@
     startElement={() => tableHeader}
     endElement={() => tableFooter}
     itemsElement={() => tableBody}
-    let:exposedSlot
+    let:loading
   >
-    <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
+    <div style="height: 300px; width: 100%; text-align: center; line-height: 300px; border: 1px solid #ccc">Spacer</div>
 
     <table style="width: 100%; border-collapse: collapse">
       <thead bind:this={tableHeader} style="padding: 10px">
@@ -37,7 +37,7 @@
           </tr>
         {/each}
 
-        {#if exposedSlot.loadingPrevious || exposedSlot.loadingNext}
+        {#if loading}
           <tr>
             <td colspan="2" style="padding: 12px; border: 1px solid #ccc; text-align: center"> Loading... </td>
           </tr>
@@ -53,6 +53,6 @@
       </tfoot>
     </table>
 
-    <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">Spacer</div>
+    <div style="height: 300px; width: 100%; text-align: center; line-height: 300px; border: 1px solid #ccc">Spacer</div>
   </InfiniteScroll>
 </div>

@@ -1,17 +1,17 @@
 import { escape } from 'lodash-es'
-import React, { FunctionComponent, useContext, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
 type InertiaHeadProps = {
   title?: string
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 type InertiaHead = FunctionComponent<InertiaHeadProps>
 
 const Head: InertiaHead = function ({ children, title }) {
   const headManager = useContext(HeadContext)
-  const provider = useMemo(() => headManager.createProvider(), [headManager])
+  const provider = useMemo(() => headManager!.createProvider(), [headManager])
   const isServer = typeof window === 'undefined'
 
   useEffect(() => {
@@ -22,8 +22,9 @@ const Head: InertiaHead = function ({ children, title }) {
     }
   }, [provider, children, title])
 
-  function isUnaryTag(node) {
+  function isUnaryTag(node: ReactElement<any>) {
     return (
+      typeof node.type === 'string' &&
       [
         'area',
         'base',
@@ -44,59 +45,76 @@ const Head: InertiaHead = function ({ children, title }) {
     )
   }
 
-  function renderTagStart(node) {
+  function renderTagStart(node: ReactElement<any>): string {
     const attrs = Object.keys(node.props).reduce((carry, name) => {
       if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
         return carry
       }
+
       const value = String(node.props[name])
+
       if (value === '') {
         return carry + ` ${name}`
-      } else {
-        return carry + ` ${name}="${escape(value)}"`
       }
+
+      return carry + ` ${name}="${escape(value)}"`
     }, '')
-    return `<${node.type}${attrs}>`
+
+    return `<${String(node.type)}${attrs}>`
   }
 
-  function renderTagChildren(node) {
-    return typeof node.props.children === 'string'
-      ? node.props.children
-      : node.props.children.reduce((html, child) => html + renderTag(child), '')
+  function renderTagChildren(node: ReactElement<any>): string {
+    const { children } = node.props
+
+    if (typeof children === 'string') {
+      return children
+    }
+
+    if (Array.isArray(children)) {
+      return children.reduce((html, child) => html + renderTag(child), '')
+    }
+
+    return ''
   }
 
-  function renderTag(node) {
+  function renderTag(node: ReactElement<any>): string {
     let html = renderTagStart(node)
+
     if (node.props.children) {
       html += renderTagChildren(node)
     }
+
     if (node.props.dangerouslySetInnerHTML) {
       html += node.props.dangerouslySetInnerHTML.__html
     }
+
     if (!isUnaryTag(node)) {
-      html += `</${node.type}>`
+      html += `</${String(node.type)}>`
     }
+
     return html
   }
 
-  function ensureNodeHasInertiaProp(node) {
+  function ensureNodeHasInertiaProp(node: ReactElement<any>) {
     return React.cloneElement(node, {
-      inertia: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
+      [provider.preferredAttribute()]: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
     })
   }
 
-  function renderNode(node) {
+  function renderNode(node: ReactElement<any>) {
     return renderTag(ensureNodeHasInertiaProp(node))
   }
 
-  function renderNodes(nodes) {
-    const computed = React.Children.toArray(nodes)
+  function renderNodes(nodes: ReactNode) {
+    const elements = React.Children.toArray(nodes)
       .filter((node) => node)
-      .map((node) => renderNode(node))
-    if (title && !computed.find((tag) => tag.startsWith('<title'))) {
-      computed.push(`<title inertia>${title}</title>`)
+      .map((node) => renderNode(node as ReactElement<any>))
+
+    if (title && !elements.find((tag) => tag.startsWith('<title'))) {
+      elements.push(`<title ${provider.preferredAttribute()}>${title}</title>`)
     }
-    return computed
+
+    return elements
   }
 
   if (isServer) {

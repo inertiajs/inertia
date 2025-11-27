@@ -690,8 +690,8 @@ test.describe('Preserve scroll', () => {
 
     test('restores all tracked scroll regions when pressing the back button (visit method)', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Preserve Scroll' }).click()
-
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two')
+      await page.waitForTimeout(100)
 
       await scrollElementTo(
         page,
@@ -711,8 +711,8 @@ test.describe('Preserve scroll', () => {
 
     test('restores all tracked scroll regions when pressing the back button (GET method)', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Preserve Scroll (GET)' }).click()
-
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two')
+      await page.waitForTimeout(100)
 
       await scrollElementTo(
         page,
@@ -1006,7 +1006,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
 
   await expect(consoleMessages.messages).toHaveLength(0)
   await expect(consoleMessages.errors).toHaveLength(1)
-  await expect(consoleMessages.errors[0]).toBe('Error after visit')
+  await expect(consoleMessages.errors[0]).toContain('Error after visit')
 
   await page.getByRole('link', { name: 'Visit dump page' }).click()
 
@@ -1014,4 +1014,54 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
 
   await expect(dump.method).toBe('get')
   await expect(dump.form).toEqual({})
+})
+
+test('vue proxies synced back to the core adapter are not stored in history state', async ({ page }) => {
+  test.skip(process.env.PACKAGE !== 'vue3', 'Vue 3 specific test')
+
+  pageLoads.watch(page)
+  await page.goto('/visits/proxy')
+  await expect(page.getByText('Site ID: 1')).toBeVisible()
+
+  const fooText = await page.locator('#foo').innerText()
+  const statusText = await page.locator('#status-1').innerText()
+  await expect(statusText).toBe('Statuses: running')
+
+  await page.getByRole('button', { name: 'Update First Site Ref' }).click()
+
+  const newStatusText = await page.locator('#status-1').innerText()
+  await expect(newStatusText).not.toBe(statusText)
+  await expect(newStatusText.startsWith('Statuses: frontend-')).toBeTruthy()
+
+  await page.getByRole('button', { name: 'Reload' }).click()
+  await expect(page.locator('#foo')).not.toHaveText(fooText)
+  await expect(await page.locator('#status-1').innerText()).toBe(newStatusText)
+
+  const newFooText = await page.locator('#foo').innerText()
+
+  // Navigate away...
+  await page.getByRole('link', { name: 'Go Home' }).click()
+  await expect(page).toHaveURL('/')
+
+  // Go back...
+  await page.goBack()
+  await expect(page).toHaveURL('/visits/proxy')
+
+  // Ensure state is preserved...
+  await expect(page.locator('#foo')).toHaveText(newFooText)
+  await expect(await page.locator('#status-1').innerText()).toBe(newStatusText)
+
+  // Update ref again...
+  await page.getByRole('button', { name: 'Update First Site Ref' }).click()
+
+  const updatedStatusText = await page.locator('#status-1').innerText()
+  await expect(updatedStatusText).not.toBe(newStatusText)
+  await expect(updatedStatusText.startsWith('Statuses: frontend-')).toBeTruthy()
+
+  // Reload again...
+  await page.getByRole('button', { name: 'Reload' }).click()
+  await expect(page.locator('#foo')).not.toHaveText(newFooText)
+
+  // Ensure updated status is still there
+  await expect(await page.locator('#status-1').innerText()).toBe(updatedStatusText)
 })

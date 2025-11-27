@@ -240,6 +240,8 @@ class PrefetchedRequests {
         'showProgress',
         'replace',
         'prefetch',
+        'preserveScroll',
+        'preserveState',
         'onBefore',
         'onBeforeUpdate',
         'onStart',
@@ -252,6 +254,7 @@ class PrefetchedRequests {
         'onCancelToken',
         'onPrefetching',
         'async',
+        'viewTransition',
       ],
     )
   }

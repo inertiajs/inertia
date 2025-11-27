@@ -19,3 +19,7 @@ const validation = <T extends Record<string, FormDataConvertible>>(errors: () =>
   return { filterAndMap, unique }
 }
 </script>
+
+<template>
+  <button @click="validation(() => ({ name: 'Validation error' }))">Handle</button>
+</template>

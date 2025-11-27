@@ -6,10 +6,10 @@
 </script>
 
 <InfiniteScroll data="users" style="display: grid; gap: 20px" manual>
-  <div slot="previous" let:exposedPrevious>
-    <p>Has more previous items: {exposedPrevious.hasMore}</p>
-    <button on:click={exposedPrevious.fetch}>
-      {exposedPrevious.loading ? 'Loading previous items...' : 'Load previous items'}
+  <div slot="previous" let:hasMore let:loading let:fetch>
+    <p>Has more previous items: {hasMore}</p>
+    <button on:click={fetch}>
+      {loading ? 'Loading previous items...' : 'Load previous items'}
     </button>
   </div>
 
@@ -17,10 +17,10 @@
     <UserCard {user} />
   {/each}
 
-  <div slot="next" let:exposedNext>
-    <p>Has more next items: {exposedNext.hasMore}</p>
-    <button on:click={exposedNext.fetch}>
-      {exposedNext.loading ? 'Loading next items...' : 'Load next items'}
+  <div slot="next" let:hasMore let:loading let:fetch>
+    <p>Has more next items: {hasMore}</p>
+    <button on:click={fetch}>
+      {loading ? 'Loading next items...' : 'Load next items'}
     </button>
   </div>
 </InfiniteScroll>

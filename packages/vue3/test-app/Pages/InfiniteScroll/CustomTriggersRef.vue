@@ -23,7 +23,7 @@ const tableBody = ref<HTMLElement>()
       :items-element="() => tableBody"
       #default="{ loadingPrevious, loadingNext }"
     >
-      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+      <div style="height: 300px; width: 100%; text-align: center; line-height: 300px; border: 1px solid #ccc">
         Spacer
       </div>
 
@@ -54,7 +54,7 @@ const tableBody = ref<HTMLElement>()
         </tfoot>
       </table>
 
-      <div style="height: 500px; width: 100%; text-align: center; line-height: 500px; border: 1px solid #ccc">
+      <div style="height: 300px; width: 100%; text-align: center; line-height: 300px; border: 1px solid #ccc">
         Spacer
       </div>
     </InfiniteScroll>

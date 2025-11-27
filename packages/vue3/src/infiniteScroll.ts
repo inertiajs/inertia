@@ -6,10 +6,13 @@ import {
   InfiniteScrollSlotProps,
   useInfiniteScroll,
 } from '@inertiajs/core'
-import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, watch } from 'vue'
+import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
 
 // Vue-specific element resolver
-const resolveHTMLElement = (value, fallback): HTMLElement | null => {
+const resolveHTMLElement = (
+  value: string | object | (() => HTMLElement | null),
+  fallback: HTMLElement | null,
+): HTMLElement | null => {
   if (!value) {
     return fallback
   }
@@ -29,9 +32,16 @@ const resolveHTMLElement = (value, fallback): HTMLElement | null => {
 
 const InfiniteScroll = defineComponent({
   name: 'InfiniteScroll',
+  slots: Object as SlotsType<{
+    default: InfiniteScrollSlotProps
+    previous: InfiniteScrollActionSlotProps
+    next: InfiniteScrollActionSlotProps
+    loading: InfiniteScrollActionSlotProps
+  }>,
   props: {
     data: {
       type: String as PropType<InfiniteScrollComponentBaseProps['data']>,
+      required: true,
     },
     buffer: {
       type: Number as PropType<InfiniteScrollComponentBaseProps['buffer']>,
@@ -101,7 +111,11 @@ const InfiniteScroll = defineComponent({
     const loadingNext = ref(false)
     const requestCount = ref(0)
 
-    const { dataManager, elementManager } = useInfiniteScroll({
+    const {
+      dataManager,
+      elementManager,
+      flush: flushInfiniteScroll,
+    } = useInfiniteScroll({
       // Data
       getPropName: () => props.data,
       inReverseMode: () => props.reverse,
@@ -166,10 +180,7 @@ const InfiniteScroll = defineComponent({
       }
     })
 
-    onUnmounted(() => {
-      dataManager.removeEventListener()
-      elementManager.flushAll()
-    })
+    onUnmounted(flushInfiniteScroll)
 
     watch(
       () => [autoLoad.value, props.onlyNext, props.onlyPrevious],
@@ -218,7 +229,7 @@ const InfiniteScroll = defineComponent({
               ? slots.previous(exposedPrevious)
               : loadingPrevious.value
                 ? slots.loading?.(exposedPrevious)
-                : null,
+                : undefined,
           ),
         )
       }
@@ -231,7 +242,7 @@ const InfiniteScroll = defineComponent({
             loading: loadingPrevious.value || loadingNext.value,
             loadingPrevious: loadingPrevious.value,
             loadingNext: loadingNext.value,
-          } as InfiniteScrollSlotProps),
+          }),
         ),
       )
 
@@ -251,7 +262,7 @@ const InfiniteScroll = defineComponent({
           h(
             'div',
             { ref: endElementRef },
-            slots.next ? slots.next(exposedNext) : loadingNext.value ? slots.loading?.(exposedNext) : null,
+            slots.next ? slots.next(exposedNext) : loadingNext.value ? slots.loading?.(exposedNext) : undefined,
           ),
         )
       }

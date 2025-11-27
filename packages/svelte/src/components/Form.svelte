@@ -5,6 +5,7 @@
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type Method,
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
@@ -45,17 +46,17 @@
   let isDirty = false
   let defaultData: FormData = new FormData()
 
-  $: _method = isUrlMethodPair(action) ? action.method : (method.toLowerCase() as FormComponentProps['method'])
-  $: _action = isUrlMethodPair(action) ? action.url : action
+  $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
+  $: _action = isUrlMethodPair(action) ? action.url : (action as string)
 
-  function getFormData(): FormData {
+  export function getFormData(): FormData {
     return new FormData(formElement)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  function getData(): Record<string, FormDataConvertible> {
+  export function getData(): Record<string, FormDataConvertible> {
     return formDataToObject(getFormData())
   }
 
@@ -80,6 +81,7 @@
 
     const submitOptions: FormSubmitOptions = {
       headers,
+      queryStringArrayFormat,
       errorBag,
       showProgress,
       invalidateCacheTags,
@@ -117,7 +119,7 @@
       ...options,
     }
 
-    $form.transform(() => transform(_data)).submit(_method, url, submitOptions)
+    $form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
   }
 
   function handleSubmit(event: Event) {
@@ -197,5 +199,7 @@
     {isDirty}
     {submit}
     {defaults}
+    {getData}
+    {getFormData}
   />
 </form>

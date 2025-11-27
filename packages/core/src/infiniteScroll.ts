@@ -1,3 +1,4 @@
+import { requestAnimationFrame } from './domUtils'
 import { useInfiniteScrollData } from './infiniteScroll/data'
 import { useInfiniteScrollElementManager } from './infiniteScroll/elements'
 import { useInfiniteScrollQueryString } from './infiniteScroll/queryString'
@@ -35,19 +36,19 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     // so they don't get confused with server-loaded content
     onBeforeUpdate: elementManager.processManuallyAddedElements,
     // After successful request, tag new server content
-    onCompletePreviousRequest: (loadedPage?: string | number) => {
-      setTimeout(() => {
+    onCompletePreviousRequest: (loadedPage) => {
+      options.onCompletePreviousRequest()
+      requestAnimationFrame(() => {
         elementManager.processServerLoadedElements(loadedPage)
-        options.onCompletePreviousRequest()
-        window.queueMicrotask(elementManager.refreshTriggers)
-      })
+        elementManager.refreshTriggers()
+      }, 2)
     },
-    onCompleteNextRequest: (loadedPage?: string | number) => {
-      setTimeout(() => {
+    onCompleteNextRequest: (loadedPage) => {
+      options.onCompleteNextRequest()
+      requestAnimationFrame(() => {
         elementManager.processServerLoadedElements(loadedPage)
-        options.onCompleteNextRequest()
-        window.queueMicrotask(elementManager.refreshTriggers)
-      })
+        elementManager.refreshTriggers()
+      }, 2)
     },
   })
 
@@ -91,5 +92,10 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
   return {
     dataManager,
     elementManager,
+    flush: () => {
+      dataManager.removeEventListener()
+      elementManager.flushAll()
+      queryStringManager.cancel()
+    },
   }
 }
