@@ -10,7 +10,7 @@
 
   let { data, fallback, children }: Props = $props()
 
-  const keys = Array.isArray(data) ? data : [data]
+  const keys = $derived(Array.isArray(data) ? data : [data])
   let loaded = $state(false)
 
   const isServer = typeof window === 'undefined'
