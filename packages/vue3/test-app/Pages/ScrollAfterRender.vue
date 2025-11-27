@@ -45,7 +45,7 @@ function beforeNavigate() {
     >
       Go to page {{ page + 1 }}
     </Link>
-    <div v-for="i in [...Array(1000).keys()]" :key="i">
+    <div v-for="i in [...Array(500).keys()]" :key="i">
       <p>
         Sunt culpa sit sunt enim aliquip. Esse ea ea quis voluptate. Enim consectetur aliqua ex ex magna cupidatat id
         minim sit elit. Amet pariatur occaecat pariatur duis eiusmod dolore magna. Et commodo cupidatat in commodo elit

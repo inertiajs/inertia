@@ -35,7 +35,7 @@ export default ({ page }: { page: number }) => {
         >
           Go to page {page + 1}
         </Link>
-        {Array.from({ length: 1000 }).map(() => (
+        {Array(500).map(() => (
           <div>
             <p>
               Sunt culpa sit sunt enim aliquip. Esse ea ea quis voluptate. Enim consectetur aliqua ex ex magna cupidatat
