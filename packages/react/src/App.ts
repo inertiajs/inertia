@@ -14,6 +14,7 @@ import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
+let swapPromise: ((value:unknown) => void) | null = null
 let swapComponent: PageHandler<ReactComponent> = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
@@ -94,7 +95,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
   }, [])
 
   useEffect(() => {
-    swapPromise?.()
+    swapPromise?.(true)
     swapPromise = null
   }, [swapPromise])
 
