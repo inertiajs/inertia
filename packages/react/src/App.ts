@@ -10,7 +10,7 @@ import {
 import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
-import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
+import { LayoutComponent, LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
@@ -101,19 +101,22 @@ export default function App<SharedProps extends PageProps = PageProps>({
     children ||
     (({ Component, props, key }) => {
       const child = createElement(Component, { key, ...props })
+      const layout = Component.layout
+      if (!layout) return child
 
-      if (typeof Component.layout === 'function') {
-        return (Component.layout as LayoutFunction)(child)
+      if (typeof layout === 'function') {
+        try {
+          return (layout as LayoutFunction)(child)
+        } catch {
+          return createElement(layout as LayoutComponent, { ...props, children: child })
+        }
       }
 
-      if (Array.isArray(Component.layout)) {
-        return (Component.layout as any)
-          .concat(child)
-          .reverse()
-          .reduce((children: any, Layout: any) => createElement(Layout, { children, ...props }))
-      }
-
-      return child
+      const layouts = Array.isArray(layout) ? layout : [layout]
+      return layouts.reduceRight<ReactNode>(
+        (acc, Layout) => createElement(Layout as LayoutComponent, { ...props, children: acc }),
+        child,
+      )
     })
 
   return createElement(
