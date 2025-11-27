@@ -159,11 +159,3 @@ const testGetFormData = () => {
     <div v-else id="child-no-context">⚠ No form context available</div>
   </div>
 </template>
-
-<style scoped>
-button {
-  margin: 2px;
-  padding: 5px 10px;
-  font-size: 12px;
-}
-</style>
