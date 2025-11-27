@@ -7,13 +7,14 @@ export default ({ page }: { page: number }) => {
 
     const originalScrollTo = window.scrollTo.bind(window)
 
-    window.scrollTo = (...args: any[]) => {
-      const y = typeof args[0] === 'number' ? args[1] : (args[0]?.top ?? 0)
+    window.scrollTo = ((xOrOptions: number | ScrollToOptions, y?: number) => {
+      const firstArgIsNumber = typeof xOrOptions === 'number'
+      const scrollY = firstArgIsNumber ? y : (xOrOptions?.top ?? 0)
 
-      console.log('ScrollY', y)
+      console.log('ScrollY', scrollY)
 
-      return originalScrollTo(...args)
-    }
+      return firstArgIsNumber ? originalScrollTo(xOrOptions, y!) : originalScrollTo(xOrOptions)
+    }) as typeof window.scrollTo
   }
 
   console.log('Render')

@@ -8,13 +8,13 @@ import {
   router,
 } from '@inertiajs/core'
 import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
-let swapPromise: ((value: unknown) => void) | null = null
 let swapComponent: PageHandler<ReactComponent> = async () => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
@@ -80,24 +80,17 @@ export default function App<SharedProps extends PageProps = PageProps>({
         return
       }
 
-      setCurrent((current) => ({
-        component,
-        page,
-        key: preserveState ? current.key : Date.now(),
-      }))
-
-      return new Promise((resolve) => {
-        swapPromise = resolve
-      })
+      flushSync(() =>
+        setCurrent((current) => ({
+          component,
+          page,
+          key: preserveState ? current.key : Date.now(),
+        })),
+      )
     }
 
     router.on('navigate', () => headManager.forceUpdate())
   }, [])
-
-  useEffect(() => {
-    swapPromise?.(true)
-    swapPromise = null
-  }, [swapPromise])
 
   if (!current.component) {
     return createElement(
