@@ -845,11 +845,15 @@ test.describe('scroll', () => {
 
     consoleMessages.listen(page)
 
-    await page.getByRole('link', { exact: true, name: 'Go to page 2' }).click()
-    await expect(page).toHaveURL('/scroll-after-render/2')
+    const tries = 20
 
-    // Scroll a bit down before the next navigation, then render before scrolling up...
-    await expect(consoleMessages.messages).toEqual(['ScrollY 100', 'Render', 'ScrollY 0'])
+    for (let i = 2; i < tries + 2; i++) {
+      await page.getByRole('link', { exact: true, name: 'Go to page ' + i }).click()
+      await expect(page).toHaveURL('/scroll-after-render/' + i)
+    }
+
+    const expectedMessages = Array.from({ length: tries }, () => ['ScrollY 100', 'Render', 'ScrollY 0']).flat()
+    await expect(consoleMessages.messages).toEqual(expectedMessages)
   })
 })
 
