@@ -1,12 +1,14 @@
 import { Link } from '@inertiajs/react'
-import { useEffect } from 'react'
 
 export default ({ page }: { page: number }) => {
-  useEffect(() => {
-    console.log('LongPage mounted!' + Date.now())
-  }, [])
+  if (!window._scroll_logger_initialized) {
+    window._scroll_logger_initialized = true
+    window.addEventListener('scroll', () => console.log('ScrollY', window.scrollY))
+  }
 
-  return Array.from({ length: 3000 }, (_, i) => (
+  console.log('Render')
+
+  return Array.from({ length: 4000 }, (_, i) => (
     <>
       <h1 style={{ fontSize: '40px' }}>Article Header</h1>
       {i === 0 && <h2 style={{ fontSize: '40px' }}>Page {page}</h2>}
@@ -18,7 +20,11 @@ export default ({ page }: { page: number }) => {
           fugiat mollit eiusmod. Laboris voluptate veniam consequat proident in nulla irure velit.
         </p>
         {i === 0 && (
-          <Link href={`/long-page/${page + 1}`} style={{ display: 'block', marginTop: '20px' }}>
+          <Link
+            href={`/long-page/${page + 1}`}
+            style={{ display: 'block', marginTop: '20px' }}
+            onBefore={() => window.scrollTo(0, 100)}
+          >
             Go to page {page + 1}
           </Link>
         )}

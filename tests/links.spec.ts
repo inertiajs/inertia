@@ -816,27 +816,61 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   })
 })
 
-test('scrolls to the fragment on initial page load', async ({ page }) => {
-  await page.goto('/article#far-down')
-  await expect(page.getByRole('heading', { name: 'Article Header' })).toBeVisible()
+test.describe('scroll', () => {
+  test('scrolls to the fragment on initial page load', async ({ page }) => {
+    await page.goto('/article#far-down')
+    await expect(page.getByRole('heading', { name: 'Article Header' })).toBeVisible()
 
-  const scrollTop = await page.evaluate(() => document.documentElement.scrollTop)
-  expect(scrollTop).toBeGreaterThan(500)
-})
+    const scrollTop = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(scrollTop).toBeGreaterThan(500)
+  })
 
-test('does not scroll when clicking the same fragment link', async ({ page }) => {
-  /** @see https://github.com/inertiajs/inertia/issues/1921 */
-  await page.goto('/article#far-down')
+  test('does not scroll when clicking the same fragment link', async ({ page }) => {
+    /** @see https://github.com/inertiajs/inertia/issues/1921 */
+    await page.goto('/article#far-down')
 
-  await page.getByRole('button', { exact: true, name: 'Enable Smooth Scroll' }).click()
-  await page.getByRole('button', { exact: true, name: 'Clear Scroll Log' }).click()
-  await expect(page.getByText('Scroll log: []')).toBeVisible()
+    await page.getByRole('button', { exact: true, name: 'Enable Smooth Scroll' }).click()
+    await page.getByRole('button', { exact: true, name: 'Clear Scroll Log' }).click()
+    await expect(page.getByText('Scroll log: []')).toBeVisible()
 
-  // Click the same link again
-  for (let i = 0; i < 5; i++) {
-    await page.getByRole('link', { exact: true, name: 'Article Far Down' }).click()
-  }
-  await expect(page.getByText('Scroll log: []')).toBeVisible()
+    // Click the same link again
+    for (let i = 0; i < 5; i++) {
+      await page.getByRole('link', { exact: true, name: 'Article Far Down' }).click()
+    }
+    await expect(page.getByText('Scroll log: []')).toBeVisible()
+  })
+
+  test('scrolls to top after the page has been rendered', async ({ page }) => {
+    test.setTimeout(30_000)
+
+    await page.goto('/long-page/1')
+
+    consoleMessages.listen(page)
+
+    const tries = 10
+
+    for (let i = 2; i < tries + 2; i++) {
+      await page.getByRole('link', { exact: true, name: 'Go to page ' + i }).click()
+      await expect(page).toHaveURL('/long-page/' + i)
+    }
+
+    // Expectred log
+    //     [
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0',
+    //   'ScrollY 100', 'Render', 'ScrollY 0'
+    // ]
+
+    const expectedMessages = Array.from({ length: tries }, () => ['ScrollY 100', 'Render', 'ScrollY 0']).flat()
+    await expect(consoleMessages.messages).toEqual(expectedMessages)
+  })
 })
 
 test.describe('partial reloads', () => {

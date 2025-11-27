@@ -86,9 +86,9 @@ export default function App<SharedProps extends PageProps = PageProps>({
         key: preserveState ? current.key : Date.now(),
       }))
 
-      return new Promise((resolve) => {
-        swapPromise = resolve
-      })
+      // return new Promise((resolve) => {
+      //   swapPromise = resolve
+      // })
     }
 
     router.on('navigate', () => headManager.forceUpdate())
