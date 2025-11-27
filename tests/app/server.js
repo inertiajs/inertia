@@ -62,6 +62,13 @@ app.get('/article', (req, res) =>
   }),
 )
 
+app.get('/scroll-after-render/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollAfterRender',
+    props: { page: parseInt(req.params.page) },
+  }),
+)
+
 app.get('/links/partial-reloads', (req, res) =>
   inertia.render(req, res, {
     component: 'Links/PartialReloads',
