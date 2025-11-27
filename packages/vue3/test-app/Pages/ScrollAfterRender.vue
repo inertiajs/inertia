@@ -19,9 +19,9 @@ if (!window._scroll_to_patched) {
 
     return firstArgIsNumber ? originalScrollTo(xOrOptions, y!) : originalScrollTo(xOrOptions)
   }) as typeof window.scrollTo
+} else {
+  console.log('Render')
 }
-
-console.log('Render')
 
 function beforeNavigate() {
   window.scrollTo(0, 100)

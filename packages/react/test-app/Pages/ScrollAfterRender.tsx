@@ -15,9 +15,9 @@ export default ({ page }: { page: number }) => {
 
       return firstArgIsNumber ? originalScrollTo(xOrOptions, y!) : originalScrollTo(xOrOptions)
     }) as typeof window.scrollTo
+  } else {
+    console.log('Render')
   }
-
-  console.log('Render')
 
   return (
     <>
