@@ -613,8 +613,8 @@ export type FormComponentProps = Partial<
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
+  setError(field: string, value: ErrorValue): void
+  setError(errors: Record<string, ErrorValue>): void
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
@@ -625,7 +625,7 @@ export type FormComponentMethods = {
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
-  errors: Record<string, string>
+  errors: Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
