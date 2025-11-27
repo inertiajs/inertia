@@ -25,6 +25,29 @@
     [key: string]: any
   }
 
+  // Are these defined anywhere else?
+  type Callbacks = {
+    onfocus?: () => void
+    onblur?: () => void
+    onclick?: () => void
+    ondblclick?: () => void
+    onmousedown?: () => void
+    onmousemove?: () => void
+    onmouseout?: () => void
+    onmouseover?: () => void
+    onmouseup?: () => void
+    'oncancel-token'?: () => void
+    onbefore?: () => void
+    onstart?: () => void
+    onprogress?: () => void
+    onfinish?: () => void
+    oncancel?: () => void
+    onsuccess?: () => void
+    onerror?: () => void
+    onprefetching?: () => void
+    onprefetched?: () => void
+  }
+
   let {
     href = '',
     as = 'a',
@@ -45,7 +68,7 @@
     viewTransition = false,
     children,
     ...rest
-  }: Props = $props()
+  }: Props & Callbacks = $props()
 
   let _method = $derived(isUrlMethodPair(href) ? href.method : method)
   let _href = $derived(isUrlMethodPair(href) ? href.url : href)
