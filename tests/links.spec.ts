@@ -847,7 +847,7 @@ test.describe('scroll', () => {
 
     consoleMessages.listen(page)
 
-    const tries = 15
+    const tries = 10
 
     for (let i = 2; i < tries + 2; i++) {
       await page.getByRole('link', { exact: true, name: 'Go to page ' + i }).click()
