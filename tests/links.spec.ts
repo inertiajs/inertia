@@ -816,6 +816,14 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   })
 })
 
+test('scrolls to the fragment on initial page load', async ({ page }) => {
+  await page.goto('/article#far-down')
+  await expect(page.getByRole('heading', { name: 'Article Header' })).toBeVisible()
+
+  const scrollTop = await page.evaluate(() => document.documentElement.scrollTop)
+  expect(scrollTop).toBeGreaterThan(500)
+})
+
 test('does not scroll when clicking the same fragment link', async ({ page }) => {
   /** @see https://github.com/inertiajs/inertia/issues/1921 */
   await page.goto('/article#far-down')
