@@ -165,6 +165,49 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
+test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({ page }) => {
+  // Skip on WebKit
+  if (page.context().browser().browserType().name() === 'webkit') {
+    return test.skip('Bug in Playwright + WebKit causing the context menu to stick around')
+  }
+
+  // These two prefetch requests should be made on mount
+  const prefetch2 = page.waitForResponse('prefetch/2')
+  const prefetch4 = page.waitForResponse('prefetch/4')
+
+  await page.goto('prefetch/1')
+
+  await prefetch2
+  await prefetch4
+
+  const link = page.getByRole('link', { name: 'On Click', exact: true })
+  await expect(link).toBeVisible()
+
+  requests.listen(page)
+
+  // Right-click (secondary button) should not trigger navigation or prefetch
+  await link.click({ button: 'right' })
+  await page.waitForTimeout(100)
+  await expect(requests.requests.length).toBe(0)
+  await expect(page).toHaveURL('prefetch/1')
+
+  // Middle-click should also not trigger navigation or prefetch
+  await link.click({ button: 'middle' })
+  await page.waitForTimeout(100)
+  await expect(requests.requests.length).toBe(0)
+  await expect(page).toHaveURL('prefetch/1')
+
+  // Left-click should work normally (mousedown prefetches, mouseup navigates)
+  await link.hover()
+  await page.mouse.down()
+  await page.waitForResponse('prefetch/3')
+  await expect(page).toHaveURL('prefetch/1')
+  requests.listen(page)
+  await page.mouse.up()
+  await isPrefetchPage(page, 3)
+  await expect(requests.requests.length).toBe(0)
+})
+
 test('can cache links with single cache value', async ({ page }) => {
   await page.goto('prefetch/swr/1')
 
@@ -576,4 +619,31 @@ test.describe('tags', () => {
       })
     })
   })
+})
+
+test('can use prefetched requests with preserveState', async ({ page }) => {
+  await page.goto('/prefetch/preserve-state')
+
+  const prefetchResponse = page.waitForResponse('prefetch/preserve-state?page=2')
+  await page.getByRole('button', { name: 'Prefetch Page 2' }).click()
+  await prefetchResponse
+
+  requests.listen(page)
+
+  // Test both preserveState options use cache
+  await page.getByRole('button', { name: 'Load Page 2 (preserveState: false)' }).click()
+  await expect(page.getByText('Current Page: 2')).toBeVisible()
+  await expect(requests.requests.length).toBe(0)
+
+  await page.goto('/prefetch/preserve-state')
+
+  const prefetchResponse2 = page.waitForResponse('prefetch/preserve-state?page=2')
+  await page.getByRole('button', { name: 'Prefetch Page 2' }).click()
+  await prefetchResponse2
+
+  requests.listen(page)
+
+  await page.getByRole('button', { name: 'Load Page 2 (preserveState: true)' }).click()
+  await expect(page.getByText('Current Page: 2')).toBeVisible()
+  await expect(requests.requests.length).toBe(0)
 })

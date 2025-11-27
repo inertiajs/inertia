@@ -20,12 +20,11 @@ test('calls viewTransition callbacks when using callback function', async ({ pag
   await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
 
   await page.getByRole('button', { name: 'Transition with callback' }).click()
+  await page.waitForEvent('console', (msg) => msg.text() === 'finished')
 
   await expect(page).toHaveURL('/view-transition/page-b')
   await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-  // Wait for the 'finished' promise to resolve
-  await page.waitForEvent('console', (msg) => msg.text() === 'finished')
   await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
 })
 

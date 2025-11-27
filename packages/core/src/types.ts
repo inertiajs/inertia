@@ -57,28 +57,60 @@ export type FormDataType<T extends object> = {
     : never
 }
 
-// Note: `0 extends 1 & T` detects `any` type to prevent infinite recursion.
+/**
+ * Uses `0 extends 1 & T` to detect `any` type and prevent infinite recursion.
+ */
 export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
-  : T extends Array<unknown>
-    ? number extends T['length']
-      ? `${number}` | (0 extends 1 & T[number] ? never : `${number}.${FormDataKeys<T[number]>}`)
-      :
-          | Extract<keyof T, `${number}`>
-          | {
-              [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key & string]
-                ? never
-                : `${Key & string}.${FormDataKeys<T[Key & string]> & string}`
-            }[Extract<keyof T, `${number}`>]
-    : string extends keyof T
-      ? string
-      :
-          | Extract<keyof T, string>
-          | {
-              [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
-                ? never
-                : `${Key}.${FormDataKeys<T[Key]> & string}`
-            }[Extract<keyof T, string>]
+  : T extends unknown[]
+    ? ArrayFormDataKeys<T>
+    : T extends object
+      ? ObjectFormDataKeys<T>
+      : never
+
+/**
+ * Helper type for array form data keys
+ */
+type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
+  ? // Dynamic array
+    | `${number}`
+      | (0 extends 1 & T[number]
+          ? never
+          : T[number] extends FormDataConvertibleValue
+            ? never
+            : `${number}.${FormDataKeys<T[number]>}`)
+  : // Tuple with known length
+    | Extract<keyof T, `${number}`>
+      | {
+          [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
+            ? never
+            : T[Key] extends FormDataConvertibleValue
+              ? never
+              : `${Key & string}.${FormDataKeys<T[Key & string] & string>}`
+        }[Extract<keyof T, `${number}`>]
+
+/**
+ * Helper type for object form data keys
+ */
+type ObjectFormDataKeys<T extends object> = string extends keyof T
+  ? string
+  :
+      | Extract<keyof T, string>
+      | {
+          [Key in Extract<keyof T, string>]: 0 extends 1 & T[Key]
+            ? never
+            : T[Key] extends FormDataConvertibleValue
+              ? never
+              : T[Key] extends any[]
+                ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                : T[Key] extends Record<string, any>
+                  ? `${Key}.${FormDataKeys<T[Key]> & string}`
+                  : Exclude<T[Key], null | undefined> extends any[]
+                    ? never
+                    : Exclude<T[Key], null | undefined> extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<Exclude<T[Key], null | undefined>> & string}`
+                      : never
+        }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
   [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
@@ -180,6 +212,8 @@ export type PageHandler<ComponentType = Component> = ({
 
 export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
+export type QueryStringArrayFormatOption = 'indices' | 'brackets'
+
 export type Progress = AxiosProgressEvent
 
 export type LocationVisit = {
@@ -203,7 +237,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   headers: Record<string, string>
   errorBag: string | null
   forceFormData: boolean
-  queryStringArrayFormat: 'indices' | 'brackets'
+  queryStringArrayFormat: QueryStringArrayFormatOption
   async: boolean
   showProgress: boolean
   prefetch: boolean
@@ -395,11 +429,15 @@ export type InternalActiveVisit = ActiveVisit & {
 export type VisitId = unknown
 export type Component = unknown
 
+type FirstLevelOptional<T> = {
+  [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
+}
+
 interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
-  defaults?: Partial<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -463,18 +501,20 @@ export type PrefetchOptions = {
 export type InertiaAppConfig = {
   form: {
     recentlySuccessfulDuration: number
+    forceIndicesArrayFormatInFormData: boolean
   }
   // experimental: {
   //   /* not guaranteed */
   // }
   future: {
     /* planned defaults */
-    preserveEqualProps?: boolean
-    useDataInertiaHeadAttribute?: boolean
-    useDialogForErrorModal?: boolean
+    preserveEqualProps: boolean
+    useDataInertiaHeadAttribute: boolean
+    useDialogForErrorModal: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
+    hoverDelay: number
   }
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
@@ -573,8 +613,8 @@ export type FormComponentProps = Partial<
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
+  setError(field: string, value: ErrorValue): void
+  setError(errors: Record<string, ErrorValue>): void
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
@@ -585,7 +625,7 @@ export type FormComponentMethods = {
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
-  errors: Record<string, string>
+  errors: Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null

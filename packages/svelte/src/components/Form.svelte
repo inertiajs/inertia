@@ -81,6 +81,7 @@
 
     const submitOptions: FormSubmitOptions = {
       headers,
+      queryStringArrayFormat,
       errorBag,
       showProgress,
       invalidateCacheTags,
