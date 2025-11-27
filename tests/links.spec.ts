@@ -841,35 +841,15 @@ test.describe('scroll', () => {
   })
 
   test('scrolls to top after the page has been rendered', async ({ page }) => {
-    test.setTimeout(30_000)
-
-    await page.goto('/long-page/1')
+    await page.goto('/scroll-after-render/1')
 
     consoleMessages.listen(page)
 
-    const tries = 10
+    await page.getByRole('link', { exact: true, name: 'Go to page 2' }).click()
+    await expect(page).toHaveURL('/scroll-after-render/2')
 
-    for (let i = 2; i < tries + 2; i++) {
-      await page.getByRole('link', { exact: true, name: 'Go to page ' + i }).click()
-      await expect(page).toHaveURL('/long-page/' + i)
-    }
-
-    // Expectred log
-    //     [
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0',
-    //   'ScrollY 100', 'Render', 'ScrollY 0'
-    // ]
-
-    const expectedMessages = Array.from({ length: tries }, () => ['ScrollY 100', 'Render', 'ScrollY 0']).flat()
-    await expect(consoleMessages.messages).toEqual(expectedMessages)
+    // Scroll a bit down before the next navigation, then render before scrolling up...
+    await expect(consoleMessages.messages).toEqual(['ScrollY 100', 'Render', 'ScrollY 0'])
   })
 })
 

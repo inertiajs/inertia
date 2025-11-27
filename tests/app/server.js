@@ -62,9 +62,9 @@ app.get('/article', (req, res) =>
   }),
 )
 
-app.get('/long-page/:page', (req, res) =>
+app.get('/scroll-after-render/:page', (req, res) =>
   inertia.render(req, res, {
-    component: 'LongPage',
+    component: 'ScrollAfterRender',
     props: { page: parseInt(req.params.page) },
   }),
 )
