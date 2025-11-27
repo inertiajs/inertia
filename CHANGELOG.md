@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.18...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.19...master)
 
 - Nothing yet
+
+## [v2.2.19](https://github.com/inertiajs/inertia/compare/v2.2.18...v2.2.19) - 2025-11-27
+
+### What's Changed
+
+* Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2710
+* TypeScript fix accessing error keys of optional nested object by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2718
+* Use FormValue in Form component by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2709
+* Fix anchor hash scrolling on initial page visit in React by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2719
+* Ensure page is rendered before scrolling to top by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2721
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.18...v2.2.19
 
 ## [v2.2.18](https://github.com/inertiajs/inertia/compare/v2.2.17...v2.2.18) - 2025-11-17
 

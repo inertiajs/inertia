@@ -64,7 +64,7 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
   : T extends unknown[]
     ? ArrayFormDataKeys<T>
-    : T extends Record<string, unknown>
+    : T extends object
       ? ObjectFormDataKeys<T>
       : never
 
@@ -92,7 +92,7 @@ type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
 /**
  * Helper type for object form data keys
  */
-type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyof T
+type ObjectFormDataKeys<T extends object> = string extends keyof T
   ? string
   :
       | Extract<keyof T, string>
@@ -105,7 +105,11 @@ type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyo
                 ? `${Key}.${FormDataKeys<T[Key]> & string}`
                 : T[Key] extends Record<string, any>
                   ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                  : never
+                  : Exclude<T[Key], null | undefined> extends any[]
+                    ? never
+                    : Exclude<T[Key], null | undefined> extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<Exclude<T[Key], null | undefined>> & string}`
+                      : never
         }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
@@ -609,8 +613,8 @@ export type FormComponentProps = Partial<
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
+  setError(field: string, value: ErrorValue): void
+  setError(errors: Record<string, ErrorValue>): void
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
@@ -621,7 +625,7 @@ export type FormComponentMethods = {
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
-  errors: Record<string, string>
+  errors: Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
