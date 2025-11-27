@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react'
 import { useEffect } from 'react'
 
-export default ({ page }) => {
+export default ({ page }: { page: number }) => {
   useEffect(() => {
     console.log('LongPage mounted!' + Date.now())
   }, [])
@@ -18,8 +18,8 @@ export default ({ page }) => {
           fugiat mollit eiusmod. Laboris voluptate veniam consequat proident in nulla irure velit.
         </p>
         {i === 0 && (
-          <Link href={`/long-page/${parseInt(page) + 1}`} style={{ display: 'block', marginTop: '20px' }}>
-            Go to page {parseInt(page) + 1}
+          <Link href={`/long-page/${page + 1}`} style={{ display: 'block', marginTop: '20px' }}>
+            Go to page {page + 1}
           </Link>
         )}
         <p>

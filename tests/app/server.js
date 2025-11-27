@@ -65,7 +65,7 @@ app.get('/article', (req, res) =>
 app.get('/long-page/:page', (req, res) =>
   inertia.render(req, res, {
     component: 'LongPage',
-    props: { page: req.params.page },
+    props: { page: parseInt(req.params.page) },
   }),
 )
 
