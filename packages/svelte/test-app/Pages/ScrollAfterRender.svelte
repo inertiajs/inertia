@@ -36,7 +36,7 @@
   <Link href={`/scroll-after-render/${page + 1}`} style="display: block; margin-top: 20px;" on:before={beforeNavigate}>
     Go to page {page + 1}
   </Link>
-  {#each Array(1000) as _, i}
+  {#each Array.from({ length: 1000 }, (_, i) => i) as i (i)}
     <div>
       <p>
         Sunt culpa sit sunt enim aliquip. Esse ea ea quis voluptate. Enim consectetur aliqua ex ex magna cupidatat id
