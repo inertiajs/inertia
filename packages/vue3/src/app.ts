@@ -14,7 +14,6 @@ import {
   defineComponent,
   h,
   markRaw,
-  nextTick,
   Plugin,
   PropType,
   reactive,
