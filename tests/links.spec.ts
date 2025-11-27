@@ -851,6 +851,7 @@ test.describe('scroll', () => {
 
     for (let i = 2; i < tries + 2; i++) {
       await page.getByRole('link', { exact: true, name: 'Go to page ' + i }).click()
+      await expect(page.getByText('Page ' + i)).toBeVisible()
       await expect(page).toHaveURL('/scroll-after-render/' + i)
     }
 

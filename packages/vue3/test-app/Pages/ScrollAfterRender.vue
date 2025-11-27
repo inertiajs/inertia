@@ -1,3 +1,7 @@
+<script lang="ts">
+let originalScrollTo: typeof window.scrollTo | null = null
+</script>
+
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
 
@@ -6,10 +10,8 @@ defineProps<{
 }>()
 
 // Patch scrollTo to log synchronously when it's called (not when the scroll event fires)
-if (!window._scroll_to_patched) {
-  window._scroll_to_patched = true
-
-  const originalScrollTo = window.scrollTo.bind(window)
+if (!originalScrollTo) {
+  originalScrollTo = window.scrollTo.bind(window)
 
   window.scrollTo = ((xOrOptions: number | ScrollToOptions, y?: number) => {
     const firstArgIsNumber = typeof xOrOptions === 'number'
@@ -17,7 +19,7 @@ if (!window._scroll_to_patched) {
 
     console.log('ScrollY', scrollY)
 
-    return firstArgIsNumber ? originalScrollTo(xOrOptions, y!) : originalScrollTo(xOrOptions)
+    return firstArgIsNumber ? originalScrollTo!(xOrOptions, y!) : originalScrollTo!(xOrOptions)
   }) as typeof window.scrollTo
 } else {
   console.log('Render')
