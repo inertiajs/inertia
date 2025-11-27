@@ -6,10 +6,10 @@
   import { Link } from '@inertiajs/svelte'
 
   interface Props {
-    page: number;
+    page: number
   }
 
-  let { page }: Props = $props();
+  let { page }: Props = $props()
 
   // Patch scrollTo to log synchronously when it's called (not when the scroll event fires)
   if (!originalScrollTo) {
