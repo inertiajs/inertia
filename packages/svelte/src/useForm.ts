@@ -211,8 +211,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onSuccess: async (page: Page) => {
-          setFormState('processing', false)
-          setFormState('progress', null)
           this.clearErrors()
           setFormState('wasSuccessful', true)
           setFormState('recentlySuccessful', true)
@@ -233,8 +231,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return onSuccess
         },
         onError: (errors: Errors) => {
-          setFormState('processing', false)
-          setFormState('progress', null)
           this.clearErrors().setError(errors as FormDataErrors<TForm>)
 
           if (options.onError) {
@@ -242,9 +238,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onCancel: () => {
-          setFormState('processing', false)
-          setFormState('progress', null)
-
           if (options.onCancel) {
             return options.onCancel()
           }
