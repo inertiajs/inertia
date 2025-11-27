@@ -511,6 +511,7 @@ export type InertiaAppConfig = {
     preserveEqualProps: boolean
     useDataInertiaHeadAttribute: boolean
     useDialogForErrorModal: boolean
+    useScriptElementForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
