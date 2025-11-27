@@ -1,17 +1,20 @@
 <script lang="ts">
   import { router, WhenVisible } from '@inertiajs/svelte'
 
-  export let firstData:
-    | {
-        text: string
-      }
-    | undefined = undefined
+  interface Props {
+    firstData?:
+      | {
+          text: string
+        }
+      | undefined
+    secondData?:
+      | {
+          text: string
+        }
+      | undefined
+  }
 
-  export let secondData:
-    | {
-        text: string
-      }
-    | undefined = undefined
+  let { firstData = undefined, secondData = undefined }: Props = $props()
 
   const handleReload = () => {
     router.reload()
@@ -21,13 +24,13 @@
 <div>
   <h1>WhenVisible + Array Props + Reload</h1>
 
-  <button on:click={handleReload}>Reload Page</button>
+  <button onclick={handleReload}>Reload Page</button>
 
   <div style="margin-top: 2000px; padding: 20px; border: 1px solid #ccc">
     <WhenVisible data={['firstData', 'secondData']}>
-      <svelte:fragment slot="fallback">
+      {#snippet fallback()}
         <p>Loading array data...</p>
-      </svelte:fragment>
+      {/snippet}
 
       <div>
         <p>{firstData?.text}</p>

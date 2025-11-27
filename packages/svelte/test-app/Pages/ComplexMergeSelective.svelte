@@ -1,12 +1,16 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let mixed: {
-    name: string
-    users: string[]
-    chat: { data: number[] }
-    post: { id: number; comments: { allowed: boolean; data: string[] } }
+  interface Props {
+    mixed: {
+      name: string
+      users: string[]
+      chat: { data: number[] }
+      post: { id: number; comments: { allowed: boolean; data: string[] } }
+    }
   }
+
+  let { mixed }: Props = $props()
 
   const reload = () => {
     router.reload({
@@ -21,4 +25,4 @@
 <div>post.id: {mixed.post.id}</div>
 <div>post.comments.allowed: {mixed.post.comments.allowed ? 'true' : 'false'}</div>
 <div>post.comments.data: {mixed.post.comments.data.join(', ')}</div>
-<button on:click={reload}>Reload</button>
+<button onclick={reload}>Reload</button>

@@ -1,13 +1,17 @@
 <script lang="ts">
   import { router, Link } from '@inertiajs/svelte'
 
-  export let foo: string = 'default'
-  export let items:
-    | {
-        data: string[]
-        next_page_url?: string
-      }
-    | undefined = undefined
+  interface Props {
+    foo?: string
+    items?:
+      | {
+          data: string[]
+          next_page_url?: string
+        }
+      | undefined
+  }
+
+  let { foo = 'default', items = undefined }: Props = $props()
 
   const loadMore = () => {
     if (items?.next_page_url) {
@@ -50,7 +54,7 @@
       {/if}
 
       {#if items.next_page_url}
-        <button on:click={loadMore} class="load-more-router">Load More Router</button>
+        <button onclick={loadMore} class="load-more-router">Load More Router</button>
       {/if}
     </div>
   {/if}

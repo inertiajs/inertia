@@ -2,9 +2,9 @@
   import { Form } from '@inertiajs/svelte'
   import { onMount, onDestroy } from 'svelte'
 
-  let showProgress: boolean | undefined = undefined
+  let showProgress: boolean | undefined = $state(undefined)
   let nprogressVisible = false
-  let nprogressAppearances = 0
+  let nprogressAppearances = $state(0)
   let observer: MutationObserver | null = null
 
   function disableProgress() {
@@ -44,7 +44,7 @@
   </div>
 
   <div>
-    <button type="button" on:click={disableProgress}>Disable Progress</button>
+    <button type="button" onclick={disableProgress}>Disable Progress</button>
     <button type="submit">Submit</button>
   </div>
 </Form>

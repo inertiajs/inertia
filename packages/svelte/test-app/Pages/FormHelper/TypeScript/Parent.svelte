@@ -9,4 +9,4 @@
   })
 </script>
 
-<Child form={$form} />
+<Child {form} />

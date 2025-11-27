@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   export { default as layout } from '@/Layouts/WithScrollRegion.svelte'
 </script>
 
@@ -6,7 +6,11 @@
   import { router } from '@inertiajs/svelte'
   import type { VisitHelperOptions } from '@inertiajs/core'
 
-  export let user_id: number | undefined = undefined
+  interface Props {
+    user_id?: number | undefined
+  }
+
+  let { user_id = undefined }: Props = $props()
 
   const users = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `User ${i + 1}` }))
 
@@ -22,9 +26,9 @@
   {#each users as user (user.id)}
     <div style="padding: 20px; border-bottom: 1px solid #ccc">
       <div style="margin-bottom: 10px; width: 500px">{user.name}</div>
-      <button on:click={() => navigate(user.id)}>Default</button>
-      <button on:click={() => navigate(user.id, { preserveScroll: true })}> Preserve True </button>
-      <button on:click={() => navigate(user.id, { preserveScroll: false })}> Preserve False </button>
+      <button onclick={() => navigate(user.id)}>Default</button>
+      <button onclick={() => navigate(user.id, { preserveScroll: true })}> Preserve True </button>
+      <button onclick={() => navigate(user.id, { preserveScroll: false })}> Preserve False </button>
     </div>
   {/each}
 </div>

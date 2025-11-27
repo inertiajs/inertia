@@ -1,5 +1,6 @@
 import type { VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
+import { mount } from 'svelte'
 
 window.testing = { Inertia: router }
 
@@ -16,10 +17,10 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
-    return pages[`./Pages/${name}.svelte`]
+    return pages[`./Pages/${name}.svelte`] as ResolvedComponent
   },
   setup({ el, App, props }) {
-    new App({ target: el!, props })
+    mount(App, { target: el!, props })
   },
   ...(withAppDefaults && {
     defaults: {

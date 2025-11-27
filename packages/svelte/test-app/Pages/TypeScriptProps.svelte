@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   declare module '@inertiajs/core' {
     export interface InertiaConfig {
       sharedPageProps: {
@@ -18,18 +18,20 @@
 
   const page = usePage<PageProps>()
 
-  $: error = $page.props.flash.error
-  $: postTitles = $page.props.posts.map((post) => post.title)
+  let error = $derived(page.props.flash.error)
+  let postTitles = $derived(page.props.posts.map((post) => post.title))
 
   // @ts-expect-error - 'message' does not exist on flash
-  $: flashMessage = $page.props.flash.message
+  let flashMessage = $derived(page.props.flash.message)
   // @ts-expect-error - 'users' does not exist on page props
-  $: userNames = $page.props.users.map((user) => user.name)
+  let userNames = $derived(page.props.users.map((user) => user.name))
 
-  console.log({
-    error,
-    postTitles,
-    flashMessage,
-    userNames,
+  $effect.pre(() => {
+    console.log({
+      error,
+      postTitles,
+      flashMessage,
+      userNames,
+    })
   })
 </script>

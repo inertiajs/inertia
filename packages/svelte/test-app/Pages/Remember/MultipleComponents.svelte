@@ -3,7 +3,7 @@
   import ComponentB from '@/Pages/Remember/Components/ComponentB.svelte'
   import { inertia, useRemember } from '@inertiajs/svelte'
 
-  let untracked = ''
+  let untracked = $state('')
 
   const form = useRemember({
     name: '',
@@ -14,11 +14,11 @@
 <div>
   <label>
     Full Name
-    <input type="text" id="name" name="full_name" bind:value={$form.name} />
+    <input type="text" id="name" name="full_name" bind:value={form.name} />
   </label>
   <label>
     Remember Me
-    <input type="checkbox" id="remember" name="remember" bind:checked={$form.remember} />
+    <input type="checkbox" id="remember" name="remember" bind:checked={form.remember} />
   </label>
   <label>
     Untracked

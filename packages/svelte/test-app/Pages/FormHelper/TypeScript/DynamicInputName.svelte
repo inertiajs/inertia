@@ -14,8 +14,8 @@
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement
     const { name, value } = target
-    $form[name] = value
+    form[name] = value
   }
 </script>
 
-<input name="name" type="text" value={$form.name} on:input={handleChange} />
+<input name="name" type="text" value={form.name} oninput={handleChange} />

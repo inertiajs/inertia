@@ -1,19 +1,25 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  const replace = () => {
+  const replace = (e: Event) => {
+    e.preventDefault()
+
     router.visit('/dump/get', {
       replace: true,
     })
   }
 
-  const replaceFalse = () => {
+  const replaceFalse = (e: Event) => {
+    e.preventDefault()
+
     router.visit('/dump/get', {
       replace: false,
     })
   }
 
-  const replaceGet = () => {
+  const replaceGet = (e: Event) => {
+    e.preventDefault()
+
     router.get(
       '/dump/get',
       {},
@@ -23,7 +29,9 @@
     )
   }
 
-  const replaceGetFalse = () => {
+  const replaceGetFalse = (e: Event) => {
+    e.preventDefault()
+
     router.get(
       '/dump/get',
       {},
@@ -37,8 +45,8 @@
 <div>
   <span class="text">This is the links page that demonstrates manual replace</span>
 
-  <a href={'#'} on:click|preventDefault={replace} class="replace">[State] Replace visit: true</a>
-  <a href={'#'} on:click|preventDefault={replaceFalse} class="replace-false">[State] Replace visit: false</a>
-  <a href={'#'} on:click|preventDefault={replaceGet} class="replace-get">[State] Replace GET: true</a>
-  <a href={'#'} on:click|preventDefault={replaceGetFalse} class="replace-get-false">[State] Replace GET: false</a>
+  <a href={'#'} onclick={replace} class="replace">[State] Replace visit: true</a>
+  <a href={'#'} onclick={replaceFalse} class="replace-false">[State] Replace visit: false</a>
+  <a href={'#'} onclick={replaceGet} class="replace-get">[State] Replace GET: true</a>
+  <a href={'#'} onclick={replaceGetFalse} class="replace-get-false">[State] Replace GET: false</a>
 </div>

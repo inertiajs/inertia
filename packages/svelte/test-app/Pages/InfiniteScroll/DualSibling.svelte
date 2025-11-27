@@ -2,8 +2,12 @@
   import { InfiniteScroll } from '@inertiajs/svelte'
   import UserCard, { type User } from './UserCard.svelte'
 
-  export let users1: { data: User[] }
-  export let users2: { data: User[] }
+  interface Props {
+    users1: { data: User[] }
+    users2: { data: User[] }
+  }
+
+  let { users1, users2 }: Props = $props()
 </script>
 
 <div style="padding: 20px">
@@ -18,11 +22,13 @@
           <UserCard {user} />
         {/each}
 
-        <div slot="next" let:exposedNext style="text-align: center; padding: 20px">
-          <button on:click={exposedNext.fetch} disabled={exposedNext.loading}>
-            {exposedNext.loading ? 'Loading...' : 'Load More Users 1'}
-          </button>
-        </div>
+        {#snippet next({ exposedNext })}
+          <div style="text-align: center; padding: 20px">
+            <button onclick={exposedNext.fetch} disabled={exposedNext.loading}>
+              {exposedNext.loading ? 'Loading...' : 'Load More Users 1'}
+            </button>
+          </div>
+        {/snippet}
       </InfiniteScroll>
     </div>
 
@@ -33,11 +39,13 @@
           <UserCard {user} />
         {/each}
 
-        <div slot="next" let:exposedNext style="text-align: center; padding: 20px">
-          <button on:click={exposedNext.fetch} disabled={exposedNext.loading}>
-            {exposedNext.loading ? 'Loading...' : 'Load More Users 2'}
-          </button>
-        </div>
+        {#snippet next({ exposedNext })}
+          <div style="text-align: center; padding: 20px">
+            <button onclick={exposedNext.fetch} disabled={exposedNext.loading}>
+              {exposedNext.loading ? 'Loading...' : 'Load More Users 2'}
+            </button>
+          </div>
+        {/snippet}
       </InfiniteScroll>
     </div>
   </div>

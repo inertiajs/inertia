@@ -1,7 +1,11 @@
 <script lang="ts">
   import { Link } from '@inertiajs/svelte'
 
-  export let page: number
+  interface Props {
+    page: number
+  }
+
+  let { page }: Props = $props()
 </script>
 
 <h1 style="font-size: 40px;">

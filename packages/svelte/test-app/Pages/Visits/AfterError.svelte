@@ -18,7 +18,7 @@
 </script>
 
 <div>
-  <a href={'#'} on:click={visitDump}> Visit dump page </a>
+  <a href={'#'} onclick={visitDump}> Visit dump page </a>
 
-  <a href={'#'} on:click={throwErrorOnSuccess}> Throw error on success </a>
+  <a href={'#'} onclick={throwErrorOnSuccess}> Throw error on success </a>
 </div>

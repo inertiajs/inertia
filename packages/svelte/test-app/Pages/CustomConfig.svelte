@@ -5,7 +5,7 @@
   const form = useForm({})
 
   const submit = () => {
-    $form.post($page.url)
+    form.post(page.url)
   }
 
   config.set({
@@ -24,7 +24,7 @@
 
 <Link prefetch href="/dump/get">Prefetch Link</Link>
 <Link method="post" headers={{ 'X-From-Link': 'foo' }} href="/dump/post">Post Dump</Link>
-<button on:click={submit}>Submit Form</button>
-{#if $form.recentlySuccessful}
+<button onclick={submit}>Submit Form</button>
+{#if form.recentlySuccessful}
   <p>Form was recently successful!</p>
 {/if}

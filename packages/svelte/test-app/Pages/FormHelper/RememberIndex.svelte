@@ -7,7 +7,11 @@
     email: string
   }
 
-  export let users: User[]
+  interface Props {
+    users: User[]
+  }
+
+  let { users }: Props = $props()
 </script>
 
 <div>

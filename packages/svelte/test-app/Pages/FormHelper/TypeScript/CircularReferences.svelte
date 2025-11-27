@@ -15,8 +15,8 @@
     items: [],
   })
 
-  $form.items = []
-  $form.items = [
+  form.items = []
+  form.items = [
     {
       foo: 'bar',
       items: [
@@ -33,11 +33,11 @@
   ]
 
   // @ts-expect-error - items should be an array of SubData
-  $form.items = {}
+  form.items = {}
   // @ts-expect-error - foo should be a string
-  $form.items = [{ foo: 123 }]
+  form.items = [{ foo: 123 }]
   // @ts-expect-error - items should be an array of SubData
-  $form.items = [{ foo: 'bar', items: {} }]
+  form.items = [{ foo: 'bar', items: {} }]
   // @ts-expect-error - foo should be a string
-  $form.items = [{ foo: 'bar', items: [{ foo: 123 }] }]
+  form.items = [{ foo: 'bar', items: [{ foo: 123 }] }]
 </script>
