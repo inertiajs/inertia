@@ -29,6 +29,27 @@ test.describe('url.ts', () => {
         expect(data).toEqual({})
       })
 
+      test('merges new data into an existing query string with array values', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search?frameworks[]=react&frameworks[]=vue', {
+          q: 'bar',
+        })
+
+        expect(href).toBe('/search?frameworks[]=react&frameworks[]=vue&q=bar')
+        expect(data).toEqual({})
+      })
+
+      test('merges new data into an existing query string with array values using index notation', () => {
+        const [href, data] = mergeDataIntoQueryString(
+          'get',
+          '/search?frameworks[0]=react&frameworks[1]=vue',
+          { q: 'bar' },
+          'indices',
+        )
+
+        expect(href).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(data).toEqual({})
+      })
+
       test('overwrites existing keys in the query string when they also exist in the data', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?q=old', { q: 'new' })
 
