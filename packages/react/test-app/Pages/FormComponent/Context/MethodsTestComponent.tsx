@@ -66,7 +66,7 @@ export default function MethodsTestComponent() {
   const testGetFormData = () => {
     if (form) {
       const formData = form.getFormData()
-      const obj: Record<string, any> = {}
+      const obj: Record<string, FormDataEntryValue> = {}
       formData.forEach((value, key) => {
         obj[key] = value
       })

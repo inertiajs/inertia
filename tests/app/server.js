@@ -1103,9 +1103,7 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
   }),
 )
 
-app.get('/form-component/context', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/Context' }),
-)
+app.get('/form-component/context', (req, res) => inertia.render(req, res, { component: 'FormComponent/Context' }))
 app.get('/form-component/context-methods', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/ContextMethods' }),
 )
