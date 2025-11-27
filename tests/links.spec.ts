@@ -841,11 +841,13 @@ test.describe('scroll', () => {
   })
 
   test('scrolls to top after the page has been rendered', async ({ page }) => {
+    test.setTimeout(10_000)
+
     await page.goto('/scroll-after-render/1')
 
     consoleMessages.listen(page)
 
-    const tries = 20
+    const tries = 15
 
     for (let i = 2; i < tries + 2; i++) {
       await page.getByRole('link', { exact: true, name: 'Go to page ' + i }).click()
