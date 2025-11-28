@@ -1,7 +1,7 @@
 import test, { expect } from '@playwright/test'
 import { requests, shouldBeDumpPage } from './support'
 
-const integrations = ['form-helper']
+const integrations = ['form-component', 'form-helper']
 
 integrations.forEach((integration) => {
   test.describe('Precognition', () => {
@@ -170,7 +170,7 @@ integrations.forEach((integration) => {
       await expect(page.getByText('The name contains invalid characters.')).not.toBeVisible()
     })
 
-    test(prefix + 'shows all errors when simpleValidationErrors is false', async ({ page }) => {
+    test(prefix + 'shows all errors using array errors', async ({ page }) => {
       await page.goto('/' + integration + '/precognition/with-all-errors')
 
       await page.fill('input[name="name"]', 'ab')

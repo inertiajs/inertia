@@ -152,7 +152,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const form = formWithPrecognition()
         const transformedData = transform(form.data()) as Record<string, unknown>
         return client[method](url, transformedData)
-      }, defaults)
+      }, cloneDeep(defaults))
 
       validatorRef = validator
 
@@ -291,6 +291,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
             : Object.assign(cloneDeep(defaults), fieldOrFields)
       }
+
+      validatorRef?.defaults(defaults)
 
       return this
     },

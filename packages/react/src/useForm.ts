@@ -296,8 +296,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
       setDefaultsCalledInOnSuccess.current = true
+      let newDefaults = {} as TForm
 
       if (typeof fieldOrFields === 'undefined') {
+        newDefaults = { ...dataRef.current }
         setDefaults(dataRef.current)
         // If setData was called right before setDefaults, data was not
         // updated in that render yet, so we set a flag to update
@@ -305,11 +307,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         setDataAsDefaults(true)
       } else {
         setDefaults((defaults) => {
-          return typeof fieldOrFields === 'string'
-            ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
-            : Object.assign(cloneDeep(defaults), fieldOrFields)
+          newDefaults =
+            typeof fieldOrFields === 'string'
+              ? set(cloneDeep(defaults), fieldOrFields, maybeValue)
+              : Object.assign(cloneDeep(defaults), fieldOrFields)
+
+          return newDefaults as TForm
         })
       }
+
+      validatorRef.current?.defaults(newDefaults)
     },
     [setDefaults],
   )
@@ -496,7 +503,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         const currentData = dataRef.current
         const transformedData = transform.current(currentData) as Record<string, unknown>
         return client[method](url, transformedData)
-      }, defaults)
+      }, cloneDeep(defaults))
 
       validatorRef.current = validator
 

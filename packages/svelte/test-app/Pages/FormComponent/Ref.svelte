@@ -28,6 +28,14 @@
   function setCurrentAsDefaults() {
     formRef?.defaults()
   }
+
+  function callPrecognitionMethods() {
+    const validator = formRef?.validator()
+
+    if (validator && !formRef?.touched('company') && !formRef?.valid('company')) {
+      formRef?.validate({ only: ['company'] })
+    }
+  }
 </script>
 
 <div>
@@ -63,5 +71,6 @@
     <button on:click={clearAllErrors}> Clear Errors </button>
     <button on:click={setTestError}> Set Test Error </button>
     <button on:click={setCurrentAsDefaults}> Set Current as Defaults </button>
+    <button on:click={callPrecognitionMethods}> Call Precognition Methods </button>
   </div>
 </div>

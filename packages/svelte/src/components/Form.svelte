@@ -9,7 +9,9 @@
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
+    UseFormUtils,
   } from '@inertiajs/core'
+  import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm'
@@ -38,10 +40,34 @@
   export let resetOnError: FormComponentProps['resetOnError'] = false
   export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
+  export let validateFiles: FormComponentProps['validateFiles'] = false
+  export let validationTimeout: FormComponentProps['validationTimeout'] = 1500
+  export let withAllErrors: FormComponentProps['withAllErrors'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
-  const form = useForm({})
+  function getTransformedData(): Record<string, FormDataConvertible> {
+    const [_url, data] = getUrlAndData()
+    return transform!(data)
+  }
+
+  const form = useForm<Record<string, any>>({})
+    .withPrecognition(
+      () => _method,
+      () => getUrlAndData()[0],
+    )
+    .setValidationTimeout(validationTimeout!)
+
+  if (validateFiles) {
+    form.validateFiles()
+  }
+
+  if (withAllErrors) {
+    form.withAllErrors()
+  }
+
+  form.transform(getTransformedData)
+
   let formElement: HTMLFormElement
   let isDirty = false
   let defaultData: FormData = new FormData()
@@ -60,12 +86,16 @@
     return formDataToObject(getFormData())
   }
 
+  function getUrlAndData(): [string, Record<string, FormDataConvertible>] {
+    return mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+  }
+
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
   export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+    const [url, _data] = getUrlAndData()
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -137,26 +167,21 @@
 
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
+
+    form.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
-    // @ts-expect-error
     $form.clearErrors(...fields)
   }
 
   export function resetAndClearErrors(...fields: string[]) {
-    // @ts-expect-error
-    $form.clearErrors(...fields)
+    clearErrors(...fields)
     reset(...fields)
   }
 
-  export function setError(field: string | object, value?: string) {
-    if (typeof field === 'string') {
-      // @ts-expect-error
-      $form.setError(field, value)
-    } else {
-      $form.setError(field)
-    }
+  export function setError(fieldOrFields: string | Record<string, string>, maybeValue?: string) {
+    $form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
   }
 
   export function defaults() {
@@ -164,16 +189,54 @@
     isDirty = false
   }
 
+  export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
+    return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
+  }
+
+  export function valid(field: string) {
+    return form.valid(field)
+  }
+
+  export function invalid(field: string) {
+    return form.invalid(field)
+  }
+
+  export function touch(field: string | NamedInputEvent | string[], ...fields: string[]) {
+    return form.touch(field, ...fields)
+  }
+
+  export function touched(field?: string) {
+    return form.touched(field)
+  }
+
+  export function validator(): Validator {
+    return form.validator()
+  }
+
   onMount(() => {
     defaultData = getFormData()
 
+    form.defaults(getData())
+
     const formEvents = ['input', 'change', 'reset']
+
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+
+  $: {
+    form.setValidationTimeout(validationTimeout!)
+
+    if (validateFiles) {
+      form.validateFiles()
+    } else {
+      form.withoutFileValidation()
+    }
+  }
+
   $: slotErrors = $form.errors as Errors
 </script>
 
@@ -199,7 +262,15 @@
     {isDirty}
     {submit}
     {defaults}
+    {reset}
     {getData}
     {getFormData}
+    {validator}
+    {validate}
+    {touch}
+    validating={$form.validating}
+    valid={$form.valid}
+    invalid={$form.invalid}
+    touched={$form.touched}
   />
 </form>
