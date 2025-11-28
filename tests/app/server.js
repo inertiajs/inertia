@@ -1353,25 +1353,31 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
-const shouldResolveFooProp = (req) => {
-  if (!req.headers['x-inertia']) {
-    return true
-  }
-
-  if (req.headers['x-inertia-partial-data']?.includes('foo')) {
-    return true
-  }
-
+const getOncePropsData = (req, prop = 'foo') => {
+  const isInertiaRequest = !!req.headers['x-inertia']
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
   const loadedOnceProps = req.headers['x-inertia-page-once-props']?.split(',') ?? []
+  const isPartialRequest = partialData.includes(prop)
+  const hasPropAlready = loadedOnceProps.includes(prop)
+  const shouldResolveProp = !isInertiaRequest || isPartialRequest || !hasPropAlready
 
-  return !loadedOnceProps.includes('foo')
+  return {
+    isInertiaRequest,
+    partialData,
+    loadedOnceProps,
+    isPartialRequest,
+    hasPropAlready,
+    shouldResolveProp,
+  }
 }
 
 app.get('/once-props/page-a', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
   inertia.render(req, res, {
     component: 'OnceProps/PageA',
     props: {
-      foo: shouldResolveFooProp(req) ? 'foo-a-' + Date.now() : undefined,
+      foo: shouldResolveProp ? 'foo-a-' + Date.now() : undefined,
       bar: 'bar-a',
     },
     onceProps: { foo: { prop: 'foo', expiresAt: null } },
@@ -1379,19 +1385,101 @@ app.get('/once-props/page-a', (req, res) => {
 })
 
 app.get('/once-props/page-b', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
   inertia.render(req, res, {
     component: 'OnceProps/PageB',
     props: {
-      foo: shouldResolveFooProp(req) ? 'foo-b-' + Date.now() : undefined,
+      foo: shouldResolveProp ? 'foo-b-' + Date.now() : undefined,
       bar: 'bar-b',
     },
-    onceProps: { foo: { prop: 'foo', ttl: null } },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
   })
 })
 
 app.get('/once-props/page-c', (req, res) => {
   inertia.render(req, res, {
     component: 'OnceProps/PageC',
+  })
+})
+
+app.get('/once-props/deferred-page-a', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+
+  if (isPartialRequest) {
+    return setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'OnceProps/DeferredPageA',
+        props: {
+          foo: { text: 'foo-a-' + Date.now() },
+          bar: 'bar-a',
+        },
+        onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      })
+    }, 100)
+  }
+
+  inertia.render(req, res, {
+    component: 'OnceProps/DeferredPageA',
+    props: {
+      bar: 'bar-a',
+    },
+    deferredProps: { default: ['foo'] },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/deferred-page-b', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+
+  if (isPartialRequest) {
+    return setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'OnceProps/DeferredPageB',
+        props: {
+          foo: { text: 'foo-b-' + Date.now() },
+          bar: 'bar-b',
+        },
+        onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      })
+    }, 100)
+  }
+
+  inertia.render(req, res, {
+    component: 'OnceProps/DeferredPageB',
+    props: {
+      bar: 'bar-b',
+    },
+    deferredProps: { default: ['foo'] },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/ttl-page-a', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+  const expiresAt = Date.now() + 2000
+
+  inertia.render(req, res, {
+    component: 'OnceProps/TtlPageA',
+    props: {
+      foo: shouldResolveProp ? 'foo-a-' + Date.now() : undefined,
+      bar: 'bar-a',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt } },
+  })
+})
+
+app.get('/once-props/ttl-page-b', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+  const expiresAt = Date.now() + 2000
+
+  inertia.render(req, res, {
+    component: 'OnceProps/TtlPageB',
+    props: {
+      foo: shouldResolveProp ? 'foo-b-' + Date.now() : undefined,
+      bar: 'bar-b',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt } },
   })
 })
 
