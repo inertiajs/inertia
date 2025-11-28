@@ -9,7 +9,7 @@
     action="/precognition/headers"
     method="post"
     headers={{ 'X-Custom-Header': 'custom-value' }}
-    validateTimeout={100}
+    validationTimeout={100}
     let:invalid
     let:errors
     let:validate

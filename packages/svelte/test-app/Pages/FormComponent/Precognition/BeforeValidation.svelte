@@ -29,7 +29,7 @@
     let:invalid
     let:validate
     let:validating
-    validateTimeout={100}
+    validationTimeout={100}
   >
     <div>
       <label for="name">Name:</label>

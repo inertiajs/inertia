@@ -26,7 +26,7 @@ const handleBeforeValidation = (
       action="/precognition/default"
       method="post"
       #default="{ errors, invalid, validate, validating }"
-      :validate-timeout="100"
+      :validation-timeout="100"
     >
       <div>
         <label for="name">Name:</label>

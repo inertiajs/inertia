@@ -9,7 +9,7 @@ import { Form } from '@inertiajs/vue3'
     <Form
       action="/precognition/default"
       method="post"
-      :validateTimeout="100"
+      :validationTimeout="100"
       :transform="(data) => ({ name: String(data.name || '').repeat(2) })"
     >
       <template #default="{ invalid, errors, validate, valid, validating }">

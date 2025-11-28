@@ -9,7 +9,7 @@ import { Form } from '@inertiajs/vue3'
     <Form
       action="/precognition/default"
       method="post"
-      :validate-timeout="100"
+      :validation-timeout="100"
       #default="{ invalid, errors, validate, touch, touched, validating, reset }"
     >
       <div>

@@ -37,7 +37,7 @@
   }
 
   let validateFiles = false
-  let validateTimeout = 1500
+  let validationTimeout = 1500
 </script>
 
 <svelte:head>
@@ -59,7 +59,7 @@
       </label>
       <div class="flex items-center gap-2">
         <label class="text-sm">Timeout:</label>
-        <select bind:value={validateTimeout} class="rounded border px-2 py-1 text-sm">
+        <select bind:value={validationTimeout} class="rounded border px-2 py-1 text-sm">
           <option value={500}>500ms</option>
           <option value={1000}>1000ms</option>
           <option value={1500}>1500ms</option>
@@ -72,7 +72,7 @@
       action="/precognition/default"
       method="post"
       {validateFiles}
-      {validateTimeout}
+      {validationTimeout}
       class="space-y-4"
       let:errors
       let:invalid

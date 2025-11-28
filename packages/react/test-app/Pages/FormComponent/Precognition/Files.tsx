@@ -8,7 +8,7 @@ export default () => {
     <div>
       <h1>Form Precognition Files</h1>
 
-      <Form action="/precognition/files" method="post" validateTimeout={100} validateFiles={validateFilesEnabled}>
+      <Form action="/precognition/files" method="post" validationTimeout={100} validateFiles={validateFilesEnabled}>
         {({ invalid, errors, validate, valid, validating }) => (
           <>
             <div>

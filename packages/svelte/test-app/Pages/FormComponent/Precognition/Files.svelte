@@ -10,7 +10,7 @@
   <Form
     action="/precognition/files"
     method="post"
-    validateTimeout={100}
+    validationTimeout={100}
     validateFiles={validateFilesEnabled}
     let:invalid
     let:errors

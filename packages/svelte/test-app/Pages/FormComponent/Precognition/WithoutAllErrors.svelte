@@ -8,7 +8,7 @@
   <Form
     action="/precognition/with-all-errors"
     method="post"
-    validateTimeout={100}
+    validationTimeout={100}
     let:invalid
     let:errors
     let:validate

@@ -12,7 +12,7 @@ const validateFilesEnabled = ref(false)
     <Form
       action="/precognition/files"
       method="post"
-      :validate-timeout="100"
+      :validation-timeout="100"
       :validate-files="validateFilesEnabled"
       #default="{ invalid, errors, validate, valid, validating }"
     >

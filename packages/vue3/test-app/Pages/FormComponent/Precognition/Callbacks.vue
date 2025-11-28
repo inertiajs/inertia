@@ -12,7 +12,7 @@ const finishCalled = ref(false)
     <h1>Form Precognition Callbacks</h1>
 
     <h2>Callbacks Test</h2>
-    <Form action="/precognition/default" method="post" :validateTimeout="100">
+    <Form action="/precognition/default" method="post" :validationTimeout="100">
       <template #default="{ validate, validating, touch }">
         <div>
           <input name="name" placeholder="Name" @blur="() => touch('name')" />

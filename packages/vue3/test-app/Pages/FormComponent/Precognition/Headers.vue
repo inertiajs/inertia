@@ -10,7 +10,7 @@ import { Form } from '@inertiajs/vue3'
       action="/precognition/headers"
       method="post"
       :headers="{ 'X-Custom-Header': 'custom-value' }"
-      :validate-timeout="100"
+      :validation-timeout="100"
       #default="{ invalid, errors, validate, validating }"
     >
       <div>

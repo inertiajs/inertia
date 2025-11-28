@@ -5,7 +5,7 @@ export default () => {
     <div>
       <h1>Form Precognition - Array Errors</h1>
 
-      <Form action="/precognition/with-all-errors" method="post" validateTimeout={100}>
+      <Form action="/precognition/with-all-errors" method="post" validationTimeout={100}>
         {({ invalid, errors, validate, valid, validating }) => (
           <>
             <div>

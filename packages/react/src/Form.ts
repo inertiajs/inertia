@@ -67,7 +67,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setDefaultsOnSuccess = false,
       invalidateCacheTags = [],
       validateFiles = false,
-      validateTimeout = 1500,
+      validationTimeout = 1500,
       withAllErrors = false,
       children,
       ...props
@@ -84,7 +84,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         () => resolvedMethod,
         () => getUrlAndData()[0],
       )
-      .setValidationTimeout(validateTimeout)
+      .setValidationTimeout(validationTimeout)
 
     if (validateFiles) {
       form.validateFiles()
@@ -147,8 +147,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }, [])
 
     useEffect(() => {
-      form.setValidationTimeout(validateTimeout)
-    }, [validateTimeout])
+      form.setValidationTimeout(validationTimeout)
+    }, [validationTimeout])
 
     useEffect(() => {
       if (validateFiles) {

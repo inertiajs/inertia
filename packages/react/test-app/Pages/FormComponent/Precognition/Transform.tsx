@@ -8,7 +8,7 @@ export default () => {
       <Form
         action="/precognition/default"
         method="post"
-        validateTimeout={100}
+        validationTimeout={100}
         transform={(data) => ({ name: String(data.name || '').repeat(2) })}
       >
         {({ invalid, errors, validate, valid, validating }) => (

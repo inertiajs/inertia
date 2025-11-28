@@ -36,7 +36,7 @@ const validateWithCallbacks = (validate: FormComponentMethods['validate']) => {
 }
 
 const validateFiles = ref(false)
-const validateTimeout = ref(1500)
+const validationTimeout = ref(1500)
 </script>
 
 <template>
@@ -56,7 +56,7 @@ const validateTimeout = ref(1500)
         </label>
         <div class="flex items-center gap-2">
           <label class="text-sm">Timeout:</label>
-          <select v-model="validateTimeout" class="rounded border px-2 py-1 text-sm">
+          <select v-model="validationTimeout" class="rounded border px-2 py-1 text-sm">
             <option :value="500">500ms</option>
             <option :value="1000">1000ms</option>
             <option :value="1500">1500ms</option>
@@ -69,7 +69,7 @@ const validateTimeout = ref(1500)
         action="/precognition/default"
         method="post"
         :validate-files="validateFiles"
-        :validate-timeout="validateTimeout"
+        :validation-timeout="validationTimeout"
         #default="{ errors, invalid, valid, validate, validating }"
         class="space-y-4"
       >

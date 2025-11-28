@@ -41,7 +41,7 @@
   export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
   export let validateFiles: FormComponentProps['validateFiles'] = false
-  export let validateTimeout: FormComponentProps['validateTimeout'] = 1500
+  export let validationTimeout: FormComponentProps['validationTimeout'] = 1500
   export let withAllErrors: FormComponentProps['withAllErrors'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
@@ -56,7 +56,7 @@
       () => _method,
       () => getUrlAndData()[0],
     )
-    .setValidationTimeout(validateTimeout!)
+    .setValidationTimeout(validationTimeout!)
 
   if (validateFiles) {
     form.validateFiles()
@@ -228,7 +228,7 @@
   })
 
   $: {
-    form.setValidationTimeout(validateTimeout!)
+    form.setValidationTimeout(validationTimeout!)
 
     if (validateFiles) {
       form.validateFiles()

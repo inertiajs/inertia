@@ -37,7 +37,7 @@
   }
 
   let validateFiles = $state(false)
-  let validateTimeout = $state(1500)
+  let validationTimeout = $state(1500)
 </script>
 
 <svelte:head>
@@ -59,7 +59,7 @@
       </label>
       <div class="flex items-center gap-2">
         <label class="text-sm">Timeout:</label>
-        <select bind:value={validateTimeout} class="rounded border px-2 py-1 text-sm">
+        <select bind:value={validationTimeout} class="rounded border px-2 py-1 text-sm">
           <option value={500}>500ms</option>
           <option value={1000}>1000ms</option>
           <option value={1500}>1500ms</option>
@@ -68,7 +68,7 @@
       </div>
     </div>
 
-    <Form action="/precognition/default" method="post" {validateFiles} {validateTimeout} class="space-y-4">
+    <Form action="/precognition/default" method="post" {validateFiles} {validationTimeout} class="space-y-4">
       {#snippet children({ errors, invalid, valid, validate, validating })}
         <p class="text-sm text-blue-600">Validating: {validating ? 'Yes...' : 'No'}</p>
 

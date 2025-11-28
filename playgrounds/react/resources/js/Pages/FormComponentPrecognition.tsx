@@ -32,7 +32,7 @@ const FormComponentPrecognition = () => {
   }
 
   const [validateFiles, setValidateFiles] = useState(false)
-  const [validateTimeout, setValidateTimeout] = useState(1500)
+  const [validationTimeout, setValidateTimeout] = useState(1500)
 
   return (
     <>
@@ -58,7 +58,7 @@ const FormComponentPrecognition = () => {
             <div className="flex items-center gap-2">
               <label className="text-sm">Timeout:</label>
               <select
-                value={validateTimeout}
+                value={validationTimeout}
                 onChange={(e) => setValidateTimeout(Number(e.target.value))}
                 className="rounded border px-2 py-1 text-sm"
               >
@@ -74,7 +74,7 @@ const FormComponentPrecognition = () => {
             action="/precognition/default"
             method="post"
             validateFiles={validateFiles}
-            validateTimeout={validateTimeout}
+            validationTimeout={validationTimeout}
             className="space-y-4"
           >
             {({ errors, invalid, valid, validate, validating }) => (

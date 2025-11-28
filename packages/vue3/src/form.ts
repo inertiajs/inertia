@@ -119,8 +119,8 @@ const Form = defineComponent({
       type: Boolean as PropType<FormComponentProps['validateFiles']>,
       default: false,
     },
-    validateTimeout: {
-      type: Number as PropType<FormComponentProps['validateTimeout']>,
+    validationTimeout: {
+      type: Number as PropType<FormComponentProps['validationTimeout']>,
       default: 1500,
     },
     withAllErrors: {
@@ -141,7 +141,7 @@ const Form = defineComponent({
         () => getUrlAndData()[0],
       )
       .transform(getTransformedData)
-      .setValidationTimeout(props.validateTimeout)
+      .setValidationTimeout(props.validationTimeout)
 
     if (props.validateFiles) {
       form.validateFiles()
@@ -184,7 +184,7 @@ const Form = defineComponent({
     )
 
     watch(
-      () => props.validateTimeout,
+      () => props.validationTimeout,
       (value) => form.setValidationTimeout(value),
     )
 
