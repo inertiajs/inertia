@@ -1424,7 +1424,7 @@ app.get('/once-props/deferred-page-a', (req, res) => {
     props: {
       bar: 'bar-a',
     },
-    deferredProps: { default: ['foo'] },
+    deferredProps: hasPropAlready ? {} : { default: ['foo'] },
     onceProps: { foo: { prop: 'foo', expiresAt: null } },
   })
 })
@@ -1450,7 +1450,7 @@ app.get('/once-props/deferred-page-b', (req, res) => {
     props: {
       bar: 'bar-b',
     },
-    deferredProps: { default: ['foo'] },
+    deferredProps: hasPropAlready ? {} : { default: ['foo'] },
     onceProps: { foo: { prop: 'foo', expiresAt: null } },
   })
 })
