@@ -9,7 +9,8 @@ createServer((page) =>
       return pages[`./Pages/${name}.svelte`]
     },
     setup({ App, props }) {
-      return App.render(props)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (App as any).render(props)
     },
   }),
 )
