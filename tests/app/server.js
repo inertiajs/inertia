@@ -45,6 +45,15 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
+app.get('/ssr/page-with-script-element', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/PageWithScriptElement',
+    props: {
+      message: 'Hello from script element!',
+    },
+  }),
+)
+
 // Intercepts all .js assets (including files loaded via code splitting)
 app.get(/.*\.js$/, (req, res) =>
   res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),

@@ -32,6 +32,26 @@ test.describe('SSR', () => {
     })
   })
 
+  test.describe('initial page load with script element', () => {
+    test('embeds page data in a script element instead of data-page attribute', async ({ page }) => {
+      const response = await page.request.get('/ssr/page-with-script-element')
+      const html = await response.text()
+
+      expect(html).toContain('id="app_page"')
+      expect(html).not.toContain('data-page=')
+      expect(html).toContain('Hello from script element!')
+
+      await page.goto('/ssr/page-with-script-element')
+      const scriptContent = await page.locator('#app_page').textContent()
+      expect(JSON.parse(scriptContent || '')).toMatchObject({
+        component: 'SSR/PageWithScriptElement',
+        props: {
+          message: 'Hello from script element!',
+        },
+      })
+    })
+  })
+
   test.describe('client-side navigation', () => {
     test('navigates without full page reload after SSR', async ({ page }) => {
       pageLoads.watch(page)
