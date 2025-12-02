@@ -2,6 +2,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build .",
+    "build:ssr": "vite build --ssr ssr.ts --outDir dist",
     "dev": "nodemon --watch . --watch ../../core/dist --watch ../../svelte/dist --ext js,ts,svelte,html,json --ignore dist/ --exec 'vite build .'",
     "lint": "eslint .",
     "type-check": "svelte-check --tsconfig ./tsconfig.json"
