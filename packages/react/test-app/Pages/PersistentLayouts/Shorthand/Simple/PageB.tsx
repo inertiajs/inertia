@@ -12,6 +12,6 @@ const PageB = () => {
   )
 }
 
-PageB.layout = (page: React.ReactNode) => <SiteLayout children={page} />
+PageB.layout = SiteLayout
 
 export default PageB
