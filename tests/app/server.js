@@ -24,6 +24,27 @@ if (!adapters.includes(inertia.package)) {
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
 app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
 
+// SSR test routes (only rendered with SSR when SSR=true)
+app.get('/ssr/page1', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Page1',
+    props: {
+      user: { name: 'John Doe', email: 'john@example.com' },
+      items: ['Item 1', 'Item 2', 'Item 3'],
+      count: 42,
+    },
+  }),
+)
+
+app.get('/ssr/page2', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
 // Intercepts all .js assets (including files loaded via code splitting)
 app.get(/.*\.js$/, (req, res) =>
   res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
@@ -59,6 +80,13 @@ app.get('/article', (req, res) =>
     component: 'Article',
     props: {},
     encryptHistory: true,
+  }),
+)
+
+app.get('/scroll-after-render/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollAfterRender',
+    props: { page: parseInt(req.params.page) },
   }),
 )
 
