@@ -63,8 +63,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const isServer = typeof window === 'undefined'
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const el = isServer ? null : document.getElementById(id)
-  const elPage = isServer || !useScriptElementForInitialPage ? null : document.getElementById(id + '_page')
-  const initialPage = page || JSON.parse(el?.dataset.page || elPage?.textContent || '{}')
+  const elPage =
+    isServer || !useScriptElementForInitialPage ? null : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
+  const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
 
   // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
@@ -122,7 +123,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         Fragment,
         null,
         createElement('script', {
-          id: id + '_page',
+          'data-page': id,
           type: 'application/json',
           dangerouslySetInnerHTML: { __html: JSON.stringify(initialPage) },
         }),
