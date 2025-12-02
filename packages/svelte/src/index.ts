@@ -1,7 +1,7 @@
 import { config as coreConfig } from '@inertiajs/core'
 import type { SvelteInertiaAppConfig } from './types'
 
-export { progress, router } from '@inertiajs/core'
+export { progress, router, axios } from '@inertiajs/core'
 export { default as App } from './components/App.svelte'
 export { default as Deferred } from './components/Deferred.svelte'
 export { default as Form } from './components/Form.svelte'

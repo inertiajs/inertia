@@ -1,7 +1,7 @@
 import { config as coreConfig } from '@inertiajs/core'
 import { VueInertiaAppConfig } from './types'
 
-export { progress, router } from '@inertiajs/core'
+export { progress, router, axios } from '@inertiajs/core'
 export { default as App, usePage } from './app'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './deferred'

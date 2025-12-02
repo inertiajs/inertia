@@ -1,8 +1,9 @@
-import { config as coreConfig, progress as Progress, router as Router } from '@inertiajs/core'
+import { axios as Axios, config as coreConfig, progress as Progress, router as Router } from '@inertiajs/core'
 import { ReactInertiaAppConfig } from './types'
 
 export const progress = Progress
 export const router = Router
+export const axios = Axios
 export { default as App } from './App'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
