@@ -912,6 +912,44 @@ app.get('/deferred-props/partial-reloads', (req, res) => {
   )
 })
 
+let deferredPropsWithErrorsState = {}
+
+app.get('/deferred-props/with-errors', (req, res) => {
+  const errors = { ...deferredPropsWithErrorsState }
+
+  deferredPropsWithErrorsState = {}
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithErrors',
+      deferredProps: {
+        default: ['foo'],
+      },
+      props: {
+        errors,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithErrors',
+        props: {
+          foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
+          errors: {},
+        },
+      }),
+    250,
+  )
+})
+
+app.post('/deferred-props/with-errors', (req, res) => {
+  deferredPropsWithErrorsState = { name: 'The name field is required.' }
+
+  res.redirect(303, '/deferred-props/with-errors')
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
