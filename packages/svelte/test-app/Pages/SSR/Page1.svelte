@@ -15,7 +15,7 @@
   </div>
 
   <ul data-testid="items-list">
-    {#each items as item}
+    {#each items as item (item)}
       <li data-testid="item">{item}</li>
     {/each}
   </ul>
