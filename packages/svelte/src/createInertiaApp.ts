@@ -42,7 +42,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const el = isServer ? null : document.getElementById(id)
   const elPage =
-    isServer || !useScriptElementForInitialPage ? null : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
+    isServer || !useScriptElementForInitialPage
+      ? null
+      : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
   const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))

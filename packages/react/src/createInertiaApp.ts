@@ -64,7 +64,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const el = isServer ? null : document.getElementById(id)
   const elPage =
-    isServer || !useScriptElementForInitialPage ? null : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
+    isServer || !useScriptElementForInitialPage
+      ? null
+      : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
   const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
 
   // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
