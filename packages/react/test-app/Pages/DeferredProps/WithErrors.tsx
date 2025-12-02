@@ -8,7 +8,9 @@ const Foo = () => {
 
 export default () => {
   const { errors } = usePage<{ errors: { name?: string } }>().props
-  const form = useForm({})
+  const form = useForm({
+    name: '',
+  })
 
   const submit = () => {
     form.post('/deferred-props/with-errors')

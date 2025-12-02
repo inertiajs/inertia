@@ -5,7 +5,9 @@ defineProps<{
   foo?: { text: string }
 }>()
 
-const form = useForm({})
+const form = useForm({
+  name: '',
+})
 
 const submit = () => {
   form.post('/deferred-props/with-errors')

@@ -3,7 +3,9 @@
 
   export let foo: { text: string } | undefined
 
-  const form = useForm({})
+  const form = useForm({
+    name: '',
+  })
 
   const submit = () => {
     $form.post('/deferred-props/with-errors')
