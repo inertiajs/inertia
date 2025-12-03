@@ -169,7 +169,7 @@ export class Response {
     }
 
     this.mergeProps(pageResponse)
-    this.preserveOnceProps(pageResponse)
+    currentPage.passOncePropsTo(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -233,27 +233,6 @@ export class Response {
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
-  }
-
-  protected preserveOnceProps(pageResponse: Page): void {
-    const onceProps = pageResponse.onceProps || {}
-
-    Object.entries(onceProps).forEach(([key, onceProp]) => {
-      // Check if the current page has the same onceProp key
-      const existingOnceProp = currentPage.get().onceProps?.[key]
-
-      if (existingOnceProp === undefined) {
-        return
-      }
-
-      const currentValue = currentPage.get().props[existingOnceProp.prop]
-
-      if (pageResponse.props[onceProp.prop] === undefined) {
-        // Only preserve if no new value was provided for this prop
-        pageResponse.props[onceProp.prop] = currentValue
-        onceProps[key].expiresAt = existingOnceProp.expiresAt
-      }
-    })
   }
 
   protected preserveEqualProps(pageResponse: Page): void {

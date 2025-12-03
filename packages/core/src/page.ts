@@ -87,7 +87,7 @@ class CurrentPage {
         this.page = page
         this.cleared = false
 
-        prefetchedRequests.updateCachedResponsesWithOnceProps()
+        prefetchedRequests.syncCachedOnceProps()
 
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
@@ -218,6 +218,23 @@ class CurrentPage {
 
   public fireEventsFor(event: PageEvent): void {
     this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback())
+  }
+
+  public passOncePropsTo(toPage: Page, { overwrite = false }: { overwrite?: boolean } = {}): void {
+    const onceProps = toPage.onceProps ?? {}
+
+    Object.entries(onceProps).forEach(([key, onceProp]) => {
+      const existingOnceProp = this.page.onceProps?.[key]
+
+      if (existingOnceProp === undefined) {
+        return
+      }
+
+      if (overwrite || toPage.props[onceProp.prop] === undefined) {
+        toPage.props[onceProp.prop] = this.page.props[existingOnceProp.prop]
+        toPage.onceProps![key].expiresAt = existingOnceProp.expiresAt
+      }
+    })
   }
 }
 
