@@ -7,4 +7,4 @@
 
 <p id="foo">Foo: {foo}</p>
 <p id="bar">Bar: {bar}</p>
-<Link href="/once-props/ttl-page-a">Go to TTL Page A</Link>
+<Link href="/once-props/ttl-page/a">Go to TTL Page A</Link>

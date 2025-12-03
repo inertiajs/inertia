@@ -1471,16 +1471,17 @@ app.get('/once-props/page-c', (req, res) => {
   })
 })
 
-app.get('/once-props/deferred-page-a', (req, res) => {
+app.get('/once-props/deferred-page/:page', (req, res) => {
   const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
 
   if (isPartialRequest) {
     return setTimeout(() => {
       inertia.render(req, res, {
-        component: 'OnceProps/DeferredPageA',
+        component: `OnceProps/DeferredPage${page.toUpperCase()}`,
         props: {
-          foo: { text: 'foo-a-' + Date.now() },
-          bar: 'bar-a',
+          foo: { text: `foo-${page}-` + Date.now() },
+          bar: `bar-${page}`,
         },
         onceProps: { foo: { prop: 'foo', expiresAt: null } },
       })
@@ -1488,64 +1489,25 @@ app.get('/once-props/deferred-page-a', (req, res) => {
   }
 
   inertia.render(req, res, {
-    component: 'OnceProps/DeferredPageA',
+    component: `OnceProps/DeferredPage${page.toUpperCase()}`,
     props: {
-      bar: 'bar-a',
+      bar: `bar-${page}`,
     },
     deferredProps: hasPropAlready ? {} : { default: ['foo'] },
     onceProps: { foo: { prop: 'foo', expiresAt: null } },
   })
 })
 
-app.get('/once-props/deferred-page-b', (req, res) => {
-  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
-
-  if (isPartialRequest) {
-    return setTimeout(() => {
-      inertia.render(req, res, {
-        component: 'OnceProps/DeferredPageB',
-        props: {
-          foo: { text: 'foo-b-' + Date.now() },
-          bar: 'bar-b',
-        },
-        onceProps: { foo: { prop: 'foo', expiresAt: null } },
-      })
-    }, 100)
-  }
-
-  inertia.render(req, res, {
-    component: 'OnceProps/DeferredPageB',
-    props: {
-      bar: 'bar-b',
-    },
-    deferredProps: hasPropAlready ? {} : { default: ['foo'] },
-    onceProps: { foo: { prop: 'foo', expiresAt: null } },
-  })
-})
-
-app.get('/once-props/ttl-page-a', (req, res) => {
+app.get('/once-props/ttl-page/:page', (req, res) => {
   const { shouldResolveProp } = getOncePropsData(req)
+  const page = req.params.page
   const expiresAt = Date.now() + 2000
 
   inertia.render(req, res, {
-    component: 'OnceProps/TtlPageA',
+    component: `OnceProps/TtlPage${page.toUpperCase()}`,
     props: {
-      foo: shouldResolveProp ? 'foo-a-' + Date.now() : undefined,
-      bar: 'bar-a',
-    },
-    onceProps: { foo: { prop: 'foo', expiresAt } },
-  })
-})
-
-app.get('/once-props/ttl-page-b', (req, res) => {
-  const { shouldResolveProp } = getOncePropsData(req)
-  const expiresAt = Date.now() + 2000
-
-  inertia.render(req, res, {
-    component: 'OnceProps/TtlPageB',
-    props: {
-      foo: shouldResolveProp ? 'foo-b-' + Date.now() : undefined,
-      bar: 'bar-b',
+      foo: shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
     },
     onceProps: { foo: { prop: 'foo', expiresAt } },
   })
