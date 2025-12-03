@@ -1,6 +1,7 @@
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
 import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
@@ -85,6 +86,8 @@ class CurrentPage {
 
         this.page = page
         this.cleared = false
+
+        prefetchedRequests.updateCachedResponsesWithOnceProps()
 
         if (isNewComponent) {
           this.fireEventsFor('newComponent')

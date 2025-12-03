@@ -15,5 +15,4 @@
 
 <p id="bar">Bar: {bar}</p>
 
-<Link href="/once-props/deferred/b">Go to Deferred Page B</Link>
-<Link href="/once-props/deferred/c" prefetch="mount">Go to Deferred Page C</Link>
+<Link href="/once-props/deferred/a">Go to Deferred Page A</Link>

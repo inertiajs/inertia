@@ -12,7 +12,6 @@ import {
 import { history } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
-import { prefetchedRequests } from './prefetched'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
@@ -66,8 +65,6 @@ export class Response {
     history.preserveUrl = this.requestParams.all().preserveUrl
 
     await this.setPage()
-
-    prefetchedRequests.updateCachedResponsesWithOnceProps()
 
     const errors = currentPage.get().props.errors || {}
 

@@ -11,3 +11,4 @@
 <Link href="/once-props/page-c">Go to Page C</Link>
 <Link href="/once-props/page-d" prefetch="mount">Go to Page D</Link>
 <button on:click={() => router.reload({ only: ['foo'] })}>Reload (only foo)</button>
+<button on:click={() => router.replaceProp('foo', 'replaced-foo')}>Replace foo</button>

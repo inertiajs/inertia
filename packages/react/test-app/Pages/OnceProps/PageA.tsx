@@ -11,6 +11,7 @@ export default ({ foo, bar }: { foo: string; bar: string }) => {
         Go to Page D
       </Link>
       <button onClick={() => router.reload({ only: ['foo'] })}>Reload (only foo)</button>
+      <button onClick={() => router.replaceProp('foo', 'replaced-foo')}>Replace foo</button>
     </>
   )
 }
