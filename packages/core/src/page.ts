@@ -160,6 +160,10 @@ class CurrentPage {
     return this.page
   }
 
+  public hasOnceProps(): boolean {
+    return Object.keys(this.page.onceProps ?? {}).length > 0
+  }
+
   public merge(data: Partial<Page>): void {
     this.page = { ...this.page, ...data }
   }
@@ -221,9 +225,7 @@ class CurrentPage {
   }
 
   public passOncePropsTo(toPage: Page, { overwrite = false }: { overwrite?: boolean } = {}): void {
-    const onceProps = toPage.onceProps ?? {}
-
-    Object.entries(onceProps).forEach(([key, onceProp]) => {
+    Object.entries(toPage.onceProps ?? {}).forEach(([key, onceProp]) => {
       const existingOnceProp = this.page.onceProps?.[key]
 
       if (existingOnceProp === undefined) {

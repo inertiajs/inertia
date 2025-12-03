@@ -8,6 +8,7 @@ import {
   CacheForOption,
   InFlightPrefetch,
   InternalActiveVisit,
+  Page,
   PrefetchedResponse,
   PrefetchOptions,
   PrefetchRemovalTimer,
@@ -68,7 +69,9 @@ class PrefetchedRequests {
     }).then((response) => {
       this.remove(params)
 
-      currentPage.passOncePropsTo(response.getPageResponse())
+      const pageResponse = response.getPageResponse()
+
+      currentPage.passOncePropsTo(pageResponse)
 
       this.cached.push({
         params: { ...params },
@@ -81,7 +84,7 @@ class PrefetchedRequests {
         tags: Array.isArray(cacheTags) ? cacheTags : [cacheTags],
       })
 
-      const oncePropsExpiresIn = this.getOncePropsExpiresIn(response)
+      const oncePropsExpiresIn = this.getOncePropsExpiresIn(pageResponse)
       this.scheduleForRemoval(params, oncePropsExpiresIn ? Math.min(expires, oncePropsExpiresIn) : expires)
       this.removeFromInFlight(params)
 
@@ -265,32 +268,35 @@ class PrefetchedRequests {
   }
 
   public syncCachedOnceProps(): void {
-    if (Object.keys(currentPage.get().onceProps ?? {}).length === 0) {
+    if (!currentPage.hasOnceProps()) {
       return
     }
 
     this.cached.forEach((prefetched) => {
       prefetched.response.then((response) => {
-        currentPage.passOncePropsTo(response.getPageResponse(), { overwrite: true })
+        const pageResponse = response.getPageResponse()
 
-        const oncePropsExpiresIn = this.getOncePropsExpiresIn(response)
+        currentPage.passOncePropsTo(pageResponse, { overwrite: true })
 
-        if (oncePropsExpiresIn !== null) {
-          const prefetchExpiresIn = prefetched.expiresAt - Date.now()
-          const expiresIn = Math.min(prefetchExpiresIn, oncePropsExpiresIn)
+        const oncePropsExpiresIn = this.getOncePropsExpiresIn(pageResponse)
 
-          if (expiresIn > 0) {
-            this.scheduleForRemoval(prefetched.params, expiresIn)
-          } else {
-            this.remove(prefetched.params)
-          }
+        if (oncePropsExpiresIn === null) {
+          return
+        }
+
+        const prefetchExpiresIn = prefetched.expiresAt - Date.now()
+        const expiresIn = Math.min(prefetchExpiresIn, oncePropsExpiresIn)
+
+        if (expiresIn > 0) {
+          this.scheduleForRemoval(prefetched.params, expiresIn)
+        } else {
+          this.remove(prefetched.params)
         }
       })
     })
   }
 
-  protected getOncePropsExpiresIn(response: Response): number | null {
-    const page = response.getPageResponse()
+  protected getOncePropsExpiresIn(page: Page): number | null {
     const expiryTimes = Object.values(page.onceProps ?? {})
       .map((onceProp) => onceProp.expiresAt)
       .filter((expiresAt): expiresAt is number => expiresAt !== null)
