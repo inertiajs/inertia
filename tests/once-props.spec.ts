@@ -139,10 +139,8 @@ test('once prop with TTL has its expiry reset after reload', async ({ page }) =>
   await expect(page.getByText('Foo: foo-a')).toBeVisible()
   const initialFooText = await page.locator('#foo').innerText()
 
-  // Wait for TTL to expire
   await page.waitForTimeout(2500)
 
-  // Reload the prop - this should fetch fresh data AND reset the TTL
   await page.getByRole('button', { name: 'Reload foo' }).click()
   await expect(page.getByText(initialFooText)).not.toBeVisible()
 
@@ -150,7 +148,6 @@ test('once prop with TTL has its expiry reset after reload', async ({ page }) =>
   expect(reloadedFooText).not.toBe(initialFooText)
   expect(reloadedFooText.startsWith('Foo: foo-a')).toBe(true)
 
-  // Navigate to page B - the reloaded value should still be cached (TTL was reset)
   await page.getByRole('link', { name: 'Go to TTL Page B' }).click()
 
   await expect(page).toHaveURL('/once-props/ttl/b')
@@ -270,4 +267,127 @@ test('prefetched once prop is updated when re-prefetched before use', async ({ p
   await expect(page).toHaveURL('/once-props/page-d')
 
   await expect(page.getByText(newFooText)).toBeVisible()
+})
+
+test('prefetch cache uses updated TTL after reload and serves cache within new expiry window', async ({ page }) => {
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/ttl/c'))
+
+  await page.goto('/once-props/ttl/a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+  const initialFooText = await page.locator('#foo').innerText()
+
+  await prefetchPromise
+  await page.waitForTimeout(2500)
+
+  await page.getByRole('button', { name: 'Reload foo' }).click()
+  await expect(page.getByText(initialFooText)).not.toBeVisible()
+
+  const reloadedFooText = await page.locator('#foo').innerText()
+
+  let requestMade = false
+  page.on('request', (request) => {
+    if (request.url().includes('/once-props/ttl/c')) {
+      requestMade = true
+    }
+  })
+
+  await page.getByRole('link', { name: 'Go to TTL Page C' }).click()
+  await expect(page).toHaveURL('/once-props/ttl/c')
+
+  expect(requestMade).toBe(false)
+  await expect(page.getByText(reloadedFooText)).toBeVisible()
+})
+
+test('prefetch cache is invalidated when updated TTL expires again', async ({ page }) => {
+  test.setTimeout(10000)
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/ttl/c'))
+
+  await page.goto('/once-props/ttl/a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+  const initialFooText = await page.locator('#foo').innerText()
+
+  await prefetchPromise
+  await page.waitForTimeout(2500)
+
+  await page.getByRole('button', { name: 'Reload foo' }).click()
+  await expect(page.getByText(initialFooText)).not.toBeVisible()
+
+  const reloadedFooText = await page.locator('#foo').innerText()
+
+  await page.waitForTimeout(2500)
+
+  await page.getByRole('link', { name: 'Go to TTL Page C' }).click()
+  await expect(page).toHaveURL('/once-props/ttl/c')
+
+  const newFooText = await page.locator('#foo').innerText()
+  expect(newFooText).not.toBe(reloadedFooText)
+  expect(newFooText.startsWith('Foo: foo-c')).toBe(true)
+})
+
+test('prefetched once prop with TTL is refreshed after expiry', async ({ page }) => {
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/ttl/c'))
+
+  await page.goto('/once-props/ttl/a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+  const initialFooText = await page.locator('#foo').innerText()
+
+  await prefetchPromise
+  await page.waitForTimeout(2500)
+
+  await page.getByRole('link', { name: 'Go to TTL Page C' }).click()
+  await expect(page).toHaveURL('/once-props/ttl/c')
+
+  const newFooText = await page.locator('#foo').innerText()
+  expect(newFooText).not.toBe(initialFooText)
+  expect(newFooText.startsWith('Foo: foo-c')).toBe(true)
+})
+
+test('prefetch cache is updated when deferred once prop finishes loading', async ({ page }) => {
+  const prefetchPromise = page.waitForResponse(
+    (response) =>
+      response.url().includes('/once-props/deferred/c') && !response.request().headers()['x-inertia-partial-data'],
+  )
+
+  await page.goto('/once-props/deferred/a')
+
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+
+  await prefetchPromise
+
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes('/once-props/deferred/a') &&
+      response.request().headers()['x-inertia-partial-data'] === 'foo',
+  )
+
+  await expect(page.getByText('Loading foo...')).not.toBeVisible()
+  const fooText = await page.locator('#foo').innerText()
+  expect(fooText.startsWith('Foo: foo-a')).toBe(true)
+
+  await page.getByRole('link', { name: 'Go to Deferred Page C' }).click()
+  await expect(page).toHaveURL('/once-props/deferred/c')
+
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('prefetch cache is updated when replaceProp is called', async ({ page }) => {
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/page-d'))
+
+  await page.goto('/once-props/page-a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+
+  await prefetchPromise
+
+  await page.getByRole('button', { name: 'Replace foo' }).click()
+
+  await expect(page.getByText('Foo: replaced-foo')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Go to Page D' }).click()
+  await expect(page).toHaveURL('/once-props/page-d')
+
+  await expect(page.getByText('Foo: replaced-foo')).toBeVisible()
 })

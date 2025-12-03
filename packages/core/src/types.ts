@@ -574,6 +574,7 @@ export type PrefetchedResponse = PrefetchObject & {
   singleUse: boolean
   inFlight: false
   tags: string[]
+  oncePropsExpiresAt: number | null
 }
 
 export type PrefetchRemovalTimer = {
