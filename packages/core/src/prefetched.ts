@@ -265,7 +265,7 @@ class PrefetchedRequests {
   public updateCachedResponsesWithOnceProps(): void {
     const current = currentPage.get()
 
-    if (!current.onceProps || Object.keys(current.onceProps).length === 0) {
+    if (Object.keys(current.onceProps ?? {}).length === 0) {
       return
     }
 
