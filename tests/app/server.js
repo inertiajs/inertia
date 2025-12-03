@@ -1471,6 +1471,19 @@ app.get('/once-props/page-c', (req, res) => {
   })
 })
 
+app.get('/once-props/page-d', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageD',
+    props: {
+      foo: shouldResolveProp ? 'foo-d-' + Date.now() : undefined,
+      bar: 'bar-d',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
 app.get('/once-props/deferred/:page', (req, res) => {
   const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
   const page = req.params.page

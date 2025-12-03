@@ -199,3 +199,50 @@ test('once prop with custom key shares data across pages with different prop nam
   await expect(page).toHaveURL('/once-props/custom-key/a')
   await expect(page.getByText(permissionsText)).toBeVisible()
 })
+
+test('prefetched once prop is preserved after navigating through intermediary page', async ({ page }) => {
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/page-d'))
+
+  await page.goto('/once-props/page-a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+  await expect(page.getByText('Bar: bar-a')).toBeVisible()
+
+  const fooText = await page.locator('#foo').innerText()
+
+  await prefetchPromise
+
+  await page.getByRole('link', { name: 'Go to Page C' }).click()
+  await expect(page).toHaveURL('/once-props/page-c')
+
+  await page.getByRole('link', { name: 'Go to Page D' }).click()
+  await expect(page).toHaveURL('/once-props/page-d')
+
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('prefetched once prop is updated when re-prefetched before use', async ({ page }) => {
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/page-d'))
+
+  await page.goto('/once-props/page-a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+  await expect(page.getByText('Bar: bar-a')).toBeVisible()
+
+  const fooText = await page.locator('#foo').innerText()
+
+  await prefetchPromise
+
+  await page.getByRole('button', { name: 'Reload (only foo)' }).click()
+  await expect(page.getByText(fooText)).not.toBeVisible()
+
+  const newFooText = await page.locator('#foo').innerText()
+
+  expect(newFooText.startsWith('Foo: foo-a')).toBe(true)
+  expect(newFooText).not.toBe(fooText)
+
+  await page.getByRole('link', { name: 'Go to Page D' }).click()
+  await expect(page).toHaveURL('/once-props/page-d')
+
+  await expect(page.getByText(newFooText)).toBeVisible()
+})

@@ -48,6 +48,8 @@ export class Response {
       this.wasPrefetched = true
       this.requestParams.all().prefetch = false
 
+      this.preserveOncePropsForPrefetchedResponse()
+
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
       firePrefetchedEvent(this.response, this.requestParams.all())
 
@@ -93,6 +95,28 @@ export class Response {
 
   public mergeParams(params: ActiveVisit) {
     this.requestParams.merge(params)
+  }
+
+  protected preserveOncePropsForPrefetchedResponse() {
+    const pageResponse: Page = this.getDataFromResponse(this.response.data)
+
+    Object.entries(pageResponse.onceProps ?? {}).forEach(([key, onceProp]) => {
+      // Check if the current page has the same onceProp key
+      const existingOnceProp = currentPage.get().onceProps?.[key]
+
+      if (existingOnceProp === undefined) {
+        return
+      }
+
+      const currentValue = currentPage.get().props[existingOnceProp.prop]
+
+      if (pageResponse.props[onceProp.prop] === undefined) {
+        // Only preserve if no new value was provided for this prop
+        pageResponse.props[onceProp.prop] = currentValue
+      }
+    })
+
+    this.response.data = pageResponse
   }
 
   protected async handleNonInertiaResponse() {
