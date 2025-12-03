@@ -173,6 +173,13 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  onceProps?: Record<
+    string,
+    {
+      prop: keyof PageProps
+      expiresAt?: number | null
+    }
+  >
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -564,6 +571,7 @@ export type PrefetchCancellationToken = {
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
+  expiresAt: number
   singleUse: boolean
   inFlight: false
   tags: string[]

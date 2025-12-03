@@ -95,6 +95,10 @@ export class Response {
     this.requestParams.merge(params)
   }
 
+  public getPageResponse(): Page {
+    return (this.response.data = this.getDataFromResponse(this.response.data))
+  }
+
   protected async handleNonInertiaResponse() {
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
@@ -165,6 +169,7 @@ export class Response {
     }
 
     this.mergeProps(pageResponse)
+    currentPage.passOncePropsTo(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
