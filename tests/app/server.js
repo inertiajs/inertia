@@ -1471,7 +1471,7 @@ app.get('/once-props/page-c', (req, res) => {
   })
 })
 
-app.get('/once-props/deferred-page/:page', (req, res) => {
+app.get('/once-props/deferred/:page', (req, res) => {
   const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
   const page = req.params.page
 
@@ -1498,7 +1498,7 @@ app.get('/once-props/deferred-page/:page', (req, res) => {
   })
 })
 
-app.get('/once-props/ttl-page/:page', (req, res) => {
+app.get('/once-props/ttl/:page', (req, res) => {
   const { shouldResolveProp } = getOncePropsData(req)
   const page = req.params.page
   const expiresAt = Date.now() + 2000
@@ -1513,7 +1513,7 @@ app.get('/once-props/ttl-page/:page', (req, res) => {
   })
 })
 
-app.get('/once-props/optional-page/:page', (req, res) => {
+app.get('/once-props/optional/:page', (req, res) => {
   const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
   const page = req.params.page
 
@@ -1527,7 +1527,7 @@ app.get('/once-props/optional-page/:page', (req, res) => {
   })
 })
 
-app.get('/once-props/merge-page/:page', (req, res) => {
+app.get('/once-props/merge/:page', (req, res) => {
   const { shouldResolveProp } = getOncePropsData(req, 'items')
   const page = req.params.page
 
@@ -1539,6 +1539,21 @@ app.get('/once-props/merge-page/:page', (req, res) => {
     },
     mergeProps: ['items'],
     onceProps: { items: { prop: 'items', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/custom-key/:page', (req, res) => {
+  const page = req.params.page
+  const propName = page === 'a' ? 'userPermissions' : 'permissions'
+  const { shouldResolveProp } = getOncePropsData(req, 'user-permissions')
+
+  inertia.render(req, res, {
+    component: `OnceProps/CustomKeyPage${page.toUpperCase()}`,
+    props: {
+      [propName]: shouldResolveProp ? `perms-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: { 'user-permissions': { prop: propName, expiresAt: null } },
   })
 })
 

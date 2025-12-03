@@ -18,5 +18,5 @@ defineProps<{
 
   <p id="bar">Bar: {{ bar }}</p>
 
-  <Link href="/once-props/deferred-page/a">Go to Deferred Page A</Link>
+  <Link href="/once-props/deferred/a">Go to Deferred Page A</Link>
 </template>

@@ -7,5 +7,5 @@
 
 <p id="foo">Foo: {foo ?? 'not loaded'}</p>
 <p id="bar">Bar: {bar}</p>
-<Link href="/once-props/optional-page/b">Go to Optional Page B</Link>
+<Link href="/once-props/optional/b">Go to Optional Page B</Link>
 <button on:click={() => router.reload({ only: ['foo'] })}>Load foo</button>

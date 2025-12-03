@@ -5,7 +5,7 @@ export default ({ items, bar }: { items: string[]; bar: string }) => {
     <>
       <p id="items">Items count: {items.length}</p>
       <p id="bar">Bar: {bar}</p>
-      <Link href="/once-props/merge-page/a">Go to Merge Page A</Link>
+      <Link href="/once-props/merge/a">Go to Merge Page A</Link>
       <button onClick={() => router.reload({ only: ['items'] })}>Load more items</button>
     </>
   )
