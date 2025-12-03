@@ -1,5 +1,6 @@
 import { cloneDeep } from 'lodash-es'
 import { objectsAreEqual } from './objectUtils'
+import { page as currentPage } from './page'
 import { Response } from './response'
 import { timeToMs } from './time'
 import {
@@ -66,6 +67,8 @@ class PrefetchedRequests {
       })
     }).then((response) => {
       this.remove(params)
+
+      this.preserveOncePropsInResponse(response)
 
       this.cached.push({
         params: { ...params },
@@ -257,6 +260,47 @@ class PrefetchedRequests {
         'viewTransition',
       ],
     )
+  }
+
+  public updateCachedResponsesWithOnceProps(): void {
+    const current = currentPage.get()
+
+    if (!current.onceProps || Object.keys(current.onceProps).length === 0) {
+      return
+    }
+
+    this.cached.forEach((prefetched) => {
+      prefetched.response.then((response) => {
+        const page = response.getPageResponse()
+
+        Object.entries(page.onceProps ?? {}).forEach(([key, onceProp]) => {
+          const existingOnceProp = current.onceProps?.[key]
+
+          if (existingOnceProp === undefined) {
+            return
+          }
+
+          page.props[onceProp.prop] = current.props[existingOnceProp.prop]
+        })
+      })
+    })
+  }
+
+  protected preserveOncePropsInResponse(response: Response): void {
+    const current = currentPage.get()
+    const page = response.getPageResponse()
+
+    Object.entries(page.onceProps ?? {}).forEach(([key, onceProp]) => {
+      const existingOnceProp = current.onceProps?.[key]
+
+      if (existingOnceProp === undefined) {
+        return
+      }
+
+      if (page.props[onceProp.prop] === undefined) {
+        page.props[onceProp.prop] = current.props[existingOnceProp.prop]
+      }
+    })
   }
 }
 
