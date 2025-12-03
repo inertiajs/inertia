@@ -251,6 +251,7 @@ export class Response {
       if (pageResponse.props[onceProp.prop] === undefined) {
         // Only preserve if no new value was provided for this prop
         pageResponse.props[onceProp.prop] = currentValue
+        onceProps[key].expiresAt = existingOnceProp.expiresAt
       }
     })
   }

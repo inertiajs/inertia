@@ -155,6 +155,28 @@ test('once prop with TTL has its expiry reset after reload', async ({ page }) =>
   await expect(page.getByText(reloadedFooText)).toBeVisible()
 })
 
+test('once prop TTL is preserved across navigation and expires correctly', async ({ page }) => {
+  await page.goto('/once-props/ttl/a')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+  const initialFooText = await page.locator('#foo').innerText()
+
+  await page.waitForTimeout(1000)
+
+  await page.getByRole('link', { name: 'Go to TTL Page B' }).click()
+  await expect(page).toHaveURL('/once-props/ttl/b')
+  await expect(page.getByText(initialFooText)).toBeVisible()
+
+  await page.waitForTimeout(1500)
+
+  await page.getByRole('link', { name: 'Go to TTL Page A' }).click()
+  await expect(page).toHaveURL('/once-props/ttl/a')
+
+  const newFooText = await page.locator('#foo').innerText()
+  expect(newFooText).not.toBe(initialFooText)
+  expect(newFooText.startsWith('Foo: foo-a')).toBe(true)
+})
+
 test('optional once prop is not loaded initially, fetched via reload, then cached on navigation', async ({ page }) => {
   await page.goto('/once-props/optional/a')
 

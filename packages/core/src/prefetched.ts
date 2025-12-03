@@ -315,6 +315,7 @@ class PrefetchedRequests {
 
       if (page.props[onceProp.prop] === undefined) {
         page.props[onceProp.prop] = current.props[existingOnceProp.prop]
+        page.onceProps![key].expiresAt = existingOnceProp.expiresAt
       }
     })
   }
