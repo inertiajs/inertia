@@ -132,3 +132,50 @@ test('once prop with TTL is remembered within TTL window and reloaded after expi
   expect(newFooText).not.toBe(initialFooText)
   expect(newFooText.startsWith('Foo: foo-b')).toBe(true)
 })
+
+test('optional once prop is not loaded initially, fetched via reload, then cached on navigation', async ({ page }) => {
+  await page.goto('/once-props/optional-page/a')
+
+  await expect(page.getByText('Foo: not loaded')).toBeVisible()
+  await expect(page.getByText('Bar: bar-a')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Load foo', '/once-props/optional-page/a', 'button')
+
+  await expect(page.getByText('Foo: foo-a')).toBeVisible()
+
+  const fooText = await page.locator('#foo').innerText()
+  expect(fooText.startsWith('Foo: foo-a')).toBe(true)
+
+  await clickAndWaitForResponse(page, 'Go to Optional Page B', '/once-props/optional-page/b')
+
+  await expect(page).toHaveURL('/once-props/optional-page/b')
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Go to Optional Page A', '/once-props/optional-page/a')
+
+  await expect(page).toHaveURL('/once-props/optional-page/a')
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('merge once prop merges on reload and preserves merged data on navigation', async ({ page }) => {
+  await page.goto('/once-props/merge-page/a')
+
+  await expect(page.getByText('Items count: 3')).toBeVisible()
+  await expect(page.getByText('Bar: bar-a')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Load more items', '/once-props/merge-page/a', 'button')
+
+  await expect(page.getByText('Items count: 6')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Go to Merge Page B', '/once-props/merge-page/b')
+
+  await expect(page).toHaveURL('/once-props/merge-page/b')
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText('Items count: 6')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Go to Merge Page A', '/once-props/merge-page/a')
+
+  await expect(page).toHaveURL('/once-props/merge-page/a')
+  await expect(page.getByText('Items count: 6')).toBeVisible()
+})

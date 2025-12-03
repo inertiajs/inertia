@@ -1551,6 +1551,35 @@ app.get('/once-props/ttl-page-b', (req, res) => {
   })
 })
 
+app.get('/once-props/optional-page/:page', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+
+  inertia.render(req, res, {
+    component: `OnceProps/OptionalPage${page.toUpperCase()}`,
+    props: {
+      foo: isPartialRequest ? `foo-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: isPartialRequest || hasPropAlready ? { foo: { prop: 'foo', expiresAt: null } } : {},
+  })
+})
+
+app.get('/once-props/merge-page/:page', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req, 'items')
+  const page = req.params.page
+
+  inertia.render(req, res, {
+    component: `OnceProps/MergePage${page.toUpperCase()}`,
+    props: {
+      items: shouldResolveProp ? new Array(3).fill(page) : undefined,
+      bar: `bar-${page}`,
+    },
+    mergeProps: ['items'],
+    onceProps: { items: { prop: 'items', expiresAt: null } },
+  })
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
