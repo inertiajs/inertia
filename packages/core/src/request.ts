@@ -144,15 +144,9 @@ export class Request {
       headers['X-Inertia-Version'] = page.version
     }
 
-    const onceProps = Object.keys(page.onceProps || {}).reduce((props: string[], key: string) => {
-      const onceProp = page.onceProps![key]
-
-      if (!onceProp.expiresAt || onceProp.expiresAt > Date.now()) {
-        props.push(key)
-      }
-
-      return props
-    }, [])
+    const onceProps = Object.entries(page.onceProps || {})
+      .filter(([, onceProp]) => !onceProp.expiresAt || onceProp.expiresAt > Date.now())
+      .map(([key]) => key)
 
     if (onceProps.length > 0) {
       headers['X-Inertia-Page-Once-Props'] = onceProps.join(',')

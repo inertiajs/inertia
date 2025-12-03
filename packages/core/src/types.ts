@@ -177,7 +177,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
     string,
     {
       prop: keyof PageProps
-      expiresAt?: number
+      expiresAt?: number | null
     }
   >
 

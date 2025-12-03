@@ -299,7 +299,7 @@ class PrefetchedRequests {
   protected getOncePropsExpiresIn(page: Page): number | null {
     const expiryTimes = Object.values(page.onceProps ?? {})
       .map((onceProp) => onceProp.expiresAt)
-      .filter((expiresAt): expiresAt is number => expiresAt !== null)
+      .filter((expiresAt): expiresAt is number => !!expiresAt)
 
     if (expiryTimes.length === 0) {
       return null
