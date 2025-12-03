@@ -99,7 +99,7 @@ export class Response {
   }
 
   public getPageResponse(): Page {
-    return this.response.data = this.getDataFromResponse(this.response.data)
+    return (this.response.data = this.getDataFromResponse(this.response.data))
   }
 
   protected async handleNonInertiaResponse() {

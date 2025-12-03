@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3'
-
 defineProps<{ foo: string; bar: string }>()
 </script>
 
