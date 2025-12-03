@@ -571,10 +571,10 @@ export type PrefetchCancellationToken = {
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
+  expiresAt: number
   singleUse: boolean
   inFlight: false
   tags: string[]
-  oncePropsExpiresAt: number | null
 }
 
 export type PrefetchRemovalTimer = {

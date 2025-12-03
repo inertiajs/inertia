@@ -10,6 +10,9 @@ export default ({ foo, bar }: { foo: string; bar: string }) => {
       <Link href="/once-props/page-d" prefetch="mount">
         Go to Page D
       </Link>
+      <Link href="/once-props/page-e" prefetch="mount" cacheFor={1000}>
+        Go to Page E (short cache)
+      </Link>
       <button onClick={() => router.reload({ only: ['foo'] })}>Reload (only foo)</button>
       <button onClick={() => router.replaceProp('foo', 'replaced-foo')}>Replace foo</button>
     </>

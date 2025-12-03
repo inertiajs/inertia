@@ -73,15 +73,16 @@ class PrefetchedRequests {
       this.cached.push({
         params: { ...params },
         staleTimestamp: Date.now() + stale,
+        expiresAt: Date.now() + expires,
         response: promise,
         singleUse: expires === 0,
         timestamp: Date.now(),
         inFlight: false,
         tags: Array.isArray(cacheTags) ? cacheTags : [cacheTags],
-        oncePropsExpiresAt: this.getEarliestOncePropsExpiry(response),
       })
 
-      this.scheduleForRemoval(params, expires)
+      const oncePropsExpiresIn = this.getOncePropsExpiresIn(response)
+      this.scheduleForRemoval(params, oncePropsExpiresIn ? Math.min(expires, oncePropsExpiresIn) : expires)
       this.removeFromInFlight(params)
 
       response.handlePrefetch()
@@ -177,17 +178,7 @@ class PrefetchedRequests {
   }
 
   public get(params: ActiveVisit): InFlightPrefetch | PrefetchedResponse | null {
-    const cached = this.findCached(params)
-
-    if (cached && this.hasExpiredOnceProps(cached)) {
-      return null
-    }
-
-    return cached || this.findInFlight(params)
-  }
-
-  protected hasExpiredOnceProps(cached: PrefetchedResponse): boolean {
-    return cached.oncePropsExpiresAt !== null && cached.oncePropsExpiresAt < Date.now()
+    return this.findCached(params) || this.findInFlight(params)
   }
 
   public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
@@ -295,7 +286,18 @@ class PrefetchedRequests {
           page.onceProps![key].expiresAt = existingOnceProp.expiresAt
         })
 
-        prefetched.oncePropsExpiresAt = this.getEarliestOncePropsExpiry(response)
+        const oncePropsExpiresIn = this.getOncePropsExpiresIn(response)
+
+        if (oncePropsExpiresIn !== null) {
+          const prefetchExpiresIn = prefetched.expiresAt - Date.now()
+          const expiresIn = Math.min(prefetchExpiresIn, oncePropsExpiresIn)
+
+          if (expiresIn > 0) {
+            this.scheduleForRemoval(prefetched.params, expiresIn)
+          } else {
+            this.remove(prefetched.params)
+          }
+        }
       })
     })
   }
@@ -317,13 +319,17 @@ class PrefetchedRequests {
     })
   }
 
-  protected getEarliestOncePropsExpiry(response: Response): number | null {
+  protected getOncePropsExpiresIn(response: Response): number | null {
     const page = response.getPageResponse()
     const expiryTimes = Object.values(page.onceProps ?? {})
       .map((onceProp) => onceProp.expiresAt)
       .filter((expiresAt): expiresAt is number => expiresAt !== null)
 
-    return expiryTimes.length > 0 ? Math.min(...expiryTimes) : null
+    if (expiryTimes.length === 0) {
+      return null
+    }
+
+    return Math.min(...expiryTimes) - Date.now()
   }
 }
 
