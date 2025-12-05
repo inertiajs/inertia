@@ -12,6 +12,7 @@
 
   let { users, preserveState, filter = undefined, search = undefined }: Props = $props()
 
+  // svelte-ignore state_referenced_locally
   const form = useForm({
     filter: undefined,
     page: undefined,
@@ -19,6 +20,7 @@
   })
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined = $state()
+  // svelte-ignore state_referenced_locally
   let previousSearch = $state(search)
 
   onDestroy(() => {

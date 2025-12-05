@@ -14,6 +14,7 @@
 
   let { headers, method, form, files = {}, url, query }: Props = $props()
 
+  // svelte-ignore state_referenced_locally
   const dump = {
     headers,
     method,

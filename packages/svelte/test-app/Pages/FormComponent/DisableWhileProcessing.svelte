@@ -5,6 +5,8 @@
   }
 
   let { disable = false }: Props = $props()
+
+  // svelte-ignore state_referenced_locally
   let url = $state(`/form-component/disable-while-processing/${disable ? 'yes' : 'no'}/submit`)
 </script>
 

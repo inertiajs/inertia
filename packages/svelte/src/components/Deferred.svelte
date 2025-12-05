@@ -30,6 +30,7 @@
     })
   }
 
+  // svelte-ignore state_referenced_locally
   if (!fallback) {
     throw new Error('`<Deferred>` requires a `fallback` snippet')
   }

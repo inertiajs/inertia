@@ -22,6 +22,7 @@
 
   let { foo, bar, baz }: Props = $props()
 
+  // svelte-ignore state_referenced_locally
   let page = foo.page
 
   const reloadIt = () => {

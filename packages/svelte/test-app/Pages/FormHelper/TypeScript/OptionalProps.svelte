@@ -16,6 +16,7 @@
 
   let { user = null }: Props = $props()
 
+  // svelte-ignore state_referenced_locally
   useForm<LoginData>({
     username: user?.username ?? '',
     password: '',

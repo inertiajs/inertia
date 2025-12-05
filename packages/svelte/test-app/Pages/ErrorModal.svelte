@@ -15,9 +15,11 @@
     router.post('/json')
   }
 
-  if (dialog) {
-    config.set('future.useDialogForErrorModal', true)
-  }
+  $effect(() => {
+    if (dialog) {
+      config.set('future.useDialogForErrorModal', true)
+    }
+  })
 </script>
 
 <div>

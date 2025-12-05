@@ -8,11 +8,13 @@
 
   let { queryStringArrayFormat }: Props = $props()
 
-  const format = queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat
+  const format = $derived(queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat)
 
-  if (queryStringArrayFormat === 'force-brackets') {
-    config.set('form.forceIndicesArrayFormatInFormData', false)
-  }
+  $effect(() => {
+    if (queryStringArrayFormat === 'force-brackets') {
+      config.set('form.forceIndicesArrayFormatInFormData', false)
+    }
+  })
 </script>
 
 <Form action="/dump/post" method="post" queryStringArrayFormat={format}>

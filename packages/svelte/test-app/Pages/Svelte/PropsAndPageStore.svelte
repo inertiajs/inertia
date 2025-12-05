@@ -8,6 +8,7 @@
 
   let { foo } = $props()
 
+  // svelte-ignore state_referenced_locally
   const form = useForm({ foo })
 
   const pageProps: PageProps = {
@@ -16,6 +17,7 @@
 
   const sveltePage = usePage<PageProps>()
 
+  // svelte-ignore state_referenced_locally
   console.log('[script] foo prop is', foo)
   console.log('[script] page.props.foo is', page.props.foo)
   console.log('[script] sveltePage.props.foo is', sveltePage.props.foo)

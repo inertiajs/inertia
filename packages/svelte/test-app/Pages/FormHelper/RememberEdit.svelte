@@ -13,6 +13,7 @@
 
   let { user }: Props = $props()
 
+  // svelte-ignore state_referenced_locally
   const form = useForm('EditUserForm', {
     name: user.name,
     email: user.email,

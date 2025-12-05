@@ -15,7 +15,9 @@
   let effectACount = $state(0)
   let effectBCount = $state(0)
 
+  // svelte-ignore state_referenced_locally
   let previousNestedA = $state(nestedA)
+  // svelte-ignore state_referenced_locally
   let previousNestedB = $state(nestedB)
 
   $effect(() => {

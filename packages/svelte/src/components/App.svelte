@@ -23,8 +23,10 @@
 
   const { initialComponent, initialPage, resolveComponent }: Props = $props()
 
+  // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
   let key = $state<number | null>(null)
+  // svelte-ignore state_referenced_locally
   let page = $state(initialPage)
   let renderProps = $derived.by<RenderProps>(() => resolveRenderProps(component, page, key))
 
@@ -36,6 +38,7 @@
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
+    // svelte-ignore state_referenced_locally
     router.init<ResolvedComponent>({
       initialPage,
       resolveComponent,
