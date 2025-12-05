@@ -20,8 +20,13 @@ createInertiaApp({
     return pages[`./Pages/${name}.svelte`] as ResolvedComponent
   },
   setup({ el, App, props }) {
-    const doHydrate = el?.hasAttribute('data-server-rendered')
-    doHydrate ? hydrate(App, { target: el!, props }) : mount(App, { target: el!, props })
+    const isServerRendered = el?.hasAttribute('data-server-rendered')
+
+    if (isServerRendered) {
+      hydrate(App, { target: el!, props })
+    } else {
+      mount(App, { target: el!, props })
+    }
   },
   ...(withAppDefaults && {
     defaults: {
