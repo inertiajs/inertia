@@ -1467,6 +1467,12 @@ app.post('/flash/events/with-data', (req, res) =>
 )
 app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
 app.get('/flash/client-side-visits', (req, res) => inertia.render(req, res, { component: 'Flash/ClientSideVisits' }))
+app.get('/flash/initial', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/InitialFlash',
+    flash: { message: 'Hello from server' },
+  }),
+)
 
 app.all('*page', (req, res) => inertia.render(req, res))
 

@@ -10,7 +10,12 @@ const waitForMessages = async (page, count?: number): Promise<any[]> => {
 }
 
 test.describe('Flash Data', () => {
-  test.describe('Server-side visits', () => {
+  test('displays flash data from initial page load', async ({ page }) => {
+    await page.goto('/flash/initial')
+    await expect(page.locator('#flash')).toContainText('Hello from server')
+  })
+
+  test.describe('Requests', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/flash/events')
     })
