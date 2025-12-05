@@ -39,8 +39,14 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const elPage =
+    isServer || !useScriptElementForInitialPage
+      ? null
+      : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
+  const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
+
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
   const [initialComponent] = await Promise.all([
@@ -60,7 +66,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const { body, head, css } = svelteApp
 
     return {
-      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`,
+      body: useScriptElementForInitialPage
+        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage)}</script><div data-server-rendered="true" id="${id}">${body}</div>`
+        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }

@@ -1,6 +1,6 @@
 import type { VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
-import { mount } from 'svelte'
+import { hydrate, mount } from 'svelte'
 
 window.testing = { Inertia: router }
 
@@ -20,7 +20,8 @@ createInertiaApp({
     return pages[`./Pages/${name}.svelte`] as ResolvedComponent
   },
   setup({ el, App, props }) {
-    mount(App, { target: el!, props })
+    const doHydrate = el?.hasAttribute('data-server-rendered')
+    doHydrate ? hydrate(App, { target: el!, props }) : mount(App, { target: el!, props })
   },
   ...(withAppDefaults && {
     defaults: {

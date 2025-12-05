@@ -115,6 +115,14 @@ export class Router {
   }
 
   public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
+    return this.doReload(options)
+  }
+
+  protected doReload<T extends RequestPayload = RequestPayload>(
+    options: ReloadOptions<T> & {
+      deferredProps?: boolean
+    } = {},
+  ): void {
     if (typeof window === 'undefined') {
       return
     }
@@ -521,7 +529,7 @@ export class Router {
   protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
-        this.reload({ only: group })
+        this.doReload({ only: group, deferredProps: true })
       })
     }
   }

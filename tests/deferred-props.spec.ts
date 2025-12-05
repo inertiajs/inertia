@@ -272,3 +272,41 @@ test('prefetch works with deferred props without errors', async ({ page }) => {
 
   expect(consoleMessages.errors).toHaveLength(0)
 })
+
+test('deferred props do not clear validation errors', async ({ page }) => {
+  await page.goto('/deferred-props/with-errors')
+
+  await expect(page.locator('#page-error')).not.toBeVisible()
+  await expect(page.locator('#form-error')).not.toBeVisible()
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+
+  await page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+  )
+
+  await expect(page.getByText('foo value')).toBeVisible()
+
+  const deferredResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+  )
+  const errorResponsePromise = page.waitForResponse(
+    (response) => !response.request().headers()['x-inertia-partial-data'] && response.status() === 200,
+  )
+
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await errorResponsePromise
+
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+
+  await deferredResponsePromise
+
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+  await expect(page.getByText('foo value')).toBeVisible()
+})

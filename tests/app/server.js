@@ -24,6 +24,36 @@ if (!adapters.includes(inertia.package)) {
 // Used because Cypress does not allow you to navigate to a different origin URL within a single test.
 app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
 
+// SSR test routes (only rendered with SSR when SSR=true)
+app.get('/ssr/page1', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Page1',
+    props: {
+      user: { name: 'John Doe', email: 'john@example.com' },
+      items: ['Item 1', 'Item 2', 'Item 3'],
+      count: 42,
+    },
+  }),
+)
+
+app.get('/ssr/page2', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
+app.get('/ssr/page-with-script-element', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/PageWithScriptElement',
+    props: {
+      message: 'Hello from script element!',
+    },
+  }),
+)
+
 // Intercepts all .js assets (including files loaded via code splitting)
 app.get(/.*\.js$/, (req, res) =>
   res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
@@ -889,6 +919,44 @@ app.get('/deferred-props/partial-reloads', (req, res) => {
       }),
     500,
   )
+})
+
+let deferredPropsWithErrorsState = {}
+
+app.get('/deferred-props/with-errors', (req, res) => {
+  const errors = { ...deferredPropsWithErrorsState }
+
+  deferredPropsWithErrorsState = {}
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithErrors',
+      deferredProps: {
+        default: ['foo'],
+      },
+      props: {
+        errors,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithErrors',
+        props: {
+          foo: req.headers['x-inertia-partial-data']?.includes('foo') ? { text: 'foo value' } : undefined,
+          errors: {},
+        },
+      }),
+    250,
+  )
+})
+
+app.post('/deferred-props/with-errors', (req, res) => {
+  deferredPropsWithErrorsState = { name: 'The name field is required.' }
+
+  res.redirect(303, '/deferred-props/with-errors')
 })
 
 app.get('/svelte/props-and-page-store', (req, res) =>

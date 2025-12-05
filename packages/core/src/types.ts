@@ -424,6 +424,7 @@ export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisi
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
+  deferredProps?: boolean
 }
 
 export type VisitId = unknown
@@ -511,6 +512,7 @@ export type InertiaAppConfig = {
     preserveEqualProps: boolean
     useDataInertiaHeadAttribute: boolean
     useDialogForErrorModal: boolean
+    useScriptElementForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
