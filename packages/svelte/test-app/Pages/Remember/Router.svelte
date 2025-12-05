@@ -1,8 +1,8 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  let foo = '-'
-  let bar = 0
+  let foo = $state('-')
+  let bar = $state(0)
 
   function remember() {
     router.remember('foo')
@@ -34,7 +34,7 @@
 <div>
   <p>Foo: {foo}</p>
   <p>Bar: {bar}</p>
-  <button on:click={remember}>Remember</button>
-  <button on:click={restore}>Restore</button>
-  <button on:click={restoreTyped}>Restore Typed</button>
+  <button onclick={remember}>Remember</button>
+  <button onclick={restore}>Restore</button>
+  <button onclick={restoreTyped}>Restore Typed</button>
 </div>

@@ -1,10 +1,14 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   export { default as layout } from '@/Layouts/Prefetch.svelte'
 </script>
 
 <script lang="ts">
-  export let pageNumber: number
-  export let lastLoaded: number
+  interface Props {
+    pageNumber: number
+    lastLoaded: number
+  }
+
+  let { pageNumber, lastLoaded }: Props = $props()
 </script>
 
 <div>This is page {pageNumber}</div>

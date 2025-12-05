@@ -1,40 +1,38 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy } from 'svelte'
-  import { usePage } from '../page'
+  import { usePage } from '../page.svelte'
 
-  export let data: string | string[] = ''
-  export let params: ReloadOptions = {}
-  export let buffer: number = 0
-  export let as: keyof HTMLElementTagNameMap = 'div'
-  export let always: boolean = false
+  interface Props {
+    data?: string | string[]
+    params?: ReloadOptions
+    buffer?: number
+    as?: keyof HTMLElementTagNameMap
+    always?: boolean
+    children?: import('svelte').Snippet
+    fallback?: import('svelte').Snippet
+  }
 
-  let loaded = false
+  let { data = '', params = {}, buffer = 0, as = 'div', always = false, children, fallback }: Props = $props()
+
+  let loaded = $state(false)
   let fetching = false
-  let el: HTMLElement
   let observer: IntersectionObserver | null = null
 
   const page = usePage()
 
   // Watch for page prop changes and reset loaded state when data becomes undefined
-  $: {
+  $effect(() => {
     if (Array.isArray(data)) {
       // For arrays, reset loaded if any prop becomes undefined
-      if (data.some((key) => $page.props[key] === undefined)) {
+      if (data.some((key) => page.props[key] === undefined)) {
         loaded = false
       }
-    } else if ($page.props[data as string] === undefined) {
+    } else if (page.props[data as string] === undefined) {
       loaded = false
     }
-  }
+  })
 
-  $: if (el) {
-    registerObserver()
-  }
-
-  function registerObserver() {
-    observer?.disconnect()
-
+  function attachObserver(el: HTMLElement) {
     observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) {
@@ -76,11 +74,12 @@
     )
 
     observer.observe(el)
-  }
 
-  onDestroy(() => {
-    observer?.disconnect()
-  })
+    // Clean up will run like onDestroy
+    return () => {
+      observer?.disconnect()
+    }
+  }
 
   function getReloadParams(): Partial<ReloadOptions> {
     if (data !== '') {
@@ -98,11 +97,11 @@
 </script>
 
 {#if always || !loaded}
-  <svelte:element this={as} bind:this={el} />
+  <svelte:element this={as} {@attach attachObserver} />
 {/if}
 
 {#if loaded}
-  <slot />
-{:else if $$slots.fallback}
-  <slot name="fallback" />
+  {@render children?.()}
+{:else if fallback}
+  {@render fallback?.()}
 {/if}

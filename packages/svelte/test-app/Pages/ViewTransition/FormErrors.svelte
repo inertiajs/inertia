@@ -4,7 +4,7 @@
   const form = useForm({ name: '' })
 
   const submit = () => {
-    $form.post('/view-transition/form-errors', {
+    form.post('/view-transition/form-errors', {
       viewTransition: (viewTransition) => {
         viewTransition.ready.then(() => console.log('ready'))
         viewTransition.updateCallbackDone.then(() => console.log('updateCallbackDone'))
@@ -19,12 +19,12 @@
 
   <label>
     Name
-    <input id="name" bind:value={$form.name} type="text" name="name" />
+    <input id="name" bind:value={form.name} type="text" name="name" />
   </label>
 
-  {#if $form.errors.name}
-    <p class="name_error">{$form.errors.name}</p>
+  {#if form.errors.name}
+    <p class="name_error">{form.errors.name}</p>
   {/if}
 
-  <button class="submit" on:click={submit}>Submit with View Transition</button>
+  <button class="submit" onclick={submit}>Submit with View Transition</button>
 </div>

@@ -18,10 +18,9 @@ import type {
 import { router } from '@inertiajs/core'
 import type { AxiosProgressEvent } from 'axios'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
-import { writable, type Writable } from 'svelte/store'
 import { config } from '.'
 
-type InertiaFormStore<TForm extends object> = Writable<InertiaForm<TForm>> & InertiaForm<TForm>
+type InertiaFormStore<TForm extends object> = InertiaForm<TForm>
 
 type FormOptions = Omit<VisitOptions, 'data'>
 type SubmitArgs = [Method, string, FormOptions?] | [UrlMethodPair, FormOptions?]
@@ -81,12 +80,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   // overriding user's custom defaults with automatic behavior.
   let defaultsCalledInOnSuccess = false
 
-  // Internal helper to update form state properties
-  const setFormState = <K extends keyof InertiaFormProps<TForm>>(key: K, value: InertiaFormProps<TForm>[K]) => {
-    store.update((form) => ({ ...form, [key]: value }))
-  }
-
-  const store = writable<InertiaForm<TForm>>({
+  let form = $state({
     ...(restored ? restored.data : data),
     isDirty: false,
     errors: (restored ? restored.errors : {}) as FormDataErrors<TForm>,
@@ -96,9 +90,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     recentlySuccessful: false,
     processing: false,
     setStore(keyOrData: keyof InertiaFormProps<TForm> | FormDataKeys<TForm> | TForm, maybeValue = undefined) {
-      store.update((store) => {
-        return typeof keyOrData === 'string' ? set(store, keyOrData, maybeValue) : Object.assign(store, keyOrData)
-      })
+      if (typeof keyOrData === 'string') {
+        set(form, keyOrData, maybeValue)
+      } else {
+        Object.assign(form, keyOrData)
+      }
     },
     data() {
       return Object.keys(data).reduce((carry, key) => {
@@ -140,24 +136,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return this
     },
     setError(fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) {
-      setFormState('errors', {
+      form.errors = {
         ...this.errors,
         ...((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
-      })
+      } as FormDataErrors<TForm>
 
       return this
     },
     clearErrors(...fields: string[]) {
-      setFormState(
-        'errors',
-        Object.keys(this.errors).reduce(
-          (carry, field) => ({
-            ...carry,
-            ...(fields.length > 0 && !fields.includes(field) ? { [field]: (this.errors as Errors)[field] } : {}),
-          }),
-          {},
-        ) as FormDataErrors<TForm>,
-      )
+      form.errors = Object.keys(this.errors).reduce(
+        (carry, field) => ({
+          ...carry,
+          ...(fields.length > 0 && !fields.includes(field) ? { [field]: (this.errors as Errors)[field] } : {}),
+        }),
+        {},
+      ) as FormDataErrors<TForm>
       return this
     },
     resetAndClearErrors(...fields: Array<FormDataKeys<TForm>>) {
@@ -174,7 +167,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
       defaultsCalledInOnSuccess = false
 
-      const data = transform(this.data()) as RequestPayload
+      const transformedData = transform(this.data()) as RequestPayload
 
       const _options: Omit<VisitOptions, 'method'> = {
         ...options,
@@ -186,8 +179,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onBefore: (visit: PendingVisit) => {
-          setFormState('wasSuccessful', false)
-          setFormState('recentlySuccessful', false)
+          form.wasSuccessful = false
+          form.recentlySuccessful = false
           if (recentlySuccessfulTimeoutId) {
             clearTimeout(recentlySuccessfulTimeoutId)
           }
@@ -197,44 +190,41 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onStart: (visit: PendingVisit) => {
-          setFormState('processing', true)
+          form.processing = true
 
           if (options.onStart) {
             return options.onStart(visit)
           }
         },
         onProgress: (event?: AxiosProgressEvent) => {
-          setFormState('progress', event || null)
+          form.progress = event || null
 
           if (options.onProgress) {
             return options.onProgress(event)
           }
         },
         onSuccess: async (page: Page) => {
-          setFormState('processing', false)
-          setFormState('progress', null)
+          form.processing = false
+          form.progress = null
           this.clearErrors()
-          setFormState('wasSuccessful', true)
-          setFormState('recentlySuccessful', true)
+          form.wasSuccessful = true
+          form.recentlySuccessful = true
           recentlySuccessfulTimeoutId = setTimeout(
-            () => setFormState('recentlySuccessful', false),
+            () => (form.recentlySuccessful = false),
             config.get('form.recentlySuccessfulDuration'),
           )
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 
           if (!defaultsCalledInOnSuccess) {
-            store.update((form) => {
-              this.defaults(cloneDeep(form.data()))
-              return form
-            })
+            this.defaults(cloneDeep(this.data()))
           }
 
           return onSuccess
         },
         onError: (errors: Errors) => {
-          setFormState('processing', false)
-          setFormState('progress', null)
+          form.processing = false
+          form.progress = null
           this.clearErrors().setError(errors as FormDataErrors<TForm>)
 
           if (options.onError) {
@@ -242,16 +232,16 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           }
         },
         onCancel: () => {
-          setFormState('processing', false)
-          setFormState('progress', null)
+          form.processing = false
+          form.progress = null
 
           if (options.onCancel) {
             return options.onCancel()
           }
         },
         onFinish: (visit: ActiveVisit) => {
-          setFormState('processing', false)
-          setFormState('progress', null)
+          form.processing = false
+          form.progress = null
           cancelToken = null
 
           if (options.onFinish) {
@@ -261,24 +251,24 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       }
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data })
+        router.delete(url, { ..._options, data: transformedData })
       } else {
-        router[method](url, data, _options)
+        router[method](url, transformedData, _options)
       }
     },
-    get(url: string, options: VisitOptions) {
+    get(url: string, options?: VisitOptions) {
       this.submit('get', url, options)
     },
-    post(url: string, options: VisitOptions) {
+    post(url: string, options?: VisitOptions) {
       this.submit('post', url, options)
     },
-    put(url: string, options: VisitOptions) {
+    put(url: string, options?: VisitOptions) {
       this.submit('put', url, options)
     },
-    patch(url: string, options: VisitOptions) {
+    patch(url: string, options?: VisitOptions) {
       this.submit('patch', url, options)
     },
-    delete(url: string, options: VisitOptions) {
+    delete(url: string, options?: VisitOptions) {
       this.submit('delete', url, options)
     },
     cancel() {
@@ -286,20 +276,20 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     },
   } as InertiaForm<TForm>)
 
-  store.subscribe((form) => {
+  $effect(() => {
     if (form.isDirty === isEqual(form.data(), defaults)) {
-      setFormState('isDirty', !form.isDirty)
+      form.isDirty = !form.isDirty
     }
 
     const hasErrors = Object.keys(form.errors).length > 0
     if (form.hasErrors !== hasErrors) {
-      setFormState('hasErrors', !form.hasErrors)
+      form.hasErrors = !form.hasErrors
     }
 
     if (rememberKey) {
-      router.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      router.remember({ data: form.data(), errors: $state.snapshot(form.errors) }, rememberKey)
     }
   })
 
-  return store as InertiaFormStore<TForm>
+  return form as InertiaFormStore<TForm>
 }
