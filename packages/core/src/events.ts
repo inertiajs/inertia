@@ -54,3 +54,7 @@ export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, 
 export const firePrefetchingEvent: GlobalEventTrigger<'prefetching'> = (visit) => {
   return fireEvent('prefetching', { detail: { visit } })
 }
+
+export const fireFlashEvent: GlobalEventTrigger<'flash'> = (flash) => {
+  return fireEvent('flash', { detail: { flash } })
+}

@@ -2,7 +2,7 @@ import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
-import { fireBeforeEvent } from './events'
+import { fireBeforeEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
@@ -258,6 +258,7 @@ export class Router {
       showProgress: false,
       prefetch: true,
       viewTransition: false,
+      redirectBack: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -390,8 +391,8 @@ export class Router {
     this.clientVisit(params)
   }
 
-  protected clientVisit<TProps = Page['props']>(
-    params: ClientSideVisitOptions<TProps>,
+  protected clientVisit<TProps = Page['props'], TFlash = Page['flash']>(
+    params: ClientSideVisitOptions<TProps, TFlash>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
     const current = currentPage.get()
@@ -399,11 +400,14 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const { viewTransition, onError, onFinish, onSuccess, ...pageParams } = params
+    const flash = typeof params.flash === 'function' ? params.flash((current.flash ?? {}) as TFlash) : params.flash
+
+    const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 
     const page = {
       ...current,
       ...pageParams,
+      flash: flash ? flash : undefined,
       props: props as Page['props'],
     }
 
@@ -421,6 +425,13 @@ export class Router {
         const errors = currentPage.get().props.errors || {}
 
         if (Object.keys(errors).length === 0) {
+          const currentFlash = currentPage.get().flash
+
+          if (currentFlash && Object.keys(currentFlash).length > 0) {
+            fireFlashEvent(currentFlash)
+            onFlash?.(currentFlash)
+          }
+
           return onSuccess?.(currentPage.get())
         }
 
@@ -439,6 +450,7 @@ export class Router {
         showProgress: false,
         prefetch: true,
         viewTransition: false,
+        redirectBack: false,
       }),
       ...this.getVisitEvents(options),
     }
@@ -481,6 +493,7 @@ export class Router {
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
+      redirectBack: false,
       ...options,
       ...configuredOptions,
     }
@@ -521,6 +534,7 @@ export class Router {
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
     }

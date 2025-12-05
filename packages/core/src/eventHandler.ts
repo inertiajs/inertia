@@ -74,7 +74,7 @@ class EventHandler {
       const url = hrefToUrl(currentPage.get().url)
       url.hash = window.location.hash
 
-      history.replaceState({ ...currentPage.get(), url: url.href })
+      history.replaceState({ ...currentPage.getWithoutFlashData(), url: url.href })
       Scroll.reset()
 
       return

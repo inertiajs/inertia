@@ -73,9 +73,12 @@ class CurrentPage {
       const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
-      return new Promise((resolve) => {
-        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
-      }).then(() => {
+      // Strip flash data from the page object, we don't want it when navigating back/forward...
+      const { flash, ...pageWithoutFlash } = page
+
+      return new Promise<void>((resolve) =>
+        replace ? history.replaceState(pageWithoutFlash, resolve) : history.pushState(pageWithoutFlash, resolve),
+      ).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
         if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
@@ -155,6 +158,12 @@ class CurrentPage {
 
   public get(): Page {
     return this.page
+  }
+
+  public getWithoutFlashData(): Page {
+    const { flash, ...page } = this.page
+
+    return page
   }
 
   public merge(data: Partial<Page>): void {

@@ -73,14 +73,14 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
  */
 type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
   ? // Dynamic array
-    | `${number}`
+      | `${number}`
       | (0 extends 1 & T[number]
           ? never
           : T[number] extends FormDataConvertibleValue
             ? never
             : `${number}.${FormDataKeys<T[number]>}`)
   : // Tuple with known length
-    | Extract<keyof T, `${number}`>
+      | Extract<keyof T, `${number}`>
       | {
           [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
             ? never
@@ -144,6 +144,10 @@ export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
+export interface PageFlashData {
+  [key: string]: unknown
+}
+
 export interface PageProps {
   [key: string]: unknown
 }
@@ -173,6 +177,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  flash?: PageFlashData
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -183,10 +188,11 @@ export type ScrollRegion = {
   left: number
 }
 
-export interface ClientSideVisitOptions<TProps = Page['props']> {
+export interface ClientSideVisitOptions<TProps = Page['props'], TFlash = Page['flash']> {
   component?: Page['component']
   url?: Page['url']
   props?: ((props: TProps) => PageProps) | PageProps
+  flash?: ((flash: TFlash) => PageFlashData) | PageFlashData
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
@@ -194,7 +200,8 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   errorBag?: string | null
   viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
-  onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
+  onFinish?: (visit: ClientSideVisitOptions<TProps, TFlash>) => void
+  onFlash?: (flash: PageFlashData) => void
   onSuccess?: (page: Page) => void
 }
 
@@ -246,6 +253,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   preserveUrl: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
+  redirectBack: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -340,6 +348,13 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
+  flash: {
+    parameters: [Page['flash']]
+    details: {
+      flash: Page['flash']
+    }
+    result: void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -386,6 +401,7 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancel: GlobalEventCallback<'cancel', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
+  onFlash: GlobalEventCallback<'flash', T>
   onPrefetched: GlobalEventCallback<'prefetched', T>
   onPrefetching: GlobalEventCallback<'prefetching', T>
 }
@@ -521,30 +537,29 @@ export type InertiaAppConfig = {
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
-export interface LinkComponentBaseProps
-  extends Partial<
-    Pick<
-      Visit<RequestPayload>,
-      | 'data'
-      | 'method'
-      | 'replace'
-      | 'preserveScroll'
-      | 'preserveState'
-      | 'preserveUrl'
-      | 'only'
-      | 'except'
-      | 'headers'
-      | 'queryStringArrayFormat'
-      | 'async'
-      | 'viewTransition'
-    > &
-      VisitCallbacks & {
-        href: string | UrlMethodPair
-        prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-        cacheFor: CacheForOption | CacheForOption[]
-        cacheTags: string | string[]
-      }
-  > {}
+export interface LinkComponentBaseProps extends Partial<
+  Pick<
+    Visit<RequestPayload>,
+    | 'data'
+    | 'method'
+    | 'replace'
+    | 'preserveScroll'
+    | 'preserveState'
+    | 'preserveUrl'
+    | 'only'
+    | 'except'
+    | 'headers'
+    | 'queryStringArrayFormat'
+    | 'async'
+    | 'viewTransition'
+  > &
+    VisitCallbacks & {
+      href: string | UrlMethodPair
+      prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+      cacheFor: CacheForOption | CacheForOption[]
+      cacheTags: string | string[]
+    }
+> {}
 
 type PrefetchObject = {
   params: ActiveVisit
@@ -739,5 +754,6 @@ declare global {
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:flash': GlobalEvent<'flash'>
   }
 }

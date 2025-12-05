@@ -15,6 +15,30 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 const upload = multer()
 
+// Inertia middleware simulation: handle X-Inertia-Redirect-Back header
+app.use((req, res, next) => {
+  const originalRedirect = res.redirect.bind(res)
+  res.redirect = function (status, url) {
+    // Handle both res.redirect(url) and res.redirect(status, url) signatures
+    if (typeof status === 'string') {
+      url = status
+      status = 302
+    }
+
+    // If client requested redirect back and this is an Inertia request, override redirect to go back
+    if (req.headers['x-inertia-redirect-back'] && req.headers['x-inertia']) {
+      const referer = req.headers['referer']
+      if (referer) {
+        const refererUrl = new URL(referer)
+        return originalRedirect(status, refererUrl.pathname + refererUrl.search)
+      }
+    }
+
+    return originalRedirect(status, url)
+  }
+  next()
+})
+
 const adapters = ['react', 'svelte', 'vue3']
 
 if (!adapters.includes(inertia.package)) {
@@ -322,6 +346,8 @@ app.post('/form-helper/events/errors', (req, res) => {
     })
   }, 250)
 })
+
+//
 
 const methods = ['get', 'post', 'put', 'patch', 'delete']
 
@@ -995,6 +1021,17 @@ app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserv
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
+
+// Test redirectBack option - server redirects to home but client can override with redirectBack: true
+app.get('/redirect-back', (req, res) =>
+  inertia.render(req, res, {
+    component: 'RedirectBack',
+  }),
+)
+app.post('/redirect-back/submit', (req, res) => {
+  // Server wants to redirect to home, but client may override with redirectBack: true
+  res.redirect(303, '/')
+})
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
@@ -1420,6 +1457,16 @@ app.post('/view-transition/form-errors', (req, res) =>
     props: { errors: { name: 'The name field is required.' } },
   }),
 )
+
+app.get('/flash/events', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
+app.post('/flash/events/with-data', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/Events',
+    flash: { foo: 'bar' },
+  }),
+)
+app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
+app.get('/flash/client-side-visits', (req, res) => inertia.render(req, res, { component: 'Flash/ClientSideVisits' }))
 
 app.all('*page', (req, res) => inertia.render(req, res))
 

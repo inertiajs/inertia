@@ -149,5 +149,6 @@ export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageP
     matchPropsOn: computed(() => page.value?.matchPropsOn),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
+    flash: computed(() => page.value?.flash),
   }) as Page<TPageProps>
 }

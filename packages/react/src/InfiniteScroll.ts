@@ -53,7 +53,8 @@ const renderSlot = (
 }
 
 interface ComponentProps
-  extends InfiniteScrollComponentBaseProps,
+  extends
+    InfiniteScrollComponentBaseProps,
     Omit<React.HTMLAttributes<HTMLElement>, keyof InfiniteScrollComponentBaseProps | 'children'> {
   children?: React.ReactNode | ((props: InfiniteScrollSlotProps) => React.ReactNode)
 
