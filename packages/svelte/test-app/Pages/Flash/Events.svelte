@@ -73,7 +73,7 @@
 <div>
   <span id="flash">{$page.flash ? JSON.stringify($page.flash) : 'no-flash'}</span>
 
-  <a href="#" on:click|preventDefault={visitWithFlash} class="with-flash">Visit with flash</a>
-  <a href="#" on:click|preventDefault={visitWithoutFlash} class="without-flash">Visit without flash</a>
-  <a href="#" on:click|preventDefault={navigateAway} class="navigate-away">Navigate away</a>
+  <a href={'#'} on:click|preventDefault={visitWithFlash} class="with-flash">Visit with flash</a>
+  <a href={'#'} on:click|preventDefault={visitWithoutFlash} class="without-flash">Visit without flash</a>
+  <a href={'#'} on:click|preventDefault={navigateAway} class="navigate-away">Navigate away</a>
 </div>
