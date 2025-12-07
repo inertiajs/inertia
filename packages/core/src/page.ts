@@ -9,6 +9,7 @@ class CurrentPage {
   protected page!: Page
   protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
+  protected onFlashCallback?: (flash: Page['flash']) => void
   protected componentId = {}
   protected listeners: {
     event: PageEvent
@@ -22,10 +23,12 @@ class CurrentPage {
     initialPage,
     swapComponent,
     resolveComponent,
+    onFlash,
   }: RouterInitParams<ComponentType>) {
     this.page = initialPage
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
+    this.onFlashCallback = onFlash
 
     return this
   }
@@ -172,6 +175,7 @@ class CurrentPage {
 
   public setFlash(flash: Page['flash']): void {
     this.page = { ...this.page, flash }
+    this.onFlashCallback?.(flash)
   }
 
   public setUrlHash(hash: string): void {

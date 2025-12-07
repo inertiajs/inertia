@@ -53,11 +53,13 @@ export class Router {
     initialPage,
     resolveComponent,
     swapComponent,
+    onFlash,
   }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,
       swapComponent,
+      onFlash,
     })
 
     InitialVisit.handle()

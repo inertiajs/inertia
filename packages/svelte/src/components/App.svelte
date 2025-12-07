@@ -40,11 +40,10 @@
         renderProps = resolveRenderProps(component, page, key)
         setPage(page)
       },
-    })
-
-    router.on('flash', (event) => {
-      page = { ...page, flash: event.detail.flash }
-      setPage(page)
+      onFlash: (flash) => {
+        page = { ...page, flash }
+        setPage(page)
+      },
     })
   }
 

@@ -83,12 +83,12 @@ const App: InertiaApp = defineComponent({
           page.value = options.page
           key.value = options.preserveState ? key.value : Date.now()
         },
+        onFlash: (flash) => {
+          page.value = { ...page.value!, flash }
+        },
       })
 
       router.on('navigate', () => headManager.forceUpdate())
-      router.on('flash', (event) => {
-        page.value = { ...page.value!, flash: event.detail.flash }
-      })
     }
 
     return () => {

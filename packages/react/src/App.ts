@@ -66,6 +66,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
       initialPage,
       resolveComponent: resolveComponent!,
       swapComponent: async (args) => swapComponent(args),
+      onFlash: (flash) => {
+        setCurrent((current) => ({
+          ...current,
+          page: { ...current.page, flash },
+        }))
+      },
     })
 
     routerIsInitialized = true
@@ -90,12 +96,6 @@ export default function App<SharedProps extends PageProps = PageProps>({
     }
 
     router.on('navigate', () => headManager.forceUpdate())
-    router.on('flash', (event) => {
-      setCurrent((current) => ({
-        ...current,
-        page: { ...current.page, flash: event.detail.flash },
-      }))
-    })
   }, [])
 
   if (!current.component) {

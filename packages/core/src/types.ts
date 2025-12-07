@@ -423,6 +423,7 @@ export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
   swapComponent: PageHandler<ComponentType>
+  onFlash?: (flash: Page['flash']) => void
 }
 
 export type PendingVisitOptions = {
