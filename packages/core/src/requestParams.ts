@@ -139,10 +139,6 @@ export class RequestParams {
       headers['X-Inertia-Error-Bag'] = this.params.errorBag
     }
 
-    if (this.params.redirectBack) {
-      headers['X-Inertia-Redirect-Back'] = 'true'
-    }
-
     return headers
   }
 

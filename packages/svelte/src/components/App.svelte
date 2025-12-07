@@ -41,6 +41,11 @@
         setPage(page)
       },
     })
+
+    router.on('flash', (event) => {
+      page = { ...page, flash: event.detail.flash }
+      setPage(page)
+    })
   }
 
   /**

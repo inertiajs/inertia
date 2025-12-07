@@ -170,6 +170,10 @@ class CurrentPage {
     this.page = { ...this.page, ...data }
   }
 
+  public setFlash(flash: Page['flash']): void {
+    this.page = { ...this.page, flash }
+  }
+
   public setUrlHash(hash: string): void {
     if (!this.page.url.includes(hash)) {
       this.page.url += hash

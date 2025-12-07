@@ -90,6 +90,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
     }
 
     router.on('navigate', () => headManager.forceUpdate())
+    router.on('flash', (event) => {
+      setCurrent((current) => ({
+        ...current,
+        page: { ...current.page, flash: event.detail.flash },
+      }))
+    })
   }, [])
 
   if (!current.component) {

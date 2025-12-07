@@ -1022,16 +1022,6 @@ app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserv
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 
-// Test redirectBack option - server redirects to home but client can override with redirectBack: true
-app.get('/redirect-back', (req, res) =>
-  inertia.render(req, res, {
-    component: 'RedirectBack',
-  }),
-)
-app.post('/redirect-back/submit', (req, res) => {
-  // Server wants to redirect to home, but client may override with redirectBack: true
-  res.redirect(303, '/')
-})
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
@@ -1467,6 +1457,7 @@ app.post('/flash/events/with-data', (req, res) =>
 )
 app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
 app.get('/flash/client-side-visits', (req, res) => inertia.render(req, res, { component: 'Flash/ClientSideVisits' }))
+app.get('/flash/router-flash', (req, res) => inertia.render(req, res, { component: 'Flash/RouterFlash' }))
 app.get('/flash/initial', (req, res) =>
   inertia.render(req, res, {
     component: 'Flash/InitialFlash',

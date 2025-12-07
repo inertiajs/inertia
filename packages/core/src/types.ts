@@ -253,7 +253,6 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   preserveUrl: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
-  redirectBack: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {

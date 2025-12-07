@@ -258,7 +258,6 @@ export class Router {
       showProgress: false,
       prefetch: true,
       viewTransition: false,
-      redirectBack: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -391,6 +390,18 @@ export class Router {
     this.clientVisit(params)
   }
 
+  public flash<TFlash = Page['flash']>(flash: ((flash: TFlash) => Page['flash']) | Page['flash']): void {
+    const current = currentPage.get()
+    const newFlash = typeof flash === 'function' ? flash((current.flash ?? {}) as TFlash) : flash
+
+    if (!newFlash || Object.keys(newFlash).length === 0) {
+      return
+    }
+
+    currentPage.setFlash(newFlash)
+    fireFlashEvent(newFlash)
+  }
+
   protected clientVisit<TProps = Page['props'], TFlash = Page['flash']>(
     params: ClientSideVisitOptions<TProps, TFlash>,
     { replace = false }: { replace?: boolean } = {},
@@ -450,7 +461,6 @@ export class Router {
         showProgress: false,
         prefetch: true,
         viewTransition: false,
-        redirectBack: false,
       }),
       ...this.getVisitEvents(options),
     }
@@ -493,7 +503,6 @@ export class Router {
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
-      redirectBack: false,
       ...options,
       ...configuredOptions,
     }

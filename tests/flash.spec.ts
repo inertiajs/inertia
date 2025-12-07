@@ -109,4 +109,45 @@ test.describe('Flash Data', () => {
       expect(requests.requests.length).toBe(0)
     })
   })
+
+  test.describe('router.flash()', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/flash/router-flash')
+    })
+
+    test('sets flash data with object', async ({ page }) => {
+      requests.listen(page)
+
+      await expect(page.locator('#flash')).toHaveText('no-flash')
+
+      await page.getByRole('button', { name: 'Set flash', exact: true }).click()
+
+      await expect(page.locator('#flash')).toContainText('foo')
+      expect(requests.requests.length).toBe(0)
+    })
+
+    test('merges flash data using function', async ({ page }) => {
+      requests.listen(page)
+
+      await page.getByRole('button', { name: 'Set flash', exact: true }).click()
+      await expect(page.locator('#flash')).toContainText('foo')
+
+      await page.getByRole('button', { name: 'Merge flash' }).click()
+
+      const flashText = await page.locator('#flash').textContent()
+      expect(flashText).toContain('foo')
+      expect(flashText).toContain('bar')
+      expect(flashText).toContain('baz')
+      expect(requests.requests.length).toBe(0)
+    })
+
+    test('does not fire event for empty flash', async ({ page }) => {
+      requests.listen(page)
+
+      await page.getByRole('button', { name: 'Clear flash' }).click()
+
+      await expect(page.locator('#flash')).toHaveText('no-flash')
+      expect(requests.requests.length).toBe(0)
+    })
+  })
 })
