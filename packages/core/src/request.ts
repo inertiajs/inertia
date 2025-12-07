@@ -149,7 +149,7 @@ export class Request {
       .map(([key]) => key)
 
     if (onceProps.length > 0) {
-      headers['X-Inertia-Page-Once-Props'] = onceProps.join(',')
+      headers['X-Inertia-Except-Once-Props'] = onceProps.join(',')
     }
 
     return headers

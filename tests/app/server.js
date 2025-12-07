@@ -1424,7 +1424,7 @@ app.post('/view-transition/form-errors', (req, res) =>
 const getOncePropsData = (req, prop = 'foo') => {
   const isInertiaRequest = !!req.headers['x-inertia']
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
-  const loadedOnceProps = req.headers['x-inertia-page-once-props']?.split(',') ?? []
+  const loadedOnceProps = req.headers['x-inertia-except-once-props']?.split(',') ?? []
   const isPartialRequest = partialData.includes(prop)
   const hasPropAlready = loadedOnceProps.includes(prop)
   const shouldResolveProp = !isInertiaRequest || isPartialRequest || !hasPropAlready
