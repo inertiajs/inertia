@@ -210,6 +210,16 @@ app.get('/client-side-visit/props', (req, res) =>
   }),
 )
 
+app.get('/client-side-visit/sequential', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Sequential',
+    props: {
+      foo: 'foo',
+      bar: 'bar',
+    },
+  }),
+)
+
 app.get('/visits/proxy', (req, res) => {
   const timeout = req.headers['x-inertia-partial-data'] ? 250 : 0
   const statuses = ['pending', 'running', 'success', 'failed', 'canceled']
