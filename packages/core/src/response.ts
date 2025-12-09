@@ -110,7 +110,7 @@ export class Response {
 
     const response = {
       ...this.response,
-      data: this.getDataFromResponse(this.response.data),
+      data: this.getPageResponse(),
     }
 
     if (fireInvalidEvent(response)) {
@@ -162,7 +162,7 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse = this.getDataFromResponse(this.response.data)
+    const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()

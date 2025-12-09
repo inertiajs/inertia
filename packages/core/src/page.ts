@@ -6,7 +6,7 @@ import { Scroll } from './scroll'
 import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
-export class CurrentPage {
+class CurrentPage {
   protected page!: Page
   protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
