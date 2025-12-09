@@ -169,7 +169,7 @@ export class Response {
     }
 
     this.mergeProps(pageResponse)
-    currentPage.passOncePropsTo(pageResponse)
+    currentPage.mergeOncePropsIntoResponse(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)

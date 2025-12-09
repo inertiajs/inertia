@@ -6,7 +6,7 @@ import { Scroll } from './scroll'
 import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
-class CurrentPage {
+export class CurrentPage {
   protected page!: Page
   protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
@@ -87,7 +87,9 @@ class CurrentPage {
         this.page = page
         this.cleared = false
 
-        prefetchedRequests.syncCachedOnceProps()
+        if (this.hasOnceProps()) {
+          prefetchedRequests.updateCachedOncePropsFromCurrentPage()
+        }
 
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
@@ -224,17 +226,17 @@ class CurrentPage {
     this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback())
   }
 
-  public passOncePropsTo(toPage: Page, { overwrite = false }: { overwrite?: boolean } = {}): void {
-    Object.entries(toPage.onceProps ?? {}).forEach(([key, onceProp]) => {
+  public mergeOncePropsIntoResponse(response: Page, { force = false }: { force?: boolean } = {}): void {
+    Object.entries(response.onceProps ?? {}).forEach(([key, onceProp]) => {
       const existingOnceProp = this.page.onceProps?.[key]
 
       if (existingOnceProp === undefined) {
         return
       }
 
-      if (overwrite || toPage.props[onceProp.prop] === undefined) {
-        toPage.props[onceProp.prop] = this.page.props[existingOnceProp.prop]
-        toPage.onceProps![key].expiresAt = existingOnceProp.expiresAt
+      if (force || response.props[onceProp.prop] === undefined) {
+        response.props[onceProp.prop] = this.page.props[existingOnceProp.prop]
+        response.onceProps![key].expiresAt = existingOnceProp.expiresAt
       }
     })
   }
