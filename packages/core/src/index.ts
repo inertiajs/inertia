@@ -2,7 +2,7 @@ import { Config } from './config'
 import { Router } from './router'
 
 export { config } from './config'
-export { getScrollableParent } from './domUtils'
+export { getInitialPageFromDOM, getScrollableParent } from './domUtils'
 export { objectToFormData } from './formData'
 export { formDataToObject } from './formObject'
 export { default as createHeadManager } from './head'
