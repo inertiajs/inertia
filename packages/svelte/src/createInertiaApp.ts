@@ -1,8 +1,10 @@
 import {
+  getInitialPageFromDOM,
   router,
   setupProgress,
   type CreateInertiaAppOptionsForCSR,
   type InertiaAppResponse,
+  type Page,
   type PageProps,
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
@@ -40,12 +42,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const isServer = typeof window === 'undefined'
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
-  const el = isServer ? null : document.getElementById(id)
-  const elPage =
-    isServer || !useScriptElementForInitialPage
-      ? null
-      : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
-  const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
@@ -54,7 +51,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
     return setup({
-      el,
+      el: isServer ? null : document.getElementById(id),
       App,
       props: { initialPage, initialComponent, resolveComponent },
     })
