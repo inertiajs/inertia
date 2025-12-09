@@ -8,6 +8,7 @@ import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
+import Queue from './queue'
 import { Request } from './request'
 import { RequestParams } from './requestParams'
 import { RequestStream } from './requestStream'
@@ -48,6 +49,8 @@ export class Router {
     maxConcurrent: Infinity,
     interruptible: false,
   })
+
+  protected clientVisitQueue = new Queue<Promise<void>>()
 
   public init<ComponentType = Component>({
     initialPage,
@@ -394,6 +397,13 @@ export class Router {
     params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
+    this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
+  }
+
+  protected performClientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
+    { replace = false }: { replace?: boolean } = {},
+  ): Promise<void> {
     const current = currentPage.get()
 
     const props =
@@ -410,7 +420,7 @@ export class Router {
     const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
-    currentPage
+    return currentPage
       .set(page, {
         replace,
         preserveScroll,
@@ -421,12 +431,13 @@ export class Router {
         const errors = currentPage.get().props.errors || {}
 
         if (Object.keys(errors).length === 0) {
-          return onSuccess?.(currentPage.get())
+          onSuccess?.(currentPage.get())
+          return
         }
 
         const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
 
-        return onError?.(scopedErrors)
+        onError?.(scopedErrors)
       })
       .finally(() => onFinish?.(params))
   }
