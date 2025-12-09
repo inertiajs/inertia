@@ -1421,6 +1421,168 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
+const getOncePropsData = (req, prop = 'foo') => {
+  const isInertiaRequest = !!req.headers['x-inertia']
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+  const loadedOnceProps = req.headers['x-inertia-except-once-props']?.split(',') ?? []
+  const isPartialRequest = partialData.includes(prop)
+  const hasPropAlready = loadedOnceProps.includes(prop)
+  const shouldResolveProp = !isInertiaRequest || isPartialRequest || !hasPropAlready
+
+  return {
+    isInertiaRequest,
+    partialData,
+    loadedOnceProps,
+    isPartialRequest,
+    hasPropAlready,
+    shouldResolveProp,
+  }
+}
+
+app.get('/once-props/page-a', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageA',
+    props: {
+      foo: shouldResolveProp ? 'foo-a-' + Date.now() : undefined,
+      bar: 'bar-a',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/page-b', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageB',
+    props: {
+      foo: shouldResolveProp ? 'foo-b-' + Date.now() : undefined,
+      bar: 'bar-b',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/page-c', (req, res) => {
+  inertia.render(req, res, {
+    component: 'OnceProps/PageC',
+  })
+})
+
+app.get('/once-props/page-d', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageD',
+    props: {
+      foo: shouldResolveProp ? 'foo-d-' + Date.now() : undefined,
+      bar: 'bar-d',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/page-e', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageE',
+    props: {
+      foo: shouldResolveProp ? 'foo-e-' + Date.now() : undefined,
+      bar: 'bar-e',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/deferred/:page', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+
+  if (isPartialRequest) {
+    return setTimeout(() => {
+      inertia.render(req, res, {
+        component: `OnceProps/DeferredPage${page.toUpperCase()}`,
+        props: {
+          foo: { text: `foo-${page}-` + Date.now() },
+          bar: `bar-${page}`,
+        },
+        onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      })
+    }, 100)
+  }
+
+  inertia.render(req, res, {
+    component: `OnceProps/DeferredPage${page.toUpperCase()}`,
+    props: {
+      bar: `bar-${page}`,
+    },
+    deferredProps: hasPropAlready ? {} : { default: ['foo'] },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/ttl/:page', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+  const page = req.params.page
+  const expiresAt = Date.now() + 2000
+
+  inertia.render(req, res, {
+    component: `OnceProps/TtlPage${page.toUpperCase()}`,
+    props: {
+      foo: shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt } },
+  })
+})
+
+app.get('/once-props/optional/:page', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+
+  inertia.render(req, res, {
+    component: `OnceProps/OptionalPage${page.toUpperCase()}`,
+    props: {
+      foo: isPartialRequest ? `foo-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: isPartialRequest || hasPropAlready ? { foo: { prop: 'foo', expiresAt: null } } : {},
+  })
+})
+
+app.get('/once-props/merge/:page', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req, 'items')
+  const page = req.params.page
+
+  inertia.render(req, res, {
+    component: `OnceProps/MergePage${page.toUpperCase()}`,
+    props: {
+      items: shouldResolveProp ? new Array(3).fill(page) : undefined,
+      bar: `bar-${page}`,
+    },
+    mergeProps: ['items'],
+    onceProps: { items: { prop: 'items', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/custom-key/:page', (req, res) => {
+  const page = req.params.page
+  const propName = page === 'a' ? 'userPermissions' : 'permissions'
+  const { shouldResolveProp } = getOncePropsData(req, 'user-permissions')
+
+  inertia.render(req, res, {
+    component: `OnceProps/CustomKeyPage${page.toUpperCase()}`,
+    props: {
+      [propName]: shouldResolveProp ? `perms-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: { 'user-permissions': { prop: propName, expiresAt: null } },
+  })
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
