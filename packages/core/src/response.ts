@@ -110,7 +110,7 @@ export class Response {
 
     const response = {
       ...this.response,
-      data: this.getPageResponse(),
+      data: this.getDataFromResponse(this.response.data),
     }
 
     if (fireInvalidEvent(response)) {
