@@ -511,8 +511,7 @@ test.describe('Form Component', () => {
       await expect(page).toHaveURL('/form-component/view-transition')
       await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-      await page.waitForEvent('console', (msg) => msg.text() === 'finished')
-      await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+      await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
     })
   })
 

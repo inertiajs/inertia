@@ -2195,11 +2195,13 @@ test.describe('Router', () => {
 
     await page.goto('/infinite-scroll')
 
-    // Navigate back and forth 10 times rapidly
+    // Navigate back and forth 20 times rapidly
     for (let i = 0; i < 20; i++) {
       await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true }).click()
+      await expect(page.getByRole('link', { name: 'Go back to Links' })).toBeVisible()
       expect(consoleMessages.errors).toHaveLength(0)
       await page.getByRole('link', { name: 'Go back to Links' }).click()
+      await expect(page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true })).toBeVisible()
       expect(consoleMessages.errors).toHaveLength(0)
     }
 
