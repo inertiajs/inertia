@@ -29,6 +29,8 @@ test.describe('Form Component', () => {
 
     queryStringArrayFormats.forEach((format) => {
       test('can submit the form with filled values using ' + format + ' format', async ({ page }) => {
+        test.setTimeout(10_000)
+
         await page.goto('/form-component/elements?queryStringArrayFormat=' + format)
         await expect(page.locator('#name')).toBeVisible()
 
