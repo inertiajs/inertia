@@ -127,8 +127,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 
   // Keyboard activation with Enter
   await page.getByRole('link', { name: 'On Enter' }).focus()
+  const prefetch6 = page.waitForResponse('prefetch/6')
   await page.keyboard.down('Enter')
-  await page.waitForResponse('prefetch/6')
+  await prefetch6
   await expect(page).toHaveURL('prefetch/1')
   requests.listen(page)
   await page.keyboard.up('Enter')
@@ -145,8 +146,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 
   // Keyboard activation with Spacebar on button
   await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  const prefetch7 = page.waitForResponse('prefetch/7')
   await page.keyboard.down(' ')
-  await page.waitForResponse('prefetch/7')
+  await prefetch7
   await expect(page).toHaveURL('prefetch/6')
   requests.listen(page)
   await page.keyboard.up(' ')
