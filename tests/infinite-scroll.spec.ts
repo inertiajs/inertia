@@ -2191,6 +2191,7 @@ test.describe('Router', () => {
   })
 
   test('it can navigate rapidly between pages with infinite scroll without errors', async ({ page }) => {
+    test.setTimeout(10_000)
     consoleMessages.listen(page)
 
     await page.goto('/infinite-scroll')
