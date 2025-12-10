@@ -954,6 +954,22 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="name"]')).toBe('New Name')
       expect(await page.inputValue('input[name="email"]')).toBe('new@example.com')
     })
+
+    test('the precognition methods are available via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+      requests.listen(page)
+
+      await page.click('button:has-text("Call Precognition Methods")')
+
+      await page.waitForTimeout(500) // Wait for request to be made
+
+      await expect(requests.requests).toHaveLength(1)
+
+      const request = requests.requests[0]
+
+      expect(request.method()).toBe('POST')
+      expect(request.headers()['precognition']).toBe('true')
+    })
   })
 
   test.describe('Uppercase Methods', () => {

@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\ChatMessage;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Foundation\Precognition;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -108,6 +111,18 @@ Route::post('/form-component', function () {
 
     return back();
 });
+
+Route::get('/form-component/precognition', function () {
+    return inertia('FormComponentPrecognition');
+});
+
+Route::post('/form-component/precognition', function (PrecognitionFormRequest $request) {
+    $data = $request->validated();
+
+    // dd($data);
+
+    return back();
+})->middleware([HandlePrecognitiveRequests::class]);
 
 Route::post('/user', function () {
     return inertia('User', [

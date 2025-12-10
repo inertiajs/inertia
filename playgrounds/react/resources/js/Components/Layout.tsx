@@ -17,10 +17,13 @@ export default function Layout({ children, padding = true }: { children: React.R
           Article
         </Link>
         <Link href="/form" className="hover:underline" prefetch={['mount', 'click']} stale-after="1m">
-          Form
+          useForm
         </Link>
         <Link href="/form-component" className="hover:underline">
-          Form Comp
+          {'<Form>'}
+        </Link>
+        <Link href="/form-component/precognition" className="hover:underline">
+          Precognition
         </Link>
         <Link href="/async" className="hover:underline">
           Async

@@ -1,4 +1,4 @@
-import { expect, Page, Request } from '@playwright/test'
+import { expect, Page, Request, Response } from '@playwright/test'
 
 export const clickAndWaitForResponse = async (
   page: Page,
