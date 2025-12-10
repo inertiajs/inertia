@@ -5,10 +5,10 @@
     "serve:watch": "nodemon server.js"
   },
   "devDependencies": {
-    "body-parser": "^1.20.4",
+    "body-parser": "^1.20.3",
     "css-loader": "^5.2.7",
     "eslint": "^7.32.0",
-    "express": "^5.2.1",
+    "express": "^5.2.0",
     "multer": "^2.0.2",
     "nodemon": "^3.1.11"
   }
