@@ -989,6 +989,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
   consoleMessages.listen(page)
 
   await page.goto('/visits/after-error/1')
+  await expect(page.getByRole('link', { name: 'Throw error on success' })).toBeVisible()
 
   await expect(consoleMessages.messages).toHaveLength(0)
   await expect(consoleMessages.errors).toHaveLength(0)
@@ -1022,6 +1023,7 @@ test('vue proxies synced back to the core adapter are not stored in history stat
   pageLoads.watch(page)
   await page.goto('/visits/proxy')
   await expect(page.getByText('Site ID: 1')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Update First Site Ref' })).toBeVisible()
 
   const fooText = await page.locator('#foo').innerText()
   const statusText = await page.locator('#status-1').innerText()
