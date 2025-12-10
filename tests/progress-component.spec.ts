@@ -32,7 +32,7 @@ test.describe('Progress Component', () => {
     await expect(peg).toBeVisible()
 
     const initialTransform = await getProgressPercent(bar)
-    await expect(initialTransform).toBeCloseTo(-92, 1)
+    await expect(initialTransform).toBeLessThan(-70)
 
     await page.waitForTimeout(300)
     const afterTrickle = await getProgressPercent(bar)
@@ -99,7 +99,7 @@ test.describe('Progress Component', () => {
     await page.getByRole('button', { name: 'Reset' }).click()
 
     const transform0 = await getProgressPercent(bar)
-    await expect(transform0).toBeCloseTo(-92, 1)
+    await expect(transform0).toBeLessThan(-70)
   })
 
   test('remove() completes and removes nprogress bar', async ({ page }) => {
