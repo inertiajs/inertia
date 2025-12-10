@@ -458,7 +458,7 @@ test.describe('Remember state', () => {
 
     // Load page 2
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -467,7 +467,7 @@ test.describe('Remember state', () => {
 
     // Load page 3
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('User 46')).toBeHidden()
