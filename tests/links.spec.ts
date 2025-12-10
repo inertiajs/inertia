@@ -493,6 +493,10 @@ test.describe('preserve scroll', () => {
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
     await expect(page.getByRole('button', { exact: true, name: 'Update scroll positions' })).toBeVisible()
+    // Wait for Inertia to restore scroll position after back navigation
+    await expect
+      .poll(async () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })), { timeout: 1500 })
+      .toEqual({ x: 5, y: 7 })
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
