@@ -13,7 +13,10 @@
   <a href="/once/4" use:inertia={{ prefetch: 'mount' }} class="ml-4 text-blue-500 underline">Go to Fourth Page</a>
   <button on:click={() => router.reload({ only: ['foo'] })} class="ml-4 text-blue-500 underline">Reload Foo</button>
   <button on:click={() => router.reload({ only: ['bar'] })} class="ml-4 text-blue-500 underline">Reload Bar</button>
-  <button on:click={() => router.reload({ only: ['baz1', 'baz2', 'baz3', 'baz4'] })} class="ml-4 text-blue-500 underline">
+  <button
+    on:click={() => router.reload({ only: ['baz1', 'baz2', 'baz3', 'baz4'] })}
+    class="ml-4 text-blue-500 underline"
+  >
     Reload Baz
   </button>
   <button on:click={() => router.reload({ only: ['qux'] })} class="ml-4 text-blue-500 underline">Reload Qux</button>
