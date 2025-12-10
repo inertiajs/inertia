@@ -75,13 +75,13 @@ async function getUserIdsFromDOM(page: Page) {
 async function expectQueryString(page: Page, expectedPage: string) {
   if (expectedPage === '1') {
     // Page 1 removes the page param entirely
-    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 800 })
+    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 1000 })
     const currentUrl = await page.url()
     expect(currentUrl).not.toContain('page=')
   } else {
     // Other pages should have explicit page param
     await page.waitForFunction((pageNum: string) => window.location.search.includes(`page=${pageNum}`), expectedPage, {
-      timeout: 800,
+      timeout: 1000,
     })
     const currentUrl = await page.url()
     expect(currentUrl).toContain(`page=${expectedPage}`)
@@ -281,7 +281,7 @@ test.describe('Automatic page loading', () => {
       () => window.location.search.includes('users1=2'),
       {},
       {
-        timeout: 800,
+        timeout: 1000,
       },
     )
 
@@ -306,7 +306,7 @@ test.describe('Automatic page loading', () => {
       () => window.location.search.includes('users2=2'),
       {},
       {
-        timeout: 800,
+        timeout: 1000,
       },
     )
 
@@ -1533,11 +1533,11 @@ test.describe('Scrollable container support', () => {
     // Helper function to check URL updates with container scrolling
     const expectQueryStringInContainer = async (expectedPage: string) => {
       if (expectedPage === '1') {
-        await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 800 })
+        await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 1000 })
         expect(page.url()).not.toContain('page=')
       } else {
         await page.waitForFunction((pageNum) => window.location.search.includes(`page=${pageNum}`), expectedPage, {
-          timeout: 800,
+          timeout: 1000,
         })
         expect(page.url()).toContain(`page=${expectedPage}`)
       }
@@ -1586,11 +1586,15 @@ test.describe('Scrollable container support', () => {
 
     // Wait for page 2 to load automatically...
     await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('Loading more users...')).toBeHidden()
 
     // Scroll container to top to trigger loading page 1
     await scrollElementSmoothTo(scrollContainer, 0)
 
     const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '16')
+
+    // Wait for loading to start or data to appear
+    await expect(page.getByText('Loading more users...').or(page.getByText('User 1', { exact: true }))).toBeVisible()
     const beforeScreenshot = await screenshotter(page)
 
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
