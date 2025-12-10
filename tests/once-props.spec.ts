@@ -62,6 +62,30 @@ test('partial reload preserves the prop', async ({ page }) => {
   await expect(page.getByText(newFooText)).toBeVisible()
 })
 
+test('partial reload of one once prop preserves all once props on navigation', async ({ page }) => {
+  await page.goto('/once-props/partial-reload/a')
+
+  const fooText = await page.locator('#foo').innerText()
+  const barText = await page.locator('#bar').innerText()
+
+  expect(fooText.startsWith('Foo: foo-a')).toBe(true)
+  expect(barText.startsWith('Bar: bar-a')).toBe(true)
+
+  await page.getByRole('button', { name: 'Reload (only foo)' }).click()
+  await expect(page.getByText(fooText)).not.toBeVisible()
+
+  const newFooText = await page.locator('#foo').innerText()
+  expect(newFooText.startsWith('Foo: foo-a')).toBe(true)
+  expect(newFooText).not.toBe(fooText)
+
+  await expect(page.getByText(barText)).toBeVisible()
+
+  await page.getByRole('link', { name: 'Go to Partial Reload B' }).click()
+  await expect(page).toHaveURL('/once-props/partial-reload/b')
+  await expect(page.getByText(newFooText)).toBeVisible()
+  await expect(page.getByText(barText)).toBeVisible()
+})
+
 test('navigating through an intermediary page without the once prop', async ({ page }) => {
   await expect(page.getByText('Foo: foo-a')).toBeVisible()
   await expect(page.getByText('Bar: bar-a')).toBeVisible()

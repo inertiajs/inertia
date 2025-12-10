@@ -333,6 +333,14 @@ export class Response {
         ...(pageResponse.scrollProps || {}),
       }
     }
+
+    // Preserve the existing onceProps
+    if (currentPage.hasOnceProps()) {
+      pageResponse.onceProps = {
+        ...(currentPage.get().onceProps || {}),
+        ...(pageResponse.onceProps || {}),
+      }
+    }
   }
 
   protected mergeOrMatchItems(
