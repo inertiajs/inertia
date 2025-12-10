@@ -1191,6 +1191,11 @@ app.post('/form-component/view-transition', (req, res) =>
   inertia.render(req, res, { component: 'ViewTransition/PageB' }),
 )
 
+app.get('/form-component/context', (req, res) => inertia.render(req, res, { component: 'FormComponent/Context' }))
+app.get('/form-component/context-methods', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/ContextMethods' }),
+)
+
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']

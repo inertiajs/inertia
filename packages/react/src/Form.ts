@@ -12,10 +12,12 @@ import {
 } from '@inertiajs/core'
 import { isEqual } from 'lodash-es'
 import React, {
+  createContext,
   createElement,
   FormEvent,
   forwardRef,
   ReactNode,
+  useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -38,6 +40,8 @@ type ComponentProps = (FormComponentProps &
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 
 const noop = () => undefined
+
+export const FormContext = createContext<FormComponentRef | undefined>(undefined)
 
 const Form = forwardRef<FormComponentRef, ComponentProps>(
   (
@@ -172,27 +176,30 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setIsDirty(false)
     }
 
-    const exposed = () => ({
-      errors: form.errors,
-      hasErrors: form.hasErrors,
-      processing: form.processing,
-      progress: form.progress,
-      wasSuccessful: form.wasSuccessful,
-      recentlySuccessful: form.recentlySuccessful,
-      isDirty,
-      clearErrors: form.clearErrors,
-      resetAndClearErrors,
-      setError: form.setError,
-      reset,
-      submit,
-      defaults,
-      getData,
-      getFormData,
-    })
+    const exposedValue = useMemo(
+      () => ({
+        errors: form.errors,
+        hasErrors: form.hasErrors,
+        processing: form.processing,
+        progress: form.progress,
+        wasSuccessful: form.wasSuccessful,
+        recentlySuccessful: form.recentlySuccessful,
+        isDirty,
+        clearErrors: form.clearErrors,
+        resetAndClearErrors,
+        setError: form.setError,
+        reset,
+        submit,
+        defaults,
+        getData,
+        getFormData,
+      }),
+      [form, isDirty, submit],
+    )
 
-    useImperativeHandle(ref, exposed, [form, isDirty, submit])
+    useImperativeHandle(ref, () => exposedValue, [exposedValue])
 
-    return createElement(
+    const formElement_el = createElement(
       'form',
       {
         ...props,
@@ -209,11 +216,17 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         // See: https://github.com/inertiajs/inertia/pull/2536
         inert: disableWhileProcessing && form.processing && 'true',
       },
-      typeof children === 'function' ? children(exposed()) : children,
+      typeof children === 'function' ? children(exposedValue) : children,
     )
+
+    return createElement(FormContext.Provider, { value: exposedValue }, formElement_el)
   },
 )
 
 Form.displayName = 'InertiaForm'
+
+export function useFormContext(): FormComponentRef | undefined {
+  return useContext(FormContext)
+}
 
 export default Form
