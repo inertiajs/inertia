@@ -3,7 +3,7 @@
 </script>
 
 <script>
-  let { foo, bar, baz4 } = $props()
+  let { foo, bar, baz4, qux } = $props()
 </script>
 
 <svelte:head>
@@ -14,3 +14,4 @@
 <p>Foo: {foo}</p>
 <p>Bar: {bar}</p>
 <p>Baz: {baz4}</p>
+<p>Qux: {qux ?? 'Loading...'}</p>

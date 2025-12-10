@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import Layout from './Layout'
 
-const Second = ({ foo, bar, baz2 }: { foo: string; bar: string; baz2: string }) => {
+const Second = ({ foo, bar, baz2, qux }: { foo: string; bar: string; baz2: string; qux?: string }) => {
   return (
     <>
       <Head title="Once Props: Second Page" />
@@ -9,6 +9,7 @@ const Second = ({ foo, bar, baz2 }: { foo: string; bar: string; baz2: string }) 
       <p>Foo: {foo}</p>
       <p>Bar: {bar}</p>
       <p>Baz: {baz2}</p>
+      <p>Qux: {qux ?? 'Loading...'}</p>
     </>
   )
 }
