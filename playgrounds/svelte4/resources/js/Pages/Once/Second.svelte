@@ -6,6 +6,7 @@
   export let foo: string
   export let bar: string
   export let baz2: string
+  export let qux: string | undefined
 </script>
 
 <svelte:head>
@@ -16,3 +17,4 @@
 <p>Foo: {foo}</p>
 <p>Bar: {bar}</p>
 <p>Baz: {baz2}</p>
+<p>Qux: {qux ?? 'Loading...'}</p>

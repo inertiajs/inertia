@@ -10,6 +10,7 @@ defineProps<{
   foo: string
   bar: string
   baz1: string
+  qux?: string
 }>()
 </script>
 
@@ -19,4 +20,5 @@ defineProps<{
   <p>Foo: {{ foo }}</p>
   <p>Bar: {{ bar }}</p>
   <p>Baz: {{ baz1 }}</p>
+  <p>Qux: {{ qux ?? 'Loading...' }}</p>
 </template>

@@ -541,5 +541,6 @@ Route::get('/once/{page}', function (int $page) {
         'foo' => Inertia::once(fn () => 'foo value: '.now()->getTimestampMs())->fresh($page === 3),
         'bar' => Inertia::once(fn () => 'bar value: '.now()->getTimestampMs())->until(10),
         'baz' . $page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
+        'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
     ]);
 });

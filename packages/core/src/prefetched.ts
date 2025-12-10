@@ -277,6 +277,16 @@ class PrefetchedRequests {
 
         currentPage.mergeOncePropsIntoResponse(pageResponse, { force: true })
 
+        for (const [group, deferredProps] of Object.entries(pageResponse.deferredProps ?? {})) {
+          const remaining = deferredProps.filter((prop) => pageResponse.props[prop] === undefined)
+
+          if (remaining.length > 0) {
+            pageResponse.deferredProps![group] = remaining
+          } else {
+            delete pageResponse.deferredProps![group]
+          }
+        }
+
         const oncePropExpiresIn = this.getShortestOncePropTtl(pageResponse)
 
         if (oncePropExpiresIn === null) {

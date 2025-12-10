@@ -13,8 +13,9 @@ import { Link } from '@inertiajs/vue3'
     <Link href="/once/4" class="ml-4 text-blue-500 underline" prefetch="mount"> Go to Fourth Page </Link>
     <button @click="$inertia.reload({ only: ['foo'] })" class="ml-4 text-blue-500 underline">Reload Foo</button>
     <button @click="$inertia.reload({ only: ['bar'] })" class="ml-4 text-blue-500 underline">Reload Bar</button>
-    <button @click="$inertia.reload({ only: ['baz1', 'baz2', 'baz3'] })" class="ml-4 text-blue-500 underline">
+    <button @click="$inertia.reload({ only: ['baz1', 'baz2', 'baz3', 'baz4'] })" class="ml-4 text-blue-500 underline">
       Reload Baz
     </button>
+    <button @click="$inertia.reload({ only: ['qux'] })" class="ml-4 text-blue-500 underline">Reload Qux</button>
   </Layout>
 </template>
