@@ -1563,6 +1563,41 @@ app.get('/once-props/deferred/:page', (req, res) => {
   })
 })
 
+app.get('/once-props/slow-deferred/:page', (req, res) => {
+  const fooData = getOncePropsData(req, 'foo')
+  const barData = getOncePropsData(req, 'bar')
+  const page = req.params.page
+
+  // foo is deferred (slow), bar is not
+  if (fooData.isPartialRequest) {
+    return setTimeout(() => {
+      inertia.render(req, res, {
+        component: `OnceProps/SlowDeferredPage${page.toUpperCase()}`,
+        props: {
+          foo: `foo-${page}-` + Date.now(),
+          bar: barData.shouldResolveProp ? `bar-${page}-` + Date.now() : undefined,
+        },
+        onceProps: {
+          foo: { prop: 'foo', expiresAt: null },
+          bar: { prop: 'bar', expiresAt: null },
+        },
+      })
+    }, 1000)
+  }
+
+  inertia.render(req, res, {
+    component: `OnceProps/SlowDeferredPage${page.toUpperCase()}`,
+    props: {
+      bar: barData.shouldResolveProp ? `bar-${page}-` + Date.now() : undefined,
+    },
+    deferredProps: fooData.hasPropAlready ? {} : { default: ['foo'] },
+    onceProps: {
+      foo: { prop: 'foo', expiresAt: null },
+      bar: { prop: 'bar', expiresAt: null },
+    },
+  })
+})
+
 app.get('/once-props/ttl/:page', (req, res) => {
   const { shouldResolveProp } = getOncePropsData(req)
   const page = req.params.page

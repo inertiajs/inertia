@@ -126,6 +126,37 @@ test('deferred once prop is loaded via defer and then remembered on navigation',
   await expect(page.getByText(fooText)).toBeVisible()
 })
 
+test('navigating before deferred+once prop loads preserves other once props and loads deferred+once prop on new page', async ({
+  page,
+}) => {
+  await page.goto('/once-props/slow-deferred/a')
+
+  await expect(page.locator('#bar')).toContainText('Bar: bar-a')
+  await expect(page.locator('#foo-loading')).toBeVisible()
+
+  const barText = await page.locator('#bar').innerText()
+
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await expect(page).toHaveURL('/once-props/slow-deferred/b')
+
+  // bar should be preserved from page A (it was a once prop that was already loaded)
+  await expect(page.locator('#bar')).toContainText(barText)
+
+  // foo should be loaded via defer on page B since we didn't have it on page A
+  await expect(page.locator('#foo-loading')).toBeVisible()
+  await expect(page.locator('#foo')).toContainText('Foo: foo-b')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  // Navigate back to page A
+  await page.getByRole('link', { name: 'Go to Page A' }).click()
+  await expect(page).toHaveURL('/once-props/slow-deferred/a')
+
+  // bar should still be preserved, as well as foo now since it was loaded on page B
+  await expect(page.locator('#foo')).toContainText(fooText)
+  await expect(page.locator('#bar')).toContainText(barText)
+})
+
 test('once prop with TTL is remembered within TTL window and reloaded after expiry', async ({ page }) => {
   await page.goto('/once-props/ttl/a')
 

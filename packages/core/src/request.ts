@@ -145,7 +145,14 @@ export class Request {
     }
 
     const onceProps = Object.entries(page.onceProps || {})
-      .filter(([, onceProp]) => !onceProp.expiresAt || onceProp.expiresAt > Date.now())
+      .filter(([, onceProp]) => {
+        if (page.props[onceProp.prop] === undefined) {
+          // The prop could deferred and not be loaded yet
+          return false
+        }
+
+        return !onceProp.expiresAt || onceProp.expiresAt > Date.now()
+      })
       .map(([key]) => key)
 
     if (onceProps.length > 0) {
