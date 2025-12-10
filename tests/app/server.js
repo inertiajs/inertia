@@ -333,23 +333,176 @@ app.post('/form-helper/events/errors', (req, res) => {
   }, 250)
 })
 
-const methods = ['get', 'post', 'put', 'patch', 'delete']
+app.post('/precognition/default', upload.any(), (req, res) => {
+  if (!req.headers['precognition']) {
+    return renderDump(req, res)
+  }
 
-methods.forEach((method) =>
-  app[method](`/dump/${method}`, upload.any(), (req, res) =>
-    inertia.render(req, res, {
-      component: 'Dump',
-      props: {
-        headers: req.headers,
-        method,
-        form: req.body,
-        query: req.query,
-        files: req.files,
-        url: req.originalUrl,
-      },
-    }),
-  ),
-)
+  setTimeout(
+    () => {
+      const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+      const name = req.body['name']
+      const email = req.body['email']
+      const errors = {}
+
+      if (!name) {
+        errors.name = 'The name field is required.'
+      }
+
+      if (name && name.length < 3) {
+        errors.name = 'The name must be at least 3 characters.'
+      }
+
+      if (!email) {
+        errors.email = 'The email field is required.'
+      }
+
+      if (email && !/\S+@\S+\.\S+/.test(email)) {
+        errors.email = 'The email must be a valid email address.'
+      }
+
+      if (only.length) {
+        Object.keys(errors).forEach((key) => {
+          if (!only.includes(key)) {
+            delete errors[key]
+          }
+        })
+      }
+
+      res.header('Precognition', 'true')
+      res.header('Vary', 'Precognition')
+
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ errors })
+      }
+
+      return res.status(204).header('Precognition-Success', 'true').send()
+    },
+    !!req.query['slow'] ? 2000 : 250,
+  )
+})
+
+app.post('/precognition/with-all-errors', (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const errors = {}
+
+    if (!name) {
+      errors.name = ['The name field is required.']
+    }
+
+    if (name && name.length < 3) {
+      errors.name = ['The name must be at least 3 characters.', 'The name contains invalid characters.']
+    }
+
+    if (!email) {
+      errors.email = ['The email field is required.']
+    }
+
+    if (email && !/\S+@\S+\.\S+/.test(email)) {
+      errors.email = ['The email must be a valid email address.', 'The email format is incorrect.']
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+app.post('/precognition/files', upload.any(), (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const hasAvatar = req.files && req.files.avatar
+    const errors = {}
+
+    if (!name) {
+      errors.name = 'The name field is required.'
+    }
+
+    if (name && name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    if (!hasAvatar) {
+      errors.avatar = 'The avatar field is required.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+app.post('/precognition/headers', (req, res) => {
+  setTimeout(() => {
+    const customHeader = req.headers['x-custom-header']
+    const name = req.body['name']
+    const errors = {}
+
+    // Show error when custom header IS present (to prove it was sent)
+    if (customHeader === 'custom-value') {
+      errors.name = 'Custom header received: custom-value'
+    } else if (!name) {
+      errors.name = 'The name field is required.'
+    } else if (name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+const methods = ['get', 'post', 'put', 'patch', 'delete']
+const renderDump = (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: {
+      headers: req.headers,
+      method: req.method?.toLowerCase(),
+      form: req.body,
+      query: req.query,
+      files: req.files,
+      url: req.originalUrl,
+    },
+  })
+
+methods.forEach((method) => app[method](`/dump/${method}`, upload.any(), (req, res) => renderDump(req, res)))
 
 app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
   if (req.headers['x-inertia-partial-data']) {

@@ -600,6 +600,23 @@ export type ProgressSettings = {
 
 export type UrlMethodPair = { url: string; method: Method }
 
+export type UseFormTransformCallback<TForm> = (data: TForm) => object
+export type UseFormWithPrecognitionArguments =
+  | [Method | (() => Method), string | (() => string)]
+  | [UrlMethodPair | (() => UrlMethodPair)]
+
+type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormPrecognitionArguments<TForm> =
+  | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
+  | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
+export type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
+
+export type UseFormSubmitOptions = Omit<VisitOptions, 'data'>
+export type UseFormSubmitArguments =
+  | [Method, string, UseFormSubmitOptions?]
+  | [UrlMethodPair, UseFormSubmitOptions?]
+  | [UseFormSubmitOptions?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'

@@ -1,6 +1,8 @@
 import { Config } from './config'
 import { Router } from './router'
 
+export { UseFormUtils } from './useFormUtils'
+
 export { config } from './config'
 export { getInitialPageFromDOM, getScrollableParent } from './domUtils'
 export { objectToFormData } from './formData'
