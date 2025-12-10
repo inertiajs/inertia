@@ -157,11 +157,19 @@
       Submit
     </button>
 
-    <button type="button" on:click={() => validate()} class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50">
+    <button
+      type="button"
+      on:click={() => validate()}
+      class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50"
+    >
       Validate Touched
     </button>
 
-    <button type="button" on:click={() => touch('name')} class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50">
+    <button
+      type="button"
+      on:click={() => touch('name')}
+      class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50"
+    >
       Touch Name
     </button>
 

@@ -40,7 +40,13 @@
 
 <h1 class="text-3xl">Form Component Precognition</h1>
 
-<Form action="/form-component/precognition" method="post" {validateFiles} {validationTimeout} class="mt-6 max-w-2xl space-y-6">
+<Form
+  action="/form-component/precognition"
+  method="post"
+  {validateFiles}
+  {validationTimeout}
+  class="mt-6 max-w-2xl space-y-6"
+>
   {#snippet children({ errors, invalid, valid, validate, validating, touch, touched, processing })}
     <!-- Status Display -->
     <div class="rounded border border-gray-200 bg-gray-50 p-4">
@@ -144,11 +150,19 @@
         Submit
       </button>
 
-      <button type="button" onclick={() => validate()} class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50">
+      <button
+        type="button"
+        onclick={() => validate()}
+        class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50"
+      >
         Validate Touched
       </button>
 
-      <button type="button" onclick={() => touch('name')} class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50">
+      <button
+        type="button"
+        onclick={() => touch('name')}
+        class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-50"
+      >
         Touch Name
       </button>
 
