@@ -1510,6 +1510,32 @@ app.get('/once-props/page-e', (req, res) => {
   })
 })
 
+app.get('/once-props/partial-reload/:page', (req, res) => {
+  const page = req.params.page
+  const fooData = getOncePropsData(req, 'foo')
+  const barData = getOncePropsData(req, 'bar')
+
+  const isPartialReload = fooData.partialData.length > 0
+  const onceProps = {}
+
+  if (!isPartialReload || fooData.isPartialRequest) {
+    onceProps.foo = { prop: 'foo', expiresAt: null }
+  }
+
+  if (!isPartialReload || barData.isPartialRequest) {
+    onceProps.bar = { prop: 'bar', expiresAt: null }
+  }
+
+  inertia.render(req, res, {
+    component: `OnceProps/PartialReload${page.toUpperCase()}`,
+    props: {
+      foo: fooData.shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+      bar: barData.shouldResolveProp ? `bar-${page}-` + Date.now() : undefined,
+    },
+    onceProps,
+  })
+})
+
 app.get('/once-props/deferred/:page', (req, res) => {
   const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
   const page = req.params.page
