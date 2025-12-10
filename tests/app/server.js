@@ -1187,6 +1187,9 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
     props: { lastLoaded: Date.now(), propType: req.params.propType },
   }),
 )
+app.post('/form-component/view-transition', (req, res) =>
+  inertia.render(req, res, { component: 'ViewTransition/PageB' }),
+)
 
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
   const page = req.query.page ? parseInt(req.query.page) : 1
