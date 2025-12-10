@@ -23,7 +23,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <button onClick={() => router.reload({ only: ['bar'] })} className="ml-4 text-blue-500 underline">
         Reload Bar
       </button>
-      <button onClick={() => router.reload({ only: ['baz1', 'baz2', 'baz3'] })} className="ml-4 text-blue-500 underline">
+      <button
+        onClick={() => router.reload({ only: ['baz1', 'baz2', 'baz3'] })}
+        className="ml-4 text-blue-500 underline"
+      >
         Reload Baz
       </button>
     </MainLayout>
