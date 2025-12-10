@@ -602,7 +602,7 @@ export type UrlMethodPair = { url: string; method: Method }
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
 export type FormComponentProps = Partial<
