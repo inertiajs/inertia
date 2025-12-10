@@ -55,6 +55,10 @@ export class RequestParams {
     return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
   }
 
+  public isDeferredPropsRequest() {
+    return this.params.deferredProps === true
+  }
+
   public onCancelToken(cb: VoidFunction) {
     this.params.onCancelToken({
       cancel: cb,

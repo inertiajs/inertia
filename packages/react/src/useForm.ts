@@ -351,7 +351,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
 
   const setError = useCallback(
-    (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: string) => {
+    (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) => {
       setErrors((errors) => {
         const newErrors = {
           ...errors,

@@ -1,6 +1,7 @@
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
 import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
@@ -86,6 +87,10 @@ class CurrentPage {
         this.page = page
         this.cleared = false
 
+        if (this.hasOnceProps()) {
+          prefetchedRequests.updateCachedOncePropsFromCurrentPage()
+        }
+
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
         }
@@ -157,6 +162,10 @@ class CurrentPage {
     return this.page
   }
 
+  public hasOnceProps(): boolean {
+    return Object.keys(this.page.onceProps ?? {}).length > 0
+  }
+
   public merge(data: Partial<Page>): void {
     this.page = { ...this.page, ...data }
   }
@@ -215,6 +224,21 @@ class CurrentPage {
 
   public fireEventsFor(event: PageEvent): void {
     this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback())
+  }
+
+  public mergeOncePropsIntoResponse(response: Page, { force = false }: { force?: boolean } = {}): void {
+    Object.entries(response.onceProps ?? {}).forEach(([key, onceProp]) => {
+      const existingOnceProp = this.page.onceProps?.[key]
+
+      if (existingOnceProp === undefined) {
+        return
+      }
+
+      if (force || response.props[onceProp.prop] === undefined) {
+        response.props[onceProp.prop] = this.page.props[existingOnceProp.prop]
+        response.onceProps![key].expiresAt = existingOnceProp.expiresAt
+      }
+    })
   }
 }
 

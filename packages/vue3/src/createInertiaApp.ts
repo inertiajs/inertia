@@ -1,8 +1,10 @@
 import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
+  getInitialPageFromDOM,
   InertiaAppResponse,
   InertiaAppSSRResponse,
+  Page,
   PageProps,
   router,
   setupProgress,
@@ -59,8 +61,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
-  const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
@@ -91,7 +93,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
 
     return csrSetup({
-      el: el as HTMLElement,
+      el: document.getElementById(id)!,
       App,
       props,
       plugin,
@@ -103,14 +105,31 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   if (isServer && render) {
+    const element = () => {
+      if (!useScriptElementForInitialPage) {
+        return h('div', {
+          id,
+          'data-page': JSON.stringify(initialPage),
+          innerHTML: vueApp ? render(vueApp) : '',
+        })
+      }
+
+      return [
+        h('script', {
+          'data-page': id,
+          type: 'application/json',
+          innerHTML: JSON.stringify(initialPage),
+        }),
+        h('div', {
+          id,
+          innerHTML: vueApp ? render(vueApp) : '',
+        }),
+      ]
+    }
+
     const body = await render(
       createSSRApp({
-        render: () =>
-          h('div', {
-            id,
-            'data-page': JSON.stringify(initialPage),
-            innerHTML: vueApp ? render(vueApp) : '',
-          }),
+        render: () => element(),
       }),
     )
 

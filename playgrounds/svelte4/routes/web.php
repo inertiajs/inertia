@@ -456,3 +456,20 @@ Route::get('/data-table', function () {
         'users' => Inertia::scroll($users),
     ]);
 });
+
+Route::get('/once/{page}', function (int $page) {
+    $component = match ($page) {
+        1 => 'Once/First',
+        2 => 'Once/Second',
+        3 => 'Once/Third',
+        4 => 'Once/Fourth',
+        default => abort(404),
+    };
+
+    return inertia($component, [
+        'foo' => Inertia::once(fn () => 'foo value: '.now()->getTimestampMs())->fresh($page === 3),
+        'bar' => Inertia::once(fn () => 'bar value: '.now()->getTimestampMs())->until(10),
+        'baz' . $page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
+        'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
+    ]);
+});
