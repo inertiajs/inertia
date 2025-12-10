@@ -119,7 +119,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   const data: TForm = typeof initialData === 'function' ? initialData() : (initialData as TForm)
   const restored = rememberKey
-    ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, string> } | null)
+    ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, ErrorValue> } | null)
     : null
   let defaults = cloneDeep(data)
   let cancelToken: CancelToken | null = null

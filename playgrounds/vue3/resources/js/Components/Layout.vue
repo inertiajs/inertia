@@ -33,7 +33,8 @@ const appName = computed(() => page.props.appName)
     <Link href="/chat" class="hover:underline">Chat</Link>
     <Link href="/photo-grid" class="hover:underline">Photo Grid</Link>
     <Link href="/photo-grid/horizontal" class="hover:underline">Photo Row</Link>
-    <Link href="/data-table" class="hover:underline">Data Table</Link>
+    <Link href="/data-table" class="hover:underline">Table</Link>
+    <Link href="/once/1" class="hover:underline">Once</Link>
   </nav>
   <main :class="padding ? 'px-10 py-8' : ''">
     <slot />

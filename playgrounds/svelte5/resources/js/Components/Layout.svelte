@@ -14,7 +14,8 @@
   <a href="/form-component/precognition" use:inertia class="hover:underline">Precognition</a>
   <a href="/photo-grid" use:inertia class="hover:underline">Photo Grid</a>
   <a href="/photo-grid/horizontal" use:inertia class="hover:underline">Photo Row</a>
-  <a href="/data-table" use:inertia class="hover:underline">Data Table</a>
+  <a href="/data-table" use:inertia class="hover:underline">Table</a>
+  <a href="/once/1" use:inertia class="hover:underline">Once</a>
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
 </nav>
 

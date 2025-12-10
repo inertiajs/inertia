@@ -33,6 +33,11 @@ export class Scroll {
     })
 
     this.save()
+    this.scrollToAnchor()
+  }
+
+  public static scrollToAnchor(): void {
+    const anchorHash = typeof window !== 'undefined' ? window.location.hash : null
 
     if (anchorHash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the

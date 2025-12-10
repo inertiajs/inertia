@@ -65,7 +65,7 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
   : T extends unknown[]
     ? ArrayFormDataKeys<T>
-    : T extends Record<string, unknown>
+    : T extends object
       ? ObjectFormDataKeys<T>
       : never
 
@@ -93,7 +93,7 @@ type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
 /**
  * Helper type for object form data keys
  */
-type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyof T
+type ObjectFormDataKeys<T extends object> = string extends keyof T
   ? string
   :
       | Extract<keyof T, string>
@@ -106,7 +106,11 @@ type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyo
                 ? `${Key}.${FormDataKeys<T[Key]> & string}`
                 : T[Key] extends Record<string, any>
                   ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                  : never
+                  : Exclude<T[Key], null | undefined> extends any[]
+                    ? never
+                    : Exclude<T[Key], null | undefined> extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<Exclude<T[Key], null | undefined>> & string}`
+                      : never
         }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
@@ -164,12 +168,19 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   version: string | null
   clearHistory: boolean
   encryptHistory: boolean
-  deferredProps?: Record<string, VisitOptions['only']>
+  deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   mergeProps?: string[]
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  onceProps?: Record<
+    string,
+    {
+      prop: keyof PageProps
+      expiresAt?: number | null
+    }
+  >
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -421,6 +432,7 @@ export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisi
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
+  deferredProps?: boolean
 }
 
 export type VisitId = unknown
@@ -508,6 +520,7 @@ export type InertiaAppConfig = {
     preserveEqualProps: boolean
     useDataInertiaHeadAttribute: boolean
     useDialogForErrorModal: boolean
+    useScriptElementForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
@@ -559,6 +572,7 @@ export type PrefetchCancellationToken = {
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
+  expiresAt: number
   singleUse: boolean
   inFlight: false
   tags: string[]
@@ -606,7 +620,7 @@ export type UseFormSubmitArguments =
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
 export type FormComponentProps = Partial<
@@ -630,8 +644,8 @@ export type FormComponentProps = Partial<
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
+  setError(field: string, value: ErrorValue): void
+  setError(errors: Record<string, ErrorValue>): void
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
@@ -648,7 +662,7 @@ export type FormComponentMethods = {
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
-  errors: Record<string, string>
+  errors: Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null

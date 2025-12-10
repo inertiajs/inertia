@@ -96,7 +96,10 @@ export class InitialVisit {
     currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true }).then(() => {
       if (navigationType.isReload()) {
         Scroll.restore(history.getScrollRegions())
+      } else {
+        Scroll.scrollToAnchor()
       }
+
       fireNavigateEvent(currentPage.get())
     })
   }

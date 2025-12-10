@@ -499,6 +499,21 @@ test.describe('Form Component', () => {
       await expect(requests.requests).toHaveLength(1)
       await expect(page).toHaveURL('form-component/options')
     })
+
+    test('submits the form with view transitions enabled', async ({ page }) => {
+      consoleMessages.listen(page)
+      pageLoads.watch(page, 2)
+
+      await page.goto('/form-component/view-transition')
+
+      await page.getByRole('button', { name: 'Submit with View Transition' }).click()
+
+      await expect(page).toHaveURL('/form-component/view-transition')
+      await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+
+      await page.waitForEvent('console', (msg) => msg.text() === 'finished')
+      await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+    })
   })
 
   test.describe('Progress', () => {

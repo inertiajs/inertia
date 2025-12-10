@@ -8,6 +8,7 @@ import {
   router,
 } from '@inertiajs/core'
 import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
@@ -79,11 +80,13 @@ export default function App<SharedProps extends PageProps = PageProps>({
         return
       }
 
-      setCurrent((current) => ({
-        component,
-        page,
-        key: preserveState ? current.key : Date.now(),
-      }))
+      flushSync(() =>
+        setCurrent((current) => ({
+          component,
+          page,
+          key: preserveState ? current.key : Date.now(),
+        })),
+      )
     }
 
     router.on('navigate', () => headManager.forceUpdate())

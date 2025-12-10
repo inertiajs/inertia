@@ -22,7 +22,8 @@
   <a href="/poll" use:inertia class="hover:underline">Poll</a>
   <a href="/photo-grid" use:inertia class="hover:underline">Photo Grid</a>
   <a href="/photo-grid/horizontal" use:inertia class="hover:underline">Photo Row</a>
-  <a href="/data-table" use:inertia class="hover:underline">Data Table</a>
+  <a href="/data-table" use:inertia class="hover:underline">Table</a>
+  <a href="/once/1" use:inertia class="hover:underline">Once</a>
 </nav>
 
 <main class="px-10 py-8">

@@ -44,7 +44,10 @@ export default function Layout({ children, padding = true }: { children: React.R
           Photo Row
         </Link>
         <Link href="/data-table" className="hover:underline">
-          Data Table
+          Table
+        </Link>
+        <Link href="/once/1" className="hover:underline">
+          Once
         </Link>
         <Link href="/logout" method="post" className="hover:underline">
           Logout
