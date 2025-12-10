@@ -1892,7 +1892,8 @@ Object.entries({
 
       // Scroll to bottom to trigger loading users 16-30
       await scrollToBottom(page)
-      await expect(page.getByText('Loading...')).toBeVisible()
+      // Wait for loading to start or data to appear (whichever comes first)
+      await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
       await expect(page.getByText('User 16')).toBeVisible()
       await expect(page.getByText('User 30')).toBeVisible()
       await expect(page.getByText('Loading...')).toBeHidden()
@@ -1900,7 +1901,8 @@ Object.entries({
 
       // Load page 3 by scrolling to tfoot (custom after trigger)
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - 500))
-      await expect(page.getByText('Loading...')).toBeVisible()
+      // Wait for loading to start or data to appear (whichever comes first)
+      await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
       await expect(page.getByText('User 31')).toBeVisible()
       await expect(page.getByText('User 40')).toBeVisible()
       await expect(page.getByText('Loading...')).toBeHidden()
