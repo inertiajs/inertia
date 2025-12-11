@@ -1383,8 +1383,15 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    const afterPosition = await getUserCardPosition(page, '16')
+    // Wait for scroll restoration to complete
+    await expect
+      .poll(async () => {
+        const position = await getUserCardPosition(page, '16')
+        return position.viewportTop
+      })
+      .toBeCloseTo(beforePosition.viewportTop, 0)
 
+    const afterPosition = await getUserCardPosition(page, '16')
     expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
@@ -1601,8 +1608,15 @@ test.describe('Scrollable container support', () => {
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
+    // Wait for scroll restoration to complete
+    await expect
+      .poll(async () => {
+        const position = await getUserCardPositionInContainer(page, scrollContainer, '16')
+        return position.viewportTop
+      })
+      .toBeCloseTo(beforePosition.viewportTop, 0)
 
+    const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
     expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
