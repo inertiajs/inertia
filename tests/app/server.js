@@ -1703,7 +1703,7 @@ app.get('/once-props/deferred/:page', (req, res) => {
         },
         onceProps: { foo: { prop: 'foo', expiresAt: null } },
       })
-    }, 100)
+    }, 250)
   }
 
   inertia.render(req, res, {
