@@ -126,6 +126,18 @@ test.describe('Flash Data', () => {
       expect(requests.requests.length).toBe(0)
     })
 
+    test('sets flash data with key-value pair', async ({ page }) => {
+      requests.listen(page)
+
+      await expect(page.locator('#flash')).toHaveText('no-flash')
+
+      await page.getByRole('button', { name: 'Set flash key-value' }).click()
+
+      await expect(page.locator('#flash')).toContainText('foo')
+      await expect(page.locator('#flash')).toContainText('bar')
+      expect(requests.requests.length).toBe(0)
+    })
+
     test('merges flash data using function', async ({ page }) => {
       requests.listen(page)
 
@@ -141,8 +153,11 @@ test.describe('Flash Data', () => {
       expect(requests.requests.length).toBe(0)
     })
 
-    test('does not fire event for empty flash', async ({ page }) => {
+    test('clears flash data using function', async ({ page }) => {
       requests.listen(page)
+
+      await page.getByRole('button', { name: 'Set flash', exact: true }).click()
+      await expect(page.locator('#flash')).toContainText('foo')
 
       await page.getByRole('button', { name: 'Clear flash' }).click()
 

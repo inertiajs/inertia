@@ -5,12 +5,16 @@
     router.flash({ foo: 'bar' })
   }
 
+  const setFlashKeyValue = () => {
+    router.flash('foo', 'bar')
+  }
+
   const mergeFlash = () => {
     router.flash((current) => ({ ...current, bar: 'baz' }))
   }
 
   const clearFlash = () => {
-    router.flash({})
+    router.flash(() => ({}))
   }
 </script>
 
@@ -18,6 +22,7 @@
   <span id="flash">{$page.flash ? JSON.stringify($page.flash) : 'no-flash'}</span>
 
   <button on:click={setFlash}>Set flash</button>
+  <button on:click={setFlashKeyValue}>Set flash key-value</button>
   <button on:click={mergeFlash}>Merge flash</button>
   <button on:click={clearFlash}>Clear flash</button>
 </div>

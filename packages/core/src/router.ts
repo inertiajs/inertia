@@ -392,16 +392,32 @@ export class Router {
     this.clientVisit(params)
   }
 
-  public flash<TFlash = Page['flash']>(flash: ((flash: TFlash) => Page['flash']) | Page['flash']): void {
-    const current = currentPage.get()
-    const newFlash = typeof flash === 'function' ? flash((current.flash ?? {}) as TFlash) : flash
+  public flash<TFlash = Page['flash']>(
+    keyOrData: string | ((flash: TFlash) => Page['flash']) | Page['flash'],
+    value?: unknown,
+  ): void {
+    const current = currentPage.get().flash ?? ({} as TFlash)
+    let flash: Page['flash']
 
-    if (!newFlash || Object.keys(newFlash).length === 0) {
+    if (typeof keyOrData === 'function') {
+      flash = keyOrData(current)
+    } else if (typeof keyOrData === 'string') {
+      flash = { ...current, [keyOrData]: value }
+    } else if (keyOrData && Object.keys(keyOrData).length) {
+      flash = { ...current, ...keyOrData }
+    } else {
       return
     }
 
-    currentPage.setFlash(newFlash)
-    fireFlashEvent(newFlash)
+    if (flash && !Object.keys(flash).length) {
+      flash = undefined
+    }
+
+    currentPage.setFlash(flash)
+
+    if (flash) {
+      fireFlashEvent(flash)
+    }
   }
 
   protected clientVisit<TProps = Page['props'], TFlash = Page['flash']>(
@@ -420,7 +436,7 @@ export class Router {
     const page = {
       ...current,
       ...pageParams,
-      flash: flash ? flash : undefined,
+      flash: flash || undefined,
       props: props as Page['props'],
     }
 
