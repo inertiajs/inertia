@@ -3,7 +3,7 @@ import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageFlashData, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
+import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
@@ -180,7 +180,7 @@ class CurrentPage {
     this.page = { ...this.page, ...data }
   }
 
-  public setFlash(flash: PageFlashData): void {
+  public setFlash(flash: FlashData): void {
     this.page = { ...this.page, flash }
     this.onFlashCallback?.(flash)
   }

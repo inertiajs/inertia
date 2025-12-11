@@ -8,8 +8,13 @@ declare module 'axios' {
   }
 }
 
+export interface PageFlashData {
+  [key: string]: unknown
+}
+
 export type DefaultInertiaConfig = {
   errorValueType: string
+  flashDataType: PageFlashData
   sharedPageProps: PageProps
 }
 /**
@@ -22,9 +27,12 @@ export type DefaultInertiaConfig = {
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
+ *     flashDataType: {
+ *       success?: string
+ *       error?: string
+ *     }
  *     sharedPageProps: {
  *       auth: { user: User | null }
- *       flash: { success?: string; error?: string }
  *     }
  *   }
  * }
@@ -35,6 +43,7 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
   ? InertiaConfig[Key]
   : DefaultInertiaConfig[Key]
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
+export type FlashData = InertiaConfigFor<'flashDataType'>
 export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
 
 export type Errors = Record<string, ErrorValue>
@@ -145,10 +154,6 @@ export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
-export interface PageFlashData {
-  [key: string]: unknown
-}
-
 export interface PageProps {
   [key: string]: unknown
 }
@@ -178,7 +183,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
-  flash: PageFlashData
+  flash: FlashData
   onceProps?: Record<
     string,
     {
@@ -196,11 +201,11 @@ export type ScrollRegion = {
   left: number
 }
 
-export interface ClientSideVisitOptions<TProps = Page['props'], TFlash extends PageFlashData = Page['flash']> {
+export interface ClientSideVisitOptions<TProps = Page['props'], TFlash extends FlashData = Page['flash']> {
   component?: Page['component']
   url?: Page['url']
   props?: ((props: TProps) => PageProps) | PageProps
-  flash?: ((flash: TFlash) => PageFlashData) | PageFlashData
+  flash?: ((flash: TFlash) => FlashData) | FlashData
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
@@ -209,7 +214,7 @@ export interface ClientSideVisitOptions<TProps = Page['props'], TFlash extends P
   viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps, TFlash>) => void
-  onFlash?: (flash: PageFlashData) => void
+  onFlash?: (flash: FlashData) => void
   onSuccess?: (page: Page) => void
 }
 

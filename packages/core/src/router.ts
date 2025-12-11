@@ -23,7 +23,7 @@ import {
   InFlightPrefetch,
   Method,
   Page,
-  PageFlashData,
+  FlashData,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -396,12 +396,12 @@ export class Router {
     this.clientVisit(params)
   }
 
-  public flash<TFlash extends PageFlashData = Page['flash']>(
-    keyOrData: string | ((flash: TFlash) => PageFlashData) | PageFlashData,
+  public flash<TFlash extends FlashData = Page['flash']>(
+    keyOrData: string | ((flash: TFlash) => FlashData) | FlashData,
     value?: unknown,
   ): void {
     const current = currentPage.get().flash as TFlash
-    let flash: PageFlashData
+    let flash: FlashData
 
     if (typeof keyOrData === 'function') {
       flash = keyOrData(current)
@@ -420,14 +420,14 @@ export class Router {
     }
   }
 
-  protected clientVisit<TProps = Page['props'], TFlash extends PageFlashData = Page['flash']>(
+  protected clientVisit<TProps = Page['props'], TFlash extends FlashData = Page['flash']>(
     params: ClientSideVisitOptions<TProps, TFlash>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
     this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
   }
 
-  protected performClientVisit<TProps = Page['props'], TFlash extends PageFlashData = Page['flash']>(
+  protected performClientVisit<TProps = Page['props'], TFlash extends FlashData = Page['flash']>(
     params: ClientSideVisitOptions<TProps, TFlash>,
     { replace = false }: { replace?: boolean } = {},
   ): Promise<void> {
