@@ -46,9 +46,11 @@ export default defineComponent({
       (value) => {
         if (Array.isArray(this.data)) {
           if (this.data.every((data) => page.props[data as string] !== undefined)) {
+            this.loaded = true
             return
           }
         } else if (value !== undefined) {
+          this.loaded = true
           return
         }
 
