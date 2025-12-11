@@ -15,20 +15,10 @@
   let observer: IntersectionObserver | null = null
 
   const page = usePage()
+  $: keys = data ? (Array.isArray(data) ? data : [data]) : []
+  $: loaded = keys.length > 0 && keys.every((key) => $page.props[key] !== undefined)
 
-  // Watch for page prop changes and reset loaded state when data becomes undefined
-  $: {
-    if (Array.isArray(data)) {
-      // For arrays, reset loaded if any prop becomes undefined
-      if (data.some((key) => $page.props[key] === undefined)) {
-        loaded = false
-      }
-    } else if ($page.props[data as string] === undefined) {
-      loaded = false
-    }
-  }
-
-  $: if (el) {
+  $: if (el && (!loaded || always)) {
     registerObserver()
   }
 
