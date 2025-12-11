@@ -695,6 +695,29 @@ app.get('/when-visible-array-reload', (req, res) => {
   }
 })
 
+app.get('/when-visible-back-button', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleBackButton',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleBackButton',
+        props: {
+          lazyData: {
+            text: 'This is lazy loaded data!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>

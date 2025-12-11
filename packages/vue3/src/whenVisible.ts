@@ -34,27 +34,24 @@ export default defineComponent({
   unmounted() {
     this.observer?.disconnect()
   },
+  computed: {
+    keys(): string[] {
+      return this.data ? ((Array.isArray(this.data) ? this.data : [this.data]) as string[]) : []
+    },
+  },
   created() {
     const page = usePage()
 
     this.$watch(
+      () => this.keys.map((key) => page.props[key]),
       () => {
-        return Array.isArray(this.data)
-          ? this.data.map((data) => page.props[data as string])
-          : page.props[this.data as string]
-      },
-      (value) => {
-        if (Array.isArray(this.data)) {
-          if (this.data.every((data) => page.props[data as string] !== undefined)) {
-            this.loaded = true
-            return
-          }
-        } else if (value !== undefined) {
-          this.loaded = true
+        const exists = this.keys.length > 0 && this.keys.every((key) => page.props[key] !== undefined)
+        this.loaded = exists
+
+        if (exists && !this.always) {
           return
         }
 
-        this.loaded = false
         this.$nextTick(this.registerObserver)
       },
       { immediate: true },
