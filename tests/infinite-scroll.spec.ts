@@ -13,6 +13,7 @@ function infiniteScrollRequests() {
 
 async function scrollToTop(page: Page) {
   await page.evaluate(() => window.scrollTo(0, 0))
+  await expect.poll(() => page.evaluate(() => window.scrollY === 0)).toBe(true)
 }
 
 async function scrollToBottom(page: Page) {
@@ -24,29 +25,26 @@ async function smoothScrollTo(page: any, targetY: number) {
   // own 'smooth' scroll by scrolling halfway first, then to the target after a short delay...
   await page.evaluate((top: number) => {
     const current = window.scrollY
-
-    if (top > current) {
-      window.scrollTo(0, current + (top - current) / 2)
-    } else {
-      window.scrollTo(0, current - (current - top) / 2)
-    }
-
+    window.scrollTo(0, current + (top - current) / 2)
     setTimeout(() => window.scrollTo(0, top), 10)
   }, targetY)
 
-  await page.waitForTimeout(20)
+  // Wait for scroll to reach target (clamped to max scrollable position)
+  await expect
+    .poll(() =>
+      page.evaluate((target: number) => {
+        const maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight
+        return Math.abs(window.scrollY - Math.min(target, maxScroll)) < 5
+      }, targetY),
+    )
+    .toBe(true)
 }
 
 async function scrollElementSmoothTo(element: Locator, targetY: number) {
   // Same as smoothScrollTo but for a specific element
   await element.evaluate((el, top) => {
     const current = el.scrollTop
-
-    if (top > current) {
-      el.scrollTo(0, current + (top - current) / 2)
-    } else {
-      el.scrollTo(0, current - (current - top) / 2)
-    }
+    el.scrollTo(0, current + (top - current) / 2)
     setTimeout(() => el.scrollTo(0, top), 10)
   }, targetY)
 
@@ -841,9 +839,8 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Total items on page: 30')).toBeVisible()
 
-    const pageHeight = await page.evaluate(() => document.body.scrollHeight)
-
-    await smoothScrollTo(page, pageHeight)
+    // Scroll to page 2 content area to trigger URL update
+    await page.getByText('User 20').scrollIntoViewIfNeeded()
     await expectQueryString(page, '2')
     await expect(infiniteScrollRequests().length).toBeGreaterThanOrEqual(1)
 
@@ -866,8 +863,8 @@ test.describe('Toggle configuration', () => {
     await page.getByLabel('Preserve URL: true').uncheck()
     await expect(page.getByText('Preserve URL: false')).toBeVisible()
 
-    const newPageHeight = await page.evaluate(() => document.body.scrollHeight)
-    await smoothScrollTo(page, newPageHeight)
+    // Scroll to page 3 content area to trigger URL update
+    await page.getByText('User 35').scrollIntoViewIfNeeded()
     await expectQueryString(page, '3')
   })
 })
@@ -1277,7 +1274,9 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    // Scroll to User 20 area (middle of page 2) to trigger URL update to page=2
+    const user20 = page.getByText('User 20')
+    await user20.scrollIntoViewIfNeeded()
     await expectQueryString(page, '2')
 
     // Verify the internal Inertia page URL is still relative
@@ -1305,7 +1304,9 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    // Scroll to User 20 area (middle of page 2) to trigger URL update to page=2
+    const user20 = page.getByText('User 20')
+    await user20.scrollIntoViewIfNeeded()
     await expectQueryString(page, '2')
 
     // Verify the internal Inertia page URL is still absolute
@@ -1352,6 +1353,9 @@ test.describe('Scroll position preservation', () => {
 
     // Scroll to the top of the page to load page 1
     await scrollToTop(page)
+
+    // Wait for loading to start so we capture a stable "before" state
+    await expect(page.getByText('Loading...')).toBeVisible()
 
     const screenshotter = await screenshotBelowUserCard(page, '16')
     const beforeScreenshot = await screenshotter(page)
