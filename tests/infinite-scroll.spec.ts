@@ -86,6 +86,54 @@ async function expectQueryString(page: Page, expectedPage: string) {
   }
 }
 
+async function getUserCardPosition(page: Page, id: string) {
+  const userCard = page.getByText(`User ${id}`)
+  await expect(userCard).toBeVisible()
+
+  const boundingBox = await userCard.boundingBox()
+
+  if (!boundingBox) {
+    throw new Error(`Could not find bounding box for User ${id}`)
+  }
+
+  const scrollY = await page.evaluate(() => window.scrollY)
+  const viewportHeight = await page.evaluate(() => window.innerHeight)
+
+  return {
+    top: boundingBox.y + scrollY,
+    bottom: boundingBox.y + boundingBox.height + scrollY,
+    viewportTop: boundingBox.y,
+    viewportBottom: boundingBox.y + boundingBox.height,
+    relativeToViewport: boundingBox.y / viewportHeight,
+  }
+}
+
+async function getUserCardPositionInContainer(page: Page, container: Locator, id: string) {
+  const userCard = page.getByText(`User ${id}`)
+  await expect(userCard).toBeVisible()
+
+  const containerBox = await container.boundingBox()
+  const userBox = await userCard.boundingBox()
+
+  if (!containerBox || !userBox) {
+    throw new Error(`Could not find bounding box for container or User ${id}`)
+  }
+
+  const containerScrollTop = await container.evaluate((el) => el.scrollTop)
+  const containerHeight = await container.evaluate((el) => el.clientHeight)
+
+  const relativeTop = userBox.y - containerBox.y + containerScrollTop
+  const relativeBottom = relativeTop + userBox.height
+
+  return {
+    top: relativeTop,
+    bottom: relativeBottom,
+    viewportTop: userBox.y - containerBox.y,
+    viewportBottom: userBox.y + userBox.height - containerBox.y,
+    relativeToContainer: (userBox.y - containerBox.y) / containerHeight,
+  }
+}
+
 test.describe('Automatic page loading', () => {
   test('it loads the next page when scrolling to the bottom', async ({ page }) => {
     requests.listen(page)
@@ -1318,33 +1366,6 @@ test.describe('URL query string management', () => {
 })
 
 test.describe('Scroll position preservation', () => {
-  async function screenshotAroundUserCard(page: Page, id: string, position: 'above' | 'below') {
-    const viewport = page.viewportSize()
-
-    if (!viewport) {
-      throw new Error('Viewport size is not defined')
-    }
-
-    const userText = `User ${id}`
-    const userCard = await page.getByText(userText)?.boundingBox()
-
-    if (!userCard) {
-      throw new Error(`Could not find bounding box for user with text "${userText}"`)
-    }
-
-    const clip = {
-      x: 0,
-      y: position === 'below' ? userCard.y + userCard.height : 0,
-      width: viewport.width,
-      height: position === 'below' ? viewport.height - (userCard.y + userCard.height) : viewport.height - userCard.y,
-    }
-
-    return (p: Page, path?: string) => p.screenshot({ clip, path })
-  }
-
-  const screenshotBelowUserCard = async (page: Page, id: string) => await screenshotAroundUserCard(page, id, 'below')
-  const screenshotAboveUserCard = async (page: Page, id: string) => await screenshotAroundUserCard(page, id, 'above')
-
   test('it maintains scroll position when loading previous pages', async ({ page, context }) => {
     await page.goto('/infinite-scroll/trigger-both?page=3')
 
@@ -1357,15 +1378,14 @@ test.describe('Scroll position preservation', () => {
     // Wait for loading to start so we capture a stable "before" state
     await expect(page.getByText('Loading...')).toBeVisible()
 
-    const screenshotter = await screenshotBelowUserCard(page, '16')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPosition(page, '16')
 
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPosition(page, '16')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when loading next pages', async ({ page }) => {
@@ -1379,8 +1399,7 @@ test.describe('Scroll position preservation', () => {
     await scrollToBottom(page)
 
     await expect(page.getByText('Loading...')).toBeVisible()
-    const screenshotter = await screenshotAboveUserCard(page, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPosition(page, '15')
     await expect(page.getByText('Loading...')).toBeVisible()
 
     // Wait for any initial loading to complete
@@ -1390,9 +1409,9 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('User 31')).toBeHidden()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPosition(page, '15')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when loading previous pages with buffer margin', async ({ page }) => {
@@ -1432,17 +1451,16 @@ test.describe('Scroll position preservation', () => {
     // Scroll to bottom to trigger loading, similar to the working test
     await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
-    const screenshotter = await screenshotAboveUserCard(page, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPosition(page, '15')
 
     // Wait for loading to complete
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPosition(page, '15')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when first child element is invisible', async ({ page }) => {
@@ -1563,25 +1581,6 @@ test.describe('Scrollable container support', () => {
     await expectQueryStringInContainer('1')
   })
 
-  async function screenshotBelowUserCardInContainer(page: Page, scrollContainer: Locator, userId: string) {
-    const containerRect = await scrollContainer.boundingBox()
-    const userRect = await page.getByText(`User ${userId}`).boundingBox()
-
-    if (!containerRect || !userRect) {
-      throw new Error(`Could not get container or User ${userId} bounding box`)
-    }
-
-    // Calculate the area below the user within the container bounds
-    const clip = {
-      x: containerRect.x,
-      y: userRect.y + userRect.height,
-      width: containerRect.width,
-      height: containerRect.y + containerRect.height - (userRect.y + userRect.height),
-    }
-
-    return (p: Page, path?: string) => p.screenshot({ clip, path })
-  }
-
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
@@ -1595,18 +1594,16 @@ test.describe('Scrollable container support', () => {
     // Scroll container to top to trigger loading page 1
     await scrollElementSmoothTo(scrollContainer, 0)
 
-    const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '16')
-
     // Wait for loading to start or data to appear
     await expect(page.getByText('Loading more users...').or(page.getByText('User 1', { exact: true }))).toBeVisible()
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
 
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
@@ -1621,17 +1618,16 @@ test.describe('Scrollable container support', () => {
     // Scroll down within container to see User 15 and trigger loading page 2
     await scrollElementToBottom(scrollContainer)
 
-    const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPositionInContainer(page, scrollContainer, '15')
 
     await expect(page.getByText('Loading more users...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '15')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it does not treat overflow-x: hidden as a scroll container', async ({ page }) => {
