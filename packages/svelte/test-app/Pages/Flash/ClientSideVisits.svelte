@@ -34,7 +34,7 @@
 </script>
 
 <div>
-  <span id="flash">{$page.flash ? JSON.stringify($page.flash) : 'no-flash'}</span>
+  <span id="flash">{JSON.stringify($page.flash)}</span>
 
   <button on:click={withFlash}>With flash object</button>
   <button on:click={withFlashFunction}>With flash function</button>

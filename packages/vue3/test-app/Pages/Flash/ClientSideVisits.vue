@@ -35,7 +35,7 @@ const withoutFlash = () => {
 
 <template>
   <div>
-    <span id="flash">{{ page.flash ? JSON.stringify(page.flash) : 'no-flash' }}</span>
+    <span id="flash">{{ JSON.stringify(page.flash) }}</span>
 
     <button @click="withFlash">With flash object</button>
     <button @click="withFlashFunction">With flash function</button>

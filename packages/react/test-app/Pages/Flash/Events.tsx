@@ -71,7 +71,7 @@ export default () => {
 
   return (
     <div>
-      <span id="flash">{page.flash ? JSON.stringify(page.flash) : 'no-flash'}</span>
+      <span id="flash">{JSON.stringify(page.flash)}</span>
 
       <a
         href="#"

@@ -72,7 +72,7 @@ const navigateAway = () => {
 
 <template>
   <div>
-    <span id="flash">{{ page.flash ? JSON.stringify(page.flash) : 'no-flash' }}</span>
+    <span id="flash">{{ JSON.stringify(page.flash) }}</span>
 
     <a href="#" @click.prevent="visitWithFlash" class="with-flash">Visit with flash</a>
     <a href="#" @click.prevent="visitWithoutFlash" class="without-flash">Visit without flash</a>

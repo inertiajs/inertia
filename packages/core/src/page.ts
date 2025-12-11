@@ -3,7 +3,7 @@ import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
+import { Component, Page, PageEvent, PageFlashData, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
@@ -26,7 +26,7 @@ class CurrentPage {
     resolveComponent,
     onFlash,
   }: RouterInitParams<ComponentType>) {
-    this.page = initialPage
+    this.page = { ...initialPage, flash: initialPage.flash ?? {} }
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
@@ -77,11 +77,11 @@ class CurrentPage {
       const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
-      // Strip flash data from the page object, we don't want it when navigating back/forward...
-      const { flash, ...pageWithoutFlash } = page
+      // Clear flash data from the page object, we don't want it when navigating back/forward...
+      const pageForHistory = { ...page, flash: {} }
 
       return new Promise<void>((resolve) =>
-        replace ? history.replaceState(pageWithoutFlash, resolve) : history.pushState(pageWithoutFlash, resolve),
+        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
       ).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
@@ -169,9 +169,7 @@ class CurrentPage {
   }
 
   public getWithoutFlashData(): Page {
-    const { flash, ...page } = this.page
-
-    return page
+    return { ...this.page, flash: {} }
   }
 
   public hasOnceProps(): boolean {
@@ -182,7 +180,7 @@ class CurrentPage {
     this.page = { ...this.page, ...data }
   }
 
-  public setFlash(flash: Page['flash']): void {
+  public setFlash(flash: PageFlashData): void {
     this.page = { ...this.page, flash }
     this.onFlashCallback?.(flash)
   }

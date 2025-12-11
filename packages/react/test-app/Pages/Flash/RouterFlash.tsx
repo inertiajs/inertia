@@ -21,7 +21,7 @@ export default () => {
 
   return (
     <div>
-      <span id="flash">{page.flash ? JSON.stringify(page.flash) : 'no-flash'}</span>
+      <span id="flash">{JSON.stringify(page.flash)}</span>
 
       <button onClick={setFlash}>Set flash</button>
       <button onClick={setFlashKeyValue}>Set flash key-value</button>

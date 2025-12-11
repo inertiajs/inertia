@@ -22,7 +22,7 @@ const clearFlash = () => {
 
 <template>
   <div>
-    <span id="flash">{{ page.flash ? JSON.stringify(page.flash) : 'no-flash' }}</span>
+    <span id="flash">{{ JSON.stringify(page.flash) }}</span>
 
     <button @click="setFlash">Set flash</button>
     <button @click="setFlashKeyValue">Set flash key-value</button>

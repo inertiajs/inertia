@@ -87,7 +87,7 @@ export class Response {
 
     const { flash } = currentPage.get()
 
-    if (flash && Object.keys(flash).length > 0) {
+    if (Object.keys(flash).length > 0) {
       fireFlashEvent(flash)
       this.requestParams.all().onFlash(flash)
     }
@@ -104,7 +104,8 @@ export class Response {
   }
 
   public getPageResponse(): Page {
-    return (this.response.data = this.getDataFromResponse(this.response.data))
+    const data = this.getDataFromResponse(this.response.data)
+    return (this.response.data = { ...data, flash: data.flash ?? {} })
   }
 
   protected async handleNonInertiaResponse() {

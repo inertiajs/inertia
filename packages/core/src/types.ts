@@ -178,7 +178,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
-  flash?: PageFlashData
+  flash: PageFlashData
   onceProps?: Record<
     string,
     {
@@ -196,7 +196,7 @@ export type ScrollRegion = {
   left: number
 }
 
-export interface ClientSideVisitOptions<TProps = Page['props'], TFlash = Page['flash']> {
+export interface ClientSideVisitOptions<TProps = Page['props'], TFlash extends PageFlashData = Page['flash']> {
   component?: Page['component']
   url?: Page['url']
   props?: ((props: TProps) => PageProps) | PageProps

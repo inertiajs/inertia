@@ -49,7 +49,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
-    page: initialPage,
+    page: { ...initialPage, flash: initialPage.flash ?? {} },
     key: null,
   })
 

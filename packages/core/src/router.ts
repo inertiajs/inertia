@@ -23,6 +23,7 @@ import {
   InFlightPrefetch,
   Method,
   Page,
+  PageFlashData,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -395,15 +396,15 @@ export class Router {
     this.clientVisit(params)
   }
 
-  public flash<TFlash = Page['flash']>(
-    keyOrData: string | ((flash: TFlash) => Page['flash']) | Page['flash'],
+  public flash<TFlash extends PageFlashData = Page['flash']>(
+    keyOrData: string | ((flash: TFlash) => PageFlashData) | PageFlashData,
     value?: unknown,
   ): void {
-    const current = currentPage.get().flash ?? ({} as TFlash)
-    let flash: Page['flash']
+    const current = currentPage.get().flash as TFlash
+    let flash: PageFlashData
 
     if (typeof keyOrData === 'function') {
-      flash = keyOrData(current as TFlash)
+      flash = keyOrData(current)
     } else if (typeof keyOrData === 'string') {
       flash = { ...current, [keyOrData]: value }
     } else if (keyOrData && Object.keys(keyOrData).length) {
@@ -412,25 +413,21 @@ export class Router {
       return
     }
 
-    if (flash && !Object.keys(flash).length) {
-      flash = undefined
-    }
-
     currentPage.setFlash(flash)
 
-    if (flash) {
+    if (Object.keys(flash).length) {
       fireFlashEvent(flash)
     }
   }
 
-  protected clientVisit<TProps = Page['props'], TFlash = Page['flash']>(
+  protected clientVisit<TProps = Page['props'], TFlash extends PageFlashData = Page['flash']>(
     params: ClientSideVisitOptions<TProps, TFlash>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
     this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
   }
 
-  protected performClientVisit<TProps = Page['props'], TFlash = Page['flash']>(
+  protected performClientVisit<TProps = Page['props'], TFlash extends PageFlashData = Page['flash']>(
     params: ClientSideVisitOptions<TProps, TFlash>,
     { replace = false }: { replace?: boolean } = {},
   ): Promise<void> {
@@ -439,14 +436,14 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const flash = typeof params.flash === 'function' ? params.flash((current.flash ?? {}) as TFlash) : params.flash
+    const flash = typeof params.flash === 'function' ? params.flash(current.flash as TFlash) : params.flash
 
     const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 
     const page = {
       ...current,
       ...pageParams,
-      flash: flash || undefined,
+      flash: flash ?? {},
       props: props as Page['props'],
     }
 
@@ -466,7 +463,7 @@ export class Router {
         if (Object.keys(errors).length === 0) {
           const currentFlash = currentPage.get().flash
 
-          if (currentFlash && Object.keys(currentFlash).length > 0) {
+          if (Object.keys(currentFlash).length > 0) {
             fireFlashEvent(currentFlash)
             onFlash?.(currentFlash)
           }

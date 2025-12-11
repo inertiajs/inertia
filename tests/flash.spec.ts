@@ -51,7 +51,7 @@ test.describe('Flash Data', () => {
       expect(page.url()).toContain('/flash/events')
 
       const flashAfter = await page.locator('#flash').textContent()
-      expect(flashAfter).toBe('no-flash')
+      expect(flashAfter).toBe('{}')
     })
 
     test('does not fire flash event when no flash data is present', async ({ page }) => {
@@ -71,7 +71,7 @@ test.describe('Flash Data', () => {
     test('sets flash data and fires onFlash callback', async ({ page }) => {
       requests.listen(page)
 
-      await expect(page.locator('#flash')).toHaveText('no-flash')
+      await expect(page.locator('#flash')).toHaveText('{}')
 
       await page.getByRole('button', { name: 'With flash object' }).click()
 
@@ -104,7 +104,7 @@ test.describe('Flash Data', () => {
 
       await page.getByRole('button', { name: 'Without flash' }).click()
 
-      await expect(page.locator('#flash')).toHaveText('no-flash')
+      await expect(page.locator('#flash')).toHaveText('{}')
       expect(await page.evaluate(() => window.flashCount)).toBe(1)
       expect(requests.requests.length).toBe(0)
     })
@@ -118,7 +118,7 @@ test.describe('Flash Data', () => {
     test('sets flash data with object', async ({ page }) => {
       requests.listen(page)
 
-      await expect(page.locator('#flash')).toHaveText('no-flash')
+      await expect(page.locator('#flash')).toHaveText('{}')
 
       await page.getByRole('button', { name: 'Set flash', exact: true }).click()
 
@@ -129,7 +129,7 @@ test.describe('Flash Data', () => {
     test('sets flash data with key-value pair', async ({ page }) => {
       requests.listen(page)
 
-      await expect(page.locator('#flash')).toHaveText('no-flash')
+      await expect(page.locator('#flash')).toHaveText('{}')
 
       await page.getByRole('button', { name: 'Set flash key-value' }).click()
 
@@ -161,7 +161,7 @@ test.describe('Flash Data', () => {
 
       await page.getByRole('button', { name: 'Clear flash' }).click()
 
-      await expect(page.locator('#flash')).toHaveText('no-flash')
+      await expect(page.locator('#flash')).toHaveText('{}')
       expect(requests.requests.length).toBe(0)
     })
   })

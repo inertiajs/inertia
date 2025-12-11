@@ -19,7 +19,7 @@
 </script>
 
 <div>
-  <span id="flash">{$page.flash ? JSON.stringify($page.flash) : 'no-flash'}</span>
+  <span id="flash">{JSON.stringify($page.flash)}</span>
 
   <button on:click={setFlash}>Set flash</button>
   <button on:click={setFlashKeyValue}>Set flash key-value</button>
