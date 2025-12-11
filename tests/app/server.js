@@ -234,6 +234,16 @@ app.get('/client-side-visit/props', (req, res) =>
   }),
 )
 
+app.get('/client-side-visit/sequential', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Sequential',
+    props: {
+      foo: 'foo',
+      bar: 'bar',
+    },
+  }),
+)
+
 app.get('/visits/proxy', (req, res) => {
   const timeout = req.headers['x-inertia-partial-data'] ? 250 : 0
   const statuses = ['pending', 'running', 'success', 'failed', 'canceled']
@@ -349,23 +359,176 @@ app.post('/form-helper/events/errors', (req, res) => {
 
 //
 
-const methods = ['get', 'post', 'put', 'patch', 'delete']
+app.post('/precognition/default', upload.any(), (req, res) => {
+  if (!req.headers['precognition']) {
+    return renderDump(req, res)
+  }
 
-methods.forEach((method) =>
-  app[method](`/dump/${method}`, upload.any(), (req, res) =>
-    inertia.render(req, res, {
-      component: 'Dump',
-      props: {
-        headers: req.headers,
-        method,
-        form: req.body,
-        query: req.query,
-        files: req.files,
-        url: req.originalUrl,
-      },
-    }),
-  ),
-)
+  setTimeout(
+    () => {
+      const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+      const name = req.body['name']
+      const email = req.body['email']
+      const errors = {}
+
+      if (!name) {
+        errors.name = 'The name field is required.'
+      }
+
+      if (name && name.length < 3) {
+        errors.name = 'The name must be at least 3 characters.'
+      }
+
+      if (!email) {
+        errors.email = 'The email field is required.'
+      }
+
+      if (email && !/\S+@\S+\.\S+/.test(email)) {
+        errors.email = 'The email must be a valid email address.'
+      }
+
+      if (only.length) {
+        Object.keys(errors).forEach((key) => {
+          if (!only.includes(key)) {
+            delete errors[key]
+          }
+        })
+      }
+
+      res.header('Precognition', 'true')
+      res.header('Vary', 'Precognition')
+
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ errors })
+      }
+
+      return res.status(204).header('Precognition-Success', 'true').send()
+    },
+    !!req.query['slow'] ? 2000 : 250,
+  )
+})
+
+app.post('/precognition/with-all-errors', (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const errors = {}
+
+    if (!name) {
+      errors.name = ['The name field is required.']
+    }
+
+    if (name && name.length < 3) {
+      errors.name = ['The name must be at least 3 characters.', 'The name contains invalid characters.']
+    }
+
+    if (!email) {
+      errors.email = ['The email field is required.']
+    }
+
+    if (email && !/\S+@\S+\.\S+/.test(email)) {
+      errors.email = ['The email must be a valid email address.', 'The email format is incorrect.']
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+app.post('/precognition/files', upload.any(), (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const hasAvatar = req.files && req.files.avatar
+    const errors = {}
+
+    if (!name) {
+      errors.name = 'The name field is required.'
+    }
+
+    if (name && name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    if (!hasAvatar) {
+      errors.avatar = 'The avatar field is required.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+app.post('/precognition/headers', (req, res) => {
+  setTimeout(() => {
+    const customHeader = req.headers['x-custom-header']
+    const name = req.body['name']
+    const errors = {}
+
+    // Show error when custom header IS present (to prove it was sent)
+    if (customHeader === 'custom-value') {
+      errors.name = 'Custom header received: custom-value'
+    } else if (!name) {
+      errors.name = 'The name field is required.'
+    } else if (name.length < 3) {
+      errors.name = 'The name must be at least 3 characters.'
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+const methods = ['get', 'post', 'put', 'patch', 'delete']
+const renderDump = (req, res) =>
+  inertia.render(req, res, {
+    component: 'Dump',
+    props: {
+      headers: req.headers,
+      method: req.method?.toLowerCase(),
+      form: req.body,
+      query: req.query,
+      files: req.files,
+      url: req.originalUrl,
+    },
+  })
+
+methods.forEach((method) => app[method](`/dump/${method}`, upload.any(), (req, res) => renderDump(req, res)))
 
 app.get('/visits/reload-on-mount', upload.any(), (req, res) => {
   if (req.headers['x-inertia-partial-data']) {
@@ -549,6 +712,29 @@ app.get('/when-visible-array-reload', (req, res) => {
           },
           secondData: {
             text: 'Second lazy data loaded!',
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/when-visible-back-button', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'WhenVisibleBackButton',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleBackButton',
+        props: {
+          lazyData: {
+            text: 'This is lazy loaded data!',
           },
         },
       })
@@ -1204,6 +1390,9 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
     props: { lastLoaded: Date.now(), propType: req.params.propType },
   }),
 )
+app.post('/form-component/view-transition', (req, res) =>
+  inertia.render(req, res, { component: 'ViewTransition/PageB' }),
+)
 
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
   const page = req.query.page ? parseInt(req.query.page) : 1
@@ -1464,6 +1653,228 @@ app.get('/flash/initial', (req, res) =>
     flash: { message: 'Hello from server' },
   }),
 )
+const getOncePropsData = (req, prop = 'foo') => {
+  const isInertiaRequest = !!req.headers['x-inertia']
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+  const loadedOnceProps = req.headers['x-inertia-except-once-props']?.split(',') ?? []
+  const isPartialRequest = partialData.includes(prop)
+  const hasPropAlready = loadedOnceProps.includes(prop)
+  const shouldResolveProp = !isInertiaRequest || isPartialRequest || !hasPropAlready
+
+  return {
+    isInertiaRequest,
+    partialData,
+    loadedOnceProps,
+    isPartialRequest,
+    hasPropAlready,
+    shouldResolveProp,
+  }
+}
+
+app.get('/once-props/page-a', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageA',
+    props: {
+      foo: shouldResolveProp ? 'foo-a-' + Date.now() : undefined,
+      bar: 'bar-a',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/page-b', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageB',
+    props: {
+      foo: shouldResolveProp ? 'foo-b-' + Date.now() : undefined,
+      bar: 'bar-b',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/page-c', (req, res) => {
+  inertia.render(req, res, {
+    component: 'OnceProps/PageC',
+  })
+})
+
+app.get('/once-props/page-d', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageD',
+    props: {
+      foo: shouldResolveProp ? 'foo-d-' + Date.now() : undefined,
+      bar: 'bar-d',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/page-e', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/PageE',
+    props: {
+      foo: shouldResolveProp ? 'foo-e-' + Date.now() : undefined,
+      bar: 'bar-e',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/partial-reload/:page', (req, res) => {
+  const page = req.params.page
+  const fooData = getOncePropsData(req, 'foo')
+  const barData = getOncePropsData(req, 'bar')
+
+  const isPartialReload = fooData.partialData.length > 0
+  const onceProps = {}
+
+  if (!isPartialReload || fooData.isPartialRequest) {
+    onceProps.foo = { prop: 'foo', expiresAt: null }
+  }
+
+  if (!isPartialReload || barData.isPartialRequest) {
+    onceProps.bar = { prop: 'bar', expiresAt: null }
+  }
+
+  inertia.render(req, res, {
+    component: `OnceProps/PartialReload${page.toUpperCase()}`,
+    props: {
+      foo: fooData.shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+      bar: barData.shouldResolveProp ? `bar-${page}-` + Date.now() : undefined,
+    },
+    onceProps,
+  })
+})
+
+app.get('/once-props/deferred/:page', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+
+  if (isPartialRequest) {
+    return setTimeout(() => {
+      inertia.render(req, res, {
+        component: `OnceProps/DeferredPage${page.toUpperCase()}`,
+        props: {
+          foo: { text: `foo-${page}-` + Date.now() },
+          bar: `bar-${page}`,
+        },
+        onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      })
+    }, 250)
+  }
+
+  inertia.render(req, res, {
+    component: `OnceProps/DeferredPage${page.toUpperCase()}`,
+    props: {
+      bar: `bar-${page}`,
+    },
+    deferredProps: hasPropAlready ? {} : { default: ['foo'] },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/slow-deferred/:page', (req, res) => {
+  const fooData = getOncePropsData(req, 'foo')
+  const barData = getOncePropsData(req, 'bar')
+  const page = req.params.page
+
+  // foo is deferred (slow), bar is not
+  if (fooData.isPartialRequest) {
+    return setTimeout(() => {
+      inertia.render(req, res, {
+        component: `OnceProps/SlowDeferredPage${page.toUpperCase()}`,
+        props: {
+          foo: `foo-${page}-` + Date.now(),
+          bar: barData.shouldResolveProp ? `bar-${page}-` + Date.now() : undefined,
+        },
+        onceProps: {
+          foo: { prop: 'foo', expiresAt: null },
+          bar: { prop: 'bar', expiresAt: null },
+        },
+      })
+    }, 1000)
+  }
+
+  inertia.render(req, res, {
+    component: `OnceProps/SlowDeferredPage${page.toUpperCase()}`,
+    props: {
+      bar: barData.shouldResolveProp ? `bar-${page}-` + Date.now() : undefined,
+    },
+    deferredProps: fooData.hasPropAlready ? {} : { default: ['foo'] },
+    onceProps: {
+      foo: { prop: 'foo', expiresAt: null },
+      bar: { prop: 'bar', expiresAt: null },
+    },
+  })
+})
+
+app.get('/once-props/ttl/:page', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+  const page = req.params.page
+  const expiresAt = Date.now() + 2000
+
+  inertia.render(req, res, {
+    component: `OnceProps/TtlPage${page.toUpperCase()}`,
+    props: {
+      foo: shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt } },
+  })
+})
+
+app.get('/once-props/optional/:page', (req, res) => {
+  const { isPartialRequest, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+
+  inertia.render(req, res, {
+    component: `OnceProps/OptionalPage${page.toUpperCase()}`,
+    props: {
+      foo: isPartialRequest ? `foo-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: isPartialRequest || hasPropAlready ? { foo: { prop: 'foo', expiresAt: null } } : {},
+  })
+})
+
+app.get('/once-props/merge/:page', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req, 'items')
+  const page = req.params.page
+
+  inertia.render(req, res, {
+    component: `OnceProps/MergePage${page.toUpperCase()}`,
+    props: {
+      items: shouldResolveProp ? new Array(3).fill(page) : undefined,
+      bar: `bar-${page}`,
+    },
+    mergeProps: ['items'],
+    onceProps: { items: { prop: 'items', expiresAt: null } },
+  })
+})
+
+app.get('/once-props/custom-key/:page', (req, res) => {
+  const page = req.params.page
+  const propName = page === 'a' ? 'userPermissions' : 'permissions'
+  const { shouldResolveProp } = getOncePropsData(req, 'user-permissions')
+
+  inertia.render(req, res, {
+    component: `OnceProps/CustomKeyPage${page.toUpperCase()}`,
+    props: {
+      [propName]: shouldResolveProp ? `perms-${page}-` + Date.now() : undefined,
+      bar: `bar-${page}`,
+    },
+    onceProps: { 'user-permissions': { prop: propName, expiresAt: null } },
+  })
+})
 
 app.all('*page', (req, res) => inertia.render(req, res))
 

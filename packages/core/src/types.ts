@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -171,13 +172,20 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   version: string | null
   clearHistory: boolean
   encryptHistory: boolean
-  deferredProps?: Record<string, VisitOptions['only']>
+  deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   mergeProps?: string[]
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
   flash?: PageFlashData
+  onceProps?: Record<
+    string,
+    {
+      prop: keyof PageProps
+      expiresAt?: number | null
+    }
+  >
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -579,6 +587,7 @@ export type PrefetchCancellationToken = {
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
+  expiresAt: number
   singleUse: boolean
   inFlight: false
   tags: string[]
@@ -607,9 +616,26 @@ export type ProgressSettings = {
 
 export type UrlMethodPair = { url: string; method: Method }
 
+export type UseFormTransformCallback<TForm> = (data: TForm) => object
+export type UseFormWithPrecognitionArguments =
+  | [Method | (() => Method), string | (() => string)]
+  | [UrlMethodPair | (() => UrlMethodPair)]
+
+type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormPrecognitionArguments<TForm> =
+  | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
+  | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
+export type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
+
+export type UseFormSubmitOptions = Omit<VisitOptions, 'data'>
+export type UseFormSubmitArguments =
+  | [Method, string, UseFormSubmitOptions?]
+  | [UrlMethodPair, UseFormSubmitOptions?]
+  | [UseFormSubmitOptions?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
 export type FormComponentProps = Partial<
@@ -625,6 +651,9 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  validateFiles?: boolean
+  validationTimeout?: number
+  withAllErrors?: boolean
 }
 
 export type FormComponentMethods = {
@@ -637,6 +666,12 @@ export type FormComponentMethods = {
   defaults: () => void
   getData: () => Record<string, FormDataConvertible>
   getFormData: () => FormData
+  valid: (field: string) => boolean
+  invalid: (field: string) => boolean
+  validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig): void
+  touch: (...fields: string[]) => void
+  touched(field?: string): boolean
+  validator: () => Validator
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
@@ -649,6 +684,7 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validating: boolean
 }
 
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState

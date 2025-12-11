@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { requests } from './support'
+import { pageLoads, requests } from './support'
 
 test('it will wait to fire the reload until element is visible', async ({ page }) => {
   await page.goto('/when-visible')
@@ -153,4 +153,59 @@ test('it handles array props correctly with router.reload()', async ({ page }) =
   await expect(page.getByText('Loading array data...')).not.toBeVisible()
   await expect(page.getByText('First lazy data loaded!')).toBeVisible()
   await expect(page.getByText('Second lazy data loaded!')).toBeVisible()
+})
+
+test('it shows loaded content immediately when data exists from history (back button)', async ({ page }) => {
+  await page.goto('/when-visible-back-button')
+  pageLoads.watch(page)
+  requests.listen(page)
+
+  await expect(page.getByText('This is lazy loaded data!')).not.toBeVisible()
+
+  await page.evaluate(() => (window as any).scrollTo(0, 2000))
+  await expect(page.getByText('Loading lazy data...')).toBeVisible()
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Loading lazy data...')).not.toBeVisible()
+  await expect(page.getByText('This is lazy loaded data!', { exact: true })).toBeVisible()
+
+  // Navigate away and back
+  await page.evaluate(() => (window as any).scrollTo(0, 0))
+  await page.getByRole('link', { name: 'Navigate Away' }).click()
+  await page.waitForURL('/links/method')
+  await page.goBack()
+  await page.waitForURL('/when-visible-back-button')
+
+  // Data exists from history, should show immediately without making a request
+  requests.listen(page)
+  await expect(page.getByText('This is lazy loaded data!', { exact: true })).toBeVisible()
+  await expect(page.getByText('Loading lazy data...')).not.toBeVisible()
+  expect(requests.requests).toHaveLength(0)
+})
+
+test('it re-triggers when always prop is set after back button navigation', async ({ page }) => {
+  await page.goto('/when-visible-back-button')
+  pageLoads.watch(page)
+
+  // Scroll to the always component and load data
+  await page.evaluate(() => (window as any).scrollTo(0, 4000))
+  await expect(page.getByText('Loading always data...')).toBeVisible()
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Always: This is lazy loaded data!')).toBeVisible()
+
+  // Navigate away and back
+  await page.evaluate(() => (window as any).scrollTo(0, 0))
+  await page.getByRole('link', { name: 'Navigate Away' }).click()
+  await page.waitForURL('/links/method')
+  await page.goBack()
+  await page.waitForURL('/when-visible-back-button')
+  await expect(page.getByText('Always: This is lazy loaded data!')).toBeVisible()
+
+  // Scroll to trigger the always component again, should re-fetch
+  await page.evaluate(() => (window as any).scrollTo(0, 4000))
+  const response = await page.waitForResponse(
+    (res) =>
+      res.url().includes('/when-visible-back-button') &&
+      res.request().headers()['x-inertia-partial-data'] !== undefined,
+  )
+  expect(response.status()).toBe(200)
 })
