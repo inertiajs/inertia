@@ -488,6 +488,39 @@ app.post('/precognition/headers', (req, res) => {
   }, 250)
 })
 
+app.post('/precognition/dynamic-array-inputs', upload.any(), (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const items = req.body['items'] || []
+    const errors = {}
+
+    if (Array.isArray(items)) {
+      items.forEach((item, index) => {
+        if (!item.name || item.name.length < 3) {
+          errors[`items.${index}.name`] = 'The name must be at least 3 characters.'
+        }
+      })
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
 const methods = ['get', 'post', 'put', 'patch', 'delete']
 const renderDump = (req, res) =>
   inertia.render(req, res, {
