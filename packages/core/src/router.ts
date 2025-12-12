@@ -24,6 +24,7 @@ import {
   Method,
   Page,
   FlashData,
+  PageFlashData,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -396,12 +397,12 @@ export class Router {
     this.clientVisit(params)
   }
 
-  public flash<TFlash extends FlashData = Page['flash']>(
-    keyOrData: string | ((flash: TFlash) => FlashData) | FlashData,
+  public flash(
+    keyOrData: string | ((flash: FlashData) => PageFlashData) | PageFlashData,
     value?: unknown,
   ): void {
-    const current = currentPage.get().flash as TFlash
-    let flash: FlashData
+    const current = currentPage.get().flash
+    let flash: PageFlashData
 
     if (typeof keyOrData === 'function') {
       flash = keyOrData(current)
@@ -420,15 +421,15 @@ export class Router {
     }
   }
 
-  protected clientVisit<TProps = Page['props'], TFlash extends FlashData = Page['flash']>(
-    params: ClientSideVisitOptions<TProps, TFlash>,
+  protected clientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
     this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
   }
 
-  protected performClientVisit<TProps = Page['props'], TFlash extends FlashData = Page['flash']>(
-    params: ClientSideVisitOptions<TProps, TFlash>,
+  protected performClientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): Promise<void> {
     const current = currentPage.get()
@@ -436,7 +437,7 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const flash = typeof params.flash === 'function' ? params.flash(current.flash as TFlash) : params.flash
+    const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
 
     const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 

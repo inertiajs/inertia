@@ -200,11 +200,11 @@ export type ScrollRegion = {
   left: number
 }
 
-export interface ClientSideVisitOptions<TProps = Page['props'], TFlash extends FlashData = Page['flash']> {
+export interface ClientSideVisitOptions<TProps = Page['props']> {
   component?: Page['component']
   url?: Page['url']
   props?: ((props: TProps) => PageProps) | PageProps
-  flash?: ((flash: TFlash) => FlashData) | FlashData
+  flash?: ((flash: FlashData) => PageFlashData) | PageFlashData
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
@@ -212,7 +212,7 @@ export interface ClientSideVisitOptions<TProps = Page['props'], TFlash extends F
   errorBag?: string | null
   viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
-  onFinish?: (visit: ClientSideVisitOptions<TProps, TFlash>) => void
+  onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onFlash?: (flash: FlashData) => void
   onSuccess?: (page: Page) => void
 }
