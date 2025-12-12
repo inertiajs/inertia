@@ -62,7 +62,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
     return {
       body: useScriptElementForInitialPage
-        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage)}</script><div data-server-rendered="true" id="${id}">${html}</div>`
+        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${html}</div>`
         : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
