@@ -68,7 +68,7 @@ const App: InertiaApp = defineComponent({
   },
   setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
-    page.value = initialPage
+    page.value = { ...initialPage, flash: initialPage.flash ?? {} }
     key.value = undefined
 
     const isServer = typeof window === 'undefined'

@@ -28,8 +28,7 @@ export type DefaultInertiaConfig = {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
  *     flashDataType: {
- *       success?: string
- *       error?: string
+ *       toast?: { type: 'success' | 'error', message: string }
  *     }
  *     sharedPageProps: {
  *       auth: { user: User | null }

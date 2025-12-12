@@ -458,16 +458,16 @@ export class Router {
         viewTransition,
       })
       .then(() => {
+        const currentFlash = currentPage.get().flash
+
+        if (Object.keys(currentFlash).length > 0) {
+          fireFlashEvent(currentFlash)
+          onFlash?.(currentFlash)
+        }
+
         const errors = currentPage.get().props.errors || {}
 
         if (Object.keys(errors).length === 0) {
-          const currentFlash = currentPage.get().flash
-
-          if (Object.keys(currentFlash).length > 0) {
-            fireFlashEvent(currentFlash)
-            onFlash?.(currentFlash)
-          }
-
           onSuccess?.(currentPage.get())
           return
         }
