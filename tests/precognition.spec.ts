@@ -678,4 +678,28 @@ test.describe('Form Helper', () => {
       await expect(page.locator('#touched-company')).toHaveText('Company touched: yes')
     })
   })
+
+  test('validates dynamic array inputs after first validation', async ({ page }) => {
+    await page.goto('/form-helper/precognition/dynamic-array-inputs')
+
+    // Add two items
+    await page.click('#add-item')
+    await page.click('#add-item')
+
+    // Validate first item
+    await page.fill('input[name="items.0.name"]', 'ab')
+    await page.locator('input[name="items.0.name"]').blur()
+
+    await expect(page.getByText('Validating...')).toBeVisible()
+    await expect(page.getByText('Validating...')).not.toBeVisible()
+    await expect(page.locator('#items\\.0\\.name-error')).toBeVisible()
+
+    // Validate second item - this should also trigger validation
+    await page.fill('input[name="items.1.name"]', 'x')
+    await page.locator('input[name="items.1.name"]').blur()
+
+    await expect(page.getByText('Validating...')).toBeVisible()
+    await expect(page.getByText('Validating...')).not.toBeVisible()
+    await expect(page.locator('#items\\.1\\.name-error')).toBeVisible()
+  })
 })
