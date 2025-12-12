@@ -21,13 +21,50 @@ return [
 
     'ssr' => [
 
-        'enabled' => true,
+        'enabled' => (bool) env('INERTIA_SSR_ENABLED', true),
 
-        'url' => 'http://127.0.0.1:13714',
+        'url' => env('INERTIA_SSR_URL', 'http://127.0.0.1:13714'),
+
+        'ensure_bundle_exists' => (bool) env('INERTIA_SSR_ENSURE_BUNDLE_EXISTS', true),
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pages
+    |--------------------------------------------------------------------------
+    |
+    | Set `ensure_pages_exist` to true if you want to enforce that Inertia page
+    | components exist on disk when rendering a page. This is useful for
+    | catching missing or misnamed components.
+    |
+    | The `page_paths` and `page_extensions` options define where to look
+    | for page components and which file extensions to consider.
+    |
+    */
+
+    'ensure_pages_exist' => false,
+
+    'page_paths' => [
+
+        resource_path('js/Pages'),
+
+    ],
+
+    'page_extensions' => [
+
+        'js',
+        'jsx',
+        'svelte',
+        'ts',
+        'tsx',
+        'vue',
+
+    ],
+
+    'use_script_element_for_initial_page' => (bool) env('INERTIA_USE_SCRIPT_ELEMENT_FOR_INITIAL_PAGE', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -38,6 +75,10 @@ return [
     | filesystem. For instance, when using `assertInertia`, the assertion
     | attempts to locate the component as a file relative to any of the
     | paths AND with any of the extensions specified here.
+    |
+    | Note: In a future release, the `page_paths` and `page_extensions`
+    | options below will be removed. The root-level options above
+    | will be used for both application and testing purposes.
     |
     */
 
@@ -66,7 +107,7 @@ return [
 
     'history' => [
 
-        'encrypt' => true,
+        'encrypt' => (bool) env('INERTIA_ENCRYPT_HISTORY', true),
 
     ],
 
