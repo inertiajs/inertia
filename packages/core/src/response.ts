@@ -95,6 +95,10 @@ export class Response {
     this.requestParams.merge(params)
   }
 
+  public getPageResponse(): Page {
+    return (this.response.data = this.getDataFromResponse(this.response.data))
+  }
+
   protected async handleNonInertiaResponse() {
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
@@ -158,13 +162,14 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse = this.getDataFromResponse(this.response.data)
+    const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
 
     this.mergeProps(pageResponse)
+    currentPage.mergeOncePropsIntoResponse(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -326,6 +331,14 @@ export class Response {
       pageResponse.scrollProps = {
         ...(currentPage.get().scrollProps || {}),
         ...(pageResponse.scrollProps || {}),
+      }
+    }
+
+    // Preserve the existing onceProps
+    if (currentPage.hasOnceProps()) {
+      pageResponse.onceProps = {
+        ...(currentPage.get().onceProps || {}),
+        ...(pageResponse.onceProps || {}),
       }
     }
   }

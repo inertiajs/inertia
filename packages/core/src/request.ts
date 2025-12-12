@@ -140,8 +140,25 @@ export class Request {
       'X-Inertia': true,
     }
 
-    if (currentPage.get().version) {
-      headers['X-Inertia-Version'] = currentPage.get().version
+    const page = currentPage.get()
+
+    if (page.version) {
+      headers['X-Inertia-Version'] = page.version
+    }
+
+    const onceProps = Object.entries(page.onceProps || {})
+      .filter(([, onceProp]) => {
+        if (page.props[onceProp.prop] === undefined) {
+          // The prop could deferred and not be loaded yet
+          return false
+        }
+
+        return !onceProp.expiresAt || onceProp.expiresAt > Date.now()
+      })
+      .map(([key]) => key)
+
+    if (onceProps.length > 0) {
+      headers['X-Inertia-Except-Once-Props'] = onceProps.join(',')
     }
 
     return headers

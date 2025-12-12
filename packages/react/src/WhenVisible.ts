@@ -1,5 +1,5 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { createElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { createElement, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import usePage from './usePage'
 
 interface WhenVisibleProps {
@@ -17,26 +17,19 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   as = as ?? 'div'
   fallback = fallback ?? null
 
-  const [loaded, setLoaded] = useState(false)
+  const pageProps = usePage().props
+  const keys = useMemo(() => (data ? (Array.isArray(data) ? data : [data]) : []), [data])
+
+  const [loaded, setLoaded] = useState(() => keys.length > 0 && keys.every((key) => pageProps[key] !== undefined))
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
   const observer = useRef<IntersectionObserver | null>(null)
 
-  const page = usePage()
-
   useEffect(() => {
-    if (Array.isArray(data)) {
-      // For arrays, reset loaded if any prop becomes undefined
-      if (data.some((key) => page.props[key] === undefined)) {
-        setLoaded(false)
-      }
-    } else if (data) {
-      // For single prop, reset loaded if prop becomes undefined
-      if (page.props[data] === undefined) {
-        setLoaded(false)
-      }
+    if (keys.length > 0) {
+      setLoaded(keys.every((key) => pageProps[key] !== undefined))
     }
-  }, [data, ...(Array.isArray(data) ? data.map((key) => page.props[key]) : [page.props[data!]])])
+  }, [pageProps, keys])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
     if (data) {
@@ -103,12 +96,16 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
       return
     }
 
+    if (loaded && !always) {
+      return
+    }
+
     registerObserver()
 
     return () => {
       observer.current?.disconnect()
     }
-  }, [loaded, ref, getReloadParams, buffer])
+  }, [always, loaded, ref, getReloadParams, buffer])
 
   const resolveChildren = () => (typeof children === 'function' ? children() : children)
   const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)

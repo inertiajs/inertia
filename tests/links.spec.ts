@@ -492,6 +492,12 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+    await expect(page.getByRole('button', { exact: true, name: 'Update scroll positions' })).toBeVisible()
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
+
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
@@ -525,6 +531,11 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
+
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
@@ -541,7 +552,12 @@ test.describe('preserve scroll', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')
     await expect(page.getByText('Foo is now default')).toBeVisible()
-    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click() //
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
+
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
@@ -637,11 +653,14 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll')
     await expect(page.getByText('Foo is now default')).toBeVisible()
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
+
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
-
-    // Wait for scroll restoration to complete - use longer timeout for flaky CI
-    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
 
   test('restores the document scroll position when pressing the back button with history encryption enabled', async ({
@@ -690,6 +709,11 @@ test.describe('enabled', () => {
     await page.goBack()
 
     await expect(page).toHaveURL('/links/preserve-scroll')
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
+
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
@@ -857,6 +881,18 @@ test.describe('scroll', () => {
 
     const expectedMessages = Array.from({ length: tries }, () => ['ScrollY 100', 'Render', 'ScrollY 0']).flat()
     await expect(consoleMessages.messages).toEqual(expectedMessages)
+  })
+
+  test('preserves scroll position within a scroll region while keeping scrolling when navigating', async ({ page }) => {
+    await page.goto('/scroll-region-preserve-url/1')
+    await expect(page.getByText('Page: 1')).toBeVisible()
+
+    await page.click('#scroll-and-navigate')
+    await expect(page.getByText('Page: 2')).toBeVisible()
+
+    // Verify scroll position was preserved (should be +100px, not 0)
+    const finalScroll = await page.locator('#scroll-container').evaluate((el) => el.scrollTop)
+    expect(finalScroll).toBeGreaterThan(100)
   })
 })
 

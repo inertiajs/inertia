@@ -16,5 +16,10 @@ createServer((page) =>
         render: () => h(App, props),
       }).use(plugin)
     },
+    defaults: {
+      future: {
+        useScriptElementForInitialPage: page.component === 'SSR/PageWithScriptElement',
+      },
+    },
   }),
 )

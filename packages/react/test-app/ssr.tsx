@@ -11,5 +11,10 @@ createServer((page) =>
       return pages[`./Pages/${name}.tsx`]
     },
     setup: ({ App, props }) => <App {...props} />,
+    defaults: {
+      future: {
+        useScriptElementForInitialPage: page.component === 'SSR/PageWithScriptElement',
+      },
+    },
   }),
 )

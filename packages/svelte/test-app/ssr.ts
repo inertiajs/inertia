@@ -12,5 +12,10 @@ createServer((page) =>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (App as any).render(props)
     },
+    defaults: {
+      future: {
+        useScriptElementForInitialPage: page.component === 'SSR/PageWithScriptElement',
+      },
+    },
   }),
 )
