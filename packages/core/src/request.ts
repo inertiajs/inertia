@@ -6,6 +6,8 @@ import { Response } from './response'
 import { ActiveVisit, Page } from './types'
 import { urlWithoutHash } from './url'
 
+export { axios }
+
 export class Request {
   protected response!: Response
   protected cancelToken!: AbortController
