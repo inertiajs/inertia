@@ -13,7 +13,12 @@ function addItem() {
   <div>
     <button id="add-item" @click="addItem">Add Item</button>
 
-    <Form action="/precognition/dynamic-array-inputs" method="post" :validation-timeout="100" #default="{ invalid, errors, validate, validating }">
+    <Form
+      action="/precognition/dynamic-array-inputs"
+      method="post"
+      :validation-timeout="100"
+      #default="{ invalid, errors, validate, validating }"
+    >
       <div v-for="(item, idx) in items" :key="idx">
         <input v-model="item.name" :name="`items.${idx}.name`" @blur="validate(`items.${idx}.name`)" />
         <p v-if="invalid(`items.${idx}.name`)" :id="`items.${idx}.name-error`">{{ errors[`items.${idx}.name`] }}</p>

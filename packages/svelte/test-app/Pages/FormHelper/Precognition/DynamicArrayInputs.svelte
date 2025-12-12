@@ -18,7 +18,9 @@
   {#each $form.items as item, idx}
     <div>
       <input bind:value={item.name} name={`items.${idx}.name`} on:blur={() => $form.validate(`items.${idx}.name`)} />
-      {#if $form.invalid(`items.${idx}.name`)}<p id={`items.${idx}.name-error`}>{$form.errors[`items.${idx}.name`]}</p>{/if}
+      {#if $form.invalid(`items.${idx}.name`)}<p id={`items.${idx}.name-error`}>
+          {$form.errors[`items.${idx}.name`]}
+        </p>{/if}
       {#if $form.valid(`items.${idx}.name`)}<p>Valid!</p>{/if}
     </div>
   {/each}

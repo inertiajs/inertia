@@ -11,7 +11,15 @@
 <div>
   <button id="add-item" on:click={addItem}>Add Item</button>
 
-  <Form action="/precognition/dynamic-array-inputs" method="post" validationTimeout={100} let:invalid let:errors let:validate let:validating>
+  <Form
+    action="/precognition/dynamic-array-inputs"
+    method="post"
+    validationTimeout={100}
+    let:invalid
+    let:errors
+    let:validate
+    let:validating
+  >
     {#each items as item, idx}
       <div>
         <input bind:value={item.name} name={`items.${idx}.name`} on:blur={() => validate(`items.${idx}.name`)} />

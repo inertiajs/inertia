@@ -18,7 +18,9 @@ function addItem() {
 
     <div v-for="(item, idx) in form.items" :key="idx">
       <input v-model="item.name" :name="`items.${idx}.name`" @blur="form.validate(`items.${idx}.name`)" />
-      <p v-if="form.invalid(`items.${idx}.name`)" :id="`items.${idx}.name-error`">{{ form.errors[`items.${idx}.name`] }}</p>
+      <p v-if="form.invalid(`items.${idx}.name`)" :id="`items.${idx}.name-error`">
+        {{ form.errors[`items.${idx}.name`] }}
+      </p>
       <p v-if="form.valid(`items.${idx}.name`)">Valid!</p>
     </div>
 
