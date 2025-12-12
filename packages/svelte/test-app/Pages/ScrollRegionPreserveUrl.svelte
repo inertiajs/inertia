@@ -4,6 +4,7 @@
   export let page: number
 
   let scrollInterval: ReturnType<typeof setInterval> | null = null
+  let items = Array.from({ length: 50 }, (_, i) => i + 1)
 
   const startScrollingAndNavigate = () => {
     const container = document.getElementById('scroll-container')!
@@ -40,8 +41,8 @@
   <div style="padding: 10px">
     <div class="page-number">Page: {page}</div>
     <button id="scroll-and-navigate" on:click={startScrollingAndNavigate}>Start scrolling and navigate</button>
-    {#each { length: 50 } as _, i}
-      <div style="padding: 20px; border-bottom: 1px solid #eee">Item {i + 1}</div>
+    {#each items as num (num)}
+      <div style="padding: 20px; border-bottom: 1px solid #eee">Item {num}</div>
     {/each}
   </div>
 </div>
