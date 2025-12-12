@@ -15,7 +15,7 @@
 <div>
   <button id="add-item" on:click={addItem}>Add Item</button>
 
-  {#each $form.items as item, idx}
+  {#each $form.items as item, idx (idx)}
     <div>
       <input bind:value={item.name} name={`items.${idx}.name`} on:blur={() => $form.validate(`items.${idx}.name`)} />
       {#if $form.invalid(`items.${idx}.name`)}<p id={`items.${idx}.name-error`}>

@@ -20,7 +20,7 @@
     let:validate
     let:validating
   >
-    {#each items as item, idx}
+    {#each items as item, idx (idx)}
       <div>
         <input bind:value={item.name} name={`items.${idx}.name`} on:blur={() => validate(`items.${idx}.name`)} />
         {#if invalid(`items.${idx}.name`)}<p id={`items.${idx}.name-error`}>{errors[`items.${idx}.name`]}</p>{/if}
