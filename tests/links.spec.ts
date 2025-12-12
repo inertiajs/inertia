@@ -882,6 +882,18 @@ test.describe('scroll', () => {
     const expectedMessages = Array.from({ length: tries }, () => ['ScrollY 100', 'Render', 'ScrollY 0']).flat()
     await expect(consoleMessages.messages).toEqual(expectedMessages)
   })
+
+  test('preserves scroll position within a scroll region while keeping scrolling when navigating', async ({ page }) => {
+    await page.goto('/scroll-region-preserve-url/1')
+    await expect(page.getByText('Page: 1')).toBeVisible()
+
+    await page.click('#scroll-and-navigate')
+    await expect(page.getByText('Page: 2')).toBeVisible()
+
+    // Verify scroll position was preserved (should be +100px, not 0)
+    const finalScroll = await page.locator('#scroll-container').evaluate((el) => el.scrollTop)
+    expect(finalScroll).toBeGreaterThan(100)
+  })
 })
 
 test.describe('partial reloads', () => {

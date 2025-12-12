@@ -3,10 +3,10 @@ import { ScrollRegion } from './types'
 
 export class Scroll {
   public static save(): void {
-    history.saveScrollPositions(this.getScrollPositions())
+    history.saveScrollPositions(this.getScrollRegions())
   }
 
-  public static getScrollPositions(): ScrollRegion[] {
+  public static getScrollRegions(): ScrollRegion[] {
     return Array.from(this.regions()).map((region) => ({
       top: region.scrollTop,
       left: region.scrollLeft,

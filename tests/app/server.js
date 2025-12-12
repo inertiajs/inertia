@@ -186,6 +186,13 @@ app.get('/links/scroll-region-list/user/:id', (req, res) =>
   res.redirect(303, `/links/scroll-region-list?user_id=${req.params.id}`),
 )
 
+app.get('/scroll-region-preserve-url/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollRegionPreserveUrl',
+    props: { page: parseInt(req.params.page) },
+  }),
+)
+
 app.get('/client-side-visit', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Page1',
