@@ -73,7 +73,7 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
     props: {
-      message: 'Hello from script element!',
+      message: 'Hello from script element! Escape </script>.',
     },
   }),
 )
@@ -208,6 +208,13 @@ app.get('/links/scroll-region-list', (req, res) =>
 )
 app.get('/links/scroll-region-list/user/:id', (req, res) =>
   res.redirect(303, `/links/scroll-region-list?user_id=${req.params.id}`),
+)
+
+app.get('/scroll-region-preserve-url/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollRegionPreserveUrl',
+    props: { page: parseInt(req.params.page) },
+  }),
 )
 
 app.get('/client-side-visit', (req, res) =>
@@ -501,6 +508,39 @@ app.post('/precognition/headers', (req, res) => {
       errors.name = 'The name field is required.'
     } else if (name.length < 3) {
       errors.name = 'The name must be at least 3 characters.'
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
+app.post('/precognition/dynamic-array-inputs', upload.any(), (req, res) => {
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const items = req.body['items'] || []
+    const errors = {}
+
+    if (Array.isArray(items)) {
+      items.forEach((item, index) => {
+        if (!item.name || item.name.length < 3) {
+          errors[`items.${index}.name`] = 'The name must be at least 3 characters.'
+        }
+      })
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
     }
 
     res.header('Precognition', 'true')

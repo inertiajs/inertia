@@ -38,14 +38,14 @@ test.describe('SSR', () => {
 
     expect(html).toContain('data-page="app"')
     expect(html).toContain('<script data-page="app" type="application/json">')
-    expect(html).toContain('Hello from script element!')
+    expect(html).toContain('Hello from script element! Escape <\\/script>.')
 
     await page.goto('/ssr/page-with-script-element')
     const scriptContent = await page.locator('script[data-page="app"]').textContent()
     expect(JSON.parse(scriptContent || '')).toMatchObject({
       component: 'SSR/PageWithScriptElement',
       props: {
-        message: 'Hello from script element!',
+        message: 'Hello from script element! Escape </script>.',
       },
     })
   })

@@ -74,7 +74,7 @@ class CurrentPage {
 
       const isServer = typeof window === 'undefined'
       const location = !isServer ? window.location : new URL(page.url)
-      const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
+      const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       // Clear flash data from the page object, we don't want it when navigating back/forward...

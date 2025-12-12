@@ -7,9 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.0...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.1...master)
 
 - Nothing yet
+
+## [v2.3.1](https://github.com/inertiajs/inertia/compare/v2.3.0...v2.3.1) - 2025-12-12
+
+### What's Changed
+
+* Test for Form + Vue Options API by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2750
+* Fix for validating items in dynamic arrays by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2753
+* Escape forward slashes when using useScriptElementForInitialPage by [@kirk-loretz-fsn](https://github.com/kirk-loretz-fsn) in https://github.com/inertiajs/inertia/pull/2751
+* Sync Playground configs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2754
+* Fix race condition when restoring scroll regions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2755
+
+### New Contributors
+
+* [@kirk-loretz-fsn](https://github.com/kirk-loretz-fsn) made their first contribution in https://github.com/inertiajs/inertia/pull/2751
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.0...v2.3.1
 
 ## [v2.3.0](https://github.com/inertiajs/inertia/compare/v2.2.21...v2.3.0) - 2025-12-11
 

@@ -118,7 +118,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         h('script', {
           'data-page': id,
           type: 'application/json',
-          innerHTML: JSON.stringify(initialPage),
+          innerHTML: JSON.stringify(initialPage).replace(/\//g, '\\/'),
         }),
         h('div', {
           id,

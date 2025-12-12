@@ -151,7 +151,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       let withAllErrors = false
       const validator = createValidator((client) => {
         const { method, url } = precognitionEndpoint!()
-        const transformedData = transform(this.data()) as Record<string, unknown>
+        const transformedData = cloneDeep(transform(this.data())) as Record<string, unknown>
 
         return client[method](url, transformedData)
       }, cloneDeep(defaults))
