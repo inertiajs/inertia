@@ -71,7 +71,7 @@ class CurrentPage {
 
       const isServer = typeof window === 'undefined'
       const location = !isServer ? window.location : new URL(page.url)
-      const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
+      const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollPositions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       return new Promise((resolve) => {
