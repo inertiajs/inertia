@@ -31,7 +31,9 @@ export default () => {
             onChange={(e) => updateItem(idx, e.target.value)}
             onBlur={() => form.validate(`items.${idx}.name`)}
           />
-          {form.invalid(`items.${idx}.name`) && <p id={`items.${idx}.name-error`}>{form.errors[`items.${idx}.name`]}</p>}
+          {form.invalid(`items.${idx}.name`) && (
+            <p id={`items.${idx}.name-error`}>{form.errors[`items.${idx}.name`]}</p>
+          )}
           {form.valid(`items.${idx}.name`) && <p>Valid!</p>}
         </div>
       ))}
