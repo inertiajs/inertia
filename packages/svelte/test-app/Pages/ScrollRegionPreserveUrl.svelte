@@ -18,26 +18,22 @@
     // After 150ms of scrolling, navigate to the other page
     setTimeout(() => {
       router.visit(`/scroll-region-preserve-url/${nextPage}`, {
-          preserveScroll: true,
-          preserveState: true,
-          preserveUrl: true,
-          onSuccess: () => {
-            // Stop scrolling after navigation
-            if (scrollInterval) {
-              clearInterval(scrollInterval)
-              scrollInterval = null
-            }
-          },
-       })
+        preserveScroll: true,
+        preserveState: true,
+        preserveUrl: true,
+        onSuccess: () => {
+          // Stop scrolling after navigation
+          if (scrollInterval) {
+            clearInterval(scrollInterval)
+            scrollInterval = null
+          }
+        },
+      })
     }, 150)
   }
 </script>
 
-<div
-  scroll-region
-  id="scroll-container"
-  style="height: 300px; overflow-y: auto; border: 1px solid #ccc"
->
+<div scroll-region id="scroll-container" style="height: 300px; overflow-y: auto; border: 1px solid #ccc">
   <div style="padding: 10px">
     <div class="page-number">Page: {page}</div>
     <button id="scroll-and-navigate" on:click={startScrollingAndNavigate}>Start scrolling and navigate</button>
