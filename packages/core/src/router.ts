@@ -17,13 +17,13 @@ import {
   ActiveVisit,
   ClientSideVisitOptions,
   Component,
+  FlashData,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
   Method,
   Page,
-  FlashData,
   PageFlashData,
   PendingVisit,
   PendingVisitOptions,
@@ -397,8 +397,8 @@ export class Router {
     this.clientVisit(params)
   }
 
-  public flash(
-    keyOrData: string | ((flash: FlashData) => PageFlashData) | PageFlashData,
+  public flash<TFlash extends PageFlashData = PageFlashData>(
+    keyOrData: string | ((flash: FlashData) => TFlash) | TFlash,
     value?: unknown,
   ): void {
     const current = currentPage.get().flash

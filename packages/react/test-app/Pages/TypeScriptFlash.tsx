@@ -49,6 +49,12 @@ export default function TypeScriptFlash() {
     }),
   })
 
+  // Scoped flash typing with generic (for page/section-specific flash)
+  router.flash<{ paymentError: string }>({ paymentError: 'Card declined' })
+
+  // @ts-expect-error - 'paymentError' should be string, not number
+  router.flash<{ paymentError: string }>({ paymentError: 123 })
+
   console.log({
     flash,
     toast,
