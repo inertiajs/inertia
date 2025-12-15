@@ -15,30 +15,6 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 const upload = multer()
 
-// Inertia middleware simulation: handle X-Inertia-Redirect-Back header
-app.use((req, res, next) => {
-  const originalRedirect = res.redirect.bind(res)
-  res.redirect = function (status, url) {
-    // Handle both res.redirect(url) and res.redirect(status, url) signatures
-    if (typeof status === 'string') {
-      url = status
-      status = 302
-    }
-
-    // If client requested redirect back and this is an Inertia request, override redirect to go back
-    if (req.headers['x-inertia-redirect-back'] && req.headers['x-inertia']) {
-      const referer = req.headers['referer']
-      if (referer) {
-        const refererUrl = new URL(referer)
-        return originalRedirect(status, refererUrl.pathname + refererUrl.search)
-      }
-    }
-
-    return originalRedirect(status, url)
-  }
-  next()
-})
-
 const adapters = ['react', 'svelte', 'vue3']
 
 if (!adapters.includes(inertia.package)) {
