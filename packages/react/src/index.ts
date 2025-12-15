@@ -13,6 +13,7 @@ export { InertiaLinkProps, default as Link } from './Link'
 export { ReactComponent as ResolvedComponent } from './types'
 export {
   InertiaFormProps,
+  InertiaPrecognitiveFormProps,
   SetDataAction,
   SetDataByKeyValuePair,
   SetDataByMethod,
