@@ -49,7 +49,6 @@
 
   const getTransformedData = (): Record<string, FormDataConvertible> => {
     const [_url, data] = getUrlAndData()
-
     return transform!(data)
   }
 
@@ -58,7 +57,6 @@
       () => _method,
       () => getUrlAndData()[0],
     )
-    .transform(getTransformedData)
     .setValidationTimeout(validationTimeout!)
 
   if (validateFiles) {
@@ -68,6 +66,8 @@
   if (withAllErrors) {
     form.withAllErrors()
   }
+
+  form.transform(getTransformedData)
 
   let formElement: HTMLFormElement
   let isDirty = false
