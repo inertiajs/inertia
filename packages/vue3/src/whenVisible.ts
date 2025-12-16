@@ -1,9 +1,13 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { defineComponent, h, PropType } from 'vue'
+import { defineComponent, h, PropType, SlotsType } from 'vue'
 import { usePage } from './app'
 
 export default defineComponent({
   name: 'WhenVisible',
+  slots: Object as SlotsType<{
+    default: { fetching: boolean }
+    fallback: {}
+  }>,
   props: {
     data: {
       type: [String, Array<String>],
@@ -125,9 +129,9 @@ export default defineComponent({
     }
 
     if (!this.loaded) {
-      els.push(this.$slots.fallback ? this.$slots.fallback() : null)
+      els.push(this.$slots.fallback ? this.$slots.fallback({}) : null)
     } else if (this.$slots.default) {
-      els.push(this.$slots.default())
+      els.push(this.$slots.default({ fetching: this.fetching }))
     }
 
     return els

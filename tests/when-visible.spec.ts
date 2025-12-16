@@ -209,3 +209,30 @@ test('it re-triggers when always prop is set after back button navigation', asyn
   )
   expect(response.status()).toBe(200)
 })
+
+test('it exposes fetching state to the default slot', async ({ page }) => {
+  await page.goto('/when-visible-fetching')
+
+  await page.evaluate(() => (window as any).scrollTo(0, 5000))
+  await expect(page.getByText('Loading lazy data...')).toBeVisible()
+  await expect(page.getByText('Lazy data loaded!')).not.toBeVisible()
+
+  await page.waitForResponse(page.url())
+  await page.evaluate(() => (window as any).scrollTo(0, 0))
+  await page.waitForTimeout(100)
+
+  await expect(page.getByText('Loading lazy data...')).not.toBeVisible()
+  await expect(page.getByText('Lazy data loaded!')).toBeVisible()
+  await expect(page.getByText('Fetching in background...')).not.toBeVisible()
+
+  // Scroll back to trigger re-fetch, content stays visible while fetching
+  await page.evaluate(() => (window as any).scrollTo(0, 5000))
+  await expect(page.getByText('Lazy data loaded!')).toBeVisible()
+  await expect(page.getByText('Fetching in background...')).toBeVisible()
+
+  await page.waitForResponse(page.url())
+  await page.evaluate(() => (window as any).scrollTo(0, 0))
+  await page.waitForTimeout(100)
+  await expect(page.getByText('Lazy data loaded!')).toBeVisible()
+  await expect(page.getByText('Fetching in background...')).not.toBeVisible()
+})
