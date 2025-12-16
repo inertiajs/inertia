@@ -1,8 +1,22 @@
 import test, { expect } from '@playwright/test'
 import { config } from '../../packages/core/src/config'
-import { mergeDataIntoQueryString, transformUrlAndData } from '../../packages/core/src/url'
+import { mergeDataIntoQueryString, transformUrlAndData, urlHasHost } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
+
+  test.describe('urlHasHost', () => {
+    test('returns true for absolute URLs', () => {
+      expect(urlHasHost('https://example.com')).toBe(true)
+    })
+
+    test('returns true for protocol-relative URLs', () => {
+      expect(urlHasHost('//example.com')).toBe(true)
+    })
+
+    test('returns false for relative URLs', () => {
+      expect(urlHasHost('/search')).toBe(false)
+    })
+  })
 
   test.describe('mergeDataIntoQueryString', () => {
     test.describe('GET request', () => {

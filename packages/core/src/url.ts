@@ -103,7 +103,7 @@ export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
   return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
 }
 
-export function urlHasHost(url: string): boolean {
+export function urlHasHost(href: string): boolean {
   try {
     const url = new URL(href, 'http://dummy-inertia-host');
     return !!url.host && url.host !== 'dummy-inertia-host';
