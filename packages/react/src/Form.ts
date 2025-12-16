@@ -246,7 +246,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         defaults,
         getData,
         getFormData,
-        
+
         // Precognition
         validator: () => form.validator(),
         validating: form.validating,
