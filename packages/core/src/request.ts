@@ -66,8 +66,12 @@ export class Request {
 
         return Promise.reject(error)
       })
-      .catch((error) => {
+      .catch(async (error) => {
         if (axios.isCancel(error)) {
+          return
+        }
+
+        if ((await this.requestParams.all().onException(error)) === false) {
           return
         }
 

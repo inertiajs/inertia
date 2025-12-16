@@ -472,17 +472,62 @@ test.describe('Events', () => {
       await listenForGlobalMessages(page, 'inertia:exception', true)
       await page.getByRole('link', { exact: true, name: 'Exception Event' }).click()
 
-      const messages = await waitForMessages(page, 4)
+      const messages = await waitForMessages(page, 6)
       const globalMessages = await waitForGlobalMessages(page, 'inertia:exception', 1)
 
       await assertIsGlobalEvent(globalMessages[0], 'inertia:exception', true)
       await assertExceptionObject(JSON.parse(globalMessages[0].detail))
 
+      // Local Event Callback
+      await expect(messages[0]).toBe('onException')
+
       // Global Inertia Event Listener
-      await expect(messages[0]).toBe('Inertia.on(exception)')
+      await expect(messages[2]).toBe('Inertia.on(exception)')
 
       // Global Native Event Listener
-      await expect(messages[2]).toBe('addEventListener(inertia:exception)')
+      await expect(messages[4]).toBe('addEventListener(inertia:exception)')
+    })
+
+    test.describe('Local Event Callbacks', () => {
+      test('can prevent the global event and rejection by returning false', async ({ page }) => {
+        await listenForGlobalMessages(page, 'inertia:exception', true)
+        await page.getByRole('link', { exact: true, name: 'Exception Event (Prevent)' }).click()
+
+        const messages = await waitForMessages(page, 3)
+        const globalMessages = await waitForGlobalMessages(page, 'inertia:exception', 0)
+
+        await expect(messages[0]).toBe('onException')
+        await expect(messages[2]).toBe('onFinish')
+        await expect(globalMessages.length).toBe(0)
+      })
+    })
+
+    test.describe('Global Inertia.on', () => {
+      test('can prevent the rejection by returning false', async ({ page }) => {
+        await page
+          .getByRole('link', { exact: true, name: 'Exception Event - Prevent globally using Inertia Event Listener' })
+          .click()
+
+        const messages = await waitForMessages(page, 5)
+        await expect(messages[0]).toBe('onException')
+        await expect(messages[2]).toBe('addEventListener(inertia:exception)')
+        await expect(messages[3]).toBe('Inertia.on(exception)')
+        await expect(messages[4]).toBe('onFinish')
+      })
+    })
+
+    test.describe('Global addEventListener', () => {
+      test('can prevent the rejection by using preventDefault', async ({ page }) => {
+        await page
+          .getByRole('link', { exact: true, name: 'Exception Event - Prevent globally using Native Event Listeners' })
+          .click()
+
+        const messages = await waitForMessages(page, 5)
+        await expect(messages[0]).toBe('onException')
+        await expect(messages[2]).toBe('Inertia.on(exception)')
+        await expect(messages[3]).toBe('addEventListener(inertia:exception)')
+        await expect(messages[4]).toBe('onFinish')
+      })
     })
   })
 

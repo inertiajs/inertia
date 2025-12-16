@@ -354,8 +354,68 @@
       '/disconnect',
       {},
       {
-        // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onException method
-        onException: () => internalAlert('This listener should not have been called.'),
+        onException: (error) => {
+          internalAlert('onException')
+          internalAlert(error)
+        },
+      },
+    )
+  }
+
+  const exceptionVisitPreventLocal = () => {
+    router.on('exception', () => internalAlert('This listener should not have been called.'))
+    document.addEventListener('inertia:exception', () => internalAlert('This listener should not have been called.'))
+
+    router.post(
+      '/disconnect',
+      {},
+      {
+        onException: (error) => {
+          internalAlert('onException')
+          internalAlert(error)
+          return false
+        },
+        onFinish: () => internalAlert('onFinish'),
+      },
+    )
+  }
+
+  const exceptionVisitPreventGlobalInertia = () => {
+    document.addEventListener('inertia:exception', () => internalAlert('addEventListener(inertia:exception)'))
+    router.on('exception', () => {
+      internalAlert('Inertia.on(exception)')
+      return false
+    })
+
+    router.post(
+      '/disconnect',
+      {},
+      {
+        onException: (error) => {
+          internalAlert('onException')
+          internalAlert(error)
+        },
+        onFinish: () => internalAlert('onFinish'),
+      },
+    )
+  }
+
+  const exceptionVisitPreventGlobalNative = () => {
+    router.on('exception', () => internalAlert('Inertia.on(exception)'))
+    document.addEventListener('inertia:exception', (event) => {
+      internalAlert('addEventListener(inertia:exception)')
+      event.preventDefault()
+    })
+
+    router.post(
+      '/disconnect',
+      {},
+      {
+        onException: (error) => {
+          internalAlert('onException')
+          internalAlert(error)
+        },
+        onFinish: () => internalAlert('onFinish'),
       },
     )
   }
@@ -415,7 +475,7 @@
       onError: () => internalAlert('onError'),
       onSuccess: () => internalAlert('onSuccess'),
       onInvalid: () => internalAlert('onInvalid'), // Does not exist.
-      onException: () => internalAlert('onException'), // Does not exist.
+      onException: () => internalAlert('onException'),
       onFinish: () => internalAlert('onFinish'),
       onNavigate: () => internalAlert('onNavigate'), // Does not exist.
     }
@@ -606,6 +666,15 @@
 
   <!-- Events: Exception -->
   <a href={'#'} on:click|preventDefault={exceptionVisit} class="exception">Exception Event</a>
+  <a href={'#'} on:click|preventDefault={exceptionVisitPreventLocal} class="exception-prevent-local"
+    >Exception Event (Prevent)</a
+  >
+  <a href={'#'} on:click|preventDefault={exceptionVisitPreventGlobalInertia} class="exception-prevent-global-inertia"
+    >Exception Event - Prevent globally using Inertia Event Listener</a
+  >
+  <a href={'#'} on:click|preventDefault={exceptionVisitPreventGlobalNative} class="exception-prevent-global-native"
+    >Exception Event - Prevent globally using Native Event Listeners</a
+  >
 
   <!-- Events: Finish -->
   <a href={'#'} on:click|preventDefault={finishVisit} class="finish">Finish Event</a>
