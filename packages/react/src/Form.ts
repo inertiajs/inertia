@@ -87,8 +87,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       )
       .setValidationTimeout(validationTimeout)
 
-    form.transform(getTransformedData)
-
     if (validateFiles) {
       form.validateFiles()
     }
@@ -96,6 +94,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     if (withAllErrors) {
       form.withAllErrors()
     }
+
+    form.transform(getTransformedData)
 
     const formElement = useRef<HTMLFormElement>(undefined)
 
