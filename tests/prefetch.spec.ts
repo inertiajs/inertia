@@ -78,8 +78,9 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 
   await page.getByRole('link', { name: 'On Click' }).hover()
+  const prefetch3 = page.waitForResponse('prefetch/3')
   await page.mouse.down()
-  await page.waitForResponse('prefetch/3')
+  await prefetch3
   await expect(page).toHaveURL('prefetch/4')
   requests.listen(page)
   await page.mouse.up()
@@ -92,8 +93,9 @@ test('can prefetch using link props', async ({ page }) => {
   // If they just do a quick hover, it shouldn't make the request
   await expect(requests.requests.length).toBe(0)
 
+  const prefetch1 = page.waitForResponse('prefetch/1')
   await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
-  await page.waitForResponse('prefetch/1')
+  await prefetch1
   await expect(page).toHaveURL('prefetch/3')
 
   requests.listen(page)
@@ -104,8 +106,9 @@ test('can prefetch using link props', async ({ page }) => {
   // Wait for the cache to timeout on the combo link
   await page.waitForTimeout(1200)
 
+  const prefetch4b = page.waitForResponse('prefetch/4')
   await page.getByRole('link', { name: 'On Hover + Mount' }).hover()
-  await page.waitForResponse('prefetch/4')
+  await prefetch4b
   await expect(page).toHaveURL('prefetch/1')
 
   requests.listen(page)
@@ -127,8 +130,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 
   // Keyboard activation with Enter
   await page.getByRole('link', { name: 'On Enter' }).focus()
+  const prefetch6 = page.waitForResponse('prefetch/6')
   await page.keyboard.down('Enter')
-  await page.waitForResponse('prefetch/6')
+  await prefetch6
   await expect(page).toHaveURL('prefetch/1')
   requests.listen(page)
   await page.keyboard.up('Enter')
@@ -145,8 +149,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 
   // Keyboard activation with Spacebar on button
   await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  const prefetch7 = page.waitForResponse('prefetch/7')
   await page.keyboard.down(' ')
-  await page.waitForResponse('prefetch/7')
+  await prefetch7
   await expect(page).toHaveURL('prefetch/6')
   requests.listen(page)
   await page.keyboard.up(' ')
@@ -156,8 +161,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
   // Keyboard activation with Enter on button
   await page.goto('prefetch/1')
   await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  const prefetch7b = page.waitForResponse('prefetch/7')
   await page.keyboard.down('Enter')
-  await page.waitForResponse('prefetch/7')
+  await prefetch7b
   await expect(page).toHaveURL('prefetch/1')
   requests.listen(page)
   await page.keyboard.up('Enter')
@@ -199,8 +205,9 @@ test('does not navigate or prefetch on secondary button click when using prefetc
 
   // Left-click should work normally (mousedown prefetches, mouseup navigates)
   await link.hover()
+  const prefetch3b = page.waitForResponse('prefetch/3')
   await page.mouse.down()
-  await page.waitForResponse('prefetch/3')
+  await prefetch3b
   await expect(page).toHaveURL('prefetch/1')
   requests.listen(page)
   await page.mouse.up()
@@ -282,8 +289,9 @@ test.describe('UrlMethodPair prefetch support', () => {
   })
 
   test('can use flush with UrlMethodPair', async ({ page }) => {
+    const swrResponse = page.waitForResponse((response) => response.url().includes('prefetch/swr/4'))
     await page.locator('#test-prefetch').click()
-    await page.waitForResponse((response) => response.url().includes('prefetch/swr/4'))
+    await swrResponse
 
     await expect(page.locator('#is-prefetched')).toHaveText('true')
 

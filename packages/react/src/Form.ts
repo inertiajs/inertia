@@ -8,8 +8,10 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
+import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
 import { isEqual } from 'lodash-es'
 import React, {
   createContext,
@@ -68,12 +70,36 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       resetOnSuccess = false,
       setDefaultsOnSuccess = false,
       invalidateCacheTags = [],
+      validateFiles = false,
+      validationTimeout = 1500,
+      withAllErrors = false,
       children,
       ...props
     },
     ref,
   ) => {
+    const getTransformedData = (): Record<string, FormDataConvertible> => {
+      const [_url, data] = getUrlAndData()
+      return transform(data)
+    }
+
     const form = useForm<Record<string, any>>({})
+      .withPrecognition(
+        () => resolvedMethod,
+        () => getUrlAndData()[0],
+      )
+      .setValidationTimeout(validationTimeout)
+
+    if (validateFiles) {
+      form.validateFiles()
+    }
+
+    if (withAllErrors) {
+      form.withAllErrors()
+    }
+
+    form.transform(getTransformedData)
+
     const formElement = useRef<HTMLFormElement>(undefined)
 
     const resolvedMethod = useMemo(() => {
@@ -90,29 +116,62 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
     const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
 
+    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
+        resolvedMethod,
+        isUrlMethodPair(action) ? action.url : action,
+        getData(),
+        queryStringArrayFormat,
+      )
+    }
+
     const updateDirtyState = (event: Event) =>
       deferStateUpdate(() =>
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
       )
 
+    const clearErrors = (...names: string[]) => {
+      form.clearErrors(...names)
+
+      return form
+    }
+
     useEffect(() => {
       defaultData.current = getFormData()
+
+      form.setDefaults(getData())
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
       formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
 
-      return () => formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+      return () => {
+        formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+      }
     }, [])
+
+    useEffect(() => {
+      form.setValidationTimeout(validationTimeout)
+    }, [validationTimeout])
+
+    useEffect(() => {
+      if (validateFiles) {
+        form.validateFiles()
+      } else {
+        form.withoutFileValidation()
+      }
+    }, [validateFiles])
 
     const reset = (...fields: string[]) => {
       if (formElement.current) {
         resetFormFields(formElement.current, defaultData.current, fields)
       }
+
+      form.reset(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      form.clearErrors(...fields)
+      clearErrors(...fields)
       reset(...fields)
     }
 
@@ -129,12 +188,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     }
 
     const submit = () => {
-      const [url, _data] = mergeDataIntoQueryString(
-        resolvedMethod,
-        isUrlMethodPair(action) ? action.url : action,
-        getData(),
-        queryStringArrayFormat,
-      )
+      const [url, _data] = getUrlAndData()
 
       const submitOptions: FormSubmitOptions = {
         headers,
@@ -167,7 +221,6 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         ...options,
       }
 
-      form.transform(() => transform(_data))
       form.submit(resolvedMethod, url, submitOptions)
     }
 
@@ -185,7 +238,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         wasSuccessful: form.wasSuccessful,
         recentlySuccessful: form.recentlySuccessful,
         isDirty,
-        clearErrors: form.clearErrors,
+        clearErrors,
         resetAndClearErrors,
         setError: form.setError,
         reset,
@@ -193,6 +246,16 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         defaults,
         getData,
         getFormData,
+        
+        // Precognition
+        validator: () => form.validator(),
+        validating: form.validating,
+        valid: form.valid,
+        invalid: form.invalid,
+        validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) =>
+          form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers)),
+        touch: form.touch,
+        touched: form.touched,
       }),
       [form, isDirty, submit],
     )

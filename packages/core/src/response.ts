@@ -95,6 +95,10 @@ export class Response {
     this.requestParams.merge(params)
   }
 
+  public getPageResponse(): Page {
+    return (this.response.data = this.getDataFromResponse(this.response.data))
+  }
+
   protected async handleNonInertiaResponse() {
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
@@ -158,13 +162,14 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse = this.getDataFromResponse(this.response.data)
+    const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
 
     this.mergeProps(pageResponse)
+    currentPage.mergeOncePropsIntoResponse(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -312,11 +317,28 @@ export class Response {
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
+    if (this.requestParams.isDeferredPropsRequest()) {
+      const currentErrors = currentPage.get().props.errors
+
+      if (currentErrors && Object.keys(currentErrors).length > 0) {
+        // Preserve existing errors during deferred props requests
+        pageResponse.props.errors = currentErrors
+      }
+    }
+
     // Preserve the existing scrollProps
     if (currentPage.get().scrollProps) {
       pageResponse.scrollProps = {
         ...(currentPage.get().scrollProps || {}),
         ...(pageResponse.scrollProps || {}),
+      }
+    }
+
+    // Preserve the existing onceProps
+    if (currentPage.hasOnceProps()) {
+      pageResponse.onceProps = {
+        ...(currentPage.get().onceProps || {}),
+        ...(pageResponse.onceProps || {}),
       }
     }
   }
