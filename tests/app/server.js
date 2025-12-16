@@ -758,6 +758,24 @@ app.get('/when-visible-back-button', (req, res) => {
   }
 })
 
+app.get('/when-visible-fetching', (req, res) => {
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleFetching',
+        props: {
+          lazyData: { text: 'Lazy data loaded!' },
+        },
+      })
+    }, 500)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisibleFetching',
+      props: {},
+    })
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>

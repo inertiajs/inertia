@@ -2,8 +2,12 @@ import { ReloadOptions, router } from '@inertiajs/core'
 import { createElement, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import usePage from './usePage'
 
+interface WhenVisibleSlotProps {
+  fetching: boolean
+}
+
 interface WhenVisibleProps {
-  children: ReactNode | (() => ReactNode)
+  children: ReactNode | ((props: WhenVisibleSlotProps) => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data?: string | string[]
   params?: ReloadOptions
@@ -21,6 +25,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   const keys = useMemo(() => (data ? (Array.isArray(data) ? data : [data]) : []), [data])
 
   const [loaded, setLoaded] = useState(() => keys.length > 0 && keys.every((key) => pageProps[key] !== undefined))
+  const [isFetching, setIsFetching] = useState(false)
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
   const observer = useRef<IntersectionObserver | null>(null)
@@ -63,6 +68,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
         }
 
         fetching.current = true
+        setIsFetching(true)
 
         const reloadParams = getReloadParams()
 
@@ -70,11 +76,13 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
           ...reloadParams,
           onStart: (e) => {
             fetching.current = true
+            setIsFetching(true)
             reloadParams.onStart?.(e)
           },
           onFinish: (e) => {
             setLoaded(true)
             fetching.current = false
+            setIsFetching(false)
             reloadParams.onFinish?.(e)
 
             if (!always) {
@@ -107,7 +115,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     }
   }, [always, loaded, ref, getReloadParams, buffer])
 
-  const resolveChildren = () => (typeof children === 'function' ? children() : children)
+  const resolveChildren = () => (typeof children === 'function' ? children({ fetching: isFetching }) : children)
   const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)
 
   if (always || !loaded) {
