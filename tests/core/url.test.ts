@@ -3,7 +3,6 @@ import { config } from '../../packages/core/src/config'
 import { mergeDataIntoQueryString, transformUrlAndData, urlHasHost } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
-
   test.describe('urlHasHost', () => {
     test('returns true for absolute URLs', () => {
       expect(urlHasHost('https://example.com')).toBe(true)
