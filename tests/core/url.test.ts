@@ -3,6 +3,7 @@ import { config } from '../../packages/core/src/config'
 import { mergeDataIntoQueryString, transformUrlAndData } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
+
   test.describe('mergeDataIntoQueryString', () => {
     test.describe('GET request', () => {
       test('appends data to a URL without an existing query string', () => {

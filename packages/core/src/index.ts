@@ -17,7 +17,7 @@ export {
   hrefToUrl,
   isUrlMethodPair,
   mergeDataIntoQueryString,
-  urlHasProtocol,
+  urlHasHost,
   urlToString,
   urlWithoutHash,
 } from './url'

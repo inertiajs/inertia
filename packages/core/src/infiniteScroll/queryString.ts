@@ -1,4 +1,4 @@
-import { hrefToUrl, router, urlHasProtocol, urlToString } from '..'
+import { hrefToUrl, router, urlHasHost, urlToString } from '..'
 import debounce from '../debounce'
 import { getElementsInViewportFromCollection } from '../domUtils'
 import { page as currentPage } from './../page'
@@ -37,7 +37,7 @@ export const useInfiniteScrollQueryString = (options: {
             const currentPageUrl = currentPage.get().url
             initialUrl = hrefToUrl(currentPageUrl)
             payloadUrl = hrefToUrl(currentPageUrl)
-            initialUrlWasAbsolute = urlHasProtocol(currentPageUrl)
+            initialUrlWasAbsolute = urlHasHost(currentPageUrl)
           }
 
           const pageName = options.getPageName()
