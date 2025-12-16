@@ -1364,6 +1364,9 @@ app.get('/form-component/dotted-keys', (req, res) =>
 )
 app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
 app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
+app.get('/form-component/submit-button', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitButton' }),
+)
 app.get('/form-component/uppercase-method', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
 )

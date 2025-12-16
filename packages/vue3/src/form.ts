@@ -18,6 +18,7 @@ import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref
 import useForm from './useForm'
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+type FormSubmitter = HTMLElement | null
 
 const noop = () => undefined
 
@@ -190,23 +191,24 @@ const Form = defineComponent({
 
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
-    const getFormData = (): FormData => new FormData(formElement.value)
+    const getFormData = (submitter?: FormSubmitter): FormData => new FormData(formElement.value, submitter)
 
     // Convert the FormData to an object because we can't compare two FormData
     // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
+    const getData = (submitter?: FormSubmitter): Record<string, FormDataConvertible> =>
+      formDataToObject(getFormData(submitter))
 
-    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+    const getUrlAndData = (submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] => {
       return mergeDataIntoQueryString(
         method.value,
         isUrlMethodPair(props.action) ? props.action.url : props.action,
-        getData(),
+        getData(submitter),
         props.queryStringArrayFormat,
       )
     }
 
-    const submit = () => {
+    const submit = (submitter?: FormSubmitter) => {
       const maybeReset = (resetOption: boolean | string[]) => {
         if (!resetOption) {
           return
@@ -247,10 +249,13 @@ const Form = defineComponent({
         ...props.options,
       }
 
-      const [url, data] = getUrlAndData()
+      const [url, data] = getUrlAndData(submitter)
 
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => props.transform(data)).submit(method.value, url, submitOptions)
+
+      // Reset the transformer back so the submitter is not used for future submissions
+      form.transform(getTransformedData)
     }
 
     const reset = (...fields: string[]) => {
@@ -330,7 +335,7 @@ const Form = defineComponent({
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
-            submit()
+            submit(event.submitter)
           },
           inert: props.disableWhileProcessing && form.processing,
         },

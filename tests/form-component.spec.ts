@@ -1559,4 +1559,39 @@ test.describe('Form Component', () => {
       })
     })
   })
+
+  test.describe('Submit Button', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/submit-button')
+    })
+
+    test('includes submit button name and value in form data', async ({ page }) => {
+      await page.click('#save-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        action: 'save',
+      })
+    })
+
+    test('includes different button value when clicking different submit button', async ({ page }) => {
+      await page.click('#draft-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        action: 'draft',
+      })
+    })
+
+    test('does not include action when button has no name', async ({ page }) => {
+      await page.click('#no-name-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+      })
+    })
+  })
 })
