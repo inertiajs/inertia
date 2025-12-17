@@ -19,7 +19,7 @@ class History {
 
   public remember(data: unknown, key: string): void {
     this.replaceState({
-      ...currentPage.get(),
+      ...currentPage.getWithoutFlashData(),
       rememberedState: {
         ...(currentPage.get()?.rememberedState ?? {}),
         [key]: data,

@@ -261,6 +261,7 @@ class PrefetchedRequests {
         'onCancel',
         'onSuccess',
         'onError',
+        'onFlash',
         'onPrefetched',
         'onCancelToken',
         'onPrefetching',

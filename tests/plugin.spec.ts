@@ -10,7 +10,7 @@ test.describe('plugin', () => {
       const initialPage = await page.evaluate(() => (window as any).initialPage)
       const $page = await page.evaluate(() => (window as any)._plugin_global_props.$page)
       await expect(initialPage).not.toBeNull()
-      await expect($page).toEqual(initialPage)
+      await expect($page).toMatchObject(initialPage)
     })
 
     test('misses the helper when not registered', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { eventHandler } from './eventHandler'
-import { fireNavigateEvent } from './events'
+import { fireFlashEvent, fireNavigateEvent } from './events'
 import { history } from './history'
 import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
@@ -100,7 +100,15 @@ export class InitialVisit {
         Scroll.scrollToAnchor()
       }
 
-      fireNavigateEvent(currentPage.get())
+      const page = currentPage.get()
+
+      fireNavigateEvent(page)
+
+      const flash = page.flash
+
+      if (Object.keys(flash).length > 0) {
+        fireFlashEvent(flash)
+      }
     })
   }
 }

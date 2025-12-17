@@ -340,6 +340,8 @@ app.post('/form-helper/events/errors', (req, res) => {
   }, 250)
 })
 
+//
+
 app.post('/precognition/default', upload.any(), (req, res) => {
   if (!req.headers['precognition']) {
     return renderDump(req, res)
@@ -1268,6 +1270,7 @@ app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserv
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
+
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
@@ -1700,6 +1703,60 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
+app.get('/flash/events', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
+app.post('/flash/events/with-data', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/Events',
+    flash: { foo: 'bar' },
+  }),
+)
+app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
+app.get('/flash/client-side-visits', (req, res) => inertia.render(req, res, { component: 'Flash/ClientSideVisits' }))
+app.get('/flash/router-flash', (req, res) => inertia.render(req, res, { component: 'Flash/RouterFlash' }))
+app.get('/flash/initial', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/InitialFlash',
+    flash: { message: 'Hello from server' },
+  }),
+)
+app.get('/flash/with-deferred', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'Flash/WithDeferred',
+      deferredProps: {
+        default: ['data'],
+      },
+      props: {},
+      flash: { message: 'Flash with deferred' },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Flash/WithDeferred',
+        props: {
+          data: req.headers['x-inertia-partial-data']?.includes('data') ? 'Deferred data loaded' : undefined,
+        },
+      }),
+    100,
+  )
+})
+app.get('/flash/partial', (req, res) => {
+  const count = parseInt(req.query.count || '0')
+  const flashType = req.query.flashType || 'same'
+
+  let flash = { message: 'Initial flash' }
+  if (req.headers['x-inertia-partial-data']) {
+    flash = flashType === 'different' ? { message: `Updated flash ${count}` } : { message: 'Initial flash' }
+  }
+
+  inertia.render(req, res, {
+    component: 'Flash/Partial',
+    props: { count },
+    flash,
+  })
+})
 const getOncePropsData = (req, prop = 'foo') => {
   const isInertiaRequest = !!req.headers['x-inertia']
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []

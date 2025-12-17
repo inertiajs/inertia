@@ -49,7 +49,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
-    page: initialPage,
+    page: { ...initialPage, flash: initialPage.flash ?? {} },
     key: null,
   })
 
@@ -66,6 +66,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
       initialPage,
       resolveComponent: resolveComponent!,
       swapComponent: async (args) => swapComponent(args),
+      onFlash: (flash) => {
+        setCurrent((current) => ({
+          ...current,
+          page: { ...current.page, flash },
+        }))
+      },
     })
 
     routerIsInitialized = true
