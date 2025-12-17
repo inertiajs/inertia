@@ -59,6 +59,51 @@ test.describe('url.ts', () => {
         expect(dataIndices).toEqual({})
       })
 
+      test('merges data into URL with existing nested brackets notation arrays', () => {
+        const originalHref = '/search?filters[tags][]=a&filters[tags][]=b'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?filters[tags][]=a&filters[tags][]=b&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?filters[tags][0]=a&filters[tags][1]=b&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with existing nested indices notation arrays', () => {
+        const originalHref = '/search?filters[tags][0]=a&filters[tags][1]=b'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?filters[tags][0]=a&filters[tags][1]=b&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?filters[tags][0]=a&filters[tags][1]=b&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with single item at index 0', () => {
+        const originalHref = '/search?items[0]=first'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?items[0]=first&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?items[0]=first&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
       test('overwrites existing keys in the query string when they also exist in the data', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?q=old', { q: 'new' })
 
