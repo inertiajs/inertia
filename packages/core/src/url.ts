@@ -104,7 +104,7 @@ export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
 }
 
 export function urlHasProtocol(url: string): boolean {
-  return /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  return /^([a-z][a-z0-9+.-]*:)?\/\/[^/]/i.test(url)
 }
 
 export function urlToString(url: URL | string, absolute: boolean): string {
