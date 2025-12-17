@@ -5,7 +5,7 @@ test.describe('Form Component Context', () => {
   test.describe('Basic Context', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      await page.goto('/form-component/context')
+      await page.goto('/form-component/context/default')
     })
 
     test('provides context to child components', async ({ page }) => {
@@ -110,7 +110,7 @@ test.describe('Form Component Context', () => {
   test.describe('Context Methods', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      await page.goto('/form-component/context-methods')
+      await page.goto('/form-component/context/methods')
     })
 
     test('child can access all state properties through context', async ({ page }) => {
@@ -290,7 +290,7 @@ test.describe('Form Component Context', () => {
   test.describe('Multiple Forms', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
-      await page.goto('/form-component/context-multiple')
+      await page.goto('/form-component/context/multiple')
     })
 
     test('each form provides isolated context to its children', async ({ page }) => {

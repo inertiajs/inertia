@@ -5,8 +5,8 @@ const form = useFormContext()
 </script>
 
 <template>
-  <div v-if="form" id="deeply-nested-state">
+  <div v-if="form">
     <span>Deeply Nested: Form is {{ form.isDirty ? 'dirty' : 'clean' }}</span>
   </div>
-  <div v-else id="deeply-nested-no-context">No context</div>
+  <div v-else>No context</div>
 </template>

@@ -24,43 +24,42 @@ export default () => {
   }
 
   if (!form) {
-    return <div id="child-no-context">No form context available</div>
+    return <div>No form context available</div>
   }
 
   return (
     <>
-      <span id="child-is-dirty">{String(form.isDirty)}</span>
-      <span id="child-has-errors">{String(form.hasErrors)}</span>
-      <span id="child-processing">{String(form.processing)}</span>
-      <span id="child-was-successful">{String(form.wasSuccessful)}</span>
-      <span id="child-recently-successful">{String(form.recentlySuccessful)}</span>
-      {form.hasErrors && <pre id="child-errors">{JSON.stringify(form.errors, null, 2)}</pre>}
+      <span>{String(form.isDirty)}</span>
+      <span>{String(form.hasErrors)}</span>
+      <span>{String(form.processing)}</span>
+      <span>{String(form.wasSuccessful)}</span>
+      <span>{String(form.recentlySuccessful)}</span>
+      {form.hasErrors && <pre>{JSON.stringify(form.errors, null, 2)}</pre>}
 
-      <button type="button" id="child-submit" onClick={() => form.submit()}>
+      <button type="button" onClick={() => form.submit()}>
         submit()
       </button>
-      <button type="button" id="child-reset-all" onClick={() => form.reset()}>
+      <button type="button" onClick={() => form.reset()}>
         reset()
       </button>
-      <button type="button" id="child-reset-name" onClick={() => form.reset('name')}>
+      <button type="button" onClick={() => form.reset('name')}>
         reset('name')
       </button>
-      <button type="button" id="child-reset-multiple" onClick={() => form.reset('name', 'email')}>
+      <button type="button" onClick={() => form.reset('name', 'email')}>
         reset('name', 'email')
       </button>
 
-      <button type="button" id="child-clear-all-errors" onClick={() => form.clearErrors()}>
+      <button type="button" onClick={() => form.clearErrors()}>
         clearErrors()
       </button>
-      <button type="button" id="child-clear-name-error" onClick={() => form.clearErrors('name')}>
+      <button type="button" onClick={() => form.clearErrors('name')}>
         clearErrors('name')
       </button>
-      <button type="button" id="child-set-single-error" onClick={() => form.setError('name', 'Name is invalid')}>
+      <button type="button" onClick={() => form.setError('name', 'Name is invalid')}>
         setError('name')
       </button>
       <button
         type="button"
-        id="child-set-multiple-errors"
         onClick={() =>
           form.setError({
             name: 'Name error from child',
@@ -72,30 +71,30 @@ export default () => {
         setError({'{...}'})
       </button>
 
-      <button type="button" id="child-reset-clear-all" onClick={() => form.resetAndClearErrors()}>
+      <button type="button" onClick={() => form.resetAndClearErrors()}>
         resetAndClearErrors()
       </button>
-      <button type="button" id="child-reset-clear-name" onClick={() => form.resetAndClearErrors('name')}>
+      <button type="button" onClick={() => form.resetAndClearErrors('name')}>
         resetAndClearErrors('name')
       </button>
-      <button type="button" id="child-set-defaults" onClick={() => form.defaults()}>
+      <button type="button" onClick={() => form.defaults()}>
         defaults()
       </button>
 
-      <button type="button" id="child-get-data" onClick={testGetData}>
+      <button type="button" onClick={testGetData}>
         getData()
       </button>
-      <button type="button" id="child-get-form-data" onClick={testGetFormData}>
+      <button type="button" onClick={testGetFormData}>
         getFormData()
       </button>
 
       {getDataResult && (
-        <div id="get-data-result">
+        <div>
           <pre>{getDataResult}</pre>
         </div>
       )}
       {getFormDataResult && (
-        <div id="get-form-data-result">
+        <div>
           <pre>{getFormDataResult}</pre>
         </div>
       )}
