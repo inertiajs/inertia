@@ -257,12 +257,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         touch: form.touch,
         touched: form.touched,
       }),
-      [form, isDirty, submit],
+      [form, isDirty, headers],
     )
 
     useImperativeHandle(ref, () => exposedValue, [exposedValue])
 
-    const formElement_el = createElement(
+    const formNode = createElement(
       'form',
       {
         ...props,
@@ -282,7 +282,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       typeof children === 'function' ? children(exposedValue) : children,
     )
 
-    return createElement(FormContext.Provider, { value: exposedValue }, formElement_el)
+    return createElement(FormContext.Provider, { value: exposedValue }, formNode)
   },
 )
 
