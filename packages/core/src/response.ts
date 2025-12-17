@@ -65,6 +65,8 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
+    const previousFlash = currentPage.get().flash
+
     await this.setPage()
 
     const errors = currentPage.get().props.errors || {}
@@ -87,7 +89,7 @@ export class Response {
 
     const { flash } = currentPage.get()
 
-    if (Object.keys(flash).length > 0) {
+    if (Object.keys(flash).length > 0 && !isEqual(flash, previousFlash)) {
       fireFlashEvent(flash)
       this.requestParams.all().onFlash(flash)
     }
@@ -349,6 +351,12 @@ export class Response {
         ...(currentPage.get().onceProps || {}),
         ...(pageResponse.onceProps || {}),
       }
+    }
+
+    // Preserve flash data and merge with new flash data on non-deferred requests
+    pageResponse.flash = {
+      ...currentPage.get().flash,
+      ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
     }
   }
 

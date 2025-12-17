@@ -20,6 +20,51 @@ test.describe('Flash Data', () => {
     await expect(page.locator('#flash-events')).toContainText('Hello from server')
   })
 
+  test('preserves flash data after deferred props load and does not fire event again', async ({ page }) => {
+    await page.goto('/flash/with-deferred')
+
+    await expect(page.locator('#flash')).toContainText('Flash with deferred')
+    await expect(page.locator('#flash-event-count')).toHaveText('1')
+    await expect(page.locator('#loading')).toBeVisible()
+
+    await page.waitForResponse(page.url())
+
+    await expect(page.locator('#loading')).not.toBeVisible()
+    await expect(page.locator('#data')).toContainText('Deferred data loaded')
+    await expect(page.locator('#flash')).toContainText('Flash with deferred')
+    await expect(page.locator('#flash-event-count')).toHaveText('1')
+  })
+
+  test('does not fire flash event on partial request when flash is unchanged', async ({ page }) => {
+    await page.goto('/flash/partial')
+
+    await expect(page.locator('#flash')).toContainText('Initial flash')
+    await expect(page.locator('#flash-event-count')).toHaveText('1')
+
+    const initialCount = await page.locator('#count').textContent()
+    const responsePromise = page.waitForResponse((res) => res.url().includes('/flash/partial'))
+    await page.getByRole('button', { name: 'Reload with same flash' }).click()
+    await responsePromise
+
+    await expect(page.locator('#count')).not.toHaveText(initialCount!)
+    await expect(page.locator('#flash')).toContainText('Initial flash')
+    await expect(page.locator('#flash-event-count')).toHaveText('1')
+  })
+
+  test('fires flash event on partial request when flash changes', async ({ page }) => {
+    await page.goto('/flash/partial')
+
+    await expect(page.locator('#flash')).toContainText('Initial flash')
+    await expect(page.locator('#flash-event-count')).toHaveText('1')
+
+    const responsePromise = page.waitForResponse((res) => res.url().includes('/flash/partial'))
+    await page.getByRole('button', { name: 'Reload with different flash' }).click()
+    await responsePromise
+
+    await expect(page.locator('#flash')).toContainText('Updated flash')
+    await expect(page.locator('#flash-event-count')).toHaveText('2')
+  })
+
   test.describe('Requests', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/flash/events')

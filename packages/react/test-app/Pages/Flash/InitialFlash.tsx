@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 export default () => {
   const page = usePage()
   const [, forceUpdate] = useState(0)
-  const flashEvents = useRef<any[]>([])
+  const flashEvents = useRef<Record<string, unknown>[]>([])
   const listenerSetup = useRef(false)
 
   if (!listenerSetup.current) {

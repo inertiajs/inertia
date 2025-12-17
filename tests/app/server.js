@@ -1719,6 +1719,44 @@ app.get('/flash/initial', (req, res) =>
     flash: { message: 'Hello from server' },
   }),
 )
+app.get('/flash/with-deferred', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'Flash/WithDeferred',
+      deferredProps: {
+        default: ['data'],
+      },
+      props: {},
+      flash: { message: 'Flash with deferred' },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Flash/WithDeferred',
+        props: {
+          data: req.headers['x-inertia-partial-data']?.includes('data') ? 'Deferred data loaded' : undefined,
+        },
+      }),
+    100,
+  )
+})
+app.get('/flash/partial', (req, res) => {
+  const count = parseInt(req.query.count || '0')
+  const flashType = req.query.flashType || 'same'
+
+  let flash = { message: 'Initial flash' }
+  if (req.headers['x-inertia-partial-data']) {
+    flash = flashType === 'different' ? { message: `Updated flash ${count}` } : { message: 'Initial flash' }
+  }
+
+  inertia.render(req, res, {
+    component: 'Flash/Partial',
+    props: { count },
+    flash,
+  })
+})
 const getOncePropsData = (req, prop = 'foo') => {
   const isInertiaRequest = !!req.headers['x-inertia']
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []

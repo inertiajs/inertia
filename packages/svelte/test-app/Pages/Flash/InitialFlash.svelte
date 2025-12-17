@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page, router } from '@inertiajs/svelte'
 
-  let flashEvents: any[] = []
+  let flashEvents: Record<string, unknown>[] = []
 
   router.on('flash', (e) => {
     flashEvents = [...flashEvents, e.detail.flash]

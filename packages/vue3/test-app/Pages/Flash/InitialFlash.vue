@@ -3,7 +3,7 @@ import { router, usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const page = usePage()
-const flashEvents = ref<any[]>([])
+const flashEvents = ref<Record<string, unknown>[]>([])
 
 router.on('flash', (e) => {
   flashEvents.value.push(e.detail.flash)
