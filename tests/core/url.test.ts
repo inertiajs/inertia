@@ -104,6 +104,36 @@ test.describe('url.ts', () => {
         expect(dataIndices).toEqual({})
       })
 
+      test('merges data into URL with sparse array indices', () => {
+        const originalHref = '/search?a[0]=x&a[5]=y'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?a[0]=x&a[5]=y&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?a[0]=x&a[5]=y&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with objects at array indices', () => {
+        const originalHref = '/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
       test('overwrites existing keys in the query string when they also exist in the data', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?q=old', { q: 'new' })
 
