@@ -1,52 +1,28 @@
 <script setup lang="ts">
 import { useFormContext } from '@inertiajs/vue3'
 
+const props = defineProps<{
+  formId?: string
+}>()
+
 const form = useFormContext()
-
-const submitFromChild = () => {
-  form?.submit()
-}
-
-const resetFromChild = () => {
-  form?.reset()
-}
-
-const clearErrorsFromChild = () => {
-  form?.clearErrors()
-}
-
-const setTestError = () => {
-  form?.setError('name', 'Error set from child component')
-}
-
-const setDefaultsFromChild = () => {
-  form?.defaults()
-}
 </script>
 
 <template>
-  <div id="child-component" style="border: 2px solid blue; padding: 10px; margin: 10px 0">
-    <h3>Child Component (using useFormContext)</h3>
-
-    <div v-if="form" id="child-state">
-      <div>Child: Form is <span v-if="form.isDirty">dirty</span><span v-else>clean</span></div>
-      <div v-if="form.hasErrors">Child: Form has errors</div>
-      <div v-if="form.processing">Child: Form is processing</div>
-      <div v-if="form.errors.name" id="child_error_name">Child Error: {{ form.errors.name }}</div>
-      <div v-if="form.wasSuccessful" id="child_was_successful">Child: Form was successful</div>
-      <div v-if="form.recentlySuccessful" id="child_recently_successful">Child: Form recently successful</div>
-    </div>
-
-    <div v-if="!form" id="child-no-context">No form context available</div>
-
-    <div style="margin-top: 10px">
-      <button type="button" @click="submitFromChild" id="child-submit-button">Submit from Child</button>
-      <button type="button" @click="resetFromChild" id="child-reset-button">Reset from Child</button>
-      <button type="button" @click="clearErrorsFromChild" id="child-clear-errors-button">
-        Clear Errors from Child
-      </button>
-      <button type="button" @click="setTestError" id="child-set-error-button">Set Error from Child</button>
-      <button type="button" @click="setDefaultsFromChild" id="child-defaults-button">Set Defaults from Child</button>
-    </div>
+  <div v-if="form" :id="formId ? `${formId}-child-state` : 'child-state'">
+    <span>Child: Form is {{ form.isDirty ? 'dirty' : 'clean' }}</span>
+    <span v-if="form.hasErrors"> | Child: Form has errors</span>
+    <span v-if="form.errors.name" :id="formId ? undefined : 'child_error_name'"> | Error: {{ form.errors.name }}</span>
   </div>
+  <div v-else id="child-no-context">No form context available</div>
+
+  <button type="button" :id="formId ? `${formId}-set-error` : 'child-set-error-button'" @click="form?.setError('name', formId ? 'Error from child' : 'Error set from child component')">
+    Set Error
+  </button>
+  <button type="button" :id="formId ? `${formId}-clear-error` : 'child-clear-errors-button'" @click="form?.clearErrors('name')">
+    Clear Error
+  </button>
+  <button v-if="!formId" type="button" id="child-submit-button" @click="form?.submit()">Submit from Child</button>
+  <button v-if="!formId" type="button" id="child-reset-button" @click="form?.reset()">Reset from Child</button>
+  <button v-if="!formId" type="button" id="child-defaults-button" @click="form?.defaults()">Set Defaults</button>
 </template>
