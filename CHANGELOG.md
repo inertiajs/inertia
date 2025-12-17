@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.2...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.3...master)
 
 - Nothing yet
+
+## [v2.3.3](https://github.com/inertiajs/inertia/compare/v2.3.2...v2.3.3) - 2025-12-17
+
+### What's Changed
+
+* Add support for protocol-relative urls in url.ts by [@machour](https://github.com/machour) in https://github.com/inertiajs/inertia/pull/2769
+* Fix brackets notation qs parsing by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2722
+* Support for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2757
+
+### New Contributors
+
+* [@machour](https://github.com/machour) made their first contribution in https://github.com/inertiajs/inertia/pull/2769
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.2...v2.3.3
 
 ## [v2.3.2](https://github.com/inertiajs/inertia/compare/v2.3.1...v2.3.2) - 2025-12-16
 
