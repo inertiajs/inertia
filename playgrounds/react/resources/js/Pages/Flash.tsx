@@ -35,9 +35,7 @@ const Flash = () => {
       <div className="mt-6 space-y-6">
         <div>
           <h2 className="text-lg font-semibold">Current page.flash</h2>
-          <pre className="mt-2 rounded-sm bg-gray-100 p-3 text-sm">
-            {JSON.stringify(flash ?? 'null', null, 2)}
-          </pre>
+          <pre className="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify(flash ?? 'null', null, 2)}</pre>
         </div>
 
         <div>
@@ -59,7 +57,12 @@ const Flash = () => {
               Flash with render
             </Link>
           </div>
-          <form onSubmit={(e) => { e.preventDefault(); router.post('/flash/form') }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              router.post('/flash/form')
+            }}
+          >
             <button type="submit" className="rounded-sm bg-slate-800 px-4 py-2 text-white">
               Flash with redirect
             </button>

@@ -43,7 +43,11 @@
 
   <div>
     <h2 class="text-lg font-semibold">Flash Event Log</h2>
-    <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify(flashLog.length ? flashLog : 'No flash events yet', null, 2)}</pre>
+    <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify(
+        flashLog.length ? flashLog : 'No flash events yet',
+        null,
+        2,
+      )}</pre>
     {#if flashLog.length}
       <button on:click={clearLog} class="mt-2 text-sm text-gray-500 underline">Clear log</button>
     {/if}
