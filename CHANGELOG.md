@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.1...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.2...master)
 
 - Nothing yet
+
+## [v2.3.2](https://github.com/inertiajs/inertia/compare/v2.3.1...v2.3.2) - 2025-12-16
+
+### What's Changed
+
+* Expose InertiaPrecognitiveForm type by [@lcdss](https://github.com/lcdss) in https://github.com/inertiajs/inertia/pull/2756
+* Test for loading deferred props on `router.reload()` without `only`/`except` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2761
+* Expose `fetching` in default `<WhenVisible>` slot by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2766
+* Include submitter element value in Form component submission by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2770
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.1...v2.3.2
 
 ## [v2.3.1](https://github.com/inertiajs/inertia/compare/v2.3.0...v2.3.1) - 2025-12-12
 

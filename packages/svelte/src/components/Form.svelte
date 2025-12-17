@@ -45,8 +45,9 @@
   export let withAllErrors: FormComponentProps['withAllErrors'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+  type FormSubmitter = HTMLElement | null
 
-  function getTransformedData(): Record<string, FormDataConvertible> {
+  const getTransformedData = (): Record<string, FormDataConvertible> => {
     const [_url, data] = getUrlAndData()
     return transform!(data)
   }
@@ -75,27 +76,27 @@
   $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
   $: _action = isUrlMethodPair(action) ? action.url : (action as string)
 
-  export function getFormData(): FormData {
-    return new FormData(formElement)
+  export function getFormData(submitter?: FormSubmitter): FormData {
+    return new FormData(formElement, submitter)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  export function getData(): Record<string, FormDataConvertible> {
-    return formDataToObject(getFormData())
+  export function getData(submitter?: FormSubmitter): Record<string, FormDataConvertible> {
+    return formDataToObject(getFormData(submitter))
   }
 
-  function getUrlAndData(): [string, Record<string, FormDataConvertible>] {
-    return mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+  function getUrlAndData(submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] {
+    return mergeDataIntoQueryString(_method, _action, getData(submitter), queryStringArrayFormat)
   }
 
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
-  export function submit() {
-    const [url, _data] = getUrlAndData()
+  export function submit(submitter?: FormSubmitter) {
+    const [url, data] = getUrlAndData(submitter)
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -149,12 +150,16 @@
       ...options,
     }
 
-    $form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
+    // We need transform because we can't override the default data with different keys (by design)
+    $form.transform(() => transform!(data)).submit(_method, url, submitOptions)
+
+    // Reset the transformer back so the submitter is not used for future submissions
+    $form.transform(getTransformedData)
   }
 
-  function handleSubmit(event: Event) {
+  function handleSubmit(event: SubmitEvent) {
     event.preventDefault()
-    submit()
+    submit(event.submitter)
   }
 
   function handleReset(event: Event) {

@@ -38,6 +38,7 @@ type ComponentProps = (FormComponentProps &
 }
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+type FormSubmitter = HTMLElement | null
 
 const noop = () => undefined
 
@@ -105,18 +106,19 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
 
-    const getFormData = (): FormData => new FormData(formElement.current)
+    const getFormData = (submitter?: FormSubmitter): FormData => new FormData(formElement.current, submitter)
 
     // Convert the FormData to an object because we can't compare two FormData
     // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
+    const getData = (submitter?: FormSubmitter): Record<string, FormDataConvertible> =>
+      formDataToObject(getFormData(submitter))
 
-    const getUrlAndData = (): [string, Record<string, FormDataConvertible>] => {
+    const getUrlAndData = (submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] => {
       return mergeDataIntoQueryString(
         resolvedMethod,
         isUrlMethodPair(action) ? action.url : action,
-        getData(),
+        getData(submitter),
         queryStringArrayFormat,
       )
     }
@@ -183,8 +185,8 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       }
     }
 
-    const submit = () => {
-      const [url, _data] = getUrlAndData()
+    const submit = (submitter?: FormSubmitter) => {
+      const [url, data] = getUrlAndData(submitter)
 
       const submitOptions: FormSubmitOptions = {
         headers,
@@ -217,7 +219,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         ...options,
       }
 
+      // We need transform because we can't override the default data with different keys (by design)
+      form.transform(() => transform(data))
       form.submit(resolvedMethod, url, submitOptions)
+
+      // Reset the transformer back so the submitter is not used for future submissions
+      form.transform(getTransformedData)
     }
 
     const defaults = () => {
@@ -264,7 +271,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         method: resolvedMethod,
         onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault()
-          submit()
+          submit((event.nativeEvent as SubmitEvent).submitter)
         },
         // Only React 19 supports passing a boolean to the `inert` attribute.
         // To support earlier versions as well, we use the string 'true'.

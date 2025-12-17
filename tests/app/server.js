@@ -760,6 +760,24 @@ app.get('/when-visible-back-button', (req, res) => {
   }
 })
 
+app.get('/when-visible-fetching', (req, res) => {
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleFetching',
+        props: {
+          lazyData: { text: 'Lazy data loaded!' },
+        },
+      })
+    }, 500)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisibleFetching',
+      props: {},
+    })
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>
@@ -1187,6 +1205,35 @@ app.post('/deferred-props/with-errors', (req, res) => {
   res.redirect(303, '/deferred-props/with-errors')
 })
 
+app.get('/deferred-props/with-reload', (req, res) => {
+  const page = parseInt(req.query.page) || 1
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithReload',
+      url: req.originalUrl,
+      deferredProps: {
+        default: ['results'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithReload',
+        url: req.originalUrl,
+        props: {
+          results: req.headers['x-inertia-partial-data']?.includes('results')
+            ? { data: [`Item ${page}-1`, `Item ${page}-2`, `Item ${page}-3`], page }
+            : undefined,
+        },
+      }),
+    300,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
@@ -1338,6 +1385,9 @@ app.get('/form-component/dotted-keys', (req, res) =>
 )
 app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
 app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
+app.get('/form-component/submit-button', (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/SubmitButton' }),
+)
 app.get('/form-component/uppercase-method', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
 )

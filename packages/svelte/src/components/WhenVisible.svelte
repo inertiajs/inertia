@@ -92,7 +92,7 @@
 {/if}
 
 {#if loaded}
-  <slot />
+  <slot {fetching} />
 {:else if $$slots.fallback}
   <slot name="fallback" />
 {/if}
