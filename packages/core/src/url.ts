@@ -51,7 +51,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   qsArrayFormat: QueryStringArrayFormatOption = 'brackets',
 ): [string, MergeDataIntoQueryStringDataReturnType<T>] {
   const hasDataForQueryString = method === 'get' && !isFormData(data) && Object.keys(data).length > 0
-  const hasHost = urlHasHost(href.toString())
+  const hasHost = urlHasProtocol(href.toString())
   const hasAbsolutePath = hasHost || href.toString().startsWith('/') || href.toString() === ''
   const hasRelativePath = !hasAbsolutePath && !href.toString().startsWith('#') && !href.toString().startsWith('?')
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
@@ -103,13 +103,8 @@ export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
   return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
 }
 
-export function urlHasHost(href: string): boolean {
-  try {
-    const url = new URL(href, 'http://dummy-inertia-host')
-    return !!url.host && url.host !== 'dummy-inertia-host'
-  } catch {
-    return false
-  }
+export function urlHasProtocol(url: string): boolean {
+  return /^([a-z][a-z0-9+.-]*:)?\/\/[^/]/i.test(url)
 }
 
 export function urlToString(url: URL | string, absolute: boolean): string {

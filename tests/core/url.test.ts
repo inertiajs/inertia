@@ -1,19 +1,45 @@
 import test, { expect } from '@playwright/test'
 import { config } from '../../packages/core/src/config'
-import { mergeDataIntoQueryString, transformUrlAndData, urlHasHost } from '../../packages/core/src/url'
+import { mergeDataIntoQueryString, transformUrlAndData, urlHasProtocol } from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
-  test.describe('urlHasHost', () => {
-    test('returns true for absolute URLs', () => {
-      expect(urlHasHost('https://example.com')).toBe(true)
+  test.describe('urlHasProtocol', () => {
+    const trueCases = [
+      ['https://example.com', 'https protocol'],
+      ['http://example.com', 'http protocol'],
+      ['ftp://files.example.com', 'ftp protocol'],
+      ['custom-scheme://app', 'custom scheme with hyphen'],
+      ['scheme123://app', 'scheme with numbers'],
+      ['//example.com', 'protocol-relative URL'],
+      ['//example.com/path', 'protocol-relative URL with path'],
+      ['//example.com:8080', 'protocol-relative URL with port'],
+      ['//localhost', 'protocol-relative localhost'],
+    ] as const
+
+    const falseCases = [
+      ['/path', 'absolute path'],
+      ['/path/to/page', 'nested absolute path'],
+      ['path/to/page', 'relative path'],
+      ['./path', 'relative path with dot'],
+      ['../path', 'relative path with double dot'],
+      ['?query=value', 'query string only'],
+      ['#hash', 'hash only'],
+      ['', 'empty string'],
+      ['///path', 'triple slash'],
+      ['///', 'triple slash only'],
+      ['//', 'double slash only'],
+    ] as const
+
+    trueCases.forEach(([url, description]) => {
+      test(`returns true for ${description}: ${url}`, () => {
+        expect(urlHasProtocol(url)).toBe(true)
+      })
     })
 
-    test('returns true for protocol-relative URLs', () => {
-      expect(urlHasHost('//example.com')).toBe(true)
-    })
-
-    test('returns false for relative URLs', () => {
-      expect(urlHasHost('/search')).toBe(false)
+    falseCases.forEach(([url, description]) => {
+      test(`returns false for ${description}: ${url}`, () => {
+        expect(urlHasProtocol(url)).toBe(false)
+      })
     })
   })
 
