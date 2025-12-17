@@ -24,6 +24,7 @@
   <a href="/photo-grid/horizontal" use:inertia class="hover:underline">Photo Row</a>
   <a href="/data-table" use:inertia class="hover:underline">Table</a>
   <a href="/once/1" use:inertia class="hover:underline">Once</a>
+  <a href="/flash" use:inertia class="hover:underline">Flash</a>
 </nav>
 
 <main class="px-10 py-8">

@@ -487,3 +487,15 @@ Route::get('/once/{page}', function (int $page) {
         'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
     ]);
 });
+
+Route::get('/flash', function () {
+    return inertia('Flash');
+});
+
+Route::get('/flash/direct', function () {
+    return Inertia::flash('message', 'Sent with render!')->render('Flash');
+});
+
+Route::post('/flash/form', function () {
+    return Inertia::flash('message', 'Sent with redirect!')->back();
+});

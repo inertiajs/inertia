@@ -49,6 +49,9 @@ export default function Layout({ children, padding = true }: { children: React.R
         <Link href="/once/1" className="hover:underline">
           Once
         </Link>
+        <Link href="/flash" className="hover:underline">
+          Flash
+        </Link>
         <Link href="/logout" method="post" className="hover:underline">
           Logout
         </Link>
