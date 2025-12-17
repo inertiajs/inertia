@@ -61,7 +61,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
   if (hasDataForQueryString) {
-    const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
+    const parseOptions = { ignoreQueryPrefix: true, arrayLimit: -1 }
     url.search = qs.stringify(
       { ...qs.parse(url.search, parseOptions), ...data },
       {
