@@ -29,25 +29,34 @@ test.describe('url.ts', () => {
         expect(data).toEqual({})
       })
 
-      test('merges new data into an existing query string with array values', () => {
-        const [href, data] = mergeDataIntoQueryString('get', '/search?frameworks[]=react&frameworks[]=vue', {
-          q: 'bar',
-        })
+      test('merges data into URL with existing brackets notation arrays', () => {
+        const originalHref = '/search?frameworks[]=react&frameworks[]=vue'
+        const additionalData = { q: 'bar' }
 
-        expect(href).toBe('/search?frameworks[]=react&frameworks[]=vue&q=bar')
-        expect(data).toEqual({})
+        const [hrefBrackts, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackts).toBe('/search?frameworks[]=react&frameworks[]=vue&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(dataIndices).toEqual({})
       })
 
-      test('merges new data into an existing query string with array values using index notation', () => {
-        const [href, data] = mergeDataIntoQueryString(
-          'get',
-          '/search?frameworks[0]=react&frameworks[1]=vue',
-          { q: 'bar' },
-          'indices',
-        )
+      test('merges data into URL with existing indices notation arrays', () => {
+        const originalHref = '/search?frameworks[0]=react&frameworks[1]=vue'
+        const additionalData = { q: 'bar' }
 
-        expect(href).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
-        expect(data).toEqual({})
+        const [hrefBrackts, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackts).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(dataIndices).toEqual({})
       })
 
       test('overwrites existing keys in the query string when they also exist in the data', () => {
