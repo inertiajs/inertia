@@ -15,6 +15,11 @@ test.describe('Flash Data', () => {
     await expect(page.locator('#flash')).toContainText('Hello from server')
   })
 
+  test('fires flash event on initial page load for global listeners', async ({ page }) => {
+    await page.goto('/flash/initial')
+    await expect(page.locator('#flash-events')).toContainText('Hello from server')
+  })
+
   test.describe('Requests', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/flash/events')
