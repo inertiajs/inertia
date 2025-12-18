@@ -434,3 +434,13 @@ Route::get('/flash/direct', function () {
 Route::post('/flash/form', function () {
     return Inertia::flash('message', 'Sent with redirect!')->back();
 });
+
+Route::post('/flash/submit', function () {
+    Inertia::flash('message', 'Flash from redirect');
+
+    return redirect('/flash/target');
+});
+
+Route::get('/flash/target', function () {
+    return inertia('FlashTarget');
+});

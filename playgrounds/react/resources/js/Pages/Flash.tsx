@@ -1,16 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react'
-import { useEffect, useState } from 'react'
-import Layout from '../Components/Layout'
+import FlashLayout from '../Components/FlashLayout'
 
 const Flash = () => {
   const { flash } = usePage()
-  const [flashLog, setFlashLog] = useState<Record<string, unknown>[]>([])
-
-  useEffect(() => {
-    return router.on('flash', ({ detail: { flash } }) => {
-      setFlashLog((prev) => [...prev, flash])
-    })
-  }, [])
 
   const triggerFrontendFlash = () => {
     router.flash('message', 'Hello from the frontend!')
@@ -23,10 +15,6 @@ const Flash = () => {
     })
   }
 
-  const clearLog = () => {
-    setFlashLog([])
-  }
-
   return (
     <>
       <Head title="Flash" />
@@ -36,18 +24,6 @@ const Flash = () => {
         <div>
           <h2 className="text-lg font-semibold">Current page.flash</h2>
           <pre className="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify(flash ?? 'null', null, 2)}</pre>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold">Flash Event Log</h2>
-          <pre className="mt-2 rounded-sm bg-gray-100 p-3 text-sm">
-            {JSON.stringify(flashLog.length ? flashLog : 'No flash events yet', null, 2)}
-          </pre>
-          {flashLog.length > 0 && (
-            <button onClick={clearLog} className="mt-2 text-sm text-gray-500 underline">
-              Clear log
-            </button>
-          )}
         </div>
 
         <div className="space-y-3">
@@ -64,9 +40,17 @@ const Flash = () => {
             }}
           >
             <button type="submit" className="rounded-sm bg-slate-800 px-4 py-2 text-white">
-              Flash with redirect
+              Flash with back()
             </button>
           </form>
+          <div>
+            <button
+              onClick={() => router.post('/flash/submit')}
+              className="rounded-sm bg-slate-800 px-4 py-2 text-white"
+            >
+              Flash with redirect
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -85,6 +69,6 @@ const Flash = () => {
   )
 }
 
-Flash.layout = (page) => <Layout children={page} />
+Flash.layout = (page) => <FlashLayout children={page} />
 
 export default Flash

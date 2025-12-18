@@ -1,17 +1,11 @@
 <script context="module">
-  export { default as layout } from '../Components/Layout.svelte'
+  export { default as layout } from '../Components/FlashLayout.svelte'
 </script>
 
 <script>
   import { Link, page, router } from '@inertiajs/svelte'
 
   export let appName
-
-  let flashLog = []
-
-  router.on('flash', ({ detail: { flash } }) => {
-    flashLog = [...flashLog, flash]
-  })
 
   const triggerFrontendFlash = () => {
     router.flash('message', 'Hello from the frontend!')
@@ -22,10 +16,6 @@
       message: 'Multiple items',
       count: 42,
     })
-  }
-
-  const clearLog = () => {
-    flashLog = []
   }
 </script>
 
@@ -41,26 +31,19 @@
     <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify($page.flash ?? 'null', null, 2)}</pre>
   </div>
 
-  <div>
-    <h2 class="text-lg font-semibold">Flash Event Log</h2>
-    <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify(
-        flashLog.length ? flashLog : 'No flash events yet',
-        null,
-        2,
-      )}</pre>
-    {#if flashLog.length}
-      <button on:click={clearLog} class="mt-2 text-sm text-gray-500 underline">Clear log</button>
-    {/if}
-  </div>
-
   <div class="space-y-3">
     <h2 class="text-lg font-semibold">Server-side Flash</h2>
     <div>
       <Link href="/flash/direct" class="rounded-sm bg-slate-800 px-4 py-2 text-white">Flash with render</Link>
     </div>
     <form on:submit|preventDefault={() => router.post('/flash/form')}>
-      <button type="submit" class="rounded-sm bg-slate-800 px-4 py-2 text-white">Flash with redirect</button>
+      <button type="submit" class="rounded-sm bg-slate-800 px-4 py-2 text-white">Flash with back()</button>
     </form>
+    <div>
+      <button on:click={() => router.post('/flash/submit')} class="rounded-sm bg-slate-800 px-4 py-2 text-white">
+        Flash with redirect
+      </button>
+    </div>
   </div>
 
   <div class="space-y-3">
