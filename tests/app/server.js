@@ -1719,6 +1719,17 @@ app.get('/flash/initial', (req, res) =>
     flash: { message: 'Hello from server' },
   }),
 )
+app.get('/flash/redirect/page-1', (req, res) =>
+  inertia.render(req, res, { component: 'Flash/Redirect/PageOne' }),
+)
+app.post('/flash/redirect/submit', (req, res) => res.redirect(303, '/flash/redirect/page-2'))
+app.get('/flash/redirect/page-2', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/Redirect/PageTwo',
+    flash: { message: 'Flash from redirect' },
+  }),
+)
+
 app.get('/flash/with-deferred', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {

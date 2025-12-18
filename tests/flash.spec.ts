@@ -215,4 +215,20 @@ test.describe('Flash Data', () => {
       expect(requests.requests.length).toBe(0)
     })
   })
+
+  test.describe('Redirect with shared layout', () => {
+    test('fires flash event only once when redirecting to a different component', async ({ page }) => {
+      await page.goto('/flash/redirect/page-1')
+      await expect(page.locator('.text')).toHaveText('Page One')
+
+      const initialLayoutId = await page.locator('.layout-id').textContent()
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('.text')).toHaveText('Page Two')
+      await expect(page.locator('.flash')).toContainText('Flash from redirect')
+      await expect(page.locator('.layout-id')).toHaveText(initialLayoutId!)
+      await expect(page.locator('.flash-count')).toHaveText('1')
+    })
+  })
 })

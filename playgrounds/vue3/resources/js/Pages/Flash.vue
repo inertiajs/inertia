@@ -1,18 +1,10 @@
 <script lang="ts">
-import Layout from '../Components/Layout.vue'
-export default { layout: Layout }
+import FlashLayout from '../Components/FlashLayout.vue'
+export default { layout: FlashLayout }
 </script>
 
 <script setup lang="ts">
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
-import { ref } from 'vue'
-
-const page = usePage()
-const flashLog = ref<Record<string, unknown>[]>([])
-
-router.on('flash', ({ detail: { flash } }) => {
-  flashLog.value.push(flash)
-})
+import { Head, Link, router } from '@inertiajs/vue3'
 
 const triggerFrontendFlash = () => {
   router.flash('message', 'Hello from the frontend!')
@@ -24,10 +16,6 @@ const triggerMultipleFlash = () => {
     count: 42,
   })
 }
-
-const clearLog = () => {
-  flashLog.value = []
-}
 </script>
 
 <template>
@@ -37,15 +25,7 @@ const clearLog = () => {
   <div class="mt-6 space-y-6">
     <div>
       <h2 class="text-lg font-semibold">Current page.flash</h2>
-      <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{{ page.flash ?? 'null' }}</pre>
-    </div>
-
-    <div>
-      <h2 class="text-lg font-semibold">Flash Event Log</h2>
-      <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{{
-        flashLog.length ? flashLog : 'No flash events yet'
-      }}</pre>
-      <button v-if="flashLog.length" @click="clearLog" class="mt-2 text-sm text-gray-500 underline">Clear log</button>
+      <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{{ $page.flash ?? 'null' }}</pre>
     </div>
 
     <div class="space-y-3">
@@ -54,8 +34,13 @@ const clearLog = () => {
         <Link href="/flash/direct" class="rounded-sm bg-slate-800 px-4 py-2 text-white">Flash with render</Link>
       </div>
       <form @submit.prevent="router.post('/flash/form')">
-        <button type="submit" class="rounded-sm bg-slate-800 px-4 py-2 text-white">Flash with redirect</button>
+        <button type="submit" class="rounded-sm bg-slate-800 px-4 py-2 text-white">Flash with back()</button>
       </form>
+      <div>
+        <button @click="router.post('/flash/submit')" class="rounded-sm bg-slate-800 px-4 py-2 text-white">
+          Flash with redirect
+        </button>
+      </div>
     </div>
 
     <div class="space-y-3">

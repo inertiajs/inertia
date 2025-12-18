@@ -554,6 +554,16 @@ Route::post('/flash/form', function () {
     return Inertia::flash('message', 'Sent with redirect!')->back();
 });
 
+Route::post('/flash/submit', function () {
+    Inertia::flash('message', 'Flash from redirect');
+
+    return redirect('/flash/target');
+});
+
+Route::get('/flash/target', function () {
+    return inertia('FlashTarget');
+});
+
 Route::get('/once/{page}', function (int $page) {
     $component = match ($page) {
         1 => 'Once/First',
