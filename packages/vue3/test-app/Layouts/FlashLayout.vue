@@ -2,6 +2,13 @@
 import { router } from '@inertiajs/vue3'
 import { getCurrentInstance, onMounted, ref } from 'vue'
 
+declare global {
+  interface Window {
+    _inertia_flash_events: unknown[]
+    _inertia_flash_layout_id: number | undefined
+  }
+}
+
 const layoutId = ref<number | null>(null)
 const flashCount = ref(0)
 
