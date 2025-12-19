@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
