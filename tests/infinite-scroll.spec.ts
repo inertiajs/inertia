@@ -515,6 +515,30 @@ test.describe('Manual page loading', () => {
     await expect(page.getByText('Has more next items: true')).toBeVisible()
   })
 
+  test('it does not skip pages after direct URL navigation', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
+
   test('it resets pagination state when navigating to a different page number', async ({ page }) => {
     await page.goto('/infinite-scroll/manual')
 
