@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.3...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.4...master)
 
 - Nothing yet
+
+## [v2.3.4](https://github.com/inertiajs/inertia/compare/v2.3.3...v2.3.4) - 2025-12-19
+
+### What's Changed
+
+* Only restore Infinite Scroll state from history on back/forward navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2777
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.3...v2.3.4
 
 ## [v2.3.3](https://github.com/inertiajs/inertia/compare/v2.3.2...v2.3.3) - 2025-12-17
 
