@@ -14,10 +14,15 @@
     baz: number[]
   }
 
-  export let foo: ComponentProps['foo']
-  export let bar: ComponentProps['bar']
-  export let baz: ComponentProps['baz']
+  interface Props {
+    foo: ComponentProps['foo']
+    bar: ComponentProps['bar']
+    baz: ComponentProps['baz']
+  }
 
+  let { foo, bar, baz }: Props = $props()
+
+  // svelte-ignore state_referenced_locally
   let page = foo.page
 
   const reloadIt = () => {
@@ -55,5 +60,5 @@
 <div>foo.page is {foo.page}</div>
 <div>foo.per_page is {foo.per_page}</div>
 <div>foo.meta.label is {foo.meta.label}</div>
-<button on:click={reloadIt}>Reload</button>
-<button on:click={getFresh}>Get Fresh</button>
+<button onclick={reloadIt}>Reload</button>
+<button onclick={getFresh}>Get Fresh</button>

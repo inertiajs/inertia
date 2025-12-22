@@ -19,10 +19,10 @@
 </script>
 
 <div>
-  <span id="flash">{JSON.stringify($page.flash)}</span>
+  <span id="flash">{JSON.stringify(page.flash)}</span>
 
-  <button on:click={setFlash}>Set flash</button>
-  <button on:click={setFlashKeyValue}>Set flash key-value</button>
-  <button on:click={mergeFlash}>Merge flash</button>
-  <button on:click={clearFlash}>Clear flash</button>
+  <button onclick={setFlash}>Set flash</button>
+  <button onclick={setFlashKeyValue}>Set flash key-value</button>
+  <button onclick={mergeFlash}>Merge flash</button>
+  <button onclick={clearFlash}>Clear flash</button>
 </div>

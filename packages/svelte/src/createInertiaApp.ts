@@ -12,7 +12,7 @@ import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
 import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
 
-type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
+type SvelteRenderResult = { body: string; head: string; css?: { code: string } }
 
 type SetupOptions<SharedProps extends PageProps> = {
   el: HTMLElement | null
@@ -46,24 +46,26 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
-  const svelteApp = await Promise.all([
+  const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
-  ]).then(([initialComponent]) => {
-    return setup({
-      el: isServer ? null : document.getElementById(id),
-      App,
-      props: { initialPage, initialComponent, resolveComponent },
-    })
+  ])
+
+  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent }
+
+  const svelteApp = await setup({
+    el: isServer ? null : document.getElementById(id),
+    App,
+    props,
   })
 
   if (isServer && svelteApp) {
-    const { html, head, css } = svelteApp
+    const { body, head, css } = svelteApp
 
     return {
       body: useScriptElementForInitialPage
-        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${html}</div>`
-        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${body}</div>`
+        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
