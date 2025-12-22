@@ -27,7 +27,7 @@
   let component = $state(initialComponent)
   let key = $state<number | null>(null)
   // svelte-ignore state_referenced_locally
-  let page = $state(initialPage)
+  let page = $state({ ...initialPage, flash: initialPage.flash ?? {} })
   let renderProps = $derived.by<RenderProps>(() => resolveRenderProps(component, page, key))
 
   // Reactively update the global page state when local page state changes
@@ -47,6 +47,9 @@
         page = args.page
 
         key = args.preserveState ? key : Date.now()
+      },
+      onFlash: (flash) => {
+        page = { ...page, flash }
       },
     })
   }

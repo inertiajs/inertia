@@ -41,6 +41,9 @@
     resetOnError?: FormComponentProps['resetOnError']
     resetOnSuccess?: FormComponentProps['resetOnSuccess']
     setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess']
+    validateFiles?: FormComponentProps['validateFiles']
+    validationTimeout?: FormComponentProps['validationTimeout']
+    withAllErrors?: FormComponentProps['withAllErrors']
     children?: import('svelte').Snippet<[any]>
     [key: string]: any
   }
@@ -68,13 +71,38 @@
     resetOnError = false,
     resetOnSuccess = false,
     setDefaultsOnSuccess = false,
+    validateFiles = false,
+    validationTimeout = 1500,
+    withAllErrors = false,
     children,
     ...rest
   }: Props = $props()
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+  type FormSubmitter = HTMLElement | null
 
-  const form = useForm({})
+  const getTransformedData = (): Record<string, FormDataConvertible> => {
+    const [_url, data] = getUrlAndData()
+    return transform!(data)
+  }
+
+  const form = useForm<Record<string, any>>({})
+    .withPrecognition(
+      () => _method,
+      () => getUrlAndData()[0],
+    )
+    .setValidationTimeout(validationTimeout!)
+
+  if (validateFiles) {
+    form.validateFiles()
+  }
+
+  if (withAllErrors) {
+    form.withAllErrors()
+  }
+
+  form.transform(getTransformedData)
+
   let formElement: HTMLFormElement = $state(null!)
   let isDirty = $state(false)
   let defaultData: FormData = new FormData()
@@ -156,7 +184,11 @@
       ...options,
     }
 
-    form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
+    // We need transform because we can't override the default data with different keys (by design)
+    form.transform(() => transform!(data)).submit(_method, url, submitOptions)
+
+    // Reset the transformer back so the submitter is not used for future submissions
+    form.transform(getTransformedData)
   }
 
   function handleSubmit(event: SubmitEvent) {
@@ -179,23 +211,16 @@
   }
 
   export function clearErrors(...fields: string[]) {
-    // @ts-expect-error
     form.clearErrors(...fields)
   }
 
   export function resetAndClearErrors(...fields: string[]) {
-    // @ts-expect-error
-    form.clearErrors(...fields)
+    clearErrors(...fields)
     reset(...fields)
   }
 
-  export function setError(field: string | object, value?: string) {
-    if (typeof field === 'string') {
-      // @ts-expect-error
-      form.setError(field, value)
-    } else {
-      form.setError(field)
-    }
+  export function setError(fieldOrFields: string | Record<string, string>, maybeValue?: string) {
+    form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
   }
 
   export function defaults() {
@@ -240,6 +265,17 @@
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+
+  $effect(() => {
+    form.setValidationTimeout(validationTimeout!)
+
+    if (validateFiles) {
+      form.validateFiles()
+    } else {
+      form.withoutFileValidation()
+    }
+  })
+
   const slotErrors = $derived(form.errors as Errors)
 </script>
 
@@ -266,7 +302,15 @@
     isDirty,
     submit,
     defaults,
+    reset,
     getData,
     getFormData,
+    validator,
+    validate,
+    touch,
+    validating: form.validating,
+    valid: form.valid,
+    invalid: form.invalid,
+    touched: form.touched,
   })}
 </form>

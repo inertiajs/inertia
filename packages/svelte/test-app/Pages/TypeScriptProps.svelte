@@ -18,19 +18,19 @@
 
   const page = usePage<PageProps>()
 
-  let error = $derived(page.props.flash.error)
+  let userName = $derived(page.props.auth.user?.name)
   let postTitles = $derived(page.props.posts.map((post) => post.title))
 
-  // @ts-expect-error - 'message' does not exist on flash
-  let flashMessage = $derived(page.props.flash.message)
+  // @ts-expect-error - 'email' does not exist on user
+  let userEmail = $derived(page.props.auth.user?.email)
   // @ts-expect-error - 'users' does not exist on page props
   let userNames = $derived(page.props.users.map((user) => user.name))
 
   $effect.pre(() => {
     console.log({
-      error,
+      userName,
       postTitles,
-      flashMessage,
+      userEmail,
       userNames,
     })
   })

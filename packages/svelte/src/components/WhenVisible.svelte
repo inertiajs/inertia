@@ -8,29 +8,18 @@
     buffer?: number
     as?: keyof HTMLElementTagNameMap
     always?: boolean
-    children?: import('svelte').Snippet
+    children?: import('svelte').Snippet<[any]>
     fallback?: import('svelte').Snippet
   }
 
   let { data = '', params = {}, buffer = 0, as = 'div', always = false, children, fallback }: Props = $props()
 
-  let loaded = $state(false)
-  let fetching = false
+  let keys = $derived(data ? (Array.isArray(data) ? data : [data]) : [])
+  let loaded = $derived(keys.length > 0 && keys.every((key) => page.props[key] !== undefined))
+  let fetching = $state(false)
   let observer: IntersectionObserver | null = null
 
   const page = usePage()
-
-  // Watch for page prop changes and reset loaded state when data becomes undefined
-  $effect(() => {
-    if (Array.isArray(data)) {
-      // For arrays, reset loaded if any prop becomes undefined
-      if (data.some((key) => page.props[key] === undefined)) {
-        loaded = false
-      }
-    } else if (page.props[data as string] === undefined) {
-      loaded = false
-    }
-  })
 
   function attachObserver(el: HTMLElement) {
     observer = new IntersectionObserver(
@@ -101,7 +90,7 @@
 {/if}
 
 {#if loaded}
-  {@render children?.()}
+  {@render children?.({ fetching })}
 {:else if fallback}
   {@render fallback?.()}
 {/if}

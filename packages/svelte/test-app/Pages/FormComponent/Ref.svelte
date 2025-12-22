@@ -73,5 +73,6 @@
     <button onclick={clearAllErrors}> Clear Errors </button>
     <button onclick={setTestError}> Set Test Error </button>
     <button onclick={setCurrentAsDefaults}> Set Current as Defaults </button>
+    <button onclick={callPrecognitionMethods}> Call Precognition Methods </button>
   </div>
 </div>

@@ -29,15 +29,23 @@
     <div>
       <button
         type="button"
-        onclick={() =>
+        onclick={() => {
+          console.log('Set Errors clicked')
           setError({
             name: 'The name field is required.',
             handle: 'The handle field is invalid.',
-          })}
+          })
+        }}
       >
         Set Errors
       </button>
-      <button type="button" onclick={() => clearErrors()}>Clear Errors</button>
+      <button
+        type="button"
+        onclick={() => {
+          console.log('Clear Errors clicked')
+          clearErrors()
+        }}>Clear Errors</button
+      >
       <button type="button" onclick={() => clearErrors('name')}>Clear Name Error</button>
       <button type="button" onclick={() => (errorBag = 'bag')}>Use Error Bag</button>
     </div>

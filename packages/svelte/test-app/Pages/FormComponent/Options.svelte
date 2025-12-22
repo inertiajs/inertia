@@ -1,19 +1,17 @@
-<!-- @migration-task Error while migrating Svelte code: can't migrate `let only: string[] = []` to `$state` because there's a variable named state.
-     Rename the variable and try again or migrate by hand. -->
 <script lang="ts">
   import { Form } from '@inertiajs/svelte'
   import type { Method, QueryStringArrayFormatOption } from '@inertiajs/core'
   import Article from '../Article.svelte'
 
-  let only: string[] = []
-  let except: string[] = []
-  let reset: string[] = []
-  let replace = false
-  let state = 'Default State'
-  let preserveScroll = false
-  let preserveState = false
-  let preserveUrl = false
-  let queryStringArrayFormat: QueryStringArrayFormatOption | undefined = undefined
+  let only: string[] = $state([])
+  let except: string[] = $state([])
+  let reset: string[] = $state([])
+  let replace = $state(false)
+  let _state = $state('Default State')
+  let preserveScroll = $state(false)
+  let preserveState = $state(false)
+  let preserveUrl = $state(false)
+  let queryStringArrayFormat: QueryStringArrayFormatOption | undefined = $state(undefined)
 
   function setOnly() {
     only = ['users']
@@ -37,38 +35,42 @@
 
   function enablePreserveState() {
     preserveState = true
-    state = 'Replaced State'
+    _state = 'Replaced State'
   }
 
   function enablePreserveUrl() {
     preserveUrl = true
   }
 
-  $: action = (() => {
-    if (preserveScroll) {
-      return '/article'
-    }
+  let action = $derived(
+    (() => {
+      if (preserveScroll) {
+        return '/article'
+      }
 
-    if (preserveState) {
-      return '/form-component/options'
-    }
+      if (preserveState) {
+        return '/form-component/options'
+      }
 
-    if (preserveUrl) {
-      return '/form-component/options?page=2'
-    }
+      if (preserveUrl) {
+        return '/form-component/options?page=2'
+      }
 
-    return queryStringArrayFormat ? '/dump/get' : '/dump/post'
-  })()
+      return queryStringArrayFormat ? '/dump/get' : '/dump/post'
+    })(),
+  )
 
-  $: method = (() => {
-    if (preserveScroll || preserveState || preserveUrl) {
-      return 'get'
-    }
+  let method = $derived(
+    (() => {
+      if (preserveScroll || preserveState || preserveUrl) {
+        return 'get'
+      }
 
-    return queryStringArrayFormat ? 'get' : 'post'
-  })() as Method
+      return queryStringArrayFormat ? 'get' : 'post'
+    })() as Method,
+  )
 
-  $: options = {
+  let options = $derived({
     only,
     except,
     reset,
@@ -76,7 +78,7 @@
     preserveScroll,
     preserveState,
     preserveUrl,
-  }
+  })
 </script>
 
 <Form {action} {method} {options} {queryStringArrayFormat}>
@@ -86,19 +88,19 @@
   <input type="text" name="tags[]" value="beta" readonly />
 
   <div>
-    State: <span id="state">{state}</span>
+    State: <span id="state">{_state}</span>
   </div>
 
   <div>
-    <button type="button" on:click={setOnly}>Set Only (users)</button>
-    <button type="button" on:click={setExcept}>Set Except (stats)</button>
-    <button type="button" on:click={setReset}>Set Reset (orders)</button>
-    <button type="button" on:click={() => (queryStringArrayFormat = 'brackets')}>Use Brackets Format</button>
-    <button type="button" on:click={() => (queryStringArrayFormat = 'indices')}>Use Indices Format</button>
-    <button type="button" on:click={enablePreserveScroll}>Enable Preserve Scroll</button>
-    <button type="button" on:click={enablePreserveState}>Enable Preserve State</button>
-    <button type="button" on:click={enablePreserveUrl}>Enable Preserve URL</button>
-    <button type="button" on:click={enableReplace}>Enable Replace</button>
+    <button type="button" onclick={setOnly}>Set Only (users)</button>
+    <button type="button" onclick={setExcept}>Set Except (stats)</button>
+    <button type="button" onclick={setReset}>Set Reset (orders)</button>
+    <button type="button" onclick={() => (queryStringArrayFormat = 'brackets')}>Use Brackets Format</button>
+    <button type="button" onclick={() => (queryStringArrayFormat = 'indices')}>Use Indices Format</button>
+    <button type="button" onclick={enablePreserveScroll}>Enable Preserve Scroll</button>
+    <button type="button" onclick={enablePreserveState}>Enable Preserve State</button>
+    <button type="button" onclick={enablePreserveUrl}>Enable Preserve URL</button>
+    <button type="button" onclick={enableReplace}>Enable Replace</button>
     <button type="submit">Submit</button>
   </div>
 
