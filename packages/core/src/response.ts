@@ -5,6 +5,7 @@ import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
+  fireFlashEvent,
   fireInvalidEvent,
   firePrefetchedEvent,
   fireSuccessEvent,
@@ -64,6 +65,8 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
+    const previousFlash = currentPage.get().flash
+
     await this.setPage()
 
     const errors = currentPage.get().props.errors || {}
@@ -84,6 +87,13 @@ export class Response {
       router.flush(currentPage.get().url)
     }
 
+    const { flash } = currentPage.get()
+
+    if (Object.keys(flash).length > 0 && (!this.requestParams.isPartial() || !isEqual(flash, previousFlash))) {
+      fireFlashEvent(flash)
+      this.requestParams.all().onFlash(flash)
+    }
+
     fireSuccessEvent(currentPage.get())
 
     await this.requestParams.all().onSuccess(currentPage.get())
@@ -93,6 +103,11 @@ export class Response {
 
   public mergeParams(params: ActiveVisit) {
     this.requestParams.merge(params)
+  }
+
+  public getPageResponse(): Page {
+    const data = this.getDataFromResponse(this.response.data)
+    return (this.response.data = { ...data, flash: data.flash ?? {} })
   }
 
   protected async handleNonInertiaResponse() {
@@ -158,13 +173,14 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse = this.getDataFromResponse(this.response.data)
+    const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
 
     this.mergeProps(pageResponse)
+    currentPage.mergeOncePropsIntoResponse(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -327,6 +343,20 @@ export class Response {
         ...(currentPage.get().scrollProps || {}),
         ...(pageResponse.scrollProps || {}),
       }
+    }
+
+    // Preserve the existing onceProps
+    if (currentPage.hasOnceProps()) {
+      pageResponse.onceProps = {
+        ...(currentPage.get().onceProps || {}),
+        ...(pageResponse.onceProps || {}),
+      }
+    }
+
+    // Preserve flash data and merge with new flash data on non-deferred requests
+    pageResponse.flash = {
+      ...currentPage.get().flash,
+      ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
     }
   }
 

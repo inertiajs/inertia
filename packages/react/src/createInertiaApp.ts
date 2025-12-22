@@ -1,13 +1,15 @@
 import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
+  getInitialPageFromDOM,
   InertiaAppResponse,
   InertiaAppSSRResponse,
+  Page,
   PageProps,
   router,
   setupProgress,
 } from '@inertiajs/core'
-import { Fragment, ReactElement, createElement } from 'react'
+import { createElement, Fragment, ReactElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import App, { InertiaAppProps, type InertiaApp } from './App'
 import { config } from './index'
@@ -62,12 +64,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const isServer = typeof window === 'undefined'
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
-  const el = isServer ? null : document.getElementById(id)
-  const elPage =
-    isServer || !useScriptElementForInitialPage
-      ? null
-      : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
-  const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
   // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
   const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
@@ -98,7 +95,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
 
     return csrSetup({
-      el: el as HTMLElement,
+      el: document.getElementById(id)!,
       App,
       props,
     })
@@ -127,7 +124,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         createElement('script', {
           'data-page': id,
           type: 'application/json',
-          dangerouslySetInnerHTML: { __html: JSON.stringify(initialPage) },
+          dangerouslySetInnerHTML: { __html: JSON.stringify(initialPage).replace(/\//g, '\\/') },
         }),
         createElement('div', { id }, reactApp as ReactElement),
       )

@@ -1,8 +1,10 @@
 import {
+  getInitialPageFromDOM,
   router,
   setupProgress,
   type CreateInertiaAppOptionsForCSR,
   type InertiaAppResponse,
+  type Page,
   type PageProps,
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
@@ -40,18 +42,19 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const isServer = typeof window === 'undefined'
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
-  const el = isServer ? null : document.getElementById(id)
-  const elPage =
-    isServer || !useScriptElementForInitialPage
-      ? null
-      : document.querySelector(`script[data-page="${id}"][type="application/json"]`)
-  const initialPage = page || JSON.parse(elPage?.textContent || el?.dataset.page || '{}')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component),
     router.decryptHistory().catch(() => {}),
+  ]).then(([initialComponent]) => {
+    return setup({
+      el: isServer ? null : document.getElementById(id),
+      App,
+      props: { initialPage, initialComponent, resolveComponent },
+    })
   ])
 
   const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent }
@@ -67,6 +70,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
     return {
       body: useScriptElementForInitialPage
+        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${html}</div>`
+        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
         ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage)}</script><div data-server-rendered="true" id="${id}">${body}</div>`
         : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],

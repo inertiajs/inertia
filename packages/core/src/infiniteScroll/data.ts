@@ -62,8 +62,13 @@ export const useInfiniteScrollData = (options: {
 
     const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
 
-    if (rememberedState && typeof rememberedState === 'object') {
-      // Restore the remembered state so the state matches the remembered prop data...
+    if (
+      rememberedState &&
+      typeof rememberedState === 'object' &&
+      rememberedState.lastLoadedPage === getScrollPropFromCurrentPage().currentPage
+    ) {
+      // Restore remembered state only when it's consistent with the current scroll prop,
+      // which ensures back/forward navigation works while direct URL visits reset properly.
       state.previousPage = rememberedState.previousPage
       state.nextPage = rememberedState.nextPage
       state.lastLoadedPage = rememberedState.lastLoadedPage

@@ -61,7 +61,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
   if (hasDataForQueryString) {
-    const parseOptions = { ignoreQueryPrefix: true, parseArrays: false }
+    const parseOptions = { ignoreQueryPrefix: true, arrayLimit: -1 }
     url.search = qs.stringify(
       { ...qs.parse(url.search, parseOptions), ...data },
       {
@@ -104,7 +104,7 @@ export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
 }
 
 export function urlHasProtocol(url: string): boolean {
-  return /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  return /^([a-z][a-z0-9+.-]*:)?\/\/[^/]/i.test(url)
 }
 
 export function urlToString(url: URL | string, absolute: boolean): string {

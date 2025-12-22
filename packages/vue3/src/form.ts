@@ -9,13 +9,16 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
+import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType } from 'vue'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType, watch } from 'vue'
 import useForm from './useForm'
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+type FormSubmitter = HTMLElement | null
 
 const noop = () => undefined
 
@@ -113,9 +116,42 @@ const Form = defineComponent({
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
     },
+    validateFiles: {
+      type: Boolean as PropType<FormComponentProps['validateFiles']>,
+      default: false,
+    },
+    validationTimeout: {
+      type: Number as PropType<FormComponentProps['validationTimeout']>,
+      default: 1500,
+    },
+    withAllErrors: {
+      type: Boolean as PropType<FormComponentProps['withAllErrors']>,
+      default: false,
+    },
   },
   setup(props, { slots, attrs, expose }) {
+    const getTransformedData = (): Record<string, FormDataConvertible> => {
+      const [_url, data] = getUrlAndData()
+
+      return props.transform(data)
+    }
+
     const form = useForm<Record<string, any>>({})
+      .withPrecognition(
+        () => method.value,
+        () => getUrlAndData()[0],
+      )
+      .transform(getTransformedData)
+      .setValidationTimeout(props.validationTimeout)
+
+    if (props.validateFiles) {
+      form.validateFiles()
+    }
+
+    if (props.withAllErrors) {
+      form.withAllErrors()
+    }
+
     const formElement = ref()
     const method = computed(() =>
       isUrlMethodPair(props.action) ? props.action.method : (props.method.toLowerCase() as Method),
@@ -137,26 +173,42 @@ const Form = defineComponent({
 
     onMounted(() => {
       defaultData.value = getFormData()
+
+      form.defaults(getData())
+
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
 
+    watch(
+      () => props.validateFiles,
+      (value) => (value ? form.validateFiles() : form.withoutFileValidation()),
+    )
+
+    watch(
+      () => props.validationTimeout,
+      (value) => form.setValidationTimeout(value),
+    )
+
     onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
 
-    const getFormData = (): FormData => new FormData(formElement.value)
+    const getFormData = (submitter?: FormSubmitter): FormData => new FormData(formElement.value, submitter)
 
     // Convert the FormData to an object because we can't compare two FormData
     // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
     // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-    const getData = (): Record<string, FormDataConvertible> => formDataToObject(getFormData())
+    const getData = (submitter?: FormSubmitter): Record<string, FormDataConvertible> =>
+      formDataToObject(getFormData(submitter))
 
-    const submit = () => {
-      const [action, data] = mergeDataIntoQueryString(
+    const getUrlAndData = (submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] => {
+      return mergeDataIntoQueryString(
         method.value,
         isUrlMethodPair(props.action) ? props.action.url : props.action,
-        getData(),
+        getData(submitter),
         props.queryStringArrayFormat,
       )
+    }
 
+    const submit = (submitter?: FormSubmitter) => {
       const maybeReset = (resetOption: boolean | string[]) => {
         if (!resetOption) {
           return
@@ -197,16 +249,27 @@ const Form = defineComponent({
         ...props.options,
       }
 
+      const [url, data] = getUrlAndData(submitter)
+
       // We need transform because we can't override the default data with different keys (by design)
-      form.transform(() => props.transform(data)).submit(method.value, action, submitOptions)
+      form.transform(() => props.transform(data)).submit(method.value, url, submitOptions)
+
+      // Reset the transformer back so the submitter is not used for future submissions
+      form.transform(getTransformedData)
     }
 
     const reset = (...fields: string[]) => {
       resetFormFields(formElement.value, defaultData.value, fields)
+
+      form.reset(...fields)
+    }
+
+    const clearErrors = (...fields: string[]) => {
+      form.clearErrors(...fields)
     }
 
     const resetAndClearErrors = (...fields: string[]) => {
-      form.clearErrors(...fields)
+      clearErrors(...fields)
       reset(...fields)
     }
 
@@ -234,7 +297,10 @@ const Form = defineComponent({
       get recentlySuccessful() {
         return form.recentlySuccessful
       },
-      clearErrors: (...fields: string[]) => form.clearErrors(...fields),
+      get validating() {
+        return form.validating
+      },
+      clearErrors,
       resetAndClearErrors,
       setError: (fieldOrFields: string | Record<string, string>, maybeValue?: string) =>
         form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors),
@@ -246,6 +312,15 @@ const Form = defineComponent({
       defaults,
       getData,
       getFormData,
+
+      // Precognition
+      touch: form.touch,
+      valid: form.valid,
+      invalid: form.invalid,
+      touched: form.touched,
+      validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) =>
+        form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, props.headers)),
+      validator: () => form.validator(),
     }
 
     expose<FormComponentRef>(exposed)
@@ -260,7 +335,7 @@ const Form = defineComponent({
           method: method.value,
           onSubmit: (event) => {
             event.preventDefault()
-            submit()
+            submit(event.submitter)
           },
           inert: props.disableWhileProcessing && form.processing,
         },

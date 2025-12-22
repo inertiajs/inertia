@@ -273,6 +273,34 @@ test('prefetch works with deferred props without errors', async ({ page }) => {
   expect(consoleMessages.errors).toHaveLength(0)
 })
 
+test('router.reload() without only/except triggers deferred props to reload', async ({ page }) => {
+  await page.goto('/deferred-props/with-reload')
+
+  await expect(page.getByText('Loading results...')).toBeVisible()
+
+  await page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'results' && response.status() === 200,
+  )
+
+  await expect(page.getByText('Loading results...')).not.toBeVisible()
+  await expect(page.locator('#results-data')).toHaveText('Item 1-1, Item 1-2, Item 1-3')
+  await expect(page.locator('#results-page')).toHaveText('Page: 1')
+
+  const deferredResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'results' && response.status() === 200,
+  )
+
+  await page.getByRole('button', { name: 'Reload with page 2' }).click()
+
+  await expect(page.getByText('Loading results...')).toBeVisible()
+
+  await deferredResponsePromise
+
+  await expect(page.getByText('Loading results...')).not.toBeVisible()
+  await expect(page.locator('#results-data')).toHaveText('Item 2-1, Item 2-2, Item 2-3')
+  await expect(page.locator('#results-page')).toHaveText('Page: 2')
+})
+
 test('deferred props do not clear validation errors', async ({ page }) => {
   await page.goto('/deferred-props/with-errors')
 

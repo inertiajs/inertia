@@ -1,4 +1,4 @@
-import { expect, Page, Request } from '@playwright/test'
+import { expect, Page, Request, Response } from '@playwright/test'
 
 export const clickAndWaitForResponse = async (
   page: Page,
@@ -43,6 +43,8 @@ export const consoleMessages = {
 export const requests = {
   requests: [] as Request[],
   finished: [] as Request[],
+  failed: [] as Request[],
+  responses: [] as Response[],
 
   listen(page: Page) {
     this.requests = []
@@ -52,6 +54,16 @@ export const requests = {
   listenForFinished(page: Page) {
     this.finished = []
     page.on('requestfinished', (request) => this.finished.push(request))
+  },
+
+  listenForFailed(page: Page) {
+    this.failed = []
+    page.on('requestfailed', (request) => this.failed.push(request))
+  },
+
+  listenForResponses(page: Page) {
+    this.responses = []
+    page.on('response', (data) => this.responses.push(data))
   },
 }
 

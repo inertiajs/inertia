@@ -2,12 +2,13 @@ import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
-import { fireBeforeEvent } from './events'
+import { fireBeforeEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
+import Queue from './queue'
 import { Request } from './request'
 import { RequestParams } from './requestParams'
 import { RequestStream } from './requestStream'
@@ -16,12 +17,14 @@ import {
   ActiveVisit,
   ClientSideVisitOptions,
   Component,
+  FlashData,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
   Method,
   Page,
+  PageFlashData,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -49,15 +52,19 @@ export class Router {
     interruptible: false,
   })
 
+  protected clientVisitQueue = new Queue<Promise<void>>()
+
   public init<ComponentType = Component>({
     initialPage,
     resolveComponent,
     swapComponent,
+    onFlash,
   }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,
       swapComponent,
+      onFlash,
     })
 
     InitialVisit.handle()
@@ -390,27 +397,61 @@ export class Router {
     this.clientVisit(params)
   }
 
+  public flash<TFlash extends PageFlashData = PageFlashData>(
+    keyOrData: string | ((flash: FlashData) => TFlash) | TFlash,
+    value?: unknown,
+  ): void {
+    const current = currentPage.get().flash
+    let flash: PageFlashData
+
+    if (typeof keyOrData === 'function') {
+      flash = keyOrData(current)
+    } else if (typeof keyOrData === 'string') {
+      flash = { ...current, [keyOrData]: value }
+    } else if (keyOrData && Object.keys(keyOrData).length) {
+      flash = { ...current, ...keyOrData }
+    } else {
+      return
+    }
+
+    currentPage.setFlash(flash)
+
+    if (Object.keys(flash).length) {
+      fireFlashEvent(flash)
+    }
+  }
+
   protected clientVisit<TProps = Page['props']>(
     params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
+    this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
+  }
+
+  protected performClientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
+    { replace = false }: { replace?: boolean } = {},
+  ): Promise<void> {
     const current = currentPage.get()
 
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const { viewTransition, onError, onFinish, onSuccess, ...pageParams } = params
+    const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
+
+    const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 
     const page = {
       ...current,
       ...pageParams,
+      flash: flash ?? {},
       props: props as Page['props'],
     }
 
     const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
-    currentPage
+    return currentPage
       .set(page, {
         replace,
         preserveScroll,
@@ -418,15 +459,23 @@ export class Router {
         viewTransition,
       })
       .then(() => {
+        const currentFlash = currentPage.get().flash
+
+        if (Object.keys(currentFlash).length > 0) {
+          fireFlashEvent(currentFlash)
+          onFlash?.(currentFlash)
+        }
+
         const errors = currentPage.get().props.errors || {}
 
         if (Object.keys(errors).length === 0) {
-          return onSuccess?.(currentPage.get())
+          onSuccess?.(currentPage.get())
+          return
         }
 
         const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
 
-        return onError?.(scopedErrors)
+        onError?.(scopedErrors)
       })
       .finally(() => onFinish?.(params))
   }
@@ -521,6 +570,7 @@ export class Router {
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
     }

@@ -6,7 +6,12 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: 'Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.'
+      value: |
+        Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.
+
+        Before submitting, please confirm:
+        - The issue is reproducible with the **latest version** of Inertia.js
+        - You are using **supported versions** of Node.js, PHP, and other server-side dependencies
   - type: input
     attributes:
       label: '@inertiajs/svelte Version'

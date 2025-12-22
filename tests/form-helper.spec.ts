@@ -1024,3 +1024,80 @@ test.describe('React', () => {
     await expect(page.locator('#effect-count')).toHaveText('Effect count: 2')
   })
 })
+
+test.describe('Vue Options API', () => {
+  test.skip(process.env.PACKAGE !== 'vue3', 'Only for Vue')
+
+  test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/form-helper/options-api')
+  })
+
+  test('can set default form values', async ({ page }) => {
+    await expect(page.locator('#email')).toHaveValue('test@test.com')
+    await expect(page.locator('#password')).toHaveValue('')
+    await expect(page.locator('#remember')).not.toBeChecked()
+    await expect(page.locator('.email-value')).toHaveText('test@test.com')
+  })
+
+  test('v-model two-way binding works', async ({ page }) => {
+    await expect(page.locator('#email')).toHaveValue('test@test.com')
+    await expect(page.locator('.email-value')).toHaveText('test@test.com')
+
+    await page.fill('#email', 'new@email.com')
+
+    await expect(page.locator('#email')).toHaveValue('new@email.com')
+    await expect(page.locator('.email-value')).toHaveText('new@email.com')
+    await expect(page.locator('.dirty-status')).toHaveText('Form is dirty')
+
+    await page.check('#remember')
+    await expect(page.locator('#remember')).toBeChecked()
+    await expect(page.locator('.remember-value')).toHaveText('true')
+  })
+
+  test('can programmatically update form fields', async ({ page }) => {
+    await expect(page.locator('#email')).toHaveValue('test@test.com')
+
+    await page.getByRole('button', { name: 'Set email programmatically' }).click()
+
+    await expect(page.locator('#email')).toHaveValue('changed@test.com')
+    await expect(page.locator('.email-value')).toHaveText('changed@test.com')
+    await expect(page.locator('.dirty-status')).toHaveText('Form is dirty')
+  })
+
+  test('can clear form fields', async ({ page }) => {
+    await expect(page.locator('#email')).toHaveValue('test@test.com')
+
+    await page.getByRole('button', { name: 'Clear email' }).click()
+
+    await expect(page.locator('#email')).toHaveValue('')
+    await expect(page.locator('.email-value')).toHaveText('')
+    await expect(page.locator('.dirty-status')).toHaveText('Form is dirty')
+  })
+
+  test('can reset form to initial values', async ({ page }) => {
+    await page.fill('#email', 'changed@test.com')
+    await expect(page.locator('.dirty-status')).toHaveText('Form is dirty')
+
+    await page.getByRole('button', { name: 'Reset all data' }).click()
+
+    await expect(page.locator('#email')).toHaveValue('test@test.com')
+    await expect(page.locator('.email-value')).toHaveText('test@test.com')
+    await expect(page.locator('.dirty-status')).toHaveText('Form is not dirty')
+  })
+
+  test('can submit form', async ({ page }) => {
+    await page.fill('#email', 'submitted@test.com')
+    await page.fill('#password', 'secret123')
+    await page.check('#remember')
+
+    await page.getByRole('button', { name: 'Submit form' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    await expect(dump.method).toEqual('post')
+    await expect(dump.form.email).toEqual('submitted@test.com')
+    await expect(dump.form.password).toEqual('secret123')
+    await expect(dump.form.remember).toEqual(true)
+  })
+})

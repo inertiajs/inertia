@@ -1,14 +1,16 @@
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
+import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
   protected page!: Page
   protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
+  protected onFlashCallback?: (flash: Page['flash']) => void
   protected componentId = {}
   protected listeners: {
     event: PageEvent
@@ -22,10 +24,12 @@ class CurrentPage {
     initialPage,
     swapComponent,
     resolveComponent,
+    onFlash,
   }: RouterInitParams<ComponentType>) {
-    this.page = initialPage
+    this.page = { ...initialPage, flash: initialPage.flash ?? {} }
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
+    this.onFlashCallback = onFlash
 
     return this
   }
@@ -70,12 +74,15 @@ class CurrentPage {
 
       const isServer = typeof window === 'undefined'
       const location = !isServer ? window.location : new URL(page.url)
-      const scrollRegions = !isServer && preserveScroll ? history.getScrollRegions() : []
+      const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
-      return new Promise((resolve) => {
-        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
-      }).then(() => {
+      // Clear flash data from the page object, we don't want it when navigating back/forward...
+      const pageForHistory = { ...page, flash: {} }
+
+      return new Promise<void>((resolve) =>
+        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
+      ).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
         if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
@@ -85,6 +92,10 @@ class CurrentPage {
 
         this.page = page
         this.cleared = false
+
+        if (this.hasOnceProps()) {
+          prefetchedRequests.updateCachedOncePropsFromCurrentPage()
+        }
 
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
@@ -157,8 +168,21 @@ class CurrentPage {
     return this.page
   }
 
+  public getWithoutFlashData(): Page {
+    return { ...this.page, flash: {} }
+  }
+
+  public hasOnceProps(): boolean {
+    return Object.keys(this.page.onceProps ?? {}).length > 0
+  }
+
   public merge(data: Partial<Page>): void {
     this.page = { ...this.page, ...data }
+  }
+
+  public setFlash(flash: FlashData): void {
+    this.page = { ...this.page, flash }
+    this.onFlashCallback?.(flash)
   }
 
   public setUrlHash(hash: string): void {
@@ -215,6 +239,21 @@ class CurrentPage {
 
   public fireEventsFor(event: PageEvent): void {
     this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback())
+  }
+
+  public mergeOncePropsIntoResponse(response: Page, { force = false }: { force?: boolean } = {}): void {
+    Object.entries(response.onceProps ?? {}).forEach(([key, onceProp]) => {
+      const existingOnceProp = this.page.onceProps?.[key]
+
+      if (existingOnceProp === undefined) {
+        return
+      }
+
+      if (force || response.props[onceProp.prop] === undefined) {
+        response.props[onceProp.prop] = this.page.props[existingOnceProp.prop]
+        response.onceProps![key].expiresAt = existingOnceProp.expiresAt
+      }
+    })
   }
 }
 

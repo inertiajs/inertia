@@ -28,6 +28,14 @@
   function setCurrentAsDefaults() {
     formRef?.defaults()
   }
+
+  function callPrecognitionMethods() {
+    const validator = formRef?.validator()
+
+    if (validator && !formRef?.touched('company') && !formRef?.valid('company')) {
+      formRef?.validate({ only: ['company'] })
+    }
+  }
 </script>
 
 <div>

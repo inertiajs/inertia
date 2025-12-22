@@ -9,7 +9,9 @@
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
+    UseFormUtils,
   } from '@inertiajs/core'
+  import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
   import { onMount } from 'svelte'
   import useForm from '../useForm.svelte'
@@ -80,23 +82,27 @@
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
 
-  export function getFormData(): FormData {
-    return new FormData(formElement)
+  export function getFormData(submitter?: FormSubmitter): FormData {
+    return new FormData(formElement, submitter)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  export function getData(): Record<string, FormDataConvertible> {
-    return formDataToObject(getFormData())
+  export function getData(submitter?: FormSubmitter): Record<string, FormDataConvertible> {
+    return formDataToObject(getFormData(submitter))
+  }
+
+  function getUrlAndData(submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] {
+    return mergeDataIntoQueryString(_method, _action, getData(submitter), queryStringArrayFormat)
   }
 
   function updateDirtyState(event: Event) {
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
-  export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+  export function submit(submitter?: FormSubmitter) {
+    const [url, data] = getUrlAndData(submitter)
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -153,9 +159,9 @@
     form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
   }
 
-  function handleSubmit(event: Event) {
+  function handleSubmit(event: SubmitEvent) {
     event.preventDefault()
-    submit()
+    submit(event.submitter)
   }
 
   function handleReset(event: Event) {
@@ -168,6 +174,8 @@
 
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
+
+    form.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
@@ -195,10 +203,37 @@
     isDirty = false
   }
 
+  export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
+    return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
+  }
+
+  export function valid(field: string) {
+    return form.valid(field)
+  }
+
+  export function invalid(field: string) {
+    return form.invalid(field)
+  }
+
+  export function touch(field: string | NamedInputEvent | string[], ...fields: string[]) {
+    return form.touch(field, ...fields)
+  }
+
+  export function touched(field?: string) {
+    return form.touched(field)
+  }
+
+  export function validator(): Validator {
+    return form.validator()
+  }
+
   onMount(() => {
     defaultData = getFormData()
 
+    form.defaults(getData())
+
     const formEvents = ['input', 'change', 'reset']
+
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
     return () => {

@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -7,8 +8,13 @@ declare module 'axios' {
   }
 }
 
+export interface PageFlashData {
+  [key: string]: unknown
+}
+
 export type DefaultInertiaConfig = {
   errorValueType: string
+  flashDataType: PageFlashData
   sharedPageProps: PageProps
 }
 /**
@@ -21,9 +27,11 @@ export type DefaultInertiaConfig = {
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
+ *     flashDataType: {
+ *       toast?: { type: 'success' | 'error', message: string }
+ *     }
  *     sharedPageProps: {
  *       auth: { user: User | null }
- *       flash: { success?: string; error?: string }
  *     }
  *   }
  * }
@@ -34,6 +42,7 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
   ? InertiaConfig[Key]
   : DefaultInertiaConfig[Key]
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
+export type FlashData = InertiaConfigFor<'flashDataType'>
 export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
 
 export type Errors = Record<string, ErrorValue>
@@ -167,12 +176,20 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   version: string | null
   clearHistory: boolean
   encryptHistory: boolean
-  deferredProps?: Record<string, VisitOptions['only']>
+  deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   mergeProps?: string[]
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  flash: FlashData
+  onceProps?: Record<
+    string,
+    {
+      prop: keyof PageProps
+      expiresAt?: number | null
+    }
+  >
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -187,6 +204,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   component?: Page['component']
   url?: Page['url']
   props?: ((props: TProps) => PageProps) | PageProps
+  flash?: ((flash: FlashData) => PageFlashData) | PageFlashData
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
@@ -195,6 +213,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
+  onFlash?: (flash: FlashData) => void
   onSuccess?: (page: Page) => void
 }
 
@@ -340,6 +359,13 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
+  flash: {
+    parameters: [Page['flash']]
+    details: {
+      flash: Page['flash']
+    }
+    result: void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -386,6 +412,7 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancel: GlobalEventCallback<'cancel', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
+  onFlash: GlobalEventCallback<'flash', T>
   onPrefetched: GlobalEventCallback<'prefetched', T>
   onPrefetching: GlobalEventCallback<'prefetching', T>
 }
@@ -408,6 +435,7 @@ export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
   swapComponent: PageHandler<ComponentType>
+  onFlash?: (flash: Page['flash']) => void
 }
 
 export type PendingVisitOptions = {
@@ -564,6 +592,7 @@ export type PrefetchCancellationToken = {
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
+  expiresAt: number
   singleUse: boolean
   inFlight: false
   tags: string[]
@@ -592,9 +621,26 @@ export type ProgressSettings = {
 
 export type UrlMethodPair = { url: string; method: Method }
 
+export type UseFormTransformCallback<TForm> = (data: TForm) => object
+export type UseFormWithPrecognitionArguments =
+  | [Method | (() => Method), string | (() => string)]
+  | [UrlMethodPair | (() => UrlMethodPair)]
+
+type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormPrecognitionArguments<TForm> =
+  | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
+  | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
+export type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
+
+export type UseFormSubmitOptions = Omit<VisitOptions, 'data'>
+export type UseFormSubmitArguments =
+  | [Method, string, UseFormSubmitOptions?]
+  | [UrlMethodPair, UseFormSubmitOptions?]
+  | [UseFormSubmitOptions?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
 export type FormComponentProps = Partial<
@@ -610,6 +656,9 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  validateFiles?: boolean
+  validationTimeout?: number
+  withAllErrors?: boolean
 }
 
 export type FormComponentMethods = {
@@ -622,6 +671,12 @@ export type FormComponentMethods = {
   defaults: () => void
   getData: () => Record<string, FormDataConvertible>
   getFormData: () => FormData
+  valid: (field: string) => boolean
+  invalid: (field: string) => boolean
+  validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig): void
+  touch: (...fields: string[]) => void
+  touched(field?: string): boolean
+  validator: () => Validator
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
@@ -634,6 +689,7 @@ export type FormComponentState = {
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validating: boolean
 }
 
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState
@@ -739,5 +795,6 @@ declare global {
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:flash': GlobalEvent<'flash'>
   }
 }

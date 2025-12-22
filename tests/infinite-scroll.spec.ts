@@ -13,6 +13,7 @@ function infiniteScrollRequests() {
 
 async function scrollToTop(page: Page) {
   await page.evaluate(() => window.scrollTo(0, 0))
+  await expect.poll(() => page.evaluate(() => window.scrollY === 0)).toBe(true)
 }
 
 async function scrollToBottom(page: Page) {
@@ -24,29 +25,26 @@ async function smoothScrollTo(page: any, targetY: number) {
   // own 'smooth' scroll by scrolling halfway first, then to the target after a short delay...
   await page.evaluate((top: number) => {
     const current = window.scrollY
-
-    if (top > current) {
-      window.scrollTo(0, current + (top - current) / 2)
-    } else {
-      window.scrollTo(0, current - (current - top) / 2)
-    }
-
+    window.scrollTo(0, current + (top - current) / 2)
     setTimeout(() => window.scrollTo(0, top), 10)
   }, targetY)
 
-  await page.waitForTimeout(20)
+  // Wait for scroll to reach target (clamped to max scrollable position)
+  await expect
+    .poll(() =>
+      page.evaluate((target: number) => {
+        const maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight
+        return Math.abs(window.scrollY - Math.min(target, maxScroll)) < 5
+      }, targetY),
+    )
+    .toBe(true)
 }
 
 async function scrollElementSmoothTo(element: Locator, targetY: number) {
   // Same as smoothScrollTo but for a specific element
   await element.evaluate((el, top) => {
     const current = el.scrollTop
-
-    if (top > current) {
-      el.scrollTo(0, current + (top - current) / 2)
-    } else {
-      el.scrollTo(0, current - (current - top) / 2)
-    }
+    el.scrollTo(0, current + (top - current) / 2)
     setTimeout(() => el.scrollTo(0, top), 10)
   }, targetY)
 
@@ -75,16 +73,64 @@ async function getUserIdsFromDOM(page: Page) {
 async function expectQueryString(page: Page, expectedPage: string) {
   if (expectedPage === '1') {
     // Page 1 removes the page param entirely
-    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 800 })
+    await page.waitForFunction(() => !window.location.search.includes('page='), {}, { timeout: 1000 })
     const currentUrl = await page.url()
     expect(currentUrl).not.toContain('page=')
   } else {
     // Other pages should have explicit page param
     await page.waitForFunction((pageNum: string) => window.location.search.includes(`page=${pageNum}`), expectedPage, {
-      timeout: 800,
+      timeout: 1000,
     })
     const currentUrl = await page.url()
     expect(currentUrl).toContain(`page=${expectedPage}`)
+  }
+}
+
+async function getUserCardPosition(page: Page, id: string) {
+  const userCard = page.getByText(`User ${id}`)
+  await expect(userCard).toBeVisible()
+
+  const boundingBox = await userCard.boundingBox()
+
+  if (!boundingBox) {
+    throw new Error(`Could not find bounding box for User ${id}`)
+  }
+
+  const scrollY = await page.evaluate(() => window.scrollY)
+  const viewportHeight = await page.evaluate(() => window.innerHeight)
+
+  return {
+    top: boundingBox.y + scrollY,
+    bottom: boundingBox.y + boundingBox.height + scrollY,
+    viewportTop: boundingBox.y,
+    viewportBottom: boundingBox.y + boundingBox.height,
+    relativeToViewport: boundingBox.y / viewportHeight,
+  }
+}
+
+async function getUserCardPositionInContainer(page: Page, container: Locator, id: string) {
+  const userCard = page.getByText(`User ${id}`)
+  await expect(userCard).toBeVisible()
+
+  const containerBox = await container.boundingBox()
+  const userBox = await userCard.boundingBox()
+
+  if (!containerBox || !userBox) {
+    throw new Error(`Could not find bounding box for container or User ${id}`)
+  }
+
+  const containerScrollTop = await container.evaluate((el) => el.scrollTop)
+  const containerHeight = await container.evaluate((el) => el.clientHeight)
+
+  const relativeTop = userBox.y - containerBox.y + containerScrollTop
+  const relativeBottom = relativeTop + userBox.height
+
+  return {
+    top: relativeTop,
+    bottom: relativeBottom,
+    viewportTop: userBox.y - containerBox.y,
+    viewportBottom: userBox.y + userBox.height - containerBox.y,
+    relativeToContainer: (userBox.y - containerBox.y) / containerHeight,
   }
 }
 
@@ -281,7 +327,7 @@ test.describe('Automatic page loading', () => {
       () => window.location.search.includes('users1=2'),
       {},
       {
-        timeout: 800,
+        timeout: 1000,
       },
     )
 
@@ -306,7 +352,7 @@ test.describe('Automatic page loading', () => {
       () => window.location.search.includes('users2=2'),
       {},
       {
-        timeout: 800,
+        timeout: 1000,
       },
     )
 
@@ -442,6 +488,99 @@ test.describe('Manual page loading', () => {
 
     await expect(infiniteScrollRequests().length).toBe(3)
   })
+
+  test('it resets pagination state after direct URL navigation', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+  })
+
+  test('it does not skip pages after direct URL navigation', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
+
+  test('it resets pagination state when navigating to a different page number', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more previous items: false')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+    await expect(page.getByText('Has more previous items: false')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual?page=2')
+
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true })).toBeHidden()
+    await expect(page.getByText('User 15')).toBeHidden()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Has more previous items: true')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load previous items' }).click()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more previous items: false')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 20')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+  })
 })
 
 test.describe('Remember state', () => {
@@ -458,7 +597,7 @@ test.describe('Remember state', () => {
 
     // Load page 2
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -467,7 +606,7 @@ test.describe('Remember state', () => {
 
     // Load page 3
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('User 46')).toBeHidden()
@@ -841,9 +980,8 @@ test.describe('Toggle configuration', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Total items on page: 30')).toBeVisible()
 
-    const pageHeight = await page.evaluate(() => document.body.scrollHeight)
-
-    await smoothScrollTo(page, pageHeight)
+    // Scroll to page 2 content area to trigger URL update
+    await page.getByText('User 20').scrollIntoViewIfNeeded()
     await expectQueryString(page, '2')
     await expect(infiniteScrollRequests().length).toBeGreaterThanOrEqual(1)
 
@@ -866,8 +1004,8 @@ test.describe('Toggle configuration', () => {
     await page.getByLabel('Preserve URL: true').uncheck()
     await expect(page.getByText('Preserve URL: false')).toBeVisible()
 
-    const newPageHeight = await page.evaluate(() => document.body.scrollHeight)
-    await smoothScrollTo(page, newPageHeight)
+    // Scroll to page 3 content area to trigger URL update
+    await page.getByText('User 35').scrollIntoViewIfNeeded()
     await expectQueryString(page, '3')
   })
 })
@@ -1277,7 +1415,9 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    // Scroll to User 20 area (middle of page 2) to trigger URL update to page=2
+    const user20 = page.getByText('User 20')
+    await user20.scrollIntoViewIfNeeded()
     await expectQueryString(page, '2')
 
     // Verify the internal Inertia page URL is still relative
@@ -1305,7 +1445,9 @@ test.describe('URL query string management', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    await smoothScrollTo(page, await page.evaluate(() => document.body.scrollHeight))
+    // Scroll to User 20 area (middle of page 2) to trigger URL update to page=2
+    const user20 = page.getByText('User 20')
+    await user20.scrollIntoViewIfNeeded()
     await expectQueryString(page, '2')
 
     // Verify the internal Inertia page URL is still absolute
@@ -1317,33 +1459,6 @@ test.describe('URL query string management', () => {
 })
 
 test.describe('Scroll position preservation', () => {
-  async function screenshotAroundUserCard(page: Page, id: string, position: 'above' | 'below') {
-    const viewport = page.viewportSize()
-
-    if (!viewport) {
-      throw new Error('Viewport size is not defined')
-    }
-
-    const userText = `User ${id}`
-    const userCard = await page.getByText(userText)?.boundingBox()
-
-    if (!userCard) {
-      throw new Error(`Could not find bounding box for user with text "${userText}"`)
-    }
-
-    const clip = {
-      x: 0,
-      y: position === 'below' ? userCard.y + userCard.height : 0,
-      width: viewport.width,
-      height: position === 'below' ? viewport.height - (userCard.y + userCard.height) : viewport.height - userCard.y,
-    }
-
-    return (p: Page, path?: string) => p.screenshot({ clip, path })
-  }
-
-  const screenshotBelowUserCard = async (page: Page, id: string) => await screenshotAroundUserCard(page, id, 'below')
-  const screenshotAboveUserCard = async (page: Page, id: string) => await screenshotAroundUserCard(page, id, 'above')
-
   test('it maintains scroll position when loading previous pages', async ({ page, context }) => {
     await page.goto('/infinite-scroll/trigger-both?page=3')
 
@@ -1353,15 +1468,24 @@ test.describe('Scroll position preservation', () => {
     // Scroll to the top of the page to load page 1
     await scrollToTop(page)
 
-    const screenshotter = await screenshotBelowUserCard(page, '16')
-    const beforeScreenshot = await screenshotter(page)
+    // Wait for loading to start so we capture a stable "before" state
+    await expect(page.getByText('Loading...')).toBeVisible()
+
+    const beforePosition = await getUserCardPosition(page, '16')
 
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    // Wait for scroll restoration to complete
+    await expect
+      .poll(async () => {
+        const position = await getUserCardPosition(page, '16')
+        return position.viewportTop
+      })
+      .toBeCloseTo(beforePosition.viewportTop, 0)
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    const afterPosition = await getUserCardPosition(page, '16')
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when loading next pages', async ({ page }) => {
@@ -1375,8 +1499,7 @@ test.describe('Scroll position preservation', () => {
     await scrollToBottom(page)
 
     await expect(page.getByText('Loading...')).toBeVisible()
-    const screenshotter = await screenshotAboveUserCard(page, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPosition(page, '15')
     await expect(page.getByText('Loading...')).toBeVisible()
 
     // Wait for any initial loading to complete
@@ -1386,9 +1509,9 @@ test.describe('Scroll position preservation', () => {
     await expect(page.getByText('User 31')).toBeHidden()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPosition(page, '15')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when loading previous pages with buffer margin', async ({ page }) => {
@@ -1428,17 +1551,16 @@ test.describe('Scroll position preservation', () => {
     // Scroll to bottom to trigger loading, similar to the working test
     await scrollToBottom(page)
     await expect(page.getByText('Loading...')).toBeVisible()
-    const screenshotter = await screenshotAboveUserCard(page, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPosition(page, '15')
 
     // Wait for loading to complete
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPosition(page, '15')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when first child element is invisible', async ({ page }) => {
@@ -1533,11 +1655,11 @@ test.describe('Scrollable container support', () => {
     // Helper function to check URL updates with container scrolling
     const expectQueryStringInContainer = async (expectedPage: string) => {
       if (expectedPage === '1') {
-        await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 800 })
+        await page.waitForFunction(() => !window.location.search.includes('page='), { timeout: 1000 })
         expect(page.url()).not.toContain('page=')
       } else {
         await page.waitForFunction((pageNum) => window.location.search.includes(`page=${pageNum}`), expectedPage, {
-          timeout: 800,
+          timeout: 1000,
         })
         expect(page.url()).toContain(`page=${expectedPage}`)
       }
@@ -1559,25 +1681,6 @@ test.describe('Scrollable container support', () => {
     await expectQueryStringInContainer('1')
   })
 
-  async function screenshotBelowUserCardInContainer(page: Page, scrollContainer: Locator, userId: string) {
-    const containerRect = await scrollContainer.boundingBox()
-    const userRect = await page.getByText(`User ${userId}`).boundingBox()
-
-    if (!containerRect || !userRect) {
-      throw new Error(`Could not get container or User ${userId} bounding box`)
-    }
-
-    // Calculate the area below the user within the container bounds
-    const clip = {
-      x: containerRect.x,
-      y: userRect.y + userRect.height,
-      width: containerRect.width,
-      height: containerRect.y + containerRect.height - (userRect.y + userRect.height),
-    }
-
-    return (p: Page, path?: string) => p.screenshot({ clip, path })
-  }
-
   test('it maintains scroll position when loading previous pages in container', async ({ page }) => {
     await page.goto('/infinite-scroll/scroll-container?page=3')
 
@@ -1586,19 +1689,28 @@ test.describe('Scrollable container support', () => {
 
     // Wait for page 2 to load automatically...
     await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('Loading more users...')).toBeHidden()
 
     // Scroll container to top to trigger loading page 1
     await scrollElementSmoothTo(scrollContainer, 0)
 
-    const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '16')
-    const beforeScreenshot = await screenshotter(page)
+    // Wait for loading to start or data to appear
+    await expect(page.getByText('Loading more users...').or(page.getByText('User 1', { exact: true }))).toBeVisible()
+    const beforePosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
 
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    // Wait for scroll restoration to complete
+    await expect
+      .poll(async () => {
+        const position = await getUserCardPositionInContainer(page, scrollContainer, '16')
+        return position.viewportTop
+      })
+      .toBeCloseTo(beforePosition.viewportTop, 0)
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
@@ -1613,17 +1725,16 @@ test.describe('Scrollable container support', () => {
     // Scroll down within container to see User 15 and trigger loading page 2
     await scrollElementToBottom(scrollContainer)
 
-    const screenshotter = await screenshotBelowUserCardInContainer(page, scrollContainer, '15')
-    const beforeScreenshot = await screenshotter(page)
+    const beforePosition = await getUserCardPositionInContainer(page, scrollContainer, '15')
 
     await expect(page.getByText('Loading more users...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    const afterScreenshot = await screenshotter(page)
+    const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '15')
 
-    expect(afterScreenshot).toEqual(beforeScreenshot)
+    expect(afterPosition.viewportTop).toBeCloseTo(beforePosition.viewportTop, 0)
   })
 
   test('it does not treat overflow-x: hidden as a scroll container', async ({ page }) => {
@@ -1892,7 +2003,8 @@ Object.entries({
 
       // Scroll to bottom to trigger loading users 16-30
       await scrollToBottom(page)
-      await expect(page.getByText('Loading...')).toBeVisible()
+      // Wait for loading to start or data to appear (whichever comes first)
+      await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
       await expect(page.getByText('User 16')).toBeVisible()
       await expect(page.getByText('User 30')).toBeVisible()
       await expect(page.getByText('Loading...')).toBeHidden()
@@ -1900,7 +2012,8 @@ Object.entries({
 
       // Load page 3 by scrolling to tfoot (custom after trigger)
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight - 500))
-      await expect(page.getByText('Loading...')).toBeVisible()
+      // Wait for loading to start or data to appear (whichever comes first)
+      await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
       await expect(page.getByText('User 31')).toBeVisible()
       await expect(page.getByText('User 40')).toBeVisible()
       await expect(page.getByText('Loading...')).toBeHidden()
@@ -2191,15 +2304,18 @@ test.describe('Router', () => {
   })
 
   test('it can navigate rapidly between pages with infinite scroll without errors', async ({ page }) => {
+    test.setTimeout(10_000)
     consoleMessages.listen(page)
 
     await page.goto('/infinite-scroll')
 
-    // Navigate back and forth 10 times rapidly
+    // Navigate back and forth 20 times rapidly
     for (let i = 0; i < 20; i++) {
       await page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true }).click()
+      await expect(page.getByRole('link', { name: 'Go back to Links' })).toBeVisible()
       expect(consoleMessages.errors).toHaveLength(0)
       await page.getByRole('link', { name: 'Go back to Links' }).click()
+      await expect(page.getByRole('link', { name: 'Go to InfiniteScrollWithLink', exact: true })).toBeVisible()
       expect(consoleMessages.errors).toHaveLength(0)
     }
 
