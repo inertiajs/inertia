@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
 
-defineProps({
-  pageNumber: Number,
-  largeData: String,
-})
+defineProps<{
+  pageNumber: number
+  largeData: string
+}>()
 </script>
 
 <template>
