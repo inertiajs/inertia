@@ -2225,6 +2225,25 @@ Object.entries({
   })
 })
 
+test.describe('Reset triggers', () => {
+  test('it auto-loads additional pages after clearing search filter', async ({ page }) => {
+    await page.goto('/infinite-scroll/filtering-reset')
+
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible({ timeout: 3000 })
+
+    await page.locator('input').nth(0).fill('adelle')
+    await expect(page.getByText('Current search: adelle')).toBeVisible()
+
+    const userIds = await getUserIdsFromDOM(page)
+    expect(userIds.length).toBe(1)
+
+    await page.locator('input').nth(0).fill('')
+    await expect(page.getByText('Current search: none')).toBeVisible()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible({ timeout: 3000 })
+  })
+})
+
 test.describe('Router', () => {
   test('it can reload unrelated props without affecting infinite scroll', async ({ page }) => {
     await page.goto('/infinite-scroll/reload-unrelated')
