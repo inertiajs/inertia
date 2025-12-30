@@ -1696,6 +1696,44 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
   )
 })
 
+app.get('/infinite-scroll/filtering-reset', (req, res) => {
+  const search = req.query.search || ''
+
+  let users = getUserNames()
+
+  if (search) {
+    users = users.filter((user) => user.toLowerCase().includes(search.toLowerCase()))
+  }
+
+  const perPage = 15
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, perPage, users.length)
+
+  if (page > 1) {
+    users = users.slice((page - 1) * perPage, page * perPage)
+  }
+
+  paginated.data = paginated.data.map((user, i) => ({ ...user, name: users[i] }))
+
+  if (req.headers['x-inertia-reset']) {
+    scrollProp.reset = true
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/FilteringReset',
+        props: { users: paginated, search },
+        ...(req.headers['x-inertia-reset'] ? {} : { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }),
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
 app.post('/view-transition/form-errors', (req, res) =>
   inertia.render(req, res, {
     component: 'ViewTransition/FormErrors',
