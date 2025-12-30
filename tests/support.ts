@@ -1,5 +1,7 @@
 import { expect, Page, Request, Response } from '@playwright/test'
 
+export const isWebKit = (page: Page) => page.context().browser()?.browserType().name() === 'webkit'
+
 export const clickAndWaitForResponse = async (
   page: Page,
   buttonText: string,

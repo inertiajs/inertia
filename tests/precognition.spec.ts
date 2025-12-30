@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { requests, shouldBeDumpPage } from './support'
+import { isWebKit, requests, shouldBeDumpPage } from './support'
 
 const integrations = ['form-component', 'form-helper']
 
@@ -530,8 +530,7 @@ integrations.forEach((integration) => {
       expect(requests.responses).toHaveLength(1)
 
       const cancelledRequestError = await requests.failed[0].failure()?.errorText
-      const isWebKit = page.context().browser()?.browserType().name() === 'webkit'
-      expect(cancelledRequestError).toBe(isWebKit ? 'cancelled' : 'net::ERR_ABORTED')
+      expect(cancelledRequestError).toBe(isWebKit(page) ? 'cancelled' : 'net::ERR_ABORTED')
     })
 
     test(prefix + 'validates dynamic array inputs after first validation', async ({ page }) => {
