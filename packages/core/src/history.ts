@@ -243,11 +243,7 @@ class History {
   }
 
   public browserHasHistoryEntry(): boolean {
-    if (typeof window === 'undefined') {
-      return false
-    }
-
-    return !!window.history.state?.page
+    return !isServer && !!window.history.state?.page
   }
 
   public clear() {
