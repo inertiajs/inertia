@@ -242,8 +242,8 @@ class History {
     }
   }
 
-  public hasAnyState(): boolean {
-    return !!this.getAllState()
+  public browserHasHistoryEntry(): boolean {
+    return !isServer && !!window.history.state?.page
   }
 
   public clear() {
