@@ -21,7 +21,7 @@ if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
 }
 
-app.get('/non-inertia', (req, res) =>
+app.all('/non-inertia', (req, res) =>
   res.status(200).send(`
     <!DOCTYPE html>
     <html>
