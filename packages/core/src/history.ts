@@ -193,6 +193,28 @@ class History {
     })
   }
 
+  protected isHistoryThrottleError(error: unknown): error is Error & { name: 'SecurityError' } {
+    return (
+      error instanceof Error &&
+      error.name === 'SecurityError' &&
+      (error.message.includes('history.pushState') || error.message.includes('history.replaceState'))
+    )
+  }
+
+  protected withThrottleProtection<T = void>(cb: () => T): Promise<T | undefined> {
+    return Promise.resolve().then(() => {
+      try {
+        return cb()
+      } catch (error) {
+        if (!this.isHistoryThrottleError(error)) {
+          throw error
+        }
+
+        console.error(error.message)
+      }
+    })
+  }
+
   protected doReplaceState(
     data: {
       page: Page | ArrayBuffer
@@ -201,7 +223,7 @@ class History {
     },
     url?: string,
   ): Promise<void> {
-    return Promise.resolve().then(() =>
+    return this.withThrottleProtection(() => {
       window.history.replaceState(
         {
           ...data,
@@ -210,8 +232,8 @@ class History {
         },
         '',
         url,
-      ),
-    )
+      )
+    })
   }
 
   protected doPushState(
@@ -222,7 +244,7 @@ class History {
     },
     url: string,
   ): Promise<void> {
-    return Promise.resolve().then(() => window.history.pushState(data, '', url))
+    return this.withThrottleProtection(() => window.history.pushState(data, '', url))
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
