@@ -1,5 +1,5 @@
-<script>
-  function navigate(e) {
+<script lang="ts">
+  function navigate(e: MouseEvent) {
     e.preventDefault()
     window.history.replaceState({ foo: {} }, '')
     window.location.href = '/non-inertia'
