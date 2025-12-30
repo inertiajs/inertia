@@ -243,7 +243,11 @@ class History {
   }
 
   public hasAnyState(): boolean {
-    return !!this.getAllState()
+    if (typeof window === 'undefined') {
+      return false
+    }
+
+    return !!window.history.state?.page
   }
 
   public clear() {
