@@ -24,7 +24,7 @@ export class InitialVisit {
   }
 
   protected static handleBackForward(): boolean {
-    if (!navigationType.isBackForward() || !history.hasAnyState()) {
+    if (!navigationType.isBackForward() || !history.browserHasHistoryEntry()) {
       return false
     }
 

@@ -242,7 +242,7 @@ class History {
     }
   }
 
-  public hasAnyState(): boolean {
+  public browserHasHistoryEntry(): boolean {
     if (typeof window === 'undefined') {
       return false
     }
