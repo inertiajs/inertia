@@ -674,6 +674,20 @@ app.get('/history/version/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/history-quota/:pageNumber', (req, res) => {
+  const pageNumber = parseInt(req.params.pageNumber)
+  // Generate ~10MB of data (10 * 1024 * 1024 characters)
+  const largeData = 'x'.repeat(10 * 1024 * 1024)
+
+  inertia.render(req, res, {
+    component: 'HistoryQuota/Page',
+    props: {
+      pageNumber,
+      largeData,
+    },
+  })
+})
+
 app.get('/when-visible', (req, res) => {
   const page = () =>
     inertia.render(req, res, {

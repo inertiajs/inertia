@@ -72,9 +72,22 @@ export class Router {
     eventHandler.init()
 
     eventHandler.on('missingHistoryItem', () => {
-      if (typeof window !== 'undefined') {
-        this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
+      if (typeof window === 'undefined') {
+        return
       }
+
+      // Capture scroll position before the visit since history.state will be replaced
+      const scrollPosition = history.getDocumentScrollPosition()
+
+      this.visit(window.location.href, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+        onSuccess: () => {
+          // Restore document scroll - scroll regions are handled by preserveScroll
+          window.scrollTo(scrollPosition.left, scrollPosition.top)
+        },
+      })
     })
 
     eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {

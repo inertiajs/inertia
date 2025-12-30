@@ -51,7 +51,7 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
-        const doPush = () => this.doPushState({ page: data }, page.url).then(() => cb?.())
+        const doPush = () => this.doPushState(data, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
           return new Promise((resolve) => {
@@ -201,6 +201,10 @@ class History {
     )
   }
 
+  protected isQuotaExceededError(error: unknown): error is Error & { name: 'QuotaExceededError' } {
+    return error instanceof Error && error.name === 'QuotaExceededError'
+  }
+
   protected withThrottleProtection<T = void>(cb: () => T): Promise<T | undefined> {
     return Promise.resolve().then(() => {
       try {
@@ -223,28 +227,42 @@ class History {
     },
     url?: string,
   ): Promise<void> {
+    const stateData = {
+      page: data.page,
+      scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+      documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+    }
+
     return this.withThrottleProtection(() => {
-      window.history.replaceState(
-        {
-          ...data,
-          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-        },
-        '',
-        url,
-      )
+      try {
+        window.history.replaceState(stateData, '', url)
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        // Quota exceeded: store minimal state without page data
+        // The page will be refetched on back/forward navigation
+        const { page, ...withoutPage } = stateData
+        window.history.replaceState(withoutPage, '', url)
+      }
     })
   }
 
-  protected doPushState(
-    data: {
-      page: Page | ArrayBuffer
-      scrollRegions?: ScrollRegion[]
-      documentScrollPosition?: ScrollRegion
-    },
-    url: string,
-  ): Promise<void> {
-    return this.withThrottleProtection(() => window.history.pushState(data, '', url))
+  protected doPushState(page: Page | ArrayBuffer, url: string): Promise<void> {
+    return this.withThrottleProtection(() => {
+      try {
+        window.history.pushState({ page }, '', url)
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        // Quota exceeded: store minimal state without page data
+        // The page will be refetched on back/forward navigation
+        window.history.pushState({}, '', url)
+      }
+    })
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
