@@ -21,8 +21,18 @@ if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
 }
 
-// Used because Cypress does not allow you to navigate to a different origin URL within a single test.
-app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
+app.all('/non-inertia', (req, res) =>
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head><title>Non-Inertia Page</title></head>
+      <body>
+        <h1>This is a page that does not have the Inertia app loaded.</h1>
+        <p><a href="/navigate-non-inertia">Go to Inertia page</a></p>
+      </body>
+    </html>
+  `),
+)
 
 // SSR test routes (only rendered with SSR when SSR=true)
 app.get('/ssr/page1', (req, res) =>
@@ -1703,6 +1713,44 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
       inertia.render(req, res, {
         component: 'InfiniteScroll/Filtering',
         props: { users: paginated, filter, search, preserveState: req.params.preserveState === 'preserve-state' },
+        ...(req.headers['x-inertia-reset'] ? {} : { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }),
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+app.get('/infinite-scroll/filtering-reset', (req, res) => {
+  const search = req.query.search || ''
+
+  let users = getUserNames()
+
+  if (search) {
+    users = users.filter((user) => user.toLowerCase().includes(search.toLowerCase()))
+  }
+
+  const perPage = 15
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, perPage, users.length)
+
+  if (page > 1) {
+    users = users.slice((page - 1) * perPage, page * perPage)
+  }
+
+  paginated.data = paginated.data.map((user, i) => ({ ...user, name: users[i] }))
+
+  if (req.headers['x-inertia-reset']) {
+    scrollProp.reset = true
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/FilteringReset',
+        props: { users: paginated, search },
         ...(req.headers['x-inertia-reset'] ? {} : { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }),
         scrollProps: { users: scrollProp },
       }),
