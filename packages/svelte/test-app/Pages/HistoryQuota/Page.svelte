@@ -10,7 +10,7 @@
   <p>Data size: {largeData?.length?.toLocaleString()} bytes</p>
 
   <div style="margin-top: 20px">
-    {#each Array.from({ length: 20 }, (_, i) => i + 1) as n}
+    {#each Array.from({ length: 20 }, (_, i) => i + 1) as n (n)}
       <Link href={`/history-quota/${n}`} style="margin-right: 10px">
         Page {n}
       </Link>
