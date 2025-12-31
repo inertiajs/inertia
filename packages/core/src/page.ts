@@ -1,6 +1,6 @@
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
-import { history, HistoryQuotaExceededError } from './history'
+import { history } from './history'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
 import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
@@ -19,6 +19,7 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
   protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
+  protected historyQuotaExceeded = false
 
   public init<ComponentType = Component>({
     initialPage,
@@ -30,6 +31,10 @@ class CurrentPage {
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
+
+    eventHandler.on('historyQuotaExceeded', () => {
+      this.historyQuotaExceeded = true
+    })
 
     return this
   }
@@ -80,25 +85,9 @@ class CurrentPage {
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
 
-      return new Promise<boolean>((resolve) => {
-        const promise =
-          (replace ? history.replaceState(pageForHistory) : history.pushState(pageForHistory)) ?? Promise.resolve()
-
-        return promise
-          .then(() => resolve(true))
-          .catch((e) => {
-            if (e instanceof HistoryQuotaExceededError) {
-              window.location.href = page.url
-              resolve(false)
-            } else {
-              throw e
-            }
-          })
-      }).then((result) => {
-        if (!result) {
-          return
-        }
-
+      return new Promise<void>((resolve) =>
+        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
+      ).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
         if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
@@ -122,6 +111,13 @@ class CurrentPage {
         }
 
         this.isFirstPageLoad = false
+
+        if (this.historyQuotaExceeded) {
+          // If we exceeded the history quota, don't attempt to swap the
+          // component as we're performing a full page reload instead.
+          this.historyQuotaExceeded = false
+          return
+        }
 
         return this.swap({
           component,

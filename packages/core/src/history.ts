@@ -1,5 +1,6 @@
 import { cloneDeep, isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
+import { eventHandler } from './eventHandler'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
@@ -8,8 +9,6 @@ import { Page, ScrollRegion } from './types'
 const isServer = typeof window === 'undefined'
 const queue = new Queue<Promise<void>>()
 const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
-
-export class HistoryQuotaExceededError extends Error {}
 
 class History {
   public rememberedState = 'rememberedState' as const
@@ -37,7 +36,7 @@ class History {
     }
   }
 
-  public pushState(page: Page, cb: (() => void) | null = null): Promise<void> | undefined {
+  public pushState(page: Page, cb: (() => void) | null = null): void {
     if (isServer) {
       return
     }
@@ -49,15 +48,15 @@ class History {
 
     this.current = page
 
-    return queue.add(() => {
+    queue.add(() => {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
-        const doPush = () => this.doPushState(data, page.url).then(() => cb?.())
+        const doPush = () => this.doPushState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          return new Promise((resolve, reject) => {
-            setTimeout(() => doPush().then(resolve).catch(reject))
+          return new Promise((resolve) => {
+            setTimeout(() => doPush().then(resolve))
           })
         }
 
@@ -164,7 +163,7 @@ class History {
     return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
 
-  public replaceState(page: Page, cb: (() => void) | null = null): Promise<void> | void {
+  public replaceState(page: Page, cb: (() => void) | null = null): void {
     currentPage.merge(page)
 
     if (isServer) {
@@ -178,15 +177,15 @@ class History {
 
     this.current = page
 
-    return queue.add(() => {
+    queue.add(() => {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
         const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          return new Promise((resolve, reject) => {
-            setTimeout(() => doReplace().then(resolve).catch(reject))
+          return new Promise((resolve) => {
+            setTimeout(() => doReplace().then(resolve))
           })
         }
 
@@ -242,12 +241,23 @@ class History {
     })
   }
 
-  protected doPushState(page: Page | ArrayBuffer, url: string): Promise<void> {
+  protected doPushState(
+    data: {
+      page: Page | ArrayBuffer
+      scrollRegions?: ScrollRegion[]
+      documentScrollPosition?: ScrollRegion
+    },
+    url: string,
+  ): Promise<void> {
     return this.withThrottleProtection(() => {
       try {
-        window.history.pushState({ page }, '', url)
+        window.history.pushState(data, '', url)
       } catch (error) {
-        throw this.isQuotaExceededError(error) ? new HistoryQuotaExceededError() : error
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        eventHandler.fireInternalEvent('historyQuotaExceeded', url)
       }
     })
   }

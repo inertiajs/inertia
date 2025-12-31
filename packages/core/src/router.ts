@@ -80,6 +80,10 @@ export class Router {
     eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
       this.loadDeferredProps(deferredProps)
     })
+
+    eventHandler.on('historyQuotaExceeded', (url) => {
+      window.location.href = url
+    })
   }
 
   public get<T extends RequestPayload = RequestPayload>(
