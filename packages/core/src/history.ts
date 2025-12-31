@@ -178,7 +178,7 @@ class History {
 
     this.current = page
 
-    queue.add(() => {
+    return queue.add(() => {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
@@ -230,23 +230,15 @@ class History {
     url?: string,
   ): Promise<void> {
     return this.withThrottleProtection(() => {
-      try {
-        window.history.replaceState(
-          {
-            page: data.page,
-            scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-            documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-          },
-          '',
-          url,
-        )
-      } catch (error) {
-        if (!this.isQuotaExceededError(error)) {
-          throw error
-        }
-        // For replaceState quota errors, silently fail
-        // A full reload would cause an infinite loop since we're already on this URL
-      }
+      window.history.replaceState(
+        {
+          page: data.page,
+          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+        },
+        '',
+        url,
+      )
     })
   }
 
