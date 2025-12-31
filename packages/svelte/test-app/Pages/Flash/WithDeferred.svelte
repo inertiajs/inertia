@@ -1,9 +1,13 @@
 <script lang="ts">
   import { Deferred, page, router } from '@inertiajs/svelte'
 
-  export let data: string | undefined
+  interface Props {
+    data: string | undefined
+  }
 
-  let flashEventCount = 0
+  let { data }: Props = $props()
+
+  let flashEventCount = $state(0)
 
   router.on('flash', () => {
     flashEventCount++
@@ -11,11 +15,13 @@
 </script>
 
 <div>
-  <span id="flash">{JSON.stringify($page.flash)}</span>
+  <span id="flash">{JSON.stringify(page.flash)}</span>
   <span id="flash-event-count">{flashEventCount}</span>
 
   <Deferred data="data">
-    <div id="loading" slot="fallback">Loading...</div>
+    {#snippet fallback()}
+      <div id="loading">Loading...</div>
+    {/snippet}
     <div id="data">{data}</div>
   </Deferred>
 </div>

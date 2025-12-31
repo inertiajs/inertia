@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Link } from '@inertiajs/svelte'
 
-  export let method
+  let { method } = $props()
 </script>
 
 <div>

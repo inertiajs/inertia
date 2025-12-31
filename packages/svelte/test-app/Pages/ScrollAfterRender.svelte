@@ -1,11 +1,15 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let originalScrollTo: typeof window.scrollTo | null = null
 </script>
 
 <script lang="ts">
   import { Link } from '@inertiajs/svelte'
 
-  export let page: number
+  interface Props {
+    page: number
+  }
+
+  let { page }: Props = $props()
 
   // Patch scrollTo to log synchronously when it's called (not when the scroll event fires)
   if (!originalScrollTo) {
@@ -35,7 +39,7 @@
     Sunt culpa sit sunt enim aliquip. Esse ea ea quis voluptate. Enim consectetur aliqua ex ex magna cupidatat id minim
     sit elit.
   </p>
-  <Link href={`/scroll-after-render/${page + 1}`} style="display: block; margin-top: 20px;" on:before={beforeNavigate}>
+  <Link href={`/scroll-after-render/${page + 1}`} style="display: block; margin-top: 20px;" onbefore={beforeNavigate}>
     Go to page {page + 1}
   </Link>
   {#each Array(500).keys() as i (i)}

@@ -1,7 +1,9 @@
 <script lang="ts">
   import { useRemember } from '@inertiajs/svelte'
 
-  let untracked = ''
+  let { ...rest } = $props()
+
+  let untracked = $state('')
 
   const data = useRemember(
     {
@@ -12,15 +14,15 @@
   )
 </script>
 
-<div {...$$restProps}>
+<div {...rest}>
   <span>This component uses a string 'key' for the remember functionality.</span>
   <label>
     Full Name
-    <input type="text" class="b-name" name="full_name" bind:value={$data.name} />
+    <input type="text" class="b-name" name="full_name" bind:value={data.name} />
   </label>
   <label>
     Remember Me
-    <input type="checkbox" class="b-remember" name="remember" bind:checked={$data.remember} />
+    <input type="checkbox" class="b-remember" name="remember" bind:checked={data.remember} />
   </label>
   <label>
     Remember Me
