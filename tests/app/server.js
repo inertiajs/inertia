@@ -686,8 +686,9 @@ app.get('/history/version/:pageNumber', (req, res) => {
 
 app.get('/history-quota/:pageNumber', (req, res) => {
   const pageNumber = parseInt(req.params.pageNumber)
-  // Generate ~10MB of data (10 * 1024 * 1024 characters)
-  const largeData = 'x'.repeat(10 * 1024 * 1024)
+  const size = 8 * 1024 * 1024 // 8 MB
+
+  const largeData = pageNumber < 8 ? 'x'.repeat(size) : 'x'.repeat(size - 2137)
 
   inertia.render(req, res, {
     component: 'HistoryQuota/Page',

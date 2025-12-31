@@ -4,7 +4,7 @@ import { requests } from './support'
 // WebKit has a ~64MB limit on history.state storage.
 // Chromium and Firefox have virtually unlimited storage.
 test.describe('history quota exceeded', () => {
-  test.setTimeout(120000)
+  test.setTimeout(10_000)
 
   test.beforeEach(async ({ page, browserName }) => {
     test.skip(browserName !== 'webkit', 'WebKit-specific quota limit')
@@ -64,6 +64,44 @@ test.describe('history quota exceeded', () => {
     }
 
     throw new Error('Expected quota to be exceeded')
+  })
+
+  test('it can continue navigating after quota is exceeded', async ({ page }) => {
+    let quotaExceededAtPage = 0
+
+    // Navigate until quota is exceeded
+    for (let i = 2; i <= 10; i++) {
+      await page.click(`text=Page ${i}`)
+      await page.waitForURL(`/history-quota/${i}`)
+
+      const hasPageData = await page.evaluate(() => !!window.history.state?.page)
+
+      if (!hasPageData) {
+        quotaExceededAtPage = i
+        break
+      }
+    }
+
+    expect(quotaExceededAtPage).toBeGreaterThan(0)
+
+    // Continue navigating 10 more pages - all should work with empty state
+    for (let i = quotaExceededAtPage + 1; i <= quotaExceededAtPage + 100; i++) {
+      await page.click(`text=Page ${i}`)
+      await page.waitForURL(`/history-quota/${i}`)
+      await expect(page.getByText(`History Quota Test - Page ${i}`)).toBeVisible()
+
+      // Should still be able to push empty state
+      const state = await page.evaluate(() => window.history.state)
+      expect(state).toBeDefined()
+    }
+
+    const currentPageUrl = await page.url()
+    expect(currentPageUrl).toBe(`/history-quota/${quotaExceededAtPage + 1000}`)
+
+    // Navigate back...
+    await page.goBack()
+    await page.waitForURL(`/history-quota/${quotaExceededAtPage + 999}`)
+    await expect(page.getByText(`History Quota Test - Page ${quotaExceededAtPage + 999}`)).toBeVisible()
   })
 
   test('it restores scroll position after refetch', async ({ page }) => {

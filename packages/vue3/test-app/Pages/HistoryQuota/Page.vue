@@ -13,7 +13,8 @@ defineProps<{
     <p>Data size: {{ largeData?.length?.toLocaleString() }} bytes</p>
 
     <div style="margin-top: 20px">
-      <Link v-for="n in 20" :key="n" :href="`/history-quota/${n}`" style="margin-right: 10px"> Page {{ n }} </Link>
+      <Link :href="`/history-quota/1`"> Page 1 </Link>
+      <Link :href="`/history-quota/${pageNumber + 1}`"> Page {{ pageNumber + 1 }} </Link>
     </div>
 
     <div style="height: 5000px"></div>
