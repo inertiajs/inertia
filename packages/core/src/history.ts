@@ -231,7 +231,7 @@ class History {
     return this.withThrottleProtection(() => {
       window.history.replaceState(
         {
-          page: data.page,
+          ...data,
           scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
           documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
         },
