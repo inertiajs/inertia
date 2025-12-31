@@ -40,7 +40,7 @@ app.get('/ssr/page1', (req, res) =>
     component: 'SSR/Page1',
     props: {
       user: { name: 'John Doe', email: 'john@example.com' },
-      // items: ['Item 1', 'Item 2', 'Item 3'],
+      items: ['Item 1', 'Item 2', 'Item 3'],
       count: 42,
     },
   }),
