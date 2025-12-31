@@ -1,15 +1,8 @@
-import * as qs from 'qs'
 import { config } from './config'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
-import type {
-  FormDataConvertible,
-  Method,
-  QueryStringArrayFormatOption,
-  RequestPayload,
-  UrlMethodPair,
-  VisitOptions,
-} from './types'
+import * as queryString from './queryString'
+import type { FormDataConvertible, Method, QueryStringArrayFormatOption, RequestPayload, UrlMethodPair, VisitOptions } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
@@ -64,14 +57,8 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
     // If the original URL contains indices notation (e.g. [0], [1]), preserve it.
     // Indices notation cannot be converted to brackets notation without data loss.
     const hasIndices = /\[\d+\]/.test(url.search)
-    const parseOptions = { ignoreQueryPrefix: true, allowSparse: true }
-    url.search = qs.stringify(
-      { ...qs.parse(url.search, parseOptions), ...data },
-      {
-        encodeValuesOnly: true,
-        arrayFormat: hasIndices ? 'indices' : qsArrayFormat,
-      },
-    )
+    const arrayFormat = hasIndices ? 'indices' : qsArrayFormat
+    url.search = queryString.stringify({ ...queryString.parse(url.search), ...data }, arrayFormat)
   }
 
   return [

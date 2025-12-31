@@ -335,6 +335,48 @@ test.describe('url.ts', () => {
         expect(href).toBe('https://example.com/search?existing=value&new=param')
         expect(data).toEqual({})
       })
+
+      test('decodes plus signs as spaces in existing query string values', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search?q=hello+world', { filter: 'test' })
+
+        expect(href).toBe('/search?q=hello%20world&filter=test')
+        expect(data).toEqual({})
+      })
+
+      test('properly encodes values containing ampersands', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search', { q: 'foo&bar' })
+
+        expect(href).toBe('/search?q=foo%26bar')
+        expect(data).toEqual({})
+      })
+
+      test('properly encodes values containing equals signs', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search', { equation: '1+1=2' })
+
+        expect(href).toBe('/search?equation=1%2B1%3D2')
+        expect(data).toEqual({})
+      })
+
+      test('properly encodes values containing question marks', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search', { q: 'what?' })
+
+        expect(href).toBe('/search?q=what%3F')
+        expect(data).toEqual({})
+      })
+
+      test('returns URL unchanged when data is empty object', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search?existing=value', {})
+
+        expect(href).toBe('/search?existing=value')
+        expect(data).toEqual({})
+      })
+
+      test('handles values containing hash symbols', () => {
+        const [href, data] = mergeDataIntoQueryString('get', '/search', { color: '#ff0000' })
+
+        expect(href).toBe('/search?color=%23ff0000')
+        expect(data).toEqual({})
+      })
     })
 
     test.describe('non-GET request', () => {
