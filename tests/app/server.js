@@ -684,6 +684,21 @@ app.get('/history/version/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/history-quota/:pageNumber', (req, res) => {
+  const pageNumber = parseInt(req.params.pageNumber)
+  const size = 8 * 1024 * 1024 // 8 MB
+
+  const largeData = pageNumber < 8 ? 'x'.repeat(size) : 'x'.repeat(size - 2137)
+
+  inertia.render(req, res, {
+    component: 'HistoryQuota/Page',
+    props: {
+      pageNumber,
+      largeData,
+    },
+  })
+})
+
 app.get('/when-visible', (req, res) => {
   const page = () =>
     inertia.render(req, res, {

@@ -19,6 +19,7 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
   protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
+  protected historyQuotaExceeded = false
 
   public init<ComponentType = Component>({
     initialPage,
@@ -30,6 +31,10 @@ class CurrentPage {
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
+
+    eventHandler.on('historyQuotaExceeded', () => {
+      this.historyQuotaExceeded = true
+    })
 
     return this
   }
@@ -106,6 +111,13 @@ class CurrentPage {
         }
 
         this.isFirstPageLoad = false
+
+        if (this.historyQuotaExceeded) {
+          // If we exceeded the history quota, don't attempt to swap the
+          // component as we're performing a full page reload instead.
+          this.historyQuotaExceeded = false
+          return
+        }
 
         return this.swap({
           component,

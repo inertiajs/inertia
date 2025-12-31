@@ -1,5 +1,6 @@
 import { cloneDeep, isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
+import { eventHandler } from './eventHandler'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
@@ -201,6 +202,10 @@ class History {
     )
   }
 
+  protected isQuotaExceededError(error: unknown): error is Error & { name: 'QuotaExceededError' } {
+    return error instanceof Error && error.name === 'QuotaExceededError'
+  }
+
   protected withThrottleProtection<T = void>(cb: () => T): Promise<T | undefined> {
     return Promise.resolve().then(() => {
       try {
@@ -244,7 +249,17 @@ class History {
     },
     url: string,
   ): Promise<void> {
-    return this.withThrottleProtection(() => window.history.pushState(data, '', url))
+    return this.withThrottleProtection(() => {
+      try {
+        window.history.pushState(data, '', url)
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        eventHandler.fireInternalEvent('historyQuotaExceeded', url)
+      }
+    })
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
