@@ -108,17 +108,13 @@ export default defineComponent({
       this.observer.observe(this.$el.nextSibling)
     },
     getReloadParams(): Partial<ReloadOptions> {
+      const reloadParams: Partial<ReloadOptions> = { ...this.$props.params }
+
       if (this.$props.data) {
-        return {
-          only: (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[],
-        }
+        reloadParams.only = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]
       }
 
-      if (!this.$props.params) {
-        throw new Error('You must provide either a `data` or `params` prop.')
-      }
-
-      return this.$props.params
+      return reloadParams
     },
   },
   render() {

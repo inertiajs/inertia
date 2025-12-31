@@ -236,3 +236,25 @@ test('it exposes fetching state to the default slot', async ({ page }) => {
   await expect(page.getByText('Lazy data loaded!')).toBeVisible()
   await expect(page.getByText('Fetching in background...')).not.toBeVisible()
 })
+
+test('it merges data and params props', async ({ page }) => {
+  await page.goto('/when-visible-merge-params')
+
+  // Using only the data prop works as before
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+  await expect(page.getByText('Loading data only...')).toBeVisible()
+  await page.waitForResponse(page.url())
+  await expect(page.getByText('Data only loaded: Data only success!')).toBeVisible()
+
+  // Using both data and params merges them - data sets 'only', params.data becomes query string
+  await page.evaluate(() => (window as any).scrollTo(0, 8000))
+  await expect(page.getByText('Loading merged...')).toBeVisible()
+  await page.waitForResponse((res) => res.url().includes('extra=from-params'))
+  await expect(page.getByText('Merged loaded: Merged success! extra=from-params')).toBeVisible()
+
+  // Other params options like preserveUrl are also passed through
+  await page.evaluate(() => (window as any).scrollTo(0, 13500))
+  await expect(page.getByText('Loading merged with callback...')).toBeVisible()
+  await page.waitForResponse((res) => res.url().includes('page=2'))
+  await expect(page.getByText('Merged with callback loaded: Merged with callback success! page=2')).toBeVisible()
+})

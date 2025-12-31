@@ -788,6 +788,37 @@ app.get('/when-visible-fetching', (req, res) => {
   }
 })
 
+app.get('/when-visible-merge-params', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']
+
+  if (partialData) {
+    const props = {}
+    const partialProps = partialData.split(',')
+
+    if (partialProps.includes('dataOnlyProp')) {
+      props.dataOnlyProp = { text: 'Data only success!' }
+    }
+    if (partialProps.includes('mergedProp')) {
+      props.mergedProp = { text: `Merged success! extra=${req.query.extra}` }
+    }
+    if (partialProps.includes('mergedWithCallbackProp')) {
+      props.mergedWithCallbackProp = { text: `Merged with callback success! page=${req.query.page}` }
+    }
+
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleMergeParams',
+        props,
+      })
+    }, 100)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisibleMergeParams',
+      props: {},
+    })
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>
