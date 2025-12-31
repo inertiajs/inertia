@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.4...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.5...master)
 
 - Nothing yet
+
+## [v2.3.5](https://github.com/inertiajs/inertia/compare/v2.3.4...v2.3.5) - 2025-12-31
+
+### What's Changed
+
+* Refresh the Infinite Scroll triggers after partial reload by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2784
+* Fix `hasAnyState()` to actually check for browser history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2785
+* Handle WebKit history throttle errors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2786
+* Merge `data` and `params` props in `<WhenVisible>` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2789
+* Handle `QuotaExceededError` in WebKit by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2788
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.4...v2.3.5
 
 ## [v2.3.4](https://github.com/inertiajs/inertia/compare/v2.3.3...v2.3.4) - 2025-12-19
 
