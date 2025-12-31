@@ -21,8 +21,18 @@ if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
 }
 
-// Used because Cypress does not allow you to navigate to a different origin URL within a single test.
-app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
+app.all('/non-inertia', (req, res) =>
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head><title>Non-Inertia Page</title></head>
+      <body>
+        <h1>This is a page that does not have the Inertia app loaded.</h1>
+        <p><a href="/navigate-non-inertia">Go to Inertia page</a></p>
+      </body>
+    </html>
+  `),
+)
 
 // SSR test routes (only rendered with SSR when SSR=true)
 app.get('/ssr/page1', (req, res) =>
@@ -30,7 +40,7 @@ app.get('/ssr/page1', (req, res) =>
     component: 'SSR/Page1',
     props: {
       user: { name: 'John Doe', email: 'john@example.com' },
-      items: ['Item 1', 'Item 2', 'Item 3'],
+      // items: ['Item 1', 'Item 2', 'Item 3'],
       count: 42,
     },
   }),
