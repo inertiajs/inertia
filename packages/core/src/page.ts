@@ -1,6 +1,6 @@
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
-import { history } from './history'
+import { history, HistoryQuotaExceededError } from './history'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
 import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
@@ -80,9 +80,25 @@ class CurrentPage {
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
 
-      return new Promise<void>((resolve) =>
-        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
-      ).then(() => {
+      return new Promise<boolean>((resolve) => {
+        const promise =
+          (replace ? history.replaceState(pageForHistory) : history.pushState(pageForHistory)) ?? Promise.resolve()
+
+        return promise
+          .then(() => resolve(true))
+          .catch((e) => {
+            if (e instanceof HistoryQuotaExceededError) {
+              window.location.href = page.url
+              resolve(false)
+            } else {
+              throw e
+            }
+          })
+      }).then((result) => {
+        if (!result) {
+          return
+        }
+
         const isNewComponent = !this.isTheSame(page)
 
         if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {

@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test'
-import { requests } from './support'
 
 // WebKit has a ~64MB limit on history.state storage.
 // Chromium and Firefox have virtually unlimited storage.
+// When quota is exceeded, Inertia falls back to a full page reload.
 test.describe('history quota exceeded', () => {
   test.setTimeout(10_000)
 
@@ -12,124 +12,61 @@ test.describe('history quota exceeded', () => {
     await page.goto('/history-quota/1')
   })
 
-  test('it falls back to refetching when quota is exceeded', async ({ page }) => {
-    let quotaExceededAtPage = 0
+  test('it performs a full page reload when quota is exceeded', async ({ page }) => {
+    let fullReloadAtPage = 0
+    let loadCount = 0
 
-    for (let i = 2; i <= 10; i++) {
+    // Track page load events
+    page.on('load', () => {
+      loadCount++
+    })
+
+    for (let i = 2; i <= 20; i++) {
+      const loadsBefore = loadCount
+
       await page.click(`text=Page ${i}`)
       await page.waitForURL(`/history-quota/${i}`)
       await expect(page.getByText(`History Quota Test - Page ${i}`)).toBeVisible()
 
-      const hasPageData = await page.evaluate(() => !!window.history.state?.page)
-
-      if (!hasPageData) {
-        quotaExceededAtPage = i
+      // If load count increased, it was a full page reload
+      if (loadCount > loadsBefore) {
+        fullReloadAtPage = i
         break
       }
     }
 
-    expect(quotaExceededAtPage).toBeGreaterThan(0)
+    // Should have triggered a full reload at some point
+    expect(fullReloadAtPage).toBeGreaterThan(0)
 
-    requests.listen(page)
-
-    await page.goBack()
-    await page.waitForURL(`/history-quota/${quotaExceededAtPage - 1}`)
-    await expect(page.getByText(`History Quota Test - Page ${quotaExceededAtPage - 1}`)).toBeVisible()
-
-    // Page before quota should restore from history
-    expect(requests.requests).toHaveLength(0)
-
-    requests.listen(page)
-
-    await page.goForward()
-    await page.waitForURL(`/history-quota/${quotaExceededAtPage}`)
-    await expect(page.getByText(`History Quota Test - Page ${quotaExceededAtPage}`)).toBeVisible()
-
-    // Page after quota should be refetched
-    expect(requests.requests.length).toBeGreaterThan(0)
+    // And we should still be on the correct page
+    await expect(page.getByText(`History Quota Test - Page ${fullReloadAtPage}`)).toBeVisible()
   })
 
-  test('it stores minimal state without page data when quota is exceeded', async ({ page }) => {
-    for (let i = 2; i <= 10; i++) {
+  test('navigation continues to work after quota-triggered reload', async ({ page }) => {
+    let reloadHappened = false
+
+    page.on('load', () => {
+      reloadHappened = true
+    })
+
+    // Navigate until we trigger a full reload
+    for (let i = 2; i <= 20; i++) {
+      reloadHappened = false
+
       await page.click(`text=Page ${i}`)
       await page.waitForURL(`/history-quota/${i}`)
+      await expect(page.getByText(`History Quota Test - Page ${i}`)).toBeVisible()
 
-      const state = await page.evaluate(() => window.history.state)
-
-      if (!state?.page) {
-        expect(state).toBeDefined()
-        expect(state.page).toBeUndefined()
+      if (reloadHappened) {
+        // After a full reload, try one more navigation to verify it still works
+        const nextPage = i + 1
+        await page.click(`text=Page ${nextPage}`)
+        await page.waitForURL(`/history-quota/${nextPage}`)
+        await expect(page.getByText(`History Quota Test - Page ${nextPage}`)).toBeVisible()
         return
       }
     }
 
-    throw new Error('Expected quota to be exceeded')
-  })
-
-  test('it can continue navigating after quota is exceeded', async ({ page }) => {
-    let quotaExceededAtPage = 0
-
-    // Navigate until quota is exceeded
-    for (let i = 2; i <= 10; i++) {
-      await page.click(`text=Page ${i}`)
-      await page.waitForURL(`/history-quota/${i}`)
-
-      const hasPageData = await page.evaluate(() => !!window.history.state?.page)
-
-      if (!hasPageData) {
-        quotaExceededAtPage = i
-        break
-      }
-    }
-
-    expect(quotaExceededAtPage).toBeGreaterThan(0)
-
-    // Continue navigating 10 more pages - all should work with empty state
-    for (let i = quotaExceededAtPage + 1; i <= quotaExceededAtPage + 100; i++) {
-      await page.click(`text=Page ${i}`)
-      await page.waitForURL(`/history-quota/${i}`)
-      await expect(page.getByText(`History Quota Test - Page ${i}`)).toBeVisible()
-
-      // Should still be able to push empty state
-      const state = await page.evaluate(() => window.history.state)
-      expect(state).toBeDefined()
-    }
-
-    const currentPageUrl = await page.url()
-    expect(currentPageUrl).toBe(`/history-quota/${quotaExceededAtPage + 1000}`)
-
-    // Navigate back...
-    await page.goBack()
-    await page.waitForURL(`/history-quota/${quotaExceededAtPage + 999}`)
-    await expect(page.getByText(`History Quota Test - Page ${quotaExceededAtPage + 999}`)).toBeVisible()
-  })
-
-  test('it restores scroll position after refetch', async ({ page }) => {
-    await page.evaluate(() => window.scrollTo(0, 150))
-    await page.waitForTimeout(200)
-
-    let quotaExceededAtPage = 0
-
-    for (let i = 2; i <= 10; i++) {
-      await page.click(`text=Page ${i}`)
-      await page.waitForURL(`/history-quota/${i}`)
-
-      const hasPageData = await page.evaluate(() => !!window.history.state?.page)
-
-      if (!hasPageData) {
-        quotaExceededAtPage = i
-        break
-      }
-    }
-
-    expect(quotaExceededAtPage).toBeGreaterThan(0)
-
-    for (let i = quotaExceededAtPage - 1; i >= 1; i--) {
-      await page.goBack()
-      await page.waitForURL(`/history-quota/${i}`)
-    }
-
-    const scrollTop = await page.evaluate(() => window.scrollY)
-    expect(scrollTop).toBe(150)
+    throw new Error('Expected a full page reload to occur')
   })
 })

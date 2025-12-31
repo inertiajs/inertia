@@ -9,6 +9,8 @@ const isServer = typeof window === 'undefined'
 const queue = new Queue<Promise<void>>()
 const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 
+export class HistoryQuotaExceededError extends Error {}
+
 class History {
   public rememberedState = 'rememberedState' as const
   public scrollRegions = 'scrollRegions' as const
@@ -35,7 +37,7 @@ class History {
     }
   }
 
-  public pushState(page: Page, cb: (() => void) | null = null): void {
+  public pushState(page: Page, cb: (() => void) | null = null): Promise<void> | undefined {
     if (isServer) {
       return
     }
@@ -47,7 +49,7 @@ class History {
 
     this.current = page
 
-    queue.add(() => {
+    return queue.add(() => {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
@@ -162,7 +164,7 @@ class History {
     return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
 
-  public replaceState(page: Page, cb: (() => void) | null = null): void {
+  public replaceState(page: Page, cb: (() => void) | null = null): Promise<void> | void {
     currentPage.merge(page)
 
     if (isServer) {
@@ -227,24 +229,23 @@ class History {
     },
     url?: string,
   ): Promise<void> {
-    const stateData = {
-      page: data.page,
-      scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-      documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-    }
-
     return this.withThrottleProtection(() => {
       try {
-        window.history.replaceState(stateData, '', url)
+        window.history.replaceState(
+          {
+            page: data.page,
+            scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+            documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+          },
+          '',
+          url,
+        )
       } catch (error) {
         if (!this.isQuotaExceededError(error)) {
           throw error
         }
-
-        // Quota exceeded: store minimal state without page data
-        // The page will be refetched on back/forward navigation
-        const { page, ...withoutPage } = stateData
-        window.history.replaceState(withoutPage, '', url)
+        // For replaceState quota errors, silently fail
+        // A full reload would cause an infinite loop since we're already on this URL
       }
     })
   }
@@ -254,13 +255,7 @@ class History {
       try {
         window.history.pushState({ page }, '', url)
       } catch (error) {
-        if (!this.isQuotaExceededError(error)) {
-          throw error
-        }
-
-        // Quota exceeded: store minimal state without page data
-        // The page will be refetched on back/forward navigation
-        window.history.pushState({}, '', url)
+        throw this.isQuotaExceededError(error) ? new HistoryQuotaExceededError() : error
       }
     })
   }
