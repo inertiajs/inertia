@@ -80,9 +80,8 @@ export const useInfiniteScrollData = (options: {
 
   const removeEventListener = router.on('beforeUpdate', (event) => {
     const page = event.detail.page
-    const scrollProp = getScrollProp(page)
 
-    if (state.component === page.component && scrollProp.reset) {
+    if (state.component === page.component && getScrollProp(page).reset) {
       resetState(page)
     }
   })
