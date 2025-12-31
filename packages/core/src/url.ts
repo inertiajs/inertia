@@ -2,7 +2,14 @@ import { config } from './config'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
 import * as queryString from './queryString'
-import type { FormDataConvertible, Method, QueryStringArrayFormatOption, RequestPayload, UrlMethodPair, VisitOptions } from './types'
+import type {
+  FormDataConvertible,
+  Method,
+  QueryStringArrayFormatOption,
+  RequestPayload,
+  UrlMethodPair,
+  VisitOptions,
+} from './types'
 
 export function hrefToUrl(href: string | URL): URL {
   return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
