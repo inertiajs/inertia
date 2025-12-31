@@ -56,8 +56,8 @@ class History {
         const doPush = () => this.doPushState(data, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          return new Promise((resolve) => {
-            setTimeout(() => doPush().then(resolve))
+          return new Promise((resolve, reject) => {
+            setTimeout(() => doPush().then(resolve).catch(reject))
           })
         }
 
@@ -185,8 +185,8 @@ class History {
         const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
 
         if (isChromeIOS) {
-          return new Promise((resolve) => {
-            setTimeout(() => doReplace().then(resolve))
+          return new Promise((resolve, reject) => {
+            setTimeout(() => doReplace().then(resolve).catch(reject))
           })
         }
 
