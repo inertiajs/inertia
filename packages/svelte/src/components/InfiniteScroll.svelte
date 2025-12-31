@@ -8,6 +8,7 @@
     useInfiniteScroll,
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
+  import page from '../page'
 
   export let data: InfiniteScrollComponentBaseProps['data']
   export let buffer: InfiniteScrollComponentBaseProps['buffer'] = 0
@@ -33,11 +34,13 @@
   $: resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
   $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null
 
+  $: dataProp = $page?.props?.[data]
+
   $: sharedExposed = {
     loadingPrevious,
     loadingNext,
-    hasPrevious: infiniteScrollInstance?.dataManager.hasPrevious() || false,
-    hasNext: infiniteScrollInstance?.dataManager.hasNext() || false,
+    hasPrevious: (void dataProp, infiniteScrollInstance?.dataManager.hasPrevious()) || false,
+    hasNext: (void dataProp, infiniteScrollInstance?.dataManager.hasNext()) || false,
   } satisfies Pick<InfiniteScrollActionSlotProps, 'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'>
 
   $: exposedPrevious = {
@@ -45,7 +48,7 @@
     fetch: fetchPrevious,
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
-    hasMore: infiniteScrollInstance?.dataManager.hasPrevious() || false,
+    hasMore: (void dataProp, infiniteScrollInstance?.dataManager.hasPrevious()) || false,
     ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps
 
@@ -54,7 +57,7 @@
     fetch: fetchNext,
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
-    hasMore: infiniteScrollInstance?.dataManager.hasNext() || false,
+    hasMore: (void dataProp, infiniteScrollInstance?.dataManager.hasNext()) || false,
     ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps
 
