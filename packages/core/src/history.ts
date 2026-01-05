@@ -164,6 +164,11 @@ class History {
   }
 
   public replaceState(page: Page, cb: (() => void) | null = null): void {
+    if (isEqual(this.current, page)) {
+      cb && cb()
+      return
+    }
+
     currentPage.merge(page)
 
     if (isServer) {
