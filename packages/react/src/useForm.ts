@@ -73,6 +73,7 @@ export interface InertiaFormProps<TForm extends object> {
   put: (url: string, options?: UseFormSubmitOptions) => void
   delete: (url: string, options?: UseFormSubmitOptions) => void
   cancel: () => void
+  dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => InertiaFormProps<TForm>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormProps<TForm>
 }
 
@@ -131,7 +132,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
   const cancelToken = useRef<CancelToken | null>(null)
   const recentlySuccessfulTimeoutId = useRef<number>(undefined)
-  const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
+  const excludeKeysRef = useRef<FormDataKeys<TForm>[]>([])
+  const [data, setData] = rememberKey
+    ? useRemember(defaults, `${rememberKey}:data`, excludeKeysRef)
+    : useState(defaults)
   const [errors, setErrors] = rememberKey
     ? useRemember({} as FormDataErrors<TForm>, `${rememberKey}:errors`)
     : useState({} as FormDataErrors<TForm>)
@@ -453,6 +457,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     patch,
     delete: deleteMethod,
     cancel,
+    dontRemember: <K extends FormDataKeys<TForm>>(...keys: K[]) => {
+      excludeKeysRef.current = keys
+      return form
+    },
   } as InertiaFormProps<TForm>
 
   const tap = <T>(value: T, callback: (value: T) => unknown): T => {
