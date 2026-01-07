@@ -21,11 +21,10 @@ export const useInfiniteScrollData = (options: {
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: (loadedPage: string | number | null) => void
   onCompleteNextRequest: (loadedPage: string | number | null) => void
+  onReset?: () => void
 }): UseInfiniteScrollDataManager => {
-  const getCurrentPage = (): Page => currentPage.get()
-
-  const getScrollProp = (page: Page): ScrollProp => {
-    const scrollProp = page.scrollProps?.[options.getPropName()]
+  const getScrollPropFromCurrentPage = (): ScrollProp => {
+    const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
 
     if (scrollProp) {
       return scrollProp
@@ -46,10 +45,10 @@ export const useInfiniteScrollData = (options: {
     loading: boolean
   } & InfiniteScrollState
 
-  const resetState = (page: Page) => {
-    const scrollProp = getScrollProp(page)
+  const resetState = () => {
+    const scrollProp = getScrollPropFromCurrentPage()
 
-    state.component = page.component
+    state.component = currentPage.get().component
     state.loading = false
     state.previousPage = scrollProp.previousPage
     state.nextPage = scrollProp.nextPage
@@ -60,14 +59,14 @@ export const useInfiniteScrollData = (options: {
   const getRememberKey = () => `inertia:infinite-scroll-data:${options.getPropName()}`
 
   if (typeof window !== 'undefined') {
-    resetState(getCurrentPage())
+    resetState()
 
     const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
 
     if (
       rememberedState &&
       typeof rememberedState === 'object' &&
-      rememberedState.lastLoadedPage === getScrollProp(getCurrentPage()).currentPage
+      rememberedState.lastLoadedPage === getScrollPropFromCurrentPage().currentPage
     ) {
       // Restore remembered state only when it's consistent with the current scroll prop,
       // which ensures back/forward navigation works while direct URL visits reset properly.
@@ -78,11 +77,10 @@ export const useInfiniteScrollData = (options: {
     }
   }
 
-  const removeEventListener = router.on('beforeUpdate', (event) => {
-    const page = event.detail.page
-
-    if (state.component === page.component && getScrollProp(page).reset) {
-      resetState(page)
+  const removeEventListener = router.on('success', (event) => {
+    if (state.component === event.detail.page.component && getScrollPropFromCurrentPage().reset) {
+      resetState()
+      options.onReset?.()
     }
   })
 
@@ -97,7 +95,7 @@ export const useInfiniteScrollData = (options: {
   }
 
   const syncStateOnSuccess = (side: Side) => {
-    const scrollProp = getScrollProp(getCurrentPage())
+    const scrollProp = getScrollPropFromCurrentPage()
     const paginationProp = getScrollPropKeyForSide(side)
 
     state.lastLoadedPage = scrollProp.currentPage
@@ -118,7 +116,7 @@ export const useInfiniteScrollData = (options: {
     )
   }
 
-  const getPageName = () => getScrollProp(getCurrentPage()).pageName
+  const getPageName = () => getScrollPropFromCurrentPage().pageName
   const getRequestCount = () => state.requestCount
 
   const fetchPage = (side: Side, reloadOptions: ReloadOptions = {}): void => {

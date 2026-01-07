@@ -8,7 +8,6 @@
     useInfiniteScroll,
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
-  import page from '../page'
 
   export let data: InfiniteScrollComponentBaseProps['data']
   export let buffer: InfiniteScrollComponentBaseProps['buffer'] = 0
@@ -30,17 +29,17 @@
   let loadingPrevious = false
   let loadingNext = false
   let requestCount = 0
+  let hasPreviousPage = false
+  let hasNextPage = false
 
   $: resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
   $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null
 
-  $: dataProp = $page?.props?.[data]
-
   $: sharedExposed = {
     loadingPrevious,
     loadingNext,
-    hasPrevious: (void dataProp, infiniteScrollInstance?.dataManager.hasPrevious()) || false,
-    hasNext: (void dataProp, infiniteScrollInstance?.dataManager.hasNext()) || false,
+    hasPrevious: hasPreviousPage,
+    hasNext: hasNextPage,
   } satisfies Pick<InfiniteScrollActionSlotProps, 'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'>
 
   $: exposedPrevious = {
@@ -48,7 +47,7 @@
     fetch: fetchPrevious,
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
-    hasMore: (void dataProp, infiniteScrollInstance?.dataManager.hasPrevious()) || false,
+    hasMore: hasPreviousPage,
     ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps
 
@@ -57,7 +56,7 @@
     fetch: fetchNext,
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
-    hasMore: (void dataProp, infiniteScrollInstance?.dataManager.hasNext()) || false,
+    hasMore: hasNextPage,
     ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps
 
@@ -122,6 +121,12 @@
     setTimeout(setupInfiniteScrollInstance)
   })
 
+  function syncStateFromDataManager() {
+    requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
+    hasPreviousPage = infiniteScrollInstance!.dataManager.hasPrevious()
+    hasNextPage = infiniteScrollInstance!.dataManager.hasNext()
+  }
+
   function setupInfiniteScrollInstance() {
     const resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
     const resolvedStartElement = resolveHTMLElement(startElement, startElementRef)
@@ -146,18 +151,19 @@
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
       onCompletePreviousRequest: () => {
-        requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
         loadingPrevious = false
+        syncStateFromDataManager()
       },
       onCompleteNextRequest: () => {
-        requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
         loadingNext = false
+        syncStateFromDataManager()
       },
+      onDataReset: syncStateFromDataManager,
     })
 
     const { dataManager, elementManager } = infiniteScrollInstance
 
-    requestCount = dataManager.getRequestCount()
+    syncStateFromDataManager()
 
     elementManager.setupObservers()
     elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
