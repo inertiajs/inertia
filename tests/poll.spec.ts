@@ -86,3 +86,21 @@ manualData.forEach(({ method, url }) => {
 
 test.skip('it will throttle polling when in the background', async ({ page }) => {})
 test.skip('it is able to keep alive when in the background', async ({ page }) => {})
+
+Object.entries({
+  unencrypted: '/poll/unchanged-data',
+  encrypted: '/poll/unchanged-data/encrypted',
+}).forEach(([scenario, url]) => {
+  test(`it skips replaceState when polling returns unchanged data (${scenario})`, async ({ page }) => {
+    await page.goto(url)
+
+    await page.waitForResponse(page.url())
+    await page.waitForResponse(page.url())
+
+    const pollsFinished = Number(await page.locator('.pollsFinished').textContent())
+    await expect(pollsFinished).toBeGreaterThanOrEqual(2)
+
+    // Only 1 replaceState from initial page load, none from polling
+    await expect(page.locator('.replaceStateCalls')).toHaveText('1')
+  })
+})

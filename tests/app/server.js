@@ -584,6 +584,16 @@ app.post('/events/errors', (req, res) =>
 app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/Hook', props: {} }))
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
+app.get('/poll/unchanged-data', (req, res) =>
+  inertia.render(req, res, { component: 'Poll/UnchangedData', props: { custom_prop: 'unchanged' } }),
+)
+app.get('/poll/unchanged-data/encrypted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Poll/UnchangedData',
+    props: { custom_prop: 'unchanged' },
+    encryptHistory: true,
+  }),
+)
 
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
