@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.6...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.7...master)
 
 - Nothing yet
+
+## [v2.3.7](https://github.com/inertiajs/inertia/compare/v2.3.6...v2.3.7) - 2026-01-07
+
+### What's Changed
+
+* Add `dontRemember()` method to form helper by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2792
+* Only call `replaceState()` when page data has actually changed by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2793
+* Fix `@typescript-eslint/unbound-method` warning when destructuring `useForm()` methods by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2794
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.6...v2.3.7
 
 ## [v2.3.6](https://github.com/inertiajs/inertia/compare/v2.3.5...v2.3.6) - 2025-12-31
 
