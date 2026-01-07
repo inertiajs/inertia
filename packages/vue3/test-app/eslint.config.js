@@ -9,7 +9,7 @@ export default defineConfigWithVueTs(
     files: ['**/*.vue', '**/*.js', '**/*.ts'],
   },
   {
-    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts'],
+    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts', '*.timestamp-*'],
   },
   vue.configs['flat/essential'],
   vueTsConfigs.recommended,
@@ -21,11 +21,16 @@ export default defineConfigWithVueTs(
         ...globals.browser,
         ...globals.es2020,
       },
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
   {
     rules: {
       'vue/multi-word-component-names': 'off',
+      '@typescript-eslint/unbound-method': 'error',
     },
   },
   prettier,
