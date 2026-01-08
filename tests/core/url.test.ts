@@ -174,6 +174,16 @@ test.describe('url.ts', () => {
         expect(dataIndices).toEqual({})
       })
 
+      test('merges data into URL with URL-encoded indices notation', () => {
+        const originalHref = '/search?items%5B0%5D%5Bname%5D=foo&items%5B1%5D%5Bname%5D=bar'
+        const additionalData = { q: 'baz' }
+
+        const [href, data] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(href).toBe('/search?items[0][name]=foo&items[1][name]=bar&q=baz')
+        expect(data).toEqual({})
+      })
+
       test('overwrites existing keys in the query string when they also exist in the data', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?q=old', { q: 'new' })
 
