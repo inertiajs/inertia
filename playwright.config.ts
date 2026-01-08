@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test'
 declare const process: {
   argv: string[]
   env: {
-    BROWSER?: 'chromium' | 'webkit'
+    BROWSER?: 'chromium' | 'webkit' | 'firefox'
     CI?: boolean
     PACKAGE?: 'vue3' | 'react' | 'svelte'
     SSR?: 'true'
