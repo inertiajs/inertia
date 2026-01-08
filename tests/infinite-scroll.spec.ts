@@ -2392,4 +2392,21 @@ test.describe('Router', () => {
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
   })
+
+  test('it preserves URL-encoded indices notation in query string when fetching pages', async ({ page }) => {
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/filtering/refresh-state?foo%5B0%5D%5Bbar%5D=baz')
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+
+    await scrollToBottom(page)
+    await page.waitForTimeout(500)
+
+    const pageRequests = infiniteScrollRequests()
+    expect(pageRequests.length).toBeGreaterThan(0)
+
+    const requestUrl = pageRequests[pageRequests.length - 1].url()
+    expect(requestUrl).toContain('foo[0][bar]=baz')
+    expect(requestUrl).not.toContain('foo[][bar]')
+  })
 })
