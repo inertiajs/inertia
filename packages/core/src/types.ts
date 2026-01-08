@@ -718,6 +718,7 @@ export interface UseInfiniteScrollOptions {
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: () => void
   onCompleteNextRequest: () => void
+  onDataReset?: () => void
 }
 
 export interface UseInfiniteScrollDataManager {

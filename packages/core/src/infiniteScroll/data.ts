@@ -21,6 +21,7 @@ export const useInfiniteScrollData = (options: {
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: (loadedPage: string | number | null) => void
   onCompleteNextRequest: (loadedPage: string | number | null) => void
+  onReset?: () => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
     const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
@@ -79,6 +80,7 @@ export const useInfiniteScrollData = (options: {
   const removeEventListener = router.on('success', (event) => {
     if (state.component === event.detail.page.component && getScrollPropFromCurrentPage().reset) {
       resetState()
+      options.onReset?.()
     }
   })
 
