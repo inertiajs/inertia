@@ -5,6 +5,7 @@ import {
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
+  InertiaFormResetEventSymbol,
   isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
@@ -163,6 +164,11 @@ const Form = defineComponent({
     const defaultData = ref(new FormData())
 
     const onFormUpdate = (event: Event) => {
+      // Prevent Firefox's native reset behavior on internal reset events
+      if (event.type === 'reset' && (event as CustomEvent).detail?.[InertiaFormResetEventSymbol]) {
+        event.preventDefault()
+      }
+
       // If the form is reset, we set isDirty to false as we already know it's back
       // to defaults. Also, the fields are updated after the reset event, so the
       // comparison will be incorrect unless we use nextTick/setTimeout.

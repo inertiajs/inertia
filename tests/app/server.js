@@ -64,13 +64,8 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
-// Intercepts all .js assets (including files loaded via code splitting)
-app.get(/.*\.js$/, (req, res) =>
-  res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
-)
-
-// Intercepts all .css assets
-app.get(/.*\.css$/, (req, res) =>
+// Intercepts all CSS and JS assets (including files loaded via code splitting)
+app.get(/.*\.(?:js|css)$/, (req, res) =>
   res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
 )
 

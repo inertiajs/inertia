@@ -27,8 +27,7 @@ test('replaces the page client side', async ({ page, browserName }) => {
 
   const historyLength = await page.evaluate(() => window.history.length)
   // Firefox doesn't count the initial about:blank page in history.length
-  const expectedLength = browserName === 'firefox' ? 1 : 2
-  await expect(historyLength).toBe(expectedLength)
+  await expect(historyLength).toBe(browserName === 'firefox' ? 1 : 2)
 })
 
 test('preserves the state based on the errors object', async ({ page }) => {
@@ -105,6 +104,5 @@ test('pushes the page client side', async ({ page, browserName }) => {
 
   const historyLength = await page.evaluate(() => window.history.length)
   // Firefox doesn't count the initial about:blank page in history.length
-  const expectedLength = browserName === 'firefox' ? 2 : 3
-  await expect(historyLength).toBe(expectedLength)
+  await expect(historyLength).toBe(browserName === 'firefox' ? 2 : 3)
 })

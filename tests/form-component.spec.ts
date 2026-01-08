@@ -934,17 +934,11 @@ test.describe('Form Component', () => {
     })
 
     test('can set current form data as defaults via ref', async ({ page, browserName }) => {
-      // Form reset via ref doesn't work correctly on Firefox
-      test.skip(browserName === 'firefox', 'Form reset via ref not working on Firefox')
-
       await page.goto('/form-component/ref')
 
       // Modify form fields
       await page.fill('input[name="name"]', 'New Name')
       await page.fill('input[name="email"]', 'new@example.com')
-
-      // Wait for Vue reactivity
-      await page.waitForTimeout(100)
 
       // Form should be dirty
       await expect(page.getByText('Form is dirty')).toBeVisible()

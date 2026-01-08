@@ -889,11 +889,9 @@ test.describe('Remember state', () => {
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
 
-    // After reload, the scroll position should be restored, which triggers infinite scroll automatically
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('Manual mode: false')).toBeVisible()
-
     expect(page.url()).toContain('page=2')
 
     // Verify dataset tags for existing elements (pages 2+3 are present)
