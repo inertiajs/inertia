@@ -107,7 +107,7 @@ export class InitialVisit {
       const flash = page.flash
 
       if (Object.keys(flash).length > 0) {
-        fireFlashEvent(flash)
+        queueMicrotask(() => fireFlashEvent(flash))
       }
     })
   }
