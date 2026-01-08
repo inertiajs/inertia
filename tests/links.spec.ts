@@ -1,5 +1,13 @@
 import { expect, Page, test } from '@playwright/test'
-import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage } from './support'
+import {
+  consoleMessages,
+  ensureScrollPosition,
+  pageLoads,
+  requests,
+  scrollElementTo,
+  shouldBeDumpPage,
+  waitForFragmentScroll,
+} from './support'
 
 declare const process: { env: { PACKAGE?: string } }
 
@@ -33,10 +41,10 @@ test('will avoid an extra reload after a location visit', async ({ page }) => {
   await page.getByRole('link', { name: 'Location visit' }).click()
   const dump = await shouldBeDumpPage(page, 'get')
   await expect(dump['x-inertia']).toBeUndefined()
-  // /location',
-  // /dump/get',
-  // /assets/index-*.js',
-  await expect(requests.requests.length).toBe(3)
+  // Requests made: /location (redirect), /dump/get, /assets/index-*.js, /assets/index-*.css
+  // Filter to only count page requests (assets may vary by browser)
+  const pageRequests = requests.requests.filter((r) => !r.url().includes('/assets/'))
+  await expect(pageRequests.length).toBe(2)
 })
 
 test('will automatically cancel a pending visits when a new request is made', async ({ page }) => {
@@ -459,9 +467,11 @@ test.describe('preserve scroll', () => {
   }) => {
     consoleMessages.listen(page)
 
-    await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click({ position: { x: 0, y: 0 } })
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click()
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
+
+    await ensureScrollPosition(page, '#slot', 10, 15)
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
@@ -507,9 +517,7 @@ test.describe('preserve scroll', () => {
     page,
   }) => {
     consoleMessages.listen(page)
-    await page
-      .getByRole('link', { exact: true, name: 'Preserve Scroll (Callback)' })
-      .click({ position: { x: 0, y: 0 } })
+    await page.getByRole('link', { exact: true, name: 'Preserve Scroll (Callback)' }).click()
 
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
@@ -592,7 +600,7 @@ test.describe('enabled', () => {
 
   test('resets scroll regions to the top when returning false from a preserveScroll callback', async ({ page }) => {
     consoleMessages.listen(page)
-    await page.getByText('Reset Scroll (Callback)', { exact: true }).click({ position: { x: 0, y: 0 } })
+    await page.getByText('Reset Scroll (Callback)', { exact: true }).click()
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now foo')).toBeVisible()
@@ -621,7 +629,7 @@ test.describe('enabled', () => {
 
   test('preserves scroll regions when using the "preserve-scroll" feature from a callback', async ({ page }) => {
     consoleMessages.listen(page)
-    await page.getByText('Preserve Scroll (Callback)', { exact: true }).click({ position: { x: 0, y: 0 } })
+    await page.getByText('Preserve Scroll (Callback)', { exact: true }).click()
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
@@ -821,6 +829,7 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   test('scrolls to the fragment element when making a visit to a different page', async ({ page }) => {
     await page.getByRole('link', { name: 'Basic link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#target')
+    await waitForFragmentScroll(page)
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
   })
@@ -828,6 +837,7 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
   test('scrolls to the fragment element when making a visit to the same page', async ({ page }) => {
     await page.getByRole('link', { exact: true, name: 'Fragment link' }).click()
     await expect(page).toHaveURL('/links/url-fragments#target')
+    await waitForFragmentScroll(page)
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
   })

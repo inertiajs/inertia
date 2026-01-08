@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { requests } from './support'
+import { gotoPageAndWaitForContent, requests } from './support'
 
 const waitForMessages = async (page, count?: number): Promise<any[]> => {
   if (typeof count === 'number') {
@@ -21,7 +21,7 @@ test.describe('Flash Data', () => {
   })
 
   test('preserves flash data after deferred props load and does not fire event again', async ({ page }) => {
-    await page.goto('/flash/with-deferred')
+    await gotoPageAndWaitForContent(page, '/flash/with-deferred')
 
     await expect(page.locator('#flash')).toContainText('Flash with deferred')
     await expect(page.locator('#flash-event-count')).toHaveText('1')

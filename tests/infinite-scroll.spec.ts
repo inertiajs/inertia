@@ -848,7 +848,12 @@ test.describe('Remember state', () => {
     await expectQueryString(page, '3')
   })
 
-  test('it handles starting on page 2, loading pages, refresh, and dataset verification', async ({ page }) => {
+  test('it handles starting on page 2, loading pages, refresh, and dataset verification', async ({
+    page,
+    browserName,
+  }) => {
+    // Firefox doesn't auto-trigger IntersectionObserver after scroll position restoration
+    test.skip(browserName === 'firefox', 'Firefox handles IntersectionObserver differently after scroll restoration')
     await page.goto('/infinite-scroll/remember-state?page=2')
 
     requests.listen(page)
@@ -883,9 +888,12 @@ test.describe('Remember state', () => {
     await expect(page.getByText('User 15')).toBeHidden()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
+
+    // After reload, the scroll position should be restored, which triggers infinite scroll automatically
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('Manual mode: false')).toBeVisible()
+
     expect(page.url()).toContain('page=2')
 
     // Verify dataset tags for existing elements (pages 2+3 are present)

@@ -69,6 +69,11 @@ app.get(/.*\.js$/, (req, res) =>
   res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
 )
 
+// Intercepts all .css assets
+app.get(/.*\.css$/, (req, res) =>
+  res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
+)
+
 /**
  * Used for testing the Inertia plugin is registered.
  * @see plugin.test.js
@@ -106,6 +111,13 @@ app.get('/scroll-after-render/:page', (req, res) =>
   inertia.render(req, res, {
     component: 'ScrollAfterRender',
     props: { page: parseInt(req.params.page) },
+  }),
+)
+
+app.get('/scroll-smooth/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollSmooth',
+    props: { page: req.params.page },
   }),
 )
 

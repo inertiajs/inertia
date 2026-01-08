@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test'
-import { clickAndWaitForResponse, consoleMessages } from './support'
+import { clickAndWaitForResponse, consoleMessages, gotoPageAndWaitForContent, reloadAndWaitForContent } from './support'
 
 test('can load deferred props', async ({ page }) => {
-  await page.goto('/deferred-props/page-1')
+  await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
   await expect(page.getByText('Loading bar...')).toBeVisible()
@@ -38,7 +38,7 @@ test('can load deferred props', async ({ page }) => {
 })
 
 test('we are not caching deferred props after reload', async ({ page }) => {
-  await page.goto('/deferred-props/page-1')
+  await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
   await expect(page.getByText('Loading bar...')).toBeVisible()
@@ -52,7 +52,7 @@ test('we are not caching deferred props after reload', async ({ page }) => {
   await expect(page.getByText('foo value')).toBeVisible()
   await expect(page.getByText('bar value')).toBeVisible()
 
-  await page.reload()
+  await reloadAndWaitForContent(page)
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
   await expect(page.getByText('Loading bar...')).toBeVisible()
@@ -68,7 +68,7 @@ test('we are not caching deferred props after reload', async ({ page }) => {
 })
 
 test('props will re-defer if a link is clicked to go to the same page again', async ({ page }) => {
-  await page.goto('/deferred-props/page-1')
+  await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
   await expect(page.getByText('Loading bar...')).toBeVisible()
@@ -99,7 +99,7 @@ shoulReload.forEach((type) => {
   test(`it will handle partial reloads properly when deferred is being reloaded (${type})`, async ({ page }) => {
     test.skip(process.env.PACKAGE !== 'react', 'React only test')
 
-    await page.goto(`/deferred-props/with-partial-reload/${type}`)
+    await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
 
     await expect(page.getByText('Loading...')).toBeVisible()
 
@@ -125,7 +125,7 @@ noReload.forEach((type) => {
   test(`it will handle partial reloads properly when deferred is not reloaded (${type})`, async ({ page }) => {
     test.skip(process.env.PACKAGE !== 'react', 'React only test')
 
-    await page.goto(`/deferred-props/with-partial-reload/${type}`)
+    await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
 
     await expect(page.getByText('Loading...')).toBeVisible()
 
@@ -147,7 +147,7 @@ noReload.forEach((type) => {
 test('it will not revert to fallback when fetching a url that is different than the current page', async ({ page }) => {
   test.skip(process.env.PACKAGE !== 'react', 'React only test')
 
-  await page.goto(`/deferred-props/with-partial-reload/only`)
+  await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/only`)
 
   await expect(page.getByText('Loading...')).toBeVisible()
 
@@ -172,7 +172,7 @@ test('it will not revert to fallback when fetching a url that is different than 
 test('load deferred props in multiple groups', async ({ page }) => {
   const props = ['foo', 'bar', 'baz', 'qux', 'quux']
 
-  await page.goto('/deferred-props/many-groups')
+  await gotoPageAndWaitForContent(page, '/deferred-props/many-groups')
 
   for (const prop of props) {
     await expect(page.getByText(`Loading ${prop}...`)).toBeVisible()
@@ -190,7 +190,7 @@ test('load deferred props in multiple groups', async ({ page }) => {
 })
 
 test('load deferred props with partial reload on mount', async ({ page }) => {
-  await page.goto('/deferred-props/instant-reload')
+  await gotoPageAndWaitForContent(page, '/deferred-props/instant-reload')
 
   await expect(page.getByText('Loading bar...')).toBeVisible()
 
@@ -199,7 +199,7 @@ test('load deferred props with partial reload on mount', async ({ page }) => {
 })
 
 test('can partial reload deferred props independently', async ({ page }) => {
-  await page.goto('/deferred-props/partial-reloads')
+  await gotoPageAndWaitForContent(page, '/deferred-props/partial-reloads')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
   await expect(page.getByText('Loading bar...')).toBeVisible()
@@ -249,7 +249,7 @@ test('prefetch works with deferred props without errors', async ({ page }) => {
   consoleMessages.listen(page)
   const prefetch = page.waitForResponse('/deferred-props/page-3')
 
-  await page.goto('/deferred-props/page-1')
+  await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
   await expect(page.getByRole('link', { name: 'Page 3' })).toBeVisible()
 
   consoleMessages.errors = []
@@ -274,7 +274,7 @@ test('prefetch works with deferred props without errors', async ({ page }) => {
 })
 
 test('router.reload() without only/except triggers deferred props to reload', async ({ page }) => {
-  await page.goto('/deferred-props/with-reload')
+  await gotoPageAndWaitForContent(page, '/deferred-props/with-reload')
 
   await expect(page.getByText('Loading results...')).toBeVisible()
 
@@ -302,7 +302,7 @@ test('router.reload() without only/except triggers deferred props to reload', as
 })
 
 test('deferred props do not clear validation errors', async ({ page }) => {
-  await page.goto('/deferred-props/with-errors')
+  await gotoPageAndWaitForContent(page, '/deferred-props/with-errors')
 
   await expect(page.locator('#page-error')).not.toBeVisible()
   await expect(page.locator('#form-error')).not.toBeVisible()

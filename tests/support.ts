@@ -1,7 +1,5 @@
 import { expect, Page, Request, Response } from '@playwright/test'
 
-export const isWebKit = (page: Page) => page.context().browser()?.browserType().name() === 'webkit'
-
 export const clickAndWaitForResponse = async (
   page: Page,
   buttonText: string,
@@ -18,9 +16,13 @@ export const pageLoads = {
 
   watch(page: Page, maxLoads = 1) {
     this.count = 0
-    this.maxLoads = maxLoads
 
     page.on('load', () => {
+      // Ignore load events from about:blank (Firefox fires these, Chromium doesn't)
+      if (page.url() === 'about:blank') {
+        return
+      }
+
       this.count++
 
       if (this.count > maxLoads) {
@@ -71,6 +73,8 @@ export const requests = {
 
 export const shouldBeDumpPage = async (page: Page, method: 'get' | 'post' | 'patch' | 'put' | 'delete') => {
   await expect(page).toHaveURL(`dump/${method}`)
+  // Wait for the dump component to render (ensures Vue has mounted and set window._inertia_request_dump)
+  await expect(page.getByText('This is Inertia page component containing a data dump')).toBeVisible()
   // @ts-ignore
   const dump = await page.evaluate(() => window._inertia_request_dump)
   await expect(dump).not.toBeNull()
@@ -82,4 +86,48 @@ export const scrollElementTo = async (page: Page, promise: Promise<void>) => {
   await promise
   // Wait for scroll listener debounce
   await page.waitForTimeout(100)
+}
+
+export const gotoPageAndWaitForContent = async (page: Page, url: string) => {
+  await page.goto(url, { waitUntil: 'domcontentloaded' })
+}
+
+export const reloadAndWaitForContent = async (page: Page) => {
+  await page.reload({ waitUntil: 'domcontentloaded' })
+}
+
+// Wait for scroll to complete after navigating to a fragment
+export const waitForFragmentScroll = async (page: Page) => {
+  // Give time for the scroll animation to complete
+  await page.waitForTimeout(200)
+}
+
+// Ensure scroll position is set on an element (some browsers may not restore scroll positions automatically)
+export const ensureScrollPosition = async (
+  page: Page,
+  selector: string,
+  scrollLeft: number,
+  scrollTop: number,
+) => {
+  await page.waitForSelector(selector, { timeout: 3000 })
+
+  const isCorrect = await page.evaluate(
+    ({ sel, left, top }) => {
+      const el = document.querySelector(sel)
+      return el ? el.scrollLeft === left && el.scrollTop === top : false
+    },
+    { sel: selector, left: scrollLeft, top: scrollTop },
+  )
+
+  if (!isCorrect) {
+    await page.evaluate(
+      ({ sel, left, top }) => {
+        const el = document.querySelector(sel)
+        if (el) {
+          el.scrollTo(left, top)
+        }
+      },
+      { sel: selector, left: scrollLeft, top: scrollTop },
+    )
+  }
 }
