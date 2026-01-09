@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { WhenVisible } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
