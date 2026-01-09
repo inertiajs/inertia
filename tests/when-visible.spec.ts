@@ -50,17 +50,21 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   // Now scroll up and down to re-trigger it
   await page.evaluate(() => (window as any).scrollTo(0, 13_000))
   await page.waitForFunction(() => document.documentElement.scrollTop < 14000, { timeout: 2000 })
+  await page.waitForTimeout(200)
 
+  let responsePromise = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
   await expect(page.getByText('Third one is visible!')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await responsePromise
 
   await page.evaluate(() => (window as any).scrollTo(0, 13_000))
   await page.waitForFunction(() => document.documentElement.scrollTop < 14000, { timeout: 2000 })
+  await page.waitForTimeout(200)
 
+  responsePromise = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
   await expect(page.getByText('Third one is visible!')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await responsePromise
 
   await page.evaluate(() => (window as any).scrollTo(0, 20_000))
   await expect(page.getByText('Loading fourth one...')).toBeVisible()
