@@ -45,6 +45,7 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
       options.onCompleteNextRequest()
       requestAnimationFrame(() => elementManager.processServerLoadedElements(loadedPage), 2)
     },
+    onReset: options.onDataReset,
   })
 
   const addScrollPreservationCallbacks = (reloadOptions: ReloadOptions): ReloadOptions => {

@@ -664,8 +664,10 @@ export type FormComponentProps = Partial<
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: ErrorValue): void
-  setError(errors: Record<string, ErrorValue>): void
+  setError: {
+    (field: string, value: ErrorValue): void
+    (errors: Record<string, ErrorValue>): void
+  }
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
@@ -673,9 +675,9 @@ export type FormComponentMethods = {
   getFormData: () => FormData
   valid: (field: string) => boolean
   invalid: (field: string) => boolean
-  validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig): void
+  validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => void
   touch: (...fields: string[]) => void
-  touched(field?: string): boolean
+  touched: (field?: string) => boolean
   validator: () => Validator
 }
 
@@ -716,6 +718,7 @@ export interface UseInfiniteScrollOptions {
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: () => void
   onCompleteNextRequest: () => void
+  onDataReset?: () => void
 }
 
 export interface UseInfiniteScrollDataManager {

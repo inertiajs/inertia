@@ -63,8 +63,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   if (hasDataForQueryString) {
     // If the original URL contains indices notation (e.g. [0], [1]), preserve it.
     // Indices notation cannot be converted to brackets notation without data loss.
-    const hasIndices = /\[\d+\]/.test(url.search)
-    const arrayFormat = hasIndices ? 'indices' : qsArrayFormat
+    const arrayFormat = queryString.hasIndices(url) ? 'indices' : qsArrayFormat
     url.search = queryString.stringify({ ...queryString.parse(url.search), ...data }, arrayFormat)
   }
 

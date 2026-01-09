@@ -56,6 +56,7 @@ export interface InertiaFormProps<TForm extends object> {
   patch(url: string, options?: UseFormSubmitOptions): void
   delete(url: string, options?: UseFormSubmitOptions): void
   cancel(): void
+  dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   withPrecognition(...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveForm<TForm>
 }
 
@@ -127,6 +128,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let transform: UseFormTransformCallback<TForm> = (data) => data
 
   let validatorRef: Validator | null = null
+  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
 
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
@@ -438,9 +440,19 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         cancelToken.cancel()
       }
     },
+    dontRemember(...keys: FormDataKeys<TForm>[]) {
+      rememberExcludeKeys = keys
+      return this
+    },
     __rememberable: rememberKey === null,
     __remember() {
-      return { data: this.data(), errors: this.errors }
+      const data = this.data()
+      if (rememberExcludeKeys.length > 0) {
+        const filtered = { ...data } as Record<string, unknown>
+        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
+        return { data: filtered as TForm, errors: this.errors }
+      }
+      return { data, errors: this.errors }
     },
     __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }) {
       Object.assign(this, restored.data)
@@ -454,8 +466,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     typedForm as typeof typedForm & InternalRememberState<TForm>,
     (newValue) => {
       typedForm.isDirty = !isEqual(typedForm.data(), defaults)
-      if (rememberKey) {
-        router.remember(cloneDeep(newValue.__remember()), rememberKey)
+
+      const storedData = router.restore(rememberKey!)
+      const newData = cloneDeep(newValue.__remember())
+
+      if (rememberKey && !isEqual(storedData, newData)) {
+        router.remember(newData, rememberKey)
       }
     },
     { immediate: true, deep: true },

@@ -107,6 +107,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
     const [loadingPrevious, setLoadingPrevious] = useState(false)
     const [loadingNext, setLoadingNext] = useState(false)
     const [requestCount, setRequestCount] = useState(0)
+    const [hasPreviousPage, setHasPreviousPage] = useState(false)
+    const [hasNextPage, setHasNextPage] = useState(false)
 
     const [resolvedStartElement, setResolvedStartElement] = useState<HTMLElement | null>(null)
     const [resolvedEndElement, setResolvedEndElement] = useState<HTMLElement | null>(null)
@@ -171,6 +173,12 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         return
       }
 
+      function syncStateFromDataManager() {
+        setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
+        setHasPreviousPage(infiniteScrollInstance.dataManager.hasPrevious())
+        setHasNextPage(infiniteScrollInstance.dataManager.hasNext())
+      }
+
       const infiniteScrollInstance = useInfiniteScroll({
         // Data
         getPropName: () => data,
@@ -191,18 +199,18 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         onBeforeNextRequest: () => setLoadingNext(true),
         onCompletePreviousRequest: () => {
           setLoadingPrevious(false)
-          setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
+          syncStateFromDataManager()
         },
         onCompleteNextRequest: () => {
           setLoadingNext(false)
-          setRequestCount(infiniteScrollInstance.dataManager.getRequestCount())
+          syncStateFromDataManager()
         },
+        onDataReset: syncStateFromDataManager,
       })
 
       setInfiniteScroll(infiniteScrollInstance)
       const { dataManager, elementManager } = infiniteScrollInstance
-
-      setRequestCount(dataManager.getRequestCount())
+      syncStateFromDataManager()
 
       elementManager.setupObservers()
       elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
@@ -256,8 +264,8 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
     > = {
       loadingPrevious,
       loadingNext,
-      hasPrevious: dataManager?.hasPrevious() ?? false,
-      hasNext: dataManager?.hasNext() ?? false,
+      hasPrevious: hasPreviousPage,
+      hasNext: hasNextPage,
     }
 
     const exposedPrevious: InfiniteScrollActionSlotProps = {
@@ -265,7 +273,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       fetch: dataManager?.fetchPrevious ?? (() => {}),
       autoMode: headerAutoMode,
       manualMode: !headerAutoMode,
-      hasMore: dataManager?.hasPrevious() ?? false,
+      hasMore: hasPreviousPage,
       ...sharedExposed,
     }
 
@@ -274,7 +282,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       fetch: dataManager?.fetchNext ?? (() => {}),
       autoMode: footerAutoMode,
       manualMode: !footerAutoMode,
-      hasMore: dataManager?.hasNext() ?? false,
+      hasMore: hasNextPage,
       ...sharedExposed,
     }
 

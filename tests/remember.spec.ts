@@ -386,6 +386,24 @@ test.describe('Remember (local state caching)', () => {
       await expect(page.locator('.handle_error')).toBeVisible()
       await expect(page.locator('.remember_error')).not.toBeVisible()
     })
+
+    test('it excludes fields via dontRemember', async ({ page }) => {
+      await page.goto('remember/form-helper/password')
+
+      await page.fill('#username', 'A')
+      await page.fill('#password', 'B')
+
+      await page.getByRole('link', { name: 'Navigate away' }).click()
+
+      await shouldBeDumpPage(page, 'get')
+
+      await page.goBack()
+
+      await expect(page).toHaveURL('remember/form-helper/password')
+
+      await expect(page.locator('#username')).toHaveValue('A')
+      await expect(page.locator('#password')).toHaveValue('')
+    })
   })
 
   test('restore without types', async ({ page }) => {
