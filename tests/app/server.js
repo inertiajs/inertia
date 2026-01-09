@@ -844,6 +844,24 @@ app.get('/when-visible-merge-params', (req, res) => {
   }
 })
 
+app.get('/when-visible-params-update', (req, res) => {
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleParamsUpdate',
+        props: {
+          lazyData: { text: `Loaded with paramValue=${req.query.paramValue}` },
+        },
+      })
+    }, 100)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisibleParamsUpdate',
+      props: {},
+    })
+  }
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>

@@ -258,3 +258,21 @@ test('it merges data and params props', async ({ page }) => {
   await page.waitForResponse((res) => res.url().includes('page=2'))
   await expect(page.getByText('Merged with callback loaded: Merged with callback success! page=2')).toBeVisible()
 })
+
+test('it does not trigger unneeded requests when params change while visible', async ({ page }) => {
+  await page.goto('/when-visible-params-update')
+
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+  await expect(page.getByText('Loading lazy data...')).toBeVisible()
+  await page.waitForResponse((res) => res.url().includes('paramValue=initial'))
+  await expect(page.getByText('Data loaded: Loaded with paramValue=initial')).toBeVisible()
+  await page.waitForTimeout(100)
+
+  requests.listen(page)
+
+  await page.getByRole('button', { name: 'Update Param' }).click()
+  await expect(page.getByText('Current param: updated')).toBeVisible()
+  await page.waitForTimeout(100)
+
+  expect(requests.requests).toHaveLength(0)
+})
