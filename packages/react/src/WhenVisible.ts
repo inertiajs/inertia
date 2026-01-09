@@ -29,6 +29,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
   const observer = useRef<IntersectionObserver | null>(null)
+  const getReloadParamsRef = useRef<() => Partial<ReloadOptions>>(() => ({}))
 
   useEffect(() => {
     if (keys.length > 0) {
@@ -45,6 +46,8 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
 
     return reloadParams
   }, [params, data])
+
+  getReloadParamsRef.current = getReloadParams
 
   const registerObserver = () => {
     observer.current?.disconnect()
@@ -66,7 +69,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
         fetching.current = true
         setIsFetching(true)
 
-        const reloadParams = getReloadParams()
+        const reloadParams = getReloadParamsRef.current()
 
         router.reload({
           ...reloadParams,
@@ -109,7 +112,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
     return () => {
       observer.current?.disconnect()
     }
-  }, [always, loaded, ref, getReloadParams, buffer])
+  }, [always, loaded, buffer])
 
   const resolveChildren = () => (typeof children === 'function' ? children({ fetching: isFetching }) : children)
   const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)
