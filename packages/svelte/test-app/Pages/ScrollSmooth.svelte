@@ -22,7 +22,7 @@
 
   <div class="content">
     {#if page === 'long'}
-      {#each Array(50) as _, i}
+      {#each Array(50).keys() as i (i)}
         <div class="content-block">
           <h2>Section {i + 1}</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
