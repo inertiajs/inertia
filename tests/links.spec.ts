@@ -875,8 +875,9 @@ test.describe('scroll', () => {
     await expect(page.getByText('Scroll log: []')).toBeVisible()
   })
 
-  test('scrolls to top after the page has been rendered', async ({ page }) => {
-    test.setTimeout(10_000)
+  test('scrolls to top after the page has been rendered', async ({ page, browserName }) => {
+    // Firefox in CI is slower, needs more time for multiple navigations
+    test.setTimeout(browserName === 'firefox' ? 30_000 : 10_000)
 
     await page.goto('/scroll-after-render/1')
 

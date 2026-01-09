@@ -21,13 +21,16 @@ test.describe('Flash Data', () => {
   })
 
   test('preserves flash data after deferred props load and does not fire event again', async ({ page }) => {
+    // Set up response listener before navigating to catch the deferred request
+    const deferredResponse = page.waitForResponse((res) => res.url().includes('/flash/with-deferred'))
+
     await gotoPageAndWaitForContent(page, '/flash/with-deferred')
 
     await expect(page.locator('#flash')).toContainText('Flash with deferred')
     await expect(page.locator('#flash-event-count')).toHaveText('1')
-    await expect(page.locator('#loading')).toBeVisible()
 
-    await page.waitForResponse(page.url())
+    // Wait for deferred data to load (may already be loaded in fast CI environments)
+    await deferredResponse
 
     await expect(page.locator('#loading')).not.toBeVisible()
     await expect(page.locator('#data')).toContainText('Deferred data loaded')
