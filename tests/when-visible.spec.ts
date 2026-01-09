@@ -80,7 +80,6 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
   await expect(page.getByText('Count is now 1')).toBeVisible()
   await page.waitForResponse(page.url() + '?count=1')
-  await page.waitForTimeout(100)
   await expect(page.getByText('Count is now 2')).toBeVisible()
 })
 
