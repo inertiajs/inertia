@@ -24,6 +24,8 @@ test('will start polling when the component mounts with usePoll', async ({ page 
   const only2 = await response2.request().headerValue('X-Inertia-Partial-Data')
   await expect(only2).toBe('custom_prop')
 
+  // Wait for console messages to be captured (may be delayed in Firefox)
+  await expect.poll(() => consoleMessages.messages.length, { timeout: 2000 }).toBeGreaterThanOrEqual(2)
   await expect(consoleMessages.messages[0]).toContain('hook poll finished')
   await expect(consoleMessages.messages[1]).toContain('hook poll finished')
 
