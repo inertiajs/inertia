@@ -56,7 +56,9 @@ export default defineComponent({
           return
         }
 
-        this.$nextTick(this.registerObserver)
+        if (!this.observer || !exists) {
+          this.$nextTick(this.registerObserver)
+        }
       },
       { immediate: true },
     )
