@@ -1,6 +1,13 @@
 import type { QueryStringArrayFormatOption } from './types'
 
 /**
+ * Returns true if the given URL query string contains indexed array parameters.
+ */
+export function hasIndices(url: URL): boolean {
+  return /\[\d+\]/.test(decodeURIComponent(url.search))
+}
+
+/**
  * Parse a query string into a nested object.
  */
 export function parse(query: string): Record<string, unknown> {
