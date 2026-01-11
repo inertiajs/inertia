@@ -4,7 +4,7 @@
   /**
    * Test page for GitHub issue #2806:
    * React useForm `onError` doesn't sync errors to precognition validator
-   * 
+   *
    * Uses useForm hook (Form Helper) instead of Form component
    */
   const form = useForm({
@@ -43,7 +43,7 @@
     </div>
 
     {#if $form.validating}<p id="validating">Validating...</p>{/if}
-    
+
     <button type="submit" id="submit-btn">Submit</button>
   </form>
 </div>

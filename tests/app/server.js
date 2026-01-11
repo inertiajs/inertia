@@ -587,9 +587,7 @@ app.post('/precognition/error-sync', upload.any(), (req, res) => {
     // Detect which component to return based on referer
     const referer = req.headers['referer'] || ''
     const isFormHelper = referer.includes('/form-helper/')
-    const component = isFormHelper
-      ? 'FormHelper/Precognition/ErrorSync'
-      : 'FormComponent/Precognition/ErrorSync'
+    const component = isFormHelper ? 'FormHelper/Precognition/ErrorSync' : 'FormComponent/Precognition/ErrorSync'
 
     if (Object.keys(errors).length) {
       return inertia.render(req, res, {
@@ -1097,9 +1095,9 @@ app.get('/match-props-on-key', (req, res) => {
     ...(req.headers['x-inertia-reset']
       ? {}
       : {
-        deepMergeProps: ['foo', 'baz'],
-        matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
-      }),
+          deepMergeProps: ['foo', 'baz'],
+          matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+        }),
   })
 })
 
@@ -1249,9 +1247,9 @@ app.get('/deferred-props/many-groups', (req, res) => {
         deferredProps: requestedProps
           ? {}
           : props.reduce((groups, prop) => {
-            groups[prop] = [prop]
-            return groups
-          }, {}),
+              groups[prop] = [prop]
+              return groups
+            }, {}),
       }),
     delay,
   )
@@ -1267,10 +1265,10 @@ app.get('/deferred-props/instant-reload', (req, res) => {
         component: 'DeferredProps/InstantReload',
         props: requestedProps
           ? {
-            [requestedProps]: {
-              text: `${requestedProps} value`,
-            },
-          }
+              [requestedProps]: {
+                text: `${requestedProps} value`,
+              },
+            }
           : {},
         deferredProps: requestedProps ? {} : { default: ['bar'] },
       }),
@@ -1796,7 +1794,7 @@ app.get('/infinite-scroll/dual-sibling', (req, res) => {
   )
 })
 
-function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) { }
+function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) {}
 
 app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
   const filter = req.query.filter || ''
