@@ -540,6 +540,69 @@ app.post('/precognition/dynamic-array-inputs', upload.any(), (req, res) => {
   }, 250)
 })
 
+// Route to test that form submission errors are properly synced to precognition validator
+// This reproduces GitHub issue #2806
+app.post('/precognition/error-sync', upload.any(), (req, res) => {
+  const isPrecognition = req.headers['precognition'] === 'true'
+
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const errors = {}
+
+    // Validate name
+    if (!name || name.trim() === '') {
+      errors.name = 'The name field is required.'
+    }
+
+    // Validate email
+    if (!email || email.trim() === '') {
+      errors.email = 'The email field is required.'
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'The email must be a valid email address.'
+    }
+
+    // For precognition, filter to only requested fields
+    if (isPrecognition && only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    if (isPrecognition) {
+      res.header('Precognition', 'true')
+      res.header('Vary', 'Precognition')
+
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ errors })
+      }
+
+      return res.status(204).header('Precognition-Success', 'true').send()
+    }
+
+    // Non-precognition: regular form submission with Inertia error response
+    // Detect which component to return based on referer
+    const referer = req.headers['referer'] || ''
+    const isFormHelper = referer.includes('/form-helper/')
+    const component = isFormHelper
+      ? 'FormHelper/Precognition/ErrorSync'
+      : 'FormComponent/Precognition/ErrorSync'
+
+    if (Object.keys(errors).length) {
+      return inertia.render(req, res, {
+        component,
+        props: { errors },
+      })
+    }
+
+    // Success - redirect
+    return res.redirect(303, '/')
+  }, 100)
+})
+
 const methods = ['get', 'post', 'put', 'patch', 'delete']
 const renderDump = (req, res) =>
   inertia.render(req, res, {
@@ -1034,9 +1097,9 @@ app.get('/match-props-on-key', (req, res) => {
     ...(req.headers['x-inertia-reset']
       ? {}
       : {
-          deepMergeProps: ['foo', 'baz'],
-          matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
-        }),
+        deepMergeProps: ['foo', 'baz'],
+        matchPropsOn: ['foo.data.id', 'foo.companies.otherId', 'foo.teams.uuid'],
+      }),
   })
 })
 
@@ -1186,9 +1249,9 @@ app.get('/deferred-props/many-groups', (req, res) => {
         deferredProps: requestedProps
           ? {}
           : props.reduce((groups, prop) => {
-              groups[prop] = [prop]
-              return groups
-            }, {}),
+            groups[prop] = [prop]
+            return groups
+          }, {}),
       }),
     delay,
   )
@@ -1204,10 +1267,10 @@ app.get('/deferred-props/instant-reload', (req, res) => {
         component: 'DeferredProps/InstantReload',
         props: requestedProps
           ? {
-              [requestedProps]: {
-                text: `${requestedProps} value`,
-              },
-            }
+            [requestedProps]: {
+              text: `${requestedProps} value`,
+            },
+          }
           : {},
         deferredProps: requestedProps ? {} : { default: ['bar'] },
       }),
@@ -1733,7 +1796,7 @@ app.get('/infinite-scroll/dual-sibling', (req, res) => {
   )
 })
 
-function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) {}
+function renderInfiniteScrollWithTag(req, res, component, total = 40, orderByDesc = false, perPage = 15) { }
 
 app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
   const filter = req.query.filter || ''

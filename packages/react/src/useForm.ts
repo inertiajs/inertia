@@ -237,8 +237,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
-            setErrors(errors as FormDataErrors<TForm>)
-            setHasErrors(true)
+            setError(errors as FormDataErrors<TForm>)
           }
 
           if (options.onError) {

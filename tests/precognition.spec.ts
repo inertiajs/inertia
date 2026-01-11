@@ -556,6 +556,36 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.locator('#items\\.1\\.name-error')).toBeVisible()
     })
+
+    test(prefix + 'clears submission errors on subsequent precognition success', async ({ page }) => {
+      /**
+       * Test for GitHub issue #2806:
+       */
+
+      await page.goto('/' + integration + '/precognition/error-sync')
+
+      // Step 1: Submit the form with empty fields to trigger onError
+      await page.click('#submit-btn')
+
+      // Wait for the error response and errors to appear
+      await expect(page.locator('#name-error')).toBeVisible()
+      await expect(page.locator('#email-error')).toBeVisible()
+      await expect(page.locator('#name-error')).toHaveText('The name field is required.')
+      await expect(page.locator('#email-error')).toHaveText('The email field is required.')
+
+      // Step 2: Type a valid name and blur to trigger precognition validation
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+
+      // Wait for precognition validation to complete
+      await expect(page.locator('#validating')).toBeVisible()
+      await expect(page.locator('#validating')).not.toBeVisible()
+
+      // Step 3: Assert that name error is cleared but email error remains
+      // This is where React fails - the name error persists
+      await expect(page.locator('#name-error')).not.toBeVisible()
+      await expect(page.locator('#email-error')).toBeVisible()
+    })
   })
 })
 
