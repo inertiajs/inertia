@@ -1855,6 +1855,35 @@ app.get('/infinite-scroll/filtering-manual', (req, res) => {
   )
 })
 
+// Deferred scroll props test - simulates Inertia::scroll()->defer()
+app.get('/infinite-scroll/deferred', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  if (!partialReload) {
+    // Initial page load - defer the users prop, no scrollProps yet
+    return inertia.render(req, res, {
+      component: 'InfiniteScroll/Deferred',
+      props: {},
+      deferredProps: { default: ['users'] },
+    })
+  }
+
+  // Deferred props request - send both the data AND scrollProps
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/Deferred',
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    250,
+  )
+})
+
 app.post('/view-transition/form-errors', (req, res) =>
   inertia.render(req, res, {
     component: 'ViewTransition/FormErrors',
@@ -1898,7 +1927,7 @@ app.get('/flash/with-deferred', (req, res) => {
           data: req.headers['x-inertia-partial-data']?.includes('data') ? 'Deferred data loaded' : undefined,
         },
       }),
-    100,
+    250,
   )
 })
 app.get('/flash/partial', (req, res) => {
