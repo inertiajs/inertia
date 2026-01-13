@@ -540,6 +540,65 @@ app.post('/precognition/dynamic-array-inputs', upload.any(), (req, res) => {
   }, 250)
 })
 
+app.post('/precognition/error-sync', upload.any(), (req, res) => {
+  const isPrecognition = req.headers['precognition'] === 'true'
+
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const errors = {}
+
+    // Validate name
+    if (!name || name.trim() === '') {
+      errors.name = 'The name field is required.'
+    }
+
+    // Validate email
+    if (!email || email.trim() === '') {
+      errors.email = 'The email field is required.'
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'The email must be a valid email address.'
+    }
+
+    // For precognition, filter to only requested fields
+    if (isPrecognition && only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    if (isPrecognition) {
+      res.header('Precognition', 'true')
+      res.header('Vary', 'Precognition')
+
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ errors })
+      }
+
+      return res.status(204).header('Precognition-Success', 'true').send()
+    }
+
+    // Non-precognition: regular form submission with Inertia error response
+    // Detect which component to return based on referer
+    const referer = req.headers['referer'] || ''
+    const isFormHelper = referer.includes('/form-helper/')
+    const component = isFormHelper ? 'FormHelper/Precognition/ErrorSync' : 'FormComponent/Precognition/ErrorSync'
+
+    if (Object.keys(errors).length) {
+      return inertia.render(req, res, {
+        component,
+        props: { errors },
+      })
+    }
+
+    // Success - redirect
+    return res.redirect(303, '/')
+  }, 100)
+})
+
 const methods = ['get', 'post', 'put', 'patch', 'delete']
 const renderDump = (req, res) =>
   inertia.render(req, res, {

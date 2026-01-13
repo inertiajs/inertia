@@ -556,6 +556,27 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.locator('#items\\.1\\.name-error')).toBeVisible()
     })
+
+    test(prefix + 'clears submission errors on subsequent precognition success', async ({ page }) => {
+      await page.goto('/' + integration + '/precognition/error-sync')
+
+      // Submit with empty fields to trigger validation errors
+      await page.click('#submit-btn')
+      await expect(page.locator('#name-error')).toBeVisible()
+      await expect(page.locator('#email-error')).toBeVisible()
+      await expect(page.locator('#name-error')).toHaveText('The name field is required.')
+      await expect(page.locator('#email-error')).toHaveText('The email field is required.')
+
+      // Fill valid name and trigger precognition validation
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+      await expect(page.locator('#validating')).toBeVisible()
+      await expect(page.locator('#validating')).not.toBeVisible()
+
+      // Name error should be cleared, email error should remain
+      await expect(page.locator('#name-error')).not.toBeVisible()
+      await expect(page.locator('#email-error')).toBeVisible()
+    })
   })
 })
 
