@@ -2410,3 +2410,32 @@ test.describe('Router', () => {
     expect(requestUrl).not.toContain('foo[][bar]')
   })
 })
+
+test.describe('Deferred scroll props', () => {
+  test('it loads deferred scroll props and merges scrollProps correctly', async ({ page }) => {
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/deferred')
+
+    await expect(page.getByText('Loading deferred scroll prop...')).toBeVisible()
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('Loading deferred scroll prop...')).toBeHidden()
+
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Loading next items...')).toBeVisible()
+
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading next items...')).toBeHidden()
+
+    // Verify the requests: 1 for deferred props, 1 for loading next page
+    const pageRequests = infiniteScrollRequests()
+    expect(pageRequests.length).toBe(2)
+  })
+})
