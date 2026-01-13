@@ -2,14 +2,10 @@ import { Form } from '@inertiajs/react'
 import MethodsTestComponent from './MethodsTestComponent'
 
 export default () => (
-  <Form action="/dump/post" method="post">
-    {({ isDirty, hasErrors, errors }) => (
+  <Form action="/form-component/context/methods" method="post">
+    {({ errors }) => (
       <>
-        <div>
-          <span>{String(isDirty)}</span>
-          <span>{String(hasErrors)}</span>
-          {hasErrors && <pre>{JSON.stringify(errors, null, 2)}</pre>}
-        </div>
+        {Object.keys(errors).length > 0 && <pre>{JSON.stringify(errors, null, 2)}</pre>}
 
         <input type="text" name="name" defaultValue="Initial Name" />
         <input type="email" name="email" defaultValue="initial@example.com" />

@@ -27,11 +27,9 @@ function testGetFormData() {
 
 <template>
   <div v-if="form">
-    <span>{{ form.isDirty }}</span>
-    <span>{{ form.hasErrors }}</span>
-    <span>{{ form.processing }}</span>
-    <span>{{ form.wasSuccessful }}</span>
-    <span>{{ form.recentlySuccessful }}</span>
+    <span v-if="form.processing">Child: processing</span>
+    <span v-if="form.wasSuccessful">Child: was successful</span>
+    <span v-if="form.recentlySuccessful">Child: recently successful</span>
     <pre v-if="form.hasErrors">{{ JSON.stringify(form.errors, null, 2) }}</pre>
 
     <button type="button" @click="form.submit()">submit()</button>

@@ -4,12 +4,8 @@ import MethodsTestComponent from './MethodsTestComponent.vue'
 </script>
 
 <template>
-  <Form action="/dump/post" method="post" #default="{ isDirty, hasErrors, errors }">
-    <div>
-      <span>{{ isDirty }}</span>
-      <span>{{ hasErrors }}</span>
-      <pre v-if="hasErrors">{{ JSON.stringify(errors, null, 2) }}</pre>
-    </div>
+  <Form action="/form-component/context/methods" method="post" #default="{ errors }">
+    <pre v-if="Object.keys(errors).length">{{ JSON.stringify(errors, null, 2) }}</pre>
 
     <input type="text" name="name" value="Initial Name" />
     <input type="email" name="email" value="initial@example.com" />

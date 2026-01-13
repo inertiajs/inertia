@@ -3,12 +3,8 @@
   import MethodsTestComponent from './MethodsTestComponent.svelte'
 </script>
 
-<Form action="/dump/post" method="post" let:isDirty let:hasErrors let:errors>
-  <div>
-    <span>{isDirty}</span>
-    <span>{hasErrors}</span>
-    {#if hasErrors}<pre>{JSON.stringify(errors, null, 2)}</pre>{/if}
-  </div>
+<Form action="/form-component/context/methods" method="post" let:errors>
+  {#if Object.keys(errors).length}<pre>{JSON.stringify(errors, null, 2)}</pre>{/if}
 
   <input type="text" name="name" value="Initial Name" />
   <input type="email" name="email" value="initial@example.com" />

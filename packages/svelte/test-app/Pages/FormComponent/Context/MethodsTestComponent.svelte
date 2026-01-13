@@ -25,11 +25,9 @@
 </script>
 
 {#if $form}
-  <span>{$form.isDirty}</span>
-  <span>{$form.hasErrors}</span>
-  <span>{$form.processing}</span>
-  <span>{$form.wasSuccessful}</span>
-  <span>{$form.recentlySuccessful}</span>
+  {#if $form.processing}<span>Child: processing</span>{/if}
+  {#if $form.wasSuccessful}<span>Child: was successful</span>{/if}
+  {#if $form.recentlySuccessful}<span>Child: recently successful</span>{/if}
   {#if $form.hasErrors}<pre>{JSON.stringify($form.errors, null, 2)}</pre>{/if}
 
   <button type="button" on:click={() => $form.submit()}>submit()</button>

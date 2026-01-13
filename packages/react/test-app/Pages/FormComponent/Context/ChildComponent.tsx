@@ -9,6 +9,9 @@ export default ({ formId }: { formId?: string }) => {
         <div>
           <span>Child: Form is {form.isDirty ? 'dirty' : 'clean'}</span>
           {form.hasErrors && <span> | Child: Form has errors</span>}
+          {form.processing && <span> | Child: Form is processing</span>}
+          {form.wasSuccessful && <span> | Child: Form was successful</span>}
+          {form.recentlySuccessful && <span> | Child: Form recently successful</span>}
           {form.errors.name && <span> | Error: {form.errors.name}</span>}
         </div>
       ) : (

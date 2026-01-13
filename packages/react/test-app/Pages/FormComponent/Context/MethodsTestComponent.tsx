@@ -29,11 +29,9 @@ export default () => {
 
   return (
     <>
-      <span>{String(form.isDirty)}</span>
-      <span>{String(form.hasErrors)}</span>
-      <span>{String(form.processing)}</span>
-      <span>{String(form.wasSuccessful)}</span>
-      <span>{String(form.recentlySuccessful)}</span>
+      {form.processing && <span>Child: processing</span>}
+      {form.wasSuccessful && <span>Child: was successful</span>}
+      {form.recentlySuccessful && <span>Child: recently successful</span>}
       {form.hasErrors && <pre>{JSON.stringify(form.errors, null, 2)}</pre>}
 
       <button type="button" onClick={() => form.submit()}>

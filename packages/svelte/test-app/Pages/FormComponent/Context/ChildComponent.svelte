@@ -10,6 +10,9 @@
   <div>
     <span>Child: Form is {$form.isDirty ? 'dirty' : 'clean'}</span>
     {#if $form.hasErrors}<span> | Child: Form has errors</span>{/if}
+    {#if $form.processing}<span> | Child: Form is processing</span>{/if}
+    {#if $form.wasSuccessful}<span> | Child: Form was successful</span>{/if}
+    {#if $form.recentlySuccessful}<span> | Child: Form recently successful</span>{/if}
     {#if $form.errors.name}<span> | Error: {$form.errors.name}</span>{/if}
   </div>
 {:else}

@@ -12,6 +12,9 @@ const form = useFormContext()
   <div v-if="form">
     <span>Child: Form is {{ form.isDirty ? 'dirty' : 'clean' }}</span>
     <span v-if="form.hasErrors"> | Child: Form has errors</span>
+    <span v-if="form.processing"> | Child: Form is processing</span>
+    <span v-if="form.wasSuccessful"> | Child: Form was successful</span>
+    <span v-if="form.recentlySuccessful"> | Child: Form recently successful</span>
     <span v-if="form.errors.name"> | Error: {{ form.errors.name }}</span>
   </div>
   <div v-else>No form context available</div>
