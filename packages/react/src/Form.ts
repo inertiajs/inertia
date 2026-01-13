@@ -43,7 +43,7 @@ type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetc
 
 const noop = () => undefined
 
-export const FormContext = createContext<FormComponentRef | undefined>(undefined)
+const FormContext = createContext<FormComponentRef | undefined>(undefined)
 
 const Form = forwardRef<FormComponentRef, ComponentProps>(
   (

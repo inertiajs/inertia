@@ -34,7 +34,7 @@ type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetc
 
 const noop = () => undefined
 
-export const FormContextKey: InjectionKey<FormComponentRef> = Symbol('InertiaFormContext')
+const FormContextKey: InjectionKey<FormComponentRef> = Symbol('InertiaFormContext')
 
 const Form = defineComponent({
   name: 'Form',
