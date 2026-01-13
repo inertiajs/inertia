@@ -337,8 +337,8 @@ export class Response {
       }
     }
 
-    // Preserve the existing scrollProps while merging new ones in
-    if (currentPage.get().scrollProps || pageResponse.scrollProps) {
+    // Preserve the existing scrollProps
+    if (currentPage.get().scrollProps) {
       pageResponse.scrollProps = {
         ...(currentPage.get().scrollProps || {}),
         ...(pageResponse.scrollProps || {}),
