@@ -1,12 +1,6 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte'
 
-  /**
-   * Test page for GitHub issue #2806:
-   * React useForm `onError` doesn't sync errors to precognition validator
-   *
-   * Uses useForm hook (Form Helper) instead of Form component
-   */
   const form = useForm({
     name: '',
     email: '',

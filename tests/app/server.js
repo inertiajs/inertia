@@ -540,8 +540,6 @@ app.post('/precognition/dynamic-array-inputs', upload.any(), (req, res) => {
   }, 250)
 })
 
-// Route to test that form submission errors are properly synced to precognition validator
-// This reproduces GitHub issue #2806
 app.post('/precognition/error-sync', upload.any(), (req, res) => {
   const isPrecognition = req.headers['precognition'] === 'true'
 
