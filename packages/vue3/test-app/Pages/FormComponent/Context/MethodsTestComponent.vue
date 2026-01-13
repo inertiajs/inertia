@@ -60,12 +60,8 @@ function testGetFormData() {
     <button type="button" @click="testGetData">getData()</button>
     <button type="button" @click="testGetFormData">getFormData()</button>
 
-    <div v-if="getDataResult">
-      <pre>{{ getDataResult }}</pre>
-    </div>
-    <div v-if="getFormDataResult">
-      <pre>{{ getFormDataResult }}</pre>
-    </div>
+    <pre v-if="getDataResult" id="get-data-result">{{ getDataResult }}</pre>
+    <pre v-if="getFormDataResult" id="get-form-data-result">{{ getFormDataResult }}</pre>
   </div>
   <div v-else>No form context available</div>
 </template>

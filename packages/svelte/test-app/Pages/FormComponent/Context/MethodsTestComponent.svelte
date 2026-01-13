@@ -52,12 +52,8 @@
   <button type="button" on:click={testGetData}>getData()</button>
   <button type="button" on:click={testGetFormData}>getFormData()</button>
 
-  {#if getDataResult}
-    <div><pre>{getDataResult}</pre></div>
-  {/if}
-  {#if getFormDataResult}
-    <div><pre>{getFormDataResult}</pre></div>
-  {/if}
+  {#if getDataResult}<pre id="get-data-result">{getDataResult}</pre>{/if}
+  {#if getFormDataResult}<pre id="get-form-data-result">{getFormDataResult}</pre>{/if}
 {:else}
   <div>No form context available</div>
 {/if}

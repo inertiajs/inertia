@@ -86,16 +86,8 @@ export default () => {
         getFormData()
       </button>
 
-      {getDataResult && (
-        <div>
-          <pre>{getDataResult}</pre>
-        </div>
-      )}
-      {getFormDataResult && (
-        <div>
-          <pre>{getFormDataResult}</pre>
-        </div>
-      )}
+      {getDataResult && <pre id="get-data-result">{getDataResult}</pre>}
+      {getFormDataResult && <pre id="get-form-data-result">{getFormDataResult}</pre>}
     </>
   )
 }
