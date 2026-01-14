@@ -1274,7 +1274,7 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
-app.get('/deferred-props/rapid-navigation/:filter?', (req, res) => {
+app.get('/deferred-props/rapid-navigation{/:filter}', (req, res) => {
   const filter = req.params.filter || 'none'
   const requestedProps = req.headers['x-inertia-partial-data']
 
