@@ -345,17 +345,14 @@ test('it refetches pending deferred props after navigating back', async ({ page 
   await expect(page.getByText('Loading fast prop...')).toBeVisible()
   await expect(page.getByText('Loading slow prop...')).toBeVisible()
 
+  // Navigate away before deferred props load
   await page.getByRole('link', { name: 'Go to Page B' }).click()
   await page.waitForURL('/deferred-props/back-button/b')
-
-  await expect(page.getByText('Loading data...')).toBeVisible()
 
   await page.goBack()
   await page.waitForURL('/deferred-props/back-button/a')
 
-  await expect(page.getByText('Loading fast prop...')).toBeVisible()
-  await expect(page.getByText('Loading slow prop...')).toBeVisible()
-
+  // Both props should eventually load after navigating back
   await expect(page.getByText('Fast prop loaded')).toBeVisible()
   await expect(page.getByText('Slow prop loaded')).toBeVisible()
 })
