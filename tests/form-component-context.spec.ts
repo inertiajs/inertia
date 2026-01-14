@@ -138,7 +138,6 @@ test.describe('Form Component Context', () => {
       await expect(page.getByText('Child: recently successful')).not.toBeVisible()
 
       await page.getByRole('button', { name: 'submit()' }).click()
-      await page.waitForResponse((response) => response.url().includes('/form-component/context/methods'))
 
       await expect(page.getByText('Child: was successful')).toBeVisible()
       await expect(page.getByText('Child: recently successful')).toBeVisible()
