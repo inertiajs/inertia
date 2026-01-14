@@ -1274,8 +1274,8 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
-app.get('/deferred-props/rapid-navigation{/:filter}', (req, res) => {
-  const filter = req.params.filter || 'none'
+app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
+  const id = req.params.id || 'none'
   const requestedProps = req.headers['x-inertia-partial-data']
 
   if (!requestedProps) {
@@ -1287,7 +1287,7 @@ app.get('/deferred-props/rapid-navigation{/:filter}', (req, res) => {
         group3: ['activity'],
       },
       props: {
-        filter,
+        id,
       },
     })
   }
@@ -1298,10 +1298,10 @@ app.get('/deferred-props/rapid-navigation{/:filter}', (req, res) => {
       inertia.render(req, res, {
         component: 'DeferredProps/RapidNavigation',
         props: {
-          filter,
-          users: requestedProps.includes('users') ? { text: `users data for ${filter}` } : undefined,
-          stats: requestedProps.includes('stats') ? { text: `stats data for ${filter}` } : undefined,
-          activity: requestedProps.includes('activity') ? { text: `activity data for ${filter}` } : undefined,
+          id,
+          users: requestedProps.includes('users') ? { text: `users data for ${id}` } : undefined,
+          stats: requestedProps.includes('stats') ? { text: `stats data for ${id}` } : undefined,
+          activity: requestedProps.includes('activity') ? { text: `activity data for ${id}` } : undefined,
         },
       }),
     600,

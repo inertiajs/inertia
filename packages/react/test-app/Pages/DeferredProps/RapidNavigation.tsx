@@ -16,11 +16,11 @@ const Activity = () => {
 }
 
 export default () => {
-  const { filter } = usePage<{ filter: string }>().props
+  const { id } = usePage<{ id: string }>().props
 
   return (
     <>
-      <div>Current filter: {filter}</div>
+      <div>Page: {id}</div>
 
       <Deferred data="users" fallback={<div>Loading users...</div>}>
         <Users />
@@ -34,9 +34,9 @@ export default () => {
         <Activity />
       </Deferred>
 
-      <Link href="/deferred-props/rapid-navigation/a">Filter A</Link>
-      <Link href="/deferred-props/rapid-navigation/b">Filter B</Link>
-      <Link href="/deferred-props/rapid-navigation/c">Filter C</Link>
+      <Link href="/deferred-props/rapid-navigation/a">Page A</Link>
+      <Link href="/deferred-props/rapid-navigation/b">Page B</Link>
+      <Link href="/deferred-props/rapid-navigation/c">Page C</Link>
       <Link href="/deferred-props/page-1">Navigate Away</Link>
 
       <button
@@ -50,29 +50,9 @@ export default () => {
         Navigate with onBefore
       </button>
 
-      <button onClick={() => router.reload({ except: ['stats'] })}>Reload with except</button>
-
-      <button onClick={() => router.visit('/deferred-props/rapid-navigation/b', { only: ['users'] })}>
-        Visit B with only
-      </button>
-
-      <button onClick={() => router.visit(`/deferred-props/rapid-navigation/${filter}`)}>Re-visit same URL</button>
-
       <button onClick={() => router.reload()}>Plain reload</button>
 
-      <button onClick={() => router.reload({ only: ['users'], except: ['stats'] })}>Reload with only and except</button>
-
-      <button onClick={() => router.visit('/deferred-props/rapid-navigation/b', { except: ['stats'] })}>
-        Visit B with except
-      </button>
-
-      <button
-        onClick={() => router.visit('/deferred-props/rapid-navigation/b', { only: ['users'], except: ['stats'] })}
-      >
-        Visit B with only and except
-      </button>
-
-      <button onClick={() => router.prefetch('/deferred-props/rapid-navigation/b')}>Prefetch Filter B</button>
+      <button onClick={() => router.visit(`/deferred-props/rapid-navigation/${id}?foo=bar`)}>Add query param</button>
 
       <button onClick={() => router.prefetch('/deferred-props/page-1')}>Prefetch Page 1</button>
     </>

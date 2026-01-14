@@ -2,7 +2,7 @@
 import { Deferred, Link, router } from '@inertiajs/vue3'
 
 defineProps<{
-  filter: string
+  id: string
   users?: { text: string }
   stats?: { text: string }
   activity?: { text: string }
@@ -17,7 +17,7 @@ const handleOnBeforeClick = () => {
 </script>
 
 <template>
-  <div>Current filter: {{ filter }}</div>
+  <div>Page: {{ id }}</div>
 
   <Deferred data="users">
     <div>{{ users?.text }}</div>
@@ -40,32 +40,16 @@ const handleOnBeforeClick = () => {
     </template>
   </Deferred>
 
-  <Link href="/deferred-props/rapid-navigation/a">Filter A</Link>
-  <Link href="/deferred-props/rapid-navigation/b">Filter B</Link>
-  <Link href="/deferred-props/rapid-navigation/c">Filter C</Link>
+  <Link href="/deferred-props/rapid-navigation/a">Page A</Link>
+  <Link href="/deferred-props/rapid-navigation/b">Page B</Link>
+  <Link href="/deferred-props/rapid-navigation/c">Page C</Link>
   <Link href="/deferred-props/page-1">Navigate Away</Link>
 
   <button @click="handleOnBeforeClick">Navigate with onBefore</button>
 
-  <button @click="router.reload({ except: ['stats'] })">Reload with except</button>
-
-  <button @click="router.visit('/deferred-props/rapid-navigation/b', { only: ['users'] })">Visit B with only</button>
-
-  <button @click="router.visit(`/deferred-props/rapid-navigation/${filter}`)">Re-visit same URL</button>
-
   <button @click="router.reload()">Plain reload</button>
 
-  <button @click="router.reload({ only: ['users'], except: ['stats'] })">Reload with only and except</button>
-
-  <button @click="router.visit('/deferred-props/rapid-navigation/b', { except: ['stats'] })">
-    Visit B with except
-  </button>
-
-  <button @click="router.visit('/deferred-props/rapid-navigation/b', { only: ['users'], except: ['stats'] })">
-    Visit B with only and except
-  </button>
-
-  <button @click="router.prefetch('/deferred-props/rapid-navigation/b')">Prefetch Filter B</button>
+  <button @click="router.visit(`/deferred-props/rapid-navigation/${id}?foo=bar`)">Add query param</button>
 
   <button @click="router.prefetch('/deferred-props/page-1')">Prefetch Page 1</button>
 </template>
