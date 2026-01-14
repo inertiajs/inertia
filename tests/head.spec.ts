@@ -31,6 +31,24 @@ test.describe('Head component', () => {
     expect(titles.allHaveInertiaAttribute).toBe(true)
   })
 
+  test('opt-in to using data-inertia instead of inertia attribute', async ({ page }) => {
+    await page.goto('/head/dataset')
+    await page.waitForSelector('title[data-inertia]', { state: 'attached' })
+
+    const titles = await page.evaluate(() => {
+      const allTitles = Array.from(document.querySelectorAll('title'))
+      return {
+        total: allTitles.length,
+        inertiaTitle: allTitles.find((t) => t.hasAttribute('data-inertia'))?.textContent,
+        allHaveInertiaAttribute: allTitles.every((t) => t.hasAttribute('data-inertia')),
+      }
+    })
+
+    expect(titles.total).toBe(1)
+    expect(titles.inertiaTitle).toBe('Test Head Component')
+    expect(titles.allHaveInertiaAttribute).toBe(true)
+  })
+
   test('renders the title tag and children with proper escaping', async ({ page }) => {
     await page.goto('/head')
     await page.waitForSelector('title[inertia]', { state: 'attached' })

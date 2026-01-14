@@ -1,0 +1,86 @@
+name: Playwright Tests on Chromium
+on: [push, pull_request]
+jobs:
+  test-chromium:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: Chromium (${{ matrix.adapter }})
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        adapter: ['vue', 'react', 'svelte']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Inertia
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
+
+      - name: Install Playwright Browsers
+        run: pnpm playwright install chromium
+
+      - name: Run Playwright Tests
+        run: pnpm test:${{ matrix.adapter }}
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium
+          path: test-results
+
+  test-chromium-ssr:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: Chromium SSR (${{ matrix.adapter }})
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        adapter: ['vue', 'react', 'svelte']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Inertia
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
+
+      - name: Install Playwright Browsers
+        run: pnpm playwright install chromium
+
+      - name: Run Playwright SSR Tests
+        run: pnpm test:ssr:${{ matrix.adapter }} --project=chromium
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr
+          path: test-results

@@ -21,6 +21,7 @@ export const useInfiniteScrollData = (options: {
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: (loadedPage: string | number | null) => void
   onCompleteNextRequest: (loadedPage: string | number | null) => void
+  onReset?: () => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
     const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
@@ -62,8 +63,13 @@ export const useInfiniteScrollData = (options: {
 
     const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
 
-    if (rememberedState && typeof rememberedState === 'object') {
-      // Restore the remembered state so the state matches the remembered prop data...
+    if (
+      rememberedState &&
+      typeof rememberedState === 'object' &&
+      rememberedState.lastLoadedPage === getScrollPropFromCurrentPage().currentPage
+    ) {
+      // Restore remembered state only when it's consistent with the current scroll prop,
+      // which ensures back/forward navigation works while direct URL visits reset properly.
       state.previousPage = rememberedState.previousPage
       state.nextPage = rememberedState.nextPage
       state.lastLoadedPage = rememberedState.lastLoadedPage
@@ -74,6 +80,7 @@ export const useInfiniteScrollData = (options: {
   const removeEventListener = router.on('success', (event) => {
     if (state.component === event.detail.page.component && getScrollPropFromCurrentPage().reset) {
       resetState()
+      options.onReset?.()
     }
   })
 

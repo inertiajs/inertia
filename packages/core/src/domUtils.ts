@@ -1,4 +1,9 @@
 const elementInViewport = (el: HTMLElement) => {
+  if (el.offsetParent === null) {
+    // Element is not participating in layout (e.g., display: none)
+    return false
+  }
+
   const rect = el.getBoundingClientRect()
 
   // We check both vertically and horizontally for containers that scroll in either direction
@@ -73,9 +78,13 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
 }
 
 export const getElementsInViewportFromCollection = (
-  referenceElement: HTMLElement,
   elements: HTMLElement[],
+  referenceElement?: HTMLElement,
 ): HTMLElement[] => {
+  if (!referenceElement) {
+    return elements.filter((element) => elementInViewport(element))
+  }
+
   const referenceIndex = elements.indexOf(referenceElement)
   const upwardElements: HTMLElement[] = []
   const downwardElements: HTMLElement[] = []
@@ -104,4 +113,36 @@ export const getElementsInViewportFromCollection = (
 
   // Reverse upward elements to maintain DOM order, then append downward elements
   return [...upwardElements.reverse(), ...downwardElements]
+}
+
+export const requestAnimationFrame = (cb: () => void, times: number = 1): void => {
+  window.requestAnimationFrame(() => {
+    if (times > 1) {
+      requestAnimationFrame(cb, times - 1)
+    } else {
+      cb()
+    }
+  })
+}
+
+export const getInitialPageFromDOM = <T>(id: string, useScriptElement: boolean = false): T | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  if (!useScriptElement) {
+    const el = document.getElementById(id)
+
+    if (el?.dataset.page) {
+      return JSON.parse(el.dataset.page)
+    }
+  }
+
+  const scriptEl = document.querySelector(`script[data-page="${id}"][type="application/json"]`)
+
+  if (scriptEl?.textContent) {
+    return JSON.parse(scriptEl.textContent)
+  }
+
+  return null
 }

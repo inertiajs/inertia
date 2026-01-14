@@ -12,8 +12,9 @@
   <a href="/" use:inertia={{ prefetch: true }} class="hover:underline">Home</a>
   <a href="/users" use:inertia={{ prefetch: true, cacheFor: ['2s', '1m'] }} class="hover:underline">Users</a>
   <a href="/article" use:inertia={{ prefetch: 'click' }} class="hover:underline">Article</a>
-  <a href="/form" use:inertia={{ prefetch: ['mount', 'click'] }} class="hover:underline">Form</a>
-  <a href="/form-component" use:inertia class="hover:underline">Form Component</a>
+  <a href="/form" use:inertia={{ prefetch: ['mount', 'click'] }} class="hover:underline">useForm</a>
+  <a href="/form-component" use:inertia class="hover:underline">{'<Form>'}</a>
+  <a href="/form-component/precognition" use:inertia class="hover:underline">Precognition</a>
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
   <a href="/goodbye" use:inertia class="hover:underline">External</a>
   <a href="/async" use:inertia class="hover:underline">Async</a>
@@ -21,7 +22,9 @@
   <a href="/poll" use:inertia class="hover:underline">Poll</a>
   <a href="/photo-grid" use:inertia class="hover:underline">Photo Grid</a>
   <a href="/photo-grid/horizontal" use:inertia class="hover:underline">Photo Row</a>
-  <a href="/data-table" use:inertia class="hover:underline">Data Table</a>
+  <a href="/data-table" use:inertia class="hover:underline">Table</a>
+  <a href="/once/1" use:inertia class="hover:underline">Once</a>
+  <a href="/flash" use:inertia class="hover:underline">Flash</a>
 </nav>
 
 <main class="px-10 py-8">

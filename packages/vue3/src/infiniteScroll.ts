@@ -110,6 +110,14 @@ const InfiniteScroll = defineComponent({
     const loadingPrevious = ref(false)
     const loadingNext = ref(false)
     const requestCount = ref(0)
+    const hasPreviousPage = ref(false)
+    const hasNextPage = ref(false)
+
+    const syncStateFromDataManager = () => {
+      requestCount.value = dataManager.getRequestCount()
+      hasPreviousPage.value = dataManager.hasPrevious()
+      hasNextPage.value = dataManager.hasNext()
+    }
 
     const {
       dataManager,
@@ -134,16 +142,17 @@ const InfiniteScroll = defineComponent({
       onBeforePreviousRequest: () => (loadingPrevious.value = true),
       onBeforeNextRequest: () => (loadingNext.value = true),
       onCompletePreviousRequest: () => {
-        requestCount.value = dataManager.getRequestCount()
         loadingPrevious.value = false
+        syncStateFromDataManager()
       },
       onCompleteNextRequest: () => {
-        requestCount.value = dataManager.getRequestCount()
         loadingNext.value = false
+        syncStateFromDataManager()
       },
+      onDataReset: syncStateFromDataManager,
     })
 
-    requestCount.value = dataManager.getRequestCount()
+    syncStateFromDataManager()
 
     const autoLoad = computed<boolean>(() => !manualMode.value)
     const manualMode = computed<boolean>(
@@ -205,8 +214,8 @@ const InfiniteScroll = defineComponent({
       > = {
         loadingPrevious: loadingPrevious.value,
         loadingNext: loadingNext.value,
-        hasPrevious: dataManager.hasPrevious(),
-        hasNext: dataManager.hasNext(),
+        hasPrevious: hasPreviousPage.value,
+        hasNext: hasNextPage.value,
       }
 
       // Only render previous trigger if not using custom element
@@ -217,7 +226,7 @@ const InfiniteScroll = defineComponent({
           fetch: dataManager.fetchPrevious,
           autoMode: headerAutoMode,
           manualMode: !headerAutoMode,
-          hasMore: dataManager.hasPrevious(),
+          hasMore: hasPreviousPage.value,
           ...sharedExposed,
         }
 
@@ -254,7 +263,7 @@ const InfiniteScroll = defineComponent({
           fetch: dataManager.fetchNext,
           autoMode: footerAutoMode,
           manualMode: !footerAutoMode,
-          hasMore: dataManager.hasNext(),
+          hasMore: hasNextPage.value,
           ...sharedExposed,
         }
 

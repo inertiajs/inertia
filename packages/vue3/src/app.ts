@@ -68,7 +68,7 @@ const App: InertiaApp = defineComponent({
   },
   setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
-    page.value = initialPage
+    page.value = { ...initialPage, flash: initialPage.flash ?? {} }
     key.value = undefined
 
     const isServer = typeof window === 'undefined'
@@ -82,6 +82,9 @@ const App: InertiaApp = defineComponent({
           component.value = markRaw(options.component)
           page.value = options.page
           key.value = options.preserveState ? key.value : Date.now()
+        },
+        onFlash: (flash) => {
+          page.value = { ...page.value!, flash }
         },
       })
 
@@ -149,5 +152,6 @@ export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageP
     matchPropsOn: computed(() => page.value?.matchPropsOn),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
+    flash: computed(() => page.value?.flash),
   }) as Page<TPageProps>
 }

@@ -211,7 +211,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseEnter: () => {
         hoverTimeout.current = window.setTimeout(() => {
           doPrefetch()
-        }, 75)
+        }, config.get('prefetch.hoverDelay'))
       },
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)
@@ -233,8 +233,10 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         }
       },
       onMouseUp: (event: React.MouseEvent) => {
-        event.preventDefault()
-        router.visit(url, visitParams)
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(url, visitParams)
+        }
       },
       onKeyUp: (event: React.KeyboardEvent) => {
         if (shouldNavigate(event)) {

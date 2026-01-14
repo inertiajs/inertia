@@ -1,9 +1,9 @@
-import { default as axios, AxiosProgressEvent, AxiosRequestConfig } from 'axios'
+import { type AxiosProgressEvent, type AxiosRequestConfig, default as axios } from 'axios'
 import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
-import { ActiveVisit, Page } from './types'
+import type { ActiveVisit, Page } from './types'
 import { urlWithoutHash } from './url'
 
 export class Request {
@@ -22,6 +22,10 @@ export class Request {
 
   public static create(params: ActiveVisit, page: Page): Request {
     return new Request(params, page)
+  }
+
+  public isPrefetch(): boolean {
+    return this.requestParams.isPrefetch()
   }
 
   public async send() {
@@ -138,8 +142,25 @@ export class Request {
       'X-Inertia': true,
     }
 
-    if (currentPage.get().version) {
-      headers['X-Inertia-Version'] = currentPage.get().version
+    const page = currentPage.get()
+
+    if (page.version) {
+      headers['X-Inertia-Version'] = page.version
+    }
+
+    const onceProps = Object.entries(page.onceProps || {})
+      .filter(([, onceProp]) => {
+        if (page.props[onceProp.prop] === undefined) {
+          // The prop could deferred and not be loaded yet
+          return false
+        }
+
+        return !onceProp.expiresAt || onceProp.expiresAt > Date.now()
+      })
+      .map(([key]) => key)
+
+    if (onceProps.length > 0) {
+      headers['X-Inertia-Except-Once-Props'] = onceProps.join(',')
     }
 
     return headers

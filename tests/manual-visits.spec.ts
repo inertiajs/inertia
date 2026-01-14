@@ -506,10 +506,14 @@ test.describe('Preserve scroll', () => {
 
       await page.waitForTimeout(100)
       await page.goBack()
-      await page.waitForTimeout(100)
 
       await expect(page).toHaveURL('/visits/preserve-scroll-false')
       await expect(page.getByText('Foo is now default')).toBeVisible()
+
+      await page.waitForFunction(
+        () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+      )
+
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
@@ -529,10 +533,14 @@ test.describe('Preserve scroll', () => {
 
       await page.waitForTimeout(100)
       await page.goBack()
-      await page.waitForTimeout(100)
 
       await expect(page).toHaveURL('/visits/preserve-scroll-false')
       await expect(page.getByText('Foo is now default')).toBeVisible()
+
+      await page.waitForFunction(
+        () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+      )
+
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
@@ -581,10 +589,14 @@ test.describe('Preserve scroll', () => {
 
       await page.waitForTimeout(100)
       await page.goBack()
-      await page.waitForTimeout(100)
 
       await expect(page).toHaveURL('/visits/preserve-scroll-false')
       await expect(page.getByText('Foo is now default')).toBeVisible()
+
+      await page.waitForFunction(
+        () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+      )
+
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
@@ -704,6 +716,11 @@ test.describe('Preserve scroll', () => {
 
       await expect(page).toHaveURL('/visits/preserve-scroll')
       await expect(page.getByText('Foo is now default')).toBeVisible()
+
+      await page.waitForFunction(
+        () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+      )
+
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
@@ -725,6 +742,11 @@ test.describe('Preserve scroll', () => {
 
       await expect(page).toHaveURL('/visits/preserve-scroll')
       await expect(page.getByText('Foo is now default')).toBeVisible()
+
+      await page.waitForFunction(
+        () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+      )
+
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
@@ -738,8 +760,11 @@ test.describe('Preserve scroll', () => {
       await page.goBack()
 
       await expect(page).toHaveURL('/visits/preserve-scroll')
+      await expect(page.getByText('Foo is now default')).toBeVisible()
 
-      await page.waitForTimeout(50)
+      await page.waitForFunction(
+        () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+      )
 
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
@@ -901,6 +926,35 @@ test('can reload on mount', async ({ page }) => {
   await expect(page.getByText('Name is mounted!')).toBeVisible()
 })
 
+test.describe('Concurrent Reloads', () => {
+  test('does not cancel the first request when a second reload is fired', async ({ page }) => {
+    await page.goto('/reload/concurrent')
+
+    await expect(page.locator('#foo')).toHaveText('Foo: initial foo')
+    await expect(page.locator('#bar')).toHaveText('Bar: initial bar')
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Reload both props' }).click()
+
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+    )
+
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'bar' && response.status() === 200,
+    )
+
+    await expect(page.locator('#foo')).toContainText('foo reloaded at')
+    await expect(page.locator('#bar')).toContainText('bar reloaded at')
+
+    const reloadRequests = requests.requests.filter(
+      (r) => r.headers()['x-inertia-partial-data'] && r.url().includes('/reload/concurrent'),
+    )
+    expect(reloadRequests).toHaveLength(2)
+  })
+})
+
 test.describe('Error bags', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
@@ -989,6 +1043,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
   consoleMessages.listen(page)
 
   await page.goto('/visits/after-error/1')
+  await expect(page.getByRole('link', { name: 'Throw error on success' })).toBeVisible()
 
   await expect(consoleMessages.messages).toHaveLength(0)
   await expect(consoleMessages.errors).toHaveLength(0)
@@ -1006,7 +1061,7 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
 
   await expect(consoleMessages.messages).toHaveLength(0)
   await expect(consoleMessages.errors).toHaveLength(1)
-  await expect(consoleMessages.errors[0]).toBe('Error after visit')
+  await expect(consoleMessages.errors[0]).toContain('Error after visit')
 
   await page.getByRole('link', { name: 'Visit dump page' }).click()
 
@@ -1018,10 +1073,12 @@ test('can do a subsequent visit after the previous visit has thrown an error in 
 
 test('vue proxies synced back to the core adapter are not stored in history state', async ({ page }) => {
   test.skip(process.env.PACKAGE !== 'vue3', 'Vue 3 specific test')
+  test.setTimeout(10_000)
 
   pageLoads.watch(page)
   await page.goto('/visits/proxy')
   await expect(page.getByText('Site ID: 1')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Update First Site Ref' })).toBeVisible()
 
   const fooText = await page.locator('#foo').innerText()
   const statusText = await page.locator('#status-1').innerText()

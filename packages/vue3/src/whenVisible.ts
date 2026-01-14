@@ -1,8 +1,13 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { defineComponent, h, PropType } from 'vue'
+import { defineComponent, h, PropType, SlotsType } from 'vue'
+import { usePage } from './app'
 
 export default defineComponent({
   name: 'WhenVisible',
+  slots: Object as SlotsType<{
+    default: { fetching: boolean }
+    fallback: {}
+  }>,
   props: {
     data: {
       type: [String, Array<String>],
@@ -33,58 +38,85 @@ export default defineComponent({
   unmounted() {
     this.observer?.disconnect()
   },
-  mounted() {
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0].isIntersecting) {
+  computed: {
+    keys(): string[] {
+      return this.data ? ((Array.isArray(this.data) ? this.data : [this.data]) as string[]) : []
+    },
+  },
+  created() {
+    const page = usePage()
+
+    this.$watch(
+      () => this.keys.map((key) => page.props[key]),
+      () => {
+        const exists = this.keys.length > 0 && this.keys.every((key) => page.props[key] !== undefined)
+        this.loaded = exists
+
+        if (exists && !this.always) {
           return
         }
 
-        if (!this.$props.always) {
-          this.observer?.disconnect()
+        if (!this.observer || !exists) {
+          this.$nextTick(this.registerObserver)
         }
-
-        if (this.fetching) {
-          return
-        }
-
-        this.fetching = true
-
-        const reloadParams = this.getReloadParams()
-
-        router.reload({
-          ...reloadParams,
-          onStart: (e) => {
-            this.fetching = true
-            reloadParams.onStart?.(e)
-          },
-          onFinish: (e) => {
-            this.loaded = true
-            this.fetching = false
-            reloadParams.onFinish?.(e)
-          },
-        })
       },
-      {
-        rootMargin: `${this.$props.buffer}px`,
-      },
+      { immediate: true },
     )
-
-    this.observer.observe(this.$el.nextSibling)
   },
   methods: {
+    registerObserver() {
+      this.observer?.disconnect()
+
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries[0].isIntersecting) {
+            return
+          }
+
+          if (this.fetching) {
+            return
+          }
+
+          if (!this.always && this.loaded) {
+            return
+          }
+
+          this.fetching = true
+
+          const reloadParams = this.getReloadParams()
+
+          router.reload({
+            ...reloadParams,
+            onStart: (e) => {
+              this.fetching = true
+              reloadParams.onStart?.(e)
+            },
+            onFinish: (e) => {
+              this.loaded = true
+              this.fetching = false
+              reloadParams.onFinish?.(e)
+
+              if (!this.always) {
+                this.observer?.disconnect()
+              }
+            },
+          })
+        },
+        {
+          rootMargin: `${this.$props.buffer}px`,
+        },
+      )
+
+      this.observer.observe(this.$el.nextSibling)
+    },
     getReloadParams(): Partial<ReloadOptions> {
+      const reloadParams: Partial<ReloadOptions> = { ...this.$props.params }
+
       if (this.$props.data) {
-        return {
-          only: (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[],
-        }
+        reloadParams.only = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]
       }
 
-      if (!this.$props.params) {
-        throw new Error('You must provide either a `data` or `params` prop.')
-      }
-
-      return this.$props.params
+      return reloadParams
     },
   },
   render() {
@@ -95,9 +127,9 @@ export default defineComponent({
     }
 
     if (!this.loaded) {
-      els.push(this.$slots.fallback ? this.$slots.fallback() : null)
+      els.push(this.$slots.fallback ? this.$slots.fallback({}) : null)
     } else if (this.$slots.default) {
-      els.push(this.$slots.default())
+      els.push(this.$slots.default({ fetching: this.fetching }))
     }
 
     return els

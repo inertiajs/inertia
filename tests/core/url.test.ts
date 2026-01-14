@@ -1,7 +1,53 @@
 import test, { expect } from '@playwright/test'
-import { mergeDataIntoQueryString } from '../../packages/core/src/url'
+import { config } from '../../packages/core/src/config'
+import {
+  isSameUrlWithoutHash,
+  mergeDataIntoQueryString,
+  transformUrlAndData,
+  urlHasProtocol,
+} from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
+  test.describe('urlHasProtocol', () => {
+    const trueCases = [
+      ['https://example.com', 'https protocol'],
+      ['http://example.com', 'http protocol'],
+      ['ftp://files.example.com', 'ftp protocol'],
+      ['custom-scheme://app', 'custom scheme with hyphen'],
+      ['scheme123://app', 'scheme with numbers'],
+      ['//example.com', 'protocol-relative URL'],
+      ['//example.com/path', 'protocol-relative URL with path'],
+      ['//example.com:8080', 'protocol-relative URL with port'],
+      ['//localhost', 'protocol-relative localhost'],
+    ] as const
+
+    const falseCases = [
+      ['/path', 'absolute path'],
+      ['/path/to/page', 'nested absolute path'],
+      ['path/to/page', 'relative path'],
+      ['./path', 'relative path with dot'],
+      ['../path', 'relative path with double dot'],
+      ['?query=value', 'query string only'],
+      ['#hash', 'hash only'],
+      ['', 'empty string'],
+      ['///path', 'triple slash'],
+      ['///', 'triple slash only'],
+      ['//', 'double slash only'],
+    ] as const
+
+    trueCases.forEach(([url, description]) => {
+      test(`returns true for ${description}: ${url}`, () => {
+        expect(urlHasProtocol(url)).toBe(true)
+      })
+    })
+
+    falseCases.forEach(([url, description]) => {
+      test(`returns false for ${description}: ${url}`, () => {
+        expect(urlHasProtocol(url)).toBe(false)
+      })
+    })
+  })
+
   test.describe('mergeDataIntoQueryString', () => {
     test.describe('GET request', () => {
       test('appends data to a URL without an existing query string', () => {
@@ -25,6 +71,121 @@ test.describe('url.ts', () => {
         const [href, data] = mergeDataIntoQueryString('get', '/search?lang=en', { q: 'bar' })
 
         expect(href).toBe('/search?lang=en&q=bar')
+        expect(data).toEqual({})
+      })
+
+      test('merges data into URL with existing brackets notation arrays', () => {
+        const originalHref = '/search?frameworks[]=react&frameworks[]=vue'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackts, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackts).toBe('/search?frameworks[]=react&frameworks[]=vue&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with existing indices notation arrays', () => {
+        const originalHref = '/search?frameworks[0]=react&frameworks[1]=vue'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackts, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackts).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?frameworks[0]=react&frameworks[1]=vue&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with existing nested brackets notation arrays', () => {
+        const originalHref = '/search?filters[tags][]=a&filters[tags][]=b'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?filters[tags][]=a&filters[tags][]=b&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?filters[tags][0]=a&filters[tags][1]=b&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with existing nested indices notation arrays', () => {
+        const originalHref = '/search?filters[tags][0]=a&filters[tags][1]=b'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?filters[tags][0]=a&filters[tags][1]=b&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?filters[tags][0]=a&filters[tags][1]=b&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with single item at index 0', () => {
+        const originalHref = '/search?items[0]=first'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?items[0]=first&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?items[0]=first&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with sparse array indices', () => {
+        const originalHref = '/search?a[0]=x&a[5]=y'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?a[0]=x&a[5]=y&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?a[0]=x&a[5]=y&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with objects at array indices', () => {
+        const originalHref = '/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2'
+        const additionalData = { q: 'bar' }
+
+        const [hrefBrackets, dataBrackets] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(hrefBrackets).toBe('/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2&q=bar')
+        expect(dataBrackets).toEqual({})
+
+        const [hrefIndices, dataIndices] = mergeDataIntoQueryString('get', originalHref, additionalData, 'indices')
+
+        expect(hrefIndices).toBe('/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2&q=bar')
+        expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with URL-encoded indices notation', () => {
+        const originalHref = '/search?items%5B0%5D%5Bname%5D=foo&items%5B1%5D%5Bname%5D=bar'
+        const additionalData = { q: 'baz' }
+
+        const [href, data] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(href).toBe('/search?items[0][name]=foo&items[1][name]=bar&q=baz')
         expect(data).toEqual({})
       })
 
@@ -253,6 +414,178 @@ test.describe('url.ts', () => {
 
         expect(href).toBe('/')
         expect(data).toEqual({ name: 'foo' })
+      })
+    })
+  })
+
+  test.describe('transformUrlAndData', () => {
+    test('accepts string URL as href parameter', () => {
+      const inputUrl = 'https://example.com/page'
+      const [url, data] = transformUrlAndData(inputUrl, { foo: 'bar' }, 'post', false, 'brackets')
+
+      expect(url).toBeInstanceOf(URL)
+      expect(url.href).toBe('https://example.com/page')
+    })
+
+    test('converts data to FormData when it contains files', () => {
+      const file = new File(['content'], 'test.txt', { type: 'text/plain' })
+      const [url, data] = transformUrlAndData('https://example.com/upload', { file }, 'post', false, 'brackets')
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).get('file')).toEqual(file)
+    })
+
+    test('converts data to FormData when forceFormData is true', () => {
+      const [url, data] = transformUrlAndData('https://example.com/submit', { name: 'test' }, 'post', true, 'brackets')
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).get('name')).toBe('test')
+    })
+
+    test('returns FormData unchanged when data is already FormData', () => {
+      const formData = new FormData()
+      formData.append('key', 'value')
+      const [url, data] = transformUrlAndData('https://example.com/submit', formData, 'post', false, 'brackets')
+
+      expect(data).toBe(formData)
+      expect(data).toBeInstanceOf(FormData)
+    })
+
+    test('does not convert to FormData when forceFormData is false and no files present', () => {
+      const [url, data] = transformUrlAndData('https://example.com/submit', { name: 'test' }, 'post', false, 'brackets')
+
+      expect(data).not.toBeInstanceOf(FormData)
+      expect(data).toEqual({ name: 'test' })
+    })
+
+    test('forces indices notation when converting arrays to FormData by default', () => {
+      const [url, data] = transformUrlAndData(
+        'https://example.com/submit',
+        { tags: ['a', 'b'] },
+        'post',
+        true,
+        'brackets',
+      )
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).get('tags[0]')).toBe('a')
+      expect((data as FormData).get('tags[1]')).toBe('b')
+    })
+
+    test('can opt-out of forcing indices notation when converting arrays to FormData by default', () => {
+      config.set('form.forceIndicesArrayFormatInFormData', false)
+
+      const [url, data] = transformUrlAndData(
+        'https://example.com/submit',
+        { tags: ['a', 'b'] },
+        'post',
+        true,
+        'brackets',
+      )
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).getAll('tags[]')).toEqual(['a', 'b'])
+    })
+
+    test('uses index notation when converting arrays to FormData with indices format', () => {
+      const [url, data] = transformUrlAndData(
+        'https://example.com/submit',
+        { tags: ['a', 'b'] },
+        'post',
+        true,
+        'indices',
+      )
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).get('tags[0]')).toBe('a')
+      expect((data as FormData).get('tags[1]')).toBe('b')
+    })
+
+    test('handles nested objects when forceFormData is true', () => {
+      const [url, data] = transformUrlAndData(
+        'https://example.com/submit',
+        { user: { name: 'John', age: 30 } },
+        'post',
+        true,
+        'brackets',
+      )
+
+      expect(data).toBeInstanceOf(FormData)
+      expect((data as FormData).get('user[name]')).toBe('John')
+      expect((data as FormData).get('user[age]')).toBe('30')
+    })
+
+    test('returns FormData with file and does not merge into query string', () => {
+      const file = new File(['content'], 'test.txt', { type: 'text/plain' })
+      const [url, data] = transformUrlAndData(
+        'https://example.com/upload',
+        { file, name: 'test' },
+        'get',
+        false,
+        'brackets',
+      )
+
+      expect(data).toBeInstanceOf(FormData)
+      expect(url.search).toBe('')
+      expect((data as FormData).get('file')).toEqual(file)
+      expect((data as FormData).get('name')).toBe('test')
+    })
+
+    test('handles absolute URLs with protocol', () => {
+      const [url, data] = transformUrlAndData('https://example.com/page', { foo: 'bar' }, 'post', false, 'brackets')
+
+      expect(url.protocol).toBe('https:')
+      expect(url.host).toBe('example.com')
+      expect(url.pathname).toBe('/page')
+    })
+
+    test('preserves existing query parameters and hash when returning FormData', () => {
+      const [url, data] = transformUrlAndData(
+        'https://example.com/page?existing=value#section',
+        { name: 'test' },
+        'post',
+        true,
+        'brackets',
+      )
+
+      expect(url.search).toBe('?existing=value')
+      expect(url.hash).toBe('#section')
+      expect(data).toBeInstanceOf(FormData)
+    })
+  })
+
+  test.describe('isSameUrlWithoutHash', () => {
+    const sameCases = [
+      ['/page', '/page', 'identical paths'],
+      ['/page', '/page#section', 'path vs path with hash'],
+      ['/page#one', '/page#two', 'same path, different hashes'],
+      ['/page?foo=bar', '/page?foo=bar', 'identical paths with query'],
+      ['/page?foo=bar', '/page?foo=bar#section', 'query vs query with hash'],
+      ['/page?foo=bar#one', '/page?foo=bar#two', 'same query, different hashes'],
+      ['https://example.com/page', 'https://example.com/page#hash', 'full URL with hash'],
+    ] as const
+
+    const differentCases = [
+      ['/page-a', '/page-b', 'different paths'],
+      ['/page', '/page?foo=bar', 'path vs path with query'],
+      ['/page?foo=bar', '/page?foo=baz', 'different query values'],
+      ['/page?a=1', '/page?b=2', 'different query params'],
+      ['https://example.com/page', 'https://other.com/page', 'different hosts'],
+    ] as const
+
+    sameCases.forEach(([url1, url2, description]) => {
+      test(`returns true for ${description}: ${url1} vs ${url2}`, () => {
+        expect(isSameUrlWithoutHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com'))).toBe(
+          true,
+        )
+      })
+    })
+
+    differentCases.forEach(([url1, url2, description]) => {
+      test(`returns false for ${description}: ${url1} vs ${url2}`, () => {
+        expect(isSameUrlWithoutHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com'))).toBe(
+          false,
+        )
       })
     })
   })

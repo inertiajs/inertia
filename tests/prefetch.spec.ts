@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { requests } from './support'
+import { isWebKit, requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -78,8 +78,9 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 
   await page.getByRole('link', { name: 'On Click' }).hover()
+  const prefetch3 = page.waitForResponse('prefetch/3')
   await page.mouse.down()
-  await page.waitForResponse('prefetch/3')
+  await prefetch3
   await expect(page).toHaveURL('prefetch/4')
   requests.listen(page)
   await page.mouse.up()
@@ -92,8 +93,9 @@ test('can prefetch using link props', async ({ page }) => {
   // If they just do a quick hover, it shouldn't make the request
   await expect(requests.requests.length).toBe(0)
 
+  const prefetch1 = page.waitForResponse('prefetch/1')
   await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
-  await page.waitForResponse('prefetch/1')
+  await prefetch1
   await expect(page).toHaveURL('prefetch/3')
 
   requests.listen(page)
@@ -104,8 +106,9 @@ test('can prefetch using link props', async ({ page }) => {
   // Wait for the cache to timeout on the combo link
   await page.waitForTimeout(1200)
 
+  const prefetch4b = page.waitForResponse('prefetch/4')
   await page.getByRole('link', { name: 'On Hover + Mount' }).hover()
-  await page.waitForResponse('prefetch/4')
+  await prefetch4b
   await expect(page).toHaveURL('prefetch/1')
 
   requests.listen(page)
@@ -127,8 +130,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 
   // Keyboard activation with Enter
   await page.getByRole('link', { name: 'On Enter' }).focus()
+  const prefetch6 = page.waitForResponse('prefetch/6')
   await page.keyboard.down('Enter')
-  await page.waitForResponse('prefetch/6')
+  await prefetch6
   await expect(page).toHaveURL('prefetch/1')
   requests.listen(page)
   await page.keyboard.up('Enter')
@@ -145,8 +149,9 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
 
   // Keyboard activation with Spacebar on button
   await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  const prefetch7 = page.waitForResponse('prefetch/7')
   await page.keyboard.down(' ')
-  await page.waitForResponse('prefetch/7')
+  await prefetch7
   await expect(page).toHaveURL('prefetch/6')
   requests.listen(page)
   await page.keyboard.up(' ')
@@ -156,12 +161,57 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
   // Keyboard activation with Enter on button
   await page.goto('prefetch/1')
   await page.getByRole('button', { name: 'On Spacebar' }).focus()
+  const prefetch7b = page.waitForResponse('prefetch/7')
   await page.keyboard.down('Enter')
-  await page.waitForResponse('prefetch/7')
+  await prefetch7b
   await expect(page).toHaveURL('prefetch/1')
   requests.listen(page)
   await page.keyboard.up('Enter')
   await isPrefetchPage(page, 7)
+  await expect(requests.requests.length).toBe(0)
+})
+
+test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({ page }) => {
+  // Skip on WebKit
+  if (isWebKit(page)) {
+    return test.skip('Bug in Playwright + WebKit causing the context menu to stick around')
+  }
+
+  // These two prefetch requests should be made on mount
+  const prefetch2 = page.waitForResponse('prefetch/2')
+  const prefetch4 = page.waitForResponse('prefetch/4')
+
+  await page.goto('prefetch/1')
+
+  await prefetch2
+  await prefetch4
+
+  const link = page.getByRole('link', { name: 'On Click', exact: true })
+  await expect(link).toBeVisible()
+
+  requests.listen(page)
+
+  // Right-click (secondary button) should not trigger navigation or prefetch
+  await link.click({ button: 'right' })
+  await page.waitForTimeout(100)
+  await expect(requests.requests.length).toBe(0)
+  await expect(page).toHaveURL('prefetch/1')
+
+  // Middle-click should also not trigger navigation or prefetch
+  await link.click({ button: 'middle' })
+  await page.waitForTimeout(100)
+  await expect(requests.requests.length).toBe(0)
+  await expect(page).toHaveURL('prefetch/1')
+
+  // Left-click should work normally (mousedown prefetches, mouseup navigates)
+  await link.hover()
+  const prefetch3b = page.waitForResponse('prefetch/3')
+  await page.mouse.down()
+  await prefetch3b
+  await expect(page).toHaveURL('prefetch/1')
+  requests.listen(page)
+  await page.mouse.up()
+  await isPrefetchPage(page, 3)
   await expect(requests.requests.length).toBe(0)
 })
 
@@ -239,8 +289,9 @@ test.describe('UrlMethodPair prefetch support', () => {
   })
 
   test('can use flush with UrlMethodPair', async ({ page }) => {
+    const swrResponse = page.waitForResponse((response) => response.url().includes('prefetch/swr/4'))
     await page.locator('#test-prefetch').click()
-    await page.waitForResponse((response) => response.url().includes('prefetch/swr/4'))
+    await swrResponse
 
     await expect(page.locator('#is-prefetched')).toHaveText('true')
 
@@ -576,4 +627,31 @@ test.describe('tags', () => {
       })
     })
   })
+})
+
+test('can use prefetched requests with preserveState', async ({ page }) => {
+  await page.goto('/prefetch/preserve-state')
+
+  const prefetchResponse = page.waitForResponse('prefetch/preserve-state?page=2')
+  await page.getByRole('button', { name: 'Prefetch Page 2' }).click()
+  await prefetchResponse
+
+  requests.listen(page)
+
+  // Test both preserveState options use cache
+  await page.getByRole('button', { name: 'Load Page 2 (preserveState: false)' }).click()
+  await expect(page.getByText('Current Page: 2')).toBeVisible()
+  await expect(requests.requests.length).toBe(0)
+
+  await page.goto('/prefetch/preserve-state')
+
+  const prefetchResponse2 = page.waitForResponse('prefetch/preserve-state?page=2')
+  await page.getByRole('button', { name: 'Prefetch Page 2' }).click()
+  await prefetchResponse2
+
+  requests.listen(page)
+
+  await page.getByRole('button', { name: 'Load Page 2 (preserveState: true)' }).click()
+  await expect(page.getByText('Current Page: 2')).toBeVisible()
+  await expect(requests.requests.length).toBe(0)
 })

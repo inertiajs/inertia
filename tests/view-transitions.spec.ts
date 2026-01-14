@@ -24,9 +24,7 @@ test('calls viewTransition callbacks when using callback function', async ({ pag
   await expect(page).toHaveURL('/view-transition/page-b')
   await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-  // Wait for the 'finished' promise to resolve
-  await page.waitForEvent('console', (msg) => msg.text() === 'finished')
-  await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+  await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
 })
 
 test('calls viewTransition callbacks on Link component with callback function', async ({ page }) => {
@@ -41,9 +39,7 @@ test('calls viewTransition callbacks on Link component with callback function', 
   await expect(page).toHaveURL('/view-transition/page-b')
   await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-  // Wait for the 'finished' promise to resolve
-  await page.waitForEvent('console', (msg) => msg.text() === 'finished')
-  await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+  await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
 })
 
 test('calls viewTransition callbacks on client-side visit with callback function', async ({ page }) => {
@@ -58,9 +54,7 @@ test('calls viewTransition callbacks on client-side visit with callback function
   await expect(page).toHaveURL('/view-transition/page-b')
   await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-  // Wait for the 'finished' promise to resolve
-  await page.waitForEvent('console', (msg) => msg.text() === 'finished')
-  await expect(consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+  await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
 })
 
 test('does not use view transition when same page returns with validation errors', async ({ page }) => {

@@ -2,7 +2,7 @@ export default {
   modal: null,
   listener: null,
 
-  show(html: Record<string, unknown> | string): void {
+  createIframeAndPage(html: Record<string, unknown> | string): { iframe: HTMLIFrameElement; page: HTMLElement } {
     if (typeof html === 'object') {
       html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(
         html,
@@ -13,6 +13,18 @@ export default {
     page.innerHTML = html
     page.querySelectorAll('a').forEach((a) => a.setAttribute('target', '_top'))
 
+    const iframe = document.createElement('iframe')
+    iframe.style.backgroundColor = 'white'
+    iframe.style.borderRadius = '5px'
+    iframe.style.width = '100%'
+    iframe.style.height = '100%'
+
+    return { iframe, page }
+  },
+
+  show(html: Record<string, unknown> | string): void {
+    const { iframe, page } = this.createIframeAndPage(html)
+
     this.modal = document.createElement('div')
     this.modal.style.position = 'fixed'
     this.modal.style.width = '100vw'
@@ -22,12 +34,6 @@ export default {
     this.modal.style.backgroundColor = 'rgba(0, 0, 0, .6)'
     this.modal.style.zIndex = 200000
     this.modal.addEventListener('click', () => this.hide())
-
-    const iframe = document.createElement('iframe')
-    iframe.style.backgroundColor = 'white'
-    iframe.style.borderRadius = '5px'
-    iframe.style.width = '100%'
-    iframe.style.height = '100%'
     this.modal.appendChild(iframe)
 
     document.body.prepend(this.modal)

@@ -1,7 +1,7 @@
-name: Playwright Tests
+name: Test App Quality
 on: [push, pull_request]
 jobs:
-  test:
+  test-app-quality:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     timeout-minutes: 15
     runs-on: ubuntu-24.04
@@ -34,16 +34,3 @@ jobs:
 
       - name: ESLint test-app
         run: cd packages/${{ matrix.adapter == 'vue' && 'vue3' || matrix.adapter }}/test-app && pnpm run lint
-
-      - name: Install Playwright Browsers
-        run: pnpm playwright install chromium
-
-      - name: Run Playwright Tests
-        run: pnpm test:${{ matrix.adapter }}
-
-      - name: Upload failure screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}
-          path: test-results

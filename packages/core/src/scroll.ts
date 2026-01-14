@@ -3,12 +3,14 @@ import { ScrollRegion } from './types'
 
 export class Scroll {
   public static save(): void {
-    history.saveScrollPositions(
-      Array.from(this.regions()).map((region) => ({
-        top: region.scrollTop,
-        left: region.scrollLeft,
-      })),
-    )
+    history.saveScrollPositions(this.getScrollRegions())
+  }
+
+  public static getScrollRegions(): ScrollRegion[] {
+    return Array.from(this.regions()).map((region) => ({
+      top: region.scrollTop,
+      left: region.scrollLeft,
+    }))
   }
 
   protected static regions(): NodeListOf<Element> {
@@ -33,6 +35,11 @@ export class Scroll {
     })
 
     this.save()
+    this.scrollToAnchor()
+  }
+
+  public static scrollToAnchor(): void {
+    const anchorHash = typeof window !== 'undefined' ? window.location.hash : null
 
     if (anchorHash) {
       // We're using a setTimeout() here as a workaround for a bug in the React adapter where the

@@ -3,14 +3,17 @@ import { ReactInertiaAppConfig } from './types'
 
 export const progress = Progress
 export const router = Router
+export { default as App } from './App'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
 export { default as Form } from './Form'
 export { default as Head } from './Head'
 export { default as InfiniteScroll } from './InfiniteScroll'
 export { InertiaLinkProps, default as Link } from './Link'
+export { ReactComponent as ResolvedComponent } from './types'
 export {
   InertiaFormProps,
+  InertiaPrecognitiveFormProps,
   SetDataAction,
   SetDataByKeyValuePair,
   SetDataByMethod,
