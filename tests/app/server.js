@@ -2261,6 +2261,56 @@ app.get('/once-props/custom-key/:page', (req, res) => {
   })
 })
 
+app.get('/deferred-props/back-button/a', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/BackButton/PageA',
+      deferredProps: {
+        fast: ['fastProp'],
+        slow: ['slowProp'],
+      },
+      props: {},
+    })
+  }
+
+  const delay = req.headers['x-inertia-partial-data']?.includes('fastProp') ? 100 : 600
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/BackButton/PageA',
+        props: {
+          fastProp: req.headers['x-inertia-partial-data']?.includes('fastProp') ? 'Fast prop loaded' : undefined,
+          slowProp: req.headers['x-inertia-partial-data']?.includes('slowProp') ? 'Slow prop loaded' : undefined,
+        },
+      }),
+    delay,
+  )
+})
+
+app.get('/deferred-props/back-button/b', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/BackButton/PageB',
+      deferredProps: {
+        default: ['data'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/BackButton/PageB',
+        props: {
+          data: req.headers['x-inertia-partial-data']?.includes('data') ? 'Page B data loaded' : undefined,
+        },
+      }),
+    400,
+  )
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
