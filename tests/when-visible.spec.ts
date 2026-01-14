@@ -69,7 +69,7 @@ test('it will wait to fire the reload until element is visible', async ({ page }
 
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
   await expect(page.getByText('Loading fifth one...')).toBeVisible()
-  await page.waitForResponse(page.url() + '?count=0')
+  await page.waitForResponse('/when-visible?count=0')
   await expect(page.getByText('Loading fifth one...')).not.toBeVisible()
   await expect(page.getByText('Count is now 1')).toBeVisible()
 
@@ -79,7 +79,7 @@ test('it will wait to fire the reload until element is visible', async ({ page }
 
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
   await expect(page.getByText('Count is now 1')).toBeVisible()
-  await page.waitForResponse(page.url() + '?count=1')
+  await page.waitForResponse('/when-visible?count=1')
   await expect(page.getByText('Count is now 2')).toBeVisible()
 })
 

@@ -1274,6 +1274,34 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/with-query-params', (req, res) => {
+  const filter = req.query.filter || 'none'
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  if (!requestedProps) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithQueryParams',
+      deferredProps: {
+        default: ['users'],
+      },
+      props: {
+        filter,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithQueryParams',
+        props: {
+          users: requestedProps.includes('users') ? { text: `users data for ${filter}` } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
 app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
   const id = req.params.id || 'none'
   const requestedProps = req.headers['x-inertia-partial-data']
@@ -1534,10 +1562,7 @@ app.post('/form-component/events/errors', async (req, res) =>
 )
 
 app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
-app.get('/form-component/options', (req, res) =>
-  // TODO: see 'url' key in helpers.js, this should be req.originalUrl by default
-  inertia.render(req, res, { component: 'FormComponent/Options', url: req.originalUrl }),
-)
+app.get('/form-component/options', (req, res) => inertia.render(req, res, { component: 'FormComponent/Options' }))
 app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),

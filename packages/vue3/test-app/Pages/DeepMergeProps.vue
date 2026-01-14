@@ -34,7 +34,7 @@ const reloadIt = () => {
 
 const getFresh = () => {
   page.value = 0
-  router.reload({
+  router.visit('/deep-merge-props', {
     reset: ['foo', 'baz'],
   })
 }

@@ -198,6 +198,29 @@ test('load deferred props with partial reload on mount', async ({ page }) => {
   await expect(page.getByText('bar value')).toBeVisible()
 })
 
+test('deferred props preserve query parameters from original URL', async ({ page }) => {
+  await page.goto('/deferred-props/with-query-params?filter=a')
+
+  // Verify the initial page load has the correct filter
+  await expect(page.getByText('Filter: a')).toBeVisible()
+  await expect(page.getByText('Loading users...')).toBeVisible()
+
+  // Wait for and capture the deferred props request
+  const deferredRequest = await page.waitForResponse((response) => {
+    const url = response.url()
+    const headers = response.request().headers()
+    return headers['x-inertia-partial-data'] === 'users' && url.includes('/deferred-props/with-query-params')
+  })
+
+  // Assert that the deferred props request includes the query parameter
+  const requestUrl = deferredRequest.url()
+  expect(requestUrl).toContain('filter=a')
+
+  // Verify the deferred data uses the correct filter
+  await expect(page.getByText('Loading users...')).not.toBeVisible()
+  await expect(page.getByText('users data for a')).toBeVisible()
+})
+
 test('can partial reload deferred props independently', async ({ page }) => {
   await page.goto('/deferred-props/partial-reloads')
 

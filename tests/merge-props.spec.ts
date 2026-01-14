@@ -34,12 +34,12 @@ test('can append to nested props', async ({ page }) => {
   await expect(page.getByText('User 1, User 2, User 3')).toBeVisible()
   await expect(page.getByText('Page: 1, Per Page: 3')).toBeVisible()
 
-  await clickAndWaitForResponse(page, 'Load More', page.url() + '?page=2', 'button')
+  await clickAndWaitForResponse(page, 'Load More', '/merge-nested-props/append?page=2', 'button')
 
   await expect(page.getByText('User 1, User 2, User 3, User 4, User 5, User 6')).toBeVisible()
   await expect(page.getByText('Page: 2, Per Page: 3')).toBeVisible()
 
-  await clickAndWaitForResponse(page, 'Load More', page.url() + '?page=3', 'button')
+  await clickAndWaitForResponse(page, 'Load More', '/merge-nested-props/append?page=3', 'button')
 
   await expect(page.getByText('User 1, User 2, User 3, User 4, User 5, User 6, User 7, User 8, User 9')).toBeVisible()
   await expect(page.getByText('Page: 3, Per Page: 3')).toBeVisible()
@@ -51,12 +51,12 @@ test('can prepend to nested props', async ({ page }) => {
   await expect(page.getByText('User 3, User 2, User 1')).toBeVisible()
   await expect(page.getByText('Page: 1, Per Page: 3')).toBeVisible()
 
-  await clickAndWaitForResponse(page, 'Load More', page.url() + '?page=2', 'button')
+  await clickAndWaitForResponse(page, 'Load More', '/merge-nested-props/prepend?page=2', 'button')
 
   await expect(page.getByText('User 6, User 5, User 4, User 3, User 2, User 1')).toBeVisible()
   await expect(page.getByText('Page: 2, Per Page: 3')).toBeVisible()
 
-  await clickAndWaitForResponse(page, 'Load More', page.url() + '?page=3', 'button')
+  await clickAndWaitForResponse(page, 'Load More', '/merge-nested-props/prepend?page=3', 'button')
 
   await expect(page.getByText('User 9, User 8, User 7, User 6, User 5, User 4, User 3, User 2, User 1')).toBeVisible()
   await expect(page.getByText('Page: 3, Per Page: 3')).toBeVisible()
