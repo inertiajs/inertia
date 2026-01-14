@@ -56,6 +56,10 @@ export class RequestParams {
     return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
   }
 
+  public isPrefetch(): boolean {
+    return this.params.prefetch === true
+  }
+
   public isDeferredPropsRequest() {
     return this.params.deferredProps === true
   }

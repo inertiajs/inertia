@@ -24,42 +24,23 @@ export class RequestStream {
     this.cancel({ interrupted: true }, false)
   }
 
-  public cancelInFlight(): void {
-    // Cancel ALL in-flight requests (used for async stream with unlimited concurrency)
-    // Note: We don't clear this.requests = [] because cancelled requests will remove
-    // themselves via the filter in send() when their promise resolves
-    const requestsToCancel = [...this.requests]
-    requestsToCancel.forEach((request) => {
-      request.cancel({ cancelled: true })
-    })
+  public cancelInFlight({ prefetch = true } = {}): void {
+    this.requests
+      .filter((request) => prefetch || !request.isPrefetch())
+      .forEach((request) => request.cancel({ cancelled: true }))
   }
 
-  public cancelNonPrefetchInFlight(): void {
-    // Cancel only non-prefetch requests (deferred props, regular visits)
-    // Prefetch requests populate the cache and are safe to continue even after navigation
-    // Note: We don't clear this.requests = [] because cancelled requests will remove
-    // themselves via the filter in send() when their promise resolves
-    const requestsToCancel = [...this.requests].filter((request) => !request.isPrefetch())
-    requestsToCancel.forEach((request) => {
-      request.cancel({ cancelled: true })
-    })
-  }
-
-  protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean): void {
-    if (!this.shouldCancel(force)) {
+  protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean = false): void {
+    if (!force && !this.shouldCancel()) {
       return
     }
 
     const request = this.requests.shift()!
 
-    request?.cancel({ interrupted, cancelled })
+    request?.cancel({ cancelled, interrupted })
   }
 
-  protected shouldCancel(force: boolean): boolean {
-    if (force) {
-      return true
-    }
-
+  protected shouldCancel(): boolean {
     return this.interruptible && this.requests.length >= this.maxConcurrent
   }
 }

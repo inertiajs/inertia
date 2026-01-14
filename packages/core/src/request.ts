@@ -25,7 +25,7 @@ export class Request {
   }
 
   public isPrefetch(): boolean {
-    return this.requestParams.all().prefetch ?? false
+    return this.requestParams.isPrefetch()
   }
 
   public async send() {

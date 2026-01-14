@@ -169,11 +169,15 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
+  /**
+   * @deprecated Use cancelAll() instead.
+   */
   public cancel(): void {
     this.syncRequestStream.cancelInFlight()
   }
 
   public cancelAll(): void {
+    // Called on popstate navigation
     this.asyncRequestStream.cancelInFlight()
     this.syncRequestStream.cancelInFlight()
   }
@@ -207,9 +211,8 @@ export class Router {
     const isSameUrl = !currentPage.isCleared() && isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))
 
     if (!isSameUrl) {
-      // Only cancel non-prefetch requests (deferred props)
-      // Prefetch requests populate cache and are safe to continue
-      this.asyncRequestStream.cancelNonPrefetchInFlight()
+      // Only cancel non-prefetch requests (deferred props + partial reloads)
+      this.asyncRequestStream.cancelInFlight({ prefetch: false })
     }
 
     const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
