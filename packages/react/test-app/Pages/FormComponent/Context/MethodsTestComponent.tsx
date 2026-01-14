@@ -75,9 +75,6 @@ export default () => {
       <button type="button" onClick={() => form.resetAndClearErrors('name')}>
         resetAndClearErrors('name')
       </button>
-      <button type="button" onClick={() => form.defaults()}>
-        defaults()
-      </button>
 
       <button type="button" onClick={testGetData}>
         getData()

@@ -47,7 +47,6 @@
 
   <button type="button" on:click={() => $form.resetAndClearErrors()}>resetAndClearErrors()</button>
   <button type="button" on:click={() => $form.resetAndClearErrors('name')}>resetAndClearErrors('name')</button>
-  <button type="button" on:click={() => $form.defaults()}>defaults()</button>
 
   <button type="button" on:click={testGetData}>getData()</button>
   <button type="button" on:click={testGetFormData}>getFormData()</button>

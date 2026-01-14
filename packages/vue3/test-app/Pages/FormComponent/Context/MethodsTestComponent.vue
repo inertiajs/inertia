@@ -55,7 +55,6 @@ function testGetFormData() {
 
     <button type="button" @click="form.resetAndClearErrors()">resetAndClearErrors()</button>
     <button type="button" @click="form.resetAndClearErrors('name')">resetAndClearErrors('name')</button>
-    <button type="button" @click="form.defaults()">defaults()</button>
 
     <button type="button" @click="testGetData">getData()</button>
     <button type="button" @click="testGetFormData">getFormData()</button>
