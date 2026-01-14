@@ -1,5 +1,7 @@
 import { expect, Page, Request, Response } from '@playwright/test'
 
+export const isWebKit = (page: Page) => page.context().browser()?.browserType().name() === 'webkit'
+
 export const clickAndWaitForResponse = async (
   page: Page,
   buttonText: string,
@@ -68,7 +70,7 @@ export const requests = {
 }
 
 export const shouldBeDumpPage = async (page: Page, method: 'get' | 'post' | 'patch' | 'put' | 'delete') => {
-  await expect(page).toHaveURL(`dump/${method}`)
+  await expect(page).toHaveURL(new RegExp(`dump/${method}`))
   // @ts-ignore
   const dump = await page.evaluate(() => window._inertia_request_dump)
   await expect(dump).not.toBeNull()

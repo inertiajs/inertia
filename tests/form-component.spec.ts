@@ -470,7 +470,7 @@ test.describe('Form Component', () => {
       expect(scrollBefore).toBeGreaterThan(0)
 
       await page.getByRole('button', { name: 'Submit' }).click()
-      await page.waitForURL('/article')
+      await page.waitForURL('/article?tags[]=alpha&tags[]=beta')
 
       const scrollAfter = await page.evaluate(() => window.scrollY)
       // TODO: why is this not exactly 100?
@@ -1556,6 +1556,41 @@ test.describe('Form Component', () => {
       expect(dump.form.fields.entries['new:1']).toEqual({
         name: 'Jane Smith',
         email: 'jane@example.com',
+      })
+    })
+  })
+
+  test.describe('Submit Button', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/submit-button')
+    })
+
+    test('includes submit button name and value in form data', async ({ page }) => {
+      await page.click('#save-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        action: 'save',
+      })
+    })
+
+    test('includes different button value when clicking different submit button', async ({ page }) => {
+      await page.click('#draft-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        action: 'draft',
+      })
+    })
+
+    test('does not include action when button has no name', async ({ page }) => {
+      await page.click('#no-name-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
       })
     })
   })

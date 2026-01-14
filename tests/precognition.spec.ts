@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { requests, shouldBeDumpPage } from './support'
+import { isWebKit, requests, shouldBeDumpPage } from './support'
 
 const integrations = ['form-component', 'form-helper']
 
@@ -530,8 +530,7 @@ integrations.forEach((integration) => {
       expect(requests.responses).toHaveLength(1)
 
       const cancelledRequestError = await requests.failed[0].failure()?.errorText
-      const isWebKit = page.context().browser()?.browserType().name() === 'webkit'
-      expect(cancelledRequestError).toBe(isWebKit ? 'cancelled' : 'net::ERR_ABORTED')
+      expect(cancelledRequestError).toBe(isWebKit(page) ? 'cancelled' : 'net::ERR_ABORTED')
     })
 
     test(prefix + 'validates dynamic array inputs after first validation', async ({ page }) => {
@@ -556,6 +555,27 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.locator('#items\\.1\\.name-error')).toBeVisible()
+    })
+
+    test(prefix + 'clears submission errors on subsequent precognition success', async ({ page }) => {
+      await page.goto('/' + integration + '/precognition/error-sync')
+
+      // Submit with empty fields to trigger validation errors
+      await page.click('#submit-btn')
+      await expect(page.locator('#name-error')).toBeVisible()
+      await expect(page.locator('#email-error')).toBeVisible()
+      await expect(page.locator('#name-error')).toHaveText('The name field is required.')
+      await expect(page.locator('#email-error')).toHaveText('The email field is required.')
+
+      // Fill valid name and trigger precognition validation
+      await page.fill('input[name="name"]', 'John Doe')
+      await page.locator('input[name="name"]').blur()
+      await expect(page.locator('#validating')).toBeVisible()
+      await expect(page.locator('#validating')).not.toBeVisible()
+
+      // Name error should be cleared, email error should remain
+      await expect(page.locator('#name-error')).not.toBeVisible()
+      await expect(page.locator('#email-error')).toBeVisible()
     })
   })
 })

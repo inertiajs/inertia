@@ -2,7 +2,7 @@
   declare module '@inertiajs/core' {
     export interface InertiaConfig {
       sharedPageProps: {
-        flash: { success?: string; error?: string }
+        auth: { user: { name: string } | null }
       }
     }
   }
@@ -18,18 +18,18 @@
 
   const page = usePage<PageProps>()
 
-  $: error = $page.props.flash.error
+  $: userName = $page.props.auth.user?.name
   $: postTitles = $page.props.posts.map((post) => post.title)
 
-  // @ts-expect-error - 'message' does not exist on flash
-  $: flashMessage = $page.props.flash.message
+  // @ts-expect-error - 'email' does not exist on user
+  $: userEmail = $page.props.auth.user?.email
   // @ts-expect-error - 'users' does not exist on page props
   $: userNames = $page.props.users.map((user) => user.name)
 
   console.log({
-    error,
+    userName,
     postTitles,
-    flashMessage,
+    userEmail,
     userNames,
   })
 </script>

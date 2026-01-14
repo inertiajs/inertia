@@ -73,17 +73,13 @@
   })
 
   function getReloadParams(): Partial<ReloadOptions> {
+    const reloadParams: Partial<ReloadOptions> = { ...params }
+
     if (data !== '') {
-      return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
-      }
+      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[]
     }
 
-    if (!params.data) {
-      throw new Error('You must provide either a `data` or `params` prop.')
-    }
-
-    return params
+    return reloadParams
   }
 </script>
 
@@ -92,7 +88,7 @@
 {/if}
 
 {#if loaded}
-  <slot />
+  <slot {fetching} />
 {:else if $$slots.fallback}
   <slot name="fallback" />
 {/if}

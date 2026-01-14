@@ -15,8 +15,7 @@ const buildPageData = (req, data) => ({
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(''),
   props: {},
-  // TODO: url should be req.originalUrl as that includes the query string
-  url: req.path,
+  url: req.originalUrl,
   version: null,
   ...data,
 })
@@ -26,15 +25,11 @@ module.exports = {
   render: (req, res, data) => {
     data = buildPageData(req, data)
 
-    if (data.component.startsWith('InfiniteScroll')) {
+    if (data.component.startsWith('InfiniteScroll') && req.query.absolutePageUrl) {
       // Support absolute URL format for testing URL preservation
-      if (req.query.absolutePageUrl) {
-        const protocol = req.protocol
-        const host = req.get('host')
-        data.url = `${protocol}://${host}${req.originalUrl}`
-      } else {
-        data.url = req.originalUrl
-      }
+      const protocol = req.protocol
+      const host = req.get('host')
+      data.url = `${protocol}://${host}${req.originalUrl}`
     }
 
     const partialDataHeader = req.headers['x-inertia-partial-data'] || ''

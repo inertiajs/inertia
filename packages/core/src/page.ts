@@ -3,13 +3,14 @@ import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
-import { Component, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
+import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
 
 class CurrentPage {
   protected page!: Page
   protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
+  protected onFlashCallback?: (flash: Page['flash']) => void
   protected componentId = {}
   protected listeners: {
     event: PageEvent
@@ -18,15 +19,22 @@ class CurrentPage {
   protected isFirstPageLoad = true
   protected cleared = false
   protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
+  protected historyQuotaExceeded = false
 
   public init<ComponentType = Component>({
     initialPage,
     swapComponent,
     resolveComponent,
+    onFlash,
   }: RouterInitParams<ComponentType>) {
-    this.page = initialPage
+    this.page = { ...initialPage, flash: initialPage.flash ?? {} }
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
+    this.onFlashCallback = onFlash
+
+    eventHandler.on('historyQuotaExceeded', () => {
+      this.historyQuotaExceeded = true
+    })
 
     return this
   }
@@ -51,6 +59,11 @@ class CurrentPage {
         component: page.component,
         url: page.url,
       }
+
+      // Preserve original deferred props for back button handling
+      if (page.initialDeferredProps === undefined) {
+        page.initialDeferredProps = page.deferredProps
+      }
     }
 
     this.componentId = {}
@@ -74,9 +87,12 @@ class CurrentPage {
       const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
       replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
-      return new Promise((resolve) => {
-        replace ? history.replaceState(page, () => resolve(null)) : history.pushState(page, () => resolve(null))
-      }).then(() => {
+      // Clear flash data from the page object, we don't want it when navigating back/forward...
+      const pageForHistory = { ...page, flash: {} }
+
+      return new Promise<void>((resolve) =>
+        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
+      ).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
         if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
@@ -100,6 +116,13 @@ class CurrentPage {
         }
 
         this.isFirstPageLoad = false
+
+        if (this.historyQuotaExceeded) {
+          // If we exceeded the history quota, don't attempt to swap the
+          // component as we're performing a full page reload instead.
+          this.historyQuotaExceeded = false
+          return
+        }
 
         return this.swap({
           component,
@@ -162,12 +185,21 @@ class CurrentPage {
     return this.page
   }
 
+  public getWithoutFlashData(): Page {
+    return { ...this.page, flash: {} }
+  }
+
   public hasOnceProps(): boolean {
     return Object.keys(this.page.onceProps ?? {}).length > 0
   }
 
   public merge(data: Partial<Page>): void {
     this.page = { ...this.page, ...data }
+  }
+
+  public setFlash(flash: FlashData): void {
+    this.page = { ...this.page, flash }
+    this.onFlashCallback?.(flash)
   }
 
   public setUrlHash(hash: string): void {

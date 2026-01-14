@@ -1,9 +1,13 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { defineComponent, h, PropType } from 'vue'
+import { defineComponent, h, PropType, SlotsType } from 'vue'
 import { usePage } from './app'
 
 export default defineComponent({
   name: 'WhenVisible',
+  slots: Object as SlotsType<{
+    default: { fetching: boolean }
+    fallback: {}
+  }>,
   props: {
     data: {
       type: [String, Array<String>],
@@ -52,7 +56,9 @@ export default defineComponent({
           return
         }
 
-        this.$nextTick(this.registerObserver)
+        if (!this.observer || !exists) {
+          this.$nextTick(this.registerObserver)
+        }
       },
       { immediate: true },
     )
@@ -104,17 +110,13 @@ export default defineComponent({
       this.observer.observe(this.$el.nextSibling)
     },
     getReloadParams(): Partial<ReloadOptions> {
+      const reloadParams: Partial<ReloadOptions> = { ...this.$props.params }
+
       if (this.$props.data) {
-        return {
-          only: (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[],
-        }
+        reloadParams.only = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]
       }
 
-      if (!this.$props.params) {
-        throw new Error('You must provide either a `data` or `params` prop.')
-      }
-
-      return this.$props.params
+      return reloadParams
     },
   },
   render() {
@@ -125,9 +127,9 @@ export default defineComponent({
     }
 
     if (!this.loaded) {
-      els.push(this.$slots.fallback ? this.$slots.fallback() : null)
+      els.push(this.$slots.fallback ? this.$slots.fallback({}) : null)
     } else if (this.$slots.default) {
-      els.push(this.$slots.default())
+      els.push(this.$slots.default({ fetching: this.fetching }))
     }
 
     return els

@@ -24,6 +24,7 @@ export class RequestParams {
         onCancel: this.wrapCallback(params, 'onCancel'),
         onSuccess: this.wrapCallback(params, 'onSuccess'),
         onError: this.wrapCallback(params, 'onError'),
+        onFlash: this.wrapCallback(params, 'onFlash'),
         onCancelToken: this.wrapCallback(params, 'onCancelToken'),
         onPrefetched: this.wrapCallback(params, 'onPrefetched'),
         onPrefetching: this.wrapCallback(params, 'onPrefetching'),
@@ -53,6 +54,10 @@ export class RequestParams {
 
   public isPartial() {
     return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
+  }
+
+  public isPrefetch(): boolean {
+    return this.params.prefetch === true
   }
 
   public isDeferredPropsRequest() {

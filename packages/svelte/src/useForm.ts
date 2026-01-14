@@ -65,6 +65,7 @@ export interface InertiaFormProps<TForm extends object> {
   patch(url: string, options?: UseFormSubmitOptions): void
   delete(url: string, options?: UseFormSubmitOptions): void
   cancel(): void
+  dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormStore<TForm>
 }
 
@@ -125,6 +126,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform: UseFormTransformCallback<TForm> = (data) => data as object
+  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
   // Track if defaults was called manually during onSuccess to avoid
   // overriding user's custom defaults with automatic behavior.
   let defaultsCalledInOnSuccess = false
@@ -465,12 +467,27 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     cancel() {
       cancelToken?.cancel()
     },
+    __remember() {
+      const data = this.data()
+      if (rememberExcludeKeys.length > 0) {
+        const filtered = { ...data } as Record<string, unknown>
+        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
+        return { data: filtered as TForm, errors: this.errors }
+      }
+      return { data, errors: this.errors }
+    },
     withPrecognition,
   } as any)
 
-  // Add withPrecognition to store object
+  // Add withPrecognition and dontRemember to store object
+  const dontRememberMethod = (...keys: FormDataKeys<TForm>[]) => {
+    rememberExcludeKeys = keys
+    return store
+  }
+
   Object.assign(store, {
     withPrecognition,
+    dontRemember: dontRememberMethod,
   })
 
   // Assign setFormState after store is created
@@ -489,7 +506,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
 
     if (rememberKey) {
-      router.remember({ data: form.data(), errors: form.errors }, rememberKey)
+      const storedData = router.restore(rememberKey)
+      const newData = (form as any).__remember()
+      if (!isEqual(storedData, newData)) {
+        router.remember(newData, rememberKey)
+      }
     }
   })
 

@@ -488,6 +488,141 @@ test.describe('Manual page loading', () => {
 
     await expect(infiniteScrollRequests().length).toBe(3)
   })
+
+  test('it resets pagination state after direct URL navigation', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+  })
+
+  test('it does not skip pages after direct URL navigation', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 31')).toBeHidden()
+  })
+
+  test('it resets pagination state when navigating to a different page number', async ({ page }) => {
+    await page.goto('/infinite-scroll/manual')
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more previous items: false')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+    await expect(page.getByText('Has more previous items: false')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await page.goto('/infinite-scroll/manual?page=2')
+
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('User 1', { exact: true })).toBeHidden()
+    await expect(page.getByText('User 15')).toBeHidden()
+    await expect(page.getByText('User 31')).toBeHidden()
+    await expect(page.getByText('Has more previous items: true')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load previous items' }).click()
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('Has more previous items: false')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('User 31')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 20')).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+  })
+
+  test('it resets hasMore state when filtering to fewer results in manual mode', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/filtering-manual')
+
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Breana Herzog')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(1)
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Diamond Gibson PhD')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBe(2)
+
+    await page.locator('input[placeholder="Search..."]').fill('adelle')
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Current search: adelle')).toBeVisible()
+    await expect(page.getByText('Breana Herzog')).toBeHidden()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+  })
+
+  test('it resets hasMore state when clearing search filter in manual mode', async ({ page }) => {
+    requests.listen(page)
+    await page.goto('/infinite-scroll/filtering-manual?search=adelle')
+
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Current search: adelle')).toBeVisible()
+    await expect(page.getByText('Has more next items: false')).toBeVisible()
+
+    await page.locator('input[placeholder="Search..."]').clear()
+    await expect(page.getByText('Current search: none')).toBeVisible()
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Breana Herzog')).toBeVisible()
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
+    await expect(infiniteScrollRequests().length).toBeGreaterThanOrEqual(1)
+  })
 })
 
 test.describe('Remember state', () => {
@@ -2132,6 +2267,25 @@ Object.entries({
   })
 })
 
+test.describe('Reset triggers', () => {
+  test('it auto-loads additional pages after clearing search filter', async ({ page }) => {
+    await page.goto('/infinite-scroll/filtering-reset')
+
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible({ timeout: 3000 })
+
+    await page.locator('input').nth(0).fill('adelle')
+    await expect(page.getByText('Current search: adelle')).toBeVisible()
+
+    const userIds = await getUserIdsFromDOM(page)
+    expect(userIds.length).toBe(1)
+
+    await page.locator('input').nth(0).fill('')
+    await expect(page.getByText('Current search: none')).toBeVisible()
+    await expect(page.getByText('Camylle Metz Sr.')).toBeVisible({ timeout: 3000 })
+  })
+})
+
 test.describe('Router', () => {
   test('it can reload unrelated props without affecting infinite scroll', async ({ page }) => {
     await page.goto('/infinite-scroll/reload-unrelated')
@@ -2237,5 +2391,51 @@ test.describe('Router', () => {
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
+  })
+
+  test('it preserves URL-encoded indices notation in query string when fetching pages', async ({ page }) => {
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/filtering/refresh-state?foo%5B0%5D%5Bbar%5D=baz')
+    await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
+
+    await scrollToBottom(page)
+    await page.waitForTimeout(500)
+
+    const pageRequests = infiniteScrollRequests()
+    expect(pageRequests.length).toBeGreaterThan(0)
+
+    const requestUrl = pageRequests[pageRequests.length - 1].url()
+    expect(requestUrl).toContain('foo[0][bar]=baz')
+    expect(requestUrl).not.toContain('foo[][bar]')
+  })
+})
+
+test.describe('Deferred scroll props', () => {
+  test('it loads deferred scroll props and merges scrollProps correctly', async ({ page }) => {
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/deferred')
+
+    await expect(page.getByText('Loading deferred scroll prop...')).toBeVisible()
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('Loading deferred scroll prop...')).toBeHidden()
+
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Loading next items...')).toBeVisible()
+
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading next items...')).toBeHidden()
+
+    // Verify the requests: 1 for deferred props, 1 for loading next page
+    const pageRequests = infiniteScrollRequests()
+    expect(pageRequests.length).toBe(2)
   })
 })

@@ -542,6 +542,18 @@ Route::post('/logout', function () {
 });
 
 
+Route::get('/flash', function () {
+    return inertia('Flash');
+});
+
+Route::get('/flash/direct', function () {
+    return Inertia::flash('message', 'Sent with render!')->render('Flash');
+});
+
+Route::post('/flash/form', function () {
+    return Inertia::flash('message', 'Sent with redirect!')->back();
+});
+
 Route::get('/once/{page}', function (int $page) {
     $component = match ($page) {
         1 => 'Once/First',

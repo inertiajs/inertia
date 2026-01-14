@@ -2,7 +2,7 @@ import { cloneDeep, get, set } from 'lodash-es'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
-import { fireBeforeEvent } from './events'
+import { fireBeforeEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
@@ -17,12 +17,14 @@ import {
   ActiveVisit,
   ClientSideVisitOptions,
   Component,
+  FlashData,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
   Method,
   Page,
+  PageFlashData,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -37,7 +39,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { isUrlMethodPair, transformUrlAndData } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -56,11 +58,13 @@ export class Router {
     initialPage,
     resolveComponent,
     swapComponent,
+    onFlash,
   }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,
       swapComponent,
+      onFlash,
     })
 
     InitialVisit.handle()
@@ -75,6 +79,10 @@ export class Router {
 
     eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
       this.loadDeferredProps(deferredProps)
+    })
+
+    eventHandler.on('historyQuotaExceeded', (url) => {
+      window.location.href = url
     })
   }
 
@@ -161,12 +169,16 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
+  /**
+   * @deprecated Use cancelAll() instead.
+   */
   public cancel(): void {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public cancelAll(): void {
-    this.asyncRequestStream.cancelInFlight()
+  public cancelAll({ prefetch = true } = {}): void {
+    // Called on popstate navigation
+    this.asyncRequestStream.cancelInFlight({ prefetch })
     this.syncRequestStream.cancelInFlight()
   }
 
@@ -193,9 +205,14 @@ export class Router {
       return
     }
 
-    const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
+    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
+      // Only cancel non-prefetch requests (deferred props + partial reloads)
+      this.asyncRequestStream.cancelInFlight({ prefetch: false })
+    }
 
-    requestStream.interruptInFlight()
+    if (!visit.async) {
+      this.syncRequestStream.interruptInFlight()
+    }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
@@ -214,6 +231,7 @@ export class Router {
       prefetchedRequests.use(prefetched, requestParams)
     } else {
       progress.reveal(true)
+      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
@@ -393,6 +411,30 @@ export class Router {
     this.clientVisit(params)
   }
 
+  public flash<TFlash extends PageFlashData = PageFlashData>(
+    keyOrData: string | ((flash: FlashData) => TFlash) | TFlash,
+    value?: unknown,
+  ): void {
+    const current = currentPage.get().flash
+    let flash: PageFlashData
+
+    if (typeof keyOrData === 'function') {
+      flash = keyOrData(current)
+    } else if (typeof keyOrData === 'string') {
+      flash = { ...current, [keyOrData]: value }
+    } else if (keyOrData && Object.keys(keyOrData).length) {
+      flash = { ...current, ...keyOrData }
+    } else {
+      return
+    }
+
+    currentPage.setFlash(flash)
+
+    if (Object.keys(flash).length) {
+      fireFlashEvent(flash)
+    }
+  }
+
   protected clientVisit<TProps = Page['props']>(
     params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
@@ -409,11 +451,14 @@ export class Router {
     const props =
       typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
 
-    const { viewTransition, onError, onFinish, onSuccess, ...pageParams } = params
+    const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
+
+    const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 
     const page = {
       ...current,
       ...pageParams,
+      flash: flash ?? {},
       props: props as Page['props'],
     }
 
@@ -428,6 +473,13 @@ export class Router {
         viewTransition,
       })
       .then(() => {
+        const currentFlash = currentPage.get().flash
+
+        if (Object.keys(currentFlash).length > 0) {
+          fireFlashEvent(currentFlash)
+          onFlash?.(currentFlash)
+        }
+
         const errors = currentPage.get().props.errors || {}
 
         if (Object.keys(errors).length === 0) {
@@ -532,6 +584,7 @@ export class Router {
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
     }
