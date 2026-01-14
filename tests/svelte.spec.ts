@@ -77,7 +77,6 @@ test('props and page store are in sync', async ({ page }) => {
 
   await page.goBack()
   await page.waitForURL('/svelte/props-and-page-store?foo=baz')
-  consoleMessages.messages = []
 
   await expect(page.getByText('foo prop is baz')).toBeVisible()
   await expect(page.getByText('$page.props.foo is baz')).toBeVisible()
