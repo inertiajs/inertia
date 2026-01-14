@@ -176,9 +176,9 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public cancelAll(): void {
+  public cancelAll({ prefetch = true } = {}): void {
     // Called on popstate navigation
-    this.asyncRequestStream.cancelInFlight()
+    this.asyncRequestStream.cancelInFlight({ prefetch })
     this.syncRequestStream.cancelInFlight()
   }
 
@@ -205,19 +205,14 @@ export class Router {
       return
     }
 
-    // Cancel in-flight async (deferred) requests when navigating to a different URL
-    // This prevents stale deferred prop data from appearing after rapid navigation
-    // We only cancel if the URL is changing - stays on same page (reloads, partial updates) are allowed
-    const isSameUrl = !currentPage.isCleared() && isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))
-
-    if (!isSameUrl) {
+    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
       // Only cancel non-prefetch requests (deferred props + partial reloads)
       this.asyncRequestStream.cancelInFlight({ prefetch: false })
     }
 
-    const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-
-    requestStream.interruptInFlight()
+    if (!visit.async) {
+      this.syncRequestStream.interruptInFlight()
+    }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
@@ -236,6 +231,7 @@ export class Router {
       prefetchedRequests.use(prefetched, requestParams)
     } else {
       progress.reveal(true)
+      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
