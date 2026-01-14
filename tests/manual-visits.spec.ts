@@ -926,6 +926,35 @@ test('can reload on mount', async ({ page }) => {
   await expect(page.getByText('Name is mounted!')).toBeVisible()
 })
 
+test.describe('Concurrent Reloads', () => {
+  test('does not cancel the first request when a second reload is fired', async ({ page }) => {
+    await page.goto('/reload/concurrent')
+
+    await expect(page.locator('#foo')).toHaveText('Foo: initial foo')
+    await expect(page.locator('#bar')).toHaveText('Bar: initial bar')
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Reload both props' }).click()
+
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+    )
+
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'bar' && response.status() === 200,
+    )
+
+    await expect(page.locator('#foo')).toContainText('foo reloaded at')
+    await expect(page.locator('#bar')).toContainText('bar reloaded at')
+
+    const reloadRequests = requests.requests.filter(
+      (r) => r.headers()['x-inertia-partial-data'] && r.url().includes('/reload/concurrent'),
+    )
+    expect(reloadRequests).toHaveLength(2)
+  })
+})
+
 test.describe('Error bags', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)

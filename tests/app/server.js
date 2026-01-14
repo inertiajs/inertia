@@ -2311,6 +2311,32 @@ app.get('/deferred-props/back-button/b', (req, res) => {
   )
 })
 
+app.get('/reload/concurrent', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']
+
+  if (!partialData) {
+    return inertia.render(req, res, {
+      component: 'Reload/Concurrent',
+      props: {
+        foo: 'initial foo',
+        bar: 'initial bar',
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Reload/Concurrent',
+        props: {
+          foo: partialData.includes('foo') ? `foo reloaded at ${Date.now()}` : undefined,
+          bar: partialData.includes('bar') ? `bar reloaded at ${Date.now()}` : undefined,
+        },
+      }),
+    600,
+  )
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
