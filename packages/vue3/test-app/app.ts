@@ -1,8 +1,11 @@
+import type { VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
 
 window.testing = { Inertia: router }
+
+const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
 createInertiaApp({
   page: window.initialPage,
@@ -26,4 +29,11 @@ createInertiaApp({
 
     inst.mount(el)
   },
+  ...(withAppDefaults && {
+    defaults: {
+      visitOptions: (href: string, options: VisitOptions) => {
+        return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }
+      },
+    },
+  }),
 })

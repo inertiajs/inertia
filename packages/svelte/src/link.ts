@@ -13,6 +13,7 @@ import {
   type VisitOptions,
 } from '@inertiajs/core'
 import type { ActionReturn } from 'svelte/action'
+import { config } from '.'
 
 type ActionEventHandlers = {
   [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
@@ -71,7 +72,7 @@ function link(
   }
 
   const prefetchHoverEvents: ActionEventHandlers = {
-    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), 75)),
+    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), config.get('prefetch.hoverDelay'))),
     mouseleave: () => clearTimeout(hoverTimeout),
     click: regularEvents.click,
   }
@@ -90,8 +91,10 @@ function link(
       }
     },
     mouseup: (event: MouseEvent) => {
-      event.preventDefault()
-      router.visit(href, visitParams)
+      if (shouldIntercept(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
     },
     keyup: (event: KeyboardEvent) => {
       if (shouldNavigate(event)) {
@@ -107,7 +110,13 @@ function link(
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, cacheTags: cacheTagValues = [], ...params }: ActionParameters) {
+  function update({
+    cacheFor = 0,
+    prefetch = false,
+    cacheTags: cacheTagValues = [],
+    viewTransition = false,
+    ...params
+  }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -133,7 +142,7 @@ function link(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     })()
 
     cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
@@ -160,6 +169,7 @@ function link(
 
     visitParams = {
       ...baseParams,
+      viewTransition,
       onStart: (visit) => {
         inFlightCount++
         updateNodeAttributes()

@@ -1,4 +1,4 @@
-import { FormDataConvertible } from './types'
+import type { FormDataConvertible, QueryStringArrayFormatOption } from './types'
 
 export const isFormData = (value: any): value is FormData => value instanceof FormData
 
@@ -6,25 +6,32 @@ export function objectToFormData(
   source: Record<string, FormDataConvertible>,
   form: FormData = new FormData(),
   parentKey: string | null = null,
+  queryStringArrayFormat: QueryStringArrayFormatOption = 'brackets',
 ): FormData {
   source = source || {}
 
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
-      append(form, composeKey(parentKey, key), source[key])
+      append(form, composeKey(parentKey, key, 'indices'), source[key], queryStringArrayFormat)
     }
   }
 
   return form
 }
 
-function composeKey(parent: string | null, key: string): string {
-  return parent ? parent + '[' + key + ']' : key
+function composeKey(parent: string | null, key: string, format: QueryStringArrayFormatOption): string {
+  if (!parent) {
+    return key
+  }
+
+  return format === 'brackets' ? `${parent}[]` : `${parent}[${key}]`
 }
 
-function append(form: FormData, key: string, value: FormDataConvertible): void {
+function append(form: FormData, key: string, value: FormDataConvertible, format: QueryStringArrayFormatOption): void {
   if (Array.isArray(value)) {
-    return Array.from(value.keys()).forEach((index) => append(form, composeKey(key, index.toString()), value[index]))
+    return Array.from(value.keys()).forEach((index) =>
+      append(form, composeKey(key, index.toString(), format), value[index], format),
+    )
   } else if (value instanceof Date) {
     return form.append(key, value.toISOString())
   } else if (value instanceof File) {
@@ -41,5 +48,5 @@ function append(form: FormData, key: string, value: FormDataConvertible): void {
     return form.append(key, '')
   }
 
-  objectToFormData(value, form, key)
+  objectToFormData(value, form, key, format)
 }

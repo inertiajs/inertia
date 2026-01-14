@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Method } from '@inertiajs/core'
+import type { Method, QueryStringArrayFormatOption } from '@inertiajs/core'
 import { Form } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import Article from './../Article.vue'
@@ -12,7 +12,7 @@ const state = ref('Default State')
 const preserveScroll = ref(false)
 const preserveState = ref(false)
 const preserveUrl = ref(false)
-const queryStringArrayFormat = ref<'indices' | 'brackets' | undefined>(undefined)
+const queryStringArrayFormat = ref<QueryStringArrayFormatOption | undefined>(undefined)
 
 function setOnly() {
   only.value = ['users']

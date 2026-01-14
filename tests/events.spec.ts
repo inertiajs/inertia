@@ -624,7 +624,7 @@ test.describe('Lifecycles', () => {
     test('cancels a visit before it completes', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Lifecycle Cancel' }).click()
 
-      const messages = await waitForMessages(page, 12)
+      const messages = await waitForMessages(page, 15)
 
       await expect(messages[0]).toBe('onBefore')
       await expect(messages[1]).toBe('Inertia.on(before)')
@@ -633,11 +633,14 @@ test.describe('Lifecycles', () => {
       await expect(messages[4]).toBe('Inertia.on(start)')
       await expect(messages[5]).toBe('addEventListener(inertia:start)')
       await expect(messages[6]).toBe('onStart')
-      await expect(messages[7]).toBe('CANCELLING!')
-      await expect(messages[8]).toBe('onCancel')
-      await expect(messages[9]).toBe('Inertia.on(finish)')
-      await expect(messages[10]).toBe('addEventListener(inertia:finish)')
-      await expect(messages[11]).toBe('onFinish')
+      await expect(messages[7]).toBe('Inertia.on(progress)')
+      await expect(messages[8]).toBe('addEventListener(inertia:progress)')
+      await expect(messages[9]).toBe('onProgress')
+      await expect(messages[10]).toBe('CANCELLING!')
+      await expect(messages[11]).toBe('onCancel')
+      await expect(messages[12]).toBe('Inertia.on(finish)')
+      await expect(messages[13]).toBe('addEventListener(inertia:finish)')
+      await expect(messages[14]).toBe('onFinish')
     })
 
     test('prevents onCancel from firing when the request is already finished', async ({ page }) => {

@@ -1,6 +1,10 @@
+import { Config } from './config'
 import { Router } from './router'
 
-export { getScrollableParent } from './domUtils'
+export { UseFormUtils } from './useFormUtils'
+
+export { config } from './config'
+export { getInitialPageFromDOM, getScrollableParent } from './domUtils'
 export { objectToFormData } from './formData'
 export { formDataToObject } from './formObject'
 export { default as createHeadManager } from './head'
@@ -17,6 +21,6 @@ export {
   urlToString,
   urlWithoutHash,
 } from './url'
-export { type Router }
+export { type Config, type Router }
 
 export const router = new Router()

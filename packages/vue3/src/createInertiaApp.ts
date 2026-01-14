@@ -1,8 +1,10 @@
 import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
+  getInitialPageFromDOM,
   InertiaAppResponse,
   InertiaAppSSRResponse,
+  Page,
   PageProps,
   router,
   setupProgress,
@@ -10,6 +12,8 @@ import {
 import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
+import { config } from './index'
+import { VueInertiaAppConfig } from './types'
 
 type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
@@ -24,14 +28,16 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SharedProps,
   ComponentResolver,
   SetupOptions<HTMLElement, SharedProps>,
-  void
+  void,
+  VueInertiaAppConfig
 >
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<null, SharedProps>,
-  VueApp
+  VueApp,
+  VueInertiaAppConfig
 > & {
   render: typeof renderToString
 }
@@ -50,10 +56,14 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   render,
+  defaults = {},
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
+  config.replace(defaults)
+
   const isServer = typeof window === 'undefined'
-  const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
+
   const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
 
   let head: string[] = []
@@ -83,7 +93,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
 
     return csrSetup({
-      el: el as HTMLElement,
+      el: document.getElementById(id)!,
       App,
       props,
       plugin,
@@ -95,14 +105,31 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   if (isServer && render) {
+    const element = () => {
+      if (!useScriptElementForInitialPage) {
+        return h('div', {
+          id,
+          'data-page': JSON.stringify(initialPage),
+          innerHTML: vueApp ? render(vueApp) : '',
+        })
+      }
+
+      return [
+        h('script', {
+          'data-page': id,
+          type: 'application/json',
+          innerHTML: JSON.stringify(initialPage).replace(/\//g, '\\/'),
+        }),
+        h('div', {
+          id,
+          innerHTML: vueApp ? render(vueApp) : '',
+        }),
+      ]
+    }
+
     const body = await render(
       createSSRApp({
-        render: () =>
-          h('div', {
-            id,
-            'data-page': JSON.stringify(initialPage),
-            innerHTML: vueApp ? render(vueApp) : '',
-          }),
+        render: () => element(),
       }),
     )
 

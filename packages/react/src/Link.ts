@@ -12,6 +12,7 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { config } from '.'
 
 const noop = () => undefined
 
@@ -55,6 +56,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       prefetch = false,
       cacheFor = 0,
       cacheTags = [],
+      viewTransition = false,
       ...props
     },
     ref,
@@ -102,6 +104,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const visitParams = useMemo<VisitOptions>(
       () => ({
         ...baseParams,
+        viewTransition,
         onCancelToken,
         onBefore,
         onStart(visit: PendingVisit) {
@@ -117,7 +120,18 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         onSuccess,
         onError,
       }),
-      [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
+      [
+        baseParams,
+        viewTransition,
+        onCancelToken,
+        onBefore,
+        onStart,
+        onProgress,
+        onFinish,
+        onCancel,
+        onSuccess,
+        onError,
+      ],
     )
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
@@ -152,7 +166,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     }, [cacheFor, prefetchModes])
 
     const doPrefetch = useMemo(() => {
@@ -197,7 +211,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseEnter: () => {
         hoverTimeout.current = window.setTimeout(() => {
           doPrefetch()
-        }, 75)
+        }, config.get('prefetch.hoverDelay'))
       },
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)
@@ -219,8 +233,10 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         }
       },
       onMouseUp: (event: React.MouseEvent) => {
-        event.preventDefault()
-        router.visit(url, visitParams)
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(url, visitParams)
+        }
       },
       onKeyUp: (event: React.KeyboardEvent) => {
         if (shouldNavigate(event)) {

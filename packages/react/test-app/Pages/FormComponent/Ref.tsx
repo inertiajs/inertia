@@ -29,6 +29,14 @@ export default function Ref() {
     formRef.current?.defaults()
   }
 
+  const callPrecognitionMethods = () => {
+    const validator = formRef.current?.validator()
+
+    if (validator && !formRef.current?.touched('company') && !formRef.current?.valid('company')) {
+      formRef.current?.validate({ only: ['company'] })
+    }
+  }
+
   return (
     <div>
       <h1>Form Ref Test</h1>
@@ -63,6 +71,7 @@ export default function Ref() {
         <button onClick={clearAllErrors}>Clear Errors</button>
         <button onClick={setTestError}>Set Test Error</button>
         <button onClick={setCurrentAsDefaults}>Set Current as Defaults</button>
+        <button onClick={callPrecognitionMethods}>Call Precognition Methods</button>
       </div>
     </div>
   )

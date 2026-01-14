@@ -16,10 +16,10 @@ export default ({ users }: { users: { data: User[] } }) => {
           <>
             <div
               style={{
-                height: '500px',
+                height: '300px',
                 width: '100%',
                 textAlign: 'center',
-                lineHeight: '500px',
+                lineHeight: '300px',
                 border: '1px solid #ccc',
               }}
             >
@@ -61,10 +61,10 @@ export default ({ users }: { users: { data: User[] } }) => {
 
             <div
               style={{
-                height: '500px',
+                height: '300px',
                 width: '100%',
                 textAlign: 'center',
-                lineHeight: '500px',
+                lineHeight: '300px',
                 border: '1px solid #ccc',
               }}
             >

@@ -1,13 +1,16 @@
 import {
+  getInitialPageFromDOM,
   router,
   setupProgress,
   type CreateInertiaAppOptionsForCSR,
   type InertiaAppResponse,
+  type Page,
   type PageProps,
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import App, { type InertiaAppProps } from './components/App.svelte'
-import type { ComponentResolver } from './types'
+import { config } from './index'
+import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
 
 type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 
@@ -23,7 +26,8 @@ type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsF
   SharedProps,
   ComponentResolver,
   SetupOptions<SharedProps>,
-  SvelteRenderResult | void
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
 >
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
@@ -32,10 +36,14 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   setup,
   progress = {},
   page,
+  defaults = {},
 }: InertiaAppOptions<SharedProps>): InertiaAppResponse {
+  config.replace(defaults)
+
   const isServer = typeof window === 'undefined'
-  const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el?.dataset.page || '{}')
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
+
   const resolveComponent = (name: string) => Promise.resolve(resolve(name))
 
   const svelteApp = await Promise.all([
@@ -43,7 +51,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
     return setup({
-      el,
+      el: isServer ? null : document.getElementById(id),
       App,
       props: { initialPage, initialComponent, resolveComponent },
     })
@@ -53,7 +61,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const { html, head, css } = svelteApp
 
     return {
-      body: `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
+      body: useScriptElementForInitialPage
+        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${html}</div>`
+        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }

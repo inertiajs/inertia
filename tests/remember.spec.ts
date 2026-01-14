@@ -386,5 +386,51 @@ test.describe('Remember (local state caching)', () => {
       await expect(page.locator('.handle_error')).toBeVisible()
       await expect(page.locator('.remember_error')).not.toBeVisible()
     })
+
+    test('it excludes fields via dontRemember', async ({ page }) => {
+      await page.goto('remember/form-helper/password')
+
+      await page.fill('#username', 'A')
+      await page.fill('#password', 'B')
+
+      await page.getByRole('link', { name: 'Navigate away' }).click()
+
+      await shouldBeDumpPage(page, 'get')
+
+      await page.goBack()
+
+      await expect(page).toHaveURL('remember/form-helper/password')
+
+      await expect(page.locator('#username')).toHaveValue('A')
+      await expect(page.locator('#password')).toHaveValue('')
+    })
+  })
+
+  test('restore without types', async ({ page }) => {
+    await page.goto('remember/router')
+
+    await expect(page.getByText('Foo: -')).toBeVisible()
+    await expect(page.getByText('Bar: 0')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Remember' }).click()
+    await page.waitForTimeout(100) // Wait for remember to complete
+    await page.getByRole('button', { name: 'Restore', exact: true }).click()
+
+    await expect(page.getByText('Foo: foo')).toBeVisible()
+    await expect(page.getByText('Bar: 42')).toBeVisible()
+  })
+
+  test('restore with types', async ({ page }) => {
+    await page.goto('remember/router')
+
+    await expect(page.getByText('Foo: -')).toBeVisible()
+    await expect(page.getByText('Bar: 0')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Remember' }).click()
+    await page.waitForTimeout(100) // Wait for remember to complete
+    await page.getByRole('button', { name: 'Restore Typed' }).click()
+
+    await expect(page.getByText('Foo: foo')).toBeVisible()
+    await expect(page.getByText('Bar: 42')).toBeVisible()
   })
 })

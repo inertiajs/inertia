@@ -438,7 +438,7 @@
         setTimeout(() => {
           internalAlert('CANCELLING!')
           token.cancel()
-        }, 10)
+        }, 250)
       },
     })
   }

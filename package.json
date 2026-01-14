@@ -22,9 +22,12 @@
     "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
     "type-check:test-app:svelte": "cd packages/svelte/test-app && pnpm run type-check",
     "type-check:test-app:vue": "cd packages/vue3/test-app && pnpm run type-check",
-    "test:react": "PACKAGE=react playwright test",
-    "test:svelte": "PACKAGE=svelte playwright test",
-    "test:vue": "PACKAGE=vue3 playwright test",
+    "test:react": "PACKAGE=react node playwright.js",
+    "test:svelte": "PACKAGE=svelte node playwright.js",
+    "test:vue": "PACKAGE=vue3 node playwright.js",
+    "test:ssr:react": "PACKAGE=react SSR=true npx playwright test",
+    "test:ssr:svelte": "PACKAGE=svelte SSR=true npx playwright test",
+    "test:ssr:vue": "PACKAGE=vue3 SSR=true npx playwright test",
     "playground:react": "cd playgrounds/react && ./init.sh && composer run dev",
     "playground:svelte4": "cd playgrounds/svelte4 && ./init.sh && composer run dev",
     "playground:svelte5": "cd playgrounds/svelte5 && ./init.sh && composer run dev",
@@ -39,6 +42,6 @@
     "prettier-plugin-tailwindcss": "^0.6.14"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.52.5"
+    "@rollup/rollup-linux-x64-gnu": "^4.53.3"
   }
 }

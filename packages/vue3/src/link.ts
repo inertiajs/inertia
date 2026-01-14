@@ -1,8 +1,5 @@
 import {
   ActiveVisit,
-  CacheForOption,
-  CancelTokenCallback,
-  GlobalEventCallback,
   isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
@@ -14,6 +11,7 @@ import {
   shouldNavigate,
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
+import { config } from '.'
 
 const noop = () => {}
 
@@ -28,11 +26,11 @@ const Link: InertiaLink = defineComponent({
   name: 'Link',
   props: {
     as: {
-      type: [String, Object] as PropType<string | Component>,
+      type: [String, Object] as PropType<InertiaLinkProps['as']>,
       default: 'a',
     },
     data: {
-      type: Object,
+      type: Object as PropType<InertiaLinkProps['data']>,
       default: () => ({}),
     },
     href: {
@@ -40,96 +38,100 @@ const Link: InertiaLink = defineComponent({
       default: '',
     },
     method: {
-      type: String as PropType<Method>,
+      type: String as PropType<InertiaLinkProps['method']>,
       default: 'get',
     },
     replace: {
-      type: Boolean,
+      type: Boolean as PropType<InertiaLinkProps['replace']>,
       default: false,
     },
     preserveScroll: {
-      type: Boolean,
+      type: [Boolean, String, Function] as PropType<InertiaLinkProps['preserveScroll']>,
       default: false,
     },
     preserveState: {
-      type: Boolean,
+      type: [Boolean, String, Function] as PropType<InertiaLinkProps['preserveState']>,
       default: null,
     },
     preserveUrl: {
-      type: Boolean,
+      type: Boolean as PropType<InertiaLinkProps['preserveUrl']>,
       default: false,
     },
     only: {
-      type: Array<string>,
+      type: Array as PropType<InertiaLinkProps['only']>,
       default: () => [],
     },
     except: {
-      type: Array<string>,
+      type: Array as PropType<InertiaLinkProps['except']>,
       default: () => [],
     },
     headers: {
-      type: Object,
+      type: Object as PropType<InertiaLinkProps['headers']>,
       default: () => ({}),
     },
     queryStringArrayFormat: {
-      type: String as PropType<'brackets' | 'indices'>,
+      type: String as PropType<InertiaLinkProps['queryStringArrayFormat']>,
       default: 'brackets',
     },
     async: {
-      type: Boolean,
+      type: Boolean as PropType<InertiaLinkProps['async']>,
       default: false,
     },
     prefetch: {
-      type: [Boolean, String, Array] as PropType<boolean | LinkPrefetchOption | LinkPrefetchOption[]>,
+      type: [Boolean, String, Array] as PropType<InertiaLinkProps['prefetch']>,
       default: false,
     },
     cacheFor: {
-      type: [Number, String, Array] as PropType<CacheForOption | CacheForOption[]>,
+      type: [Number, String, Array] as PropType<InertiaLinkProps['cacheFor']>,
       default: 0,
     },
     onStart: {
-      type: Function as PropType<GlobalEventCallback<'start'>>,
+      type: Function as PropType<InertiaLinkProps['onStart']>,
       default: noop,
     },
     onProgress: {
-      type: Function as PropType<GlobalEventCallback<'progress'>>,
+      type: Function as PropType<InertiaLinkProps['onProgress']>,
       default: noop,
     },
     onFinish: {
-      type: Function as PropType<GlobalEventCallback<'finish'>>,
+      type: Function as PropType<InertiaLinkProps['onFinish']>,
       default: noop,
     },
     onBefore: {
-      type: Function as PropType<GlobalEventCallback<'before'>>,
+      type: Function as PropType<InertiaLinkProps['onBefore']>,
       default: noop,
     },
     onCancel: {
-      type: Function as PropType<GlobalEventCallback<'cancel'>>,
+      type: Function as PropType<InertiaLinkProps['onCancel']>,
       default: noop,
     },
     onSuccess: {
-      type: Function as PropType<GlobalEventCallback<'success'>>,
+      type: Function as PropType<InertiaLinkProps['onSuccess']>,
       default: noop,
     },
     onError: {
-      type: Function as PropType<GlobalEventCallback<'error'>>,
+      type: Function as PropType<InertiaLinkProps['onError']>,
       default: noop,
     },
     onCancelToken: {
-      type: Function as PropType<CancelTokenCallback>,
+      type: Function as PropType<InertiaLinkProps['onCancelToken']>,
       default: noop,
     },
     onPrefetching: {
-      type: Function as PropType<GlobalEventCallback<'prefetching'>>,
+      type: Function as PropType<InertiaLinkProps['onPrefetching']>,
       default: noop,
     },
     onPrefetched: {
-      type: Function as PropType<GlobalEventCallback<'prefetched'>>,
+      type: Function as PropType<InertiaLinkProps['onPrefetched']>,
       default: noop,
     },
     cacheTags: {
-      type: [String, Array] as PropType<string | string[]>,
+      type: [String, Array] as PropType<InertiaLinkProps['cacheTags']>,
       default: () => [],
+    },
+    viewTransition: {
+      type: [Boolean, Object] as PropType<InertiaLinkProps['viewTransition']>,
+      default: false,
     },
   },
   setup(props, { slots, attrs }) {
@@ -165,7 +167,7 @@ const Link: InertiaLink = defineComponent({
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     })
 
     onMounted(() => {
@@ -227,6 +229,7 @@ const Link: InertiaLink = defineComponent({
 
     const visitParams = computed(() => ({
       ...baseParams.value,
+      viewTransition: props.viewTransition,
       onCancelToken: props.onCancelToken,
       onBefore: props.onBefore,
       onStart: (visit: PendingVisit) => {
@@ -271,7 +274,7 @@ const Link: InertiaLink = defineComponent({
       onMouseenter: () => {
         hoverTimeout.value = setTimeout(() => {
           prefetch()
-        }, 75)
+        }, config.get('prefetch.hoverDelay'))
       },
       onMouseleave: () => {
         clearTimeout(hoverTimeout.value)
@@ -293,8 +296,10 @@ const Link: InertiaLink = defineComponent({
         }
       },
       onMouseup: (event: MouseEvent) => {
-        event.preventDefault()
-        router.visit(href.value, visitParams.value)
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(href.value, visitParams.value)
+        }
       },
       onKeyup: (event: KeyboardEvent) => {
         if (shouldNavigate(event)) {

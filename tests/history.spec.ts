@@ -108,11 +108,17 @@ test('history can be cleared via props', async ({ page }) => {
 
 test('multi byte strings can be encrypted', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 5', '/history/5')
-  const historyState5 = await page.evaluate(() => window.history.state)
+
+  // Check that the history state has a 'page' key
+  const historyState5Keys = await page.evaluate(() => Object.keys(window.history.state))
+  await expect(historyState5Keys).toContain('page')
+
   // When history is encrypted, the page is an ArrayBuffer,
   // but Playwright doesn't transfer it as such over the wire (page.evaluate),
   // so if the object is "empty" and the page check below works, it's working.
-  await expect(historyState5.page).toEqual({})
+  const historyState5Page = await page.evaluate(() => window.history.state.page)
+  await expect(historyState5Page).toEqual({})
+
   await expect(page.getByText('Multi byte character: 😃')).toBeVisible()
 
   await clickAndWaitForResponse(page, 'Page 1', '/history/1')
