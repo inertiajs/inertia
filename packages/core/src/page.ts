@@ -59,6 +59,11 @@ class CurrentPage {
         component: page.component,
         url: page.url,
       }
+
+      // Preserve original deferred props for back button handling
+      if (page.originalDeferredProps === undefined) {
+        page.originalDeferredProps = page.deferredProps
+      }
     }
 
     this.componentId = {}

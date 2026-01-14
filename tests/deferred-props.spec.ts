@@ -338,3 +338,45 @@ test('deferred props do not clear validation errors', async ({ page }) => {
   await expect(page.locator('#form-error')).toHaveText('The name field is required.')
   await expect(page.getByText('foo value')).toBeVisible()
 })
+
+test('it refetches pending deferred props after navigating back', async ({ page }) => {
+  await page.goto('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Loading fast prop...')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+
+  await expect(page.getByText('Loading data...')).toBeVisible()
+
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Loading fast prop...')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+})
+
+test('it only refetches deferred props that were not loaded before navigating away', async ({ page }) => {
+  await page.goto('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Loading fast prop...')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+})
