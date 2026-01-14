@@ -39,7 +39,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { isUrlMethodPair, transformUrlAndData } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -169,12 +169,16 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
+  /**
+   * @deprecated Use cancelAll() instead.
+   */
   public cancel(): void {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public cancelAll(): void {
-    this.asyncRequestStream.cancelInFlight()
+  public cancelAll({ prefetch = true } = {}): void {
+    // Called on popstate navigation
+    this.asyncRequestStream.cancelInFlight({ prefetch })
     this.syncRequestStream.cancelInFlight()
   }
 
@@ -201,9 +205,14 @@ export class Router {
       return
     }
 
-    const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
+    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
+      // Only cancel non-prefetch requests (deferred props + partial reloads)
+      this.asyncRequestStream.cancelInFlight({ prefetch: false })
+    }
 
-    requestStream.interruptInFlight()
+    if (!visit.async) {
+      this.syncRequestStream.interruptInFlight()
+    }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
@@ -222,6 +231,7 @@ export class Router {
       prefetchedRequests.use(prefetched, requestParams)
     } else {
       progress.reveal(true)
+      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }

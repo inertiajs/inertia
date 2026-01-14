@@ -92,8 +92,8 @@ class EventHandler {
           return
         }
 
-        // Cancel ongoing requests
-        router.cancelAll()
+        // Cancel ongoing requests except prefetch requests
+        router.cancelAll({ prefetch: false })
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           Scroll.restore(history.getScrollRegions())

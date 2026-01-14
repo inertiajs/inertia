@@ -1274,6 +1274,40 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
+  const id = req.params.id || 'none'
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  if (!requestedProps) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/RapidNavigation',
+      deferredProps: {
+        group1: ['users'],
+        group2: ['stats'],
+        group3: ['activity'],
+      },
+      props: {
+        id,
+      },
+    })
+  }
+
+  // Simulate slow deferred prop loading (600ms)
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/RapidNavigation',
+        props: {
+          id,
+          users: requestedProps.includes('users') ? { text: `users data for ${id}` } : undefined,
+          stats: requestedProps.includes('stats') ? { text: `stats data for ${id}` } : undefined,
+          activity: requestedProps.includes('activity') ? { text: `activity data for ${id}` } : undefined,
+        },
+      }),
+    600,
+  )
+})
+
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
