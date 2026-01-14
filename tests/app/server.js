@@ -2246,12 +2246,8 @@ app.get('/deferred-props/back-button/a', (req, res) => {
       inertia.render(req, res, {
         component: 'DeferredProps/BackButton/PageA',
         props: {
-          fastProp: req.headers['x-inertia-partial-data']?.includes('fastProp')
-            ? 'Fast prop loaded'
-            : undefined,
-          slowProp: req.headers['x-inertia-partial-data']?.includes('slowProp')
-            ? 'Slow prop loaded'
-            : undefined,
+          fastProp: req.headers['x-inertia-partial-data']?.includes('fastProp') ? 'Fast prop loaded' : undefined,
+          slowProp: req.headers['x-inertia-partial-data']?.includes('slowProp') ? 'Slow prop loaded' : undefined,
         },
       }),
     delay,
