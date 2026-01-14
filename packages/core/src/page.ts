@@ -61,8 +61,8 @@ class CurrentPage {
       }
 
       // Preserve original deferred props for back button handling
-      if (page.originalDeferredProps === undefined) {
-        page.originalDeferredProps = page.deferredProps
+      if (page.initialDeferredProps === undefined) {
+        page.initialDeferredProps = page.deferredProps
       }
     }
 

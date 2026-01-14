@@ -359,9 +359,9 @@ export class Response {
       ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
     }
 
-    const currentOriginalDeferred = currentPage.get().originalDeferredProps
+    const currentOriginalDeferred = currentPage.get().initialDeferredProps
     if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
-      pageResponse.originalDeferredProps = currentOriginalDeferred
+      pageResponse.initialDeferredProps = currentOriginalDeferred
     }
   }
 

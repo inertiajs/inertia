@@ -102,7 +102,7 @@ class EventHandler {
           const pendingDeferred: Record<string, string[]> = {}
           const pageProps = currentPage.get().props
 
-          for (const [group, props] of Object.entries(data.originalDeferredProps ?? data.deferredProps ?? {})) {
+          for (const [group, props] of Object.entries(data.initialDeferredProps ?? data.deferredProps ?? {})) {
             const missing = props.filter((prop) => pageProps[prop] === undefined)
 
             if (missing.length > 0) {
