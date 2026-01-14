@@ -5,6 +5,7 @@
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type FormComponentRef,
     type Method,
     type FormDataConvertible,
     type VisitOptions,
@@ -13,7 +14,9 @@
   } from '@inertiajs/core'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
-  import { onMount } from 'svelte'
+  import { onMount, setContext } from 'svelte'
+  import { writable } from 'svelte/store'
+  import { FormContextKey } from './formContext'
   import useForm from '../useForm'
 
   const noop = () => undefined
@@ -243,6 +246,37 @@
   }
 
   $: slotErrors = $form.errors as Errors
+
+  // Form context for child components
+  const formContextStore = writable<FormComponentRef | undefined>(undefined)
+
+  $: formContextStore.set({
+    errors: $form.errors,
+    hasErrors: $form.hasErrors,
+    processing: $form.processing,
+    progress: $form.progress,
+    wasSuccessful: $form.wasSuccessful,
+    recentlySuccessful: $form.recentlySuccessful,
+    isDirty,
+    clearErrors,
+    resetAndClearErrors,
+    setError,
+    reset,
+    submit,
+    defaults,
+    getData,
+    getFormData,
+    // Precognition
+    validator,
+    validate,
+    touch,
+    validating: $form.validating,
+    valid,
+    invalid,
+    touched,
+  })
+
+  setContext(FormContextKey, formContextStore)
 </script>
 
 <form
