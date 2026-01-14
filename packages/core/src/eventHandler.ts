@@ -98,6 +98,21 @@ class EventHandler {
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           Scroll.restore(history.getScrollRegions())
           fireNavigateEvent(currentPage.get())
+
+          const pendingDeferred: Record<string, string[]> = {}
+          const pageProps = currentPage.get().props
+
+          for (const [group, props] of Object.entries(data.initialDeferredProps ?? data.deferredProps ?? {})) {
+            const missing = props.filter((prop) => pageProps[prop] === undefined)
+
+            if (missing.length > 0) {
+              pendingDeferred[group] = missing
+            }
+          }
+
+          if (Object.keys(pendingDeferred).length > 0) {
+            this.fireInternalEvent('loadDeferredProps', pendingDeferred)
+          }
         })
       })
       .catch(() => {
