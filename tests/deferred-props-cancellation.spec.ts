@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { gotoPageAndWaitForContent } from './support'
 
 test.describe('Deferred Props Cancellation', () => {
   test('it cancels in-flight deferred props when navigating to a different URL', async ({ page }) => {
@@ -23,7 +24,7 @@ test.describe('Deferred Props Cancellation', () => {
       }
     })
 
-    await page.goto('/deferred-props/rapid-navigation/a')
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Page: a')).toBeVisible()
     await expect(page.getByText('Loading users...')).toBeVisible()
 
@@ -49,7 +50,7 @@ test.describe('Deferred Props Cancellation', () => {
       }
     })
 
-    await page.goto('/deferred-props/rapid-navigation/a')
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
     // Trigger a reload (same URL)
@@ -80,7 +81,7 @@ test.describe('Deferred Props Cancellation', () => {
       }
     })
 
-    await page.goto('/deferred-props/rapid-navigation/a')
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
     // Start a prefetch
@@ -110,7 +111,7 @@ test.describe('Deferred Props Cancellation', () => {
       }
     })
 
-    await page.goto('/deferred-props/rapid-navigation/a')
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
     // Set up dialog to cancel navigation
@@ -157,7 +158,7 @@ test.describe('Deferred Props Cancellation', () => {
       }
     })
 
-    await page.goto('/deferred-props/rapid-navigation/a')
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
     // Navigate to same path but with query param (different URL)
@@ -179,7 +180,7 @@ test.describe('Deferred Props Cancellation', () => {
       }
     })
 
-    await page.goto('/deferred-props/rapid-navigation/a')
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
     // Change only the hash (same URL per isSameUrlWithoutHash)

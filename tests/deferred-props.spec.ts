@@ -205,7 +205,7 @@ test('load deferred props with partial reload on mount', async ({ page }) => {
 })
 
 test('deferred props preserve query parameters from original URL', async ({ page }) => {
-  await page.goto('/deferred-props/with-query-params?filter=a')
+  await gotoPageAndWaitForContent(page, '/deferred-props/with-query-params?filter=a')
 
   // Verify the initial page load has the correct filter
   await expect(page.getByText('Filter: a')).toBeVisible()
@@ -369,7 +369,7 @@ test('deferred props do not clear validation errors', async ({ page }) => {
 })
 
 test('it refetches pending deferred props after navigating back', async ({ page }) => {
-  await page.goto('/deferred-props/back-button/a')
+  await gotoPageAndWaitForContent(page, '/deferred-props/back-button/a')
 
   await expect(page.getByText('Loading fast prop...')).toBeVisible()
   await expect(page.getByText('Loading slow prop...')).toBeVisible()
@@ -387,7 +387,7 @@ test('it refetches pending deferred props after navigating back', async ({ page 
 })
 
 test('it only refetches deferred props that were not loaded before navigating away', async ({ page }) => {
-  await page.goto('/deferred-props/back-button/a')
+  await gotoPageAndWaitForContent(page, '/deferred-props/back-button/a')
 
   await expect(page.getByText('Loading fast prop...')).toBeVisible()
   await expect(page.getByText('Loading slow prop...')).toBeVisible()
@@ -408,7 +408,7 @@ test('it only refetches deferred props that were not loaded before navigating aw
 })
 
 test('it does not refetch deferred props that were already loaded on a previous back navigation', async ({ page }) => {
-  await page.goto('/deferred-props/back-button/a')
+  await gotoPageAndWaitForContent(page, '/deferred-props/back-button/a')
 
   // Quickly navigate away before deferred props load
   await expect(page.getByText('Loading fast prop...')).toBeVisible()

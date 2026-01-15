@@ -1,5 +1,5 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import { consoleMessages, requests } from './support'
+import { consoleMessages, gotoPageAndWaitForContent, requests } from './support'
 
 function infiniteScrollRequests() {
   return requests.requests.filter((req) => {
@@ -2421,7 +2421,7 @@ test.describe('Deferred scroll props', () => {
   test('it loads deferred scroll props and merges scrollProps correctly', async ({ page }) => {
     requests.listen(page)
 
-    await page.goto('/infinite-scroll/deferred')
+    await gotoPageAndWaitForContent(page, '/infinite-scroll/deferred')
 
     await expect(page.getByText('Loading deferred scroll prop...')).toBeVisible()
 
