@@ -611,7 +611,9 @@ test.describe('enabled', () => {
     await expect(message.version).not.toBeUndefined()
   })
 
-  test('preserves scroll regions when using the "preserve-scroll" feature', async ({ page }) => {
+  test('preserves scroll regions when using the "preserve-scroll" feature', async ({ page, browserName }) => {
+    test.skip(browserName === 'firefox', 'Firefox on Linux auto-adjusts scroll on content change')
+
     await page.getByText('Preserve Scroll', { exact: true }).click()
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two?foo=baz')
@@ -621,7 +623,12 @@ test.describe('enabled', () => {
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
   })
 
-  test('preserves scroll regions when using the "preserve-scroll" feature from a callback', async ({ page }) => {
+  test('preserves scroll regions when using the "preserve-scroll" feature from a callback', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === 'firefox', 'Firefox on Linux auto-adjusts scroll on content change')
+
     consoleMessages.listen(page)
     await page.getByTestId('preserve-callback').click()
 
