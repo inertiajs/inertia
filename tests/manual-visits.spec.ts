@@ -691,6 +691,7 @@ test.describe('Preserve scroll', () => {
 
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two?foo=baz')
       await expect(page.getByText('Foo is now baz')).toBeVisible()
+      await ensureScrollPosition(page, '#slot', 10, 15)
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
