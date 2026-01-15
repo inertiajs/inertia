@@ -452,8 +452,17 @@ export class Router {
   ): Promise<void> {
     const current = currentPage.get()
 
+    const onceProps =
+      typeof params.props === 'function'
+        ? Object.fromEntries(
+            Object.values(current.onceProps ?? {}).map((onceProp) => [onceProp.prop, current.props[onceProp.prop]]),
+          )
+        : {}
+
     const props =
-      typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
+      typeof params.props === 'function'
+        ? params.props(current.props as TProps, onceProps as Partial<TProps>)
+        : (params.props ?? current.props)
 
     const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
 

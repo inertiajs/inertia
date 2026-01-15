@@ -2298,6 +2298,19 @@ app.get('/once-props/custom-key/:page', (req, res) => {
   })
 })
 
+app.get('/once-props/client-side-visit', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/ClientSideVisit',
+    props: {
+      foo: shouldResolveProp ? 'foo-initial' : undefined,
+      bar: 'bar-initial',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
+  })
+})
+
 app.get('/deferred-props/back-button/a', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
