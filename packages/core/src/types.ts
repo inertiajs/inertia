@@ -264,6 +264,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  preserveErrors: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
 }
@@ -705,6 +706,7 @@ export interface UseInfiniteScrollOptions {
   shouldFetchNext: () => boolean
   shouldFetchPrevious: () => boolean
   shouldPreserveUrl: () => boolean
+  getReloadOptions?: () => ReloadOptions
 
   // Elements
   getTriggerMargin: () => number

@@ -4,6 +4,7 @@ import {
   InfiniteScrollComponentBaseProps,
   InfiniteScrollRef,
   InfiniteScrollSlotProps,
+  ReloadOptions,
   useInfiniteScroll,
 } from '@inertiajs/core'
 import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
@@ -91,6 +92,10 @@ const InfiniteScroll = defineComponent({
       type: [String, Function, Object] as PropType<string | (() => HTMLElement | null | undefined)>,
       default: null,
     },
+    params: {
+      type: Object as PropType<ReloadOptions>,
+      default: () => ({}),
+    },
   },
   inheritAttrs: false,
   setup(props, { slots, attrs, expose }) {
@@ -130,6 +135,7 @@ const InfiniteScroll = defineComponent({
       shouldFetchNext: () => !props.onlyPrevious,
       shouldFetchPrevious: () => !props.onlyNext,
       shouldPreserveUrl: () => props.preserveUrl,
+      getReloadOptions: () => props.params,
 
       // Elements
       getTriggerMargin: () => props.buffer,

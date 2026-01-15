@@ -554,6 +554,7 @@ export class Router {
       fresh: false,
       reset: [],
       preserveUrl: false,
+      preserveErrors: false,
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
@@ -606,7 +607,7 @@ export class Router {
   protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
-        this.doReload({ only: group, deferredProps: true })
+        this.doReload({ only: group, deferredProps: true, preserveErrors: true })
       })
     }
   }
