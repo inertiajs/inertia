@@ -176,10 +176,14 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public cancelAll({ prefetch = true } = {}): void {
-    // Called on popstate navigation
-    this.asyncRequestStream.cancelInFlight({ prefetch })
-    this.syncRequestStream.cancelInFlight()
+  public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
+    if (async) {
+      this.asyncRequestStream.cancelInFlight({ prefetch })
+    }
+
+    if (sync) {
+      this.syncRequestStream.cancelInFlight()
+    }
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
