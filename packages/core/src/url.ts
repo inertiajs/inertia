@@ -1,7 +1,7 @@
-import * as qs from 'qs'
 import { config } from './config'
 import { hasFiles } from './files'
 import { isFormData, objectToFormData } from './formData'
+import * as queryString from './queryString'
 import type {
   FormDataConvertible,
   Method,
@@ -63,16 +63,8 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   if (hasDataForQueryString) {
     // If the original URL contains indices notation (e.g. [0], [1]), preserve it.
     // Indices notation cannot be converted to brackets notation without data loss.
-    // We decode the URL search first because browsers may return URL-encoded brackets (%5B0%5D).
-    const hasIndices = /\[\d+\]/.test(decodeURIComponent(url.search))
-    const parseOptions = { ignoreQueryPrefix: true, allowSparse: true }
-    url.search = qs.stringify(
-      { ...qs.parse(url.search, parseOptions), ...data },
-      {
-        encodeValuesOnly: true,
-        arrayFormat: hasIndices ? 'indices' : qsArrayFormat,
-      },
-    )
+    const arrayFormat = queryString.hasIndices(url) ? 'indices' : qsArrayFormat
+    url.search = queryString.stringify({ ...queryString.parse(url.search), ...data }, arrayFormat)
   }
 
   return [
