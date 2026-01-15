@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@sveltejs/eslint-config": "^8.3.4",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.6",
     "eslint": "^9.39.2",

@@ -8,7 +8,6 @@
     "type-check": "vue-tsc --noEmit"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.6.0",
     "eslint": "^9.39.2",
