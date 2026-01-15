@@ -28,7 +28,7 @@
     loading="lazy"
     decoding="async"
     class={`h-full w-full object-cover transition duration-500 ease-out ${
-      loaded ? 'scale-100 opacity-100 blur-0' : 'scale-105 opacity-0 blur-sm'
+      loaded ? 'blur-0 scale-100 opacity-100' : 'scale-105 opacity-0 blur-sm'
     }`}
     on:load={handleLoad}
     alt=""

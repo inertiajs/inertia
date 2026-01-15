@@ -317,6 +317,21 @@ test('can visit the page when prefetching has failed due to network error', asyn
   await isPrefetchSwrPage(page, 1)
 })
 
+test('displays the error modal correctly when prefetching a non-Inertia response', async ({ page }) => {
+  await page.goto('prefetch/after-error')
+
+  const prefetchPromise = page.waitForResponse('/non-inertia')
+  await page.getByRole('button', { name: 'Prefetch Non-Inertia' }).click()
+  await prefetchPromise
+
+  await page.getByRole('button', { name: 'Visit Non-Inertia' }).click()
+
+  await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeVisible()
+  await expect(page.frameLocator('iframe').locator('body')).toContainText(
+    'This is a page that does not have the Inertia app loaded.',
+  )
+})
+
 const submitButtonTexts = ['Submit to Same URL', 'Submit to Other URL']
 
 submitButtonTexts.forEach((buttonText) => {

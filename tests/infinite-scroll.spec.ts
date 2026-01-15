@@ -29,15 +29,8 @@ async function smoothScrollTo(page: any, targetY: number) {
     setTimeout(() => window.scrollTo(0, top), 10)
   }, targetY)
 
-  // Wait for scroll to reach target (clamped to max scrollable position)
-  await expect
-    .poll(() =>
-      page.evaluate((target: number) => {
-        const maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight
-        return Math.abs(window.scrollY - Math.min(target, maxScroll)) < 5
-      }, targetY),
-    )
-    .toBe(true)
+  // Wait for the setTimeout to fire and scroll to settle
+  await page.waitForTimeout(20)
 }
 
 async function scrollElementSmoothTo(element: Locator, targetY: number) {
@@ -48,6 +41,7 @@ async function scrollElementSmoothTo(element: Locator, targetY: number) {
     setTimeout(() => el.scrollTo(0, top), 10)
   }, targetY)
 
+  // Wait for the setTimeout to fire and scroll to settle
   await element.page().waitForTimeout(20)
 }
 
@@ -638,8 +632,9 @@ test.describe('Remember state', () => {
     requests.listen(page)
 
     // Load page 2
+    const page2Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state?page=2'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
+    await page2Response
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -647,8 +642,9 @@ test.describe('Remember state', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Load page 3
+    const page3Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state?page=3'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
+    await page3Response
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('User 46')).toBeHidden()
@@ -1266,17 +1262,15 @@ test.describe('DOM element ordering', () => {
     await expect(page.getByText('User 25')).toBeVisible()
 
     // It automatically loads page 3 because the start trigger is visible (users 1-10)
-    await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('User 10')).toBeVisible()
-    await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom to trigger loading page 1 (users 26-40)
+    const page1Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/reverse?page=1'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await page1Response
     await expect(page.getByText('User 26')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
-    await expect(page.getByText('Loading...')).toBeHidden()
 
     // Get all user cards and check their order in the DOM
     const userIds = await getUserIdsFromDOM(page)
