@@ -15,8 +15,8 @@
   } from '@inertiajs/core'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
-  import { onMount, setContext } from 'svelte'
-  import { FormContextKey } from './formContext'
+  import { onMount } from 'svelte'
+  import { setFormContext } from './formContext'
   import useForm from '../useForm.svelte'
 
   const noop = () => undefined
@@ -287,33 +287,41 @@
   const slotErrors = $derived(form.errors as Errors)
 
   // Form context for child components
-  let formContextStore = $derived<FormComponentRef | undefined>({
-    errors: form.errors,
-    hasErrors: form.hasErrors,
-    processing: form.processing,
-    progress: form.progress,
-    wasSuccessful: form.wasSuccessful,
-    recentlySuccessful: form.recentlySuccessful,
-    isDirty,
-    clearErrors,
-    resetAndClearErrors,
-    setError,
-    reset,
-    submit,
-    defaults,
-    getData,
-    getFormData,
-    // Precognition
-    validator,
-    validate,
-    touch,
-    validating: form.validating,
-    valid,
-    invalid,
-    touched,
+  function createFormContext(): FormComponentRef {
+    return {
+      errors: form.errors,
+      hasErrors: form.hasErrors,
+      processing: form.processing,
+      progress: form.progress,
+      wasSuccessful: form.wasSuccessful,
+      recentlySuccessful: form.recentlySuccessful,
+      isDirty,
+      clearErrors,
+      resetAndClearErrors,
+      setError,
+      reset,
+      submit,
+      defaults,
+      getData,
+      getFormData,
+      // Precognition
+      validator,
+      validate,
+      touch,
+      validating: form.validating,
+      valid,
+      invalid,
+      touched,
+    }
+  }
+
+  let formContextStore = $state<FormComponentRef>(createFormContext())
+
+  $effect(() => {
+    Object.assign(formContextStore, createFormContext())
   })
 
-  setContext(FormContextKey, formContextStore)
+  setFormContext(formContextStore)
 </script>
 
 {/* @ts-expect-error method type does not match here*/ null}

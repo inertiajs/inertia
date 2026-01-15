@@ -475,14 +475,13 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       if (rememberExcludeKeys.length > 0) {
         const filtered = { ...data } as Record<string, unknown>
         rememberExcludeKeys.forEach((k) => delete filtered[k as string])
-        return { data: filtered as TForm, errors: this.errors }
+        return { data: filtered as TForm, errors: $state.snapshot(this.errors) }
       }
-      return { data, errors: this.errors }
+      return { data, errors: $state.snapshot(this.errors) }
     },
     dontRemember: dontRememberMethod,
     withPrecognition,
   } as any)
-
 
   // Assign setFormState after store is created
   setFormState = <K extends string>(key: K, value: any) => {
