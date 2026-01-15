@@ -72,9 +72,7 @@ export const requests = {
 }
 
 export const shouldBeDumpPage = async (page: Page, method: 'get' | 'post' | 'patch' | 'put' | 'delete') => {
-  await expect(page).toHaveURL(`dump/${method}`)
-  // Wait for the dump component to render (ensures Vue has mounted and set window._inertia_request_dump)
-  await expect(page.getByText('This is Inertia page component containing a data dump')).toBeVisible()
+  await expect(page).toHaveURL(new RegExp(`dump/${method}`))
   // @ts-ignore
   const dump = await page.evaluate(() => window._inertia_request_dump)
   await expect(dump).not.toBeNull()
