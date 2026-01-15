@@ -495,3 +495,23 @@ test('prefetch cache expires based on cacheFor even when once prop has no TTL', 
   await expect(page.getByText('Bar: bar-e')).toBeVisible()
   await expect(page.getByText(fooText)).toBeVisible()
 })
+
+test('it provides once props as second argument in client-side visit props callback', async ({ page }) => {
+  await page.goto('/once-props/client-side-visit')
+
+  await expect(page.getByText('Foo: foo-initial')).toBeVisible()
+  await expect(page.getByText('Bar: bar-initial')).toBeVisible()
+
+  // Without spreading onceProps, once prop becomes undefined
+  await page.getByRole('button', { name: 'Push without preserving' }).click()
+  await expect(page.locator('#foo')).toContainText('Foo:')
+  await expect(page.locator('#foo')).not.toContainText('foo-initial')
+  await expect(page.getByText('Bar: bar-updated')).toBeVisible()
+
+  await page.goto('/once-props/client-side-visit')
+
+  // Spreading onceProps preserves once props
+  await page.getByRole('button', { name: 'Push with once props' }).click()
+  await expect(page.getByText('Foo: foo-initial')).toBeVisible()
+  await expect(page.getByText('Bar: bar-updated')).toBeVisible()
+})

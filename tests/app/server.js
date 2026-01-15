@@ -618,7 +618,7 @@ const renderDump = (req, res) =>
     props: {
       headers: req.headers,
       method: req.method?.toLowerCase(),
-      form: req.body,
+      form: req.body || {},
       query: req.query,
       files: req.files,
       url: req.originalUrl,
@@ -2295,6 +2295,19 @@ app.get('/once-props/custom-key/:page', (req, res) => {
       bar: `bar-${page}`,
     },
     onceProps: { 'user-permissions': { prop: propName, expiresAt: null } },
+  })
+})
+
+app.get('/once-props/client-side-visit', (req, res) => {
+  const { shouldResolveProp } = getOncePropsData(req)
+
+  inertia.render(req, res, {
+    component: 'OnceProps/ClientSideVisit',
+    props: {
+      foo: shouldResolveProp ? 'foo-initial' : undefined,
+      bar: 'bar-initial',
+    },
+    onceProps: { foo: { prop: 'foo', expiresAt: null } },
   })
 })
 

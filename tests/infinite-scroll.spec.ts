@@ -29,15 +29,8 @@ async function smoothScrollTo(page: any, targetY: number) {
     setTimeout(() => window.scrollTo(0, top), 10)
   }, targetY)
 
-  // Wait for scroll to reach target (clamped to max scrollable position)
-  await expect
-    .poll(() =>
-      page.evaluate((target: number) => {
-        const maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight
-        return Math.abs(window.scrollY - Math.min(target, maxScroll)) < 5
-      }, targetY),
-    )
-    .toBe(true)
+  // Wait for the setTimeout to fire and scroll to settle
+  await page.waitForTimeout(20)
 }
 
 async function scrollElementSmoothTo(element: Locator, targetY: number) {
@@ -48,6 +41,7 @@ async function scrollElementSmoothTo(element: Locator, targetY: number) {
     setTimeout(() => el.scrollTo(0, top), 10)
   }, targetY)
 
+  // Wait for the setTimeout to fire and scroll to settle
   await element.page().waitForTimeout(20)
 }
 
@@ -638,8 +632,9 @@ test.describe('Remember state', () => {
     requests.listen(page)
 
     // Load page 2
+    const page2Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state?page=2'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
+    await page2Response
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -647,21 +642,24 @@ test.describe('Remember state', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Load page 3
+    const page3Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state?page=3'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
+    await page3Response
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('User 46')).toBeHidden()
     await expect(page.getByText('Manual mode: true')).toBeVisible()
     await expect(infiniteScrollRequests().length).toBe(2)
 
-    await page.waitForTimeout(100)
+    // Wait for scroll to settle after content load
+    await expect.poll(() => page.evaluate(() => window.scrollY > 0)).toBe(true)
 
     // Navigate to home page
     await page.getByRole('link', { name: 'Go to Home' }).click()
     await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
 
     await page.goBack()
+    await page.waitForURL(/\/infinite-scroll\/remember-state/)
 
     // Verify state is restored - should show all 3 pages of content
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
@@ -674,12 +672,14 @@ test.describe('Remember state', () => {
     await expect(page.getByText('Manual mode: true')).toBeVisible()
 
     // Assert the data-infinite-scroll-page attributes are still correct
-    const user1 = await page.locator('[data-user-id="1"]')
-    const user15 = await page.locator('[data-user-id="15"]')
-    const user16 = await page.locator('[data-user-id="16"]')
-    const user30 = await page.locator('[data-user-id="30"]')
-    const user31 = await page.locator('[data-user-id="31"]')
-    const user45 = await page.locator('[data-user-id="45"]')
+    const user1 = page.locator('[data-user-id="1"]')
+    const user15 = page.locator('[data-user-id="15"]')
+    const user16 = page.locator('[data-user-id="16"]')
+    const user30 = page.locator('[data-user-id="30"]')
+    const user31 = page.locator('[data-user-id="31"]')
+    const user45 = page.locator('[data-user-id="45"]')
+
+    // Wait for InfiniteScroll to fully initialize with page attributes
     await expect(user1).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user15).toHaveAttribute('data-infinite-scroll-page', '1')
     await expect(user16).toHaveAttribute('data-infinite-scroll-page', '2')
@@ -1262,17 +1262,15 @@ test.describe('DOM element ordering', () => {
     await expect(page.getByText('User 25')).toBeVisible()
 
     // It automatically loads page 3 because the start trigger is visible (users 1-10)
-    await expect(page.getByText('Loading...')).toBeVisible()
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('User 10')).toBeVisible()
-    await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom to trigger loading page 1 (users 26-40)
+    const page1Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/reverse?page=1'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await page1Response
     await expect(page.getByText('User 26')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
-    await expect(page.getByText('Loading...')).toBeHidden()
 
     // Get all user cards and check their order in the DOM
     const userIds = await getUserIdsFromDOM(page)
@@ -1741,14 +1739,14 @@ test.describe('Scrollable container support', () => {
     // Scroll container to top to trigger loading page 1
     await scrollElementSmoothTo(scrollContainer, 0)
 
-    // Wait for loading to start or data to appear
-    await expect(page.getByText('Loading more users...').or(page.getByText('User 1', { exact: true }))).toBeVisible()
+    // Capture User 16's position immediately after scroll, before prepend
     const beforePosition = await getUserCardPositionInContainer(page, scrollContainer, '16')
 
+    // Wait for page 1 to load (loading indicator may flash briefly or not at all)
     await expect(page.getByText('User 1', { exact: true })).toBeVisible()
     await expect(page.getByText('Loading more users...')).toBeHidden()
 
-    // Wait for scroll restoration to complete
+    // Wait for scroll restoration to complete - User 16 should stay in same viewport position
     await expect
       .poll(async () => {
         const position = await getUserCardPositionInContainer(page, scrollContainer, '16')

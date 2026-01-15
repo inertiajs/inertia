@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.9...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.10...master)
 
 - Nothing yet
+
+## [v2.3.10](https://github.com/inertiajs/inertia/compare/v2.3.9...v2.3.10) - 2026-01-15
+
+### What's Changed
+
+* Add `async` and `sync` options to `cancelAll` method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2814
+* Fix smooth scrolling in Firefox and add Firefox to CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2815
+* Improve flaky `<InfiniteScroll>` test in WebKit CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2818
+* Pass `onceProps` as second argument in client-side visit props callback by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2816
+* Prevent converting a string response to an object by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2821
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.9...v2.3.10
 
 ## [v2.3.9](https://github.com/inertiajs/inertia/compare/v2.3.8...v2.3.9) - 2026-01-14
 

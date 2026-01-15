@@ -12,14 +12,14 @@
     "@inertiajs/core": "workspace:*",
     "@inertiajs/svelte": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@tailwindcss/vite": "^4.1.17",
+    "@tailwindcss/vite": "^4.1.18",
     "@tsconfig/svelte": "^5.0.6",
     "axios": "^1.13.2",
     "laravel-vite-plugin": "^1.3.0",
     "lodash": "^4.17.21",
     "svelte": "^4.2.20",
-    "svelte-check": "^4.3.4",
-    "tailwindcss": "^4.1.17",
+    "svelte-check": "^4.3.5",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^5.4.21"
   }
