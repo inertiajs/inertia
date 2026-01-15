@@ -50,7 +50,7 @@
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "axios": "^1.13.2",
     "es-check": "^9.5.3",
-    "publint": "^0.2.12",
+    "publint": "^0.3.16",
     "svelte": "^4.2.20",
     "svelte-check": "^4.3.5",
     "tslib": "^2.8.1",

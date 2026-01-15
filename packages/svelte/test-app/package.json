@@ -13,7 +13,7 @@
     "@tsconfig/svelte": "^5.0.6",
     "eslint": "^9.39.2",
     "eslint-plugin-svelte": "^3.14.0",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "nodemon": "^3.1.11",
     "svelte": "^4.2.20",
     "svelte-check": "^4.3.5",
