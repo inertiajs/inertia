@@ -638,7 +638,7 @@ test.describe('Remember state', () => {
     requests.listen(page)
 
     // Load page 2
-    const page2Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state'))
+    const page2Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state?page=2'))
     await scrollToBottom(page)
     await page2Response
     await expect(page.getByText('User 16')).toBeVisible()
@@ -648,7 +648,7 @@ test.describe('Remember state', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Load page 3
-    const page3Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state'))
+    const page3Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state?page=3'))
     await scrollToBottom(page)
     await page3Response
     await expect(page.getByText('User 31')).toBeVisible()
