@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { isWebKit, requests, shouldBeDumpPage } from './support'
+import { requests, shouldBeDumpPage } from './support'
 
 const integrations = ['form-component', 'form-helper']
 
@@ -509,29 +509,34 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Custom header received: custom-value')).toBeVisible()
     })
 
-    test(prefix + 'automatically cancels previous validation when new validation starts', async ({ page }) => {
-      await page.goto('/' + integration + '/precognition/cancel')
+    test(
+      prefix + 'automatically cancels previous validation when new validation starts',
+      async ({ page, browserName }) => {
+        await page.goto('/' + integration + '/precognition/cancel')
 
-      requests.listenForFailed(page)
-      requests.listenForResponses(page)
+        requests.listenForFailed(page)
+        requests.listenForResponses(page)
 
-      await page.fill('#auto-cancel-name-input', 'ab')
-      await page.locator('#auto-cancel-name-input').blur()
-      await expect(page.getByText('Validating...')).toBeVisible()
+        await page.fill('#auto-cancel-name-input', 'ab')
+        await page.locator('#auto-cancel-name-input').blur()
+        await expect(page.getByText('Validating...')).toBeVisible()
 
-      // Immediately change value and trigger new validation - should cancel the first one
-      await page.fill('#auto-cancel-name-input', 'xy')
-      await page.locator('#auto-cancel-name-input').blur()
-      await expect(page.getByText('Validating...')).not.toBeVisible()
-      await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
+        // Immediately change value and trigger new validation - should cancel the first one
+        await page.fill('#auto-cancel-name-input', 'xy')
+        await page.locator('#auto-cancel-name-input').blur()
+        await expect(page.getByText('Validating...')).not.toBeVisible()
+        await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
 
-      // One cancelled, one 422 response
-      expect(requests.failed).toHaveLength(1)
-      expect(requests.responses).toHaveLength(1)
+        // One cancelled, one 422 response
+        expect(requests.failed).toHaveLength(1)
+        expect(requests.responses).toHaveLength(1)
 
-      const cancelledRequestError = await requests.failed[0].failure()?.errorText
-      expect(cancelledRequestError).toBe(isWebKit(page) ? 'cancelled' : 'net::ERR_ABORTED')
-    })
+        const cancelledRequestError = await requests.failed[0].failure()?.errorText
+        const expectedError =
+          browserName === 'webkit' ? 'cancelled' : browserName === 'firefox' ? 'NS_BINDING_ABORTED' : 'net::ERR_ABORTED'
+        expect(cancelledRequestError).toBe(expectedError)
+      },
+    )
 
     test(prefix + 'validates dynamic array inputs after first validation', async ({ page }) => {
       await page.goto('/' + integration + '/precognition/dynamic-array-inputs')

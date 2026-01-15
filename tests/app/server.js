@@ -64,10 +64,15 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
-// Intercepts all .js assets (including files loaded via code splitting)
-app.get(/.*\.js$/, (req, res) =>
-  res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
-)
+// Intercepts all CSS and JS assets (including files loaded via code splitting)
+app.get(/.*\.(?:js|css)$/, (req, res) => {
+  const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(404).send('Not found')
+    }
+  })
+})
 
 /**
  * Used for testing the Inertia plugin is registered.
@@ -106,6 +111,13 @@ app.get('/scroll-after-render/:page', (req, res) =>
   inertia.render(req, res, {
     component: 'ScrollAfterRender',
     props: { page: parseInt(req.params.page) },
+  }),
+)
+
+app.get('/scroll-smooth/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollSmooth',
+    props: { page: req.params.page },
   }),
 )
 
@@ -1320,7 +1332,7 @@ app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
     })
   }
 
-  // Simulate slow deferred prop loading (600ms)
+  // Simulate slow deferred prop loading
   setTimeout(
     () =>
       inertia.render(req, res, {

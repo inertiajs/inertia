@@ -1,6 +1,7 @@
 import {
   FormComponentProps,
   FormComponentRef,
+  FormComponentResetSymbol,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
@@ -127,10 +128,16 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       )
     }
 
-    const updateDirtyState = (event: Event) =>
+    const updateDirtyState = (event: Event) => {
+      if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+        // When the form is reset programmatically, prevent native reset behavior
+        event.preventDefault()
+      }
+
       deferStateUpdate(() =>
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
       )
+    }
 
     const clearErrors = (...names: string[]) => {
       form.clearErrors(...names)

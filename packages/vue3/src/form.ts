@@ -2,6 +2,7 @@ import {
   Errors,
   FormComponentProps,
   FormComponentRef,
+  FormComponentResetSymbol,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
@@ -178,9 +179,11 @@ const Form = defineComponent({
     const defaultData = ref(new FormData())
 
     const onFormUpdate = (event: Event) => {
-      // If the form is reset, we set isDirty to false as we already know it's back
-      // to defaults. Also, the fields are updated after the reset event, so the
-      // comparison will be incorrect unless we use nextTick/setTimeout.
+      if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+        // When the form is reset programmatically, prevent native reset behavior
+        event.preventDefault()
+      }
+
       isDirty.value = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.value))
     }
 

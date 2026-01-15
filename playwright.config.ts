@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test'
 declare const process: {
   argv: string[]
   env: {
-    BROWSER?: 'chromium' | 'webkit'
+    BROWSER?: 'chromium' | 'webkit' | 'firefox'
     CI?: boolean
     PACKAGE?: 'vue3' | 'react' | 'svelte'
     SSR?: 'true'
@@ -26,7 +26,7 @@ if (!adapters.includes(adapter)) {
   throw new Error(`Invalid adapter package "${adapter}". Expected one of: ${adapters.join(', ')}.`)
 }
 
-// Always define both projects, but can be overridden via BROWSER env var
+// Always define all projects, but can be overridden via --webkit or --firefox flags
 const projects = [
   {
     name: 'chromium',
@@ -35,6 +35,10 @@ const projects = [
   {
     name: 'webkit',
     use: { ...devices['Desktop Safari'] },
+  },
+  {
+    name: 'firefox',
+    use: { ...devices['Desktop Firefox'] },
   },
 ]
 

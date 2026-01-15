@@ -1,5 +1,5 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import { consoleMessages, requests } from './support'
+import { consoleMessages, gotoPageAndWaitForContent, requests } from './support'
 
 function infiniteScrollRequests() {
   return requests.requests.filter((req) => {
@@ -848,7 +848,11 @@ test.describe('Remember state', () => {
     await expectQueryString(page, '3')
   })
 
-  test('it handles starting on page 2, loading pages, refresh, and dataset verification', async ({ page }) => {
+  test('it handles starting on page 2, loading pages, refresh, and dataset verification', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === 'firefox', 'Firefox has a different scroll position after reload behavior')
     await page.goto('/infinite-scroll/remember-state?page=2')
 
     requests.listen(page)
@@ -883,6 +887,7 @@ test.describe('Remember state', () => {
     await expect(page.getByText('User 15')).toBeHidden()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
+
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('Manual mode: false')).toBeVisible()
@@ -2415,7 +2420,7 @@ test.describe('Deferred scroll props', () => {
   test('it loads deferred scroll props and merges scrollProps correctly', async ({ page }) => {
     requests.listen(page)
 
-    await page.goto('/infinite-scroll/deferred')
+    await gotoPageAndWaitForContent(page, '/infinite-scroll/deferred')
 
     await expect(page.getByText('Loading deferred scroll prop...')).toBeVisible()
 

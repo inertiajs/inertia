@@ -34,6 +34,7 @@ const PreserveScroll = ({ foo = 'default' }: { foo?: string }) => {
         href="/links/preserve-scroll-page-two"
         preserveScroll={preserveCallback}
         data={{ foo: 'baz' }}
+        data-testid="preserve-callback"
         className="preserve-callback"
       >
         Preserve Scroll (Callback)
@@ -42,6 +43,7 @@ const PreserveScroll = ({ foo = 'default' }: { foo?: string }) => {
         href="/links/preserve-scroll-page-two"
         preserveScroll={preserveCallbackFalse}
         data={{ foo: 'foo' }}
+        data-testid="reset-callback"
         className="reset-callback"
       >
         Reset Scroll (Callback)

@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { isWebKit, requests } from './support'
+import { requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -171,9 +171,12 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
-test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({ page }) => {
+test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({
+  page,
+  browserName,
+}) => {
   // Skip on WebKit
-  if (isWebKit(page)) {
+  if (browserName === 'webkit') {
     return test.skip('Bug in Playwright + WebKit causing the context menu to stick around')
   }
 

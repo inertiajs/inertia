@@ -1,3 +1,5 @@
+export const FormComponentResetSymbol = Symbol('FormComponentReset')
+
 type FormElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 
 function isFormElement(element: Element): element is FormElement {
@@ -185,8 +187,11 @@ export function resetFormFields(formElement: HTMLFormElement, defaults: FormData
     }
   })
 
-  // Dispatch reset event if any field changed (matching native form.reset() behavior)
+  // Dispatch reset event to notify listeners that the form was reset programmatically
   if (hasChanged && resetEntireForm) {
-    formElement.dispatchEvent(new Event('reset', { bubbles: true }))
+    // Use Symbol in detail so adapters can preventDefault() to avoid Firefox's native reset behavior
+    formElement.dispatchEvent(
+      new CustomEvent('reset', { bubbles: true, cancelable: true, detail: { [FormComponentResetSymbol]: true } }),
+    )
   }
 }

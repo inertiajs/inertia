@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     formDataToObject,
+    FormComponentResetSymbol,
     resetFormFields,
     mergeDataIntoQueryString,
     type Errors,
@@ -95,6 +96,11 @@
   }
 
   function updateDirtyState(event: Event) {
+    if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+      // When the form is reset programmatically, prevent native reset behavior
+      event.preventDefault()
+    }
+
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
@@ -226,7 +232,7 @@
 
     form.defaults(getData())
 
-    const formEvents = ['input', 'change', 'reset']
+    const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 

@@ -49,18 +49,22 @@ test('it will wait to fire the reload until element is visible', async ({ page }
 
   // Now scroll up and down to re-trigger it
   await page.evaluate(() => (window as any).scrollTo(0, 13_000))
-  await page.waitForTimeout(100)
+  await page.waitForFunction(() => document.documentElement.scrollTop < 14000, { timeout: 2000 })
+  await page.waitForTimeout(200)
 
+  let responsePromise = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
   await expect(page.getByText('Third one is visible!')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await responsePromise
 
   await page.evaluate(() => (window as any).scrollTo(0, 13_000))
-  await page.waitForTimeout(100)
+  await page.waitForFunction(() => document.documentElement.scrollTop < 14000, { timeout: 2000 })
+  await page.waitForTimeout(200)
 
+  responsePromise = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
   await expect(page.getByText('Third one is visible!')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await responsePromise
 
   await page.evaluate(() => (window as any).scrollTo(0, 20_000))
   await expect(page.getByText('Loading fourth one...')).toBeVisible()
@@ -74,8 +78,11 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await expect(page.getByText('Count is now 1')).toBeVisible()
 
   // Now scroll up and down to re-trigger it
-  await page.evaluate(() => (window as any).scrollTo(0, 20_000))
-  await page.waitForTimeout(100)
+  // Need to scroll far enough that the element is truly out of viewport
+  await page.evaluate(() => (window as any).scrollTo(0, 10_000))
+  await page.waitForFunction(() => document.documentElement.scrollTop < 15000, { timeout: 2000 })
+  // Give IntersectionObserver time to process the visibility change
+  await page.waitForTimeout(200)
 
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
   await expect(page.getByText('Count is now 1')).toBeVisible()
@@ -199,6 +206,14 @@ test('it re-triggers when always prop is set after back button navigation', asyn
   await page.goBack()
   await page.waitForURL('/when-visible-back-button')
   await expect(page.getByText('Always: This is lazy loaded data!')).toBeVisible()
+
+  // Ensure we're scrolled to the top before scrolling down to re-trigger
+  // Firefox may restore scroll position after back navigation, so we need to wait and force scroll
+  await page.waitForTimeout(100)
+  await page.evaluate(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  })
+  await page.waitForTimeout(200)
 
   // Scroll to trigger the always component again, should re-fetch
   await page.evaluate(() => (window as any).scrollTo(0, 4000))

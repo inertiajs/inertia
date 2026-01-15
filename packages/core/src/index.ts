@@ -11,7 +11,7 @@ export { default as createHeadManager } from './head'
 export { default as useInfiniteScroll } from './infiniteScroll'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { hide as hideProgress, progress, reveal as revealProgress, default as setupProgress } from './progress'
-export { resetFormFields } from './resetFormFields'
+export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
 export * from './types'
 export {
   hrefToUrl,

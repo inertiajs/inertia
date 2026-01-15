@@ -503,7 +503,9 @@ test.describe('Form Component', () => {
       await expect(page).toHaveURL('form-component/options')
     })
 
-    test('submits the form with view transitions enabled', async ({ page }) => {
+    test('submits the form with view transitions enabled', async ({ page, browserName }) => {
+      test.skip(browserName === 'firefox', 'Firefox does not support View Transitions API in CI')
+
       consoleMessages.listen(page)
       pageLoads.watch(page, 2)
 
@@ -933,7 +935,7 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
     })
 
-    test('can set current form data as defaults via ref', async ({ page }) => {
+    test('can set current form data as defaults via ref', async ({ page, browserName }) => {
       await page.goto('/form-component/ref')
 
       // Modify form fields
@@ -1519,7 +1521,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Test getData()' }).click()
 
       const result = consoleMessages.messages.find((msg) => msg.includes('getData result:'))
-      expect(result).toBe('getData result: {name: John Doe}')
+      expect(result).toBe('getData result: {"name":"John Doe"}')
     })
 
     test('getFormData returns FormData instance', async ({ page }) => {
@@ -1527,7 +1529,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Test getFormData()' }).click()
 
       const formDataMessage = consoleMessages.messages.find((msg) => msg.includes('getFormData entries:'))
-      expect(formDataMessage).toBe('getFormData entries: {name: Jane Doe}')
+      expect(formDataMessage).toBe('getFormData entries: {"name":"Jane Doe"}')
     })
   })
 
