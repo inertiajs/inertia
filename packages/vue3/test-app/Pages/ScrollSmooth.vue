@@ -17,20 +17,23 @@ document.documentElement.style.scrollBehavior = 'smooth'
     </div>
 
     <div class="content">
-      <div v-for="i in (page === 'long' ? 10 : 5)" :key="i" class="content-block">
+      <div v-for="i in page === 'long' ? 10 : 5" :key="i" class="content-block">
         <h2>Section {{ i }}</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore
+          magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+          consequat.
+        </p>
+        <p>
+          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+          Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
       </div>
     </div>
 
     <div class="navigation">
-      <Link v-if="page === 'long'" href="/scroll-smooth/short" class="nav-link">
-        Go to Short Page
-      </Link>
-      <Link v-else href="/scroll-smooth/long" class="nav-link">
-        Go to Long Page
-      </Link>
+      <Link v-if="page === 'long'" href="/scroll-smooth/short" class="nav-link"> Go to Short Page </Link>
+      <Link v-else href="/scroll-smooth/long" class="nav-link"> Go to Long Page </Link>
     </div>
   </div>
 </template>

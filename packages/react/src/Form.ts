@@ -137,7 +137,9 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       // If the form is reset, we set isDirty to false as we already know it's back
       // to defaults. Also, the fields are updated after the reset event, so the
       // comparison will be incorrect unless we use nextTick/setTimeout.
-      deferStateUpdate(() => setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))))
+      deferStateUpdate(() =>
+        setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
+      )
     }
 
     const clearErrors = (...names: string[]) => {
