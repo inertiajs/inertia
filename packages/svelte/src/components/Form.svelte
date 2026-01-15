@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
     formDataToObject,
-    InertiaFormResetEventSymbol,
+    FormComponentResetSymbol,
     resetFormFields,
     mergeDataIntoQueryString,
     type Errors,
@@ -96,14 +96,11 @@
   }
 
   function updateDirtyState(event: Event) {
-    // Prevent Firefox's native reset behavior on internal reset events
-    if (event.type === 'reset' && (event as CustomEvent).detail?.[InertiaFormResetEventSymbol]) {
+    if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+      // When the form is reset programmatically, prevent native reset behavior
       event.preventDefault()
     }
 
-    // If the form is reset, we set isDirty to false as we already know it's back
-    // to defaults. Also, the fields are updated after the reset event, so the
-    // comparison will be incorrect unless we use nextTick/setTimeout.
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 

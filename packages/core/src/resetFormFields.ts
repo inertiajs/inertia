@@ -1,4 +1,4 @@
-export const InertiaFormResetEventSymbol = Symbol('InertiaFormReset')
+export const FormComponentResetSymbol = Symbol('FormComponentReset')
 
 type FormElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 
@@ -191,7 +191,7 @@ export function resetFormFields(formElement: HTMLFormElement, defaults: FormData
   if (hasChanged && resetEntireForm) {
     // Use Symbol in detail so adapters can preventDefault() to avoid Firefox's native reset behavior
     formElement.dispatchEvent(
-      new CustomEvent('reset', { bubbles: true, cancelable: true, detail: { [InertiaFormResetEventSymbol]: true } }),
+      new CustomEvent('reset', { bubbles: true, cancelable: true, detail: { [FormComponentResetSymbol]: true } }),
     )
   }
 }
