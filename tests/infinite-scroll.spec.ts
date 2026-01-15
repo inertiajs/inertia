@@ -852,8 +852,7 @@ test.describe('Remember state', () => {
     page,
     browserName,
   }) => {
-    // Firefox doesn't auto-trigger IntersectionObserver after scroll position restoration
-    test.skip(browserName === 'firefox', 'Firefox handles IntersectionObserver differently after scroll restoration')
+    test.skip(browserName === 'firefox', 'Firefox has a different scroll position after reload behavior')
     await page.goto('/infinite-scroll/remember-state?page=2')
 
     requests.listen(page)
