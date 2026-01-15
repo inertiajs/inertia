@@ -1,7 +1,6 @@
 import { expect, Page, test } from '@playwright/test'
 import {
   consoleMessages,
-  ensureScrollPosition,
   pageLoads,
   requests,
   scrollElementTo,
@@ -462,12 +461,11 @@ test.describe('preserve scroll', () => {
   }) => {
     consoleMessages.listen(page)
 
-    await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click()
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll (Callback)' }).click({ position: { x: 50, y: 5 } })
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two?foo=foo')
 
     await expect(page.getByText('Foo is now foo')).toBeVisible()
 
-    await ensureScrollPosition(page, '#slot', 10, 15)
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
@@ -629,7 +627,6 @@ test.describe('enabled', () => {
 
     await expect(page).toHaveURL('/links/preserve-scroll-page-two?foo=baz')
     await expect(page.getByText('Foo is now baz')).toBeVisible()
-    await ensureScrollPosition(page, '#slot', 10, 15)
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
