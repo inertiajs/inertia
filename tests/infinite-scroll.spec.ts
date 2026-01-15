@@ -638,8 +638,9 @@ test.describe('Remember state', () => {
     requests.listen(page)
 
     // Load page 2
+    const page2Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...').or(page.getByText('User 16'))).toBeVisible()
+    await page2Response
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -647,8 +648,9 @@ test.describe('Remember state', () => {
     await expect(infiniteScrollRequests().length).toBe(1)
 
     // Load page 3
+    const page3Response = page.waitForResponse((res) => res.url().includes('/infinite-scroll/remember-state'))
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...').or(page.getByText('User 31'))).toBeVisible()
+    await page3Response
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('User 46')).toBeHidden()
