@@ -1,10 +1,10 @@
 import {
   FormComponentProps,
   FormComponentRef,
+  FormComponentResetSymbol,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
-  FormComponentResetSymbol,
   isUrlMethodPair,
   mergeDataIntoQueryString,
   Method,
