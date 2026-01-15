@@ -933,6 +933,37 @@ app.get('/when-visible-params-update', (req, res) => {
   }
 })
 
+let whenVisiblePreserveErrorsState = {}
+
+app.get('/when-visible/preserve-errors', (req, res) => {
+  const errors = { ...whenVisiblePreserveErrorsState }
+  whenVisiblePreserveErrorsState = {}
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisiblePreserveErrors',
+        props: {
+          foo: 'foo value',
+          errors: {},
+        },
+      })
+    }, 100)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisiblePreserveErrors',
+      props: {
+        errors,
+      },
+    })
+  }
+})
+
+app.post('/when-visible/preserve-errors', (req, res) => {
+  whenVisiblePreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/when-visible/preserve-errors')
+})
+
 app.get('/progress/:pageNumber', (req, res) => {
   setTimeout(
     () =>
@@ -2012,6 +2043,37 @@ app.get('/infinite-scroll/deferred', (req, res) => {
       }),
     250,
   )
+})
+
+let infiniteScrollPreserveErrorsState = {}
+
+app.get('/infinite-scroll/preserve-errors', (req, res) => {
+  const errors = { ...infiniteScrollPreserveErrorsState }
+  infiniteScrollPreserveErrorsState = {}
+
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/PreserveErrors',
+        props: {
+          users: paginated,
+          errors: partialReload ? {} : errors,
+        },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+app.post('/infinite-scroll/preserve-errors', (req, res) => {
+  infiniteScrollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/infinite-scroll/preserve-errors')
 })
 
 app.post('/view-transition/form-errors', (req, res) =>

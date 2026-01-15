@@ -328,13 +328,16 @@ export class Response {
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
-    if (this.requestParams.isDeferredPropsRequest()) {
-      const currentErrors = currentPage.get().props.errors
+    const currentErrors = currentPage.get().props.errors
+    const responseErrors = pageResponse.props.errors
 
-      if (currentErrors && Object.keys(currentErrors).length > 0) {
-        // Preserve existing errors during deferred props requests
-        pageResponse.props.errors = currentErrors
-      }
+    if (
+      this.requestParams.all().preserveErrors &&
+      currentErrors &&
+      Object.keys(currentErrors).length > 0 &&
+      (!responseErrors || Object.keys(responseErrors).length === 0)
+    ) {
+      pageResponse.props.errors = currentErrors
     }
 
     // Preserve the existing scrollProps

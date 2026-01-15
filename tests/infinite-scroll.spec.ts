@@ -2448,3 +2448,40 @@ test.describe('Deferred scroll props', () => {
     expect(pageRequests.length).toBe(2)
   })
 })
+
+test('it preserves validation errors when InfiniteScroll loads more data', async ({ page }) => {
+  await page.goto('/infinite-scroll/preserve-errors')
+
+  await expect(page.locator('#page-error')).not.toBeVisible()
+  await expect(page.locator('#form-error')).not.toBeVisible()
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+  // Submit form to trigger validation error
+  const errorResponsePromise = page.waitForResponse(
+    (response) => !response.request().headers()['x-inertia-partial-data'] && response.status() === 200,
+  )
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await errorResponsePromise
+
+  // Errors should be visible
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+
+  // Load next page
+  const loadNextResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'users' && response.status() === 200,
+  )
+  await page.locator('#load-next').click()
+  await loadNextResponsePromise
+
+  // More data should be loaded
+  await expect(page.getByText('User 16')).toBeVisible()
+
+  // Errors should still be visible after loading more data
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+})

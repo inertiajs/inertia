@@ -5,6 +5,7 @@
     type InfiniteScrollComponentBaseProps,
     type UseInfiniteScrollProps,
     type InfiniteScrollSlotProps,
+    type ReloadOptions,
     useInfiniteScroll,
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
@@ -20,6 +21,7 @@
   export let startElement: string | (() => HTMLElement | null) | null = null
   export let endElement: string | (() => HTMLElement | null) | null = null
   export let itemsElement: string | (() => HTMLElement | null) | null = null
+  export let params: ReloadOptions = {}
   export let onlyNext = false
   export let onlyPrevious = false
 
@@ -139,6 +141,7 @@
       shouldFetchNext: () => !onlyPrevious,
       shouldFetchPrevious: () => !onlyNext,
       shouldPreserveUrl: () => preserveUrl ?? false,
+      getReloadOptions: () => params,
 
       // Elements
       getTriggerMargin: () => buffer ?? 0,
