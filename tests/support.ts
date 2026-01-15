@@ -83,3 +83,13 @@ export const scrollElementTo = async (page: Page, promise: Promise<void>) => {
   // Wait for scroll listener debounce
   await page.waitForTimeout(100)
 }
+
+export const waitForScrollPosition = async (page: Page, x: number, y: number, selector?: string) => {
+  await page.waitForFunction(
+    ({ x, y, selector }) => {
+      const el = selector ? document.querySelector(selector) : document.documentElement
+      return el && el.scrollLeft === x && el.scrollTop === y
+    },
+    { x, y, selector },
+  )
+}

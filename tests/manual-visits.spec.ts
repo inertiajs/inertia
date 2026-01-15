@@ -6,6 +6,7 @@ import {
   requests,
   scrollElementTo,
   shouldBeDumpPage,
+  waitForScrollPosition,
 } from './support'
 
 test('visits a different page', async ({ page }) => {
@@ -686,6 +687,8 @@ test.describe('Preserve scroll', () => {
 
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two?foo=baz')
       await expect(page.getByText('Foo is now baz')).toBeVisible()
+      await waitForScrollPosition(page, 5, 7)
+
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
