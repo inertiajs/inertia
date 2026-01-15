@@ -1298,7 +1298,7 @@ app.get('/deferred-props/with-query-params', (req, res) => {
           users: requestedProps.includes('users') ? { text: `users data for ${filter}` } : undefined,
         },
       }),
-    2000,
+    500,
   )
 })
 
@@ -1320,7 +1320,7 @@ app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
     })
   }
 
-  // Simulate slow deferred prop loading (2000ms to ensure loading state is observable)
+  // Simulate slow deferred prop loading (600ms)
   setTimeout(
     () =>
       inertia.render(req, res, {
@@ -1332,7 +1332,7 @@ app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
           activity: requestedProps.includes('activity') ? { text: `activity data for ${id}` } : undefined,
         },
       }),
-    2000,
+    600,
   )
 })
 
@@ -1990,8 +1990,6 @@ app.get('/infinite-scroll/deferred', (req, res) => {
   }
 
   // Deferred props request - send both the data AND scrollProps
-  // Use longer delay for initial deferred props (page 1) so loading state is observable
-  const delay = page === 1 ? 2000 : 250
   setTimeout(
     () =>
       inertia.render(req, res, {
@@ -2000,7 +1998,7 @@ app.get('/infinite-scroll/deferred', (req, res) => {
         [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
         scrollProps: { users: scrollProp },
       }),
-    delay,
+    250,
   )
 })
 
@@ -2300,7 +2298,7 @@ app.get('/deferred-props/back-button/a', (req, res) => {
     })
   }
 
-  const delay = req.headers['x-inertia-partial-data']?.includes('fastProp') ? 500 : 2000
+  const delay = req.headers['x-inertia-partial-data']?.includes('fastProp') ? 100 : 600
 
   setTimeout(
     () =>
