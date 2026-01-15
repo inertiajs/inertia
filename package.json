@@ -43,5 +43,11 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.55.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "cookie": ">=0.7.0",
+      "esbuild": ">=0.25.0"
+    }
   }
 }
