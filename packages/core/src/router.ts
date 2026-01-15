@@ -452,9 +452,12 @@ export class Router {
   ): Promise<void> {
     const current = currentPage.get()
 
-    const onceProps = Object.fromEntries(
-      Object.values(current.onceProps ?? {}).map((item) => [item.prop, current.props[item.prop]]),
-    )
+    const onceProps =
+      typeof params.props === 'function'
+        ? Object.fromEntries(
+            Object.values(current.onceProps ?? {}).map((onceProp) => [onceProp.prop, current.props[onceProp.prop]]),
+          )
+        : {}
 
     const props =
       typeof params.props === 'function'
