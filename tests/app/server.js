@@ -618,7 +618,7 @@ const renderDump = (req, res) =>
     props: {
       headers: req.headers,
       method: req.method?.toLowerCase(),
-      form: req.body,
+      form: req.body || {},
       query: req.query,
       files: req.files,
       url: req.originalUrl,
