@@ -7,9 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.8...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.9...master)
 
 - Nothing yet
+
+## [v2.3.9](https://github.com/inertiajs/inertia/compare/v2.3.8...v2.3.9) - 2026-01-14
+
+### What's Changed
+
+* Fix React Precognition Error Sync (issue #2806) by [@joetifa2003](https://github.com/joetifa2003) in https://github.com/inertiajs/inertia/pull/2808
+* Add tests for deferred scroll props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2811
+* Fix deferred props not loading after back button navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2812
+* Add test for concurrent reloads by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2813
+* Cancel in-flight deferred prop requests on navigation by [@alexspeller](https://github.com/alexspeller) in https://github.com/inertiajs/inertia/pull/2656
+* fix: preserve query parameters in test server responses by [@alexspeller](https://github.com/alexspeller) in https://github.com/inertiajs/inertia/pull/2665
+* [2.x] Add Form Context Support by [@laserhybiz](https://github.com/laserhybiz) in https://github.com/inertiajs/inertia/pull/2671
+
+### New Contributors
+
+* [@joetifa2003](https://github.com/joetifa2003) made their first contribution in https://github.com/inertiajs/inertia/pull/2808
+* [@alexspeller](https://github.com/alexspeller) made their first contribution in https://github.com/inertiajs/inertia/pull/2656
+* [@laserhybiz](https://github.com/laserhybiz) made their first contribution in https://github.com/inertiajs/inertia/pull/2671
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.8...v2.3.9
 
 ## [v2.3.8](https://github.com/inertiajs/inertia/compare/v2.3.7...v2.3.8) - 2026-01-09
 

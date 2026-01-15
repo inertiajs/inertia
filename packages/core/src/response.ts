@@ -358,6 +358,11 @@ export class Response {
       ...currentPage.get().flash,
       ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
     }
+
+    const currentOriginalDeferred = currentPage.get().initialDeferredProps
+    if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
+      pageResponse.initialDeferredProps = currentOriginalDeferred
+    }
   }
 
   protected mergeOrMatchItems(

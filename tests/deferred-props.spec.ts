@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { clickAndWaitForResponse, consoleMessages, gotoPageAndWaitForContent, reloadAndWaitForContent } from './support'
+import {
+  clickAndWaitForResponse,
+  consoleMessages,
+  gotoPageAndWaitForContent,
+  reloadAndWaitForContent,
+  requests,
+} from './support'
 
 test('can load deferred props', async ({ page }) => {
   await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
@@ -198,6 +204,29 @@ test('load deferred props with partial reload on mount', async ({ page }) => {
   await expect(page.getByText('bar value')).toBeVisible()
 })
 
+test('deferred props preserve query parameters from original URL', async ({ page }) => {
+  await page.goto('/deferred-props/with-query-params?filter=a')
+
+  // Verify the initial page load has the correct filter
+  await expect(page.getByText('Filter: a')).toBeVisible()
+  await expect(page.getByText('Loading users...')).toBeVisible()
+
+  // Wait for and capture the deferred props request
+  const deferredRequest = await page.waitForResponse((response) => {
+    const url = response.url()
+    const headers = response.request().headers()
+    return headers['x-inertia-partial-data'] === 'users' && url.includes('/deferred-props/with-query-params')
+  })
+
+  // Assert that the deferred props request includes the query parameter
+  const requestUrl = deferredRequest.url()
+  expect(requestUrl).toContain('filter=a')
+
+  // Verify the deferred data uses the correct filter
+  await expect(page.getByText('Loading users...')).not.toBeVisible()
+  await expect(page.getByText('users data for a')).toBeVisible()
+})
+
 test('can partial reload deferred props independently', async ({ page }) => {
   await gotoPageAndWaitForContent(page, '/deferred-props/partial-reloads')
 
@@ -337,4 +366,75 @@ test('deferred props do not clear validation errors', async ({ page }) => {
   await expect(page.locator('#form-error')).toBeVisible()
   await expect(page.locator('#form-error')).toHaveText('The name field is required.')
   await expect(page.getByText('foo value')).toBeVisible()
+})
+
+test('it refetches pending deferred props after navigating back', async ({ page }) => {
+  await page.goto('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Loading fast prop...')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  // Navigate away before deferred props load
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+
+  // Both props should eventually load after navigating back
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+})
+
+test('it only refetches deferred props that were not loaded before navigating away', async ({ page }) => {
+  await page.goto('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Loading fast prop...')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Loading slow prop...')).toBeVisible()
+
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+})
+
+test('it does not refetch deferred props that were already loaded on a previous back navigation', async ({ page }) => {
+  await page.goto('/deferred-props/back-button/a')
+
+  // Quickly navigate away before deferred props load
+  await expect(page.getByText('Loading fast prop...')).toBeVisible()
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+
+  // Go back and wait for deferred props to fully load
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+
+  // Navigate to Page B again and wait for its deferred props
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+  await expect(page.getByText('Page B data loaded')).toBeVisible()
+
+  // Start listening for requests before going back
+  requests.listen(page)
+
+  // Go back to Page A - no requests should be made since props are already loaded
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+
+  await expect(page.getByText('Fast prop loaded')).toBeVisible()
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+
+  expect(requests.requests).toHaveLength(0)
 })

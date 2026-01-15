@@ -103,12 +103,7 @@ export const waitForFragmentScroll = async (page: Page) => {
 }
 
 // Ensure scroll position is set on an element (some browsers may not restore scroll positions automatically)
-export const ensureScrollPosition = async (
-  page: Page,
-  selector: string,
-  scrollLeft: number,
-  scrollTop: number,
-) => {
+export const ensureScrollPosition = async (page: Page, selector: string, scrollLeft: number, scrollTop: number) => {
   await page.waitForSelector(selector, { timeout: 3000 })
 
   const isCorrect = await page.evaluate(

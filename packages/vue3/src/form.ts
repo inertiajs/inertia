@@ -15,13 +15,28 @@ import {
 } from '@inertiajs/core'
 import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
 import { isEqual } from 'lodash-es'
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, PropType, ref, SlotsType, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  h,
+  inject,
+  InjectionKey,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  provide,
+  ref,
+  SlotsType,
+  watch,
+} from 'vue'
 import useForm from './useForm'
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 type FormSubmitter = HTMLElement | null
 
 const noop = () => undefined
+
+const FormContextKey: InjectionKey<FormComponentRef> = Symbol('InertiaFormContext')
 
 const Form = defineComponent({
   name: 'Form',
@@ -331,6 +346,8 @@ const Form = defineComponent({
 
     expose<FormComponentRef>(exposed)
 
+    provide(FormContextKey, exposed)
+
     return () => {
       return h(
         'form',
@@ -350,5 +367,9 @@ const Form = defineComponent({
     }
   },
 })
+
+export function useFormContext(): FormComponentRef | undefined {
+  return inject(FormContextKey)
+}
 
 export default Form
