@@ -1,5 +1,12 @@
 import { expect, Page, test } from '@playwright/test'
-import { consoleMessages, pageLoads, requests, scrollElementTo, shouldBeDumpPage, waitForScrollPosition } from './support'
+import {
+  consoleMessages,
+  pageLoads,
+  requests,
+  scrollElementTo,
+  shouldBeDumpPage,
+  waitForScrollPosition,
+} from './support'
 
 declare const process: { env: { PACKAGE?: string } }
 
