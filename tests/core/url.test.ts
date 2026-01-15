@@ -1,6 +1,11 @@
 import test, { expect } from '@playwright/test'
 import { config } from '../../packages/core/src/config'
-import { mergeDataIntoQueryString, transformUrlAndData, urlHasProtocol } from '../../packages/core/src/url'
+import {
+  isSameUrlWithoutHash,
+  mergeDataIntoQueryString,
+  transformUrlAndData,
+  urlHasProtocol,
+} from '../../packages/core/src/url'
 
 test.describe('url.ts', () => {
   test.describe('urlHasProtocol', () => {
@@ -172,6 +177,16 @@ test.describe('url.ts', () => {
 
         expect(hrefIndices).toBe('/search?items[0][id]=1&items[0][name]=foo&items[1][id]=2&q=bar')
         expect(dataIndices).toEqual({})
+      })
+
+      test('merges data into URL with URL-encoded indices notation', () => {
+        const originalHref = '/search?items%5B0%5D%5Bname%5D=foo&items%5B1%5D%5Bname%5D=bar'
+        const additionalData = { q: 'baz' }
+
+        const [href, data] = mergeDataIntoQueryString('get', originalHref, additionalData, 'brackets')
+
+        expect(href).toBe('/search?items[0][name]=foo&items[1][name]=bar&q=baz')
+        expect(data).toEqual({})
       })
 
       test('overwrites existing keys in the query string when they also exist in the data', () => {
@@ -536,6 +551,42 @@ test.describe('url.ts', () => {
       expect(url.search).toBe('?existing=value')
       expect(url.hash).toBe('#section')
       expect(data).toBeInstanceOf(FormData)
+    })
+  })
+
+  test.describe('isSameUrlWithoutHash', () => {
+    const sameCases = [
+      ['/page', '/page', 'identical paths'],
+      ['/page', '/page#section', 'path vs path with hash'],
+      ['/page#one', '/page#two', 'same path, different hashes'],
+      ['/page?foo=bar', '/page?foo=bar', 'identical paths with query'],
+      ['/page?foo=bar', '/page?foo=bar#section', 'query vs query with hash'],
+      ['/page?foo=bar#one', '/page?foo=bar#two', 'same query, different hashes'],
+      ['https://example.com/page', 'https://example.com/page#hash', 'full URL with hash'],
+    ] as const
+
+    const differentCases = [
+      ['/page-a', '/page-b', 'different paths'],
+      ['/page', '/page?foo=bar', 'path vs path with query'],
+      ['/page?foo=bar', '/page?foo=baz', 'different query values'],
+      ['/page?a=1', '/page?b=2', 'different query params'],
+      ['https://example.com/page', 'https://other.com/page', 'different hosts'],
+    ] as const
+
+    sameCases.forEach(([url1, url2, description]) => {
+      test(`returns true for ${description}: ${url1} vs ${url2}`, () => {
+        expect(isSameUrlWithoutHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com'))).toBe(
+          true,
+        )
+      })
+    })
+
+    differentCases.forEach(([url1, url2, description]) => {
+      test(`returns false for ${description}: ${url1} vs ${url2}`, () => {
+        expect(isSameUrlWithoutHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com'))).toBe(
+          false,
+        )
+      })
     })
   })
 })

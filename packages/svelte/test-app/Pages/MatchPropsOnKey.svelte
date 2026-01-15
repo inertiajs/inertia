@@ -26,7 +26,7 @@
   let page = foo.page
 
   const reloadIt = () => {
-    router.reload({
+    router.visit('/match-props-on-key', {
       data: {
         page,
       },
@@ -40,7 +40,7 @@
 
   const getFresh = () => {
     page = 0
-    router.reload({
+    router.visit('/match-props-on-key', {
       reset: ['foo', 'baz'],
     })
   }

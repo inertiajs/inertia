@@ -58,14 +58,18 @@ export interface InertiaFormProps<TForm extends object> {
   recentlySuccessful: boolean
   setData: SetDataAction<TForm>
   transform: (callback: UseFormTransformCallback<TForm>) => void
-  setDefaults(): void
-  setDefaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
-  setDefaults(fields: Partial<TForm>): void
-  reset<K extends FormDataKeys<TForm>>(...fields: K[]): void
-  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
-  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): void
-  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
-  setError(errors: FormDataErrors<TForm>): void
+  setDefaults: {
+    (): void
+    <T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): void
+    (fields: Partial<TForm>): void
+  }
+  reset: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  clearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  resetAndClearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  setError: {
+    <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
+    (errors: FormDataErrors<TForm>): void
+  }
   submit: (...args: UseFormSubmitArguments) => void
   get: (url: string, options?: UseFormSubmitOptions) => void
   patch: (url: string, options?: UseFormSubmitOptions) => void
@@ -73,30 +77,31 @@ export interface InertiaFormProps<TForm extends object> {
   put: (url: string, options?: UseFormSubmitOptions) => void
   delete: (url: string, options?: UseFormSubmitOptions) => void
   cancel: () => void
+  dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => InertiaFormProps<TForm>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormProps<TForm>
 }
 
 export interface InertiaFormValidationProps<TForm extends object> {
-  invalid<K extends FormDataKeys<TForm>>(field: K): boolean
-  setValidationTimeout(duration: number): InertiaPrecognitiveFormProps<TForm>
-  touch<K extends FormDataKeys<TForm>>(
+  invalid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  setValidationTimeout: (duration: number) => InertiaPrecognitiveFormProps<TForm>
+  touch: <K extends FormDataKeys<TForm>>(
     field: K | NamedInputEvent | Array<K>,
     ...fields: K[]
-  ): InertiaPrecognitiveFormProps<TForm>
-  touched<K extends FormDataKeys<TForm>>(field?: K): boolean
-  valid<K extends FormDataKeys<TForm>>(field: K): boolean
-  validate<K extends FormDataKeys<TForm>>(
+  ) => InertiaPrecognitiveFormProps<TForm>
+  touched: <K extends FormDataKeys<TForm>>(field?: K) => boolean
+  valid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  validate: <K extends FormDataKeys<TForm>>(
     field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
     config?: PrecognitionValidationConfig<K>,
-  ): InertiaPrecognitiveFormProps<TForm>
-  validateFiles(): InertiaPrecognitiveFormProps<TForm>
+  ) => InertiaPrecognitiveFormProps<TForm>
+  validateFiles: () => InertiaPrecognitiveFormProps<TForm>
   validating: boolean
   validator: () => Validator
-  withAllErrors(): InertiaPrecognitiveFormProps<TForm>
-  withoutFileValidation(): InertiaPrecognitiveFormProps<TForm>
+  withAllErrors: () => InertiaPrecognitiveFormProps<TForm>
+  withoutFileValidation: () => InertiaPrecognitiveFormProps<TForm>
   // Backward compatibility for easy migration from the original Precognition libraries
-  setErrors(errors: FormDataErrors<TForm>): InertiaPrecognitiveFormProps<TForm>
-  forgetError<K extends FormDataKeys<TForm> | NamedInputEvent>(field: K): InertiaPrecognitiveFormProps<TForm>
+  setErrors: (errors: FormDataErrors<TForm>) => InertiaPrecognitiveFormProps<TForm>
+  forgetError: <K extends FormDataKeys<TForm> | NamedInputEvent>(field: K) => InertiaPrecognitiveFormProps<TForm>
 }
 
 export type InertiaForm<TForm extends object> = InertiaFormProps<TForm>
@@ -131,7 +136,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   )
   const cancelToken = useRef<CancelToken | null>(null)
   const recentlySuccessfulTimeoutId = useRef<number>(undefined)
-  const [data, setData] = rememberKey ? useRemember(defaults, `${rememberKey}:data`) : useState(defaults)
+  const excludeKeysRef = useRef<FormDataKeys<TForm>[]>([])
+  const [data, setData] = rememberKey
+    ? useRemember(defaults, `${rememberKey}:data`, excludeKeysRef)
+    : useState(defaults)
   const [errors, setErrors] = rememberKey
     ? useRemember({} as FormDataErrors<TForm>, `${rememberKey}:errors`)
     : useState({} as FormDataErrors<TForm>)
@@ -229,8 +237,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
-            setErrors(errors as FormDataErrors<TForm>)
-            setHasErrors(true)
+            setError(errors as FormDataErrors<TForm>)
           }
 
           if (options.onError) {
@@ -453,6 +460,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     patch,
     delete: deleteMethod,
     cancel,
+    dontRemember: <K extends FormDataKeys<TForm>>(...keys: K[]) => {
+      excludeKeysRef.current = keys
+      return form
+    },
   } as InertiaFormProps<TForm>
 
   const tap = <T>(value: T, callback: (value: T) => unknown): T => {

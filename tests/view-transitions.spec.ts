@@ -1,70 +1,74 @@
 import { expect, test } from '@playwright/test'
 import { consoleMessages } from './support'
 
-test('navigates with boolean view transition', async ({ page }) => {
-  await page.goto('/view-transition/page-a')
+test.describe('View Transitions', () => {
+  test.skip(({ browserName }) => browserName === 'firefox', 'Firefox does not support View Transitions API in CI')
 
-  await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+  test('navigates with boolean view transition', async ({ page }) => {
+    await page.goto('/view-transition/page-a')
 
-  await page.getByRole('button', { name: 'Transition with boolean' }).click()
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
 
-  await expect(page).toHaveURL('/view-transition/page-b')
-  await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
-})
+    await page.getByRole('button', { name: 'Transition with boolean' }).click()
 
-test('calls viewTransition callbacks when using callback function', async ({ page }) => {
-  consoleMessages.listen(page)
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+  })
 
-  await page.goto('/view-transition/page-a')
+  test('calls viewTransition callbacks when using callback function', async ({ page }) => {
+    consoleMessages.listen(page)
 
-  await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+    await page.goto('/view-transition/page-a')
 
-  await page.getByRole('button', { name: 'Transition with callback' }).click()
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
 
-  await expect(page).toHaveURL('/view-transition/page-b')
-  await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+    await page.getByRole('button', { name: 'Transition with callback' }).click()
 
-  await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
-})
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-test('calls viewTransition callbacks on Link component with callback function', async ({ page }) => {
-  consoleMessages.listen(page)
+    await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+  })
 
-  await page.goto('/view-transition/page-a')
+  test('calls viewTransition callbacks on Link component with callback function', async ({ page }) => {
+    consoleMessages.listen(page)
 
-  await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+    await page.goto('/view-transition/page-a')
 
-  await page.getByRole('link', { name: 'Link to Page B' }).click()
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
 
-  await expect(page).toHaveURL('/view-transition/page-b')
-  await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+    await page.getByRole('link', { name: 'Link to Page B' }).click()
 
-  await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
-})
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-test('calls viewTransition callbacks on client-side visit with callback function', async ({ page }) => {
-  consoleMessages.listen(page)
+    await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+  })
 
-  await page.goto('/view-transition/page-a')
+  test('calls viewTransition callbacks on client-side visit with callback function', async ({ page }) => {
+    consoleMessages.listen(page)
 
-  await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+    await page.goto('/view-transition/page-a')
 
-  await page.getByRole('button', { name: 'Client-side replace' }).click()
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
 
-  await expect(page).toHaveURL('/view-transition/page-b')
-  await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+    await page.getByRole('button', { name: 'Client-side replace' }).click()
 
-  await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
-})
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-test('does not use view transition when same page returns with validation errors', async ({ page }) => {
-  consoleMessages.listen(page)
+    await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
+  })
 
-  await page.goto('/view-transition/form-errors')
-  await page.getByRole('button', { name: 'Submit with View Transition' }).click()
-  await expect(page.getByText('The name field is required.')).toBeVisible()
+  test('does not use view transition when same page returns with validation errors', async ({ page }) => {
+    consoleMessages.listen(page)
 
-  await page.waitForTimeout(500)
+    await page.goto('/view-transition/form-errors')
+    await page.getByRole('button', { name: 'Submit with View Transition' }).click()
+    await expect(page.getByText('The name field is required.')).toBeVisible()
 
-  await expect(consoleMessages.messages).toEqual([])
+    await page.waitForTimeout(500)
+
+    await expect(consoleMessages.messages).toEqual([])
+  })
 })

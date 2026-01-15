@@ -1,7 +1,7 @@
 import test, { expect } from '@playwright/test'
 import { pageLoads, requests } from './support'
 
-test('replaces the page client side', async ({ page }) => {
+test('replaces the page client side', async ({ page, browserName }) => {
   pageLoads.watch(page)
 
   await page.goto('/client-side-visit')
@@ -26,8 +26,8 @@ test('replaces the page client side', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 
   const historyLength = await page.evaluate(() => window.history.length)
-
-  await expect(historyLength).toBe(2)
+  // Firefox doesn't count the initial about:blank page in history.length
+  await expect(historyLength).toBe(browserName === 'firefox' ? 1 : 2)
 })
 
 test('preserves the state based on the errors object', async ({ page }) => {
@@ -82,7 +82,7 @@ test('fires an onError callback when the props has errors in a custom bag', asyn
   await expect(requests.requests.length).toBe(0)
 })
 
-test('pushes the page client side', async ({ page }) => {
+test('pushes the page client side', async ({ page, browserName }) => {
   pageLoads.watch(page)
 
   await page.goto('/client-side-visit')
@@ -103,6 +103,6 @@ test('pushes the page client side', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 
   const historyLength = await page.evaluate(() => window.history.length)
-
-  await expect(historyLength).toBe(3)
+  // Firefox doesn't count the initial about:blank page in history.length
+  await expect(historyLength).toBe(browserName === 'firefox' ? 2 : 3)
 })

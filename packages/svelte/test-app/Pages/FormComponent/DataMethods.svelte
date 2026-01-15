@@ -4,13 +4,12 @@
 
   function testGetData(getData: () => Record<string, FormDataConvertible>) {
     const data = getData()
-    console.log('getData result:', data)
+    console.log('getData result: ' + JSON.stringify(data))
   }
 
   function testGetFormData(getFormData: () => FormData) {
     const formData = getFormData()
-
-    console.log('getFormData entries:', Object.fromEntries(formData.entries()))
+    console.log('getFormData entries: ' + JSON.stringify(Object.fromEntries(formData.entries())))
   }
 </script>
 

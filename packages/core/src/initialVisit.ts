@@ -24,7 +24,7 @@ export class InitialVisit {
   }
 
   protected static handleBackForward(): boolean {
-    if (!navigationType.isBackForward() || !history.hasAnyState()) {
+    if (!navigationType.isBackForward() || !history.browserHasHistoryEntry()) {
       return false
     }
 
@@ -107,7 +107,7 @@ export class InitialVisit {
       const flash = page.flash
 
       if (Object.keys(flash).length > 0) {
-        fireFlashEvent(flash)
+        queueMicrotask(() => fireFlashEvent(flash))
       }
     })
   }

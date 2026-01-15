@@ -1,10 +1,12 @@
 <script lang="ts">
   import {
     formDataToObject,
+    FormComponentResetSymbol,
     resetFormFields,
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type FormComponentRef,
     type Method,
     type FormDataConvertible,
     type VisitOptions,
@@ -13,7 +15,8 @@
   } from '@inertiajs/core'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
-  import { onMount } from 'svelte'
+  import { onMount, setContext } from 'svelte'
+  import { FormContextKey } from './formContext'
   import useForm from '../useForm.svelte'
 
   const noop = () => undefined
@@ -126,6 +129,11 @@
   }
 
   function updateDirtyState(event: Event) {
+    if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+      // When the form is reset programmatically, prevent native reset behavior
+      event.preventDefault()
+    }
+
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
@@ -257,7 +265,7 @@
 
     form.defaults(getData())
 
-    const formEvents = ['input', 'change', 'reset']
+    const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
@@ -277,6 +285,35 @@
   })
 
   const slotErrors = $derived(form.errors as Errors)
+
+  // Form context for child components
+  let formContextStore = $derived<FormComponentRef | undefined>({
+    errors: form.errors,
+    hasErrors: form.hasErrors,
+    processing: form.processing,
+    progress: form.progress,
+    wasSuccessful: form.wasSuccessful,
+    recentlySuccessful: form.recentlySuccessful,
+    isDirty,
+    clearErrors,
+    resetAndClearErrors,
+    setError,
+    reset,
+    submit,
+    defaults,
+    getData,
+    getFormData,
+    // Precognition
+    validator,
+    validate,
+    touch,
+    validating: form.validating,
+    valid,
+    invalid,
+    touched,
+  })
+
+  setContext(FormContextKey, formContextStore)
 </script>
 
 {/* @ts-expect-error method type does not match here*/ null}

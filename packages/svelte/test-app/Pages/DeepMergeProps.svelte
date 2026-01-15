@@ -26,7 +26,7 @@
 
   const getFresh = () => {
     page = 0
-    router.reload({
+    router.visit('/deep-merge-props', {
       reset: ['foo', 'baz'],
     })
   }

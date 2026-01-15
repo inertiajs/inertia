@@ -1,5 +1,6 @@
 import { cloneDeep, isEqual } from 'lodash-es'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
+import { eventHandler } from './eventHandler'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
@@ -163,6 +164,11 @@ class History {
   }
 
   public replaceState(page: Page, cb: (() => void) | null = null): void {
+    if (isEqual(this.current, page)) {
+      cb && cb()
+      return
+    }
+
     currentPage.merge(page)
 
     if (isServer) {
@@ -193,6 +199,32 @@ class History {
     })
   }
 
+  protected isHistoryThrottleError(error: unknown): error is Error & { name: 'SecurityError' } {
+    return (
+      error instanceof Error &&
+      error.name === 'SecurityError' &&
+      (error.message.includes('history.pushState') || error.message.includes('history.replaceState'))
+    )
+  }
+
+  protected isQuotaExceededError(error: unknown): error is Error & { name: 'QuotaExceededError' } {
+    return error instanceof Error && error.name === 'QuotaExceededError'
+  }
+
+  protected withThrottleProtection<T = void>(cb: () => T): Promise<T | undefined> {
+    return Promise.resolve().then(() => {
+      try {
+        return cb()
+      } catch (error) {
+        if (!this.isHistoryThrottleError(error)) {
+          throw error
+        }
+
+        console.error(error.message)
+      }
+    })
+  }
+
   protected doReplaceState(
     data: {
       page: Page | ArrayBuffer
@@ -201,7 +233,7 @@ class History {
     },
     url?: string,
   ): Promise<void> {
-    return Promise.resolve().then(() =>
+    return this.withThrottleProtection(() => {
       window.history.replaceState(
         {
           ...data,
@@ -210,8 +242,8 @@ class History {
         },
         '',
         url,
-      ),
-    )
+      )
+    })
   }
 
   protected doPushState(
@@ -222,7 +254,17 @@ class History {
     },
     url: string,
   ): Promise<void> {
-    return Promise.resolve().then(() => window.history.pushState(data, '', url))
+    return this.withThrottleProtection(() => {
+      try {
+        window.history.pushState(data, '', url)
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        eventHandler.fireInternalEvent('historyQuotaExceeded', url)
+      }
+    })
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
@@ -242,8 +284,8 @@ class History {
     }
   }
 
-  public hasAnyState(): boolean {
-    return !!this.getAllState()
+  public browserHasHistoryEntry(): boolean {
+    return !isServer && !!window.history.state?.page
   }
 
   public clear() {

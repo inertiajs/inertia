@@ -9,7 +9,7 @@ export default ts.config(
     files: ['**/*.js', '**/*.ts', '**/*.svelte'],
   },
   {
-    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts'],
+    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts', '*.timestamp-*'],
   },
   js.configs.recommended,
   ...ts.configs.recommended,
@@ -54,6 +54,12 @@ export default ts.config(
     rules: {
       'svelte/no-navigation-without-resolve': 'off',
       'svelte/no-useless-mustaches': 'off',
+    },
+  },
+  {
+    files: ['**/*.ts', '**/*.svelte'],
+    rules: {
+      '@typescript-eslint/unbound-method': 'error',
     },
   },
 )

@@ -21,8 +21,18 @@ if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
 }
 
-// Used because Cypress does not allow you to navigate to a different origin URL within a single test.
-app.all('/non-inertia', (req, res) => res.status(200).send('This is a page that does not have the Inertia app loaded.'))
+app.all('/non-inertia', (req, res) =>
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head><title>Non-Inertia Page</title></head>
+      <body>
+        <h1>This is a page that does not have the Inertia app loaded.</h1>
+        <p><a href="/navigate-non-inertia">Go to Inertia page</a></p>
+      </body>
+    </html>
+  `),
+)
 
 // SSR test routes (only rendered with SSR when SSR=true)
 app.get('/ssr/page1', (req, res) =>
@@ -54,10 +64,15 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
-// Intercepts all .js assets (including files loaded via code splitting)
-app.get(/.*\.js$/, (req, res) =>
-  res.sendFile(path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))),
-)
+// Intercepts all CSS and JS assets (including files loaded via code splitting)
+app.get(/.*\.(?:js|css)$/, (req, res) => {
+  const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(404).send('Not found')
+    }
+  })
+})
 
 /**
  * Used for testing the Inertia plugin is registered.
@@ -96,6 +111,13 @@ app.get('/scroll-after-render/:page', (req, res) =>
   inertia.render(req, res, {
     component: 'ScrollAfterRender',
     props: { page: parseInt(req.params.page) },
+  }),
+)
+
+app.get('/scroll-smooth/:page', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ScrollSmooth',
+    props: { page: req.params.page },
   }),
 )
 
@@ -530,6 +552,65 @@ app.post('/precognition/dynamic-array-inputs', upload.any(), (req, res) => {
   }, 250)
 })
 
+app.post('/precognition/error-sync', upload.any(), (req, res) => {
+  const isPrecognition = req.headers['precognition'] === 'true'
+
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    const name = req.body['name']
+    const email = req.body['email']
+    const errors = {}
+
+    // Validate name
+    if (!name || name.trim() === '') {
+      errors.name = 'The name field is required.'
+    }
+
+    // Validate email
+    if (!email || email.trim() === '') {
+      errors.email = 'The email field is required.'
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'The email must be a valid email address.'
+    }
+
+    // For precognition, filter to only requested fields
+    if (isPrecognition && only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    if (isPrecognition) {
+      res.header('Precognition', 'true')
+      res.header('Vary', 'Precognition')
+
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ errors })
+      }
+
+      return res.status(204).header('Precognition-Success', 'true').send()
+    }
+
+    // Non-precognition: regular form submission with Inertia error response
+    // Detect which component to return based on referer
+    const referer = req.headers['referer'] || ''
+    const isFormHelper = referer.includes('/form-helper/')
+    const component = isFormHelper ? 'FormHelper/Precognition/ErrorSync' : 'FormComponent/Precognition/ErrorSync'
+
+    if (Object.keys(errors).length) {
+      return inertia.render(req, res, {
+        component,
+        props: { errors },
+      })
+    }
+
+    // Success - redirect
+    return res.redirect(303, '/')
+  }, 100)
+})
+
 const methods = ['get', 'post', 'put', 'patch', 'delete']
 const renderDump = (req, res) =>
   inertia.render(req, res, {
@@ -574,6 +655,16 @@ app.post('/events/errors', (req, res) =>
 app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/Hook', props: {} }))
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
+app.get('/poll/unchanged-data', (req, res) =>
+  inertia.render(req, res, { component: 'Poll/UnchangedData', props: { custom_prop: 'unchanged' } }),
+)
+app.get('/poll/unchanged-data/encrypted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Poll/UnchangedData',
+    props: { custom_prop: 'unchanged' },
+    encryptHistory: true,
+  }),
+)
 
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
@@ -671,6 +762,21 @@ app.get('/history/version/:pageNumber', (req, res) => {
       pageNumber: req.params.pageNumber,
     },
     version: req.params.pageNumber === '1' ? 'version-1' : 'version-2',
+  })
+})
+
+app.get('/history-quota/:pageNumber', (req, res) => {
+  const pageNumber = parseInt(req.params.pageNumber)
+  const size = 8 * 1024 * 1024 // 8 MB
+
+  const largeData = pageNumber < 8 ? 'x'.repeat(size) : 'x'.repeat(size - 2137)
+
+  inertia.render(req, res, {
+    component: 'HistoryQuota/Page',
+    props: {
+      pageNumber,
+      largeData,
+    },
   })
 })
 
@@ -773,6 +879,55 @@ app.get('/when-visible-fetching', (req, res) => {
   } else {
     inertia.render(req, res, {
       component: 'WhenVisibleFetching',
+      props: {},
+    })
+  }
+})
+
+app.get('/when-visible-merge-params', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']
+
+  if (partialData) {
+    const props = {}
+    const partialProps = partialData.split(',')
+
+    if (partialProps.includes('dataOnlyProp')) {
+      props.dataOnlyProp = { text: 'Data only success!' }
+    }
+    if (partialProps.includes('mergedProp')) {
+      props.mergedProp = { text: `Merged success! extra=${req.query.extra}` }
+    }
+    if (partialProps.includes('mergedWithCallbackProp')) {
+      props.mergedWithCallbackProp = { text: `Merged with callback success! page=${req.query.page}` }
+    }
+
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleMergeParams',
+        props,
+      })
+    }, 100)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisibleMergeParams',
+      props: {},
+    })
+  }
+})
+
+app.get('/when-visible-params-update', (req, res) => {
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'WhenVisibleParamsUpdate',
+        props: {
+          lazyData: { text: `Loaded with paramValue=${req.query.paramValue}` },
+        },
+      })
+    }, 100)
+  } else {
+    inertia.render(req, res, {
+      component: 'WhenVisibleParamsUpdate',
       props: {},
     })
   }
@@ -1131,6 +1286,68 @@ app.get('/deferred-props/instant-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/with-query-params', (req, res) => {
+  const filter = req.query.filter || 'none'
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  if (!requestedProps) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithQueryParams',
+      deferredProps: {
+        default: ['users'],
+      },
+      props: {
+        filter,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/WithQueryParams',
+        props: {
+          users: requestedProps.includes('users') ? { text: `users data for ${filter}` } : undefined,
+        },
+      }),
+    500,
+  )
+})
+
+app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
+  const id = req.params.id || 'none'
+  const requestedProps = req.headers['x-inertia-partial-data']
+
+  if (!requestedProps) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/RapidNavigation',
+      deferredProps: {
+        group1: ['users'],
+        group2: ['stats'],
+        group3: ['activity'],
+      },
+      props: {
+        id,
+      },
+    })
+  }
+
+  // Simulate slow deferred prop loading
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/RapidNavigation',
+        props: {
+          id,
+          users: requestedProps.includes('users') ? { text: `users data for ${id}` } : undefined,
+          stats: requestedProps.includes('stats') ? { text: `stats data for ${id}` } : undefined,
+          activity: requestedProps.includes('activity') ? { text: `activity data for ${id}` } : undefined,
+        },
+      }),
+    600,
+  )
+})
+
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
@@ -1357,10 +1574,7 @@ app.post('/form-component/events/errors', async (req, res) =>
 )
 
 app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
-app.get('/form-component/options', (req, res) =>
-  // TODO: see 'url' key in helpers.js, this should be req.originalUrl by default
-  inertia.render(req, res, { component: 'FormComponent/Options', url: req.originalUrl }),
-)
+app.get('/form-component/options', (req, res) => inertia.render(req, res, { component: 'FormComponent/Options' }))
 app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
@@ -1696,6 +1910,110 @@ app.get('/infinite-scroll/filtering/:preserveState', (req, res) => {
   )
 })
 
+app.get('/infinite-scroll/filtering-reset', (req, res) => {
+  const search = req.query.search || ''
+
+  let users = getUserNames()
+
+  if (search) {
+    users = users.filter((user) => user.toLowerCase().includes(search.toLowerCase()))
+  }
+
+  const perPage = 15
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, perPage, users.length)
+
+  if (page > 1) {
+    users = users.slice((page - 1) * perPage, page * perPage)
+  }
+
+  paginated.data = paginated.data.map((user, i) => ({ ...user, name: users[i] }))
+
+  if (req.headers['x-inertia-reset']) {
+    scrollProp.reset = true
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/FilteringReset',
+        props: { users: paginated, search },
+        ...(req.headers['x-inertia-reset'] ? {} : { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }),
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+app.get('/infinite-scroll/filtering-manual', (req, res) => {
+  const search = req.query.search || ''
+  const perPage = 15
+  const page = req.query.page ? parseInt(req.query.page) : 1
+
+  let users = getUserNames()
+
+  if (search) {
+    users = users.filter((user) => user.toLowerCase().includes(search.toLowerCase()))
+  }
+
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, perPage, users.length)
+
+  if (page > 1) {
+    users = users.slice((page - 1) * perPage, page * perPage)
+  }
+
+  paginated.data = paginated.data.map((user, i) => ({ ...user, name: users[i] }))
+
+  if (req.headers['x-inertia-reset']) {
+    scrollProp.reset = true
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/FilteringManual',
+        props: { users: paginated, search, preserveState: true },
+        ...(req.headers['x-inertia-reset'] ? {} : { [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'] }),
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+// Deferred scroll props test - simulates Inertia::scroll()->defer()
+app.get('/infinite-scroll/deferred', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  if (!partialReload) {
+    // Initial page load - defer the users prop, no scrollProps yet
+    return inertia.render(req, res, {
+      component: 'InfiniteScroll/Deferred',
+      props: {},
+      deferredProps: { default: ['users'] },
+    })
+  }
+
+  // Deferred props request - send both the data AND scrollProps
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/Deferred',
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    250,
+  )
+})
+
 app.post('/view-transition/form-errors', (req, res) =>
   inertia.render(req, res, {
     component: 'ViewTransition/FormErrors',
@@ -1739,7 +2057,7 @@ app.get('/flash/with-deferred', (req, res) => {
           data: req.headers['x-inertia-partial-data']?.includes('data') ? 'Deferred data loaded' : undefined,
         },
       }),
-    100,
+    250,
   )
 })
 app.get('/flash/partial', (req, res) => {
@@ -1978,6 +2296,82 @@ app.get('/once-props/custom-key/:page', (req, res) => {
     },
     onceProps: { 'user-permissions': { prop: propName, expiresAt: null } },
   })
+})
+
+app.get('/deferred-props/back-button/a', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/BackButton/PageA',
+      deferredProps: {
+        fast: ['fastProp'],
+        slow: ['slowProp'],
+      },
+      props: {},
+    })
+  }
+
+  const delay = req.headers['x-inertia-partial-data']?.includes('fastProp') ? 100 : 600
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/BackButton/PageA',
+        props: {
+          fastProp: req.headers['x-inertia-partial-data']?.includes('fastProp') ? 'Fast prop loaded' : undefined,
+          slowProp: req.headers['x-inertia-partial-data']?.includes('slowProp') ? 'Slow prop loaded' : undefined,
+        },
+      }),
+    delay,
+  )
+})
+
+app.get('/deferred-props/back-button/b', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/BackButton/PageB',
+      deferredProps: {
+        default: ['data'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/BackButton/PageB',
+        props: {
+          data: req.headers['x-inertia-partial-data']?.includes('data') ? 'Page B data loaded' : undefined,
+        },
+      }),
+    400,
+  )
+})
+
+app.get('/reload/concurrent', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']
+
+  if (!partialData) {
+    return inertia.render(req, res, {
+      component: 'Reload/Concurrent',
+      props: {
+        foo: 'initial foo',
+        bar: 'initial bar',
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Reload/Concurrent',
+        props: {
+          foo: partialData.includes('foo') ? `foo reloaded at ${Date.now()}` : undefined,
+          bar: partialData.includes('bar') ? `bar reloaded at ${Date.now()}` : undefined,
+        },
+      }),
+    600,
+  )
 })
 
 app.all('*page', (req, res) => inertia.render(req, res))

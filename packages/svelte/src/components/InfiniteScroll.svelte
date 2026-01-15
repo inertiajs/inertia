@@ -57,6 +57,8 @@
   let loadingPrevious = $state(false)
   let loadingNext = $state(false)
   let requestCount = $state(0)
+  let hasPreviousPage = $state(false)
+  let hasNextPage = $state(false)
 
   let infiniteScrollInstance: UseInfiniteScrollProps = $state(null!)
 
@@ -113,6 +115,12 @@
     setTimeout(setupInfiniteScrollInstance)
   })
 
+  function syncStateFromDataManager() {
+    requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
+    hasPreviousPage = infiniteScrollInstance!.dataManager.hasPrevious()
+    hasNextPage = infiniteScrollInstance!.dataManager.hasNext()
+  }
+
   function setupInfiniteScrollInstance() {
     const resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
     const resolvedStartElement = resolveHTMLElement(startElement, startElementRef)
@@ -137,18 +145,19 @@
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
       onCompletePreviousRequest: () => {
-        requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
         loadingPrevious = false
+        syncStateFromDataManager()
       },
       onCompleteNextRequest: () => {
-        requestCount = infiniteScrollInstance!.dataManager.getRequestCount()
         loadingNext = false
+        syncStateFromDataManager()
       },
+      onDataReset: syncStateFromDataManager,
     })
 
     const { dataManager, elementManager } = infiniteScrollInstance
 
-    requestCount = dataManager.getRequestCount()
+    syncStateFromDataManager()
 
     elementManager.setupObservers()
     elementManager.processServerLoadedElements(dataManager.getLastLoadedPage())
@@ -167,8 +176,8 @@
   let sharedExposed = $derived({
     loadingPrevious,
     loadingNext,
-    hasPrevious: infiniteScrollInstance?.dataManager.hasPrevious() || false,
-    hasNext: infiniteScrollInstance?.dataManager.hasNext() || false,
+    hasPrevious: hasPreviousPage,
+    hasNext: hasNextPage,
   } satisfies Pick<InfiniteScrollActionSlotProps, 'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'>)
   let manualMode = $derived(manual || (manualAfter !== undefined && manualAfter > 0 && requestCount >= manualAfter))
   let autoLoad = $derived(!manualMode)
@@ -178,7 +187,7 @@
     fetch: fetchPrevious,
     autoMode: headerAutoMode,
     manualMode: !headerAutoMode,
-    hasMore: infiniteScrollInstance?.dataManager.hasPrevious() || false,
+    hasMore: hasPreviousPage,
     ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps)
   let footerAutoMode = $derived(autoLoad && !onlyPrevious)
@@ -187,7 +196,7 @@
     fetch: fetchNext,
     autoMode: footerAutoMode,
     manualMode: !footerAutoMode,
-    hasMore: infiniteScrollInstance?.dataManager.hasNext() || false,
+    hasMore: hasNextPage,
     ...sharedExposed,
   } satisfies InfiniteScrollActionSlotProps)
   let exposedSlot = $derived({

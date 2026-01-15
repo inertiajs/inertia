@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { clickAndWaitForResponse } from './support'
+import { clickAndWaitForResponse, gotoPageAndWaitForContent } from './support'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/once-props/page-a')
@@ -102,7 +102,7 @@ test('navigating through an intermediary page without the once prop', async ({ p
 })
 
 test('deferred once prop is loaded via defer and then remembered on navigation', async ({ page }) => {
-  await page.goto('/once-props/deferred/a')
+  await gotoPageAndWaitForContent(page, '/once-props/deferred/a')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
   await expect(page.getByText('Bar: bar-a')).toBeVisible()
@@ -129,7 +129,7 @@ test('deferred once prop is loaded via defer and then remembered on navigation',
 test('navigating before deferred+once prop loads preserves other once props and loads deferred+once prop on new page', async ({
   page,
 }) => {
-  await page.goto('/once-props/slow-deferred/a')
+  await gotoPageAndWaitForContent(page, '/once-props/slow-deferred/a')
 
   await expect(page.locator('#bar')).toContainText('Bar: bar-a')
   await expect(page.locator('#foo-loading')).toBeVisible()
@@ -428,7 +428,7 @@ test('prefetch cache is updated when deferred once prop finishes loading', async
       response.url().includes('/once-props/deferred/c') && !response.request().headers()['x-inertia-partial-data'],
   )
 
-  await page.goto('/once-props/deferred/a')
+  await gotoPageAndWaitForContent(page, '/once-props/deferred/a')
 
   await expect(page.getByText('Loading foo...')).toBeVisible()
 

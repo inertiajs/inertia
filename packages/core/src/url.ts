@@ -61,12 +61,16 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
 
   if (hasDataForQueryString) {
-    const parseOptions = { ignoreQueryPrefix: true, arrayLimit: -1 }
+    // If the original URL contains indices notation (e.g. [0], [1]), preserve it.
+    // Indices notation cannot be converted to brackets notation without data loss.
+    // We decode the URL search first because browsers may return URL-encoded brackets (%5B0%5D).
+    const hasIndices = /\[\d+\]/.test(decodeURIComponent(url.search))
+    const parseOptions = { ignoreQueryPrefix: true, allowSparse: true }
     url.search = qs.stringify(
       { ...qs.parse(url.search, parseOptions), ...data },
       {
         encodeValuesOnly: true,
-        arrayFormat: qsArrayFormat,
+        arrayFormat: hasIndices ? 'indices' : qsArrayFormat,
       },
     )
   }

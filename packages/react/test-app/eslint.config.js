@@ -8,7 +8,7 @@ import typescript from 'typescript-eslint'
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts'],
+    ignores: ['node_modules', 'dist/**/*', '*.config.js', '**/*.d.ts', '*.timestamp-*'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -18,6 +18,18 @@ export default [
     ...config,
     files: ['**/*.{ts,tsx}'],
   })),
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/unbound-method': 'error',
+    },
+  },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     ...react.configs.flat.recommended,
