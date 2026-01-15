@@ -3,12 +3,13 @@ on: [push, pull_request]
 jobs:
   test-firefox:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Firefox (${{ matrix.adapter }})
+    name: Firefox (${{ matrix.adapter }}) - shard ${{ matrix.shard }} of 4)
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
+        shard: ['1', '2']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,11 +35,11 @@ jobs:
         run: pnpm playwright install firefox
 
       - name: Run Playwright Tests
-        run: pnpm test:${{ matrix.adapter }} --firefox
+        run: pnpm test:${{ matrix.adapter }} --firefox --shard=${{ matrix.shard }}/2
 
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-firefox
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-firefox-shard-${{ matrix.shard }}
           path: test-results
