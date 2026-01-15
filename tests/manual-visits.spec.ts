@@ -454,23 +454,29 @@ test.describe('Preserve scroll', () => {
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
     })
 
-    test('does not reset untracked scroll regions in persistent layouts (visit method)', async ({ page }) => {
+    test('does not reset untracked scroll regions in persistent layouts (visit method)', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName === 'firefox', 'Firefox on Linux auto-adjusts scroll on content change')
+
       await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
       await expect(page).toHaveURL('/visits/preserve-scroll-false-page-two?foo=bar')
       await expect(page.getByText('Foo is now bar')).toBeVisible()
-      // Wait for scroll to stabilize after navigation (Firefox may need this)
-      await page.waitForTimeout(100)
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
     })
 
-    test('does not reset untracked scroll regions in persistent layouts (GET method)', async ({ page }) => {
+    test('does not reset untracked scroll regions in persistent layouts (GET method)', async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName === 'firefox', 'Firefox on Linux auto-adjusts scroll on content change')
+
       await page.getByRole('link', { exact: true, name: 'Reset Scroll (GET)' }).click()
       await expect(page).toHaveURL('/visits/preserve-scroll-false-page-two?foo=baz')
       await expect(page.getByText('Foo is now baz')).toBeVisible()
-      // Wait for scroll to stabilize after navigation (Firefox may need this)
-      await page.waitForTimeout(100)
       await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
       await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
       await expect(page.getByText('Slot scroll position is 10 & 15')).toBeVisible()
