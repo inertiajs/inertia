@@ -1,8 +1,7 @@
 <script>
   import { Link } from '@inertiajs/svelte'
 
-  export let pageNumber
-  export let largeData
+  let { pageNumber, largeData } = $props()
 </script>
 
 <div>
