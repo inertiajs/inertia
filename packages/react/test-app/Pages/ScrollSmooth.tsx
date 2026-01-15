@@ -51,7 +51,9 @@ export default ({ page }: { page: 'long' | 'short' }) => {
       <div className="scroll-smooth-page">
         <div className="header">
           <h1>{page === 'long' ? 'Long Page' : 'Short Page'}</h1>
-          <p>Current scroll position: <span id="scroll-position">0</span></p>
+          <p>
+            Current scroll position: <span id="scroll-position">0</span>
+          </p>
         </div>
 
         <div className="content">
@@ -59,7 +61,10 @@ export default ({ page }: { page: 'long' | 'short' }) => {
             Array.from({ length: 50 }, (_, i) => (
               <div key={i} className="content-block">
                 <h2>Section {i + 1}</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+                  dolore magna aliqua.
+                </p>
               </div>
             ))
           ) : (

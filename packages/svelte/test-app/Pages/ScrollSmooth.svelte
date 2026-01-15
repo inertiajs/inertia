@@ -25,7 +25,10 @@
       {#each Array(50).keys() as i (i)}
         <div class="content-block">
           <h2>Section {i + 1}</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+            dolore magna aliqua.
+          </p>
         </div>
       {/each}
     {:else}
@@ -38,13 +41,9 @@
 
   <div class="navigation">
     {#if page === 'long'}
-      <Link href="/scroll-smooth/short" class="nav-link">
-        Go to Short Page
-      </Link>
+      <Link href="/scroll-smooth/short" class="nav-link">Go to Short Page</Link>
     {:else}
-      <Link href="/scroll-smooth/long" class="nav-link">
-        Go to Long Page
-      </Link>
+      <Link href="/scroll-smooth/long" class="nav-link">Go to Long Page</Link>
     {/if}
   </div>
 </div>
