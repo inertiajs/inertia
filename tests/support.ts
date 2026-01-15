@@ -100,4 +100,3 @@ export const waitForFragmentScroll = async (page: Page) => {
   // Give time for the scroll animation to complete
   await page.waitForTimeout(200)
 }
-
