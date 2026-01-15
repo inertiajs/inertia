@@ -130,7 +130,7 @@ const isLastMessage = (message: Message) => {
           class="ml-3 flex size-8 items-center justify-center rounded-lg bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Spinner v-if="isFetching || isStreaming" class="size-4 text-white" />
-          <PaperAirplaneIcon class="rotate-270 size-4 text-white" v-else />
+          <PaperAirplaneIcon class="size-4 rotate-270 text-white" v-else />
         </button>
       </form>
     </div>

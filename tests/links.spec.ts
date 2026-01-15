@@ -492,6 +492,7 @@ test.describe('preserve scroll', () => {
     )
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
 
+    await page.waitForTimeout(100)
     await page.goBack()
 
     await expect(page).toHaveURL('/links/preserve-scroll-false')

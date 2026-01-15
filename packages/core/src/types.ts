@@ -82,14 +82,14 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
  */
 type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
   ? // Dynamic array
-    | `${number}`
+      | `${number}`
       | (0 extends 1 & T[number]
           ? never
           : T[number] extends FormDataConvertibleValue
             ? never
             : `${number}.${FormDataKeys<T[number]>}`)
   : // Tuple with known length
-    | Extract<keyof T, `${number}`>
+      | Extract<keyof T, `${number}`>
       | {
           [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
             ? never
@@ -550,30 +550,29 @@ export type InertiaAppConfig = {
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
-export interface LinkComponentBaseProps
-  extends Partial<
-    Pick<
-      Visit<RequestPayload>,
-      | 'data'
-      | 'method'
-      | 'replace'
-      | 'preserveScroll'
-      | 'preserveState'
-      | 'preserveUrl'
-      | 'only'
-      | 'except'
-      | 'headers'
-      | 'queryStringArrayFormat'
-      | 'async'
-      | 'viewTransition'
-    > &
-      VisitCallbacks & {
-        href: string | UrlMethodPair
-        prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-        cacheFor: CacheForOption | CacheForOption[]
-        cacheTags: string | string[]
-      }
-  > {}
+export interface LinkComponentBaseProps extends Partial<
+  Pick<
+    Visit<RequestPayload>,
+    | 'data'
+    | 'method'
+    | 'replace'
+    | 'preserveScroll'
+    | 'preserveState'
+    | 'preserveUrl'
+    | 'only'
+    | 'except'
+    | 'headers'
+    | 'queryStringArrayFormat'
+    | 'async'
+    | 'viewTransition'
+  > &
+    VisitCallbacks & {
+      href: string | UrlMethodPair
+      prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+      cacheFor: CacheForOption | CacheForOption[]
+      cacheTags: string | string[]
+    }
+> {}
 
 type PrefetchObject = {
   params: ActiveVisit
