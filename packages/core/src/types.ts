@@ -204,7 +204,7 @@ export type ScrollRegion = {
 export interface ClientSideVisitOptions<TProps = Page['props']> {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: TProps) => PageProps) | PageProps
+  props?: ((props: TProps, onceProps: Partial<TProps>) => PageProps) | PageProps
   flash?: ((flash: FlashData) => PageFlashData) | PageFlashData
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
