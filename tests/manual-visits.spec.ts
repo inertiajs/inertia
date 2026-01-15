@@ -685,7 +685,9 @@ test.describe('Preserve scroll', () => {
 
     test('preserves scroll regions when using the "preserve-scroll" feature from a callback', async ({ page }) => {
       consoleMessages.listen(page)
-      await page.getByRole('link', { exact: true, name: 'Preserve Scroll (Callback)' }).click()
+      await page
+        .getByRole('link', { exact: true, name: 'Preserve Scroll (Callback)' })
+        .click({ position: { x: 50, y: 5 } })
 
       await expect(page).toHaveURL('/visits/preserve-scroll-page-two?foo=baz')
       await expect(page.getByText('Foo is now baz')).toBeVisible()
