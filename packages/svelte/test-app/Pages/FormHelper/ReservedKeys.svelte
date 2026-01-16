@@ -1,8 +1,8 @@
 <script lang="ts">
-import { useForm } from '@inertiajs/svelte'
+  import { useForm } from '@inertiajs/svelte'
 
-// @ts-expect-error - Intentionally using reserved key to test validation
-const form = useForm({ progress: 0 })
+  // @ts-expect-error - Intentionally using reserved key to test validation
+  const form = useForm({ progress: 0 })
 </script>
 
 <div>
