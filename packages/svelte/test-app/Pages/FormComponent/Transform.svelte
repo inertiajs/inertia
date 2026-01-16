@@ -2,7 +2,7 @@
   import { Form } from '@inertiajs/svelte'
   import type { FormDataConvertible } from '@inertiajs/core'
 
-  let transformType = 'none'
+  let transformType = $state('none')
 
   const getTransform = (type: string) => {
     switch (type) {
@@ -21,16 +21,16 @@
     }
   }
 
-  $: transform = getTransform(transformType)
+  let transform = $derived(getTransform(transformType))
 </script>
 
 <div>
   <h1>Transform Function</h1>
 
   <div>
-    <button on:click={() => (transformType = 'none')}>None</button>
-    <button on:click={() => (transformType = 'uppercase')}>Uppercase</button>
-    <button on:click={() => (transformType = 'format')}>Format</button>
+    <button onclick={() => (transformType = 'none')}>None</button>
+    <button onclick={() => (transformType = 'uppercase')}>Uppercase</button>
+    <button onclick={() => (transformType = 'format')}>Format</button>
   </div>
 
   <div>Current transform: {transformType}</div>

@@ -1,8 +1,12 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo: string | undefined
-  export let bar: string | undefined
+  interface Props {
+    foo: string | undefined
+    bar: string | undefined
+  }
+
+  let { foo, bar }: Props = $props()
 
   function reloadBothProps() {
     router.reload({ only: ['foo'] })
@@ -14,5 +18,5 @@
   <div id="foo">Foo: {foo}</div>
   <div id="bar">Bar: {bar}</div>
 
-  <button on:click={reloadBothProps}>Reload both props</button>
+  <button onclick={reloadBothProps}>Reload both props</button>
 </div>

@@ -11,11 +11,16 @@ export { default as Link } from './components/Link.svelte'
 export { default as WhenVisible } from './components/WhenVisible.svelte'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as inertia } from './link'
-export { default as page, usePage } from './page'
+export { default as page, usePage } from './page.svelte'
 export { type ResolvedComponent, type SvelteInertiaAppConfig } from './types'
-export { default as useForm, type InertiaForm, type InertiaFormProps, type InertiaPrecognitiveForm } from './useForm'
+export {
+  default as useForm,
+  type InertiaForm,
+  type InertiaFormProps,
+  type InertiaPrecognitiveForm,
+} from './useForm.svelte'
 export { default as usePoll } from './usePoll'
-export { default as usePrefetch } from './usePrefetch'
-export { default as useRemember } from './useRemember'
+export { default as usePrefetch } from './usePrefetch.svelte'
+export { default as useRemember } from './useRemember.svelte'
 
 export const config = coreConfig.extend<SvelteInertiaAppConfig>({})

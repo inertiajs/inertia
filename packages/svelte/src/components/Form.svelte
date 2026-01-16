@@ -15,38 +15,71 @@
   } from '@inertiajs/core'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
-  import { onMount, setContext } from 'svelte'
-  import { writable } from 'svelte/store'
-  import { FormContextKey } from './formContext'
-  import useForm from '../useForm'
+  import { onMount } from 'svelte'
+  import { setFormContext } from './formContext'
+  import useForm from '../useForm.svelte'
 
   const noop = () => undefined
 
-  export let action: FormComponentProps['action'] = ''
-  export let method: FormComponentProps['method'] = 'get'
-  export let headers: FormComponentProps['headers'] = {}
-  export let queryStringArrayFormat: FormComponentProps['queryStringArrayFormat'] = 'brackets'
-  export let errorBag: FormComponentProps['errorBag'] = null
-  export let showProgress: FormComponentProps['showProgress'] = true
-  export let transform: FormComponentProps['transform'] = (data) => data
-  export let options: FormComponentProps['options'] = {}
-  export let onCancelToken: FormComponentProps['onCancelToken'] = noop
-  export let onBefore: FormComponentProps['onBefore'] = noop
-  export let onStart: FormComponentProps['onStart'] = noop
-  export let onProgress: FormComponentProps['onProgress'] = noop
-  export let onFinish: FormComponentProps['onFinish'] = noop
-  export let onCancel: FormComponentProps['onCancel'] = noop
-  export let onSuccess: FormComponentProps['onSuccess'] = noop
-  export let onError: FormComponentProps['onError'] = noop
-  export let onSubmitComplete: FormComponentProps['onSubmitComplete'] = noop
-  export let disableWhileProcessing: boolean = false
-  export let invalidateCacheTags: FormComponentProps['invalidateCacheTags'] = []
-  export let resetOnError: FormComponentProps['resetOnError'] = false
-  export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
-  export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
-  export let validateFiles: FormComponentProps['validateFiles'] = false
-  export let validationTimeout: FormComponentProps['validationTimeout'] = 1500
-  export let withAllErrors: FormComponentProps['withAllErrors'] = false
+  interface Props {
+    action?: FormComponentProps['action']
+    method?: FormComponentProps['method']
+    headers?: FormComponentProps['headers']
+    queryStringArrayFormat?: FormComponentProps['queryStringArrayFormat']
+    errorBag?: FormComponentProps['errorBag']
+    showProgress?: FormComponentProps['showProgress']
+    transform?: FormComponentProps['transform']
+    options?: FormComponentProps['options']
+    onCancelToken?: FormComponentProps['onCancelToken']
+    onBefore?: FormComponentProps['onBefore']
+    onStart?: FormComponentProps['onStart']
+    onProgress?: FormComponentProps['onProgress']
+    onFinish?: FormComponentProps['onFinish']
+    onCancel?: FormComponentProps['onCancel']
+    onSuccess?: FormComponentProps['onSuccess']
+    onError?: FormComponentProps['onError']
+    onSubmitComplete?: FormComponentProps['onSubmitComplete']
+    disableWhileProcessing?: boolean
+    invalidateCacheTags?: FormComponentProps['invalidateCacheTags']
+    resetOnError?: FormComponentProps['resetOnError']
+    resetOnSuccess?: FormComponentProps['resetOnSuccess']
+    setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess']
+    validateFiles?: FormComponentProps['validateFiles']
+    validationTimeout?: FormComponentProps['validationTimeout']
+    withAllErrors?: FormComponentProps['withAllErrors']
+    children?: import('svelte').Snippet<[any]>
+    [key: string]: any
+  }
+
+  let {
+    action = $bindable(''),
+    method = 'get',
+    headers = {},
+    queryStringArrayFormat = 'brackets',
+    errorBag = null,
+    showProgress = true,
+    transform = (data) => data,
+    options = {},
+    onCancelToken = noop,
+    onBefore = noop,
+    onStart = noop,
+    onProgress = noop,
+    onFinish = noop,
+    onCancel = noop,
+    onSuccess = noop,
+    onError = noop,
+    onSubmitComplete = noop,
+    disableWhileProcessing = false,
+    invalidateCacheTags = [],
+    resetOnError = false,
+    resetOnSuccess = false,
+    setDefaultsOnSuccess = false,
+    validateFiles = false,
+    validationTimeout = 1500,
+    withAllErrors = false,
+    children,
+    ...rest
+  }: Props = $props()
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
   type FormSubmitter = HTMLElement | null
@@ -73,12 +106,12 @@
 
   form.transform(getTransformedData)
 
-  let formElement: HTMLFormElement
-  let isDirty = false
+  let formElement: HTMLFormElement = $state(null!)
+  let isDirty = $state(false)
   let defaultData: FormData = new FormData()
 
-  $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
-  $: _action = isUrlMethodPair(action) ? action.url : (action as string)
+  const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
+  const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
 
   export function getFormData(submitter?: FormSubmitter): FormData {
     return new FormData(formElement, submitter)
@@ -160,10 +193,10 @@
     }
 
     // We need transform because we can't override the default data with different keys (by design)
-    $form.transform(() => transform!(data)).submit(_method, url, submitOptions)
+    form.transform(() => transform!(data)).submit(_method, url, submitOptions)
 
     // Reset the transformer back so the submitter is not used for future submissions
-    $form.transform(getTransformedData)
+    form.transform(getTransformedData)
   }
 
   function handleSubmit(event: SubmitEvent) {
@@ -186,7 +219,7 @@
   }
 
   export function clearErrors(...fields: string[]) {
-    $form.clearErrors(...fields)
+    form.clearErrors(...fields)
   }
 
   export function resetAndClearErrors(...fields: string[]) {
@@ -195,7 +228,7 @@
   }
 
   export function setError(fieldOrFields: string | Record<string, string>, maybeValue?: string) {
-    $form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
+    form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
   }
 
   export function defaults() {
@@ -241,7 +274,7 @@
     }
   })
 
-  $: {
+  $effect(() => {
     form.setValidationTimeout(validationTimeout!)
 
     if (validateFiles) {
@@ -249,73 +282,80 @@
     } else {
       form.withoutFileValidation()
     }
-  }
-
-  $: slotErrors = $form.errors as Errors
-
-  // Form context for child components
-  const formContextStore = writable<FormComponentRef | undefined>(undefined)
-
-  $: formContextStore.set({
-    errors: $form.errors,
-    hasErrors: $form.hasErrors,
-    processing: $form.processing,
-    progress: $form.progress,
-    wasSuccessful: $form.wasSuccessful,
-    recentlySuccessful: $form.recentlySuccessful,
-    isDirty,
-    clearErrors,
-    resetAndClearErrors,
-    setError,
-    reset,
-    submit,
-    defaults,
-    getData,
-    getFormData,
-    // Precognition
-    validator,
-    validate,
-    touch,
-    validating: $form.validating,
-    valid,
-    invalid,
-    touched,
   })
 
-  setContext(FormContextKey, formContextStore)
+  const slotErrors = $derived(form.errors as Errors)
+
+  // Form context for child components
+  function createFormContext(): FormComponentRef {
+    return {
+      errors: form.errors,
+      hasErrors: form.hasErrors,
+      processing: form.processing,
+      progress: form.progress,
+      wasSuccessful: form.wasSuccessful,
+      recentlySuccessful: form.recentlySuccessful,
+      isDirty,
+      clearErrors,
+      resetAndClearErrors,
+      setError,
+      reset,
+      submit,
+      defaults,
+      getData,
+      getFormData,
+      // Precognition
+      validator,
+      validate,
+      touch,
+      validating: form.validating,
+      valid,
+      invalid,
+      touched,
+    }
+  }
+
+  let formContextStore = $state<FormComponentRef>(createFormContext())
+
+  $effect(() => {
+    Object.assign(formContextStore, createFormContext())
+  })
+
+  setFormContext(formContextStore)
 </script>
 
+{/* @ts-expect-error method type does not match here*/ null}
 <form
   bind:this={formElement}
   action={_action}
   method={_method}
-  on:submit={handleSubmit}
-  on:reset={handleReset}
-  {...$$restProps}
-  inert={disableWhileProcessing && $form.processing ? true : undefined}
+  onsubmit={handleSubmit}
+  onreset={handleReset}
+  {...rest}
+  inert={disableWhileProcessing && form.processing ? true : undefined}
 >
-  <slot
-    errors={slotErrors}
-    hasErrors={$form.hasErrors}
-    processing={$form.processing}
-    progress={$form.progress}
-    wasSuccessful={$form.wasSuccessful}
-    recentlySuccessful={$form.recentlySuccessful}
-    {clearErrors}
-    {resetAndClearErrors}
-    {setError}
-    {isDirty}
-    {submit}
-    {defaults}
-    {reset}
-    {getData}
-    {getFormData}
-    {validator}
-    {validate}
-    {touch}
-    validating={$form.validating}
-    valid={$form.valid}
-    invalid={$form.invalid}
-    touched={$form.touched}
-  />
+  {@render children?.({
+    errors: slotErrors,
+    hasErrors: form.hasErrors,
+    processing: form.processing,
+    progress: form.progress,
+    wasSuccessful: form.wasSuccessful,
+    recentlySuccessful: form.recentlySuccessful,
+    clearErrors,
+    resetAndClearErrors,
+    setError,
+    isDirty,
+    submit,
+    defaults,
+    reset,
+    getData,
+    getFormData,
+    validator,
+    validate,
+    touch,
+    validating: form.validating,
+    valid: form.valid,
+    invalid: form.invalid,
+    touched: form.touched,
+  })}
 </form>

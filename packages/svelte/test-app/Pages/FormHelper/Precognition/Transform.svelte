@@ -11,14 +11,14 @@
 
 <div>
   <div>
-    <input bind:value={$form.name} name="name" placeholder="Name" on:blur={() => $form.validate('name')} />
-    {#if $form.invalid('name')}
+    <input bind:value={form.name} name="name" placeholder="Name" onblur={() => form.validate('name')} />
+    {#if form.invalid('name')}
       <p>
-        {$form.errors.name}
+        {form.errors.name}
       </p>
     {/if}
-    {#if $form.valid('name')}<p>Name is valid!</p>{/if}
+    {#if form.valid('name')}<p>Name is valid!</p>{/if}
   </div>
 
-  {#if $form.validating}<p>Validating...</p>{/if}
+  {#if form.validating}<p>Validating...</p>{/if}
 </div>

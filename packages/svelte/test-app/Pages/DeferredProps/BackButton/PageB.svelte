@@ -1,13 +1,17 @@
 <script lang="ts">
   import { Deferred, inertia } from '@inertiajs/svelte'
 
-  export let data: string | undefined
+  interface Props {
+    data: string | undefined
+  }
+
+  let { data }: Props = $props()
 </script>
 
 <Deferred data="data">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading data...</div>
-  </svelte:fragment>
+  {/snippet}
   {data}
 </Deferred>
 

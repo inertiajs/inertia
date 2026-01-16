@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   declare global {
     interface Window {
       flashCount: number
@@ -34,9 +34,9 @@
 </script>
 
 <div>
-  <span id="flash">{JSON.stringify($page.flash)}</span>
+  <span id="flash">{JSON.stringify(page.flash)}</span>
 
-  <button on:click={withFlash}>With flash object</button>
-  <button on:click={withFlashFunction}>With flash function</button>
-  <button on:click={withoutFlash}>Without flash</button>
+  <button onclick={withFlash}>With flash object</button>
+  <button onclick={withFlashFunction}>With flash function</button>
+  <button onclick={withoutFlash}>Without flash</button>
 </div>

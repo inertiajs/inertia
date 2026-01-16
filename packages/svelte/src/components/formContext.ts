@@ -1,9 +1,14 @@
 import type { FormComponentRef } from '@inertiajs/core'
-import { getContext } from 'svelte'
-import type { Readable } from 'svelte/store'
+import { createContext } from 'svelte'
 
-export const FormContextKey = Symbol('InertiaFormContext')
+const [getFormContext, setFormContext] = createContext<FormComponentRef>()
 
-export function useFormContext(): Readable<FormComponentRef> | undefined {
-  return getContext(FormContextKey)
+export function useFormContext(): FormComponentRef | undefined {
+  try {
+    return getFormContext()
+  } catch {
+    return undefined
+  }
 }
+
+export { setFormContext }

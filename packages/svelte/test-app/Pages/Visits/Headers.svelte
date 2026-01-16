@@ -86,14 +86,14 @@
 <div>
   <span class="text">This is the page that demonstrates passing custom headers through manual visits</span>
 
-  <a href={'#'} on:click={defaultHeadersMethod} class="default">Standard visit Link</a>
+  <a href={'#'} onclick={defaultHeadersMethod} class="default">Standard visit Link</a>
 
-  <a href={'#'} on:click={visitWithCustomHeaders} class="visit">Specific visit Link</a>
-  <a href={'#'} on:click={getMethod} class="get">GET Link</a>
-  <a href={'#'} on:click={postMethod} class="post">POST Link</a>
-  <a href={'#'} on:click={putMethod} class="put">PUT Link</a>
-  <a href={'#'} on:click={patchMethod} class="patch">PATCH Link</a>
-  <a href={'#'} on:click={deleteMethod} class="delete">DELETE Link</a>
+  <a href={'#'} onclick={visitWithCustomHeaders} class="visit">Specific visit Link</a>
+  <a href={'#'} onclick={getMethod} class="get">GET Link</a>
+  <a href={'#'} onclick={postMethod} class="post">POST Link</a>
+  <a href={'#'} onclick={putMethod} class="put">PUT Link</a>
+  <a href={'#'} onclick={patchMethod} class="patch">PATCH Link</a>
+  <a href={'#'} onclick={deleteMethod} class="delete">DELETE Link</a>
 
-  <a href={'#'} on:click={overridden} class="overridden">Overriden Link</a>
+  <a href={'#'} onclick={overridden} class="overridden">Overriden Link</a>
 </div>

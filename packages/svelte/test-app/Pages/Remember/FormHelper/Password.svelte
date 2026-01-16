@@ -10,11 +10,11 @@
 <div>
   <label>
     Username
-    <input type="text" id="username" bind:value={$form.username} />
+    <input type="text" id="username" bind:value={form.username} />
   </label>
   <label>
     Password
-    <input type="password" id="password" bind:value={$form.password} />
+    <input type="password" id="password" bind:value={form.password} />
   </label>
 
   <a href="/dump/get" use:inertia class="link">Navigate away</a>

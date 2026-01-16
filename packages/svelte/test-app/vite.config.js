@@ -13,11 +13,5 @@ export default defineConfig({
       '@': __dirname,
     },
   },
-  plugins: [
-    svelte({
-      compilerOptions: {
-        hydratable: true,
-      },
-    }),
-  ],
+  plugins: [svelte()],
 })

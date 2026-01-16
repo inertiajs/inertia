@@ -1,30 +1,27 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy } from 'svelte'
-  import { usePage } from '../page'
+  import { usePage } from '../page.svelte'
 
-  export let data: string | string[] = ''
-  export let params: ReloadOptions = {}
-  export let buffer: number = 0
-  export let as: keyof HTMLElementTagNameMap = 'div'
-  export let always: boolean = false
+  interface Props {
+    data?: string | string[]
+    params?: ReloadOptions
+    buffer?: number
+    as?: keyof HTMLElementTagNameMap
+    always?: boolean
+    children?: import('svelte').Snippet<[any]>
+    fallback?: import('svelte').Snippet
+  }
 
-  let loaded = false
-  let fetching = false
-  let el: HTMLElement
+  let { data = '', params = {}, buffer = 0, as = 'div', always = false, children, fallback }: Props = $props()
+
+  let keys = $derived(data ? (Array.isArray(data) ? data : [data]) : [])
+  let loaded = $derived(keys.length > 0 && keys.every((key) => page.props[key] !== undefined))
+  let fetching = $state(false)
   let observer: IntersectionObserver | null = null
 
   const page = usePage()
-  $: keys = data ? (Array.isArray(data) ? data : [data]) : []
-  $: loaded = keys.length > 0 && keys.every((key) => $page.props[key] !== undefined)
 
-  $: if (el && (!loaded || always)) {
-    registerObserver()
-  }
-
-  function registerObserver() {
-    observer?.disconnect()
-
+  function attachObserver(el: HTMLElement) {
     observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) {
@@ -66,11 +63,12 @@
     )
 
     observer.observe(el)
-  }
 
-  onDestroy(() => {
-    observer?.disconnect()
-  })
+    // Clean up will run like onDestroy
+    return () => {
+      observer?.disconnect()
+    }
+  }
 
   function getReloadParams(): Partial<ReloadOptions> {
     const reloadParams: Partial<ReloadOptions> = { ...params }
@@ -84,11 +82,11 @@
 </script>
 
 {#if always || !loaded}
-  <svelte:element this={as} bind:this={el} />
+  <svelte:element this={as} {@attach attachObserver} />
 {/if}
 
 {#if loaded}
-  <slot {fetching} />
-{:else if $$slots.fallback}
-  <slot name="fallback" />
+  {@render children?.({ fetching })}
+{:else if fallback}
+  {@render fallback?.()}
 {/if}

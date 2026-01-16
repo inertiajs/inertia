@@ -1,26 +1,32 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   export { default as layout } from '@/Layouts/WithoutScrollRegion.svelte'
 </script>
 
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo: string = 'default'
+  const { foo = 'default' }: { foo?: string } = $props()
 
-  const preserve = () => {
+  const preserve = (e: Event) => {
+    e.preventDefault()
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'foo' },
       preserveScroll: true,
     })
   }
 
-  const preserveFalse = () => {
+  const preserveFalse = (e: Event) => {
+    e.preventDefault()
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'bar' },
     })
   }
 
-  const preserveCallback = () => {
+  const preserveCallback = (e: Event) => {
+    e.preventDefault()
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'baz' },
       preserveScroll: (page) => {
@@ -31,7 +37,9 @@
     })
   }
 
-  const preserveCallbackFalse = () => {
+  const preserveCallbackFalse = (e: Event) => {
+    e.preventDefault()
+
     router.visit('/visits/preserve-scroll-false-page-two', {
       data: { foo: 'foo' },
       preserveScroll: (page) => {
@@ -42,7 +50,9 @@
     })
   }
 
-  const preserveGet = () => {
+  const preserveGet = (e: Event) => {
+    e.preventDefault()
+
     router.get(
       '/visits/preserve-scroll-false-page-two',
       {
@@ -54,7 +64,9 @@
     )
   }
 
-  const preserveGetFalse = () => {
+  const preserveGetFalse = (e: Event) => {
+    e.preventDefault()
+
     router.get('/visits/preserve-scroll-false-page-two', {
       foo: 'baz',
     })
@@ -67,13 +79,13 @@
   </span>
   <span class="foo">Foo is now {foo}</span>
 
-  <a href={'#'} on:click|preventDefault={preserve} class="preserve">Preserve Scroll</a>
-  <a href={'#'} on:click|preventDefault={preserveFalse} class="reset">Reset Scroll</a>
-  <a href={'#'} on:click|preventDefault={preserveCallback} class="preserve-callback">Preserve Scroll (Callback)</a>
+  <a href={'#'} onclick={preserve} class="preserve">Preserve Scroll</a>
+  <a href={'#'} onclick={preserveFalse} class="reset">Reset Scroll</a>
+  <a href={'#'} onclick={preserveCallback} class="preserve-callback">Preserve Scroll (Callback)</a>
   <br />
-  <a href={'#'} on:click|preventDefault={preserveCallbackFalse} class="reset-callback">Reset Scroll (Callback)</a>
-  <a href={'#'} on:click|preventDefault={preserveGet} class="preserve-get">Preserve Scroll (GET)</a>
-  <a href={'#'} on:click|preventDefault={preserveGetFalse} class="reset-get">Reset Scroll (GET)</a>
+  <a href={'#'} onclick={preserveCallbackFalse} class="reset-callback">Reset Scroll (Callback)</a>
+  <a href={'#'} onclick={preserveGet} class="preserve-get">Preserve Scroll (GET)</a>
+  <a href={'#'} onclick={preserveGetFalse} class="reset-get">Reset Scroll (GET)</a>
 
   <a href="/non-inertia" class="off-site">Off-site link</a>
 </div>

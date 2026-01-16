@@ -1,8 +1,12 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let foo = ''
-  export let bar = ''
+  interface Props {
+    foo?: string
+    bar?: string
+  }
+
+  let { foo = '', bar = '' }: Props = $props()
 
   const replaceSequentially = () => {
     router.replaceProp('foo', 'baz')
@@ -14,5 +18,5 @@
   <p>Foo: {foo}</p>
   <p>Bar: {bar}</p>
 
-  <button on:click={replaceSequentially}>Replace foo and bar sequentially</button>
+  <button onclick={replaceSequentially}>Replace foo and bar sequentially</button>
 </div>

@@ -5,18 +5,20 @@
   import OutsideFormComponent from './OutsideFormComponent.svelte'
 </script>
 
-<Form action="/dump/post" method="post" let:isDirty let:hasErrors let:errors>
-  <div>
-    <span>Parent: Form is {isDirty ? 'dirty' : 'clean'}</span>
-    {#if hasErrors}<span> | Parent: Form has errors</span>{/if}
-    {#if errors.name}<span> | {errors.name}</span>{/if}
-  </div>
+<Form action="/dump/post" method="post">
+  {#snippet children({ isDirty, hasErrors, errors })}
+    <div>
+      <span>Parent: Form is {isDirty ? 'dirty' : 'clean'}</span>
+      {#if hasErrors}<span> | Parent: Form has errors</span>{/if}
+      {#if errors.name}<span> | {errors.name}</span>{/if}
+    </div>
 
-  <input type="text" name="name" value="John Doe" />
-  <input type="email" name="email" value="john@example.com" />
+    <input type="text" name="name" value="John Doe" />
+    <input type="email" name="email" value="john@example.com" />
 
-  <ChildComponent />
-  <NestedComponent />
+    <ChildComponent />
+    <NestedComponent />
+  {/snippet}
 </Form>
 
 <OutsideFormComponent />

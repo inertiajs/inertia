@@ -1,11 +1,15 @@
 <script lang="ts">
   import { Link, WhenVisible } from '@inertiajs/svelte'
 
-  export let lazyData:
-    | {
-        text: string
-      }
-    | undefined = undefined
+  interface Props {
+    lazyData?:
+      | {
+          text: string
+        }
+      | undefined
+  }
+
+  let { lazyData = undefined }: Props = $props()
 </script>
 
 <div>
@@ -15,9 +19,9 @@
 
   <div style="margin-top: 2000px; padding: 20px; border: 1px solid #ccc">
     <WhenVisible data="lazyData">
-      <svelte:fragment slot="fallback">
+      {#snippet fallback()}
         <p>Loading lazy data...</p>
-      </svelte:fragment>
+      {/snippet}
 
       <p>{lazyData?.text}</p>
     </WhenVisible>
@@ -25,9 +29,9 @@
 
   <div style="margin-top: 2000px; padding: 20px; border: 1px solid #ccc">
     <WhenVisible data="lazyData" always>
-      <svelte:fragment slot="fallback">
+      {#snippet fallback()}
         <p>Loading always data...</p>
-      </svelte:fragment>
+      {/snippet}
 
       <p>Always: {lazyData?.text}</p>
     </WhenVisible>

@@ -1,15 +1,19 @@
 <script lang="ts">
   import { Deferred } from '@inertiajs/svelte'
 
-  export let filter: string
-  export let users: { text: string } | undefined
+  interface Props {
+    filter: string
+    users: { text: string } | undefined
+  }
+
+  let { filter, users }: Props = $props()
 </script>
 
 <div>Filter: {filter}</div>
 
 <Deferred data="users">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading users...</div>
-  </svelte:fragment>
+  {/snippet}
   <div>{users?.text}</div>
 </Deferred>

@@ -14,5 +14,6 @@ export default defineConfig({
       // Only externalize Svelte (peer dependency) - bundle everything else
       external: ['svelte', 'svelte/internal', 'svelte/store'],
     },
+    target: 'es2020',
   },
 })
