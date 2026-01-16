@@ -13,12 +13,6 @@ const PageB = () => {
   )
 }
 
-PageB.layout = (page: React.ReactNode) => {
-  return (
-    <SiteLayout>
-      <NestedLayout children={page} />
-    </SiteLayout>
-  )
-}
+PageB.layout = [SiteLayout, NestedLayout]
 
 export default PageB
