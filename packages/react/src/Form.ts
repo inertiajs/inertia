@@ -27,6 +27,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
+import { isReact19 } from './react'
 import useForm from './useForm'
 
 // Polyfill for startTransition to support React 16.9+
@@ -284,11 +285,10 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           event.preventDefault()
           submit((event.nativeEvent as SubmitEvent).submitter)
         },
-        // Only React 19 supports passing a boolean to the `inert` attribute.
-        // To support earlier versions as well, we use the string 'true'.
-        // Unfortunately, React 19 treats an empty string as `false`.
+        // React 19 supports passing a boolean to the `inert` attribute, but shows
+        // a warning when receiving a string. Earlier versions require the string 'true'.
         // See: https://github.com/inertiajs/inertia/pull/2536
-        inert: disableWhileProcessing && form.processing && 'true',
+        inert: disableWhileProcessing && form.processing && (isReact19 ? true : 'true'),
       },
       typeof children === 'function' ? children(exposed) : children,
     )
