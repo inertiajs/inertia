@@ -3,7 +3,11 @@
   import type { FormDataConvertible } from '@inertiajs/core'
   import type { InertiaForm } from '@inertiajs/svelte'
 
-  export let form: InertiaForm<TFormData>
+  interface Props {
+    form: InertiaForm<TFormData>
+  }
+
+  let { form }: Props = $props()
 </script>
 
 <div>{form}</div>

@@ -1,16 +1,24 @@
 <script lang="ts">
   import { Deferred } from '@inertiajs/svelte'
 
-  export let alpha: string | undefined
-  export let beta: string | undefined
+  interface Props {
+    alpha: string | undefined
+    beta: string | undefined
+  }
+
+  let { alpha, beta }: Props = $props()
 </script>
 
 <Deferred data="alpha">
-  <div slot="fallback">Loading alpha...</div>
+  {#snippet fallback()}
+    <div>Loading alpha...</div>
+  {/snippet}
   {alpha}
 </Deferred>
 
 <Deferred data="beta">
-  <div slot="fallback">Loading beta...</div>
+  {#snippet fallback()}
+    <div>Loading beta...</div>
+  {/snippet}
   {beta}
 </Deferred>

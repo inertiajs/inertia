@@ -1,7 +1,7 @@
 <script>
   import { Deferred, router } from '@inertiajs/svelte'
 
-  export let results
+  let { results } = $props()
 
   const handleReload = () => {
     router.reload({
@@ -11,11 +11,11 @@
 </script>
 
 <Deferred data="results">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading results...</div>
-  </svelte:fragment>
+  {/snippet}
   <div id="results-data">{results?.data?.join(', ')}</div>
   <div id="results-page">Page: {results?.page}</div>
 </Deferred>
 
-<button on:click={handleReload}>Reload with page 2</button>
+<button onclick={handleReload}>Reload with page 2</button>

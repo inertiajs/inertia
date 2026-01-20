@@ -1,8 +1,12 @@
 <script lang="ts">
   import { Link, router } from '@inertiajs/svelte'
 
-  export let foo: string
-  export let bar: string
+  interface Props {
+    foo: string
+    bar: string
+  }
+
+  let { foo, bar }: Props = $props()
 </script>
 
 <p id="foo">Foo: {foo}</p>
@@ -11,5 +15,5 @@
 <Link href="/once-props/page-c">Go to Page C</Link>
 <Link href="/once-props/page-d" prefetch="mount">Go to Page D</Link>
 <Link href="/once-props/page-e" prefetch="mount" cacheFor={1000}>Go to Page E (short cache)</Link>
-<button on:click={() => router.reload({ only: ['foo'] })}>Reload (only foo)</button>
-<button on:click={() => router.replaceProp('foo', 'replaced-foo')}>Replace foo</button>
+<button onclick={() => router.reload({ only: ['foo'] })}>Reload (only foo)</button>
+<button onclick={() => router.replaceProp('foo', 'replaced-foo')}>Replace foo</button>

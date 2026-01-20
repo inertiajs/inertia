@@ -9,6 +9,6 @@
 <div>
   <h1>Navigate Non-Inertia</h1>
   <p>
-    <a href="/non-inertia" on:click={navigate}>Go to non-Inertia page</a>
+    <a href="/non-inertia" onclick={navigate}>Go to non-Inertia page</a>
   </p>
 </div>

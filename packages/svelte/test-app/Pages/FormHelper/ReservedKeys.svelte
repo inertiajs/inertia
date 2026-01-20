@@ -6,5 +6,5 @@
 </script>
 
 <div>
-  <div id="form-created">Form created with progress value: {$form.progress}</div>
+  <div id="form-created">Form created with progress value: {form.progress}</div>
 </div>

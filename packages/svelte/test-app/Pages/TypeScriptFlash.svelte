@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   declare module '@inertiajs/core' {
     export interface InertiaConfig {
       flashDataType: {
@@ -13,13 +13,13 @@
   import { router, page } from '@inertiajs/svelte'
 
   // page.flash is always an object
-  $: flash = $page.flash
-  $: toast = $page.flash.toast
-  $: toastMessage = $page.flash.toast?.message
-  $: toastType = $page.flash.toast?.type
+  let flash = $derived(page.flash)
+  let toast = $derived(page.flash.toast)
+  let toastMessage = $derived(page.flash.toast?.message)
+  let toastType = $derived(page.flash.toast?.type)
 
   // @ts-expect-error - 'message' does not exist on flash (it's on toast)
-  $: flashMessage = $page.flash.message
+  let flashMessage = $derived(page.flash.message)
 
   // router.flash with object
   router.flash({ toast: { type: 'success', message: 'Hello' } })
@@ -55,15 +55,17 @@
   // @ts-expect-error - 'paymentError' should be string, not number
   router.flash<{ paymentError: string }>({ paymentError: 123 })
 
-  console.log({
-    flash,
-    toast,
-    toastMessage,
-    toastType,
-    flashMessage,
+  $effect.pre(() => {
+    console.log({
+      flash,
+      toast,
+      toastMessage,
+      toastType,
+      flashMessage,
+    })
   })
 </script>
 
-{#if $page.flash.toast}
-  {$page.flash.toast.message}
+{#if page.flash.toast}
+  {page.flash.toast.message}
 {/if}
