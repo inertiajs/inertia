@@ -2,8 +2,8 @@
   import { usePoll } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 
-  let replaceStateCalls = 0
-  let pollsFinished = 0
+  let replaceStateCalls = $state(0)
+  let pollsFinished = $state(0)
 
   onMount(() => {
     const original = window.history.replaceState.bind(window.history)

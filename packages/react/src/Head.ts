@@ -1,5 +1,5 @@
 import { escape } from 'lodash-es'
-import React, { FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, ReactElement, ReactNode, use, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
 type InertiaHeadProps = {
@@ -10,7 +10,7 @@ type InertiaHeadProps = {
 type InertiaHead = FunctionComponent<InertiaHeadProps>
 
 const Head: InertiaHead = function ({ children, title }) {
-  const headManager = useContext(HeadContext)
+  const headManager = use(HeadContext)
   const provider = useMemo(() => headManager!.createProvider(), [headManager])
   const isServer = typeof window === 'undefined'
 

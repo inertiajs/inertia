@@ -1,8 +1,12 @@
 <script lang="ts">
   import { Link } from '@inertiajs/svelte'
 
-  export let userPermissions: string
-  export let bar: string
+  interface Props {
+    userPermissions: string
+    bar: string
+  }
+
+  let { userPermissions, bar }: Props = $props()
 </script>
 
 <p id="permissions">Permissions: {userPermissions}</p>

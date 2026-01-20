@@ -8,71 +8,71 @@
   })
 
   const submit = () => {
-    $form.post($page.url)
+    form.post(page.url)
   }
 
   const submitAndReset = () => {
-    $form.post('/form-helper/data/redirect-back', {
-      onSuccess: () => $form.reset(),
+    form.post('/form-helper/data/redirect-back', {
+      onSuccess: () => form.reset(),
     })
   }
 
   const resetAll = () => {
-    $form.reset()
+    form.reset()
   }
 
   const resetOne = () => {
-    $form.reset('handle')
+    form.reset('handle')
   }
 
   const reassign = () => {
-    $form.defaults()
+    form.defaults()
   }
 
   const reassignObject = () => {
-    $form.defaults({
+    form.defaults({
       handle: 'updated handle',
       remember: true,
     })
   }
 
   const reassignSingle = () => {
-    $form.defaults('name', 'single value')
+    form.defaults('name', 'single value')
   }
 </script>
 
 <div>
   <label>
     Full Name
-    <input type="text" id="name" name="name" bind:value={$form.name} />
+    <input type="text" id="name" name="name" bind:value={form.name} />
   </label>
-  {#if $form.errors.name}
-    <span class="name_error">{$form.errors.name}</span>
+  {#if form.errors.name}
+    <span class="name_error">{form.errors.name}</span>
   {/if}
   <label>
     Handle
-    <input type="text" id="handle" name="handle" bind:value={$form.handle} />
+    <input type="text" id="handle" name="handle" bind:value={form.handle} />
   </label>
-  {#if $form.errors.handle}
-    <span class="handle_error">{$form.errors.handle}</span>
+  {#if form.errors.handle}
+    <span class="handle_error">{form.errors.handle}</span>
   {/if}
   <label>
     Remember Me
-    <input type="checkbox" id="remember" name="remember" bind:checked={$form.remember} />
+    <input type="checkbox" id="remember" name="remember" bind:checked={form.remember} />
   </label>
-  {#if $form.errors.remember}
-    <span class="remember_error">{$form.errors.remember}</span>
+  {#if form.errors.remember}
+    <span class="remember_error">{form.errors.remember}</span>
   {/if}
 
-  <button on:click={submit} class="submit">Submit form</button>
-  <button on:click={submitAndReset} class="submit">Submit form and reset</button>
+  <button onclick={submit} class="submit">Submit form</button>
+  <button onclick={submitAndReset} class="submit">Submit form and reset</button>
 
-  <button on:click={resetAll} class="reset">Reset all data</button>
-  <button on:click={resetOne} class="reset-one">Reset one field</button>
+  <button onclick={resetAll} class="reset">Reset all data</button>
+  <button onclick={resetOne} class="reset-one">Reset one field</button>
 
-  <button on:click={reassign} class="reassign">Reassign current as defaults</button>
-  <button on:click={reassignObject} class="reassign-object">Reassign default values</button>
-  <button on:click={reassignSingle} class="reassign-single">Reassign single default</button>
+  <button onclick={reassign} class="reassign">Reassign current as defaults</button>
+  <button onclick={reassignObject} class="reassign-object">Reassign default values</button>
+  <button onclick={reassignSingle} class="reassign-single">Reassign single default</button>
 
-  <span class="errors-status">Form has {$form.hasErrors ? '' : 'no '}errors</span>
+  <span class="errors-status">Form has {form.hasErrors ? '' : 'no '}errors</span>
 </div>

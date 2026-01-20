@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Link } from '@inertiajs/svelte'
 
-  let href = '/sleep'
+  let href = $state('/sleep')
 
   const changeUrl = () => {
     href = '/something-else'
@@ -9,6 +9,6 @@
 </script>
 
 <div>
-  <button on:click={changeUrl}>Change URL</button>
+  <button onclick={changeUrl}>Change URL</button>
   <Link {href} class="get">The Link</Link>
 </div>

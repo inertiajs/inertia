@@ -7,12 +7,16 @@
     bar: string
   }
 
-  export let foo: string
-  export let bar: string
+  interface Props {
+    foo: string
+    bar: string
+  }
 
-  let errors = 0
-  let finished = 0
-  let success = 0
+  let { foo, bar }: Props = $props()
+
+  let errors = $state(0)
+  let finished = $state(0)
+  let success = $state(0)
   let random = Math.random()
 
   const bagErrors = () => {
@@ -68,14 +72,14 @@
 <div>
   <div>{foo}</div>
   <div>{bar}</div>
-  <button on:click={replace}>Replace</button>
-  <button on:click={() => replaceAndPreserveStateWithErrors({ name: 'Field is required' })}>
+  <button onclick={replace}>Replace</button>
+  <button onclick={() => replaceAndPreserveStateWithErrors({ name: 'Field is required' })}>
     Replace with errors
   </button>
-  <button on:click={() => replaceAndPreserveStateWithErrors()}>Replace without errors</button>
-  <button on:click={push}>Push</button>
-  <button on:click={defaultErrors}>Errors (default)</button>
-  <button on:click={bagErrors}>Errors (bag)</button>
+  <button onclick={() => replaceAndPreserveStateWithErrors()}>Replace without errors</button>
+  <button onclick={push}>Push</button>
+  <button onclick={defaultErrors}>Errors (default)</button>
+  <button onclick={bagErrors}>Errors (bag)</button>
   <div>Errors: {errors}</div>
   <div>Finished: {finished}</div>
   <div>Success: {success}</div>

@@ -6,7 +6,11 @@
     document.documentElement.style.scrollBehavior = 'smooth'
   }
 
-  export let scrollLog: number[] = []
+  interface Props {
+    scrollLog?: number[]
+  }
+
+  let { scrollLog = $bindable([]) }: Props = $props()
 
   const handleScrollEvent = () => {
     scrollLog = [...scrollLog, document.documentElement.scrollTop]
@@ -89,8 +93,8 @@
 
 <Link id="article-far-down" data-testid="article-far-down" href="/article#far-down">Article Far Down</Link>
 
-<button id="enable-smooth-scroll" data-testid="enable-smooth-scroll" on:click={enableSmoothScroll}>
+<button id="enable-smooth-scroll" data-testid="enable-smooth-scroll" onclick={enableSmoothScroll}>
   Enable Smooth Scroll
 </button>
 
-<button id="clear-scroll-log" data-testid="clear-scroll-log" on:click={() => (scrollLog = [])}>Clear Scroll Log</button>
+<button id="clear-scroll-log" data-testid="clear-scroll-log" onclick={() => (scrollLog = [])}>Clear Scroll Log</button>

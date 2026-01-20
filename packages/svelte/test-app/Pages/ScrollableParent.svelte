@@ -2,30 +2,30 @@
   import { onMount } from 'svelte'
   import { getScrollableParent } from '@inertiajs/core'
 
-  let overflowXHidden: HTMLDivElement
-  let overflowXScroll: HTMLDivElement
-  let overflowYAuto: HTMLDivElement
-  let overflowYAutoNoHeight: HTMLDivElement
-  let overflowXScrollOverflowYHidden: HTMLDivElement
-  let horizontalScrollCalc: HTMLDivElement
-  let verticalScrollMaxHeight: HTMLDivElement
-  let nestedScroll: HTMLDivElement
-  let overflowAutoNoConstraints: HTMLDivElement
-  let flexHorizontalCarousel: HTMLDivElement
-  let coercedAutoNoConstraint: HTMLDivElement
-  let displayContents: HTMLDivElement
-  let overflowClip: HTMLDivElement
-  let overflowOverlay: HTMLDivElement
-  let inlineWidthStyle: HTMLDivElement
-  let bothScrollDirections: HTMLDivElement
-  let overflowYAutoOverflowXVisible: HTMLDivElement
-  let overflowYAutoOverflowXClip: HTMLDivElement
-  let overflowXAutoOverflowYVisible: HTMLDivElement
-  let overflowXAutoOverflowYClip: HTMLDivElement
-  let overflowYAutoOverflowXHidden: HTMLDivElement
-  let overflowXAutoOverflowYHidden: HTMLDivElement
+  let overflowXHidden: HTMLDivElement = $state(null!)
+  let overflowXScroll: HTMLDivElement = $state(null!)
+  let overflowYAuto: HTMLDivElement = $state(null!)
+  let overflowYAutoNoHeight: HTMLDivElement = $state(null!)
+  let overflowXScrollOverflowYHidden: HTMLDivElement = $state(null!)
+  let horizontalScrollCalc: HTMLDivElement = $state(null!)
+  let verticalScrollMaxHeight: HTMLDivElement = $state(null!)
+  let nestedScroll: HTMLDivElement = $state(null!)
+  let overflowAutoNoConstraints: HTMLDivElement = $state(null!)
+  let flexHorizontalCarousel: HTMLDivElement = $state(null!)
+  let coercedAutoNoConstraint: HTMLDivElement = $state(null!)
+  let displayContents: HTMLDivElement = $state(null!)
+  let overflowClip: HTMLDivElement = $state(null!)
+  let overflowOverlay: HTMLDivElement = $state(null!)
+  let inlineWidthStyle: HTMLDivElement = $state(null!)
+  let bothScrollDirections: HTMLDivElement = $state(null!)
+  let overflowYAutoOverflowXVisible: HTMLDivElement = $state(null!)
+  let overflowYAutoOverflowXClip: HTMLDivElement = $state(null!)
+  let overflowXAutoOverflowYVisible: HTMLDivElement = $state(null!)
+  let overflowXAutoOverflowYClip: HTMLDivElement = $state(null!)
+  let overflowYAutoOverflowXHidden: HTMLDivElement = $state(null!)
+  let overflowXAutoOverflowYHidden: HTMLDivElement = $state(null!)
 
-  let results: Record<string, HTMLElement | null> = {}
+  let results: Record<string, HTMLElement | null> = $state({})
 
   onMount(() => {
     Object.entries({

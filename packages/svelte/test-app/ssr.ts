@@ -1,5 +1,6 @@
 import { createInertiaApp, type ResolvedComponent } from '@inertiajs/svelte'
 import createServer from '@inertiajs/svelte/server'
+import { render } from 'svelte/server'
 
 createServer((page) =>
   createInertiaApp({
@@ -9,8 +10,7 @@ createServer((page) =>
       return pages[`./Pages/${name}.svelte`]
     },
     setup({ App, props }) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (App as any).render(props)
+      return render(App, { props })
     },
     defaults: {
       future: {
