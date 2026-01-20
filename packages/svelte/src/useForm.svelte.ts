@@ -27,6 +27,32 @@ import { createValidator, resolveName, toSimpleValidationErrors } from 'laravel-
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { config } from '.'
 
+// Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties
+let reservedFormKeys: Set<string> | null = null
+let bootstrapping = false
+
+function validateFormDataKeys<TForm extends object>(data: TForm): void {
+  if (bootstrapping) {
+    return
+  }
+
+  if (reservedFormKeys === null) {
+    bootstrapping = true
+    const store = useForm({})
+    // Get the store value to extract form property keys (not the Writable methods)
+    reservedFormKeys = new Set(Object.keys(getStore(store)))
+    bootstrapping = false
+  }
+
+  const conflicts = Object.keys(data).filter((key) => reservedFormKeys!.has(key))
+  if (conflicts.length > 0) {
+    console.error(
+      `[Inertia] useForm() data contains field(s) that conflict with form properties: ${conflicts.map((k) => `"${k}"`).join(', ')}. ` +
+        `These fields will be overwritten by form methods/properties. Please rename these fields.`,
+    )
+  }
+}
+
 type InertiaFormStore<TForm extends object> = InertiaForm<TForm>
 type InertiaPrecognitiveFormStore<TForm extends object> = InertiaPrecognitiveForm<TForm>
 
@@ -95,20 +121,28 @@ interface InternalPrecognitionState {
 export type InertiaForm<TForm extends object> = InertiaFormProps<TForm> & TForm
 export type InertiaPrecognitiveForm<TForm extends object> = InertiaForm<TForm> & InertiaFormValidationProps<TForm>
 
+type ReservedFormKeys = keyof InertiaFormProps<any>
+
+type ValidateFormData<T> = {
+  [K in keyof T]: K extends ReservedFormKeys ? ['Error: This field name is reserved by useForm:', K] : T[K]
+}
+
 export default function useForm<TForm extends FormDataType<TForm>>(
   method: Method | (() => Method),
   url: string | (() => string),
-  data: TForm | (() => TForm),
+  data: ValidateFormData<TForm> | (() => ValidateFormData<TForm>),
 ): InertiaPrecognitiveFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   urlMethodPair: UrlMethodPair | (() => UrlMethodPair),
-  data: TForm | (() => TForm),
+  data: ValidateFormData<TForm> | (() => ValidateFormData<TForm>),
 ): InertiaPrecognitiveFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   rememberKey: string,
-  data: TForm | (() => TForm),
+  data: ValidateFormData<TForm> | (() => ValidateFormData<TForm>),
 ): InertiaFormStore<TForm>
-export default function useForm<TForm extends FormDataType<TForm>>(data: TForm | (() => TForm)): InertiaFormStore<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(
+  data: ValidateFormData<TForm> | (() => ValidateFormData<TForm>),
+): InertiaFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaFormStore<TForm> | InertiaPrecognitiveFormStore<TForm> {
@@ -121,6 +155,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, ErrorValue> } | null)
     : null
   let defaults = cloneDeep(data)
+  validateFormDataKeys(defaults)
   let cancelToken: CancelToken | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let transform: UseFormTransformCallback<TForm> = (data) => data as object

@@ -455,6 +455,29 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Name is valid!')).toBeVisible()
     })
 
+    test(prefix + 'validates correctly when transform changes data keys', async ({ page }) => {
+      await page.goto('/' + integration + '/precognition/transform-keys')
+
+      // Invalid email triggers validation error
+      await page.fill('#email-input', 'invalid-email')
+      await page.locator('#email-input').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
+
+      // Valid email clears the error
+      await page.fill('#email-input', 'valid@email.com')
+      await page.locator('#email-input').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
+      await expect(page.getByText('Email is valid!')).toBeVisible()
+    })
+
     test(prefix + 'calls onPrecognitionSuccess and onFinish callbacks when validation succeeds', async ({ page }) => {
       await page.goto('/' + integration + '/precognition/callbacks')
 
