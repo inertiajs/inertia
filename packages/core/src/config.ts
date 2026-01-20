@@ -79,6 +79,7 @@ export const config = new Config<InertiaAppConfig>({
     preserveEqualProps: false,
     useDataInertiaHeadAttribute: false,
     useDialogForErrorModal: false,
+    useScriptElementForInitialPage: false,
   },
   prefetch: {
     cacheFor: 30_000,

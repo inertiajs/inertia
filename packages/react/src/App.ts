@@ -8,6 +8,7 @@ import {
   router,
 } from '@inertiajs/core'
 import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import HeadContext from './HeadContext'
 import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
@@ -48,7 +49,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
-    page: initialPage,
+    page: { ...initialPage, flash: initialPage.flash ?? {} },
     key: null,
   })
 
@@ -65,6 +66,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
       initialPage,
       resolveComponent: resolveComponent!,
       swapComponent: async (args) => swapComponent(args),
+      onFlash: (flash) => {
+        setCurrent((current) => ({
+          ...current,
+          page: { ...current.page, flash },
+        }))
+      },
     })
 
     routerIsInitialized = true
@@ -79,11 +86,13 @@ export default function App<SharedProps extends PageProps = PageProps>({
         return
       }
 
-      setCurrent((current) => ({
-        component,
-        page,
-        key: preserveState ? current.key : Date.now(),
-      }))
+      flushSync(() =>
+        setCurrent((current) => ({
+          component,
+          page,
+          key: preserveState ? current.key : Date.now(),
+        })),
+      )
     }
 
     router.on('navigate', () => headManager.forceUpdate())

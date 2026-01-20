@@ -19,7 +19,7 @@ const loaded = ref(false)
       decoding="async"
       class="h-full w-full object-cover transition duration-500 ease-out"
       :class="{
-        'scale-100 opacity-100 blur-0': loaded,
+        'blur-0 scale-100 opacity-100': loaded,
         'scale-105 opacity-0 blur-sm': !loaded,
       }"
       @load="loaded = true"

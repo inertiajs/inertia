@@ -29,7 +29,10 @@ test.describe('Form Component', () => {
 
     queryStringArrayFormats.forEach((format) => {
       test('can submit the form with filled values using ' + format + ' format', async ({ page }) => {
+        test.setTimeout(10_000)
+
         await page.goto('/form-component/elements?queryStringArrayFormat=' + format)
+        await expect(page.locator('#name')).toBeVisible()
 
         await page.fill('#name', 'Joe')
         await page.selectOption('#country', 'us')
@@ -467,7 +470,7 @@ test.describe('Form Component', () => {
       expect(scrollBefore).toBeGreaterThan(0)
 
       await page.getByRole('button', { name: 'Submit' }).click()
-      await page.waitForURL('/article')
+      await page.waitForURL('/article?tags[]=alpha&tags[]=beta')
 
       const scrollAfter = await page.evaluate(() => window.scrollY)
       // TODO: why is this not exactly 100?
@@ -498,6 +501,22 @@ test.describe('Form Component', () => {
 
       await expect(requests.requests).toHaveLength(1)
       await expect(page).toHaveURL('form-component/options')
+    })
+
+    test('submits the form with view transitions enabled', async ({ page, browserName }) => {
+      test.skip(browserName === 'firefox', 'Firefox does not support View Transitions API in CI')
+
+      consoleMessages.listen(page)
+      pageLoads.watch(page, 2)
+
+      await page.goto('/form-component/view-transition')
+
+      await page.getByRole('button', { name: 'Submit with View Transition' }).click()
+
+      await expect(page).toHaveURL('/form-component/view-transition')
+      await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+
+      await expect.poll(() => consoleMessages.messages).toEqual(['updateCallbackDone', 'ready', 'finished'])
     })
   })
 
@@ -916,7 +935,7 @@ test.describe('Form Component', () => {
       expect(await page.inputValue('input[name="email"]')).toBe('modified@example.com')
     })
 
-    test('can set current form data as defaults via ref', async ({ page }) => {
+    test('can set current form data as defaults via ref', async ({ page, browserName }) => {
       await page.goto('/form-component/ref')
 
       // Modify form fields
@@ -938,6 +957,22 @@ test.describe('Form Component', () => {
 
       expect(await page.inputValue('input[name="name"]')).toBe('New Name')
       expect(await page.inputValue('input[name="email"]')).toBe('new@example.com')
+    })
+
+    test('the precognition methods are available via ref', async ({ page }) => {
+      await page.goto('/form-component/ref')
+      requests.listen(page)
+
+      await page.click('button:has-text("Call Precognition Methods")')
+
+      await page.waitForTimeout(500) // Wait for request to be made
+
+      await expect(requests.requests).toHaveLength(1)
+
+      const request = requests.requests[0]
+
+      expect(request.method()).toBe('POST')
+      expect(request.headers()['precognition']).toBe('true')
     })
   })
 
@@ -1486,7 +1521,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Test getData()' }).click()
 
       const result = consoleMessages.messages.find((msg) => msg.includes('getData result:'))
-      expect(result).toBe('getData result: {name: John Doe}')
+      expect(result).toBe('getData result: {"name":"John Doe"}')
     })
 
     test('getFormData returns FormData instance', async ({ page }) => {
@@ -1494,7 +1529,7 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Test getFormData()' }).click()
 
       const formDataMessage = consoleMessages.messages.find((msg) => msg.includes('getFormData entries:'))
-      expect(formDataMessage).toBe('getFormData entries: {name: Jane Doe}')
+      expect(formDataMessage).toBe('getFormData entries: {"name":"Jane Doe"}')
     })
   })
 
@@ -1523,6 +1558,41 @@ test.describe('Form Component', () => {
       expect(dump.form.fields.entries['new:1']).toEqual({
         name: 'Jane Smith',
         email: 'jane@example.com',
+      })
+    })
+  })
+
+  test.describe('Submit Button', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/form-component/submit-button')
+    })
+
+    test('includes submit button name and value in form data', async ({ page }) => {
+      await page.click('#save-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        action: 'save',
+      })
+    })
+
+    test('includes different button value when clicking different submit button', async ({ page }) => {
+      await page.click('#draft-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
+        action: 'draft',
+      })
+    })
+
+    test('does not include action when button has no name', async ({ page }) => {
+      await page.click('#no-name-button')
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      expect(dump.form).toEqual({
+        name: 'John Doe',
       })
     })
   })

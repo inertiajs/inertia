@@ -21,7 +21,7 @@
 
   let component = initialComponent
   let key: number | null = null
-  let page = initialPage
+  let page = { ...initialPage, flash: initialPage.flash ?? {} }
   let renderProps = resolveRenderProps(component, page, key)
 
   setPage(page)
@@ -38,6 +38,10 @@
         key = args.preserveState ? key : Date.now()
 
         renderProps = resolveRenderProps(component, page, key)
+        setPage(page)
+      },
+      onFlash: (flash) => {
+        page = { ...page, flash }
         setPage(page)
       },
     })

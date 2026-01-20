@@ -7,9 +7,191 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.2.18...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.10...master)
 
 - Nothing yet
+
+## [v2.3.10](https://github.com/inertiajs/inertia/compare/v2.3.9...v2.3.10) - 2026-01-15
+
+### What's Changed
+
+* Add `async` and `sync` options to `cancelAll` method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2814
+* Fix smooth scrolling in Firefox and add Firefox to CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2815
+* Improve flaky `<InfiniteScroll>` test in WebKit CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2818
+* Pass `onceProps` as second argument in client-side visit props callback by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2816
+* Prevent converting a string response to an object by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2821
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.9...v2.3.10
+
+## [v2.3.9](https://github.com/inertiajs/inertia/compare/v2.3.8...v2.3.9) - 2026-01-14
+
+### What's Changed
+
+* Fix React Precognition Error Sync (issue #2806) by [@joetifa2003](https://github.com/joetifa2003) in https://github.com/inertiajs/inertia/pull/2808
+* Add tests for deferred scroll props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2811
+* Fix deferred props not loading after back button navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2812
+* Add test for concurrent reloads by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2813
+* Cancel in-flight deferred prop requests on navigation by [@alexspeller](https://github.com/alexspeller) in https://github.com/inertiajs/inertia/pull/2656
+* fix: preserve query parameters in test server responses by [@alexspeller](https://github.com/alexspeller) in https://github.com/inertiajs/inertia/pull/2665
+* [2.x] Add Form Context Support by [@laserhybiz](https://github.com/laserhybiz) in https://github.com/inertiajs/inertia/pull/2671
+
+### New Contributors
+
+* [@joetifa2003](https://github.com/joetifa2003) made their first contribution in https://github.com/inertiajs/inertia/pull/2808
+* [@alexspeller](https://github.com/alexspeller) made their first contribution in https://github.com/inertiajs/inertia/pull/2656
+* [@laserhybiz](https://github.com/laserhybiz) made their first contribution in https://github.com/inertiajs/inertia/pull/2671
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.8...v2.3.9
+
+## [v2.3.8](https://github.com/inertiajs/inertia/compare/v2.3.7...v2.3.8) - 2026-01-09
+
+### What's Changed
+
+* fix: update has more state when resetting before updating page by [@AydinHassan](https://github.com/AydinHassan) in https://github.com/inertiajs/inertia/pull/2787
+* Ensure Flash Data listener is registered before event is fired by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2799
+* Improve indices detection in `mergeDataIntoQueryString()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2798
+* Fix `<WhenVisible>` re-registering observer when params change by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2804
+
+### New Contributors
+
+* [@AydinHassan](https://github.com/AydinHassan) made their first contribution in https://github.com/inertiajs/inertia/pull/2787
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.7...v2.3.8
+
+## [v2.3.7](https://github.com/inertiajs/inertia/compare/v2.3.6...v2.3.7) - 2026-01-07
+
+### What's Changed
+
+* Add `dontRemember()` method to form helper by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2792
+* Only call `replaceState()` when page data has actually changed by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2793
+* Fix `@typescript-eslint/unbound-method` warning when destructuring `useForm()` methods by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2794
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.6...v2.3.7
+
+## [v2.3.6](https://github.com/inertiajs/inertia/compare/v2.3.5...v2.3.6) - 2025-12-31
+
+### What's Changed
+
+* Bump qs from 6.14.0 to 6.14.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2790
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.5...v2.3.6
+
+## [v2.3.5](https://github.com/inertiajs/inertia/compare/v2.3.4...v2.3.5) - 2025-12-31
+
+### What's Changed
+
+* Refresh the Infinite Scroll triggers after partial reload by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2784
+* Fix `hasAnyState()` to actually check for browser history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2785
+* Handle WebKit history throttle errors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2786
+* Merge `data` and `params` props in `<WhenVisible>` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2789
+* Handle `QuotaExceededError` in WebKit by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2788
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.4...v2.3.5
+
+## [v2.3.4](https://github.com/inertiajs/inertia/compare/v2.3.3...v2.3.4) - 2025-12-19
+
+### What's Changed
+
+* Only restore Infinite Scroll state from history on back/forward navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2777
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.3...v2.3.4
+
+## [v2.3.3](https://github.com/inertiajs/inertia/compare/v2.3.2...v2.3.3) - 2025-12-17
+
+### What's Changed
+
+* Add support for protocol-relative urls in url.ts by [@machour](https://github.com/machour) in https://github.com/inertiajs/inertia/pull/2769
+* Fix brackets notation qs parsing by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2722
+* Support for Flash Data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2757
+
+### New Contributors
+
+* [@machour](https://github.com/machour) made their first contribution in https://github.com/inertiajs/inertia/pull/2769
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.2...v2.3.3
+
+## [v2.3.2](https://github.com/inertiajs/inertia/compare/v2.3.1...v2.3.2) - 2025-12-16
+
+### What's Changed
+
+* Expose InertiaPrecognitiveForm type by [@lcdss](https://github.com/lcdss) in https://github.com/inertiajs/inertia/pull/2756
+* Test for loading deferred props on `router.reload()` without `only`/`except` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2761
+* Expose `fetching` in default `<WhenVisible>` slot by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2766
+* Include submitter element value in Form component submission by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2770
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.1...v2.3.2
+
+## [v2.3.1](https://github.com/inertiajs/inertia/compare/v2.3.0...v2.3.1) - 2025-12-12
+
+### What's Changed
+
+* Test for Form + Vue Options API by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2750
+* Fix for validating items in dynamic arrays by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2753
+* Escape forward slashes when using useScriptElementForInitialPage by [@kirk-loretz-fsn](https://github.com/kirk-loretz-fsn) in https://github.com/inertiajs/inertia/pull/2751
+* Sync Playground configs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2754
+* Fix race condition when restoring scroll regions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2755
+
+### New Contributors
+
+* [@kirk-loretz-fsn](https://github.com/kirk-loretz-fsn) made their first contribution in https://github.com/inertiajs/inertia/pull/2751
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.0...v2.3.1
+
+## [v2.3.0](https://github.com/inertiajs/inertia/compare/v2.2.21...v2.3.0) - 2025-12-11
+
+### What's Changed
+
+* Support for Precognition in `useForm()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2684
+* Support for Precognition in `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2700
+* Improve Precognition examples in Playgrounds by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2746
+* Improve flaky tests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2747
+* bugfix(whenVisible-vue): Fix loaded state when data already exists by [@ClaraLeigh](https://github.com/ClaraLeigh) in https://github.com/inertiajs/inertia/pull/2748
+
+### New Contributors
+
+* [@ClaraLeigh](https://github.com/ClaraLeigh) made their first contribution in https://github.com/inertiajs/inertia/pull/2748
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.21...v2.3.0
+
+## [v2.2.21](https://github.com/inertiajs/inertia/compare/v2.2.20...v2.2.21) - 2025-12-10
+
+### What's Changed
+
+* Add `viewTransition` to `FormComponentOptions` type  by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2741
+* Preserve untouched Once Props on Partial Reload + Once Props in Playground  by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2743
+* Only preserve loaded Deferred + Once props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2745
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.20...v2.2.21
+
+## [v2.2.20](https://github.com/inertiajs/inertia/compare/v2.2.19...v2.2.20) - 2025-12-09
+
+### What's Changed
+
+* Bump express from 5.1.0 to 5.2.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2727
+* Add tests for SSR server by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2730
+* Preserve errors when loading deferred props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2729
+* Optimize page data size and parsing (37% size reduction!) by [@bram-pkg](https://github.com/bram-pkg) in https://github.com/inertiajs/inertia/pull/2687
+* Support for `once()` props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2732
+* Fix for sequential Client Side Visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2737
+* Refactor duplicated initial page code by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2738
+
+### New Contributors
+
+* [@bram-pkg](https://github.com/bram-pkg) made their first contribution in https://github.com/inertiajs/inertia/pull/2687
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.19...v2.2.20
+
+## [v2.2.19](https://github.com/inertiajs/inertia/compare/v2.2.18...v2.2.19) - 2025-11-27
+
+### What's Changed
+
+* Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2710
+* TypeScript fix accessing error keys of optional nested object by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2718
+* Use FormValue in Form component by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2709
+* Fix anchor hash scrolling on initial page visit in React by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2719
+* Ensure page is rendered before scrolling to top by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2721
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.2.18...v2.2.19
 
 ## [v2.2.18](https://github.com/inertiajs/inertia/compare/v2.2.17...v2.2.18) - 2025-11-17
 
