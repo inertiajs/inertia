@@ -1,17 +1,19 @@
 import {
+  isUrlMethodPair,
   mergeDataIntoQueryString,
   router,
   shouldIntercept,
   shouldNavigate,
   type CacheForOption,
+  type CancelToken,
   type GlobalEventsMap,
   type LinkComponentBaseProps,
   type LinkPrefetchOption,
   type Method,
   type VisitOptions,
 } from '@inertiajs/core'
-import type { CancelTokenSource } from 'axios'
 import type { ActionReturn } from 'svelte/action'
+import { config } from '.'
 
 type ActionEventHandlers = {
   [K in keyof HTMLElementEventMap]?: (event: HTMLElementEventMap[K]) => void
@@ -39,8 +41,8 @@ type ActionAttributes = {
     event: CustomEvent<SelectedGlobalEventsMap[K]['details']>,
   ) => void
 } & {
-  'on:cancel-token'?: (event: CustomEvent<CancelTokenSource>) => void
-  oncanceltoken?: (event: CustomEvent<CancelTokenSource>) => void
+  'on:cancel-token'?: (event: CustomEvent<CancelToken>) => void
+  oncanceltoken?: (event: CustomEvent<CancelToken>) => void
 }
 
 function link(
@@ -61,7 +63,7 @@ function link(
   let visitParams: VisitOptions
 
   const regularEvents: ActionEventHandlers = {
-    click: (event) => {
+    click: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         event.preventDefault()
         router.visit(href, visitParams)
@@ -70,35 +72,37 @@ function link(
   }
 
   const prefetchHoverEvents: ActionEventHandlers = {
-    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), 75)),
+    mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), config.get('prefetch.hoverDelay'))),
     mouseleave: () => clearTimeout(hoverTimeout),
     click: regularEvents.click,
   }
 
   const prefetchClickEvents: ActionEventHandlers = {
-    mousedown: (event) => {
+    mousedown: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         event.preventDefault()
         prefetch()
       }
     },
-    keydown: (event) => {
-      if (shouldIntercept(event) && shouldNavigate(event)) {
+    keydown: (event: KeyboardEvent) => {
+      if (shouldNavigate(event)) {
         event.preventDefault()
         prefetch()
       }
     },
-    mouseup: (event) => {
-      event.preventDefault()
-      router.visit(href, visitParams)
+    mouseup: (event: MouseEvent) => {
+      if (shouldIntercept(event)) {
+        event.preventDefault()
+        router.visit(href, visitParams)
+      }
     },
-    keyup: (event) => {
+    keyup: (event: KeyboardEvent) => {
       if (shouldNavigate(event)) {
         event.preventDefault()
         router.visit(href, visitParams)
       }
     },
-    click: (event) => {
+    click: (event: MouseEvent) => {
       if (shouldIntercept(event)) {
         // Let the mouseup/keyup event handle the visit
         event.preventDefault()
@@ -106,7 +110,13 @@ function link(
     },
   }
 
-  function update({ cacheFor = 0, prefetch = false, cacheTags: cacheTagValues = [], ...params }: ActionParameters) {
+  function update({
+    cacheFor = 0,
+    prefetch = false,
+    cacheTags: cacheTagValues = [],
+    viewTransition = false,
+    ...params
+  }: ActionParameters) {
     prefetchModes = (() => {
       if (prefetch === true) {
         return ['hover']
@@ -132,12 +142,12 @@ function link(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     })()
 
-    cacheTags = cacheTagValues
+    cacheTags = Array.isArray(cacheTagValues) ? cacheTagValues : [cacheTagValues]
 
-    method = typeof params.href === 'object' ? params.href.method : ((params.method?.toLowerCase() || 'get') as Method)
+    method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)
 
     if (node.tagName === 'A') {
@@ -150,6 +160,7 @@ function link(
       replace: params.replace || false,
       preserveScroll: params.preserveScroll || false,
       preserveState: params.preserveState ?? method !== 'get',
+      preserveUrl: params.preserveUrl || false,
       only: params.only || [],
       except: params.except || [],
       headers: params.headers || {},
@@ -158,6 +169,7 @@ function link(
 
     visitParams = {
       ...baseParams,
+      viewTransition,
       onStart: (visit) => {
         inFlightCount++
         updateNodeAttributes()
@@ -188,7 +200,7 @@ function link(
   function hrefAndData(method: Method, params: ActionParameters) {
     return mergeDataIntoQueryString(
       method,
-      typeof params.href === 'object' ? params.href.url : node.href || params.href || '',
+      isUrlMethodPair(params.href) ? params.href.url : node.href || params.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
     )

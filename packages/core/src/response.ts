@@ -1,6 +1,15 @@
 import { AxiosResponse } from 'axios'
-import { router } from '.'
-import { fireErrorEvent, fireInvalidEvent, firePrefetchedEvent, fireSuccessEvent } from './events'
+import { get, isEqual, set } from 'lodash-es'
+import { config, router } from '.'
+import dialog from './dialog'
+import {
+  fireBeforeUpdateEvent,
+  fireErrorEvent,
+  fireFlashEvent,
+  fireInvalidEvent,
+  firePrefetchedEvent,
+  fireSuccessEvent,
+} from './events'
 import { history } from './history'
 import modal from './modal'
 import { page as currentPage } from './page'
@@ -13,6 +22,8 @@ import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
+  protected wasPrefetched = false
+
   constructor(
     protected requestParams: RequestParams,
     protected response: AxiosResponse,
@@ -35,6 +46,7 @@ export class Response {
 
   public async process() {
     if (this.requestParams.all().prefetch) {
+      this.wasPrefetched = true
       this.requestParams.all().prefetch = false
 
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
@@ -53,6 +65,8 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
+    const previousFlash = currentPage.get().flash
+
     await this.setPage()
 
     const errors = currentPage.get().props.errors || {}
@@ -67,6 +81,19 @@ export class Response {
 
     router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
 
+    if (!this.wasPrefetched) {
+      // We end up here other than from the prefetch cache, so we assume this response is
+      // never than the cached one and therefore flush the cache.
+      router.flush(currentPage.get().url)
+    }
+
+    const { flash } = currentPage.get()
+
+    if (Object.keys(flash).length > 0 && (!this.requestParams.isPartial() || !isEqual(flash, previousFlash))) {
+      fireFlashEvent(flash)
+      this.requestParams.all().onFlash(flash)
+    }
+
     fireSuccessEvent(currentPage.get())
 
     await this.requestParams.all().onSuccess(currentPage.get())
@@ -76,6 +103,17 @@ export class Response {
 
   public mergeParams(params: ActiveVisit) {
     this.requestParams.merge(params)
+  }
+
+  public getPageResponse(): Page {
+    const data = this.getDataFromResponse(this.response.data)
+
+    // Only spread if data is an object (not a string like HTML error pages)
+    if (typeof data === 'object') {
+      return (this.response.data = { ...data, flash: data.flash ?? {} })
+    }
+
+    return (this.response.data = data)
   }
 
   protected async handleNonInertiaResponse() {
@@ -93,7 +131,7 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return modal.show(response.data)
+      return config.get('future.useDialogForErrorModal') ? dialog.show(response.data) : modal.show(response.data)
     }
   }
 
@@ -141,23 +179,30 @@ export class Response {
   }
 
   protected async setPage(): Promise<void> {
-    const pageResponse = this.getDataFromResponse(this.response.data)
+    const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
 
     this.mergeProps(pageResponse)
+    currentPage.mergeOncePropsIntoResponse(pageResponse)
+    this.preserveEqualProps(pageResponse)
+
     await this.setRememberedState(pageResponse)
 
     this.requestParams.setPreserveOptions(pageResponse)
 
     pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
+    this.requestParams.all().onBeforeUpdate(pageResponse)
+    fireBeforeUpdateEvent(pageResponse)
+
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll,
-      preserveState: this.requestParams.all().preserveState,
+      preserveScroll: this.requestParams.all().preserveScroll as boolean,
+      preserveState: this.requestParams.all().preserveState as boolean,
+      viewTransition: this.requestParams.all().viewTransition,
     })
   }
 
@@ -207,55 +252,79 @@ export class Response {
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
   }
 
+  protected preserveEqualProps(pageResponse: Page): void {
+    if (pageResponse.component !== currentPage.get().component || config.get('future.preserveEqualProps') !== true) {
+      return
+    }
+
+    const currentPageProps = currentPage.get().props
+
+    Object.entries(pageResponse.props).forEach(([key, value]) => {
+      if (isEqual(value, currentPageProps[key])) {
+        pageResponse.props[key] = currentPageProps[key]
+      }
+    })
+  }
+
   protected mergeProps(pageResponse: Page): void {
     if (!this.requestParams.isPartial() || pageResponse.component !== currentPage.get().component) {
       return
     }
 
-    const propsToMerge = pageResponse.mergeProps || []
+    const propsToAppend = pageResponse.mergeProps || []
+    const propsToPrepend = pageResponse.prependProps || []
     const propsToDeepMerge = pageResponse.deepMergeProps || []
     const matchPropsOn = pageResponse.matchPropsOn || []
 
-    propsToMerge.forEach((prop) => {
-      const incomingProp = pageResponse.props[prop]
+    const mergeProp = (prop: string, shouldAppend: boolean) => {
+      const currentProp = get(currentPage.get().props, prop)
+      const incomingProp = get(pageResponse.props, prop)
 
       if (Array.isArray(incomingProp)) {
-        pageResponse.props[prop] = this.mergeOrMatchItems(
-          (currentPage.get().props[prop] || []) as any[],
+        const newArray = this.mergeOrMatchItems(
+          (currentProp || []) as any[],
           incomingProp,
           prop,
           matchPropsOn,
+          shouldAppend,
         )
+
+        set(pageResponse.props, prop, newArray)
       } else if (typeof incomingProp === 'object' && incomingProp !== null) {
-        pageResponse.props[prop] = {
-          ...((currentPage.get().props[prop] || []) as Record<string, any>),
+        const newObject = {
+          ...(currentProp || {}),
           ...incomingProp,
         }
+
+        set(pageResponse.props, prop, newObject)
       }
-    })
+    }
+
+    propsToAppend.forEach((prop) => mergeProp(prop, true))
+    propsToPrepend.forEach((prop) => mergeProp(prop, false))
 
     propsToDeepMerge.forEach((prop) => {
-      const incomingProp = pageResponse.props[prop]
       const currentProp = currentPage.get().props[prop]
+      const incomingProp = pageResponse.props[prop]
 
       // Function to recursively merge objects and arrays
-      const deepMerge = (target: any, source: any, currentKey: string) => {
+      const deepMerge = (target: any, source: any, matchProp: string) => {
         if (Array.isArray(source)) {
-          return this.mergeOrMatchItems(target, source, currentKey, matchPropsOn)
+          return this.mergeOrMatchItems(target, source, matchProp, matchPropsOn)
         }
 
         if (typeof source === 'object' && source !== null) {
           // Merge objects by iterating over keys
           return Object.keys(source).reduce(
             (acc, key) => {
-              acc[key] = deepMerge(target ? target[key] : undefined, source[key], `${currentKey}.${key}`)
+              acc[key] = deepMerge(target ? target[key] : undefined, source[key], `${matchProp}.${key}`)
               return acc
             },
             { ...target },
           )
         }
 
-        // f the source is neither an array nor an object, simply return the it
+        // If the source is neither an array nor an object, simply return the it
         return source
       }
 
@@ -264,47 +333,132 @@ export class Response {
     })
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
-  }
 
-  protected mergeOrMatchItems(target: any[], source: any[], currentKey: string, matchPropsOn: string[]) {
-    // Determine if there's a specific key to match items.
-    // E.g.: matchPropsOn = ['posts.data.id'] and currentKey = 'posts.data' will match.
-    const matchOn = matchPropsOn.find((key) => {
-      const path = key.split('.').slice(0, -1).join('.')
-      return path === currentKey
-    })
+    if (this.requestParams.isDeferredPropsRequest()) {
+      const currentErrors = currentPage.get().props.errors
 
-    if (!matchOn) {
-      // No key found to match on, just concatenate the arrays
-      return [...(Array.isArray(target) ? target : []), ...source]
+      if (currentErrors && Object.keys(currentErrors).length > 0) {
+        // Preserve existing errors during deferred props requests
+        pageResponse.props.errors = currentErrors
+      }
     }
 
-    // Extract the unique property name to match items (e.g., 'id' from 'posts.data.id').
-    const uniqueProperty = matchOn.split('.').pop() || ''
-    const targetArray = Array.isArray(target) ? target : []
-    const map = new Map<any, any>()
+    // Preserve the existing scrollProps
+    if (currentPage.get().scrollProps) {
+      pageResponse.scrollProps = {
+        ...(currentPage.get().scrollProps || {}),
+        ...(pageResponse.scrollProps || {}),
+      }
+    }
 
-    // Populate the map with items from the target array, using the unique property as the key.
-    // If an item doesn't have the unique property or isn't an object, a unique Symbol is used as the key.
-    targetArray.forEach((item) => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
+    // Preserve the existing onceProps
+    if (currentPage.hasOnceProps()) {
+      pageResponse.onceProps = {
+        ...(currentPage.get().onceProps || {}),
+        ...(pageResponse.onceProps || {}),
+      }
+    }
+
+    // Preserve flash data and merge with new flash data on non-deferred requests
+    pageResponse.flash = {
+      ...currentPage.get().flash,
+      ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
+    }
+
+    const currentOriginalDeferred = currentPage.get().initialDeferredProps
+    if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
+      pageResponse.initialDeferredProps = currentOriginalDeferred
+    }
+  }
+
+  protected mergeOrMatchItems(
+    existingItems: any[],
+    newItems: any[],
+    matchProp: string,
+    matchPropsOn: string[],
+    shouldAppend = true,
+  ) {
+    const items = Array.isArray(existingItems) ? existingItems : []
+
+    // Find the matching key for this specific property path
+    const matchingKey = matchPropsOn.find((key) => {
+      const keyPath = key.split('.').slice(0, -1).join('.')
+
+      return keyPath === matchProp
+    })
+
+    // If no matching key is configured, simply concatenate the arrays
+    if (!matchingKey) {
+      return shouldAppend ? [...items, ...newItems] : [...newItems, ...items]
+    }
+
+    // Extract the property name we'll use to match items (e.g., 'id' from 'users.data.id')
+    const uniqueProperty = matchingKey.split('.').pop() || ''
+
+    // Create a map of new items by their unique property lookups
+    const newItemsMap = new Map()
+
+    newItems.forEach((item) => {
+      if (this.hasUniqueProperty(item, uniqueProperty)) {
+        newItemsMap.set(item[uniqueProperty], item)
       }
     })
 
-    // Iterate through the source array. If an item's unique property matches an existing key in the map,
-    // update the item. Otherwise, add the new item to the map.
-    source.forEach((item) => {
-      if (item && typeof item === 'object' && uniqueProperty in item) {
-        map.set(item[uniqueProperty], item)
-      } else {
-        map.set(Symbol(), item)
+    return shouldAppend
+      ? this.appendWithMatching(items, newItems, newItemsMap, uniqueProperty)
+      : this.prependWithMatching(items, newItems, newItemsMap, uniqueProperty)
+  }
+
+  protected appendWithMatching(
+    existingItems: any[],
+    newItems: any[],
+    newItemsMap: Map<any, any>,
+    uniqueProperty: string,
+  ): any[] {
+    // Update existing items with new values, keep non-matching items
+    const updatedExisting = existingItems.map((item) => {
+      if (this.hasUniqueProperty(item, uniqueProperty) && newItemsMap.has(item[uniqueProperty])) {
+        return newItemsMap.get(item[uniqueProperty])
       }
+
+      return item
     })
 
-    return Array.from(map.values())
+    // Filter new items to only include those not already in existing items
+    const newItemsToAdd = newItems.filter((item) => {
+      if (!this.hasUniqueProperty(item, uniqueProperty)) {
+        return true // Always add items without unique property
+      }
+
+      return !existingItems.some(
+        (existing) =>
+          this.hasUniqueProperty(existing, uniqueProperty) && existing[uniqueProperty] === item[uniqueProperty],
+      )
+    })
+
+    return [...updatedExisting, ...newItemsToAdd]
+  }
+
+  protected prependWithMatching(
+    existingItems: any[],
+    newItems: any[],
+    newItemsMap: Map<any, any>,
+    uniqueProperty: string,
+  ): any[] {
+    // Filter existing items, keeping only those not being updated
+    const untouchedExisting = existingItems.filter((item) => {
+      if (this.hasUniqueProperty(item, uniqueProperty)) {
+        return !newItemsMap.has(item[uniqueProperty])
+      }
+
+      return true
+    })
+
+    return [...newItems, ...untouchedExisting]
+  }
+
+  protected hasUniqueProperty(item: any, property: string): boolean {
+    return item && typeof item === 'object' && property in item
   }
 
   protected async setRememberedState(pageResponse: Page): Promise<void> {

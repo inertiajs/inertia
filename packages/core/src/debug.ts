@@ -2,8 +2,7 @@ export const stackTrace = (autolog = true) => {
   try {
     throw new Error()
   } catch (e) {
-    // @ts-ignore
-    const stack = e.stack
+    const stack = (e as Error).stack
 
     if (!autolog) {
       return stack

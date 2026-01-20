@@ -1,4 +1,4 @@
-import type { Method } from '@inertiajs/core'
+import type { Method, QueryStringArrayFormatOption } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
 import { useMemo, useState } from 'react'
 import Article from './../Article'
@@ -12,7 +12,9 @@ export default () => {
   const [preserveScroll, setPreserveScroll] = useState(false)
   const [preserveState, setPreserveState] = useState(false)
   const [preserveUrl, setPreserveUrl] = useState(false)
-  const [queryStringArrayFormat, setQueryStringArrayFormat] = useState<'indices' | 'brackets' | undefined>(undefined)
+  const [queryStringArrayFormat, setQueryStringArrayFormat] = useState<QueryStringArrayFormatOption | undefined>(
+    undefined,
+  )
 
   function setOnly() {
     setOnlyValues(['users'])

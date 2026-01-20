@@ -1,24 +1,30 @@
-import { hideProgress, revealProgress } from '.'
+import { cloneDeep, get, set } from 'lodash-es'
+import { progress } from '.'
+import { config } from './config'
 import { eventHandler } from './eventHandler'
-import { fireBeforeEvent } from './events'
+import { fireBeforeEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
+import Queue from './queue'
 import { Request } from './request'
+import { RequestParams } from './requestParams'
 import { RequestStream } from './requestStream'
 import { Scroll } from './scroll'
 import {
   ActiveVisit,
   ClientSideVisitOptions,
   Component,
+  FlashData,
   GlobalEvent,
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
   Method,
   Page,
+  PageFlashData,
   PendingVisit,
   PendingVisitOptions,
   PollOptions,
@@ -33,7 +39,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { isUrlMethodPair, transformUrlAndData } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -46,11 +52,19 @@ export class Router {
     interruptible: false,
   })
 
-  public init({ initialPage, resolveComponent, swapComponent }: RouterInitParams): void {
+  protected clientVisitQueue = new Queue<Promise<void>>()
+
+  public init<ComponentType = Component>({
+    initialPage,
+    resolveComponent,
+    swapComponent,
+    onFlash,
+  }: RouterInitParams<ComponentType>): void {
     currentPage.init({
       initialPage,
       resolveComponent,
       swapComponent,
+      onFlash,
     })
 
     InitialVisit.handle()
@@ -63,8 +77,12 @@ export class Router {
       }
     })
 
-    eventHandler.on('loadDeferredProps', () => {
-      this.loadDeferredProps()
+    eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
+      this.loadDeferredProps(deferredProps)
+    })
+
+    eventHandler.on('historyQuotaExceeded', (url) => {
+      window.location.href = url
     })
   }
 
@@ -108,6 +126,14 @@ export class Router {
   }
 
   public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
+    return this.doReload(options)
+  }
+
+  protected doReload<T extends RequestPayload = RequestPayload>(
+    options: ReloadOptions<T> & {
+      deferredProps?: boolean
+    } = {},
+  ): void {
     if (typeof window === 'undefined') {
       return
     }
@@ -128,8 +154,8 @@ export class Router {
     history.remember(data, key)
   }
 
-  public restore(key = 'default'): unknown {
-    return history.restore(key)
+  public restore<T = unknown>(key = 'default'): T | undefined {
+    return history.restore(key) as T | undefined
   }
 
   public on<TEventName extends GlobalEventNames>(
@@ -143,13 +169,21 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
+  /**
+   * @deprecated Use cancelAll() instead.
+   */
   public cancel(): void {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public cancelAll(): void {
-    this.asyncRequestStream.cancelInFlight()
-    this.syncRequestStream.cancelInFlight()
+  public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
+    if (async) {
+      this.asyncRequestStream.cancelInFlight({ prefetch })
+    }
+
+    if (sync) {
+      this.syncRequestStream.cancelInFlight()
+    }
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
@@ -175,9 +209,14 @@ export class Router {
       return
     }
 
-    const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
+    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
+      // Only cancel non-prefetch requests (deferred props + partial reloads)
+      this.asyncRequestStream.cancelInFlight({ prefetch: false })
+    }
 
-    requestStream.interruptInFlight()
+    if (!visit.async) {
+      this.syncRequestStream.interruptInFlight()
+    }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
@@ -192,10 +231,11 @@ export class Router {
     const prefetched = prefetchedRequests.get(requestParams)
 
     if (prefetched) {
-      revealProgress(prefetched.inFlight)
+      progress.reveal(prefetched.inFlight)
       prefetchedRequests.use(prefetched, requestParams)
     } else {
-      revealProgress(true)
+      progress.reveal(true)
+      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
@@ -242,6 +282,7 @@ export class Router {
       async: true,
       showProgress: false,
       prefetch: true,
+      viewTransition: false,
     })
 
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
@@ -259,7 +300,7 @@ export class Router {
       return
     }
 
-    hideProgress()
+    progress.hide()
 
     this.asyncRequestStream.interruptInFlight()
 
@@ -289,7 +330,7 @@ export class Router {
           this.asyncRequestStream.send(Request.create(params, currentPage.get()))
         },
         {
-          cacheFor: 30_000,
+          cacheFor: config.get('prefetch.cacheFor'),
           cacheTags: [],
           ...prefetchOptions,
         },
@@ -313,44 +354,155 @@ export class Router {
     this.clientVisit(params, { replace: true })
   }
 
+  public replaceProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | ((oldValue: unknown, props: TProps) => unknown),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replace({
+      preserveScroll: true,
+      preserveState: true,
+      props(currentProps) {
+        const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
+
+        return set(cloneDeep(currentProps), name, newValue)
+      },
+      ...(options || {}),
+    })
+  }
+
+  public appendToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [...(currentValue as unknown[]), newValue]
+      },
+      options,
+    )
+  }
+
+  public prependToProp<TProps = Page['props']>(
+    name: string,
+    value: unknown | unknown[] | ((oldValue: unknown, props: TProps) => unknown | unknown[]),
+    options?: Pick<ClientSideVisitOptions, 'onError' | 'onFinish' | 'onSuccess'>,
+  ): void {
+    this.replaceProp(
+      name,
+      (currentValue: unknown, currentProps: TProps) => {
+        const newValue = typeof value === 'function' ? value(currentValue, currentProps) : value
+
+        if (!Array.isArray(currentValue)) {
+          currentValue = currentValue !== undefined ? [currentValue] : []
+        }
+
+        return [newValue, ...(currentValue as unknown[])]
+      },
+      options,
+    )
+  }
+
   public push<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
     this.clientVisit(params)
+  }
+
+  public flash<TFlash extends PageFlashData = PageFlashData>(
+    keyOrData: string | ((flash: FlashData) => TFlash) | TFlash,
+    value?: unknown,
+  ): void {
+    const current = currentPage.get().flash
+    let flash: PageFlashData
+
+    if (typeof keyOrData === 'function') {
+      flash = keyOrData(current)
+    } else if (typeof keyOrData === 'string') {
+      flash = { ...current, [keyOrData]: value }
+    } else if (keyOrData && Object.keys(keyOrData).length) {
+      flash = { ...current, ...keyOrData }
+    } else {
+      return
+    }
+
+    currentPage.setFlash(flash)
+
+    if (Object.keys(flash).length) {
+      fireFlashEvent(flash)
+    }
   }
 
   protected clientVisit<TProps = Page['props']>(
     params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
+    this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
+  }
+
+  protected performClientVisit<TProps = Page['props']>(
+    params: ClientSideVisitOptions<TProps>,
+    { replace = false }: { replace?: boolean } = {},
+  ): Promise<void> {
     const current = currentPage.get()
 
+    const onceProps =
+      typeof params.props === 'function'
+        ? Object.fromEntries(
+            Object.values(current.onceProps ?? {}).map((onceProp) => [onceProp.prop, current.props[onceProp.prop]]),
+          )
+        : {}
+
     const props =
-      typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
+      typeof params.props === 'function'
+        ? params.props(current.props as TProps, onceProps as Partial<TProps>)
+        : (params.props ?? current.props)
 
-    const { onError, onFinish, onSuccess, ...pageParams } = params
+    const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
 
-    currentPage
-      .set(
-        {
-          ...current,
-          ...pageParams,
-          props: props as Page['props'],
-        },
-        {
-          replace,
-          preserveScroll: params.preserveScroll,
-          preserveState: params.preserveState,
-        },
-      )
+    const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
+
+    const page = {
+      ...current,
+      ...pageParams,
+      flash: flash ?? {},
+      props: props as Page['props'],
+    }
+
+    const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
+    const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
+
+    return currentPage
+      .set(page, {
+        replace,
+        preserveScroll,
+        preserveState,
+        viewTransition,
+      })
       .then(() => {
+        const currentFlash = currentPage.get().flash
+
+        if (Object.keys(currentFlash).length > 0) {
+          fireFlashEvent(currentFlash)
+          onFlash?.(currentFlash)
+        }
+
         const errors = currentPage.get().props.errors || {}
 
         if (Object.keys(errors).length === 0) {
-          return onSuccess?.(currentPage.get())
+          onSuccess?.(currentPage.get())
+          return
         }
 
         const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
 
-        return onError?.(scopedErrors)
+        onError?.(scopedErrors)
       })
       .finally(() => onFinish?.(params))
   }
@@ -362,6 +514,7 @@ export class Router {
         async: true,
         showProgress: false,
         prefetch: true,
+        viewTransition: false,
       }),
       ...this.getVisitEvents(options),
     }
@@ -377,6 +530,12 @@ export class Router {
       href = urlMethodPair.url
       options.method = options.method ?? urlMethodPair.method
     }
+
+    const defaultVisitOptionsCallback = config.get('visitOptions')
+
+    const configuredOptions = defaultVisitOptionsCallback
+      ? defaultVisitOptionsCallback(href.toString(), cloneDeep(options)) || {}
+      : {}
 
     const mergedOptions: Visit = {
       method: 'get',
@@ -397,7 +556,9 @@ export class Router {
       preserveUrl: false,
       prefetch: false,
       invalidateCacheTags: [],
+      viewTransition: false,
       ...options,
+      ...configuredOptions,
     }
 
     const [url, _data] = transformUrlAndData(
@@ -429,23 +590,23 @@ export class Router {
     return {
       onCancelToken: options.onCancelToken || (() => {}),
       onBefore: options.onBefore || (() => {}),
+      onBeforeUpdate: options.onBeforeUpdate || (() => {}),
       onStart: options.onStart || (() => {}),
       onProgress: options.onProgress || (() => {}),
       onFinish: options.onFinish || (() => {}),
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
     }
   }
 
-  protected loadDeferredProps(): void {
-    const deferred = currentPage.get()?.deferredProps
-
+  protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
-        this.reload({ only: group })
+        this.doReload({ only: group, deferredProps: true })
       })
     }
   }

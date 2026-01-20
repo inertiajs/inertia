@@ -1,4 +1,13 @@
-import { createHeadManager, Page, PageProps, router } from '@inertiajs/core'
+import {
+  createHeadManager,
+  HeadManager,
+  HeadManagerOnUpdateCallback,
+  HeadManagerTitleCallback,
+  Page,
+  PageProps,
+  router,
+  SharedPageProps,
+} from '@inertiajs/core'
 import {
   computed,
   DefineComponent,
@@ -15,21 +24,21 @@ import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
 
-export interface InertiaAppProps {
-  initialPage: Page
-  initialComponent?: object
+export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
+  initialPage: Page<SharedProps>
+  initialComponent?: DefineComponent
   resolveComponent?: (name: string, page: Page) => DefineComponent | Promise<DefineComponent>
-  titleCallback?: (title: string) => string
-  onHeadUpdate?: (elements: string[]) => void
+  titleCallback?: HeadManagerTitleCallback
+  onHeadUpdate?: HeadManagerOnUpdateCallback
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
 
-const component = ref(null)
-const page = ref<Page<any>>(null)
+const component = ref<DefineComponent | undefined>(undefined)
+const page = ref<Page>()
 const layout = shallowRef(null)
-const key = ref(null)
-let headManager = null
+const key = ref<number | undefined>(undefined)
+let headManager: HeadManager
 
 const App: InertiaApp = defineComponent({
   name: 'Inertia',
@@ -39,7 +48,7 @@ const App: InertiaApp = defineComponent({
       required: true,
     },
     initialComponent: {
-      type: Object,
+      type: Object as PropType<DefineComponent>,
       required: false,
     },
     resolveComponent: {
@@ -47,32 +56,35 @@ const App: InertiaApp = defineComponent({
       required: false,
     },
     titleCallback: {
-      type: Function as PropType<(title: string) => string>,
+      type: Function as PropType<HeadManagerTitleCallback>,
       required: false,
-      default: (title) => title,
+      default: (title: string) => title,
     },
     onHeadUpdate: {
-      type: Function as PropType<(elements: string[]) => void>,
+      type: Function as PropType<HeadManagerOnUpdateCallback>,
       required: false,
       default: () => () => {},
     },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }) {
-    component.value = initialComponent ? markRaw(initialComponent) : null
-    page.value = initialPage
-    key.value = null
+  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }: InertiaAppProps) {
+    component.value = initialComponent ? markRaw(initialComponent) : undefined
+    page.value = { ...initialPage, flash: initialPage.flash ?? {} }
+    key.value = undefined
 
     const isServer = typeof window === 'undefined'
-    headManager = createHeadManager(isServer, titleCallback, onHeadUpdate)
+    headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
 
     if (!isServer) {
-      router.init({
+      router.init<DefineComponent>({
         initialPage,
-        resolveComponent,
-        swapComponent: async (args: VuePageHandlerArgs) => {
-          component.value = markRaw(args.component)
-          page.value = args.page
-          key.value = args.preserveState ? key.value : Date.now()
+        resolveComponent: resolveComponent!,
+        swapComponent: async (options: VuePageHandlerArgs) => {
+          component.value = markRaw(options.component)
+          page.value = options.page
+          key.value = options.preserveState ? key.value : Date.now()
+        },
+        onFlash: (flash) => {
+          page.value = { ...page.value!, flash }
         },
       })
 
@@ -84,7 +96,7 @@ const App: InertiaApp = defineComponent({
         component.value.inheritAttrs = !!component.value.inheritAttrs
 
         const child = h(component.value, {
-          ...page.value.props,
+          ...page.value!.props,
           key: key.value,
         })
 
@@ -103,7 +115,7 @@ const App: InertiaApp = defineComponent({
             .reverse()
             .reduce((child, layout) => {
               layout.inheritAttrs = !!layout.inheritAttrs
-              return h(layout, { ...page.value.props }, () => child)
+              return h(layout, { ...page.value!.props }, () => child)
             })
         }
 
@@ -126,7 +138,7 @@ export const plugin: Plugin = {
   },
 }
 
-export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
+export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageProps & SharedPageProps> {
   return reactive({
     props: computed(() => page.value?.props),
     url: computed(() => page.value?.url),
@@ -135,9 +147,11 @@ export function usePage<SharedProps extends PageProps>(): Page<SharedProps> {
     clearHistory: computed(() => page.value?.clearHistory),
     deferredProps: computed(() => page.value?.deferredProps),
     mergeProps: computed(() => page.value?.mergeProps),
+    prependProps: computed(() => page.value?.prependProps),
     deepMergeProps: computed(() => page.value?.deepMergeProps),
     matchPropsOn: computed(() => page.value?.matchPropsOn),
     rememberedState: computed(() => page.value?.rememberedState),
     encryptHistory: computed(() => page.value?.encryptHistory),
-  })
+    flash: computed(() => page.value?.flash),
+  }) as Page<TPageProps>
 }

@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "2.1.1",
+  "version": "2.3.10",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -35,29 +35,27 @@
     }
   },
   "scripts": {
-    "build": "pnpm package && publint",
+    "build": "pnpm package && svelte-check --tsconfig ./tsconfig.json && publint",
     "build:with-deps": "svelte-kit sync && vite build --config vite-with-deps.config.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "dev": "pnpm package --watch",
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
-    "package": "svelte-kit sync && svelte-package --input src",
-    "prepublishOnly": "pnpm build"
+    "package": "svelte-kit sync && svelte-package --input src"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.2.0",
-    "@sveltejs/kit": "^2.20.6",
-    "@sveltejs/package": "^2.3.4",
+    "@sveltejs/adapter-auto": "^3.3.1",
+    "@sveltejs/kit": "^2.49.5",
+    "@sveltejs/package": "^2.5.7",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@types/html-escape": "^2.0.2",
-    "axios": "^1.8.2",
-    "es-check": "^9.3.1",
-    "publint": "^0.2.10",
-    "svelte": "^4.2.19",
-    "svelte-check": "^4.0.0",
-    "tslib": "^2.7.0",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.19"
+    "axios": "^1.13.2",
+    "es-check": "^9.5.3",
+    "publint": "^0.3.16",
+    "svelte": "^4.2.20",
+    "svelte-check": "^4.3.5",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
   },
   "peerDependencies": {
     "svelte": "^4.0.0 || ^5.0.0"
@@ -65,7 +63,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
-    "html-escape": "^2.0.0",
-    "lodash-es": "^4.17.21"
+    "laravel-precognition": "^1.0.0",
+    "lodash-es": "^4.17.22"
   }
 }

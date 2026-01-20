@@ -1,6 +1,7 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { onDestroy, onMount } from 'svelte'
+  import { onDestroy } from 'svelte'
+  import { usePage } from '../page'
 
   export let data: string | string[] = ''
   export let params: ReloadOptions = {}
@@ -13,10 +14,16 @@
   let el: HTMLElement
   let observer: IntersectionObserver | null = null
 
-  onMount(() => {
-    if (!el) {
-      return
-    }
+  const page = usePage()
+  $: keys = data ? (Array.isArray(data) ? data : [data]) : []
+  $: loaded = keys.length > 0 && keys.every((key) => $page.props[key] !== undefined)
+
+  $: if (el && (!loaded || always)) {
+    registerObserver()
+  }
+
+  function registerObserver() {
+    observer?.disconnect()
 
     observer = new IntersectionObserver(
       (entries) => {
@@ -24,11 +31,11 @@
           return
         }
 
-        if (!always) {
-          observer?.disconnect()
+        if (fetching) {
+          return
         }
 
-        if (fetching) {
+        if (!always && loaded) {
           return
         }
 
@@ -46,6 +53,10 @@
             loaded = true
             fetching = false
             reloadParams.onFinish?.(event)
+
+            if (!always) {
+              observer?.disconnect()
+            }
           },
         })
       },
@@ -55,24 +66,20 @@
     )
 
     observer.observe(el)
-  })
+  }
 
   onDestroy(() => {
     observer?.disconnect()
   })
 
   function getReloadParams(): Partial<ReloadOptions> {
+    const reloadParams: Partial<ReloadOptions> = { ...params }
+
     if (data !== '') {
-      return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
-      }
+      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[]
     }
 
-    if (!params.data) {
-      throw new Error('You must provide either a `data` or `params` prop.')
-    }
-
-    return params
+    return reloadParams
   }
 </script>
 
@@ -81,7 +88,7 @@
 {/if}
 
 {#if loaded}
-  <slot />
+  <slot {fetching} />
 {:else if $$slots.fallback}
   <slot name="fallback" />
 {/if}

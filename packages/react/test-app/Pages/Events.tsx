@@ -2,7 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react'
 
 declare global {
   interface Window {
-    messages: string[]
+    messages: unknown[]
   }
 }
 
@@ -15,7 +15,7 @@ export default () => {
 
   const page = usePage()
 
-  const internalAlert = (...args: any[]) => {
+  const internalAlert = (...args: unknown[]) => {
     args.forEach((arg) => window.messages.push(arg))
   }
 
@@ -87,7 +87,7 @@ export default () => {
   const beforeVisitPreventGlobalInertia = (e: React.MouseEvent) => {
     e.preventDefault()
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
-    router.on('before', (visit) => {
+    router.on('before', () => {
       internalAlert('Inertia.on(before)')
       return false
     })
@@ -441,7 +441,7 @@ export default () => {
         setTimeout(() => {
           internalAlert('CANCELLING!')
           token.cancel()
-        }, 10)
+        }, 250)
       },
     })
   }
@@ -502,7 +502,7 @@ export default () => {
       <Link
         href={page.url}
         method="post"
-        onBefore={(visit) => {
+        onBefore={() => {
           internalAlert('linkOnBefore')
           return false
         }}

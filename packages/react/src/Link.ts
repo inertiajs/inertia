@@ -1,5 +1,6 @@
 import {
   ActiveVisit,
+  isUrlMethodPair,
   LinkComponentBaseProps,
   LinkPrefetchOption,
   mergeDataIntoQueryString,
@@ -8,14 +9,16 @@ import {
   router,
   shouldIntercept,
   shouldNavigate,
+  VisitOptions,
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { config } from '.'
 
 const noop = () => undefined
 
 interface BaseInertiaLinkProps extends LinkComponentBaseProps {
   as?: ElementType
-  onClick?: (event: React.MouseEvent<Element>) => void
+  onClick?: (event: React.MouseEvent) => void
 }
 
 export type InertiaLinkProps = BaseInertiaLinkProps &
@@ -32,6 +35,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       method = 'get',
       preserveScroll = false,
       preserveState = null,
+      preserveUrl = false,
       replace = false,
       only = [],
       except = [],
@@ -52,15 +56,16 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       prefetch = false,
       cacheFor = 0,
       cacheTags = [],
+      viewTransition = false,
       ...props
     },
     ref,
   ) => {
     const [inFlightCount, setInFlightCount] = useState(0)
-    const hoverTimeout = useRef<number>(null)
+    const hoverTimeout = useRef<number>(undefined)
 
     const _method = useMemo(() => {
-      return typeof href === 'object' ? href.method : (method.toLowerCase() as Method)
+      return isUrlMethodPair(href) ? href.method : (method.toLowerCase() as Method)
     }, [href, method])
 
     const _as = useMemo(() => {
@@ -73,31 +78,33 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, [as, _method])
 
     const mergeDataArray = useMemo(
-      () => mergeDataIntoQueryString(_method, typeof href === 'object' ? href.url : href, data, queryStringArrayFormat),
+      () => mergeDataIntoQueryString(_method, isUrlMethodPair(href) ? href.url : href, data, queryStringArrayFormat),
       [href, _method, data, queryStringArrayFormat],
     )
 
     const url = useMemo(() => mergeDataArray[0], [mergeDataArray])
     const _data = useMemo(() => mergeDataArray[1], [mergeDataArray])
 
-    const baseParams = useMemo(
+    const baseParams = useMemo<VisitOptions>(
       () => ({
         data: _data,
         method: _method,
         preserveScroll,
         preserveState: preserveState ?? _method !== 'get',
+        preserveUrl,
         replace,
         only,
         except,
         headers,
         async,
       }),
-      [_data, _method, preserveScroll, preserveState, replace, only, except, headers, async],
+      [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async],
     )
 
-    const visitParams = useMemo(
+    const visitParams = useMemo<VisitOptions>(
       () => ({
         ...baseParams,
+        viewTransition,
         onCancelToken,
         onBefore,
         onStart(visit: PendingVisit) {
@@ -113,7 +120,18 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         onSuccess,
         onError,
       }),
-      [baseParams, onCancelToken, onBefore, onStart, onProgress, onFinish, onCancel, onSuccess, onError],
+      [
+        baseParams,
+        viewTransition,
+        onCancelToken,
+        onBefore,
+        onStart,
+        onProgress,
+        onFinish,
+        onCancel,
+        onSuccess,
+        onError,
+      ],
     )
 
     const prefetchModes: LinkPrefetchOption[] = useMemo(
@@ -148,7 +166,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       }
 
       // Otherwise, default to 30 seconds
-      return 30_000
+      return config.get('prefetch.cacheFor')
     }, [cacheFor, prefetchModes])
 
     const doPrefetch = useMemo(() => {
@@ -178,7 +196,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }, prefetchModes)
 
     const regularEvents = {
-      onClick: (event) => {
+      onClick: (event: React.MouseEvent) => {
         onClick(event)
 
         if (shouldIntercept(event)) {
@@ -193,7 +211,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseEnter: () => {
         hoverTimeout.current = window.setTimeout(() => {
           doPrefetch()
-        }, 75)
+        }, config.get('prefetch.hoverDelay'))
       },
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)
@@ -202,29 +220,31 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     }
 
     const prefetchClickEvents = {
-      onMouseDown: (event) => {
+      onMouseDown: (event: React.MouseEvent) => {
         if (shouldIntercept(event)) {
           event.preventDefault()
           doPrefetch()
         }
       },
-      onKeyDown: (event) => {
-        if (shouldIntercept(event) && shouldNavigate(event)) {
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (shouldNavigate(event)) {
           event.preventDefault()
           doPrefetch()
         }
       },
-      onMouseUp: (event) => {
-        event.preventDefault()
-        router.visit(url, visitParams)
+      onMouseUp: (event: React.MouseEvent) => {
+        if (shouldIntercept(event)) {
+          event.preventDefault()
+          router.visit(url, visitParams)
+        }
       },
-      onKeyUp: (event) => {
+      onKeyUp: (event: React.KeyboardEvent) => {
         if (shouldNavigate(event)) {
           event.preventDefault()
           router.visit(url, visitParams)
         }
       },
-      onClick: (event) => {
+      onClick: (event: React.MouseEvent) => {
         onClick(event)
 
         if (shouldIntercept(event)) {

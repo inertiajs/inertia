@@ -1,10 +1,12 @@
 <script lang="ts">
-import type { Component } from 'vue'
+import type { Component, VNode } from 'vue'
 import NestedLayout from '@/Layouts/NestedLayout.vue'
 import SiteLayout from '@/Layouts/SiteLayout.vue'
 
+type RenderFunction = (component: Component, children: Component[]) => VNode
+
 export default {
-  layout: (h: Function, page: Component) => {
+  layout: (h: RenderFunction, page: Component) => {
     return h(SiteLayout, [h(NestedLayout, [page])])
   },
 }

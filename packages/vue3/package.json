@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "2.1.1",
+  "version": "2.3.10",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -45,18 +45,18 @@
     "build": "pnpm clean && ./build.js && tsc",
     "build:with-deps": "./build.js --with-deps",
     "clean": "rm -rf types && rm -rf dist",
-    "dev": "./build.js --watch",
-    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose",
-    "prepublishOnly": "pnpm build"
+    "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
+    "dev:build": "./build.js --watch",
+    "dev:types": "tsc --watch --preserveWatchOutput",
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
-    "@types/node": "^22.5.3",
-    "axios": "^1.8.2",
-    "es-check": "^9.3.1",
-    "esbuild": "^0.25.0",
-    "esbuild-node-externals": "^1.6.0",
-    "typescript": "^4.9.4",
-    "vue": "^3.0.0"
+    "axios": "^1.13.2",
+    "es-check": "^9.5.3",
+    "esbuild": "^0.27.2",
+    "esbuild-node-externals": "^1.20.1",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.26"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -64,6 +64,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
-    "lodash-es": "^4.17.21"
+    "laravel-precognition": "^1.0.0",
+    "lodash-es": "^4.17.22"
   }
 }

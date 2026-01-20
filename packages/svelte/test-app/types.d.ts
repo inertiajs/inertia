@@ -9,9 +9,10 @@ declare global {
     _inertia_request_dump: {
       headers: Record<string, string>
       method: Method
-      form: Record<string, any> | undefined
+      form: Record<string, unknown> | undefined
       files: MulterFile[] | object
-      query: Record<string, any>
+      query: Record<string, unknown>
+      url: string
       $page: Page
     }
     _inertia_page_key: string | undefined

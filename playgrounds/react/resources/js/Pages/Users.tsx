@@ -6,7 +6,7 @@ const Users = ({ users }) => {
     <>
       <Head title="Users" />
       <h1 className="text-3xl">Users</h1>
-      <div className="shadow-xs mt-6 w-full max-w-2xl overflow-hidden rounded-sm border border-gray-200">
+      <div className="mt-6 w-full max-w-2xl overflow-hidden rounded-sm border border-gray-200 shadow-xs">
         <table className="w-full text-left">
           <thead>
             <tr>

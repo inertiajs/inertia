@@ -10,7 +10,7 @@ import { hrefToUrl } from './url'
 class EventHandler {
   protected internalListeners: {
     event: InternalEvent
-    listener: VoidFunction
+    listener: (...args: any[]) => void
   }[] = []
 
   public init() {
@@ -39,7 +39,7 @@ class EventHandler {
     return this.registerListener(`inertia:${type}`, listener)
   }
 
-  public on(event: InternalEvent, callback: VoidFunction): VoidFunction {
+  public on(event: InternalEvent, callback: (...args: any[]) => void): VoidFunction {
     this.internalListeners.push({ event, listener: callback })
 
     return () => {
@@ -55,8 +55,10 @@ class EventHandler {
     this.fireInternalEvent('missingHistoryItem')
   }
 
-  public fireInternalEvent(event: InternalEvent): void {
-    this.internalListeners.filter((listener) => listener.event === event).forEach((listener) => listener.listener())
+  public fireInternalEvent(event: InternalEvent, ...args: any[]): void {
+    this.internalListeners
+      .filter((listener) => listener.event === event)
+      .forEach((listener) => listener.listener(...args))
   }
 
   protected registerListener(type: string, listener: EventListener): VoidFunction {
@@ -72,7 +74,7 @@ class EventHandler {
       const url = hrefToUrl(currentPage.get().url)
       url.hash = window.location.hash
 
-      history.replaceState({ ...currentPage.get(), url: url.href })
+      history.replaceState({ ...currentPage.getWithoutFlashData(), url: url.href })
       Scroll.reset()
 
       return
@@ -90,14 +92,27 @@ class EventHandler {
           return
         }
 
-        // Cancel ongoing requests
-        router.cancelAll()
+        // Cancel ongoing requests except prefetch requests
+        router.cancelAll({ prefetch: false })
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          window.requestAnimationFrame(() => {
-            Scroll.restore(history.getScrollRegions())
-          })
+          Scroll.restore(history.getScrollRegions())
           fireNavigateEvent(currentPage.get())
+
+          const pendingDeferred: Record<string, string[]> = {}
+          const pageProps = currentPage.get().props
+
+          for (const [group, props] of Object.entries(data.initialDeferredProps ?? data.deferredProps ?? {})) {
+            const missing = props.filter((prop) => pageProps[prop] === undefined)
+
+            if (missing.length > 0) {
+              pendingDeferred[group] = missing
+            }
+          }
+
+          if (Object.keys(pendingDeferred).length > 0) {
+            this.fireInternalEvent('loadDeferredProps', pendingDeferred)
+          }
         })
       })
       .catch(() => {

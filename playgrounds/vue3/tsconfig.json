@@ -11,5 +11,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "src/**/*.vue"]
+  "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.vue"]
 }

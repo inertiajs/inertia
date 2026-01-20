@@ -1,3 +1,4 @@
+import { FormComponentRef } from '@inertiajs/core'
 import { Form } from '@inertiajs/react'
 import { useRef } from 'react'
 
@@ -8,11 +9,10 @@ declare global {
 }
 
 export default function Reset() {
-  const formRef = useRef(null)
+  const formRef = useRef<FormComponentRef>(null)
 
   // Expose reset function to window for testing
   window.resetForm = (...fields: string[]) => {
-    // @ts-expect-error
     formRef.current?.reset(...fields)
   }
 

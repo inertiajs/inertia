@@ -1,9 +1,11 @@
 <script lang="ts">
 import Layout from '@/Layouts/SWR.vue'
-import type { Component } from 'vue'
+import type { Component, VNode } from 'vue'
+
+type RenderFunction = (component: Component, children: Component[]) => VNode
 
 export default {
-  layout: (h: Function, page: Component) => h(Layout, [page]),
+  layout: (h: RenderFunction, page: Component) => h(Layout, [page]),
 }
 </script>
 

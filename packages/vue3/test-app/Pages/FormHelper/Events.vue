@@ -126,7 +126,7 @@ const onBeforeVisit = () => {
 const onBeforeVisitCancelled = () => {
   form.post('/sleep', {
     ...callbacks({
-      onBefore: (visit: PendingVisit) => {
+      onBefore: () => {
         pushEvent('onBefore')
         return false
       },
@@ -190,7 +190,7 @@ const onSuccessVisit = () => {
 const onSuccessPromiseVisit = () => {
   form.post('/dump/post', {
     ...callbacks({
-      onSuccess: (page: Page) => {
+      onSuccess: () => {
         pushEvent('onSuccess')
 
         setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)
@@ -203,7 +203,7 @@ const onSuccessPromiseVisit = () => {
 const onSuccessResetValue = () => {
   form.post(page.url, {
     ...callbacks({
-      onSuccess: (page: Page) => {
+      onSuccess: () => {
         form.reset()
       },
     }),
@@ -224,7 +224,7 @@ const onErrorVisit = () => {
 const onErrorPromiseVisit = () => {
   form.post('/form-helper/events/errors', {
     ...callbacks({
-      onError: (errors: Errors) => {
+      onError: () => {
         pushEvent('onError')
 
         setTimeout(() => pushEvent('onFinish should have been fired by now if Promise functionality did not work'), 5)

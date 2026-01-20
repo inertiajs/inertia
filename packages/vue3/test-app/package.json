@@ -1,16 +1,25 @@
 {
+  "type": "module",
   "scripts": {
     "build": "vite build .",
+    "build:ssr": "vite build --ssr ssr.ts --outDir dist",
     "dev": "nodemon --watch . --watch ../../core/dist --watch ../../vue3/dist --ext js,vue,html,json --ignore dist/ --exec 'vite build .'",
+    "lint": "eslint .",
     "type-check": "vue-tsc --noEmit"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.5",
-    "nodemon": "^3.0.0",
-    "typescript": "^5.2.2",
-    "vite": "^6.3.0",
-    "vue-tsc": "^2.2.4",
-    "vue": "^3.4.33"
+    "@vitejs/plugin-vue": "^6.0.3",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.6.2",
+    "globals": "^17.0.0",
+    "nodemon": "^3.1.11",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.0",
+    "vite": "^7.3.1",
+    "vue": "^3.5.26",
+    "vue-tsc": "^3.2.2"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

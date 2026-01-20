@@ -1,6 +1,6 @@
 import { useForm, usePage } from '@inertiajs/react'
 
-export default ({ errors }: { errors?: { name?: string; handle?: string } }) => {
+export default () => {
   const form = useForm({
     name: 'foo',
     handle: 'example',

@@ -90,6 +90,25 @@ const assertGlobalFinishEvent = async (event) => {
   await assertVisitObject(event.detail.visit)
 }
 
+const waitForMessages = async (page: Page, count?: number): Promise<any[string]> => {
+  if (typeof count === 'number') {
+    await page.waitForFunction((count) => (window as any).messages.length === count, count)
+  }
+
+  return await page.evaluate(() => (window as any).messages)
+}
+
+const waitForGlobalMessages = async (page: Page, event: string, count?: number): Promise<any[string]> => {
+  if (typeof count === 'number') {
+    await page.waitForFunction(({ count, event }) => (window as any).globalMessages[event].length === count, {
+      count,
+      event,
+    })
+  }
+
+  return await page.evaluate((event) => (window as any).globalMessages[event], event)
+}
+
 test.describe('Events', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
@@ -99,19 +118,15 @@ test.describe('Events', () => {
   test.describe('Listeners', () => {
     test('does not have any listeners by default', async ({ page }) => {
       await page.getByRole('link', { name: 'Basic Visit' }).click()
-
-      const messages = await page.evaluate(() => (window as any).messages)
-
-      await expect(messages.length).toBe(0)
+      await waitForMessages(page, 0)
     })
 
     test.describe('Inertia.on', () => {
       test('returns a callback that can be used to remove the global listener', async ({ page }) => {
         await page.getByRole('link', { name: 'Remove Inertia Listener' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await waitForMessages(page, 3)
 
-        await expect(messages.length).toBe(3)
         await expect(messages[0]).toBe('Removing Inertia.on Listener')
         await expect(messages[1]).toBe('onBefore')
         await expect(messages[2]).toBe('onStart')
@@ -126,7 +141,7 @@ test.describe('Events', () => {
 
         await page.getByRole('link', { exact: true, name: 'Before Event' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await waitForMessages(page)
         const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:before'])
 
         // Local Event Callback
@@ -148,7 +163,7 @@ test.describe('Events', () => {
       test('fires the event when a request is about to be made (link)', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Before Event Link' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
+        const messages = await waitForMessages(page)
 
         // Link Event Callback
         await expect(messages[0]).toBe('linkOnBefore')
@@ -162,18 +177,14 @@ test.describe('Events', () => {
         test('can prevent the visit by returning false', async ({ page }) => {
           await page.getByRole('link', { exact: true, name: 'Before Event (Prevent)' }).click()
 
-          const messages = await page.evaluate(() => (window as any).messages)
-
-          await expect(messages).toHaveLength(1)
+          const messages = await waitForMessages(page, 1)
           await expect(messages[0]).toBe('onBefore')
         })
 
         test('can prevent the visit by returning false (link)', async ({ page }) => {
           await page.getByRole('button', { exact: true, name: 'Before Event Link (Prevent)' }).click()
 
-          const messages = await page.evaluate(() => (window as any).messages)
-
-          await expect(messages).toHaveLength(1)
+          const messages = await waitForMessages(page, 1)
           await expect(messages[0]).toBe('linkOnBefore')
         })
       })
@@ -184,9 +195,7 @@ test.describe('Events', () => {
             .getByRole('link', { exact: true, name: 'Before Event - Prevent globally using Inertia Event Listener' })
             .click()
 
-          const messages = await page.evaluate(() => (window as any).messages)
-
-          await expect(messages).toHaveLength(3)
+          const messages = await waitForMessages(page, 3)
           await expect(messages[0]).toBe('onBefore')
           await expect(messages[1]).toBe('addEventListener(inertia:before)')
           await expect(messages[2]).toBe('Inertia.on(before)')
@@ -199,9 +208,7 @@ test.describe('Events', () => {
             .getByRole('link', { exact: true, name: 'Before Event - Prevent globally using Native Event Listeners' })
             .click()
 
-          const messages = await page.evaluate(() => (window as any).messages)
-
-          await expect(messages).toHaveLength(3)
+          const messages = await waitForMessages(page, 3)
           await expect(messages[0]).toBe('onBefore')
           await expect(messages[1]).toBe('Inertia.on(before)')
           await expect(messages[2]).toBe('addEventListener(inertia:before)')
@@ -213,11 +220,8 @@ test.describe('Events', () => {
       test('fires when the request is starting', async ({ page }) => {
         await page.getByRole('link', { exact: true, name: 'Cancel Token Event' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
         // Assert that it only gets fired locally.
-        await expect(messages).toHaveLength(2)
-
+        const messages = await waitForMessages(page, 2)
         await expect(messages[0]).toBe('onCancelToken')
         assertCancelToken(messages[1])
       })
@@ -225,11 +229,8 @@ test.describe('Events', () => {
       test('fires when the request is starting (link)', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Cancel Token Event Link' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
         // Assert that it only gets fired locally.
-        await expect(messages).toHaveLength(2)
-
+        const messages = await waitForMessages(page, 2)
         await expect(messages[0]).toBe('linkOnCancelToken')
         assertCancelToken(messages[1])
       })
@@ -239,9 +240,7 @@ test.describe('Events', () => {
       test('fires when the request was cancelled', async ({ page }) => {
         await page.getByRole('link', { exact: true, name: 'Cancel Event' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(2)
+        const messages = await waitForMessages(page, 2)
         await expect(messages[0]).toBe('onCancel')
         await expect(messages[1]).toBeUndefined()
       })
@@ -249,9 +248,7 @@ test.describe('Events', () => {
       test('fires when the request was cancelled (link)', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Cancel Event Link' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(2)
+        const messages = await waitForMessages(page, 2)
         await expect(messages[0]).toBe('linkOnCancel')
         await expect(messages[1]).toBeUndefined()
       })
@@ -263,11 +260,8 @@ test.describe('Events', () => {
 
         await page.getByRole('link', { exact: true, name: 'Start Event' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-        const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:start'])
-
-        await expect(messages).toHaveLength(6)
-        await expect(globalMessages).toHaveLength(1)
+        const messages = await waitForMessages(page, 6)
+        const globalMessages = await waitForGlobalMessages(page, 'inertia:start', 1)
 
         await assertIsGlobalEvent(globalMessages[0], 'inertia:start', false)
         await assertVisitObject(globalMessages[0].detail.visit)
@@ -286,11 +280,8 @@ test.describe('Events', () => {
       test('fires when the request has started (link)', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Start Event Link' }).click()
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(2)
-
         // Local Event Callback
+        const messages = await waitForMessages(page, 2)
         await expect(messages[0]).toBe('linkOnStart')
         assertVisitObject(messages[1])
       })
@@ -299,14 +290,10 @@ test.describe('Events', () => {
     test.describe('progress', () => {
       test('fires when the request has files and upload progression occurs', async ({ page }) => {
         await listenForGlobalMessages(page, 'inertia:progress')
-
         await clickAndWaitForResponse(page, 'Progress Event')
 
-        const messages = await page.evaluate(() => (window as any).messages)
-        const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:progress'])
-
-        await expect(messages).toHaveLength(6)
-        await expect(globalMessages).toHaveLength(1)
+        const messages = await waitForMessages(page, 6)
+        const globalMessages = await waitForGlobalMessages(page, 'inertia:progress', 1)
 
         await assertIsGlobalEvent(globalMessages[0], 'inertia:progress', false)
         await assertProgressObject(globalMessages[0].detail.progress)
@@ -325,27 +312,20 @@ test.describe('Events', () => {
       test('fires when the request has files and upload progression occurs (link)', async ({ page }) => {
         await clickAndWaitForResponse(page, 'Progress Event Link', null, 'button')
 
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(2)
-
+        const messages = await waitForMessages(page, 2)
         await expect(messages[0]).toBe('linkOnProgress')
         await assertProgressObject(messages[1])
       })
 
       test('does not fire when the request has no files', async ({ page }) => {
         await page.getByRole('link', { exact: true, name: 'Missing Progress Event (no files)' }).click()
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(1)
+        const messages = await waitForMessages(page, 1)
         await expect(messages[0]).toBe('progressNoFilesOnBefore')
       })
 
       test('does not fire when the request has no files (link)', async ({ page }) => {
         await page.getByRole('button', { exact: true, name: 'Progress Event Link (no files)' }).click()
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(1)
+        const messages = await waitForMessages(page, 1)
         await expect(messages[0]).toBe('linkProgressNoFilesOnBefore')
       })
     })
@@ -353,14 +333,10 @@ test.describe('Events', () => {
     test.describe('error', () => {
       test('fires when the request finishes with validation errors', async ({ page }) => {
         await listenForGlobalMessages(page, 'inertia:error')
-
         await clickAndWaitForResponse(page, 'Error Event', 'events/errors')
 
-        const messages = await page.evaluate(() => (window as any).messages)
-        const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:error'])
-
-        await expect(messages).toHaveLength(6)
-        await expect(globalMessages).toHaveLength(1)
+        const messages = await waitForMessages(page, 6)
+        const globalMessages = await waitForGlobalMessages(page, 'inertia:error', 1)
 
         await assertGlobalErrorEvent(globalMessages[0])
 
@@ -377,14 +353,10 @@ test.describe('Events', () => {
 
       test('fires when the request finishes with validation errors (link)', async ({ page }) => {
         await listenForGlobalMessages(page, 'inertia:error')
+        await clickAndWaitForResponse(page, 'Error Event Link', 'events/errors', 'button')
 
-        const response = await clickAndWaitForResponse(page, 'Error Event Link', 'events/errors', 'button')
-
-        const messages = await page.evaluate(() => (window as any).messages)
-        const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:error'])
-
-        await expect(messages).toHaveLength(2)
-        await expect(globalMessages).toHaveLength(1)
+        const messages = await waitForMessages(page, 2)
+        const globalMessages = await waitForGlobalMessages(page, 'inertia:error', 1)
 
         // Global Inertia Event Listener
         await expect(messages[0]).toBe('linkOnError')
@@ -397,11 +369,7 @@ test.describe('Events', () => {
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
         await clickAndWaitForResponse(page, 'Error Event (delaying onFinish w/ Promise)', 'events/errors')
 
-        await page.waitForTimeout(25)
-
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(3)
+        const messages = await waitForMessages(page, 3)
         await expect(messages[0]).toBe('onError')
         await expect(messages[1]).toBe('onFinish should have been fired by now if Promise functionality did not work')
         await expect(messages[2]).toBe('onFinish')
@@ -412,11 +380,7 @@ test.describe('Events', () => {
 
         await page.getByRole('button', { exact: true, name: 'Error Event Link (delaying onFinish w/ Promise)' }).click()
 
-        await page.waitForTimeout(25)
-
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(3)
+        const messages = await waitForMessages(page, 3)
         await expect(messages[0]).toBe('linkOnError')
         await expect(messages[1]).toBe('onFinish should have been fired by now if Promise functionality did not work')
         await expect(messages[2]).toBe('linkOnFinish')
@@ -430,11 +394,8 @@ test.describe('Events', () => {
 
       await clickAndWaitForResponse(page, 'Success Event')
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:success'])
-
-      await expect(messages).toHaveLength(6)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 6)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:success', 1)
 
       await assertGlobalSuccessEvent(globalMessages[0])
 
@@ -451,14 +412,10 @@ test.describe('Events', () => {
 
     test('fires when the request finished without validation errors (link)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:success')
-
       await clickAndWaitForResponse(page, 'Success Event Link', null, 'button')
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:success'])
-
-      await expect(messages).toHaveLength(2)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:success', 1)
 
       await assertGlobalSuccessEvent(globalMessages[0])
 
@@ -470,11 +427,7 @@ test.describe('Events', () => {
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
         await page.getByRole('link', { exact: true, name: 'Success Event (delaying onFinish w/ Promise)' }).click()
 
-        await page.waitForTimeout(25)
-
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(3)
+        const messages = await waitForMessages(page, 3)
         await expect(messages[0]).toBe('onSuccess')
         await expect(messages[1]).toBe('onFinish should have been fired by now if Promise functionality did not work')
         await expect(messages[2]).toBe('onFinish')
@@ -487,11 +440,7 @@ test.describe('Events', () => {
           .getByRole('button', { exact: true, name: 'Success Event Link (delaying onFinish w/ Promise)' })
           .click()
 
-        await page.waitForTimeout(25)
-
-        const messages = await page.evaluate(() => (window as any).messages)
-
-        await expect(messages).toHaveLength(3)
+        const messages = await waitForMessages(page, 3)
         await expect(messages[0]).toBe('linkOnSuccess')
         await expect(messages[1]).toBe('onFinish should have been fired by now if Promise functionality did not work')
         await expect(messages[2]).toBe('linkOnFinish')
@@ -502,14 +451,10 @@ test.describe('Events', () => {
   test.describe('invalid', () => {
     test('gets fired when a non-Inertia response is received', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:invalid')
-
       await clickAndWaitForResponse(page, 'Invalid Event', 'non-inertia')
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:invalid'])
-
-      await expect(messages).toHaveLength(4)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 4)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:invalid', 1)
 
       await assertIsGlobalEvent(globalMessages[0], 'inertia:invalid', true)
       await assertResponseObject(globalMessages[0].detail.response)
@@ -526,13 +471,9 @@ test.describe('Events', () => {
     test('gets fired when an unexpected situation occurs (e.g. network disconnect)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:exception', true)
       await page.getByRole('link', { exact: true, name: 'Exception Event' }).click()
-      await page.waitForTimeout(100)
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:exception'])
-
-      await expect(messages).toHaveLength(4)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 4)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:exception', 1)
 
       await assertIsGlobalEvent(globalMessages[0], 'inertia:exception', true)
       await assertExceptionObject(JSON.parse(globalMessages[0].detail))
@@ -548,14 +489,10 @@ test.describe('Events', () => {
   test.describe('finish', () => {
     test('fires when the request completes', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:finish')
-
       await clickAndWaitForResponse(page, 'Finish Event')
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:finish'])
-
-      await expect(messages).toHaveLength(6)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 6)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:finish', 1)
 
       await assertGlobalFinishEvent(globalMessages[0])
 
@@ -572,14 +509,10 @@ test.describe('Events', () => {
 
     test('fires when the request completes (link)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:finish')
-
       await clickAndWaitForResponse(page, 'Finish Event Link', null, 'button')
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:finish'])
-
-      await expect(messages).toHaveLength(2)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:finish', 1)
 
       await assertGlobalFinishEvent(globalMessages[0])
 
@@ -592,11 +525,8 @@ test.describe('Events', () => {
       await listenForGlobalMessages(page, 'inertia:navigate')
       await page.getByRole('link', { exact: true, name: 'Navigate Event' }).click()
 
-      const messages = await page.evaluate(() => (window as any).messages)
-      const globalMessages = await page.evaluate(() => (window as any).globalMessages['inertia:navigate'])
-
-      await expect(messages).toHaveLength(4)
-      await expect(globalMessages).toHaveLength(1)
+      const messages = await waitForMessages(page, 4)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:navigate', 1)
 
       await assertIsGlobalEvent(globalMessages[0], 'inertia:navigate', false)
       await assertPageObject(globalMessages[0].detail.page)
@@ -616,7 +546,7 @@ test.describe('Events', () => {
       await page.getByRole('button', { name: 'Prefetch Event Link (Hover)' }).hover()
       await prefetchResponse
 
-      const messages = await page.evaluate(() => (window as any).messages)
+      const messages = await waitForMessages(page)
 
       // Link Event Callbacks
       const prefetchingIndex = messages.findIndex((msg) => msg === 'linkOnPrefetching')
@@ -645,9 +575,7 @@ test.describe('Lifecycles', () => {
   test('fires all expected events in the correct order on a successful request', async ({ page }) => {
     await page.getByRole('link', { exact: true, name: 'Lifecycle Success' }).click()
 
-    const messages = await page.evaluate(() => (window as any).messages)
-
-    await expect(messages).toHaveLength(16)
+    const messages = await waitForMessages(page, 16)
 
     await expect(messages[0]).toBe('onBefore')
     await expect(messages[1]).toBe('Inertia.on(before)')
@@ -670,9 +598,7 @@ test.describe('Lifecycles', () => {
   test('fires all expected events in the correct order on an error request', async ({ page }) => {
     await clickAndWaitForResponse(page, 'Lifecycle Error', 'events/errors')
 
-    const messages = await page.evaluate(() => (window as any).messages)
-
-    await expect(messages).toHaveLength(18)
+    const messages = await waitForMessages(page, 18)
 
     await expect(messages[0]).toBe('onBefore')
     await expect(messages[1]).toBe('Inertia.on(before)')
@@ -698,11 +624,7 @@ test.describe('Lifecycles', () => {
     test('cancels a visit before it completes', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Lifecycle Cancel' }).click()
 
-      await page.waitForTimeout(50)
-
-      const messages = await page.evaluate(() => (window as any).messages)
-
-      await expect(messages).toHaveLength(12)
+      const messages = await waitForMessages(page, 15)
 
       await expect(messages[0]).toBe('onBefore')
       await expect(messages[1]).toBe('Inertia.on(before)')
@@ -711,19 +633,20 @@ test.describe('Lifecycles', () => {
       await expect(messages[4]).toBe('Inertia.on(start)')
       await expect(messages[5]).toBe('addEventListener(inertia:start)')
       await expect(messages[6]).toBe('onStart')
-      await expect(messages[7]).toBe('CANCELLING!')
-      await expect(messages[8]).toBe('onCancel')
-      await expect(messages[9]).toBe('Inertia.on(finish)')
-      await expect(messages[10]).toBe('addEventListener(inertia:finish)')
-      await expect(messages[11]).toBe('onFinish')
+      await expect(messages[7]).toBe('Inertia.on(progress)')
+      await expect(messages[8]).toBe('addEventListener(inertia:progress)')
+      await expect(messages[9]).toBe('onProgress')
+      await expect(messages[10]).toBe('CANCELLING!')
+      await expect(messages[11]).toBe('onCancel')
+      await expect(messages[12]).toBe('Inertia.on(finish)')
+      await expect(messages[13]).toBe('addEventListener(inertia:finish)')
+      await expect(messages[14]).toBe('onFinish')
     })
 
     test('prevents onCancel from firing when the request is already finished', async ({ page }) => {
       await page.getByRole('link', { exact: true, name: 'Lifecycle Cancel - After Finish' }).click()
 
-      const messages = await page.evaluate(() => (window as any).messages)
-
-      await expect(messages).toHaveLength(17)
+      const messages = await waitForMessages(page, 17)
 
       await expect(messages[0]).toBe('onBefore')
       await expect(messages[1]).toBe('Inertia.on(before)')

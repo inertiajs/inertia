@@ -3,7 +3,7 @@
 import type { FormDataConvertible } from '@inertiajs/core'
 import type { InertiaForm } from '@inertiajs/vue3'
 
-const props = defineProps<{
+defineProps<{
   form: InertiaForm<TFormData>
 }>()
 </script>

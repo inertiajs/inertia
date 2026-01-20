@@ -1,25 +1,57 @@
-import { Page, router, setupProgress } from '@inertiajs/core'
-import { DefineComponent, Plugin, App as VueApp, createSSRApp, h } from 'vue'
+import {
+  CreateInertiaAppOptionsForCSR,
+  CreateInertiaAppOptionsForSSR,
+  getInitialPageFromDOM,
+  InertiaAppResponse,
+  InertiaAppSSRResponse,
+  Page,
+  PageProps,
+  router,
+  setupProgress,
+} from '@inertiajs/core'
+import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
+import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
+import { config } from './index'
+import { VueInertiaAppConfig } from './types'
 
-interface CreateInertiaAppProps {
-  id?: string
-  resolve: (name: string, page: Page) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
-  setup: (props: { el: Element; App: InertiaApp; props: InertiaAppProps; plugin: Plugin }) => void | VueApp
-  title?: (title: string) => string
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
-  page?: Page
-  render?: (app: VueApp) => Promise<string>
+type ComponentResolver = (
+  name: string,
+  page: Page,
+) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
+
+type SetupOptions<ElementType, SharedProps extends PageProps> = {
+  el: ElementType
+  App: InertiaApp
+  props: InertiaAppProps<SharedProps>
+  plugin: Plugin
 }
 
-export default async function createInertiaApp({
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<HTMLElement, SharedProps>,
+  void,
+  VueInertiaAppConfig
+>
+
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<null, SharedProps>,
+  VueApp,
+  VueInertiaAppConfig
+> & {
+  render: typeof renderToString
+}
+
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<void>
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForSSR<SharedProps>,
+): Promise<InertiaAppSSRResponse>
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
   setup,
@@ -27,29 +59,47 @@ export default async function createInertiaApp({
   progress = {},
   page,
   render,
-}: CreateInertiaAppProps): Promise<{ head: string[]; body: string }> {
+  defaults = {},
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
+  config.replace(defaults)
+
   const isServer = typeof window === 'undefined'
-  const el = isServer ? null : document.getElementById(id)
-  const initialPage = page || JSON.parse(el.dataset.page)
-  const resolveComponent = (name, page) =>
+  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
+
+  const resolveComponent = (name: string, page: Page) =>
     Promise.resolve(resolve(name, page)).then((module) => module.default || module)
 
-  let head = []
+  let head: string[] = []
 
   const vueApp = await Promise.all([
     resolveComponent(initialPage.component, initialPage),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
-    return setup({
-      el,
+    const props = {
+      initialPage,
+      initialComponent,
+      resolveComponent,
+      titleCallback: title,
+    }
+
+    if (isServer) {
+      const ssrSetup = setup as (options: SetupOptions<null, SharedProps>) => VueApp
+
+      return ssrSetup({
+        el: null,
+        App,
+        props: { ...props, onHeadUpdate: (elements: string[]) => (head = elements) },
+        plugin,
+      })
+    }
+
+    const csrSetup = setup as (options: SetupOptions<HTMLElement, SharedProps>) => void
+
+    return csrSetup({
+      el: document.getElementById(id)!,
       App,
-      props: {
-        initialPage,
-        initialComponent,
-        resolveComponent,
-        titleCallback: title,
-        onHeadUpdate: isServer ? (elements) => (head = elements) : null,
-      },
+      props,
       plugin,
     })
   })
@@ -58,15 +108,32 @@ export default async function createInertiaApp({
     setupProgress(progress)
   }
 
-  if (isServer) {
+  if (isServer && render) {
+    const element = () => {
+      if (!useScriptElementForInitialPage) {
+        return h('div', {
+          id,
+          'data-page': JSON.stringify(initialPage),
+          innerHTML: vueApp ? render(vueApp) : '',
+        })
+      }
+
+      return [
+        h('script', {
+          'data-page': id,
+          type: 'application/json',
+          innerHTML: JSON.stringify(initialPage).replace(/\//g, '\\/'),
+        }),
+        h('div', {
+          id,
+          innerHTML: vueApp ? render(vueApp) : '',
+        }),
+      ]
+    }
+
     const body = await render(
       createSSRApp({
-        render: () =>
-          h('div', {
-            id,
-            'data-page': JSON.stringify(initialPage),
-            innerHTML: vueApp ? render(vueApp) : '',
-          }),
+        render: () => element(),
       }),
     )
 

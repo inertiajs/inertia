@@ -1,15 +1,13 @@
 import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
-export default ({
-  bar,
-  foo,
-  baz,
-}: {
+type PageProps = {
   bar: number[]
   foo: { page: number; data: number[]; per_page: number; meta: { label: string } }
   baz: number[]
-}) => {
+}
+
+export default ({ bar, foo, baz }: PageProps) => {
   const [page, setPage] = useState(foo.page)
 
   const reloadIt = () => {
@@ -19,14 +17,14 @@ export default ({
       },
       only: ['foo', 'baz'],
       onSuccess(visit) {
-        setPage((visit.props as any).foo.page)
+        setPage((visit.props as unknown as PageProps).foo.page)
       },
     })
   }
 
   const getFresh = () => {
     setPage(0)
-    router.reload({
+    router.visit('/deep-merge-props', {
       reset: ['foo', 'baz'],
     })
   }

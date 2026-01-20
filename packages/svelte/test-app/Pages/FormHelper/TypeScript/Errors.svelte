@@ -17,8 +17,8 @@
   const form = useForm<FormData>(defaultData)
 
   // Get Errors
-  form.errors.name
-  form.errors['company.name']
+  console.log(form.errors.name)
+  console.log(form.errors['company.name'])
 
   // Clear Errors
   $form.clearErrors('name')
@@ -53,9 +53,9 @@
   $form.setError({ 'users.0.name': 'Validation error' })
 
   // @ts-expect-error - Form has no email field
-  form.errors.email
+  console.log(form.errors.email)
   // @ts-expect-error - Company has no email field
-  form.errors['company.email']
+  console.log(form.errors['company.email'])
 
   // @ts-expect-error - Form has no email field
   $form.clearErrors('email')

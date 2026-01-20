@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react'
+import { Head, Link, router } from '@inertiajs/react'
 
 export default (props: { example: string }) => {
   const visitsMethod = (e: React.MouseEvent) => {
@@ -26,47 +26,55 @@ export default (props: { example: string }) => {
   // window._plugin_global_props = getCurrentInstance().appContext.config.globalProperties
 
   return (
-    <div>
-      <span className="text">This is the Test App Entrypoint page</span>
+    <>
+      <Head title="Home" />
 
-      <Link href="/links/method" className="links-method">
-        Basic Links
-      </Link>
+      <div>
+        <span className="text">This is the Test App Entrypoint page</span>
 
-      <Link href="/links/replace" className="links-replace">
-        'Replace' Links
-      </Link>
+        <Link href="/links/method" className="links-method">
+          Basic Links
+        </Link>
 
-      <Link href="/links/as-component" className="links-as-component">
-        As Component
-      </Link>
+        <Link href="/links/replace" className="links-replace">
+          'Replace' Links
+        </Link>
 
-      <Link href="/links/as-element" className="links-as-component">
-        As Element
-      </Link>
+        <Link href="/links/as-component" className="links-as-component">
+          As Component
+        </Link>
 
-      <a href="#" onClick={visitsMethod} className="visits-method">
-        Manual basic visits
-      </a>
+        <Link href="/links/as-element" className="links-as-component">
+          As Element
+        </Link>
 
-      <a href="#" onClick={visitsReplace} className="visits-replace">
-        Manual 'Replace' visits
-      </a>
+        <a href="#" onClick={visitsMethod} className="visits-method">
+          Manual basic visits
+        </a>
 
-      <Link href="/redirect" method="post" className="links-redirect">
-        Internal Redirect Link
-      </Link>
-      <a href="#" onClick={redirect} className="visits-redirect">
-        Manual Redirect visit
-      </a>
+        <a href="#" onClick={visitsReplace} className="visits-replace">
+          Manual 'Replace' visits
+        </a>
 
-      <Link href="/redirect-external" method="post" className="links-redirect-external">
-        External Redirect Link
-      </Link>
+        <Link href="/redirect" method="post" className="links-redirect">
+          Internal Redirect Link
+        </Link>
+        <a href="#" onClick={redirect} className="visits-redirect">
+          Manual Redirect visit
+        </a>
 
-      <a href="#" onClick={redirectExternal} className="visits-redirect-external">
-        Manual External Redirect visit
-      </a>
-    </div>
+        <Link href="/redirect-external" method="post" className="links-redirect-external">
+          External Redirect Link
+        </Link>
+
+        <a href="#" onClick={redirectExternal} className="visits-redirect-external">
+          Manual External Redirect visit
+        </a>
+
+        <Link id="navigate-back" href="/head/mixed">
+          Go to Mixed Head
+        </Link>
+      </div>
+    </>
   )
 }

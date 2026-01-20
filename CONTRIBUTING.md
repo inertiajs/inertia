@@ -215,20 +215,19 @@ The playgrounds are provided as-is and are not part of the automated test setup.
 
 ### Getting Started
 
-If setting up a playground for the first time:
-
-```sh
-cd playgrounds/react
-composer install
-cp .env.example .env
-php artisan key:generate
-```
-
-Then start the playground:
+To start a playground, simply run:
 
 ```sh
 pnpm playground:react
 ```
+
+The playground script will automatically handle initial setup if needed:
+- Installing PHP dependencies via Composer
+- Installing Node.js dependencies via pnpm
+- Creating the `.env` file from `.env.example`
+- Generating the application key
+- Setting up the SQLite database
+- Running migrations with seed data
 
 Visit the application at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
@@ -243,22 +242,20 @@ pnpm playground:vue
 
 ## Publishing (Maintainers Only)
 
-When preparing a release:
+Releasing is handled by the included release script. You'll need both the `git` CLI and the GitHub CLI ([`gh`](https://cli.github.com)) installed. To create a new release:
 
-1. Bump the versions in each `package.json` file.
+```sh
+./release.sh
+```
 
-2. Run `pnpm install` to update the lockfile.
+The script will:
+- Ensure you're on the master branch with a clean working tree
+- Prompt you to select the type of version bump (patch, minor, or major)
+- Update all package versions automatically
+- Update the lockfile
+- Create a git commit and tag
+- Push changes and tags to GitHub
+- Create a GitHub release with auto-generated notes
+- Trigger the CI publishing workflow
 
-3. Publish the packages:
-
-   ```sh
-   pnpm publish -r
-   ```
-
-   For beta releases, add the `--tag=beta` flag:
-
-   ```sh
-   pnpm publish -r --tag=beta
-   ```
-
-4. Tag a new release on [GitHub Releases](https://github.com/inertiajs/inertia/releases).
+Publishing is handled securely using GitHub + npm [trusted publishing](https://docs.npmjs.com/trusted-publishers).

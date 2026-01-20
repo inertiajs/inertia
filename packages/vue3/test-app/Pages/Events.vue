@@ -3,7 +3,7 @@ import { Link, router, usePage } from '@inertiajs/vue3'
 
 declare global {
   interface Window {
-    messages: any[]
+    messages: unknown[]
   }
 }
 
@@ -15,7 +15,7 @@ const page = usePage()
 
 window.messages = []
 
-const internalAlert = (...args: any[]) => {
+const internalAlert = (...args: unknown[]) => {
   window.messages.push(...args)
 }
 
@@ -82,7 +82,7 @@ const beforeVisitPreventLocal = () => {
 
 const beforeVisitPreventGlobalInertia = () => {
   document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
-  router.on('before', (visit) => {
+  router.on('before', () => {
     internalAlert('Inertia.on(before)')
     return false
   })
@@ -436,7 +436,7 @@ const lifecycleCancel = () => {
       setTimeout(() => {
         internalAlert('CANCELLING!')
         token.cancel()
-      }, 10)
+      }, 250)
     },
   })
 }
@@ -490,7 +490,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       :href="$page.url"
       method="post"
       @before="
-        (visit) => {
+        () => {
           internalAlert('linkOnBefore')
           return false
         }

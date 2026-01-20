@@ -1,0 +1,90 @@
+import { useFormContext } from '@inertiajs/react'
+import { useState } from 'react'
+
+export default () => {
+  const form = useFormContext()
+  const [getDataResult, setGetDataResult] = useState('')
+  const [getFormDataResult, setGetFormDataResult] = useState('')
+
+  const testGetData = () => {
+    if (form) {
+      setGetDataResult(JSON.stringify(form.getData(), null, 2))
+    }
+  }
+
+  const testGetFormData = () => {
+    if (form) {
+      const formData = form.getFormData()
+      const obj: Record<string, FormDataEntryValue> = {}
+      formData.forEach((value, key) => {
+        obj[key] = value
+      })
+      setGetFormDataResult(JSON.stringify(obj, null, 2))
+    }
+  }
+
+  if (!form) {
+    return <div>No form context available</div>
+  }
+
+  return (
+    <>
+      {form.processing && <span>Child: processing</span>}
+      {form.wasSuccessful && <span>Child: was successful</span>}
+      {form.recentlySuccessful && <span>Child: recently successful</span>}
+      {form.hasErrors && <pre>{JSON.stringify(form.errors, null, 2)}</pre>}
+
+      <button type="button" onClick={() => form.submit()}>
+        submit()
+      </button>
+      <button type="button" onClick={() => form.reset()}>
+        reset()
+      </button>
+      <button type="button" onClick={() => form.reset('name')}>
+        reset('name')
+      </button>
+      <button type="button" onClick={() => form.reset('name', 'email')}>
+        reset('name', 'email')
+      </button>
+
+      <button type="button" onClick={() => form.clearErrors()}>
+        clearErrors()
+      </button>
+      <button type="button" onClick={() => form.clearErrors('name')}>
+        clearErrors('name')
+      </button>
+      <button type="button" onClick={() => form.setError('name', 'Name is invalid')}>
+        setError('name')
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          form.setError({
+            name: 'Name error from child',
+            email: 'Email error from child',
+            bio: 'Bio error from child',
+          })
+        }
+      >
+        setError({'{...}'})
+      </button>
+
+      <button type="button" onClick={() => form.resetAndClearErrors()}>
+        resetAndClearErrors()
+      </button>
+      <button type="button" onClick={() => form.resetAndClearErrors('name')}>
+        resetAndClearErrors('name')
+      </button>
+
+      <button type="button" onClick={testGetData}>
+        getData()
+      </button>
+      <button type="button" onClick={testGetFormData}>
+        getFormData()
+      </button>
+
+      {getDataResult && <pre id="get-data-result">{getDataResult}</pre>}
+      {getFormDataResult && <pre id="get-form-data-result">{getFormDataResult}</pre>}
+    </>
+  )
+}

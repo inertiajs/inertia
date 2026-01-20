@@ -107,7 +107,7 @@
   <WhenVisible data="surprise">
     <svelte:fragment slot="fallback">
       <div class="h-24">
-        <div class="flex items-center"><Spinner /> Loading Surprise...</div>
+        <div class="flex items-center"><Spinner class="mr-2 size-5" /> Loading Surprise...</div>
       </div>
     </svelte:fragment>
 
@@ -123,7 +123,7 @@
   <WhenVisible data={['dogs', 'lunch']} buffer={200}>
     <svelte:fragment slot="fallback">
       <div class="h-24">
-        <div class="flex items-center"><Spinner /> Loading Dogs and Lunch...</div>
+        <div class="flex items-center"><Spinner class="mr-2 size-5" /> Loading Dogs and Lunch...</div>
       </div>
     </svelte:fragment>
 

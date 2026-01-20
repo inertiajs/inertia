@@ -1,8 +1,17 @@
 <?php
 
+use App\Http\Requests\PrecognitionFormRequest;
+use App\Models\ChatMessage;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Prism\Prism\Enums\Provider;
+use Prism\Prism\Prism;
+use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\UserMessage;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,6 +166,18 @@ Route::post('/form-component', function () {
     return back();
 });
 
+Route::get('/form-component/precognition', function () {
+    return inertia('FormComponentPrecognition');
+});
+
+Route::post('/form-component/precognition', function (PrecognitionFormRequest $request) {
+    $data = $request->validated();
+
+    // dd($data);
+
+    return back();
+})->middleware([HandlePrecognitiveRequests::class]);
+
 Route::post('/user', function () {
     return inertia('User', [
         'user' => request()->validate([
@@ -182,6 +203,132 @@ Route::get('/async', function () {
     ]);
 });
 
+Route::post('/messages', function (Request $request) {
+    $data = $request->validate([
+        'message' => ['required', 'string'],
+    ]);
+
+    // Store the new user message
+    $prompt = ChatMessage::create([
+        'type' => 'prompt',
+        'content' => $data['message'],
+    ]);
+
+    $messages = ChatMessage::latest('id')
+        ->limit(10)
+        ->get()
+        ->reverse()
+        ->map(function (ChatMessage $message) use ($prompt) {
+            $content = $message->content;
+
+            if ($message->is($prompt)) {
+                // Tell LLM not to answer too long and don't halucinate
+                $content = "Answer in max. 10 sentences, may be shorter. Code examples allowed when needed. Don't hallucinate, just answer based on the provided context.\n\n".$content;
+            }
+
+            return $message->type === 'prompt'
+                ? new UserMessage($content)
+                : new AssistantMessage($content);
+        })
+        ->all();
+
+    // Create a streaming response from the LLM
+    $stream = Prism::text()
+        ->using(Provider::Ollama, 'gemma3:4b')
+        ->withMessages($messages)
+        ->asStream();
+
+    return response()->stream(function () use ($stream) {
+        $response = '';
+
+        foreach ($stream as $chunk) {
+            $response .= $chunk->text;
+            echo $chunk->text;
+            ob_flush();
+            flush();
+        }
+
+        if (! blank($response)) {
+            ChatMessage::create([
+                'type' => 'response',
+                'content' => $response,
+            ]);
+        }
+    }, 200, ['X-Accel-Buffering' => 'no']);
+});
+
+Route::get('/chat', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(500_000);
+    }
+
+    return inertia('Chat', [
+        'messages' => Inertia::scroll(ChatMessage::latest('id')->cursorPaginate(10)),
+    ]);
+});
+
+Route::get('/photo-grid/{horizontal?}', function ($horizontal = null) {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(250_000);
+    }
+
+    $perPage = 24;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $photos = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'url' => "https://picsum.photos/id/{$i}/300/300",
+        ])
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos->values(),
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia($horizontal ? 'PhotoHorizontal' : 'PhotoGrid', [
+        'photos' => Inertia::scroll($photos),
+    ]);
+});
+
+Route::get('/data-table', function () {
+    if (request()->header('X-Inertia-Partial-Component')) {
+        // Simulate latency for partial reloads
+        usleep(500_000);
+    }
+
+    $perPage = 200;
+    $pages = 30;
+    $total = $perPage * $pages;
+    $page = request()->integer('page', 1);
+
+    $users = collect()
+        ->range(1, $total)
+        ->forPage($page, $perPage)
+        ->map(fn ($i) => [
+            'id' => $i,
+            'name' => "User {$i}",
+        ])
+        ->pipe(fn ($photos) => new LengthAwarePaginator(
+            $photos->values(),
+            $total,
+            $perPage,
+            $page,
+        ));
+
+    return inertia('DataTable', [
+        'users' => Inertia::scroll($users),
+    ]);
+});
+
+// @deprecated - We now have a InfiniteScroll component and Inertia::scroll() method...
 Route::get('/infinite-scroll', function () {
     $page = request()->integer('page', 1);
     $perPage = 25;
@@ -392,4 +539,34 @@ Route::post('/sleepy/{duration}', function ($duration) {
 
 Route::post('/logout', function () {
     return redirect('/login');
+});
+
+
+Route::get('/flash', function () {
+    return inertia('Flash');
+});
+
+Route::get('/flash/direct', function () {
+    return Inertia::flash('message', 'Sent with render!')->render('Flash');
+});
+
+Route::post('/flash/form', function () {
+    return Inertia::flash('message', 'Sent with redirect!')->back();
+});
+
+Route::get('/once/{page}', function (int $page) {
+    $component = match ($page) {
+        1 => 'Once/First',
+        2 => 'Once/Second',
+        3 => 'Once/Third',
+        4 => 'Once/Fourth',
+        default => abort(404),
+    };
+
+    return inertia($component, [
+        'foo' => Inertia::once(fn () => 'foo value: '.now()->getTimestampMs())->fresh($page === 3),
+        'bar' => Inertia::once(fn () => 'bar value: '.now()->getTimestampMs())->until(10),
+        'baz' . $page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
+        'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
+    ]);
 });

@@ -32,7 +32,7 @@ const Form = () => {
             value={form.data.name}
             onChange={(e) => form.setData('name', e.target.value)}
             id="name"
-            className="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+            className="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
           />
           {form.errors.name && <div className="mt-2 text-sm text-red-600">{form.errors.name}</div>}
         </div>
@@ -45,7 +45,7 @@ const Form = () => {
             value={form.data.company}
             onChange={(e) => form.setData('company', e.target.value)}
             id="company"
-            className="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+            className="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
           />
           {form.errors.company && <div className="mt-2 text-sm text-red-600">{form.errors.company}</div>}
         </div>
@@ -57,7 +57,7 @@ const Form = () => {
             value={form.data.role}
             onChange={(e) => form.setData('role', e.target.value)}
             id="role"
-            className="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+            className="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
           >
             <option></option>
             <option>User</option>

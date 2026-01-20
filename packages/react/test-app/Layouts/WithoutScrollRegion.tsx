@@ -27,6 +27,7 @@ export default ({ children }: { children: React.ReactNode }) => {
   return (
     <div style={{ width: '200vw' }}>
       <span className="layout-text">Without scroll regions</span>
+      <button onClick={handleScrollEvent}>Update scroll positions</button>
       <div className="document-position">
         Document scroll position is {documentScrollLeft} & {documentScrollTop}
       </div>

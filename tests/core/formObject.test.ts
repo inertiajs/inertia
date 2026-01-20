@@ -249,5 +249,136 @@ test.describe('formObject.ts', () => {
         },
       })
     })
+
+    test('handles mixed numeric and string keys as objects', () => {
+      const formData = makeFormData([
+        ['fields[entries][100][name]', 'John Doe'],
+        ['fields[entries][100][email]', 'john@example.com'],
+        ['fields[entries][new:1][name]', 'Jane Smith'],
+        ['fields[entries][new:1][email]', 'jane@example.com'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.fields.entries)).toBe(false)
+      expect(typeof result.fields.entries).toBe('object')
+
+      expect(Object.keys(result.fields.entries)).toHaveLength(2)
+
+      expect(result.fields.entries['100']).toEqual({
+        name: 'John Doe',
+        email: 'john@example.com',
+      })
+
+      expect(result.fields.entries['new:1']).toEqual({
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+      })
+    })
+
+    test('still creates arrays for sequential numeric indices', () => {
+      const formData = makeFormData([
+        ['items[0][name]', 'First'],
+        ['items[1][name]', 'Second'],
+        ['items[2][name]', 'Third'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      // Should create an array for sequential indices
+      expect(Array.isArray(result.items)).toBe(true)
+      expect(result.items).toEqual([{ name: 'First' }, { name: 'Second' }, { name: 'Third' }])
+    })
+
+    test('creates objects for non-sequential numeric keys', () => {
+      const formData = makeFormData([
+        ['items[0][name]', 'First'],
+        ['items[5][name]', 'Sixth'],
+        ['items[10][name]', 'Eleventh'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.items)).toBe(false)
+      expect(typeof result.items).toBe('object')
+      expect(Object.keys(result.items)).toHaveLength(3)
+      expect(result.items['0']).toEqual({ name: 'First' })
+      expect(result.items['5']).toEqual({ name: 'Sixth' })
+      expect(result.items['10']).toEqual({ name: 'Eleventh' })
+    })
+
+    test('creates objects when mixing numeric and string keys', () => {
+      const formData = makeFormData([
+        ['users[123][name]', 'User 123'],
+        ['users[admin][name]', 'Admin User'],
+        ['users[0][name]', 'User 0'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.users)).toBe(false)
+      expect(typeof result.users).toBe('object')
+      expect(Object.keys(result.users)).toHaveLength(3)
+      expect(result.users['123']).toEqual({ name: 'User 123' })
+      expect(result.users['admin']).toEqual({ name: 'Admin User' })
+      expect(result.users['0']).toEqual({ name: 'User 0' })
+    })
+
+    test('handles explicit indexed arrays correctly', () => {
+      const formData = makeFormData([
+        ['emails[1]', 'second@example.com'],
+        ['emails[0]', 'first@example.com'],
+        ['emails[2]', 'third@example.com'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.emails)).toBe(true)
+      expect(result.emails).toEqual(['first@example.com', 'second@example.com', 'third@example.com'])
+    })
+
+    test('handles mixed empty bracket and explicit index notation - empty brackets first', () => {
+      const formData = makeFormData([
+        ['tags[]', 'tag1'],
+        ['tags[]', 'tag2'],
+        ['tags[2]', 'tag3'],
+        ['tags[3]', 'tag4'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.tags)).toBe(true)
+      expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
+    })
+
+    test('handles mixed empty bracket and explicit index notation - explicit indices first', () => {
+      const formData = makeFormData([
+        ['tags[2]', 'tag1'],
+        ['tags[3]', 'tag2'],
+        ['tags[]', 'tag3'],
+        ['tags[]', 'tag4'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.tags)).toBe(true)
+      expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4'])
+    })
+
+    test('handles mixed empty bracket and explicit index notation - mixed', () => {
+      const formData = makeFormData([
+        ['tags[2]', 'tag1'],
+        ['tags[3]', 'tag2'],
+        ['tags[]', 'tag3'],
+        ['tags[]', 'tag4'],
+        ['tags[4]', 'tag5'],
+        ['tags[5]', 'tag6'],
+      ])
+
+      const result = formDataToObject(formData)
+
+      expect(Array.isArray(result.tags)).toBe(true)
+      expect(result.tags).toEqual(['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6'])
+    })
   })
 })

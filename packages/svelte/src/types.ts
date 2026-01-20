@@ -12,3 +12,5 @@ export type ResolvedComponent = {
   default: ComponentType
   layout?: LayoutType
 }
+
+export type SvelteInertiaAppConfig = {}

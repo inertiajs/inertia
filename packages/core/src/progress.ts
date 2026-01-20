@@ -1,56 +1,90 @@
 import ProgressComponent from './progress-component'
 import { GlobalEvent } from './types'
 
-let hideCount = 0
+class Progress {
+  public hideCount = 0
 
-export const reveal = (force = false) => {
-  hideCount = Math.max(0, hideCount - 1)
+  public start(): void {
+    ProgressComponent.start()
+  }
 
-  if (force || hideCount === 0) {
-    ProgressComponent.show()
+  public reveal(force: boolean = false): void {
+    this.hideCount = Math.max(0, this.hideCount - 1)
+
+    if (force || this.hideCount === 0) {
+      ProgressComponent.show()
+    }
+  }
+
+  public hide(): void {
+    this.hideCount++
+
+    ProgressComponent.hide()
+  }
+
+  public set(status: number): void {
+    ProgressComponent.set(Math.max(0, Math.min(1, status)))
+  }
+
+  public finish(): void {
+    ProgressComponent.done()
+  }
+
+  public reset(): void {
+    ProgressComponent.set(0)
+  }
+
+  public remove(): void {
+    ProgressComponent.done()
+    ProgressComponent.remove()
+  }
+
+  public isStarted(): boolean {
+    return ProgressComponent.isStarted()
+  }
+
+  public getStatus(): number | null {
+    return ProgressComponent.status
   }
 }
 
-export const hide = () => {
-  hideCount++
-
-  ProgressComponent.hide()
-}
+export const progress = new Progress()
+export const reveal = progress.reveal
+export const hide = progress.hide
 
 function addEventListeners(delay: number): void {
-  document.addEventListener('inertia:start', (e) => start(e, delay))
-  document.addEventListener('inertia:progress', progress)
+  document.addEventListener('inertia:start', (e) => handleStartEvent(e, delay))
+  document.addEventListener('inertia:progress', handleProgressEvent)
 }
 
-function start(event: GlobalEvent<'start'>, delay: number): void {
+function handleStartEvent(event: GlobalEvent<'start'>, delay: number): void {
   if (!event.detail.visit.showProgress) {
-    hide()
+    progress.hide()
   }
 
-  const timeout = setTimeout(() => ProgressComponent.start(), delay)
+  const timeout = setTimeout(() => progress.start(), delay)
   document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
 }
 
-function progress(event: GlobalEvent<'progress'>): void {
-  if (ProgressComponent.isStarted() && event.detail.progress?.percentage) {
-    ProgressComponent.set(Math.max(ProgressComponent.status!, (event.detail.progress.percentage / 100) * 0.9))
+function handleProgressEvent(event: GlobalEvent<'progress'>): void {
+  if (progress.isStarted() && event.detail.progress?.percentage) {
+    progress.set(Math.max(progress.getStatus()!, (event.detail.progress.percentage / 100) * 0.9))
   }
 }
 
 function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
   clearTimeout(timeout!)
 
-  if (!ProgressComponent.isStarted()) {
+  if (!progress.isStarted()) {
     return
   }
 
   if (event.detail.visit.completed) {
-    ProgressComponent.done()
+    progress.finish()
   } else if (event.detail.visit.interrupted) {
-    ProgressComponent.set(0)
+    progress.reset()
   } else if (event.detail.visit.cancelled) {
-    ProgressComponent.done()
-    ProgressComponent.remove()
+    progress.remove()
   }
 }
 

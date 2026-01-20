@@ -1,13 +1,13 @@
 import { useRemember } from '@inertiajs/react'
 import { useState } from 'react'
 
-export default (props: { className?: string }) => {
+export default ({ ...props }) => {
   const [untracked, setUntracked] = useState('')
 
   const [data, setData] = useRemember({ name: '', remember: false }, 'Example/ComponentB')
 
   return (
-    <div>
+    <div {...props}>
       <span>This component uses a callback-style 'key' for the remember functionality.</span>
       <label>
         Full Name

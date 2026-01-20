@@ -3,13 +3,13 @@ import { useRef } from 'react'
 
 declare global {
   interface Window {
-    componentEvents: Array<{ eventName: string; data: any; timestamp: number }>
+    componentEvents: Array<{ eventName: string; data: unknown; timestamp: number }>
   }
 }
 
 window.componentEvents = []
 
-const CustomButton = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
+const CustomButton = ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
   <button
     {...props}
     style={{
@@ -25,7 +25,7 @@ const CustomButton = ({ children, ...props }: { children: React.ReactNode; [key:
 export default ({ page }: { page: number }) => {
   const state = useRef(crypto.randomUUID())
 
-  const trackEvent = (eventName: string, data: any = null) => {
+  const trackEvent = (eventName: string, data: unknown = null) => {
     window.componentEvents.push({ eventName, data, timestamp: Date.now() })
   }
 

@@ -4,33 +4,50 @@
   "type": "module",
   "scripts": {
     "build:all": "pnpm -r --filter './packages/*' build",
-    "dev": "pnpm -r --parallel --filter './packages/*' dev",
-    "dev:test-app": "pnpx concurrently -c \"#93c5fd,#c4b5fd,#fb7185\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
-    "dev:test-app:react": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
-    "dev:test-app:svelte": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
-    "dev:test-app:vue": "pnpx concurrently -c \"#fdba74,#34d399\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
+    "dev": "pnpx concurrently -c \"#b794f4,#61dafb,#d43008,#32a06f\" \"pnpm dev:core\" \"pnpm dev:react\" \"pnpm dev:svelte\" \"pnpm dev:vue\" --names=core,react,svelte,vue",
+    "dev:core": "cd packages/core && pnpm run dev",
+    "dev:vue": "cd packages/vue3 && pnpm run dev",
+    "dev:react": "cd packages/react && pnpm run dev",
+    "dev:svelte": "cd packages/svelte && pnpm run dev",
+    "dev:test-app": "pnpx concurrently -c \"#61dafb,#d43008,#32a06f\" \"pnpm dev:test-app:react\" \"pnpm dev:test-app:svelte\" \"pnpm dev:test-app:vue\" --names=react,svelte,vue",
+    "dev:test-app:react": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=react pnpm serve:watch\" \"cd packages/react/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:svelte": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=svelte pnpm serve:watch\" \"cd packages/svelte/test-app && pnpm run dev\" --names=server,vite",
+    "dev:test-app:vue": "pnpx concurrently -c \"#c4b5fd,#ffa800\" \"cd tests/app && PACKAGE=vue3 pnpm serve:watch\" \"cd packages/vue3/test-app && pnpm run dev\" --names=server,vite",
     "es2020-check": "pnpm -r --filter './packages/*' es2020-check",
+    "lint:test-app": "pnpm -r --filter './packages/*/test-app' lint",
+    "lint:test-app:react": "cd packages/react/test-app && pnpm run lint",
+    "lint:test-app:svelte": "cd packages/svelte/test-app && pnpm run lint",
+    "lint:test-app:vue": "cd packages/vue3/test-app && pnpm run lint",
     "type-check:test-app": "pnpm -r --filter './packages/*/test-app' type-check",
     "type-check:test-app:react": "cd packages/react/test-app && pnpm run type-check",
     "type-check:test-app:svelte": "cd packages/svelte/test-app && pnpm run type-check",
     "type-check:test-app:vue": "cd packages/vue3/test-app && pnpm run type-check",
-    "test:react": "PACKAGE=react playwright test",
-    "test:svelte": "PACKAGE=svelte playwright test",
-    "test:vue": "PACKAGE=vue3 playwright test",
-    "playground:react": "cd playgrounds/react && composer run dev",
-    "playground:svelte4": "cd playgrounds/svelte4 && composer run dev",
-    "playground:svelte5": "cd playgrounds/svelte5 && composer run dev",
-    "playground:vue": "cd playgrounds/vue3 && composer run dev",
+    "test:react": "PACKAGE=react node playwright.js",
+    "test:svelte": "PACKAGE=svelte node playwright.js",
+    "test:vue": "PACKAGE=vue3 node playwright.js",
+    "test:ssr:react": "PACKAGE=react SSR=true npx playwright test",
+    "test:ssr:svelte": "PACKAGE=svelte SSR=true npx playwright test",
+    "test:ssr:vue": "PACKAGE=vue3 SSR=true npx playwright test",
+    "playground:react": "cd playgrounds/react && ./init.sh && composer run dev",
+    "playground:svelte4": "cd playgrounds/svelte4 && ./init.sh && composer run dev",
+    "playground:svelte5": "cd playgrounds/svelte5 && ./init.sh && composer run dev",
+    "playground:vue": "cd playgrounds/vue3 && ./init.sh && composer run dev",
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@playwright/test": ">=1.51.0 <1.53.0",
-    "prettier": "^3.2.5",
-    "prettier-plugin-organize-imports": "^4.1.0",
-    "prettier-plugin-svelte": "^3.2.3",
-    "prettier-plugin-tailwindcss": "^0.6.9"
+    "@playwright/test": "^1.57.0",
+    "prettier": "^3.8.0",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "prettier-plugin-svelte": "^3.4.1",
+    "prettier-plugin-tailwindcss": "^0.7.2"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.28.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.55.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "cookie": ">=0.7.0",
+      "esbuild": ">=0.25.0"
+    }
   }
 }

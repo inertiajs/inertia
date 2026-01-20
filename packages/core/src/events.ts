@@ -27,6 +27,10 @@ export const fireInvalidEvent: GlobalEventTrigger<'invalid'> = (response) => {
   return fireEvent('invalid', { cancelable: true, detail: { response } })
 }
 
+export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) => {
+  return fireEvent('beforeUpdate', { detail: { page } })
+}
+
 export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page) => {
   return fireEvent('navigate', { detail: { page } })
 }
@@ -49,4 +53,8 @@ export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, 
 
 export const firePrefetchingEvent: GlobalEventTrigger<'prefetching'> = (visit) => {
   return fireEvent('prefetching', { detail: { visit } })
+}
+
+export const fireFlashEvent: GlobalEventTrigger<'flash'> = (flash) => {
+  return fireEvent('flash', { detail: { flash } })
 }

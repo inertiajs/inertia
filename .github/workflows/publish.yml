@@ -1,0 +1,43 @@
+name: Publish Packages
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        adapter: ['core', 'vue3', 'react', 'svelte']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: 'Publish ${{ matrix.adapter }}'
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }} build
+
+      - name: 'Publish ${{ matrix.adapter }} to npm'
+        run: cd ./packages/${{ matrix.adapter }} && pnpm publish --no-git-checks

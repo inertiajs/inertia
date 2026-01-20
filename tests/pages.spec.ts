@@ -7,6 +7,25 @@ test('receives data from the controllers as props', async ({ page }) => {
   await expect(inertiaProps.example).toEqual('FooBar')
 })
 
+test('it can opt-in to preserve equal props from the previous page', async ({ page }) => {
+  await page.goto('/preserve-equal-props')
+
+  await expect(page.locator('#count-a')).toHaveText('Count A: 1')
+  await expect(page.locator('#effect-a')).toHaveText('Effect A Count: 1')
+  await expect(page.locator('#effect-b')).toHaveText('Effect B Count: 1')
+
+  await page.getByRole('button', { name: 'Submit and redirect back' }).click()
+
+  await expect(page.locator('#effect-b')).toHaveText('Effect B Count: 2')
+  await expect(page.locator('#effect-a')).toHaveText('Effect A Count: 2')
+
+  await page.getByRole('button', { name: 'Enable' }).click()
+  await page.getByRole('button', { name: 'Submit and redirect back' }).click()
+
+  await expect(page.locator('#effect-b')).toHaveText('Effect B Count: 3') // updated
+  await expect(page.locator('#effect-a')).toHaveText('Effect A Count: 2') // preserved
+})
+
 test.describe('persistent layouts', () => {
   const layoutData = [{ method: 'render-function' }, { method: 'shorthand' }] as const
 

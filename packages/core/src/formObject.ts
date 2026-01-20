@@ -1,4 +1,5 @@
 import { get, set } from 'lodash-es'
+import { isFile } from './files'
 import { FormDataConvertible } from './types'
 
 /**
@@ -59,6 +60,74 @@ function parseKey(key: string): (string | number | '')[] {
 }
 
 /**
+ * Set value in nested object, always creating objects (never arrays).
+ * This ensures we can analyze the final structure before deciding what should be arrays.
+ */
+function setNestedObject(obj: Record<string, any>, path: string[], value: any): void {
+  let current = obj
+
+  for (let i = 0; i < path.length - 1; i++) {
+    if (!(path[i] in current)) {
+      current[path[i]] = {}
+    }
+
+    current = current[path[i]]
+  }
+
+  current[path[path.length - 1]] = value
+}
+
+/**
+ * Check if an object has sequential numeric keys (0, 1, 2, ...).
+ */
+function objectHasSequentialNumericKeys(value: any): boolean {
+  const keys = Object.keys(value)
+  const numericKeys = keys
+    .filter((k) => /^\d+$/.test(k))
+    .map(Number)
+    .sort((a, b) => a - b)
+
+  return (
+    keys.length === numericKeys.length &&
+    numericKeys.length > 0 &&
+    numericKeys[0] === 0 &&
+    numericKeys.every((n, i) => n === i)
+  )
+}
+
+/**
+ * Convert objects with sequential numeric keys (0, 1, 2, ...) to arrays.
+ */
+function convertSequentialObjectsToArrays(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(convertSequentialObjectsToArrays)
+  }
+
+  if (typeof value !== 'object' || value === null || isFile(value)) {
+    return value
+  }
+
+  if (objectHasSequentialNumericKeys(value)) {
+    const result = []
+
+    for (let i = 0; i < Object.keys(value).length; i++) {
+      result[i] = convertSequentialObjectsToArrays(value[i])
+    }
+
+    return result
+  }
+
+  // Keep as object, recursively process values
+  const result: Record<string, any> = {}
+
+  for (const key in value) {
+    result[key] = convertSequentialObjectsToArrays(value[key])
+  }
+
+  return result
+}
+
+/**
  * Convert a FormData instance into an object structure.
  */
 export function formDataToObject(source: FormData): Record<string, FormDataConvertible> {
@@ -84,6 +153,14 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
 
       if (Array.isArray(existing)) {
         existing.push(value)
+      } else if (existing && typeof existing === 'object' && !isFile(existing)) {
+        // If existing is an object with numeric keys, convert to array (treating indices as relative)
+        const numericKeys = Object.keys(existing)
+          .filter((k) => /^\d+$/.test(k))
+          .map(Number)
+          .sort((a, b) => a - b)
+
+        set(form, arrayPath, numericKeys.length > 0 ? [...numericKeys.map((k) => existing[k]), value] : [value])
       } else {
         set(form, arrayPath, [value])
       }
@@ -91,9 +168,11 @@ export function formDataToObject(source: FormData): Record<string, FormDataConve
       continue
     }
 
-    // No brackets: last value wins when multiple fields have the same key
-    set(form, path, value)
+    // Always build nested objects first, then convert sequential numeric keys to arrays.
+    // This prevents the creation of sparse arrays when mixing numeric and string keys.
+    setNestedObject(form, path.map(String), value)
   }
 
-  return form
+  // Convert objects with sequential numeric keys (0, 1, 2, ...) to arrays
+  return convertSequentialObjectsToArrays(form)
 }

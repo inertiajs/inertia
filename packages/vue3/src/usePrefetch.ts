@@ -19,8 +19,8 @@ export default function usePrefetch(options: VisitOptions = {}): {
   isPrefetching.value = inFlight !== null
   isPrefetched.value = cached !== null
 
-  let onPrefetchedListener
-  let onPrefetchingListener
+  let onPrefetchedListener: () => void
+  let onPrefetchingListener: () => void
 
   onMounted(() => {
     onPrefetchingListener = router.on('prefetching', (e) => {

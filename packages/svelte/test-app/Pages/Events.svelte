@@ -15,7 +15,7 @@
 
   window.messages = []
 
-  const internalAlert = (...args: any[]) => {
+  const internalAlert = (...args: unknown[]) => {
     window.messages.push(...args)
   }
 
@@ -82,7 +82,7 @@
 
   const beforeVisitPreventGlobalInertia = () => {
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
-    router.on('before', (visit) => {
+    router.on('before', () => {
       internalAlert('Inertia.on(before)')
       return false
     })
@@ -438,7 +438,7 @@
         setTimeout(() => {
           internalAlert('CANCELLING!')
           token.cancel()
-        }, 10)
+        }, 250)
       },
     })
   }
