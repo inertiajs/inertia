@@ -20,10 +20,10 @@ export default () => {
           name="customer.email"
           placeholder="Email"
           onChange={(e) => form.setData('document.customer.email', e.target.value)}
-          onBlur={() => form.validate('customer.email')}
+          onBlur={() => form.validate('customer.email' as any)}
         />
-        {form.invalid('customer.email') && <p>{form.errors['customer.email']}</p>}
-        {form.valid('customer.email') && <p>Email is valid!</p>}
+        {form.invalid('customer.email' as any) && <p>{(form.errors as any)['customer.email']}</p>}
+        {form.valid('customer.email' as any) && <p>Email is valid!</p>}
       </div>
 
       {form.validating && <p>Validating...</p>}

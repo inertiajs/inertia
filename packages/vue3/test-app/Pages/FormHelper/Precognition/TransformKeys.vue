@@ -19,12 +19,12 @@ const form = useForm({
         v-model="form.document.customer.email"
         name="customer.email"
         placeholder="Email"
-        @blur="form.validate('customer.email')"
+        @blur="(form as any).validate('customer.email')"
       />
-      <p v-if="form.invalid('customer.email')">
-        {{ form.errors['customer.email'] }}
+      <p v-if="(form as any).invalid('customer.email')">
+        {{ (form.errors as any)['customer.email'] }}
       </p>
-      <p v-if="form.valid('customer.email')">Email is valid!</p>
+      <p v-if="(form as any).valid('customer.email')">Email is valid!</p>
     </div>
 
     <p v-if="form.validating">Validating...</p>

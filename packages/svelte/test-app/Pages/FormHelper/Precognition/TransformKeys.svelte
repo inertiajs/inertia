@@ -8,7 +8,7 @@
   })
     .withPrecognition('post', '/precognition/transform-keys')
     .setValidationTimeout(100)
-    .transform((data) => ({ ...data.document }))
+    .transform((data) => ({ ...data.document })) as any
 </script>
 
 <div>
@@ -21,9 +21,7 @@
       on:blur={() => $form.validate('customer.email')}
     />
     {#if $form.invalid('customer.email')}
-      <p>
-        {$form.errors['customer.email']}
-      </p>
+      <p>{$form.errors['customer.email']}</p>
     {/if}
     {#if $form.valid('customer.email')}<p>Email is valid!</p>{/if}
   </div>
