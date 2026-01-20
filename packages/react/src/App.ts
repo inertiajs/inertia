@@ -32,7 +32,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   children?: (options: { Component: ReactComponent; props: PageProps; key: number | null }) => ReactNode
   initialPage: Page<SharedProps>
   initialComponent?: ReactComponent
-  resolveComponent?: (name: string) => ReactComponent | Promise<ReactComponent>
+  resolveComponent?: (name: string, page?: Page) => ReactComponent | Promise<ReactComponent>
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
 }

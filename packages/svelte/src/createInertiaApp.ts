@@ -44,7 +44,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
-  const resolveComponent = (name: string, page: Page) => Promise.resolve(resolve(name, page))
+  const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve(name, page))
 
   const svelteApp = await Promise.all([
     resolveComponent(initialPage.component, initialPage),

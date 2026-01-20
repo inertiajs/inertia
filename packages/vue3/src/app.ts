@@ -27,7 +27,7 @@ import useForm from './useForm'
 export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   initialPage: Page<SharedProps>
   initialComponent?: DefineComponent
-  resolveComponent?: (name: string, page: Page) => DefineComponent | Promise<DefineComponent>
+  resolveComponent?: (name: string, page?: Page) => DefineComponent | Promise<DefineComponent>
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
 }
@@ -52,7 +52,7 @@ const App: InertiaApp = defineComponent({
       required: false,
     },
     resolveComponent: {
-      type: Function as PropType<(name: string, page: Page) => DefineComponent | Promise<DefineComponent>>,
+      type: Function as PropType<(name: string, page?: Page) => DefineComponent | Promise<DefineComponent>>,
       required: false,
     },
     titleCallback: {

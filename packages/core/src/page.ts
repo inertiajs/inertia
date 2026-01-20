@@ -238,7 +238,7 @@ class CurrentPage {
     })
   }
 
-  public resolve(component: string, page: Page): Promise<Component> {
+  public resolve(component: string, page?: Page): Promise<Component> {
     return Promise.resolve(this.resolveComponent(component, page))
   }
 

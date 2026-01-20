@@ -24,6 +24,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
 // The 'unknown' type is necessary for backwards compatibility...
 type ComponentResolver = (
   name: string,
+  page?: Page,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent } | unknown
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
