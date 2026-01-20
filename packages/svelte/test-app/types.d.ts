@@ -23,6 +23,7 @@ declare global {
     _inertia_nested_layout_props: PageProps
     _inertia_page_props: PageProps
     _plugin_global_props: object
+    resolverReceivedPage: Page | null
   }
 
   interface ImportMeta {

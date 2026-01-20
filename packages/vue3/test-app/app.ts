@@ -1,16 +1,21 @@
-import type { VisitOptions } from '@inertiajs/core'
+import type { Page, VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
 
 window.testing = { Inertia: router }
+window.resolverReceivedPage = null as Page | null
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
 createInertiaApp({
   page: window.initialPage,
-  resolve: async (name) => {
+  resolve: async (name, page) => {
     const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
+
+    if (page) {
+      window.resolverReceivedPage = page
+    }
 
     if (name === 'DeferredProps/InstantReload') {
       // Add small delay to ensure the component is loaded after the initial page load

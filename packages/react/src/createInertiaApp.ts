@@ -67,9 +67,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
-  // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
-  const resolveComponent = (name, page) =>
-    Promise.resolve(resolve(name, page)).then((module) => module.default || module)
+  const resolveComponent = (name: string, page?: Page) =>
+    Promise.resolve(resolve(name, page)).then((module) => {
+      return ((module as { default?: ReactComponent }).default || module) as ReactComponent
+    })
 
   let head: string[] = []
 
