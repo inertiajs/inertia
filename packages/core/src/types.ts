@@ -626,7 +626,10 @@ export type UseFormWithPrecognitionArguments =
   | [Method | (() => Method), string | (() => string)]
   | [UrlMethodPair | (() => UrlMethodPair)]
 
-type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormInertiaArguments<TForm> =
+  | []
+  | [data: TForm | (() => TForm)]
+  | [rememberKey: string, data: TForm | (() => TForm)]
 type UseFormPrecognitionArguments<TForm> =
   | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
   | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
