@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\ChatMessage;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -163,6 +165,18 @@ Route::post('/form-component', function () {
 
     return back();
 });
+
+Route::get('/form-component/precognition', function () {
+    return inertia('FormComponentPrecognition');
+});
+
+Route::post('/form-component/precognition', function (PrecognitionFormRequest $request) {
+    $data = $request->validated();
+
+    // dd($data);
+
+    return back();
+})->middleware([HandlePrecognitiveRequests::class]);
 
 Route::post('/user', function () {
     return inertia('User', [
@@ -525,4 +539,34 @@ Route::post('/sleepy/{duration}', function ($duration) {
 
 Route::post('/logout', function () {
     return redirect('/login');
+});
+
+
+Route::get('/flash', function () {
+    return inertia('Flash');
+});
+
+Route::get('/flash/direct', function () {
+    return Inertia::flash('message', 'Sent with render!')->render('Flash');
+});
+
+Route::post('/flash/form', function () {
+    return Inertia::flash('message', 'Sent with redirect!')->back();
+});
+
+Route::get('/once/{page}', function (int $page) {
+    $component = match ($page) {
+        1 => 'Once/First',
+        2 => 'Once/Second',
+        3 => 'Once/Third',
+        4 => 'Once/Fourth',
+        default => abort(404),
+    };
+
+    return inertia($component, [
+        'foo' => Inertia::once(fn () => 'foo value: '.now()->getTimestampMs())->fresh($page === 3),
+        'bar' => Inertia::once(fn () => 'bar value: '.now()->getTimestampMs())->until(10),
+        'baz' . $page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
+        'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
+    ]);
 });

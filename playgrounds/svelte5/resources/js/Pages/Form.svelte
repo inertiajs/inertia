@@ -35,7 +35,7 @@
       type="text"
       bind:value={$form.name}
       id="name"
-      class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+      class="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
     />
     {#if $form.errors.name}
       <div class="mt-2 text-sm text-red-600">{$form.errors.name}</div>
@@ -47,7 +47,7 @@
       type="text"
       bind:value={$form.company}
       id="company"
-      class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+      class="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
     />
     {#if $form.errors.company}
       <div class="mt-2 text-sm text-red-600">{$form.errors.company}</div>
@@ -58,7 +58,7 @@
     <select
       bind:value={$form.role}
       id="role"
-      class="shadow-xs mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1"
+      class="mt-1 w-full appearance-none rounded-sm border border-gray-200 px-2 py-1 shadow-xs"
     >
       <option></option>
       <option>User</option>

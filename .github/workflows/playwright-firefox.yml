@@ -1,0 +1,45 @@
+name: Playwright Tests on Firefox
+on: [push, pull_request]
+jobs:
+  test-firefox:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: Firefox (${{ matrix.adapter }}) - shard ${{ matrix.shard }} of 3)
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        adapter: ['vue', 'react', 'svelte']
+        shard: ['1', '2', '3']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Inertia
+        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
+
+      - name: Install Playwright Browsers
+        run: pnpm playwright install firefox
+
+      - name: Run Playwright Tests
+        run: pnpm test:${{ matrix.adapter }} --firefox --shard=${{ matrix.shard }}/3
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-firefox-shard-${{ matrix.shard }}
+          path: test-results
