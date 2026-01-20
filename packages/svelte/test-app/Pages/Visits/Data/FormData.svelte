@@ -45,9 +45,9 @@
 <div>
   <span class="text">This is the page that demonstrates manual visit data passing through FormData objects</span>
 
-  <a href={'#'} on:click={visitMethod} class="visit">Visit Link</a>
-  <a href={'#'} on:click={postMethod} class="post">POST Link</a>
-  <a href={'#'} on:click={putMethod} class="put">PUT Link</a>
-  <a href={'#'} on:click={patchMethod} class="patch">PATCH Link</a>
-  <a href={'#'} on:click={deleteMethod} class="delete">DELETE Link</a>
+  <a href={'#'} onclick={visitMethod} class="visit">Visit Link</a>
+  <a href={'#'} onclick={postMethod} class="post">POST Link</a>
+  <a href={'#'} onclick={putMethod} class="put">PUT Link</a>
+  <a href={'#'} onclick={patchMethod} class="patch">PATCH Link</a>
+  <a href={'#'} onclick={deleteMethod} class="delete">DELETE Link</a>
 </div>

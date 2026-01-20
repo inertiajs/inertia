@@ -15,5 +15,5 @@
   )
 </script>
 
-<button on:click={() => start()}>Start</button>
-<button on:click={() => stop()}>Stop</button>
+<button onclick={() => start()}>Start</button>
+<button onclick={() => stop()}>Stop</button>

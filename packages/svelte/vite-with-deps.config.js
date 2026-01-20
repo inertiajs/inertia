@@ -12,7 +12,8 @@ export default defineConfig({
     },
     rollupOptions: {
       // Only externalize Svelte (peer dependency) - bundle everything else
-      external: ['svelte', 'svelte/internal', 'svelte/store'],
+      external: (id) => id === 'svelte' || id.startsWith('svelte/'),
     },
+    target: 'es2020',
   },
 })

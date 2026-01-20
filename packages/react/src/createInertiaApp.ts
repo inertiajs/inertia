@@ -24,6 +24,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
 // The 'unknown' type is necessary for backwards compatibility...
 type ComponentResolver = (
   name: string,
+  page?: Page,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent } | unknown
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
@@ -66,13 +67,15 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
-  // @ts-expect-error - This can be improved once we remove the 'unknown' type from the resolver...
-  const resolveComponent = (name) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const resolveComponent = (name: string, page?: Page) =>
+    Promise.resolve(resolve(name, page)).then((module) => {
+      return ((module as { default?: ReactComponent }).default || module) as ReactComponent
+    })
 
   let head: string[] = []
 
   const reactApp = await Promise.all([
-    resolveComponent(initialPage.component),
+    resolveComponent(initialPage.component, initialPage),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
     const props = {

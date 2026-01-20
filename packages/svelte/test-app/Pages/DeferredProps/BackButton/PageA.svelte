@@ -1,21 +1,25 @@
 <script lang="ts">
   import { Deferred, inertia } from '@inertiajs/svelte'
 
-  export let fastProp: string | undefined
-  export let slowProp: string | undefined
+  interface Props {
+    fastProp: string | undefined
+    slowProp: string | undefined
+  }
+
+  let { fastProp, slowProp }: Props = $props()
 </script>
 
 <Deferred data="fastProp">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading fast prop...</div>
-  </svelte:fragment>
+  {/snippet}
   {fastProp}
 </Deferred>
 
 <Deferred data="slowProp">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading slow prop...</div>
-  </svelte:fragment>
+  {/snippet}
   {slowProp}
 </Deferred>
 

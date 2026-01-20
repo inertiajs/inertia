@@ -10,65 +10,60 @@
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
 
-  export let data: InfiniteScrollComponentBaseProps['data']
-  export let buffer: InfiniteScrollComponentBaseProps['buffer'] = 0
-  export let as: InfiniteScrollComponentBaseProps['as'] = 'div'
-  export let manual: InfiniteScrollComponentBaseProps['manual'] = false
-  export let manualAfter: InfiniteScrollComponentBaseProps['manualAfter'] = 0
-  export let preserveUrl: InfiniteScrollComponentBaseProps['preserveUrl'] = false
-  export let reverse: InfiniteScrollComponentBaseProps['reverse'] = false
-  export let autoScroll: InfiniteScrollComponentBaseProps['autoScroll'] = undefined
-  export let startElement: string | (() => HTMLElement | null) | null = null
-  export let endElement: string | (() => HTMLElement | null) | null = null
-  export let itemsElement: string | (() => HTMLElement | null) | null = null
-  export let params: ReloadOptions = {}
-  export let onlyNext = false
-  export let onlyPrevious = false
+  interface Props {
+    data: InfiniteScrollComponentBaseProps['data']
+    buffer?: InfiniteScrollComponentBaseProps['buffer']
+    as?: InfiniteScrollComponentBaseProps['as']
+    manual?: InfiniteScrollComponentBaseProps['manual']
+    manualAfter?: InfiniteScrollComponentBaseProps['manualAfter']
+    preserveUrl?: InfiniteScrollComponentBaseProps['preserveUrl']
+    reverse?: InfiniteScrollComponentBaseProps['reverse']
+    autoScroll?: InfiniteScrollComponentBaseProps['autoScroll']
+    startElement?: string | (() => HTMLElement | null) | null
+    endElement?: string | (() => HTMLElement | null) | null
+    itemsElement?: string | (() => HTMLElement | null) | null
+    params?: ReloadOptions
+    onlyNext?: boolean
+    onlyPrevious?: boolean
+    previous?: import('svelte').Snippet<[any]>
+    loading?: import('svelte').Snippet<[any]>
+    next?: import('svelte').Snippet<[any]>
+    children?: import('svelte').Snippet<[any]>
+    [key: string]: any
+  }
 
-  let itemsElementRef: HTMLElement
-  let startElementRef: HTMLElement
-  let endElementRef: HTMLElement
-  let loadingPrevious = false
-  let loadingNext = false
-  let requestCount = 0
-  let hasPreviousPage = false
-  let hasNextPage = false
+  let {
+    data,
+    buffer = 0,
+    as = 'div',
+    manual = false,
+    manualAfter = 0,
+    preserveUrl = false,
+    reverse = false,
+    autoScroll = undefined,
+    startElement = null,
+    endElement = null,
+    itemsElement = null,
+    params = {},
+    onlyNext = false,
+    onlyPrevious = false,
+    previous,
+    loading,
+    next,
+    children,
+    ...rest
+  }: Props = $props()
 
-  $: resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
-  $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null
+  let itemsElementRef: HTMLElement = $state(null!)
+  let startElementRef: HTMLElement = $state(null!)
+  let endElementRef: HTMLElement = $state(null!)
+  let loadingPrevious = $state(false)
+  let loadingNext = $state(false)
+  let requestCount = $state(0)
+  let hasPreviousPage = $state(false)
+  let hasNextPage = $state(false)
 
-  $: sharedExposed = {
-    loadingPrevious,
-    loadingNext,
-    hasPrevious: hasPreviousPage,
-    hasNext: hasNextPage,
-  } satisfies Pick<InfiniteScrollActionSlotProps, 'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'>
-
-  $: exposedPrevious = {
-    loading: loadingPrevious,
-    fetch: fetchPrevious,
-    autoMode: headerAutoMode,
-    manualMode: !headerAutoMode,
-    hasMore: hasPreviousPage,
-    ...sharedExposed,
-  } satisfies InfiniteScrollActionSlotProps
-
-  $: exposedNext = {
-    loading: loadingNext,
-    fetch: fetchNext,
-    autoMode: footerAutoMode,
-    manualMode: !footerAutoMode,
-    hasMore: hasNextPage,
-    ...sharedExposed,
-  } satisfies InfiniteScrollActionSlotProps
-
-  $: exposedSlot = {
-    loading: loadingPrevious || loadingNext,
-    loadingPrevious,
-    loadingNext,
-  } satisfies InfiniteScrollSlotProps
-
-  let infiniteScrollInstance: UseInfiniteScrollProps | null = null
+  let infiniteScrollInstance: UseInfiniteScrollProps = $state(null!)
 
   function resolveHTMLElement(
     value: string | (() => HTMLElement | null) | null,
@@ -179,64 +174,82 @@
     }
   }
 
-  $: manualMode = manual || (manualAfter !== undefined && manualAfter > 0 && requestCount >= manualAfter)
-  $: autoLoad = !manualMode
-
-  $: headerAutoMode = autoLoad && !onlyNext
-  $: footerAutoMode = autoLoad && !onlyPrevious
-
-  $: {
+  onDestroy(() => infiniteScrollInstance?.flush())
+  let resolvedItemsElement = $derived(resolveHTMLElement(itemsElement, itemsElementRef))
+  let scrollableParent = $derived(resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null)
+  let sharedExposed = $derived({
+    loadingPrevious,
+    loadingNext,
+    hasPrevious: hasPreviousPage,
+    hasNext: hasNextPage,
+  } satisfies Pick<InfiniteScrollActionSlotProps, 'loadingPrevious' | 'loadingNext' | 'hasPrevious' | 'hasNext'>)
+  let manualMode = $derived(manual || (manualAfter !== undefined && manualAfter > 0 && requestCount >= manualAfter))
+  let autoLoad = $derived(!manualMode)
+  let headerAutoMode = $derived(autoLoad && !onlyNext)
+  let exposedPrevious = $derived({
+    loading: loadingPrevious,
+    fetch: fetchPrevious,
+    autoMode: headerAutoMode,
+    manualMode: !headerAutoMode,
+    hasMore: hasPreviousPage,
+    ...sharedExposed,
+  } satisfies InfiniteScrollActionSlotProps)
+  let footerAutoMode = $derived(autoLoad && !onlyPrevious)
+  let exposedNext = $derived({
+    loading: loadingNext,
+    fetch: fetchNext,
+    autoMode: footerAutoMode,
+    manualMode: !footerAutoMode,
+    hasMore: hasNextPage,
+    ...sharedExposed,
+  } satisfies InfiniteScrollActionSlotProps)
+  let exposedSlot = $derived({
+    loading: loadingPrevious || loadingNext,
+    loadingPrevious,
+    loadingNext,
+  } satisfies InfiniteScrollSlotProps)
+  $effect(() => {
     // Make this block run whenever these change
     ;[autoLoad, onlyNext, onlyPrevious, reverse]
 
     autoLoad
       ? infiniteScrollInstance?.elementManager.enableTriggers()
       : infiniteScrollInstance?.elementManager.disableTriggers()
-  }
-
-  onDestroy(() => infiniteScrollInstance?.flush())
+  })
 </script>
 
 {#if !startElement && !reverse}
   <div bind:this={startElementRef}>
-    <slot name="previous" {exposedPrevious} {...exposedPrevious}>
-      {#if loadingPrevious}
-        <slot name="loading" {exposedPrevious} {...exposedPrevious} />
-      {/if}
-    </slot>
+    {#if previous}{@render previous({ exposedPrevious, ...exposedPrevious })}{:else if loadingPrevious}
+      {@render loading?.({ exposedPrevious, ...exposedPrevious })}
+    {/if}
   </div>
 {/if}
 
 {#if !endElement && reverse}
   <div bind:this={endElementRef}>
-    <slot name="next" {exposedNext} {...exposedNext}>
-      {#if loadingNext}
-        <slot name="loading" {exposedNext} {...exposedNext} />
-      {/if}
-    </slot>
+    {#if next}{@render next({ exposedNext, ...exposedNext })}{:else if loadingNext}
+      {@render loading?.({ exposedNext, ...exposedNext })}
+    {/if}
   </div>
 {/if}
 
-<svelte:element this={as} bind:this={itemsElementRef} {...$$restProps}>
-  <slot {exposedSlot} {...exposedSlot} />
+<svelte:element this={as} bind:this={itemsElementRef} {...rest}>
+  {@render children?.({ exposedSlot, ...exposedSlot })}
 </svelte:element>
 
 {#if !startElement && reverse}
   <div bind:this={startElementRef}>
-    <slot name="previous" {exposedPrevious} {...exposedPrevious}>
-      {#if loadingPrevious}
-        <slot name="loading" {exposedPrevious} {...exposedPrevious} />
-      {/if}
-    </slot>
+    {#if previous}{@render previous({ exposedPrevious, ...exposedPrevious })}{:else if loadingPrevious}
+      {@render loading?.({ exposedPrevious, ...exposedPrevious })}
+    {/if}
   </div>
 {/if}
 
 {#if !endElement && !reverse}
   <div bind:this={endElementRef}>
-    <slot name="next" {exposedNext} {...exposedNext}>
-      {#if loadingNext}
-        <slot name="loading" {exposedNext} {...exposedNext} />
-      {/if}
-    </slot>
+    {#if next}{@render next({ exposedNext, ...exposedNext })}{:else if loadingNext}
+      {@render loading?.({ exposedNext, ...exposedNext })}
+    {/if}
   </div>
 {/if}

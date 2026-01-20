@@ -1,34 +1,43 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
   import { page } from '../index'
-  import { onDestroy } from 'svelte'
 
-  export let data: string | string[]
+  interface Props {
+    data: string | string[]
+    fallback?: import('svelte').Snippet
+    children?: import('svelte').Snippet
+  }
 
-  const keys = Array.isArray(data) ? data : [data]
-  let loaded = false
+  let { data, fallback, children }: Props = $props()
+
+  const keys = $derived(Array.isArray(data) ? data : [data])
+  let loaded = $state(false)
 
   const isServer = typeof window === 'undefined'
-
   if (!isServer) {
-    const unsubscribe = page.subscribe(({ props }) => {
-      // Ensures the slot isn't loaded before the deferred props are available
-      window.queueMicrotask(() => {
-        loaded = keys.every((key) => typeof props[key] !== 'undefined')
-      })
-    })
+    // Use $effect to watch for changes in pageState.props
+    $effect(() => {
+      // Access pageState.props to make this effect reactive
+      const props = page.props
 
-    onDestroy(() => {
-      unsubscribe()
+      // Wrap this up into untrack, to make sure it doesn't gets picked as a depedency to retrigger the $effect
+      untrack(() => {
+        // Ensures the content isn't loaded before the deferred props are available
+        window.queueMicrotask(() => {
+          loaded = keys.every((key) => typeof props[key] !== 'undefined')
+        })
+      })
     })
   }
 
-  if (!$$slots.fallback) {
-    throw new Error('`<Deferred>` requires a `<svelte:fragment slot="fallback">` slot')
+  // svelte-ignore state_referenced_locally
+  if (!fallback) {
+    throw new Error('`<Deferred>` requires a `fallback` snippet')
   }
 </script>
 
 {#if loaded}
-  <slot />
+  {@render children?.()}
 {:else}
-  <slot name="fallback" />
+  {@render fallback?.()}
 {/if}

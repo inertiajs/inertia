@@ -2,18 +2,18 @@
   import { Form } from '@inertiajs/svelte'
   import type { Method } from '@inertiajs/core'
 
-  let method: Method = 'get'
+  let method: Method = $state('get')
 </script>
 
 <div>
   <h1>HTTP Methods</h1>
 
   <div>
-    <button on:click={() => (method = 'get')}>GET</button>
-    <button on:click={() => (method = 'post')}>POST</button>
-    <button on:click={() => (method = 'put')}>PUT</button>
-    <button on:click={() => (method = 'patch')}>PATCH</button>
-    <button on:click={() => (method = 'delete')}>DELETE</button>
+    <button onclick={() => (method = 'get')}>GET</button>
+    <button onclick={() => (method = 'post')}>POST</button>
+    <button onclick={() => (method = 'put')}>PUT</button>
+    <button onclick={() => (method = 'patch')}>PATCH</button>
+    <button onclick={() => (method = 'delete')}>DELETE</button>
   </div>
 
   <div>Current method: {method}</div>

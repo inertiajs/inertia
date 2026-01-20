@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   export interface User {
     id: number
     name: string
@@ -6,7 +6,11 @@
 </script>
 
 <script lang="ts">
-  export let user: User
+  interface Props {
+    user: User
+  }
+
+  let { user }: Props = $props()
 </script>
 
 <div

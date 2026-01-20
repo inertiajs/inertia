@@ -1,45 +1,49 @@
 <script lang="ts">
   import { Deferred, inertia } from '@inertiajs/svelte'
 
-  export let foo: { text: string } | undefined
-  export let bar: { text: string } | undefined
-  export let baz: { text: string } | undefined
-  export let qux: { text: string } | undefined
-  export let quux: { text: string } | undefined
+  interface Props {
+    foo: { text: string } | undefined
+    bar: { text: string } | undefined
+    baz: { text: string } | undefined
+    qux: { text: string } | undefined
+    quux: { text: string } | undefined
+  }
+
+  let { foo, bar, baz, qux, quux }: Props = $props()
 </script>
 
 <Deferred data="foo">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading foo...</div>
-  </svelte:fragment>
+  {/snippet}
   {foo?.text}
 </Deferred>
 
 <Deferred data="bar">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading bar...</div>
-  </svelte:fragment>
+  {/snippet}
   {bar?.text}
 </Deferred>
 
 <Deferred data="baz">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading baz...</div>
-  </svelte:fragment>
+  {/snippet}
   {baz?.text}
 </Deferred>
 
 <Deferred data="qux">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading qux...</div>
-  </svelte:fragment>
+  {/snippet}
   {qux?.text}
 </Deferred>
 
 <Deferred data="quux">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading quux...</div>
-  </svelte:fragment>
+  {/snippet}
   {quux?.text}
 </Deferred>
 

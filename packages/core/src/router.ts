@@ -346,8 +346,8 @@ export class Router {
     return history.decrypt()
   }
 
-  public resolveComponent(component: string): Promise<Component> {
-    return currentPage.resolve(component)
+  public resolveComponent(component: string, page?: Page): Promise<Component> {
+    return currentPage.resolve(component, page)
   }
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {

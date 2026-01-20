@@ -363,6 +363,7 @@ app.post('/form-helper/events/errors', (req, res) => {
 })
 
 //
+const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email)
 
 app.post('/precognition/default', upload.any(), (req, res) => {
   if (!req.headers['precognition']) {
@@ -388,7 +389,7 @@ app.post('/precognition/default', upload.any(), (req, res) => {
         errors.email = 'The email field is required.'
       }
 
-      if (email && !/\S+@\S+\.\S+/.test(email)) {
+      if (email && !isValidEmail(email)) {
         errors.email = 'The email must be a valid email address.'
       }
 
@@ -413,6 +414,44 @@ app.post('/precognition/default', upload.any(), (req, res) => {
   )
 })
 
+app.post('/precognition/transform-keys', upload.any(), (req, res) => {
+  if (!req.headers['precognition']) {
+    return renderDump(req, res)
+  }
+
+  setTimeout(() => {
+    const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
+    // After transform, the email is at customer.email (not document.customer.email)
+    const email = req.body['customer']?.email
+    const errors = {}
+
+    if (!email) {
+      errors['customer.email'] = 'The email field is required.'
+    }
+
+    if (email && !isValidEmail(email)) {
+      errors['customer.email'] = 'The email must be a valid email address.'
+    }
+
+    if (only.length) {
+      Object.keys(errors).forEach((key) => {
+        if (!only.includes(key)) {
+          delete errors[key]
+        }
+      })
+    }
+
+    res.header('Precognition', 'true')
+    res.header('Vary', 'Precognition')
+
+    if (Object.keys(errors).length) {
+      return res.status(422).json({ errors })
+    }
+
+    return res.status(204).header('Precognition-Success', 'true').send()
+  }, 250)
+})
+
 app.post('/precognition/with-all-errors', (req, res) => {
   setTimeout(() => {
     const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
@@ -432,7 +471,7 @@ app.post('/precognition/with-all-errors', (req, res) => {
       errors.email = ['The email field is required.']
     }
 
-    if (email && !/\S+@\S+\.\S+/.test(email)) {
+    if (email && !isValidEmail(email)) {
       errors.email = ['The email must be a valid email address.', 'The email format is incorrect.']
     }
 
@@ -569,7 +608,7 @@ app.post('/precognition/error-sync', upload.any(), (req, res) => {
     // Validate email
     if (!email || email.trim() === '') {
       errors.email = 'The email field is required.'
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!isValidEmail(email)) {
       errors.email = 'The email must be a valid email address.'
     }
 
