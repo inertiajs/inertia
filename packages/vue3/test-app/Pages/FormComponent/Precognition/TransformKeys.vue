@@ -15,7 +15,12 @@ const transformData = (data: Record<string, any>) => {
     <Form action="/precognition/transform-keys" method="post" :validationTimeout="100" :transform="transformData">
       <template #default="{ invalid, errors, validate, valid, validating }">
         <div>
-          <input id="email-input" name="document[customer][email]" placeholder="Email" @blur="() => validate('customer.email')" />
+          <input
+            id="email-input"
+            name="document[customer][email]"
+            placeholder="Email"
+            @blur="() => validate('customer.email')"
+          />
           <p v-if="invalid('customer.email')">{{ errors['customer.email'] }}</p>
           <p v-if="valid('customer.email')">Email is valid!</p>
         </div>

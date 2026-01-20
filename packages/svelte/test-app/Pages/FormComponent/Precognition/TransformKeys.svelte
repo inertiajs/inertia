@@ -23,7 +23,12 @@
     let:validating
   >
     <div>
-      <input id="email-input" name="document[customer][email]" placeholder="Email" on:blur={() => validate('customer.email')} />
+      <input
+        id="email-input"
+        name="document[customer][email]"
+        placeholder="Email"
+        on:blur={() => validate('customer.email')}
+      />
       {#if invalid('customer.email')}
         <p>{errors['customer.email']}</p>
       {/if}
