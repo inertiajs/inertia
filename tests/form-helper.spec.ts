@@ -1115,3 +1115,15 @@ test.describe('Reserved Keys', () => {
     expect(consoleMessages.messages.some((m) => m.includes('"progress"'))).toBe(true)
   })
 })
+
+test('it can create a form without initial data and use transform', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/form-helper/empty-form')
+
+  await page.getByRole('button', { name: 'Submit' }).click()
+
+  const dump = await shouldBeDumpPage(page, 'post')
+
+  await expect(dump.form.name).toEqual('John Doe')
+  await expect(dump.form.email).toEqual('john@example.com')
+})
