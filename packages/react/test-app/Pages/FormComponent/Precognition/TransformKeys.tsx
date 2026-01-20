@@ -15,7 +15,12 @@ export default () => {
         {({ invalid, errors, validate, valid, validating }) => (
           <>
             <div>
-              <input id="email-input" name="document[customer][email]" placeholder="Email" onBlur={() => validate('customer.email')} />
+              <input
+                id="email-input"
+                name="document[customer][email]"
+                placeholder="Email"
+                onBlur={() => validate('customer.email')}
+              />
               {invalid('customer.email') && <p>{errors['customer.email']}</p>}
               {valid('customer.email') && <p>Email is valid!</p>}
             </div>
