@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.10...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.11...master)
 
 - Nothing yet
+
+## [v2.3.11](https://github.com/inertiajs/inertia/compare/v2.3.10...v2.3.11) - 2026-01-20
+
+### What's Changed
+
+* Bump and cleanup dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2822
+* Add test for Precognition validation with transform key changes by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2827
+* TS and console error on conflicting `useForm()` keys by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2823
+* Allow `useForm` without arguments by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2830
+* Pass `true` to `inert` attribute in React 19 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2831
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.10...v2.3.11
 
 ## [v2.3.10](https://github.com/inertiajs/inertia/compare/v2.3.9...v2.3.10) - 2026-01-15
 
