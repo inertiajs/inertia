@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { isWebKit, requests } from './support'
+import { requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -171,9 +171,12 @@ test('can prefetch using link props with keyboard events', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
-test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({ page }) => {
+test('does not navigate or prefetch on secondary button click when using prefetch="click"', async ({
+  page,
+  browserName,
+}) => {
   // Skip on WebKit
-  if (isWebKit(page)) {
+  if (browserName === 'webkit') {
     return test.skip('Bug in Playwright + WebKit causing the context menu to stick around')
   }
 
@@ -312,6 +315,21 @@ test('can visit the page when prefetching has failed due to network error', asyn
   await page.getByRole('button', { name: 'Visit Page' }).click()
 
   await isPrefetchSwrPage(page, 1)
+})
+
+test('displays the error modal correctly when prefetching a non-Inertia response', async ({ page }) => {
+  await page.goto('prefetch/after-error')
+
+  const prefetchPromise = page.waitForResponse('/non-inertia')
+  await page.getByRole('button', { name: 'Prefetch Non-Inertia' }).click()
+  await prefetchPromise
+
+  await page.getByRole('button', { name: 'Visit Non-Inertia' }).click()
+
+  await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeVisible()
+  await expect(page.frameLocator('iframe').locator('body')).toContainText(
+    'This is a page that does not have the Inertia app loaded.',
+  )
 })
 
 const submitButtonTexts = ['Submit to Same URL', 'Submit to Other URL']

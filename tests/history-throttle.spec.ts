@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { consoleMessages, isWebKit, pageLoads } from './support'
+import { consoleMessages, pageLoads } from './support'
 
 test.describe('History API throttle', () => {
-  test('should handle rapid replaceState calls without crashing and continue navigating', async ({ page }) => {
+  test('should handle rapid replaceState calls without crashing and continue navigating', async ({
+    page,
+    browserName,
+  }) => {
     consoleMessages.listen(page)
     pageLoads.watch(page)
 
@@ -29,7 +32,7 @@ test.describe('History API throttle', () => {
         msg.includes('100 times'),
     )
 
-    if (isWebKit(page)) {
+    if (browserName === 'webkit') {
       expect(throttleLogs[0]).toContain('100 times')
     }
 

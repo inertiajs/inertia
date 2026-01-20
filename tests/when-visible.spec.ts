@@ -49,18 +49,22 @@ test('it will wait to fire the reload until element is visible', async ({ page }
 
   // Now scroll up and down to re-trigger it
   await page.evaluate(() => (window as any).scrollTo(0, 13_000))
-  await page.waitForTimeout(100)
+  await page.waitForFunction(() => document.documentElement.scrollTop < 14000, { timeout: 2000 })
+  await page.waitForTimeout(200)
 
+  let responsePromise = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
   await expect(page.getByText('Third one is visible!')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await responsePromise
 
   await page.evaluate(() => (window as any).scrollTo(0, 13_000))
-  await page.waitForTimeout(100)
+  await page.waitForFunction(() => document.documentElement.scrollTop < 14000, { timeout: 2000 })
+  await page.waitForTimeout(200)
 
+  responsePromise = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
   await expect(page.getByText('Third one is visible!')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await responsePromise
 
   await page.evaluate(() => (window as any).scrollTo(0, 20_000))
   await expect(page.getByText('Loading fourth one...')).toBeVisible()
@@ -69,17 +73,20 @@ test('it will wait to fire the reload until element is visible', async ({ page }
 
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
   await expect(page.getByText('Loading fifth one...')).toBeVisible()
-  await page.waitForResponse(page.url() + '?count=0')
+  await page.waitForResponse('/when-visible?count=0')
   await expect(page.getByText('Loading fifth one...')).not.toBeVisible()
   await expect(page.getByText('Count is now 1')).toBeVisible()
 
   // Now scroll up and down to re-trigger it
-  await page.evaluate(() => (window as any).scrollTo(0, 20_000))
-  await page.waitForTimeout(100)
+  // Need to scroll far enough that the element is truly out of viewport
+  await page.evaluate(() => (window as any).scrollTo(0, 10_000))
+  await page.waitForFunction(() => document.documentElement.scrollTop < 15000, { timeout: 2000 })
+  // Give IntersectionObserver time to process the visibility change
+  await page.waitForTimeout(200)
 
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
   await expect(page.getByText('Count is now 1')).toBeVisible()
-  await page.waitForResponse(page.url() + '?count=1')
+  await page.waitForResponse('/when-visible?count=1')
   await expect(page.getByText('Count is now 2')).toBeVisible()
 })
 
@@ -200,6 +207,14 @@ test('it re-triggers when always prop is set after back button navigation', asyn
   await page.waitForURL('/when-visible-back-button')
   await expect(page.getByText('Always: This is lazy loaded data!')).toBeVisible()
 
+  // Ensure we're scrolled to the top before scrolling down to re-trigger
+  // Firefox may restore scroll position after back navigation, so we need to wait and force scroll
+  await page.waitForTimeout(100)
+  await page.evaluate(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  })
+  await page.waitForTimeout(200)
+
   // Scroll to trigger the always component again, should re-fetch
   await page.evaluate(() => (window as any).scrollTo(0, 4000))
   const response = await page.waitForResponse(
@@ -257,4 +272,22 @@ test('it merges data and params props', async ({ page }) => {
   await expect(page.getByText('Loading merged with callback...')).toBeVisible()
   await page.waitForResponse((res) => res.url().includes('page=2'))
   await expect(page.getByText('Merged with callback loaded: Merged with callback success! page=2')).toBeVisible()
+})
+
+test('it does not trigger unneeded requests when params change while visible', async ({ page }) => {
+  await page.goto('/when-visible-params-update')
+
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+  await expect(page.getByText('Loading lazy data...')).toBeVisible()
+  await page.waitForResponse((res) => res.url().includes('paramValue=initial'))
+  await expect(page.getByText('Data loaded: Loaded with paramValue=initial')).toBeVisible()
+  await page.waitForTimeout(100)
+
+  requests.listen(page)
+
+  await page.getByRole('button', { name: 'Update Param' }).click()
+  await expect(page.getByText('Current param: updated')).toBeVisible()
+  await page.waitForTimeout(100)
+
+  expect(requests.requests).toHaveLength(0)
 })

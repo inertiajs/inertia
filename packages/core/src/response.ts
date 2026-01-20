@@ -107,7 +107,13 @@ export class Response {
 
   public getPageResponse(): Page {
     const data = this.getDataFromResponse(this.response.data)
-    return (this.response.data = { ...data, flash: data.flash ?? {} })
+
+    // Only spread if data is an object (not a string like HTML error pages)
+    if (typeof data === 'object') {
+      return (this.response.data = { ...data, flash: data.flash ?? {} })
+    }
+
+    return (this.response.data = data)
   }
 
   protected async handleNonInertiaResponse() {
@@ -357,6 +363,11 @@ export class Response {
     pageResponse.flash = {
       ...currentPage.get().flash,
       ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
+    }
+
+    const currentOriginalDeferred = currentPage.get().initialDeferredProps
+    if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
+      pageResponse.initialDeferredProps = currentOriginalDeferred
     }
   }
 

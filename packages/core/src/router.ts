@@ -39,7 +39,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { isUrlMethodPair, transformUrlAndData } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -169,13 +169,21 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
+  /**
+   * @deprecated Use cancelAll() instead.
+   */
   public cancel(): void {
     this.syncRequestStream.cancelInFlight()
   }
 
-  public cancelAll(): void {
-    this.asyncRequestStream.cancelInFlight()
-    this.syncRequestStream.cancelInFlight()
+  public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
+    if (async) {
+      this.asyncRequestStream.cancelInFlight({ prefetch })
+    }
+
+    if (sync) {
+      this.syncRequestStream.cancelInFlight()
+    }
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
@@ -201,9 +209,14 @@ export class Router {
       return
     }
 
-    const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
+    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
+      // Only cancel non-prefetch requests (deferred props + partial reloads)
+      this.asyncRequestStream.cancelInFlight({ prefetch: false })
+    }
 
-    requestStream.interruptInFlight()
+    if (!visit.async) {
+      this.syncRequestStream.interruptInFlight()
+    }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
       // Save scroll regions for the current page
@@ -222,6 +235,7 @@ export class Router {
       prefetchedRequests.use(prefetched, requestParams)
     } else {
       progress.reveal(true)
+      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
       requestStream.send(Request.create(requestParams, currentPage.get()))
     }
   }
@@ -438,8 +452,17 @@ export class Router {
   ): Promise<void> {
     const current = currentPage.get()
 
+    const onceProps =
+      typeof params.props === 'function'
+        ? Object.fromEntries(
+            Object.values(current.onceProps ?? {}).map((onceProp) => [onceProp.prop, current.props[onceProp.prop]]),
+          )
+        : {}
+
     const props =
-      typeof params.props === 'function' ? params.props(current.props as TProps) : (params.props ?? current.props)
+      typeof params.props === 'function'
+        ? params.props(current.props as TProps, onceProps as Partial<TProps>)
+        : (params.props ?? current.props)
 
     const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
 

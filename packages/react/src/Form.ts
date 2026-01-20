@@ -1,6 +1,7 @@
 import {
   FormComponentProps,
   FormComponentRef,
+  FormComponentResetSymbol,
   FormComponentSlotProps,
   FormDataConvertible,
   formDataToObject,
@@ -14,10 +15,12 @@ import {
 import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
 import { isEqual } from 'lodash-es'
 import React, {
+  createContext,
   createElement,
   FormEvent,
   forwardRef,
   ReactNode,
+  useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -41,6 +44,8 @@ type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetc
 type FormSubmitter = HTMLElement | null
 
 const noop = () => undefined
+
+const FormContext = createContext<FormComponentRef | undefined>(undefined)
 
 const Form = forwardRef<FormComponentRef, ComponentProps>(
   (
@@ -123,10 +128,16 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       )
     }
 
-    const updateDirtyState = (event: Event) =>
+    const updateDirtyState = (event: Event) => {
+      if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+        // When the form is reset programmatically, prevent native reset behavior
+        event.preventDefault()
+      }
+
       deferStateUpdate(() =>
         setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
       )
+    }
 
     const clearErrors = (...names: string[]) => {
       form.clearErrors(...names)
@@ -232,7 +243,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setIsDirty(false)
     }
 
-    const exposed = () => ({
+    const exposed = {
       errors: form.errors,
       hasErrors: form.hasErrors,
       processing: form.processing,
@@ -258,11 +269,11 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers)),
       touch: form.touch,
       touched: form.touched,
-    })
+    }
 
-    useImperativeHandle(ref, exposed, [form, isDirty, submit])
+    useImperativeHandle(ref, () => exposed, [form, isDirty, submit])
 
-    return createElement(
+    const formNode = createElement(
       'form',
       {
         ...props,
@@ -279,11 +290,17 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
         // See: https://github.com/inertiajs/inertia/pull/2536
         inert: disableWhileProcessing && form.processing && 'true',
       },
-      typeof children === 'function' ? children(exposed()) : children,
+      typeof children === 'function' ? children(exposed) : children,
     )
+
+    return createElement(FormContext.Provider, { value: exposed }, formNode)
   },
 )
 
 Form.displayName = 'InertiaForm'
+
+export function useFormContext(): FormComponentRef | undefined {
+  return useContext(FormContext)
+}
 
 export default Form
