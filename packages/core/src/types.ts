@@ -218,7 +218,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   onSuccess?: (page: Page) => void
 }
 
-export type PageResolver = (name: string) => Component
+export type PageResolver = (name: string, page?: Page) => Component
 
 export type PageHandler<ComponentType = Component> = ({
   component,
