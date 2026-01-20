@@ -8,6 +8,7 @@
   })
     .withPrecognition('post', '/precognition/transform-keys')
     .setValidationTimeout(100)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .transform((data) => ({ ...data.document })) as any
 </script>
 

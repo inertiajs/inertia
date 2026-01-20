@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Form } from '@inertiajs/svelte'
 
-  // Transform flattens the structure: { document: { customer: {...} } } -> { customer: {...} }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transformData = (data: Record<string, any>) => {
     const document = data.document || {}
     return document
