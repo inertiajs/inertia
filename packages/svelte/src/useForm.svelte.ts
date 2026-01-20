@@ -40,7 +40,7 @@ function validateFormDataKeys<TForm extends object>(data: TForm): void {
     bootstrapping = true
     const store = useForm({})
     // Get the store value to extract form property keys (not the Writable methods)
-    reservedFormKeys = new Set(Object.keys(getStore(store)))
+    reservedFormKeys = new Set(Object.keys(store))
     bootstrapping = false
   }
 
