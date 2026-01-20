@@ -11,12 +11,7 @@
 <div>
   <h1>Form Precognition Transform Keys</h1>
 
-  <Form
-    action="/precognition/transform-keys"
-    method="post"
-    validationTimeout={100}
-    transform={transformData}
-  >
+  <Form action="/precognition/transform-keys" method="post" validationTimeout={100} transform={transformData}>
     {#snippet children({ invalid, errors, validate, valid, validating })}
       <div>
         <input
