@@ -201,8 +201,8 @@ importers:
         specifier: ^1.13.2
         version: 1.13.2
       es-check:
-        specifier: 9.4.7
-        version: 9.4.7
+        specifier: 9.5.3
+        version: 9.5.3
       publint:
         specifier: ^0.3.16
         version: 0.3.16
@@ -1706,11 +1706,6 @@ packages:
     resolution: {integrity: sha512-zHXBLhP+QehSSbsS9Pt23Gg964240DPd6QCf8WpkqEXxQ7fhdZzYsocOr5u7apWonsS5EjZDmTF+/slGMyasvw==}
     engines: {node: '>= 0.4'}
 
-  es-check@9.4.7:
-    resolution: {integrity: sha512-8irS2y9kngY4BkPDFEVwzoTLJGlr31T4oI/X6e64LjzR0oNoT9At3e3ftoQpUC+ftOALM+PwKq3L4zL9fJBJfA==}
-    engines: {node: '>=18.0.0', pnpm: '>=9.0.0'}
-    hasBin: true
-
   es-check@9.5.3:
     resolution: {integrity: sha512-PSD76NQmUvnyzyb4L0oSwAi01lpOuJ/xFu1kCXIRDryVyAA6lJJdoBrPc1otDag9xcFJziRstjIbY40ImgBkcw==}
     engines: {node: '>=18.0.0', pnpm: '>=9.0.0'}
@@ -1887,9 +1882,6 @@ packages:
   express@5.2.1:
     resolution: {integrity: sha512-hIS4idWWai69NezIdRt2xFVofaF4j+6INOpJlVOLDO8zXGpUVEVzIYk12UUi2JzjEzWL3IOAxcTubgz9Po0yXw==}
     engines: {node: '>= 18'}
-
-  fast-brake@0.1.6:
-    resolution: {integrity: sha512-V3j0HTIs70OOxRpbqT0bWVdrmP86s6N8TBPw/WyKJqdJ2Fwh3CuMmlO83uIIDpqik6m1Io9fT6qwNn69EqvXYA==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -4562,13 +4554,6 @@ snapshots:
       unbox-primitive: 1.1.0
       which-typed-array: 1.1.20
 
-  es-check@9.4.7:
-    dependencies:
-      acorn: 8.15.0
-      browserslist: 4.28.1
-      fast-brake: 0.1.6
-      fast-glob: 3.3.3
-
   es-check@9.5.3:
     dependencies:
       acorn: 8.15.0
@@ -4868,8 +4853,6 @@ snapshots:
       vary: 1.1.2
     transitivePeerDependencies:
       - supports-color
-
-  fast-brake@0.1.6: {}
 
   fast-deep-equal@3.1.3: {}
 
