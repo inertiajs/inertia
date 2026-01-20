@@ -1,9 +1,9 @@
 <script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 
-  $: resolverPage = window.resolverReceivedPage
-  $: componentName = resolverPage?.component ?? 'N/A'
-  $: pageUrl = resolverPage?.url ?? 'N/A'
+  const resolverPage = window.resolverReceivedPage
+  const componentName = resolverPage?.component ?? 'N/A'
+  const pageUrl = resolverPage?.url ?? 'N/A'
 </script>
 
 <div>

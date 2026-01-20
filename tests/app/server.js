@@ -2426,9 +2426,7 @@ app.get('/reload/concurrent', (req, res) => {
   )
 })
 
-app.get('/resolver-page', (req, res) =>
-  inertia.render(req, res, { component: 'ResolverPage/Index', props: {} }),
-)
+app.get('/resolver-page', (req, res) => inertia.render(req, res, { component: 'ResolverPage/Index', props: {} }))
 
 app.get('/resolver-page/second', (req, res) =>
   inertia.render(req, res, { component: 'ResolverPage/Second', props: {} }),
