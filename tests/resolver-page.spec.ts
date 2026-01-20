@@ -1,21 +1,17 @@
 import test, { expect } from '@playwright/test'
 
-test.describe('Resolver receives page parameter', () => {
-  test('it passes the page object to the resolver on initial load', async ({ page }) => {
-    await page.goto('/resolver-page')
+test('it passes page object to resolver', async ({ page }) => {
+  await page.goto('/')
 
-    await expect(page.locator('#resolver-component')).toContainText('Component: ResolverPage/Index')
-    await expect(page.locator('#resolver-url')).toContainText('URL: /resolver-page')
-  })
+  let resolverPage = await page.evaluate(() => window.resolverReceivedPage)
+  expect(resolverPage?.component).toBe('Home')
+  expect(resolverPage?.url).toBe('/')
 
-  test('it passes the page object to the resolver on navigation', async ({ page }) => {
-    await page.goto('/resolver-page')
+  // Navigate and verify resolver receives new page
+  await page.click('.links-method')
+  await page.waitForURL('/links/method')
 
-    await expect(page.locator('#resolver-component')).toContainText('Component: ResolverPage/Index')
-
-    await page.click('#go-to-second')
-
-    await expect(page.locator('#resolver-component')).toContainText('Component: ResolverPage/Second')
-    await expect(page.locator('#resolver-url')).toContainText('URL: /resolver-page/second')
-  })
+  resolverPage = await page.evaluate(() => window.resolverReceivedPage)
+  expect(resolverPage?.component).toBe('Links/Method')
+  expect(resolverPage?.url).toBe('/links/method')
 })
