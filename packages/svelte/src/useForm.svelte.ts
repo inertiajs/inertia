@@ -143,6 +143,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 export default function useForm<TForm extends FormDataType<TForm>>(
   data: ValidateFormData<TForm> | (() => ValidateFormData<TForm>),
 ): InertiaFormStore<TForm>
+export default function useForm<TForm extends FormDataType<TForm>>(): InertiaFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaFormStore<TForm> | InertiaPrecognitiveFormStore<TForm> {
