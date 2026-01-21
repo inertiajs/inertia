@@ -1,7 +1,7 @@
-import { inertiaHttpClient } from './inertiaHttpClient'
 import { HttpClient } from './types'
+import { xhrHttpClient } from './xhrHttpClient'
 
-let httpClient: HttpClient = inertiaHttpClient
+let httpClient: HttpClient = xhrHttpClient
 
 /**
  * Get the current HTTP client

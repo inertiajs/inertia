@@ -5,7 +5,7 @@ export { UseFormUtils } from './useFormUtils'
 
 export { axiosAdapter } from './axiosHttpClient'
 export { config } from './config'
-export { inertiaHttpClient } from './inertiaHttpClient'
+export { xhrHttpClient } from './xhrHttpClient'
 export { getHttpClient, setHttpClient } from './http'
 export { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 export { getInitialPageFromDOM, getScrollableParent } from './domUtils'
