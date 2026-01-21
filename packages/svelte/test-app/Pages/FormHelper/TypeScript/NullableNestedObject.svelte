@@ -12,5 +12,5 @@
     foo: null,
   })
 
-  console.log($form.errors['foo.bar'])
+  console.log(form.errors['foo.bar'])
 </script>

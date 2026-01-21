@@ -13,7 +13,7 @@ declare global {
       files: MulterFile[] | object
       query: Record<string, unknown>
       url: string
-      $page: Page
+      page: Page
     }
     _inertia_page_key: string | undefined
     _inertia_props: PageProps
@@ -23,6 +23,7 @@ declare global {
     _inertia_nested_layout_props: PageProps
     _inertia_page_props: PageProps
     _plugin_global_props: object
+    resolverReceivedPage: Page | null
   }
 
   interface ImportMeta {

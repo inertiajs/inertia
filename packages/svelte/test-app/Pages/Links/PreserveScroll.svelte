@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   export { default as layout } from '@/Layouts/WithScrollRegion.svelte'
 </script>
 
@@ -6,7 +6,11 @@
   import { inertia } from '@inertiajs/svelte'
   import type { Page } from '@inertiajs/core'
 
-  export let foo: string = 'default'
+  interface Props {
+    foo?: string
+  }
+
+  let { foo = 'default' }: Props = $props()
 
   const preserveCallback = (page: Page) => {
     console.log(JSON.stringify(page))

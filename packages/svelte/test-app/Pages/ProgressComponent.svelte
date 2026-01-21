@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   declare global {
     interface Window {
       progressTests: unknown[]
@@ -11,7 +11,7 @@
 
   window.progressTests = []
 
-  let logs: string[] = []
+  let logs: string[] = $state([])
 
   const log = (...args: unknown[]) => {
     const message = args.join(' ')
@@ -82,24 +82,24 @@
   <h1>Progress API Test</h1>
 
   <div>
-    <button on:click={testStart}>Start</button>
-    <button on:click={testSet25}>Set 25%</button>
-    <button on:click={testSet50}>Set 50%</button>
-    <button on:click={testSet75}>Set 75%</button>
-    <button on:click={testFinish}>Finish</button>
+    <button onclick={testStart}>Start</button>
+    <button onclick={testSet25}>Set 25%</button>
+    <button onclick={testSet50}>Set 50%</button>
+    <button onclick={testSet75}>Set 75%</button>
+    <button onclick={testFinish}>Finish</button>
   </div>
 
   <div>
-    <button on:click={testReset}>Reset</button>
-    <button on:click={testRemove}>Remove</button>
-    <button on:click={testHide}>Hide</button>
-    <button on:click={testReveal}>Reveal</button>
+    <button onclick={testReset}>Reset</button>
+    <button onclick={testRemove}>Remove</button>
+    <button onclick={testHide}>Hide</button>
+    <button onclick={testReveal}>Reveal</button>
   </div>
 
   <div>
-    <button on:click={testIsStarted}>Is Started</button>
-    <button on:click={testGetStatus}>Get Status</button>
-    <button on:click={clearLogs}>Clear</button>
+    <button onclick={testIsStarted}>Is Started</button>
+    <button onclick={testGetStatus}>Get Status</button>
+    <button onclick={clearLogs}>Clear</button>
   </div>
 
   <div>

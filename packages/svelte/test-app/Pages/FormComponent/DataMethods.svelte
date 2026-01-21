@@ -16,11 +16,13 @@
 <div>
   <h1>Test getData() and getFormData() Methods</h1>
 
-  <Form let:getData let:getFormData>
-    <input type="text" id="name" name="name" />
+  <Form>
+    {#snippet children({ getData, getFormData })}
+      <input type="text" id="name" name="name" />
 
-    <button type="button" on:click={() => testGetData(getData)}> Test getData() </button>
+      <button type="button" onclick={() => testGetData(getData)}> Test getData() </button>
 
-    <button type="button" on:click={() => testGetFormData(getFormData)}> Test getFormData() </button>
+      <button type="button" onclick={() => testGetFormData(getFormData)}> Test getFormData() </button>
+    {/snippet}
   </Form>
 </div>

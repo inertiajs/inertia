@@ -20,14 +20,13 @@ import React, {
   FormEvent,
   forwardRef,
   ReactNode,
-  useContext,
+  use,
   useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from 'react'
-import { isReact19 } from './react'
 import useForm from './useForm'
 
 // Polyfill for startTransition to support React 16.9+
@@ -285,10 +284,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
           event.preventDefault()
           submit((event.nativeEvent as SubmitEvent).submitter)
         },
-        // React 19 supports passing a boolean to the `inert` attribute, but shows
-        // a warning when receiving a string. Earlier versions require the string 'true'.
-        // See: https://github.com/inertiajs/inertia/pull/2536
-        inert: disableWhileProcessing && form.processing && (isReact19 ? true : 'true'),
+        inert: disableWhileProcessing && form.processing,
       },
       typeof children === 'function' ? children(exposed) : children,
     )
@@ -300,7 +296,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 Form.displayName = 'InertiaForm'
 
 export function useFormContext(): FormComponentRef | undefined {
-  return useContext(FormContext)
+  return use(FormContext)
 }
 
 export default Form
