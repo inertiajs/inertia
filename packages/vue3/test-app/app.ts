@@ -1,4 +1,4 @@
-import type { VisitOptions } from '@inertiajs/core'
+import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
@@ -29,6 +29,7 @@ createInertiaApp({
 
     inst.mount(el)
   },
+  ...(import.meta.env.VITE_HTTP_CLIENT === 'axios' && { http: axiosAdapter() }),
   ...(withAppDefaults && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {

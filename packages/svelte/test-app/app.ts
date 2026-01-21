@@ -1,4 +1,4 @@
-import type { VisitOptions } from '@inertiajs/core'
+import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
 
 window.testing = { Inertia: router }
@@ -22,6 +22,7 @@ createInertiaApp({
     const hydrate = el?.hasAttribute('data-server-rendered')
     new App({ target: el!, props, hydrate })
   },
+  ...(import.meta.env.VITE_HTTP_CLIENT === 'axios' && { http: axiosAdapter() }),
   ...(withAppDefaults && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {

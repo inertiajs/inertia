@@ -1,7 +1,6 @@
-import { AxiosRequestConfig } from 'axios'
 import { page as currentPage } from './page'
 import { Response } from './response'
-import { ActiveVisit, InternalActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
+import { ActiveVisit, HttpRequestHeaders, InternalActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
 
 export class RequestParams {
   protected callbacks: {
@@ -116,8 +115,8 @@ export class RequestParams {
     return this.params
   }
 
-  public headers(): AxiosRequestConfig['headers'] {
-    const headers: AxiosRequestConfig['headers'] = {
+  public headers(): HttpRequestHeaders {
+    const headers: HttpRequestHeaders = {
       ...this.params.headers,
     }
 

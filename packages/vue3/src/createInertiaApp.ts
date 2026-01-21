@@ -7,6 +7,7 @@ import {
   Page,
   PageProps,
   router,
+  setHttpClient,
   setupProgress,
 } from '@inertiajs/core'
 import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
@@ -57,8 +58,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   page,
   render,
   defaults = {},
+  http,
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   config.replace(defaults)
+
+  if (http) {
+    setHttpClient(http)
+  }
 
   const isServer = typeof window === 'undefined'
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')

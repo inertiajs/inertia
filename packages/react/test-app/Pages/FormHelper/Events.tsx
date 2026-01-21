@@ -1,6 +1,5 @@
-import type { Errors, Page, PendingVisit } from '@inertiajs/core'
+import type { CancelToken, Errors, HttpProgressEvent, Page, PendingVisit } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/react'
-import type { AxiosProgressEvent, CancelTokenSource } from 'axios'
 import { useEffect } from 'react'
 
 declare global {
@@ -136,7 +135,7 @@ export default () => {
 
     form.post('/dump/post', {
       ...callbacks({
-        onProgress: (event: AxiosProgressEvent) => {
+        onProgress: (event: HttpProgressEvent) => {
           pushEvent('onProgress')
           pushData('progressEvent', event)
         },
@@ -147,7 +146,7 @@ export default () => {
   const cancelledVisit = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           setTimeout(() => {
             pushEvent('CANCELLING!')

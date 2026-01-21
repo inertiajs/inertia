@@ -1,9 +1,11 @@
-import { type AxiosProgressEvent, type AxiosRequestConfig, default as axios } from 'axios'
 import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
+import { getHttpClient } from './http'
+import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
 import type { ActiveVisit, Page } from './types'
+import { HttpProgressEvent, HttpRequestHeaders } from './types'
 import { urlWithoutHash } from './url'
 
 export class Request {
@@ -44,17 +46,15 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
-    return axios({
+    const httpRequest = getHttpClient().request
+
+    return httpRequest({
       method: this.requestParams.all().method,
       url: urlWithoutHash(this.requestParams.all().url).href,
       data: this.requestParams.data(),
-      params: this.requestParams.queryParams(),
       signal: this.cancelToken.signal,
       headers: this.getHeaders(),
       onUploadProgress: this.onProgress.bind(this),
-      // Why text? This allows us to delay JSON.parse until we're ready to use the response,
-      // helps with performance particularly on large responses + history encryption
-      responseType: 'text',
     })
       .then((response) => {
         this.response = Response.create(this.requestParams, response, this.page)
@@ -62,7 +62,8 @@ export class Request {
         return this.response.handle()
       })
       .catch((error) => {
-        if (error?.response) {
+        // Handle HTTP error responses (4xx/5xx)
+        if (error instanceof HttpResponseError) {
           this.response = Response.create(this.requestParams, error.response, this.page)
 
           return this.response.handle()
@@ -71,7 +72,8 @@ export class Request {
         return Promise.reject(error)
       })
       .catch((error) => {
-        if (axios.isCancel(error)) {
+        // Handle cancelled requests
+        if (error instanceof HttpCancelledError) {
           return
         }
 
@@ -126,7 +128,7 @@ export class Request {
     this.fireFinishEvents()
   }
 
-  protected onProgress(progress: AxiosProgressEvent): void {
+  protected onProgress(progress: HttpProgressEvent): void {
     if (this.requestParams.data() instanceof FormData) {
       progress.percentage = progress.progress ? Math.round(progress.progress * 100) : 0
       fireProgressEvent(progress)
@@ -134,8 +136,8 @@ export class Request {
     }
   }
 
-  protected getHeaders(): AxiosRequestConfig['headers'] {
-    const headers: AxiosRequestConfig['headers'] = {
+  protected getHeaders(): HttpRequestHeaders {
+    const headers: HttpRequestHeaders = {
       ...this.requestParams.headers(),
       Accept: 'text/html, application/xhtml+xml',
       'X-Requested-With': 'XMLHttpRequest',

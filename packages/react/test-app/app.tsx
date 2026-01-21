@@ -1,4 +1,4 @@
-import type { VisitOptions } from '@inertiajs/core'
+import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { type ResolvedComponent, createInertiaApp, router } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 
@@ -27,6 +27,7 @@ createInertiaApp({
     delay: 0,
     color: 'red',
   },
+  ...(import.meta.env.VITE_HTTP_CLIENT === 'axios' && { http: axiosAdapter() }),
   ...(withAppDefaults && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {

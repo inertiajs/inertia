@@ -9,6 +9,7 @@
     type FormComponentRef,
     type Method,
     type FormDataConvertible,
+    type Progress,
     type VisitOptions,
     isUrlMethodPair,
     UseFormUtils,
@@ -252,6 +253,7 @@
   }
 
   $: slotErrors = $form.errors as Errors
+  $: slotProgress = $form.progress as Progress | null
 
   // Form context for child components
   const formContextStore = writable<FormComponentRef | undefined>(undefined)
@@ -260,7 +262,7 @@
     errors: $form.errors,
     hasErrors: $form.hasErrors,
     processing: $form.processing,
-    progress: $form.progress,
+    progress: slotProgress,
     wasSuccessful: $form.wasSuccessful,
     recentlySuccessful: $form.recentlySuccessful,
     isDirty,
@@ -298,7 +300,7 @@
     errors={slotErrors}
     hasErrors={$form.hasErrors}
     processing={$form.processing}
-    progress={$form.progress}
+    progress={slotProgress}
     wasSuccessful={$form.wasSuccessful}
     recentlySuccessful={$form.recentlySuccessful}
     {clearErrors}

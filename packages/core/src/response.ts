@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios'
 import { get, isEqual, set } from 'lodash-es'
 import { config, router } from '.'
 import dialog from './dialog'
@@ -11,6 +10,7 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
+import { HttpResponse } from './types'
 import modal from './modal'
 import { page as currentPage } from './page'
 import Queue from './queue'
@@ -26,11 +26,11 @@ export class Response {
 
   constructor(
     protected requestParams: RequestParams,
-    protected response: AxiosResponse,
+    protected response: HttpResponse,
     protected originatingPage: Page,
   ) {}
 
-  public static create(params: RequestParams, response: AxiosResponse, originatingPage: Page): Response {
+  public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
     return new Response(params, response, originatingPage)
   }
 
