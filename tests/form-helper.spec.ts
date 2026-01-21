@@ -1,5 +1,5 @@
 import test, { expect, Page } from '@playwright/test'
-import { clickAndWaitForResponse, pageLoads, shouldBeDumpPage } from './support'
+import { clickAndWaitForResponse, consoleMessages, pageLoads, shouldBeDumpPage } from './support'
 
 test.describe('Form Helper', () => {
   test.describe('Methods', () => {
@@ -1100,4 +1100,30 @@ test.describe('Vue Options API', () => {
     await expect(dump.form.password).toEqual('secret123')
     await expect(dump.form.remember).toEqual(true)
   })
+})
+
+test.describe('Reserved Keys', () => {
+  test.skip(process.env.PACKAGE === 'react', 'React uses separate data property, no conflicts possible')
+
+  test('it logs a console error when using reserved form keys', async ({ page }) => {
+    consoleMessages.listen(page)
+    await page.goto('/form-helper/reserved-keys')
+
+    // Form still works, but console.error was called
+    await expect(page.locator('#form-created')).toContainText('Form created')
+    expect(consoleMessages.messages.some((m) => m.includes('[Inertia] useForm()'))).toBe(true)
+    expect(consoleMessages.messages.some((m) => m.includes('"progress"'))).toBe(true)
+  })
+})
+
+test('it can create a form without initial data and use transform', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/form-helper/empty-form')
+
+  await page.getByRole('button', { name: 'Submit' }).click()
+
+  const dump = await shouldBeDumpPage(page, 'post')
+
+  await expect(dump.form.name).toEqual('John Doe')
+  await expect(dump.form.email).toEqual('john@example.com')
 })

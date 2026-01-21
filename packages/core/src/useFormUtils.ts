@@ -38,6 +38,7 @@ export class UseFormUtils {
   /**
    * Parses all useForm() arguments into { rememberKey, data, precognitionEndpoint }.
    *
+   * useForm()
    * useForm(data)
    * useForm(rememberKey, data)
    * useForm(method, url, data)
@@ -51,6 +52,15 @@ export class UseFormUtils {
     data: TForm | (() => TForm)
     precognitionEndpoint: (() => UrlMethodPair) | null
   } {
+    if (args.length === 0) {
+      // Empty form: useForm()
+      return {
+        rememberKey: null,
+        data: {} as TForm,
+        precognitionEndpoint: null,
+      }
+    }
+
     if (args.length === 1) {
       // Basic form: useForm(data)
       return {
