@@ -1,6 +1,12 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { HttpClient, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
 
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'))
+
+  return match ? decodeURIComponent(match[3]) : null
+}
+
 function parseHeaders(xhr: XMLHttpRequest): HttpResponseHeaders {
   const headers: HttpResponseHeaders = {}
 
@@ -38,6 +44,12 @@ export class XhrHttpClient implements HttpClient {
       const xhr = new XMLHttpRequest()
 
       xhr.open(config.method.toUpperCase(), config.url, true)
+
+      const xsrfToken = getCookie('XSRF-TOKEN')
+
+      if (xsrfToken) {
+        xhr.setRequestHeader('X-XSRF-TOKEN', xsrfToken)
+      }
 
       let body: Document | XMLHttpRequestBodyInit | null = null
 
