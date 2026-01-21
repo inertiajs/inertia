@@ -10,13 +10,12 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
-import { HttpResponse } from './types'
 import modal from './modal'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()

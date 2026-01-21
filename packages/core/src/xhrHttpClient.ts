@@ -10,13 +10,16 @@ function getCookie(name: string): string | null {
 function parseHeaders(xhr: XMLHttpRequest): HttpResponseHeaders {
   const headers: HttpResponseHeaders = {}
 
-  xhr.getAllResponseHeaders().split('\r\n').forEach((line) => {
-    const index = line.indexOf(':')
+  xhr
+    .getAllResponseHeaders()
+    .split('\r\n')
+    .forEach((line) => {
+      const index = line.indexOf(':')
 
-    if (index > 0) {
-      headers[line.slice(0, index).toLowerCase().trim()] = line.slice(index + 1).trim()
-    }
-  })
+      if (index > 0) {
+        headers[line.slice(0, index).toLowerCase().trim()] = line.slice(index + 1).trim()
+      }
+    })
 
   return headers
 }

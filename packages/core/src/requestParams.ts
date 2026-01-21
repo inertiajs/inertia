@@ -1,6 +1,13 @@
 import { page as currentPage } from './page'
 import { Response } from './response'
-import { ActiveVisit, HttpRequestHeaders, InternalActiveVisit, Page, PreserveStateOption, VisitCallbacks } from './types'
+import {
+  ActiveVisit,
+  HttpRequestHeaders,
+  InternalActiveVisit,
+  Page,
+  PreserveStateOption,
+  VisitCallbacks,
+} from './types'
 
 export class RequestParams {
   protected callbacks: {
