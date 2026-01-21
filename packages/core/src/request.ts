@@ -46,16 +46,15 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
-    const httpRequest = getHttpClient().request
-
-    return httpRequest({
-      method: this.requestParams.all().method,
-      url: urlWithoutHash(this.requestParams.all().url).href,
-      data: this.requestParams.data(),
-      signal: this.cancelToken.signal,
-      headers: this.getHeaders(),
-      onUploadProgress: this.onProgress.bind(this),
-    })
+    return getHttpClient()
+      .request({
+        method: this.requestParams.all().method,
+        url: urlWithoutHash(this.requestParams.all().url).href,
+        data: this.requestParams.data(),
+        signal: this.cancelToken.signal,
+        headers: this.getHeaders(),
+        onUploadProgress: this.onProgress.bind(this),
+      })
       .then((response) => {
         this.response = Response.create(this.requestParams, response, this.page)
 
