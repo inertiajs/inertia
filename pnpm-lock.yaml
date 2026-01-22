@@ -405,48 +405,6 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)
 
-  playgrounds/svelte4:
-    devDependencies:
-      '@inertiajs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@inertiajs/svelte':
-        specifier: workspace:*
-        version: link:../../packages/svelte
-      '@sveltejs/vite-plugin-svelte':
-        specifier: ^3.1.2
-        version: 3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0))
-      '@tailwindcss/vite':
-        specifier: ^4.1.18
-        version: 4.1.18(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0))
-      '@tsconfig/svelte':
-        specifier: ^5.0.6
-        version: 5.0.6
-      axios:
-        specifier: ^1.13.2
-        version: 1.13.2
-      laravel-vite-plugin:
-        specifier: ^1.3.0
-        version: 1.3.0(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0))
-      lodash:
-        specifier: ^4.17.23
-        version: 4.17.23
-      svelte:
-        specifier: ^4.2.20
-        version: 4.2.20
-      svelte-check:
-        specifier: ^4.3.5
-        version: 4.3.5(picomatch@4.0.3)(svelte@4.2.20)(typescript@5.9.3)
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.1.18
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^5.4.21
-        version: 5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0)
-
   playgrounds/svelte5:
     devDependencies:
       '@inertiajs/core':
@@ -2244,13 +2202,6 @@ packages:
   laravel-precognition@1.0.0:
     resolution: {integrity: sha512-hvXPT7dayCQAidxnsY0hab9Q+Y2rsh7xRpH9uiFtXN8Dekc3tIZt+NrxrOZ9N5SwHBmRBze/Bv+ElfXac0kD6g==}
 
-  laravel-vite-plugin@1.3.0:
-    resolution: {integrity: sha512-P5qyG56YbYxM8OuYmK2OkhcKe0AksNVJUjq9LUZ5tOekU9fBn9LujYyctI4t9XoLjuMvHJXXpCoPntY1oKltuA==}
-    engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
-    hasBin: true
-    peerDependencies:
-      vite: ^5.0.0 || ^6.0.0
-
   laravel-vite-plugin@2.0.1:
     resolution: {integrity: sha512-zQuvzWfUKQu9oNVi1o0RZAJCwhGsdhx4NEOyrVQwJHaWDseGP9tl7XUPLY2T8Cj6+IrZ6lmyxlR1KC8unf3RLA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -3758,13 +3709,6 @@ snapshots:
       postcss-selector-parser: 6.0.10
       tailwindcss: 4.1.18
 
-  '@tailwindcss/vite@4.1.18(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0))':
-    dependencies:
-      '@tailwindcss/node': 4.1.18
-      '@tailwindcss/oxide': 4.1.18
-      tailwindcss: 4.1.18
-      vite: 5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0)
-
   '@tailwindcss/vite@4.1.18(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0))':
     dependencies:
       '@tailwindcss/node': 4.1.18
@@ -5101,12 +5045,6 @@ snapshots:
       lodash-es: 4.17.23
     transitivePeerDependencies:
       - debug
-
-  laravel-vite-plugin@1.3.0(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0)):
-    dependencies:
-      picocolors: 1.1.1
-      vite: 5.4.21(@types/node@25.0.9)(lightningcss@1.30.2)(terser@5.46.0)
-      vite-plugin-full-reload: 1.2.0
 
   laravel-vite-plugin@2.0.1(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)):
     dependencies:
