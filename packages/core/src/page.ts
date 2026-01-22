@@ -74,7 +74,7 @@ class CurrentPage {
       history.clear()
     }
 
-    return this.resolve(page.component).then((component) => {
+    return this.resolve(page.component, page).then((component) => {
       if (componentId !== this.componentId) {
         // Component has changed since we started resolving this component, bail
         return
@@ -165,7 +165,7 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
-    return this.resolve(page.component).then((component) => {
+    return this.resolve(page.component, page).then((component) => {
       this.page = page
       this.cleared = false
       history.setCurrent(page)
@@ -238,8 +238,8 @@ class CurrentPage {
     })
   }
 
-  public resolve(component: string): Promise<Component> {
-    return Promise.resolve(this.resolveComponent(component))
+  public resolve(component: string, page?: Page): Promise<Component> {
+    return Promise.resolve(this.resolveComponent(component, page))
   }
 
   public isTheSame(page: Page): boolean {

@@ -7,8 +7,13 @@
     email: string
   }
 
-  export let user: User
+  interface Props {
+    user: User
+  }
 
+  let { user }: Props = $props()
+
+  // svelte-ignore state_referenced_locally
   const form = useForm('EditUserForm', {
     name: user.name,
     email: user.email,
@@ -20,11 +25,11 @@
   <form>
     <div>
       <label for="name">Name:</label>
-      <input id="name" type="text" bind:value={$form.name} />
+      <input id="name" type="text" bind:value={form.name} />
     </div>
     <div>
       <label for="email">Email:</label>
-      <input id="email" type="email" bind:value={$form.email} />
+      <input id="email" type="email" bind:value={form.email} />
     </div>
   </form>
 </div>

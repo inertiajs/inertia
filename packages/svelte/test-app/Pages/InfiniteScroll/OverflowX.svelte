@@ -2,7 +2,11 @@
   import { InfiniteScroll } from '@inertiajs/svelte'
   import type { User } from './UserCard.svelte'
 
-  export let users: { data: User[] }
+  interface Props {
+    users: { data: User[] }
+  }
+
+  let { users }: Props = $props()
 </script>
 
 <div style="overflow-x: hidden">

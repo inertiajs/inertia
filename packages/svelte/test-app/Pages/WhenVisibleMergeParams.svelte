@@ -1,16 +1,20 @@
 <script lang="ts">
   import { WhenVisible } from '@inertiajs/svelte'
 
-  export let dataOnlyProp: { text: string } | undefined = undefined
-  export let mergedProp: { text: string } | undefined = undefined
-  export let mergedWithCallbackProp: { text: string } | undefined = undefined
+  interface Props {
+    dataOnlyProp?: { text: string } | undefined
+    mergedProp?: { text: string } | undefined
+    mergedWithCallbackProp?: { text: string } | undefined
+  }
+
+  let { dataOnlyProp = undefined, mergedProp = undefined, mergedWithCallbackProp = undefined }: Props = $props()
 </script>
 
 <div id="data-only" style="margin-top: 3000px">
   <WhenVisible data="dataOnlyProp">
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading data only...</div>
-    </svelte:fragment>
+    {/snippet}
     <div>Data only loaded: {dataOnlyProp?.text}</div>
   </WhenVisible>
 </div>
@@ -22,9 +26,9 @@
       data: { extra: 'from-params' },
     }}
   >
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading merged...</div>
-    </svelte:fragment>
+    {/snippet}
     <div>Merged loaded: {mergedProp?.text}</div>
   </WhenVisible>
 </div>
@@ -37,9 +41,9 @@
       preserveUrl: true,
     }}
   >
-    <svelte:fragment slot="fallback">
+    {#snippet fallback()}
       <div>Loading merged with callback...</div>
-    </svelte:fragment>
+    {/snippet}
     <div>Merged with callback loaded: {mergedWithCallbackProp?.text}</div>
   </WhenVisible>
 </div>

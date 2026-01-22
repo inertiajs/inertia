@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   declare global {
     interface Window {
       messages: unknown[]
@@ -15,7 +15,9 @@
     window.messages.push(...args)
   }
 
-  const visitWithFlash = () => {
+  const visitWithFlash = (e: Event) => {
+    e.preventDefault()
+
     router.on('flash', (event) => {
       internalAlert('Inertia.on(flash)')
       internalAlert(event.detail.flash)
@@ -42,7 +44,9 @@
     )
   }
 
-  const visitWithoutFlash = () => {
+  const visitWithoutFlash = (e: Event) => {
+    e.preventDefault()
+
     router.on('flash', () => {
       internalAlert('Inertia.on(flash)')
     })
@@ -65,15 +69,17 @@
     )
   }
 
-  const navigateAway = () => {
+  const navigateAway = (e: Event) => {
+    e.preventDefault()
+
     router.get('/')
   }
 </script>
 
 <div>
-  <span id="flash">{JSON.stringify($page.flash)}</span>
+  <span id="flash">{JSON.stringify(page.flash)}</span>
 
-  <a href={'#'} on:click|preventDefault={visitWithFlash} class="with-flash">Visit with flash</a>
-  <a href={'#'} on:click|preventDefault={visitWithoutFlash} class="without-flash">Visit without flash</a>
-  <a href={'#'} on:click|preventDefault={navigateAway} class="navigate-away">Navigate away</a>
+  <a href={'#'} onclick={visitWithFlash} class="with-flash">Visit with flash</a>
+  <a href={'#'} onclick={visitWithoutFlash} class="without-flash">Visit without flash</a>
+  <a href={'#'} onclick={navigateAway} class="navigate-away">Navigate away</a>
 </div>

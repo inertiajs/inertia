@@ -4,7 +4,7 @@
   const form = useFormContext()
 </script>
 
-{#if $form === undefined}
+{#if form === undefined}
   <div>Correctly returns undefined when used outside a Form component</div>
 {:else}
   <div>Unexpectedly has form context</div>

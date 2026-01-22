@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import NestedLayout from '@/Layouts/NestedLayout.svelte'
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
 
@@ -8,7 +8,7 @@
 <script lang="ts">
   import { inertia, page } from '@inertiajs/svelte'
 
-  window._inertia_page_props = $page.props
+  window._inertia_page_props = page.props
 </script>
 
 <div>

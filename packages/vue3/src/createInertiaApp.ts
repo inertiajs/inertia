@@ -15,7 +15,10 @@ import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
 
-type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
+type ComponentResolver = (
+  name: string,
+  page?: Page,
+) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
@@ -64,12 +67,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name)).then((module) => module.default || module)
+  const resolveComponent = (name: string, page?: Page) =>
+    Promise.resolve(resolve(name, page)).then((module) => module.default || module)
 
   let head: string[] = []
 
   const vueApp = await Promise.all([
-    resolveComponent(initialPage.component),
+    resolveComponent(initialPage.component, initialPage),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
     const props = {
