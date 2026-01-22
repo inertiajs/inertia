@@ -75,7 +75,7 @@ export default () => {
   const performValidation = async () => {
     try {
       await validateUser.post('/api/validate')
-    } catch (e) {
+    } catch {
       // Errors are stored in validateUser.errors
     }
   }
@@ -93,8 +93,8 @@ export default () => {
     setCancelledMessage('')
     try {
       await slowRequest.get('/api/slow')
-    } catch (e: any) {
-      if (e.name === 'HttpCancelledError' || e.message?.includes('abort')) {
+    } catch (e: unknown) {
+      if (e instanceof Error && (e.name === 'HttpCancelledError' || e.message?.includes('abort'))) {
         setCancelledMessage('Request was cancelled')
       }
     }
@@ -108,9 +108,12 @@ export default () => {
     setErrorMessage('')
     try {
       await errorHttp.post('/api/error')
-    } catch (e: any) {
-      if (e.response?.status === 500) {
-        setErrorMessage('Server returned 500 error')
+    } catch (e: unknown) {
+      if (e && typeof e === 'object' && 'response' in e) {
+        const error = e as { response?: { status?: number } }
+        if (error.response?.status === 500) {
+          setErrorMessage('Server returned 500 error')
+        }
       }
     }
   }

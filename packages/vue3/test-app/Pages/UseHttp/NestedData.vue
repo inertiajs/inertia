@@ -4,7 +4,7 @@ import { ref } from 'vue'
 
 interface NestedResponse {
   success: boolean
-  received: Record<string, any>
+  received: Record<string, unknown>
 }
 
 const nestedData = useHttp<

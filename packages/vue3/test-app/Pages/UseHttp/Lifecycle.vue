@@ -5,7 +5,7 @@ import { ref } from 'vue'
 interface LifecycleResponse {
   success: boolean
   message: string
-  received: Record<string, any>
+  received: Record<string, unknown>
 }
 
 const lifecycleTest = useHttp<{ value: string }, LifecycleResponse>({
@@ -44,8 +44,8 @@ const performLifecycleTest = async () => {
         lifecycleEvents.value.push('onFinish')
       },
     })
-  } catch (e) {
-    console.error('Lifecycle test failed:', e)
+  } catch {
+    // Error handling
   }
 }
 
@@ -69,7 +69,7 @@ const performLifecycleErrorTest = async () => {
         lifecycleErrorEvents.value.push('onFinish')
       },
     })
-  } catch (e) {
+  } catch {
     // Expected error
   }
 }
@@ -83,7 +83,7 @@ const performOnBeforeCancelTest = async () => {
         return false
       },
     })
-  } catch (e) {
+  } catch {
     // Should not reach here
   }
 }

@@ -4,7 +4,7 @@
   interface LifecycleResponse {
     success: boolean
     message: string
-    received: Record<string, any>
+    received: Record<string, unknown>
   }
 
   const lifecycleTest = useHttp<{ value: string }, LifecycleResponse>({
@@ -43,8 +43,8 @@
           lifecycleEvents = [...lifecycleEvents, 'onFinish']
         },
       })
-    } catch (e) {
-      console.error('Lifecycle test failed:', e)
+    } catch {
+      // Error handling
     }
   }
 
@@ -68,7 +68,7 @@
           lifecycleErrorEvents = [...lifecycleErrorEvents, 'onFinish']
         },
       })
-    } catch (e) {
+    } catch {
       // Expected error
     }
   }
@@ -82,7 +82,7 @@
           return false
         },
       })
-    } catch (e) {
+    } catch {
       // Should not reach here
     }
   }

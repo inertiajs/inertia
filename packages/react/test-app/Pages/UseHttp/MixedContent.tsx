@@ -10,7 +10,7 @@ interface MixedContentResponse {
     size: number
   }>
   fileCount: number
-  formData: Record<string, any>
+  formData: Record<string, unknown>
 }
 
 export default () => {

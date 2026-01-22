@@ -4,7 +4,7 @@ import { useState } from 'react'
 interface LifecycleResponse {
   success: boolean
   message: string
-  received: Record<string, any>
+  received: Record<string, unknown>
 }
 
 export default () => {
@@ -50,8 +50,8 @@ export default () => {
           setLifecycleEvents([...events])
         },
       })
-    } catch (e) {
-      console.error('Lifecycle test failed:', e)
+    } catch {
+      // Error handling
     }
   }
 
@@ -81,7 +81,7 @@ export default () => {
           setLifecycleErrorEvents([...events])
         },
       })
-    } catch (e) {
+    } catch {
       // Expected error
     }
   }
@@ -95,7 +95,7 @@ export default () => {
           return false
         },
       })
-    } catch (e) {
+    } catch {
       // Should not reach here
     }
   }
