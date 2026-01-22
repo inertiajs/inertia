@@ -175,11 +175,11 @@
   }
 
   const onCancelProcessing = () => {
-    $form.post('/sleep', {
+    form.post('/sleep', {
       ...callbacks({
         onCancelToken: (token: CancelTokenSource) => {
           pushEvent('onCancelToken')
-          pushData('onCancelToken', 'processing', $form.processing)
+          pushData('onCancelToken', 'processing', form.processing)
 
           setTimeout(() => {
             token.cancel()
@@ -187,22 +187,22 @@
         },
         onStart: () => {
           pushEvent('onStart')
-          pushData('onStart', 'processing', $form.processing)
+          pushData('onStart', 'processing', form.processing)
         },
         onCancel: () => {
           pushEvent('onCancel')
-          pushData('onCancel', 'processing', $form.processing)
+          pushData('onCancel', 'processing', form.processing)
         },
         onFinish: () => {
           pushEvent('onFinish')
-          pushData('onFinish', 'processing', $form.processing)
+          pushData('onFinish', 'processing', form.processing)
         },
       }),
     })
   }
 
   const onCancelProgress = () => {
-    $form
+    form
       .transform((data) => ({
         ...data,
         file: new File(['foobar'], 'example.bin'),
@@ -211,7 +211,7 @@
         ...callbacks({
           onCancelToken: (token: CancelTokenSource) => {
             pushEvent('onCancelToken')
-            pushData('onCancelToken', 'progress', $form.progress)
+            pushData('onCancelToken', 'progress', form.progress)
 
             setTimeout(() => {
               token.cancel()
@@ -219,19 +219,19 @@
           },
           onStart: () => {
             pushEvent('onStart')
-            pushData('onStart', 'progress', $form.progress)
+            pushData('onStart', 'progress', form.progress)
           },
           onProgress: () => {
             pushEvent('onProgress')
-            pushData('onProgress', 'progress', $form.progress)
+            pushData('onProgress', 'progress', form.progress)
           },
           onCancel: () => {
             pushEvent('onCancel')
-            pushData('onCancel', 'progress', $form.progress)
+            pushData('onCancel', 'progress', form.progress)
           },
           onFinish: () => {
             pushEvent('onFinish')
-            pushData('onFinish', 'progress', $form.progress)
+            pushData('onFinish', 'progress', form.progress)
           },
         }),
       })

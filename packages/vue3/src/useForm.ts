@@ -417,7 +417,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return onSuccess
         },
         onError: (errors) => {
-          this.clearErrors().setError(errors)
+          this.clearErrors().setError(errors as FormDataErrors<TForm>)
 
           if (options.onError) {
             return options.onError(errors)
