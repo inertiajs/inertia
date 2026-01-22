@@ -160,7 +160,7 @@ export default () => {
   const onCancelProcessing = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           setTimeout(() => {
             token.cancel()
@@ -180,7 +180,7 @@ export default () => {
     }))
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           setTimeout(() => {
             token.cancel()

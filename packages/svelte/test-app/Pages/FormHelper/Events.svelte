@@ -176,7 +176,7 @@
   const onCancelProcessing = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           pushData('onCancelToken', 'processing', form.processing)
 
@@ -208,7 +208,7 @@
       }))
       .post('/sleep', {
         ...callbacks({
-          onCancelToken: (token: CancelTokenSource) => {
+          onCancelToken: (token: CancelToken) => {
             pushEvent('onCancelToken')
             pushData('onCancelToken', 'progress', form.progress)
 
