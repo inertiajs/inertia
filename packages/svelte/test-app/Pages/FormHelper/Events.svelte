@@ -173,6 +173,69 @@
     })
   }
 
+  const onCancelProcessing = () => {
+    form.post('/sleep', {
+      ...callbacks({
+        onCancelToken: (token: CancelTokenSource) => {
+          pushEvent('onCancelToken')
+          pushData('onCancelToken', 'processing', form.processing)
+
+          setTimeout(() => {
+            token.cancel()
+          }, 10)
+        },
+        onStart: () => {
+          pushEvent('onStart')
+          pushData('onStart', 'processing', form.processing)
+        },
+        onCancel: () => {
+          pushEvent('onCancel')
+          pushData('onCancel', 'processing', form.processing)
+        },
+        onFinish: () => {
+          pushEvent('onFinish')
+          pushData('onFinish', 'processing', form.processing)
+        },
+      }),
+    })
+  }
+
+  const onCancelProgress = () => {
+    form
+      .transform((data) => ({
+        ...data,
+        file: new File(['foobar'], 'example.bin'),
+      }))
+      .post('/sleep', {
+        ...callbacks({
+          onCancelToken: (token: CancelTokenSource) => {
+            pushEvent('onCancelToken')
+            pushData('onCancelToken', 'progress', form.progress)
+
+            setTimeout(() => {
+              token.cancel()
+            }, 10)
+          },
+          onStart: () => {
+            pushEvent('onStart')
+            pushData('onStart', 'progress', form.progress)
+          },
+          onProgress: () => {
+            pushEvent('onProgress')
+            pushData('onProgress', 'progress', form.progress)
+          },
+          onCancel: () => {
+            pushEvent('onCancel')
+            pushData('onCancel', 'progress', form.progress)
+          },
+          onFinish: () => {
+            pushEvent('onFinish')
+            pushData('onFinish', 'progress', form.progress)
+          },
+        }),
+      })
+  }
+
   const onSuccessVisit = () => {
     form.post('/dump/post', {
       ...callbacks({
@@ -412,6 +475,9 @@
   <button onclick={preventDefault(onErrorProcessing)} class="error-processing">onError resets processing</button>
   <button onclick={preventDefault(errorsSetOnError)} class="errors-set-on-error">Errors set on error</button>
   <button onclick={preventDefault(onErrorPromiseVisit)} class="error-promise">onError promise</button>
+
+  <button onclick={preventDefault(onCancelProcessing)} class="cancel-processing">onCancel resets processing</button>
+  <button onclick={preventDefault(onCancelProgress)} class="cancel-progress">onCancel progress property</button>
 
   <button onclick={preventDefault(progressNoFiles)} class="no-progress">progress no files</button>
 
