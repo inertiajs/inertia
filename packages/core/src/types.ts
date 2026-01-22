@@ -1,4 +1,5 @@
 import { AxiosProgressEvent, AxiosResponse } from 'axios'
+import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { Response } from './response'
 
 declare module 'axios' {
@@ -7,8 +8,13 @@ declare module 'axios' {
   }
 }
 
+export interface PageFlashData {
+  [key: string]: unknown
+}
+
 export type DefaultInertiaConfig = {
   errorValueType: string
+  flashDataType: PageFlashData
   sharedPageProps: PageProps
 }
 /**
@@ -21,9 +27,11 @@ export type DefaultInertiaConfig = {
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
+ *     flashDataType: {
+ *       toast?: { type: 'success' | 'error', message: string }
+ *     }
  *     sharedPageProps: {
  *       auth: { user: User | null }
- *       flash: { success?: string; error?: string }
  *     }
  *   }
  * }
@@ -34,6 +42,7 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
   ? InertiaConfig[Key]
   : DefaultInertiaConfig[Key]
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
+export type FlashData = InertiaConfigFor<'flashDataType'>
 export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
 
 export type Errors = Record<string, ErrorValue>
@@ -64,7 +73,7 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
   ? never
   : T extends unknown[]
     ? ArrayFormDataKeys<T>
-    : T extends Record<string, unknown>
+    : T extends object
       ? ObjectFormDataKeys<T>
       : never
 
@@ -73,14 +82,14 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
  */
 type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
   ? // Dynamic array
-    | `${number}`
+      | `${number}`
       | (0 extends 1 & T[number]
           ? never
           : T[number] extends FormDataConvertibleValue
             ? never
             : `${number}.${FormDataKeys<T[number]>}`)
   : // Tuple with known length
-    | Extract<keyof T, `${number}`>
+      | Extract<keyof T, `${number}`>
       | {
           [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
             ? never
@@ -92,7 +101,7 @@ type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
 /**
  * Helper type for object form data keys
  */
-type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyof T
+type ObjectFormDataKeys<T extends object> = string extends keyof T
   ? string
   :
       | Extract<keyof T, string>
@@ -105,7 +114,11 @@ type ObjectFormDataKeys<T extends Record<string, unknown>> = string extends keyo
                 ? `${Key}.${FormDataKeys<T[Key]> & string}`
                 : T[Key] extends Record<string, any>
                   ? `${Key}.${FormDataKeys<T[Key]> & string}`
-                  : never
+                  : Exclude<T[Key], null | undefined> extends any[]
+                    ? never
+                    : Exclude<T[Key], null | undefined> extends Record<string, any>
+                      ? `${Key}.${FormDataKeys<Exclude<T[Key], null | undefined>> & string}`
+                      : never
         }[Extract<keyof T, string>]
 
 type PartialFormDataErrors<T> = {
@@ -163,12 +176,21 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   version: string | null
   clearHistory: boolean
   encryptHistory: boolean
-  deferredProps?: Record<string, VisitOptions['only']>
+  deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
+  initialDeferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   mergeProps?: string[]
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  flash: FlashData
+  onceProps?: Record<
+    string,
+    {
+      prop: keyof PageProps
+      expiresAt?: number | null
+    }
+  >
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -182,7 +204,8 @@ export type ScrollRegion = {
 export interface ClientSideVisitOptions<TProps = Page['props']> {
   component?: Page['component']
   url?: Page['url']
-  props?: ((props: TProps) => PageProps) | PageProps
+  props?: ((props: TProps, onceProps: Partial<TProps>) => PageProps) | PageProps
+  flash?: ((flash: FlashData) => PageFlashData) | PageFlashData
   clearHistory?: Page['clearHistory']
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
@@ -191,6 +214,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
+  onFlash?: (flash: FlashData) => void
   onSuccess?: (page: Page) => void
 }
 
@@ -336,6 +360,13 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
+  flash: {
+    parameters: [Page['flash']]
+    details: {
+      flash: Page['flash']
+    }
+    result: void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -370,7 +401,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
   ...params: GlobalEventParameters<TEventName, T>
 ) => GlobalEventResult<TEventName, T>
 
-export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps'
+export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: CancelTokenCallback
@@ -382,6 +413,7 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancel: GlobalEventCallback<'cancel', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
+  onFlash: GlobalEventCallback<'flash', T>
   onPrefetched: GlobalEventCallback<'prefetched', T>
   onPrefetching: GlobalEventCallback<'prefetching', T>
 }
@@ -404,6 +436,7 @@ export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
   swapComponent: PageHandler<ComponentType>
+  onFlash?: (flash: Page['flash']) => void
 }
 
 export type PendingVisitOptions = {
@@ -420,6 +453,7 @@ export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisi
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
+  deferredProps?: boolean
 }
 
 export type VisitId = unknown
@@ -507,6 +541,7 @@ export type InertiaAppConfig = {
     preserveEqualProps: boolean
     useDataInertiaHeadAttribute: boolean
     useDialogForErrorModal: boolean
+    useScriptElementForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
@@ -515,30 +550,29 @@ export type InertiaAppConfig = {
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
-export interface LinkComponentBaseProps
-  extends Partial<
-    Pick<
-      Visit<RequestPayload>,
-      | 'data'
-      | 'method'
-      | 'replace'
-      | 'preserveScroll'
-      | 'preserveState'
-      | 'preserveUrl'
-      | 'only'
-      | 'except'
-      | 'headers'
-      | 'queryStringArrayFormat'
-      | 'async'
-      | 'viewTransition'
-    > &
-      VisitCallbacks & {
-        href: string | UrlMethodPair
-        prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
-        cacheFor: CacheForOption | CacheForOption[]
-        cacheTags: string | string[]
-      }
-  > {}
+export interface LinkComponentBaseProps extends Partial<
+  Pick<
+    Visit<RequestPayload>,
+    | 'data'
+    | 'method'
+    | 'replace'
+    | 'preserveScroll'
+    | 'preserveState'
+    | 'preserveUrl'
+    | 'only'
+    | 'except'
+    | 'headers'
+    | 'queryStringArrayFormat'
+    | 'async'
+    | 'viewTransition'
+  > &
+    VisitCallbacks & {
+      href: string | UrlMethodPair
+      prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
+      cacheFor: CacheForOption | CacheForOption[]
+      cacheTags: string | string[]
+    }
+> {}
 
 type PrefetchObject = {
   params: ActiveVisit
@@ -558,6 +592,7 @@ export type PrefetchCancellationToken = {
 export type PrefetchedResponse = PrefetchObject & {
   staleTimestamp: number
   timestamp: number
+  expiresAt: number
   singleUse: boolean
   inFlight: false
   tags: string[]
@@ -586,9 +621,29 @@ export type ProgressSettings = {
 
 export type UrlMethodPair = { url: string; method: Method }
 
+export type UseFormTransformCallback<TForm> = (data: TForm) => object
+export type UseFormWithPrecognitionArguments =
+  | [Method | (() => Method), string | (() => string)]
+  | [UrlMethodPair | (() => UrlMethodPair)]
+
+type UseFormInertiaArguments<TForm> =
+  | []
+  | [data: TForm | (() => TForm)]
+  | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormPrecognitionArguments<TForm> =
+  | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
+  | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
+export type UseFormArguments<TForm> = UseFormInertiaArguments<TForm> | UseFormPrecognitionArguments<TForm>
+
+export type UseFormSubmitOptions = Omit<VisitOptions, 'data'>
+export type UseFormSubmitArguments =
+  | [Method, string, UseFormSubmitOptions?]
+  | [UrlMethodPair, UseFormSubmitOptions?]
+  | [UseFormSubmitOptions?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset'
+  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
 export type FormComponentProps = Partial<
@@ -604,30 +659,42 @@ export type FormComponentProps = Partial<
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
   setDefaultsOnSuccess?: boolean
+  validateFiles?: boolean
+  validationTimeout?: number
+  withAllErrors?: boolean
 }
 
 export type FormComponentMethods = {
   clearErrors: (...fields: string[]) => void
   resetAndClearErrors: (...fields: string[]) => void
-  setError(field: string, value: string): void
-  setError(errors: Record<string, string>): void
+  setError: {
+    (field: string, value: ErrorValue): void
+    (errors: Record<string, ErrorValue>): void
+  }
   reset: (...fields: string[]) => void
   submit: () => void
   defaults: () => void
   getData: () => Record<string, FormDataConvertible>
   getFormData: () => FormData
+  valid: (field: string) => boolean
+  invalid: (field: string) => boolean
+  validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => void
+  touch: (...fields: string[]) => void
+  touched: (field?: string) => boolean
+  validator: () => Validator
 }
 
 export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
 
 export type FormComponentState = {
-  errors: Record<string, string>
+  errors: Record<string, ErrorValue>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
   wasSuccessful: boolean
   recentlySuccessful: boolean
   isDirty: boolean
+  validating: boolean
 }
 
 export type FormComponentSlotProps = FormComponentMethods & FormComponentState
@@ -654,6 +721,7 @@ export interface UseInfiniteScrollOptions {
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: () => void
   onCompleteNextRequest: () => void
+  onDataReset?: () => void
 }
 
 export interface UseInfiniteScrollDataManager {
@@ -733,5 +801,6 @@ declare global {
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:flash': GlobalEvent<'flash'>
   }
 }

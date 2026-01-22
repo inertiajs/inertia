@@ -4,9 +4,10 @@ import { defineConfig, devices } from '@playwright/test'
 declare const process: {
   argv: string[]
   env: {
-    BROWSER?: 'chromium' | 'webkit'
+    BROWSER?: 'chromium' | 'webkit' | 'firefox'
     CI?: boolean
     PACKAGE?: 'vue3' | 'react' | 'svelte'
+    SSR?: 'true'
   }
   platform: string
 }
@@ -14,6 +15,7 @@ declare const process: {
 const adapter = process.env.PACKAGE || 'vue3'
 const runsInCI = !!process.env.CI
 const runsOnMac = process.platform === 'darwin'
+const ssrEnabled = process.env.SSR === 'true'
 
 const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
 const url = `http://localhost:${adapterPorts[adapter]}`
@@ -24,7 +26,7 @@ if (!adapters.includes(adapter)) {
   throw new Error(`Invalid adapter package "${adapter}". Expected one of: ${adapters.join(', ')}.`)
 }
 
-// Always define both projects, but can be overridden via BROWSER env var
+// Always define all projects, but can be overridden via --webkit or --firefox flags
 const projects = [
   {
     name: 'chromium',
@@ -33,6 +35,10 @@ const projects = [
   {
     name: 'webkit',
     use: { ...devices['Desktop Safari'] },
+  },
+  {
+    name: 'firefox',
+    use: { ...devices['Desktop Firefox'] },
   },
 ]
 
@@ -46,8 +52,35 @@ const projects = [
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+// Build commands
+const buildCommand = `pnpm -r --filter './packages/${adapter}/test-app' build`
+const buildSSRCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr`
+const serveCommand = `cd tests/app && PACKAGE=${adapter} pnpm serve`
+
+// Web server configuration based on SSR mode
+const webServerConfig = ssrEnabled
+  ? [
+      {
+        command: `${buildCommand} && ${buildSSRCommand} && node packages/${adapter}/test-app/dist/ssr.js`,
+        url: 'http://localhost:13714/health',
+        reuseExistingServer: !runsInCI,
+      },
+      {
+        command: serveCommand,
+        url,
+        reuseExistingServer: !runsInCI,
+      },
+    ]
+  : {
+      command: `${buildCommand} && ${serveCommand}`,
+      url,
+      reuseExistingServer: !runsInCI,
+    }
+
 export default defineConfig({
   testDir: './tests',
+  /* Only run SSR tests when SSR=true, otherwise exclude them */
+  ...(ssrEnabled ? { testMatch: 'ssr.spec.ts' } : { testIgnore: 'ssr.spec.ts' }),
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -76,9 +109,5 @@ export default defineConfig({
   projects,
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: `pnpm -r --filter './packages/${adapter}/test-app' build && cd tests/app && PACKAGE=${adapter} pnpm serve`,
-    url,
-    reuseExistingServer: !runsInCI,
-  },
+  webServer: webServerConfig,
 })

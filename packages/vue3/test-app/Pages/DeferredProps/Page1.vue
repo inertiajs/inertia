@@ -24,4 +24,5 @@ defineProps<{
 
   <Link href="/deferred-props/page-1">Page 1</Link>
   <Link href="/deferred-props/page-2">Page 2</Link>
+  <Link href="/deferred-props/page-3" prefetch>Page 3</Link>
 </template>

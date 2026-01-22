@@ -1,9 +1,13 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { createElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { createElement, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import usePage from './usePage'
 
+interface WhenVisibleSlotProps {
+  fetching: boolean
+}
+
 interface WhenVisibleProps {
-  children: ReactNode | (() => ReactNode)
+  children: ReactNode | ((props: WhenVisibleSlotProps) => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data?: string | string[]
   params?: ReloadOptions
@@ -17,40 +21,33 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   as = as ?? 'div'
   fallback = fallback ?? null
 
-  const [loaded, setLoaded] = useState(false)
+  const pageProps = usePage().props
+  const keys = useMemo(() => (data ? (Array.isArray(data) ? data : [data]) : []), [data])
+
+  const [loaded, setLoaded] = useState(() => keys.length > 0 && keys.every((key) => pageProps[key] !== undefined))
+  const [isFetching, setIsFetching] = useState(false)
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
   const observer = useRef<IntersectionObserver | null>(null)
-
-  const page = usePage()
+  const getReloadParamsRef = useRef<() => Partial<ReloadOptions>>(() => ({}))
 
   useEffect(() => {
-    if (Array.isArray(data)) {
-      // For arrays, reset loaded if any prop becomes undefined
-      if (data.some((key) => page.props[key] === undefined)) {
-        setLoaded(false)
-      }
-    } else if (data) {
-      // For single prop, reset loaded if prop becomes undefined
-      if (page.props[data] === undefined) {
-        setLoaded(false)
-      }
+    if (keys.length > 0) {
+      setLoaded(keys.every((key) => pageProps[key] !== undefined))
     }
-  }, [data, ...(Array.isArray(data) ? data.map((key) => page.props[key]) : [page.props[data!]])])
+  }, [pageProps, keys])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
+    const reloadParams: Partial<ReloadOptions> = { ...params }
+
     if (data) {
-      return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
-      }
+      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[]
     }
 
-    if (!params) {
-      throw new Error('You must provide either a `data` or `params` prop.')
-    }
-
-    return params
+    return reloadParams
   }, [params, data])
+
+  getReloadParamsRef.current = getReloadParams
 
   const registerObserver = () => {
     observer.current?.disconnect()
@@ -70,18 +67,21 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
         }
 
         fetching.current = true
+        setIsFetching(true)
 
-        const reloadParams = getReloadParams()
+        const reloadParams = getReloadParamsRef.current()
 
         router.reload({
           ...reloadParams,
           onStart: (e) => {
             fetching.current = true
+            setIsFetching(true)
             reloadParams.onStart?.(e)
           },
           onFinish: (e) => {
             setLoaded(true)
             fetching.current = false
+            setIsFetching(false)
             reloadParams.onFinish?.(e)
 
             if (!always) {
@@ -103,14 +103,18 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
       return
     }
 
+    if (loaded && !always) {
+      return
+    }
+
     registerObserver()
 
     return () => {
       observer.current?.disconnect()
     }
-  }, [loaded, ref, getReloadParams, buffer])
+  }, [always, loaded, buffer])
 
-  const resolveChildren = () => (typeof children === 'function' ? children() : children)
+  const resolveChildren = () => (typeof children === 'function' ? children({ fetching: isFetching }) : children)
   const resolveFallback = () => (typeof fallback === 'function' ? fallback() : fallback)
 
   if (always || !loaded) {

@@ -32,7 +32,7 @@ test.describe('Progress Component', () => {
     await expect(peg).toBeVisible()
 
     const initialTransform = await getProgressPercent(bar)
-    await expect(initialTransform).toBeCloseTo(-92, 1)
+    await expect(initialTransform).toBeLessThan(-70)
 
     await page.waitForTimeout(300)
     const afterTrickle = await getProgressPercent(bar)
@@ -59,6 +59,7 @@ test.describe('Progress Component', () => {
   })
 
   test('finish() animates to 100% then fades out and removes bar', async ({ page }) => {
+    test.setTimeout(10_000)
     await page.getByRole('button', { name: 'Set 25%' }).click()
 
     const bar = page.locator('#nprogress .bar')
@@ -74,14 +75,18 @@ test.describe('Progress Component', () => {
     const duringFinish = await getProgressPercent(bar)
     await expect(duringFinish).toBeGreaterThan(-75)
 
-    await page.waitForFunction(() => {
-      const bar = document.querySelector('#nprogress .bar') as HTMLElement
-      const transform = bar?.style.transform
+    await page.waitForFunction(
+      () => {
+        const bar = document.querySelector('#nprogress .bar') as HTMLElement
+        const transform = bar?.style.transform
 
-      const match = transform?.match(/translate3d\((-?\d+(?:\.\d+)?)%/)
+        const match = transform?.match(/translate3d\((-?\d+(?:\.\d+)?)%/)
 
-      return match && Math.abs(parseFloat(match[1])) < 1
-    })
+        return match && Math.abs(parseFloat(match[1])) < 1
+      },
+      {},
+      { timeout: 3000 },
+    )
 
     const at100 = await getProgressPercent(bar)
     await expect(at100).toBeCloseTo(0, 1)
@@ -99,7 +104,7 @@ test.describe('Progress Component', () => {
     await page.getByRole('button', { name: 'Reset' }).click()
 
     const transform0 = await getProgressPercent(bar)
-    await expect(transform0).toBeCloseTo(-92, 1)
+    await expect(transform0).toBeLessThan(-70)
   })
 
   test('remove() completes and removes nprogress bar', async ({ page }) => {

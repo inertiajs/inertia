@@ -13,7 +13,9 @@ export default function useRemember<T extends object>(
   const restored = router.restore(key)
   const type = isReactive(data) ? reactive : ref
   const hasCallbacks = typeof data.__remember === 'function' && typeof data.__restore === 'function'
-  const remembered = type(restored === undefined ? data : hasCallbacks ? data.__restore!(restored) : restored)
+  const remembered = type(
+    restored === undefined ? data : hasCallbacks ? data.__restore!(cloneDeep(restored)) : cloneDeep(restored),
+  )
 
   watch(
     remembered,

@@ -15,20 +15,10 @@
   let observer: IntersectionObserver | null = null
 
   const page = usePage()
+  $: keys = data ? (Array.isArray(data) ? data : [data]) : []
+  $: loaded = keys.length > 0 && keys.every((key) => $page.props[key] !== undefined)
 
-  // Watch for page prop changes and reset loaded state when data becomes undefined
-  $: {
-    if (Array.isArray(data)) {
-      // For arrays, reset loaded if any prop becomes undefined
-      if (data.some((key) => $page.props[key] === undefined)) {
-        loaded = false
-      }
-    } else if ($page.props[data as string] === undefined) {
-      loaded = false
-    }
-  }
-
-  $: if (el) {
+  $: if (el && (!loaded || always)) {
     registerObserver()
   }
 
@@ -83,17 +73,13 @@
   })
 
   function getReloadParams(): Partial<ReloadOptions> {
+    const reloadParams: Partial<ReloadOptions> = { ...params }
+
     if (data !== '') {
-      return {
-        only: (Array.isArray(data) ? data : [data]) as string[],
-      }
+      reloadParams.only = (Array.isArray(data) ? data : [data]) as string[]
     }
 
-    if (!params.data) {
-      throw new Error('You must provide either a `data` or `params` prop.')
-    }
-
-    return params
+    return reloadParams
   }
 </script>
 
@@ -102,7 +88,7 @@
 {/if}
 
 {#if loaded}
-  <slot />
+  <slot {fetching} />
 {:else if $$slots.fallback}
   <slot name="fallback" />
 {/if}

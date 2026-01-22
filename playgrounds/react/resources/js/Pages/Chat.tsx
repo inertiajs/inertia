@@ -143,7 +143,7 @@ const Chat = ({
               {isFetching || isStreaming ? (
                 <Spinner className="size-4 text-white" />
               ) : (
-                <PaperAirplaneIcon className="rotate-270 size-4 text-white" />
+                <PaperAirplaneIcon className="size-4 rotate-270 text-white" />
               )}
             </button>
           </form>

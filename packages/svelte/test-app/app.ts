@@ -19,7 +19,8 @@ createInertiaApp({
     return pages[`./Pages/${name}.svelte`]
   },
   setup({ el, App, props }) {
-    new App({ target: el!, props })
+    const hydrate = el?.hasAttribute('data-server-rendered')
+    new App({ target: el!, props, hydrate })
   },
   ...(withAppDefaults && {
     defaults: {

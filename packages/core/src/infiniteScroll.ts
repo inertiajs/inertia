@@ -1,4 +1,5 @@
 import { requestAnimationFrame } from './domUtils'
+import { router } from './index'
 import { useInfiniteScrollData } from './infiniteScroll/data'
 import { useInfiniteScrollElementManager } from './infiniteScroll/elements'
 import { useInfiniteScrollQueryString } from './infiniteScroll/queryString'
@@ -38,18 +39,13 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     // After successful request, tag new server content
     onCompletePreviousRequest: (loadedPage) => {
       options.onCompletePreviousRequest()
-      requestAnimationFrame(() => {
-        elementManager.processServerLoadedElements(loadedPage)
-        elementManager.refreshTriggers()
-      }, 2)
+      requestAnimationFrame(() => elementManager.processServerLoadedElements(loadedPage), 2)
     },
     onCompleteNextRequest: (loadedPage) => {
       options.onCompleteNextRequest()
-      requestAnimationFrame(() => {
-        elementManager.processServerLoadedElements(loadedPage)
-        elementManager.refreshTriggers()
-      }, 2)
+      requestAnimationFrame(() => elementManager.processServerLoadedElements(loadedPage), 2)
     },
+    onReset: options.onDataReset,
   })
 
   const addScrollPreservationCallbacks = (reloadOptions: ReloadOptions): ReloadOptions => {
@@ -89,10 +85,13 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     originalFetchPrevious(reloadOptions)
   }
 
+  const removeEventListener = router.on('success', () => requestAnimationFrame(elementManager.refreshTriggers, 2))
+
   return {
     dataManager,
     elementManager,
     flush: () => {
+      removeEventListener()
       dataManager.removeEventListener()
       elementManager.flushAll()
       queryStringManager.cancel()

@@ -1,17 +1,23 @@
 <script lang="ts">
   import {
     formDataToObject,
+    FormComponentResetSymbol,
     resetFormFields,
     mergeDataIntoQueryString,
     type Errors,
     type FormComponentProps,
+    type FormComponentRef,
     type Method,
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
+    UseFormUtils,
   } from '@inertiajs/core'
+  import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'lodash-es'
-  import { onMount } from 'svelte'
+  import { onMount, setContext } from 'svelte'
+  import { writable } from 'svelte/store'
+  import { FormContextKey } from './formContext'
   import useForm from '../useForm'
 
   const noop = () => undefined
@@ -38,10 +44,35 @@
   export let resetOnError: FormComponentProps['resetOnError'] = false
   export let resetOnSuccess: FormComponentProps['resetOnSuccess'] = false
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
+  export let validateFiles: FormComponentProps['validateFiles'] = false
+  export let validationTimeout: FormComponentProps['validationTimeout'] = 1500
+  export let withAllErrors: FormComponentProps['withAllErrors'] = false
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
+  type FormSubmitter = HTMLElement | null
 
-  const form = useForm({})
+  const getTransformedData = (): Record<string, FormDataConvertible> => {
+    const [_url, data] = getUrlAndData()
+    return transform!(data)
+  }
+
+  const form = useForm<Record<string, any>>({})
+    .withPrecognition(
+      () => _method,
+      () => getUrlAndData()[0],
+    )
+    .setValidationTimeout(validationTimeout!)
+
+  if (validateFiles) {
+    form.validateFiles()
+  }
+
+  if (withAllErrors) {
+    form.withAllErrors()
+  }
+
+  form.transform(getTransformedData)
+
   let formElement: HTMLFormElement
   let isDirty = false
   let defaultData: FormData = new FormData()
@@ -49,23 +80,32 @@
   $: _method = isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method)
   $: _action = isUrlMethodPair(action) ? action.url : (action as string)
 
-  export function getFormData(): FormData {
-    return new FormData(formElement)
+  export function getFormData(submitter?: FormSubmitter): FormData {
+    return new FormData(formElement, submitter)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  export function getData(): Record<string, FormDataConvertible> {
-    return formDataToObject(getFormData())
+  export function getData(submitter?: FormSubmitter): Record<string, FormDataConvertible> {
+    return formDataToObject(getFormData(submitter))
+  }
+
+  function getUrlAndData(submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] {
+    return mergeDataIntoQueryString(_method, _action, getData(submitter), queryStringArrayFormat)
   }
 
   function updateDirtyState(event: Event) {
+    if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+      // When the form is reset programmatically, prevent native reset behavior
+      event.preventDefault()
+    }
+
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
-  export function submit() {
-    const [url, _data] = mergeDataIntoQueryString(_method, _action, getData(), queryStringArrayFormat)
+  export function submit(submitter?: FormSubmitter) {
+    const [url, data] = getUrlAndData(submitter)
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {
@@ -119,12 +159,16 @@
       ...options,
     }
 
-    $form.transform(() => transform!(_data)).submit(_method, url, submitOptions)
+    // We need transform because we can't override the default data with different keys (by design)
+    $form.transform(() => transform!(data)).submit(_method, url, submitOptions)
+
+    // Reset the transformer back so the submitter is not used for future submissions
+    $form.transform(getTransformedData)
   }
 
-  function handleSubmit(event: Event) {
+  function handleSubmit(event: SubmitEvent) {
     event.preventDefault()
-    submit()
+    submit(event.submitter)
   }
 
   function handleReset(event: Event) {
@@ -137,26 +181,21 @@
 
   export function reset(...fields: string[]) {
     resetFormFields(formElement, defaultData, fields)
+
+    form.reset(...fields)
   }
 
   export function clearErrors(...fields: string[]) {
-    // @ts-expect-error
     $form.clearErrors(...fields)
   }
 
   export function resetAndClearErrors(...fields: string[]) {
-    // @ts-expect-error
-    $form.clearErrors(...fields)
+    clearErrors(...fields)
     reset(...fields)
   }
 
-  export function setError(field: string | object, value?: string) {
-    if (typeof field === 'string') {
-      // @ts-expect-error
-      $form.setError(field, value)
-    } else {
-      $form.setError(field)
-    }
+  export function setError(fieldOrFields: string | Record<string, string>, maybeValue?: string) {
+    $form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
   }
 
   export function defaults() {
@@ -164,17 +203,86 @@
     isDirty = false
   }
 
+  export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
+    return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
+  }
+
+  export function valid(field: string) {
+    return form.valid(field)
+  }
+
+  export function invalid(field: string) {
+    return form.invalid(field)
+  }
+
+  export function touch(field: string | NamedInputEvent | string[], ...fields: string[]) {
+    return form.touch(field, ...fields)
+  }
+
+  export function touched(field?: string) {
+    return form.touched(field)
+  }
+
+  export function validator(): Validator {
+    return form.validator()
+  }
+
   onMount(() => {
     defaultData = getFormData()
 
-    const formEvents = ['input', 'change', 'reset']
+    form.defaults(getData())
+
+    const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
+
     formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
 
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
     }
   })
+
+  $: {
+    form.setValidationTimeout(validationTimeout!)
+
+    if (validateFiles) {
+      form.validateFiles()
+    } else {
+      form.withoutFileValidation()
+    }
+  }
+
   $: slotErrors = $form.errors as Errors
+
+  // Form context for child components
+  const formContextStore = writable<FormComponentRef | undefined>(undefined)
+
+  $: formContextStore.set({
+    errors: $form.errors,
+    hasErrors: $form.hasErrors,
+    processing: $form.processing,
+    progress: $form.progress,
+    wasSuccessful: $form.wasSuccessful,
+    recentlySuccessful: $form.recentlySuccessful,
+    isDirty,
+    clearErrors,
+    resetAndClearErrors,
+    setError,
+    reset,
+    submit,
+    defaults,
+    getData,
+    getFormData,
+    // Precognition
+    validator,
+    validate,
+    touch,
+    validating: $form.validating,
+    valid,
+    invalid,
+    touched,
+  })
+
+  setContext(FormContextKey, formContextStore)
 </script>
 
 <form
@@ -199,7 +307,15 @@
     {isDirty}
     {submit}
     {defaults}
+    {reset}
     {getData}
     {getFormData}
+    {validator}
+    {validate}
+    {touch}
+    validating={$form.validating}
+    valid={$form.valid}
+    invalid={$form.invalid}
+    touched={$form.touched}
   />
 </form>

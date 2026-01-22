@@ -24,25 +24,23 @@ export class RequestStream {
     this.cancel({ interrupted: true }, false)
   }
 
-  public cancelInFlight(): void {
-    this.cancel({ cancelled: true }, true)
+  public cancelInFlight({ prefetch = true } = {}): void {
+    this.requests
+      .filter((request) => prefetch || !request.isPrefetch())
+      .forEach((request) => request.cancel({ cancelled: true }))
   }
 
-  protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean): void {
-    if (!this.shouldCancel(force)) {
+  protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean = false): void {
+    if (!force && !this.shouldCancel()) {
       return
     }
 
     const request = this.requests.shift()!
 
-    request?.cancel({ interrupted, cancelled })
+    request?.cancel({ cancelled, interrupted })
   }
 
-  protected shouldCancel(force: boolean): boolean {
-    if (force) {
-      return true
-    }
-
+  protected shouldCancel(): boolean {
     return this.interruptible && this.requests.length >= this.maxConcurrent
   }
 }
