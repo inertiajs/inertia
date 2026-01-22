@@ -18,7 +18,7 @@
     "autosize": "^6.0.1",
     "axios": "^1.13.2",
     "laravel-vite-plugin": "^2.0.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "marked": "^17.0.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
