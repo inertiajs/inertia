@@ -3,7 +3,11 @@ import { useState } from 'react'
 
 interface TransformResponse {
   success: boolean
-  received: Record<string, unknown>
+  received: {
+    transformed_name: string
+    transformed_email: string
+    original_name: string
+  }
 }
 
 export default () => {

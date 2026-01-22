@@ -3,7 +3,11 @@
 
   interface TransformResponse {
     success: boolean
-    received: Record<string, unknown>
+    received: {
+      transformed_name: string
+      transformed_email: string
+      original_name: string
+    }
   }
 
   const transformTest = useHttp<{ name: string; email: string }, TransformResponse>({
