@@ -815,6 +815,21 @@ export interface InfiniteScrollComponentBaseProps {
   onlyPrevious?: boolean
 }
 
+export type UseHttpOptions<TResponse = unknown> = {
+  onBefore?: () => boolean | void
+  onStart?: () => void
+  onProgress?: (progress: HttpProgressEvent) => void
+  onSuccess?: (response: TResponse) => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onCancelToken?: (cancelToken: CancelToken) => void
+}
+
+export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+  headers?: HttpRequestHeaders
+}
+
 declare global {
   interface DocumentEventMap {
     'inertia:before': GlobalEvent<'before'>
