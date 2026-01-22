@@ -234,8 +234,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
         onError: (errors) => {
           if (isMounted.current) {
-            setErrors(errors as FormDataErrors<TForm>)
-            setHasErrors(true)
+            setError(errors as FormDataErrors<TForm>)
           }
 
           if (options.onError) {
