@@ -11,8 +11,7 @@
   import { preventDefault } from 'svelte/legacy'
 
   import { page, useForm } from '@inertiajs/svelte'
-  import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
-  import type { CancelTokenSource } from 'axios'
+  import type { ActiveVisit, CancelToken, Page, Progress, Errors } from '@inertiajs/core'
 
   window.events = []
   window.data = []
@@ -162,7 +161,7 @@
   const cancelledVisit = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
 
           setTimeout(() => {
@@ -177,7 +176,7 @@
   const onCancelProcessing = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           pushData('onCancelToken', 'processing', form.processing)
 
@@ -209,7 +208,7 @@
       }))
       .post('/sleep', {
         ...callbacks({
-          onCancelToken: (token: CancelTokenSource) => {
+          onCancelToken: (token: CancelToken) => {
             pushEvent('onCancelToken')
             pushData('onCancelToken', 'progress', form.progress)
 

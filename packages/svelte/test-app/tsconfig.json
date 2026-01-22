@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
+    "types": ["vite/client"],
     "allowJs": true,
     "checkJs": true,
     "esModuleInterop": true,

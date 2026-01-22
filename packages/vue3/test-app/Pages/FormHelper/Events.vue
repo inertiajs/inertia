@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Errors, Page, PendingVisit, Progress } from '@inertiajs/core'
+import { CancelToken, Errors, Page, PendingVisit, Progress } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/vue3'
-import type { CancelTokenSource } from 'axios'
 
 declare global {
   interface Window {
@@ -164,7 +163,7 @@ const onProgressVisit = () => {
 const cancelledVisit = () => {
   form.post('/sleep', {
     ...callbacks({
-      onCancelToken: (token: CancelTokenSource) => {
+      onCancelToken: (token: CancelToken) => {
         pushEvent('onCancelToken')
 
         setTimeout(() => {
@@ -179,7 +178,7 @@ const cancelledVisit = () => {
 const onCancelProcessing = () => {
   form.post('/sleep', {
     ...callbacks({
-      onCancelToken: (token: CancelTokenSource) => {
+      onCancelToken: (token: CancelToken) => {
         pushEvent('onCancelToken')
         pushData('onCancelToken', 'processing', form.processing)
 
@@ -211,7 +210,7 @@ const onCancelProgress = () => {
     }))
     .post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           pushData('onCancelToken', 'progress', form.progress)
 

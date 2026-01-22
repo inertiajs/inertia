@@ -1,11 +1,35 @@
-import { AxiosProgressEvent, AxiosResponse } from 'axios'
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { Response } from './response'
 
-declare module 'axios' {
-  export interface AxiosProgressEvent {
-    percentage: number | undefined
-  }
+export type HttpRequestHeaders = Record<string, unknown>
+
+export type HttpResponseHeaders = Record<string, string>
+
+export interface HttpProgressEvent {
+  progress: number | undefined
+  loaded: number
+  total: number | undefined
+  percentage?: number
+}
+
+export interface HttpRequestConfig {
+  method: Method
+  url: string
+  data?: unknown
+  params?: Record<string, unknown>
+  headers?: HttpRequestHeaders
+  signal?: AbortSignal
+  onUploadProgress?: (event: HttpProgressEvent) => void
+}
+
+export interface HttpResponse {
+  status: number
+  data: string
+  headers: HttpResponseHeaders
+}
+
+export interface HttpClient {
+  request(config: HttpRequestConfig): Promise<HttpResponse>
 }
 
 export interface PageFlashData {
@@ -234,7 +258,7 @@ export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
 export type QueryStringArrayFormatOption = 'indices' | 'brackets'
 
-export type Progress = AxiosProgressEvent
+export type Progress = HttpProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
@@ -331,9 +355,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   invalid: {
-    parameters: [AxiosResponse]
+    parameters: [HttpResponse]
     details: {
-      response: AxiosResponse
+      response: HttpResponse
     }
     result: boolean | void
   }
@@ -345,9 +369,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: boolean | void
   }
   prefetched: {
-    parameters: [AxiosResponse, ActiveVisit<T>]
+    parameters: [HttpResponse, ActiveVisit<T>]
     details: {
-      response: AxiosResponse
+      response: HttpResponse
       fetchedAt: number
       visit: ActiveVisit<T>
     }
@@ -468,6 +492,8 @@ interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupRetur
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client to use for requests. Defaults to FetchHttpClient. */
+  http?: HttpClient
 }
 
 export interface CreateInertiaAppOptionsForCSR<
