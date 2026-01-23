@@ -139,8 +139,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(): InertiaFor
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaFormStore<TForm> | InertiaPrecognitiveFormStore<TForm> {
-  const parsedArgs = UseFormUtils.parseUseFormArguments<TForm>(...args)
-  const { rememberKey, data, precognitionEndpoint } = parsedArgs
+  const { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
 
   // Resolve data for validation (useFormState handles the actual function data logic)
   const resolvedData: TForm = typeof data === 'function' ? data() : (data as TForm)

@@ -1,6 +1,7 @@
 import {
   CancelToken,
   Errors,
+  ErrorValue,
   FormDataConvertible,
   FormDataErrors,
   FormDataKeys,
@@ -52,7 +53,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   clearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   resetAndClearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   setError: {
-    <K extends FormDataKeys<TForm>>(field: K, value: string): void
+    <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
     (errors: FormDataErrors<TForm>): void
   }
   get: (url: string, options?: UseHttpSubmitOptions<TResponse>) => Promise<TResponse>
@@ -125,8 +126,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
   ...args: UseFormArguments<TForm>
 ): UseHttp<TForm, TResponse> | UseHttpPrecognitiveProps<TForm, TResponse> {
-  const parsedArgs = UseFormUtils.parseUseFormArguments<TForm>(...args)
-  const { rememberKey, data } = parsedArgs
+  const { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
 
   // Resolve initial data for remember functionality hooks
   const initialDefaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
@@ -161,7 +161,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     finishProcessing,
   } = useFormState<TForm>({
     data,
-    precognitionEndpoint: parsedArgs.precognitionEndpoint,
+    precognitionEndpoint,
     useDataState,
     useErrorsState,
   })

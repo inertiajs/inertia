@@ -1,5 +1,6 @@
 import {
   CancelToken,
+  ErrorValue,
   FormDataErrors,
   FormDataKeys,
   FormDataType,
@@ -51,7 +52,7 @@ export interface InertiaFormProps<TForm extends object> {
   clearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   resetAndClearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   setError: {
-    <K extends FormDataKeys<TForm>>(field: K, value: string): void
+    <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
     (errors: FormDataErrors<TForm>): void
   }
   submit: (...args: UseFormSubmitArguments) => void
@@ -83,6 +84,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   validator: () => Validator
   withAllErrors: () => InertiaPrecognitiveFormProps<TForm>
   withoutFileValidation: () => InertiaPrecognitiveFormProps<TForm>
+  // Backward compatibility for easy migration from the original Precognition libraries
   setErrors: (errors: FormDataErrors<TForm>) => InertiaPrecognitiveFormProps<TForm>
   forgetError: <K extends FormDataKeys<TForm> | NamedInputEvent>(field: K) => InertiaPrecognitiveFormProps<TForm>
 }
@@ -109,8 +111,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(): InertiaFor
 export default function useForm<TForm extends FormDataType<TForm>>(
   ...args: UseFormArguments<TForm>
 ): InertiaFormProps<TForm> | InertiaPrecognitiveFormProps<TForm> {
-  const parsedArgs = UseFormUtils.parseUseFormArguments<TForm>(...args)
-  const { rememberKey, data } = parsedArgs
+  const { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
 
   // Resolve initial data for remember functionality hooks
   const initialDefaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
@@ -142,7 +143,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     finishProcessing,
   } = useFormState<TForm>({
     data,
-    precognitionEndpoint: parsedArgs.precognitionEndpoint,
+    precognitionEndpoint,
     useDataState,
     useErrorsState,
   })
