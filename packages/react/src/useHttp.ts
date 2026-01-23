@@ -24,7 +24,6 @@ import {
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep } from 'lodash-es'
 import { useCallback, useRef, useState } from 'react'
-import { config } from '.'
 import useFormState, { SetDataAction } from './useFormState'
 import useRemember from './useRemember'
 
@@ -157,6 +156,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     setProgress,
     setWasSuccessful,
     setRecentlySuccessful,
+    markAsSuccessful,
     clearErrors,
     setError,
     defaultsCalledInOnSuccessRef,
@@ -246,16 +246,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
         if (httpResponse.status >= 200 && httpResponse.status < 300) {
           if (isMounted.current) {
-            clearErrors()
-            setWasSuccessful(true)
-            setRecentlySuccessful(true)
+            markAsSuccessful()
             setResponse(responseData)
-
-            recentlySuccessfulTimeoutId.current = window.setTimeout(() => {
-              if (isMounted.current) {
-                setRecentlySuccessful(false)
-              }
-            }, config.get('form.recentlySuccessfulDuration'))
           }
 
           options.onSuccess?.(responseData)

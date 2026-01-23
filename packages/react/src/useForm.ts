@@ -20,7 +20,6 @@ import {
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep } from 'lodash-es'
 import { useCallback, useRef, useState } from 'react'
-import { config } from '.'
 import { useIsomorphicLayoutEffect } from './react'
 import useFormState, { SetDataAction, SetDataByKeyValuePair, SetDataByMethod, SetDataByObject } from './useFormState'
 import useRemember from './useRemember'
@@ -139,7 +138,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setProgress,
     setWasSuccessful,
     setRecentlySuccessful,
-    clearErrors,
+    markAsSuccessful,
     setError,
     defaultsCalledInOnSuccessRef,
   } = useFormState<TForm>({
@@ -211,14 +210,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
         onSuccess: async (page) => {
           if (isMounted.current) {
-            clearErrors()
-            setWasSuccessful(true)
-            setRecentlySuccessful(true)
-            recentlySuccessfulTimeoutId.current = setTimeout(() => {
-              if (isMounted.current) {
-                setRecentlySuccessful(false)
-              }
-            }, config.get('form.recentlySuccessfulDuration'))
+            markAsSuccessful()
           }
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null

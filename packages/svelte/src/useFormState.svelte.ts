@@ -13,6 +13,7 @@ import { router, UseFormUtils } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { createValidator, resolveName, toSimpleValidationErrors } from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
+import { config } from '.'
 
 type TransformCallback<TForm> = (data: TForm) => object
 
@@ -88,6 +89,8 @@ export interface UseFormStateReturn<TForm extends object> {
   setFormState: <K extends string>(key: K, value: any) => void
   getRecentlySuccessfulTimeoutId: () => ReturnType<typeof setTimeout> | null
   setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout> | null) => void
+  clearRecentlySuccessfulTimeout: () => void
+  markAsSuccessful: () => void
   wasDefaultsCalledInOnSuccess: () => boolean
   resetDefaultsCalledInOnSuccess: () => void
 }
@@ -368,6 +371,21 @@ export default function useFormState<TForm extends object>(
     getRecentlySuccessfulTimeoutId: () => recentlySuccessfulTimeoutId,
     setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout> | null) => {
       recentlySuccessfulTimeoutId = id
+    },
+    clearRecentlySuccessfulTimeout: () => {
+      if (recentlySuccessfulTimeoutId) {
+        clearTimeout(recentlySuccessfulTimeoutId)
+      }
+    },
+    markAsSuccessful: () => {
+      form.clearErrors()
+      setFormStateInternal('wasSuccessful', true)
+      setFormStateInternal('recentlySuccessful', true)
+
+      recentlySuccessfulTimeoutId = setTimeout(
+        () => setFormStateInternal('recentlySuccessful', false),
+        config.get('form.recentlySuccessfulDuration'),
+      )
     },
     wasDefaultsCalledInOnSuccess: () => defaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess: () => {

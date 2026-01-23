@@ -21,6 +21,7 @@ import {
 } from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { reactive, watch } from 'vue'
+import { config } from '.'
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
   only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
@@ -92,6 +93,7 @@ export interface UseFormStateReturn<TForm extends object> {
   getRecentlySuccessfulTimeoutId: () => ReturnType<typeof setTimeout> | undefined
   setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout>) => void
   clearRecentlySuccessfulTimeout: () => void
+  markAsSuccessful: () => void
   wasDefaultsCalledInOnSuccess: () => boolean
   resetDefaultsCalledInOnSuccess: () => void
 }
@@ -358,6 +360,16 @@ export default function useFormState<TForm extends object>(
     },
     clearRecentlySuccessfulTimeout: () => {
       clearTimeout(recentlySuccessfulTimeoutId)
+    },
+    markAsSuccessful: () => {
+      typedForm.clearErrors()
+      typedForm.wasSuccessful = true
+      typedForm.recentlySuccessful = true
+
+      recentlySuccessfulTimeoutId = setTimeout(
+        () => (typedForm.recentlySuccessful = false),
+        config.get('form.recentlySuccessfulDuration'),
+      )
     },
     wasDefaultsCalledInOnSuccess: () => defaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess: () => {

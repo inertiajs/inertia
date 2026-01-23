@@ -24,7 +24,6 @@ import type {
 import { router, UseFormUtils } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep, isEqual } from 'lodash-es'
-import { config } from '.'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties
@@ -156,8 +155,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     getTransform,
     getPrecognitionEndpoint,
     setFormState,
-    getRecentlySuccessfulTimeoutId,
-    setRecentlySuccessfulTimeoutId,
+    clearRecentlySuccessfulTimeout,
+    markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
   } = useFormState<TForm>({
@@ -191,10 +190,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       onBefore: (visit: PendingVisit) => {
         setFormState('wasSuccessful', false)
         setFormState('recentlySuccessful', false)
-        const timeoutId = getRecentlySuccessfulTimeoutId()
-        if (timeoutId) {
-          clearTimeout(timeoutId)
-        }
+        clearRecentlySuccessfulTimeout()
 
         return options.onBefore?.(visit)
       },
@@ -209,12 +205,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return options.onProgress?.(event)
       },
       onSuccess: async (page: Page) => {
-        form.clearErrors()
-        setFormState('wasSuccessful', true)
-        setFormState('recentlySuccessful', true)
-        setRecentlySuccessfulTimeoutId(
-          setTimeout(() => setFormState('recentlySuccessful', false), config.get('form.recentlySuccessfulDuration')),
-        )
+        markAsSuccessful()
 
         const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 

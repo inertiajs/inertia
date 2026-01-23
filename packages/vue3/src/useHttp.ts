@@ -26,7 +26,6 @@ import {
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { watch } from 'vue'
-import { config } from '.'
 import useFormState from './useFormState'
 
 export interface UseHttpProps<TForm extends object, TResponse = unknown> {
@@ -141,8 +140,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     setDefaults,
     getTransform,
     getPrecognitionEndpoint,
-    setRecentlySuccessfulTimeoutId,
     clearRecentlySuccessfulTimeout,
+    markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
   } = useFormState({
@@ -226,14 +225,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       const responseData = JSON.parse(response.data) as TResponse
 
       if (response.status >= 200 && response.status < 300) {
-        form.clearErrors()
-        form.wasSuccessful = true
-        form.recentlySuccessful = true
+        markAsSuccessful()
         ;(form as any).response = responseData
-
-        setRecentlySuccessfulTimeoutId(
-          setTimeout(() => (form.recentlySuccessful = false), config.get('form.recentlySuccessfulDuration')),
-        )
 
         options.onSuccess?.(responseData)
 

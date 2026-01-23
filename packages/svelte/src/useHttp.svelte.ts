@@ -27,7 +27,6 @@ import {
 } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep, isEqual } from 'lodash-es'
-import { config } from '.'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 export interface UseHttpProps<TForm extends object, TResponse = unknown> {
@@ -139,8 +138,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     getTransform,
     getPrecognitionEndpoint,
     setFormState,
-    getRecentlySuccessfulTimeoutId,
-    setRecentlySuccessfulTimeoutId,
+    clearRecentlySuccessfulTimeout,
+    markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
   } = useFormState<TForm>({
@@ -166,11 +165,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
     setFormState('wasSuccessful', false)
     setFormState('recentlySuccessful', false)
-
-    const timeoutId = getRecentlySuccessfulTimeoutId()
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
+    clearRecentlySuccessfulTimeout()
 
     abortController = new AbortController()
 
@@ -228,14 +223,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       const responseData = JSON.parse(response.data) as TResponse
 
       if (response.status >= 200 && response.status < 300) {
-        form.clearErrors()
-        setFormState('wasSuccessful', true)
-        setFormState('recentlySuccessful', true)
+        markAsSuccessful()
         setFormState('response', responseData)
-
-        setRecentlySuccessfulTimeoutId(
-          setTimeout(() => setFormState('recentlySuccessful', false), config.get('form.recentlySuccessfulDuration')),
-        )
 
         options.onSuccess?.(responseData)
 

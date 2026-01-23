@@ -21,7 +21,6 @@ import {
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { watch } from 'vue'
-import { config } from '.'
 import useFormState from './useFormState'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties
@@ -156,8 +155,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setDefaults,
     getTransform,
     getPrecognitionEndpoint,
-    setRecentlySuccessfulTimeoutId,
     clearRecentlySuccessfulTimeout,
+    markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
   } = useFormState<TForm>({
@@ -206,12 +205,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onProgress?.(event)
         },
         onSuccess: async (page) => {
-          form.clearErrors()
-          form.wasSuccessful = true
-          form.recentlySuccessful = true
-          setRecentlySuccessfulTimeoutId(
-            setTimeout(() => (form.recentlySuccessful = false), config.get('form.recentlySuccessfulDuration')),
-          )
+          markAsSuccessful()
 
           const onSuccess = options.onSuccess ? await options.onSuccess(page) : null
 

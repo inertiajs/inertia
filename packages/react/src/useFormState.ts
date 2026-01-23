@@ -20,6 +20,7 @@ import {
 } from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { config } from '.'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
 export type SetDataByMethod<TForm> = (data: (previousData: TForm) => TForm) => void
@@ -107,6 +108,7 @@ export interface UseFormStateReturn<TForm extends object> {
   setProgress: React.Dispatch<React.SetStateAction<Progress | null>>
   setWasSuccessful: React.Dispatch<React.SetStateAction<boolean>>
   setRecentlySuccessful: React.Dispatch<React.SetStateAction<boolean>>
+  markAsSuccessful: () => void
   clearErrors: (...fields: string[]) => void
   setError: (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) => void
   defaultsCalledInOnSuccessRef: React.MutableRefObject<boolean>
@@ -293,6 +295,18 @@ export default function useFormState<TForm extends object>(
     [reset, clearErrors],
   )
 
+  const markAsSuccessful = useCallback(() => {
+    clearErrors()
+    setWasSuccessful(true)
+    setRecentlySuccessful(true)
+
+    recentlySuccessfulTimeoutId.current = window.setTimeout(() => {
+      if (isMounted.current) {
+        setRecentlySuccessful(false)
+      }
+    }, config.get('form.recentlySuccessfulDuration'))
+  }, [clearErrors, setWasSuccessful, setRecentlySuccessful])
+
   const transformFunction = useCallback((callback: UseFormTransformCallback<TForm>) => {
     transformRef.current = callback
   }, [])
@@ -443,6 +457,7 @@ export default function useFormState<TForm extends object>(
     setProgress,
     setWasSuccessful,
     setRecentlySuccessful,
+    markAsSuccessful,
     clearErrors,
     setError,
     defaultsCalledInOnSuccessRef,
