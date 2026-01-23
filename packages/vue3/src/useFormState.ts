@@ -132,12 +132,15 @@ export default function useFormState<TForm extends object>(
       const formWithPrecognition = this as any as FormStateWithPrecognition<TForm>
 
       let withAllErrors = false
-      const validator = createValidator((client) => {
-        const { method, url } = precognitionEndpoint!()
-        const transformedData = cloneDeep(transform(this.data())) as Record<string, unknown>
+      const validator = createValidator(
+        (client) => {
+          const { method, url } = precognitionEndpoint!()
+          const transformedData = cloneDeep(transform(this.data())) as Record<string, unknown>
 
-        return client[method](url, transformedData)
-      }, cloneDeep(defaults) as Record<string, unknown>)
+          return client[method](url, transformedData)
+        },
+        cloneDeep(defaults) as Record<string, unknown>,
+      )
 
       validatorRef = validator
 

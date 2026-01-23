@@ -25,10 +25,7 @@ import { router, UseFormUtils } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { config } from '.'
-import useFormState, {
-  type FormStateWithPrecognition,
-  type InternalPrecognitionState,
-} from './useFormState.svelte'
+import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties
 let reservedFormKeys: Set<string> | null = null
@@ -255,9 +252,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     cancelToken?.cancel()
   }
 
-  const createSubmitMethod = (method: Method) => (url: string, options: VisitOptions = {}) => {
-    submit(method, url, options)
-  }
+  const createSubmitMethod =
+    (method: Method) =>
+    (url: string, options: VisitOptions = {}) => {
+      submit(method, url, options)
+    }
 
   // Add useForm-specific methods to the form object
   Object.assign(baseForm, {
@@ -301,7 +300,5 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     return form as any as InertiaPrecognitiveFormStore<TForm>
   }
 
-  return getPrecognitionEndpoint()
-    ? (form as InertiaPrecognitiveFormStore<TForm>)
-    : (form as InertiaFormStore<TForm>)
+  return getPrecognitionEndpoint() ? (form as InertiaPrecognitiveFormStore<TForm>) : (form as InertiaFormStore<TForm>)
 }

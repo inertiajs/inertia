@@ -354,12 +354,15 @@ export default function useFormState<TForm extends object>(
     precognitionEndpointRef.current = UseFormUtils.createWayfinderCallback(...args)
 
     if (!validatorRef.current) {
-      const validator = createValidator((client) => {
-        const { method, url } = precognitionEndpointRef.current!()
-        const currentData = dataRef.current
-        const transformedData = transformRef.current(currentData) as Record<string, unknown>
-        return client[method](url, transformedData)
-      }, cloneDeep(defaults as Record<string, unknown>))
+      const validator = createValidator(
+        (client) => {
+          const { method, url } = precognitionEndpointRef.current!()
+          const currentData = dataRef.current
+          const transformedData = transformRef.current(currentData) as Record<string, unknown>
+          return client[method](url, transformedData)
+        },
+        cloneDeep(defaults as Record<string, unknown>),
+      )
 
       validatorRef.current = validator
 

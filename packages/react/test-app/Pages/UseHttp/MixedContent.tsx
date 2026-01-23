@@ -91,7 +91,12 @@ export default () => {
           <input
             type="text"
             id="mixed-tags"
-            onChange={(e) => mixedContent.setData('tags', e.target.value.split(',').map((t) => t.trim()))}
+            onChange={(e) =>
+              mixedContent.setData(
+                'tags',
+                e.target.value.split(',').map((t) => t.trim()),
+              )
+            }
           />
         </label>
         <label>

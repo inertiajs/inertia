@@ -169,9 +169,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   // Add useForm-specific methods
   const form = baseForm as unknown as InertiaForm<TForm> & InternalRememberState<TForm>
 
-  const createSubmitMethod = (method: Method) => (url: string, options: VisitOptions = {}) => {
-    form.submit(method, url, options)
-  }
+  const createSubmitMethod =
+    (method: Method) =>
+    (url: string, options: VisitOptions = {}) => {
+      form.submit(method, url, options)
+    }
 
   Object.assign(form, {
     submit(...args: UseFormSubmitArguments) {

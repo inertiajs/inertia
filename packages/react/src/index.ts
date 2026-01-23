@@ -20,7 +20,7 @@ export {
   SetDataByObject,
   default as useForm,
 } from './useForm'
-export { UseHttp, UseHttpPrecognitiveProps, UseHttpProps, default as useHttp } from './useHttp'
+export { UseHttp, default as useHttp, UseHttpPrecognitiveProps, UseHttpProps } from './useHttp'
 export { default as usePage } from './usePage'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'

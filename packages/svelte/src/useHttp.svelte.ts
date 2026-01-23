@@ -28,10 +28,7 @@ import {
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { config } from '.'
-import useFormState, {
-  type FormStateWithPrecognition,
-  type InternalPrecognitionState,
-} from './useFormState.svelte'
+import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   isDirty: boolean

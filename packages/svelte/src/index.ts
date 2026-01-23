@@ -19,12 +19,7 @@ export {
   type InertiaFormProps,
   type InertiaPrecognitiveForm,
 } from './useForm.svelte'
-export {
-  default as useHttp,
-  type UseHttp,
-  type UseHttpPrecognitiveProps,
-  type UseHttpProps,
-} from './useHttp.svelte'
+export { default as useHttp, type UseHttp, type UseHttpPrecognitiveProps, type UseHttpProps } from './useHttp.svelte'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch.svelte'
 export { default as useRemember } from './useRemember.svelte'

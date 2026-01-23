@@ -90,7 +90,12 @@ export default () => {
           <input
             type="text"
             id="nested-tags"
-            onChange={(e) => nestedData.setData('tags', e.target.value.split(',').map((t) => t.trim()))}
+            onChange={(e) =>
+              nestedData.setData(
+                'tags',
+                e.target.value.split(',').map((t) => t.trim()),
+              )
+            }
           />
         </label>
         <button onClick={performNestedTest} id="nested-button">
