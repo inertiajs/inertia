@@ -219,6 +219,18 @@ export default () => {
         <button onClick={() => validateUser.clearErrors()} id="clear-errors-button">
           Clear Errors
         </button>
+        <button onClick={() => validateUser.clearErrors('name')} id="clear-name-error-button">
+          Clear Name Error
+        </button>
+        <button onClick={() => validateUser.setError('name', 'Manual name error')} id="set-name-error-button">
+          Set Name Error
+        </button>
+        <button
+          onClick={() => validateUser.setError({ name: 'Multi name error', email: 'Multi email error' })}
+          id="set-multiple-errors-button"
+        >
+          Set Multiple Errors
+        </button>
       </section>
 
       {/* DELETE Request Test */}

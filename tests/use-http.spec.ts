@@ -64,6 +64,42 @@ test.describe('useHttp', () => {
     await expect(page.locator('#validate-email-error')).not.toBeVisible()
   })
 
+  test('it clears a subset of validation errors', async ({ page }) => {
+    await page.goto('/use-http')
+
+    await page.click('#validate-button')
+    await expect(page.locator('#validate-has-errors')).toBeVisible()
+    await expect(page.locator('#validate-name-error')).toBeVisible()
+    await expect(page.locator('#validate-email-error')).toBeVisible()
+
+    await page.click('#clear-name-error-button')
+    await expect(page.locator('#validate-has-errors')).toBeVisible()
+    await expect(page.locator('#validate-name-error')).not.toBeVisible()
+    await expect(page.locator('#validate-email-error')).toBeVisible()
+  })
+
+  test('it sets a single error', async ({ page }) => {
+    await page.goto('/use-http')
+
+    await expect(page.locator('#validate-has-errors')).not.toBeVisible()
+
+    await page.click('#set-name-error-button')
+    await expect(page.locator('#validate-has-errors')).toBeVisible()
+    await expect(page.locator('#validate-name-error')).toContainText('Manual name error')
+    await expect(page.locator('#validate-email-error')).not.toBeVisible()
+  })
+
+  test('it sets multiple errors', async ({ page }) => {
+    await page.goto('/use-http')
+
+    await expect(page.locator('#validate-has-errors')).not.toBeVisible()
+
+    await page.click('#set-multiple-errors-button')
+    await expect(page.locator('#validate-has-errors')).toBeVisible()
+    await expect(page.locator('#validate-name-error')).toContainText('Multi name error')
+    await expect(page.locator('#validate-email-error')).toContainText('Multi email error')
+  })
+
   test('it makes DELETE requests', async ({ page }) => {
     await page.goto('/use-http')
 
@@ -236,6 +272,7 @@ test.describe('useHttp', () => {
       expect(uploadRequest).toBeDefined()
       expect(uploadRequest?.headers()['content-type']).toContain('multipart/form-data')
     })
+
   })
 
   test.describe('Headers', () => {
@@ -372,6 +409,32 @@ test.describe('useHttp', () => {
       const mixedRequest = requests.finished.find((r) => r.url().includes('/api/mixed'))
       expect(mixedRequest).toBeDefined()
       expect(mixedRequest?.headers()['content-type']).toContain('application/json')
+    })
+  })
+
+  test.describe('Remember', () => {
+    test('it remembers form state across navigation', async ({ page }) => {
+      await page.goto('/use-http/remember')
+
+      // Verify initial state
+      await expect(page.locator('#current-values')).toContainText('Name: initial, Email:')
+
+      // Modify form values
+      await page.fill('#name', 'changed')
+      await page.fill('#email', 'test@example.com')
+      await expect(page.locator('#current-values')).toContainText('Name: changed, Email: test@example.com')
+      await expect(page.locator('#is-dirty')).toContainText('isDirty: true')
+
+      // Navigate away
+      await page.click('#navigate-away')
+      await page.waitForURL('/dump/get')
+
+      // Navigate back
+      await page.goBack()
+      await page.waitForURL('/use-http/remember')
+
+      // Verify form state was remembered
+      await expect(page.locator('#current-values')).toContainText('Name: changed, Email: test@example.com')
     })
   })
 })

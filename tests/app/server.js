@@ -2607,6 +2607,7 @@ app.get('/use-http/nested-data', (req, res) => inertia.render(req, res, { compon
 app.get('/use-http/transform', (req, res) => inertia.render(req, res, { component: 'UseHttp/Transform' }))
 app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { component: 'UseHttp/Lifecycle' }))
 app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
+app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
 
 app.all('*page', (req, res) => inertia.render(req, res))
 
