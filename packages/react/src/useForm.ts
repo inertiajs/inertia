@@ -291,7 +291,5 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     return form as InertiaPrecognitiveFormProps<TForm>
   }
 
-  return precognitionEndpointRef.current
-    ? (form as InertiaPrecognitiveFormProps<TForm>)
-    : (form as InertiaFormProps<TForm>)
+  return precognitionEndpointRef.current ? (form as InertiaPrecognitiveFormProps<TForm>) : form
 }

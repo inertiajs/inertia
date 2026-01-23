@@ -159,7 +159,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     precognitionEndpoint,
   })
 
-  // Add useForm-specific methods
+  // Cast needed: baseForm has all form state/methods, we're adding submit methods below via Object.assign
   const form = baseForm as unknown as InertiaForm<TForm>
 
   const createSubmitMethod =
@@ -251,7 +251,5 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     },
   })
 
-  return getPrecognitionEndpoint()
-    ? (form as unknown as InertiaPrecognitiveForm<TForm>)
-    : (form as unknown as InertiaForm<TForm>)
+  return getPrecognitionEndpoint() ? (form as InertiaPrecognitiveForm<TForm>) : form
 }

@@ -266,5 +266,5 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     return form as any as InertiaPrecognitiveFormStore<TForm>
   }
 
-  return getPrecognitionEndpoint() ? (form as InertiaPrecognitiveFormStore<TForm>) : (form as InertiaFormStore<TForm>)
+  return getPrecognitionEndpoint() ? (form as InertiaPrecognitiveFormStore<TForm>) : form
 }

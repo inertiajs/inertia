@@ -143,6 +143,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     precognitionEndpoint,
   })
 
+  // Cast needed: baseForm has all form state/methods, we're adding HTTP methods below via Object.assign
   const form = baseForm as unknown as UseHttp<TForm, TResponse>
 
   // Add response property
@@ -286,7 +287,5 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     },
   })
 
-  return getPrecognitionEndpoint()
-    ? (form as unknown as UseHttpPrecognitiveProps<TForm, TResponse>)
-    : (form as unknown as UseHttp<TForm, TResponse>)
+  return getPrecognitionEndpoint() ? (form as UseHttpPrecognitiveProps<TForm, TResponse>) : form
 }

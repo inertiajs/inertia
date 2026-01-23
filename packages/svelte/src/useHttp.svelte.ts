@@ -294,7 +294,5 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     return form as any as UseHttpPrecognitiveProps<TForm, TResponse>
   }
 
-  return getPrecognitionEndpoint()
-    ? (form as unknown as UseHttpPrecognitiveProps<TForm, TResponse>)
-    : (form as unknown as UseHttp<TForm, TResponse>)
+  return getPrecognitionEndpoint() ? (form as UseHttpPrecognitiveProps<TForm, TResponse>) : form
 }

@@ -184,8 +184,15 @@ const triggerServerError = async () => {
       <div v-if="validateUser.hasErrors" id="validate-has-errors">Form has errors</div>
       <button @click="validateUser.clearErrors()" id="clear-errors-button">Clear Errors</button>
       <button @click="validateUser.clearErrors('name')" id="clear-name-error-button">Clear Name Error</button>
-      <button @click="validateUser.setError('name', 'Manual name error')" id="set-name-error-button">Set Name Error</button>
-      <button @click="validateUser.setError({ name: 'Multi name error', email: 'Multi email error' })" id="set-multiple-errors-button">Set Multiple Errors</button>
+      <button @click="validateUser.setError('name', 'Manual name error')" id="set-name-error-button">
+        Set Name Error
+      </button>
+      <button
+        @click="validateUser.setError({ name: 'Multi name error', email: 'Multi email error' })"
+        id="set-multiple-errors-button"
+      >
+        Set Multiple Errors
+      </button>
     </section>
 
     <!-- DELETE Request Test -->
