@@ -8,6 +8,7 @@ import {
   FormDataType,
   FormDataValues,
   getHttpClient,
+  hasFiles,
   HttpCancelledError,
   HttpProgressEvent,
   HttpResponseError,
@@ -88,20 +89,6 @@ export type UseHttpPrecognitiveProps<TForm extends object, TResponse = unknown> 
   UseHttpValidationProps<TForm> &
   InternalPrecognitionState
 
-function hasFiles(data: object): boolean {
-  for (const value of Object.values(data)) {
-    if (value instanceof File) {
-      return true
-    }
-
-    if (typeof value === 'object' && value !== null && hasFiles(value)) {
-      return true
-    }
-  }
-
-  return false
-}
-
 export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
   method: Method | (() => Method),
   url: string | (() => string),
@@ -172,7 +159,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
     const transform = getTransform()
     const transformedData = transform(form.data())
-    const useFormData = hasFiles(transformedData)
+    const useFormData = hasFiles(transformedData as Record<string, FormDataConvertible>)
 
     let requestUrl = url
     let requestData: FormData | string | undefined
