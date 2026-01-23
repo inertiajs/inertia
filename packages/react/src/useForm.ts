@@ -132,15 +132,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setDefaultsState,
     transformRef,
     precognitionEndpointRef,
-    recentlySuccessfulTimeoutId,
     isMounted,
     setProcessing,
     setProgress,
-    setWasSuccessful,
-    setRecentlySuccessful,
     markAsSuccessful,
     setError,
     defaultsCalledInOnSuccessRef,
+    resetBeforeSubmit,
+    finishProcessing,
   } = useFormState<TForm>({
     data,
     precognitionEndpoint: parsedArgs.precognitionEndpoint,
@@ -192,9 +191,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancelToken?.(token)
         },
         onBefore: (visit) => {
-          setWasSuccessful(false)
-          setRecentlySuccessful(false)
-          clearTimeout(recentlySuccessfulTimeoutId.current)
+          resetBeforeSubmit()
 
           return options.onBefore?.(visit)
         },
@@ -236,8 +233,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
         onFinish: (visit) => {
           if (isMounted.current) {
-            setProcessing(false)
-            setProgress(null)
+            finishProcessing()
           }
 
           cancelToken.current = null

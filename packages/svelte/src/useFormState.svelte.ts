@@ -68,6 +68,12 @@ export interface InternalPrecognitionState {
   __valid: string[]
 }
 
+export interface InternalRememberState<TForm extends object> {
+  __rememberable: boolean
+  __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
+  __restore: (restored: { data: TForm; errors: FormDataErrors<TForm> }) => void
+}
+
 export type FormState<TForm extends object> = FormStateProps<TForm> & TForm
 export type FormStateWithPrecognition<TForm extends object> = FormState<TForm> &
   FormStateValidationProps<TForm> &
@@ -80,7 +86,7 @@ export interface UseFormStateOptions<TForm extends object> {
 }
 
 export interface UseFormStateReturn<TForm extends object> {
-  form: FormState<TForm>
+  form: FormState<TForm> & InternalRememberState<TForm>
   getDefaults: () => TForm
   setDefaults: (newDefaults: TForm) => void
   getTransform: () => TransformCallback<TForm>
@@ -93,6 +99,9 @@ export interface UseFormStateReturn<TForm extends object> {
   markAsSuccessful: () => void
   wasDefaultsCalledInOnSuccess: () => boolean
   resetDefaultsCalledInOnSuccess: () => void
+  setRememberExcludeKeys: (keys: FormDataKeys<TForm>[]) => void
+  resetBeforeSubmit: () => void
+  finishProcessing: () => void
 }
 
 export default function useFormState<TForm extends object>(
@@ -114,6 +123,7 @@ export default function useFormState<TForm extends object>(
   let precognitionEndpoint = initialPrecognitionEndpoint ?? null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let defaultsCalledInOnSuccess = false
+  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
 
   let setFormStateInternal: <K extends string>(key: K, value: any) => void
 
@@ -336,6 +346,25 @@ export default function useFormState<TForm extends object>(
       return this
     },
     withPrecognition,
+
+    __rememberable: rememberKey === null,
+
+    __remember() {
+      const formData = (this as unknown as FormState<TForm>).data()
+
+      if (rememberExcludeKeys.length > 0) {
+        const filtered = { ...formData } as Record<string, unknown>
+        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
+        return { data: filtered as TForm, errors: $state.snapshot((this as unknown as FormState<TForm>).errors) }
+      }
+
+      return { data: formData, errors: $state.snapshot((this as unknown as FormState<TForm>).errors) }
+    },
+
+    __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }) {
+      Object.assign(this, restored.data)
+      ;(this as unknown as FormState<TForm>).setError(restored.errors)
+    },
   } as any)
 
   setFormStateInternal = <K extends string>(key: K, value: any) => {
@@ -354,12 +383,26 @@ export default function useFormState<TForm extends object>(
     }
   })
 
+  // Remember functionality
+  $effect(() => {
+    if (!rememberKey) {
+      return
+    }
+
+    const storedData = router.restore(rememberKey)
+    const newData = (form as unknown as InternalRememberState<TForm>).__remember()
+
+    if (!isEqual(storedData, newData)) {
+      router.remember(newData, rememberKey)
+    }
+  })
+
   if (precognitionEndpoint) {
     form.withPrecognition(precognitionEndpoint)
   }
 
   return {
-    form: form as FormState<TForm>,
+    form: form as FormState<TForm> & InternalRememberState<TForm>,
     getDefaults: () => defaults,
     setDefaults: (newDefaults: TForm) => {
       defaults = newDefaults
@@ -390,6 +433,21 @@ export default function useFormState<TForm extends object>(
     wasDefaultsCalledInOnSuccess: () => defaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess: () => {
       defaultsCalledInOnSuccess = false
+    },
+    setRememberExcludeKeys: (keys: FormDataKeys<TForm>[]) => {
+      rememberExcludeKeys = keys
+    },
+    resetBeforeSubmit: () => {
+      setFormStateInternal('wasSuccessful', false)
+      setFormStateInternal('recentlySuccessful', false)
+
+      if (recentlySuccessfulTimeoutId) {
+        clearTimeout(recentlySuccessfulTimeoutId)
+      }
+    },
+    finishProcessing: () => {
+      setFormStateInternal('processing', false)
+      setFormStateInternal('progress', null)
     },
   }
 }

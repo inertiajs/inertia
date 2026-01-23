@@ -112,6 +112,8 @@ export interface UseFormStateReturn<TForm extends object> {
   clearErrors: (...fields: string[]) => void
   setError: (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) => void
   defaultsCalledInOnSuccessRef: React.MutableRefObject<boolean>
+  resetBeforeSubmit: () => void
+  finishProcessing: () => void
 }
 
 export default function useFormState<TForm extends object>(
@@ -307,6 +309,17 @@ export default function useFormState<TForm extends object>(
     }, config.get('form.recentlySuccessfulDuration'))
   }, [clearErrors, setWasSuccessful, setRecentlySuccessful])
 
+  const resetBeforeSubmit = useCallback(() => {
+    setWasSuccessful(false)
+    setRecentlySuccessful(false)
+    clearTimeout(recentlySuccessfulTimeoutId.current)
+  }, [setWasSuccessful, setRecentlySuccessful])
+
+  const finishProcessing = useCallback(() => {
+    setProcessing(false)
+    setProgress(null)
+  }, [setProcessing, setProgress])
+
   const transformFunction = useCallback((callback: UseFormTransformCallback<TForm>) => {
     transformRef.current = callback
   }, [])
@@ -461,5 +474,7 @@ export default function useFormState<TForm extends object>(
     clearErrors,
     setError,
     defaultsCalledInOnSuccessRef,
+    resetBeforeSubmit,
+    finishProcessing,
   }
 }

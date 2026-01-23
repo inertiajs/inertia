@@ -150,16 +150,15 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     transformRef,
     dataRef,
     precognitionEndpointRef,
-    recentlySuccessfulTimeoutId,
     isMounted,
     setProcessing,
     setProgress,
-    setWasSuccessful,
-    setRecentlySuccessful,
     markAsSuccessful,
     clearErrors,
     setError,
     defaultsCalledInOnSuccessRef,
+    resetBeforeSubmit,
+    finishProcessing,
   } = useFormState<TForm>({
     data,
     precognitionEndpoint: parsedArgs.precognitionEndpoint,
@@ -178,9 +177,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       defaultsCalledInOnSuccessRef.current = false
 
       if (isMounted.current) {
-        setWasSuccessful(false)
-        setRecentlySuccessful(false)
-        clearTimeout(recentlySuccessfulTimeoutId.current)
+        resetBeforeSubmit()
       }
 
       abortController.current = new AbortController()
@@ -293,8 +290,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         throw error
       } finally {
         if (isMounted.current) {
-          setProcessing(false)
-          setProgress(null)
+          finishProcessing()
         }
 
         abortController.current = null

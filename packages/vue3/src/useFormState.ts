@@ -77,6 +77,12 @@ export type FormStateWithPrecognition<TForm extends object> = FormState<TForm> &
   FormStateValidationProps<TForm> &
   InternalPrecognitionState
 
+interface InternalRememberState<TForm extends object> {
+  __rememberable: boolean
+  __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
+  __restore: (restored: { data: TForm; errors: FormDataErrors<TForm> }) => void
+}
+
 export interface UseFormStateOptions<TForm extends object> {
   data: TForm | (() => TForm)
   rememberKey?: string | null
@@ -84,7 +90,7 @@ export interface UseFormStateOptions<TForm extends object> {
 }
 
 export interface UseFormStateReturn<TForm extends object> {
-  form: FormState<TForm>
+  form: FormState<TForm> & InternalRememberState<TForm>
   getDefaults: () => TForm
   setDefaults: (newDefaults: TForm) => void
   getTransform: () => UseFormTransformCallback<TForm>
@@ -96,6 +102,9 @@ export interface UseFormStateReturn<TForm extends object> {
   markAsSuccessful: () => void
   wasDefaultsCalledInOnSuccess: () => boolean
   resetDefaultsCalledInOnSuccess: () => void
+  setRememberExcludeKeys: (keys: FormDataKeys<TForm>[]) => void
+  resetBeforeSubmit: () => void
+  finishProcessing: () => void
 }
 
 export default function useFormState<TForm extends object>(
@@ -117,6 +126,7 @@ export default function useFormState<TForm extends object>(
   let validatorRef: Validator | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | undefined
   let defaultsCalledInOnSuccess = false
+  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
 
   const form = reactive<FormState<TForm>>({
     ...cloneDeep(defaults),
@@ -324,9 +334,28 @@ export default function useFormState<TForm extends object>(
       this.clearErrors(...fields)
       return this
     },
+
+    __rememberable: rememberKey === null,
+
+    __remember() {
+      const formData = (this as unknown as FormState<TForm>).data()
+
+      if (rememberExcludeKeys.length > 0) {
+        const filtered = { ...formData } as Record<string, unknown>
+        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
+        return { data: filtered as TForm, errors: (this as unknown as FormState<TForm>).errors }
+      }
+
+      return { data: formData, errors: (this as unknown as FormState<TForm>).errors }
+    },
+
+    __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }) {
+      Object.assign(this, restored.data)
+      ;(this as unknown as FormState<TForm>).setError(restored.errors)
+    },
   })
 
-  const typedForm = form as any as FormState<TForm>
+  const typedForm = form as any as FormState<TForm> & InternalRememberState<TForm>
 
   // Set restored errors if any
   if (restored?.errors) {
@@ -337,6 +366,24 @@ export default function useFormState<TForm extends object>(
     typedForm,
     () => {
       typedForm.isDirty = !isEqual(typedForm.data(), defaults)
+    },
+    { immediate: true, deep: true },
+  )
+
+  // Watch for remember functionality
+  watch(
+    typedForm,
+    (newValue) => {
+      if (!rememberKey) {
+        return
+      }
+
+      const storedData = router.restore(rememberKey)
+      const newData = cloneDeep((newValue as unknown as InternalRememberState<TForm>).__remember())
+
+      if (!isEqual(storedData, newData)) {
+        router.remember(newData, rememberKey)
+      }
     },
     { immediate: true, deep: true },
   )
@@ -374,6 +421,18 @@ export default function useFormState<TForm extends object>(
     wasDefaultsCalledInOnSuccess: () => defaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess: () => {
       defaultsCalledInOnSuccess = false
+    },
+    setRememberExcludeKeys: (keys: FormDataKeys<TForm>[]) => {
+      rememberExcludeKeys = keys
+    },
+    resetBeforeSubmit: () => {
+      typedForm.wasSuccessful = false
+      typedForm.recentlySuccessful = false
+      clearTimeout(recentlySuccessfulTimeoutId)
+    },
+    finishProcessing: () => {
+      typedForm.processing = false
+      typedForm.progress = null
     },
   }
 }

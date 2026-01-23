@@ -23,7 +23,7 @@ import type {
 } from '@inertiajs/core'
 import { router, UseFormUtils } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep, isEqual } from 'lodash-es'
+import { cloneDeep } from 'lodash-es'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties
@@ -147,7 +147,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   validateFormDataKeys(resolvedData)
 
   let cancelToken: CancelToken | null = null
-  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
 
   const {
     form: baseForm,
@@ -155,10 +154,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     getTransform,
     getPrecognitionEndpoint,
     setFormState,
-    clearRecentlySuccessfulTimeout,
     markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
+    setRememberExcludeKeys,
+    resetBeforeSubmit,
+    finishProcessing,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -167,11 +168,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   // Access baseForm as the full type with precognition
   const formWithPrecognition = () => baseForm as any as FormStateWithPrecognition<TForm> & InternalPrecognitionState
-
-  const dontRememberMethod = (...keys: FormDataKeys<TForm>[]) => {
-    rememberExcludeKeys = keys
-    return form
-  }
 
   const submit = (...args: UseFormSubmitArguments) => {
     const { method, url, options } = UseFormUtils.parseSubmitArguments(args, getPrecognitionEndpoint())
@@ -188,9 +184,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return options.onCancelToken?.(token)
       },
       onBefore: (visit: PendingVisit) => {
-        setFormState('wasSuccessful', false)
-        setFormState('recentlySuccessful', false)
-        clearRecentlySuccessfulTimeout()
+        resetBeforeSubmit()
 
         return options.onBefore?.(visit)
       },
@@ -224,8 +218,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         return options.onCancel?.()
       },
       onFinish: (visit: ActiveVisit) => {
-        setFormState('processing', false)
-        setFormState('progress', null)
+        finishProcessing()
         cancelToken = null
 
         return options.onFinish?.(visit)
@@ -258,31 +251,14 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     patch: createSubmitMethod('patch'),
     delete: createSubmitMethod('delete'),
     cancel,
-    __remember() {
-      const data = form.data()
-      if (rememberExcludeKeys.length > 0) {
-        const filtered = { ...data } as Record<string, unknown>
-        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
-        return { data: filtered as TForm, errors: $state.snapshot(form.errors) }
-      }
-      return { data, errors: $state.snapshot(form.errors) }
+    dontRemember(...keys: FormDataKeys<TForm>[]) {
+      setRememberExcludeKeys(keys)
+      return form
     },
-    dontRemember: dontRememberMethod,
   })
 
   // Cast to the full form type
   const form = baseForm as any as InertiaForm<TForm>
-
-  // Handle remember functionality
-  $effect(() => {
-    if (rememberKey) {
-      const storedData = router.restore(rememberKey)
-      const newData = (form as any).__remember()
-      if (!isEqual(storedData, newData)) {
-        router.remember(newData, rememberKey)
-      }
-    }
-  })
 
   // Wrap withPrecognition to return the correct type with submit methods
   const originalWithPrecognition = formWithPrecognition().withPrecognition

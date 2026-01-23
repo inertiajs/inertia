@@ -22,11 +22,10 @@ import {
   HttpResponseError,
   mergeDataIntoQueryString,
   objectToFormData,
-  router,
   UseFormUtils,
 } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep, isEqual } from 'lodash-es'
+import { cloneDeep } from 'lodash-es'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 export interface UseHttpProps<TForm extends object, TResponse = unknown> {
@@ -83,12 +82,6 @@ export interface UseHttpValidationProps<TForm extends object> {
   forgetError<K extends FormDataKeys<TForm> | NamedInputEvent>(field: K): this
 }
 
-interface InternalRememberState<TForm extends object> {
-  __rememberable: boolean
-  __remember(): { data: TForm; errors: FormDataErrors<TForm> }
-  __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }): void
-}
-
 export type UseHttp<TForm extends object, TResponse = unknown> = UseHttpProps<TForm, TResponse> & TForm
 export type UseHttpPrecognitiveProps<TForm extends object, TResponse = unknown> = UseHttp<TForm, TResponse> &
   UseHttpValidationProps<TForm>
@@ -130,7 +123,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
   const { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
 
   let abortController: AbortController | null = null
-  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
 
   const {
     form: baseForm,
@@ -138,10 +130,12 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     getTransform,
     getPrecognitionEndpoint,
     setFormState,
-    clearRecentlySuccessfulTimeout,
     markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
+    setRememberExcludeKeys,
+    resetBeforeSubmit,
+    finishProcessing,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -162,10 +156,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     }
 
     resetDefaultsCalledInOnSuccess()
-
-    setFormState('wasSuccessful', false)
-    setFormState('recentlySuccessful', false)
-    clearRecentlySuccessfulTimeout()
+    resetBeforeSubmit()
 
     abortController = new AbortController()
 
@@ -263,8 +254,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
       throw error
     } finally {
-      setFormState('processing', false)
-      setFormState('progress', null)
+      finishProcessing()
       abortController = null
       options.onFinish?.()
     }
@@ -272,11 +262,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
   const cancel = () => {
     abortController?.abort()
-  }
-
-  const dontRememberMethod = (...keys: FormDataKeys<TForm>[]) => {
-    rememberExcludeKeys = keys
-    return form
   }
 
   const createSubmitMethod =
@@ -293,36 +278,14 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     patch: createSubmitMethod('patch'),
     delete: createSubmitMethod('delete'),
     cancel,
-    dontRemember: dontRememberMethod,
-    __rememberable: rememberKey === null,
-    __remember() {
-      const formData = form.data()
-      if (rememberExcludeKeys.length > 0) {
-        const filtered = { ...formData } as Record<string, unknown>
-        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
-        return { data: filtered as TForm, errors: $state.snapshot(form.errors) }
-      }
-      return { data: formData, errors: $state.snapshot(form.errors) }
-    },
-    __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }) {
-      Object.assign(form, restored.data)
-      form.setError(restored.errors)
+    dontRemember(...keys: FormDataKeys<TForm>[]) {
+      setRememberExcludeKeys(keys)
+      return form
     },
   })
 
   // Cast to the full form type
-  const form = baseForm as any as UseHttp<TForm, TResponse> & InternalRememberState<TForm>
-
-  // Handle remember functionality
-  $effect(() => {
-    if (rememberKey) {
-      const storedData = router.restore(rememberKey)
-      const newData = form.__remember()
-      if (!isEqual(storedData, newData)) {
-        router.remember(newData, rememberKey)
-      }
-    }
-  })
+  const form = baseForm as any as UseHttp<TForm, TResponse>
 
   // Wrap withPrecognition to return the correct type
   const originalWithPrecognition = formWithPrecognition().withPrecognition

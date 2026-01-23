@@ -19,8 +19,7 @@ import {
   VisitOptions,
 } from '@inertiajs/core'
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep, isEqual } from 'lodash-es'
-import { watch } from 'vue'
+import { cloneDeep } from 'lodash-es'
 import useFormState from './useFormState'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties
@@ -105,12 +104,6 @@ interface InternalPrecognitionState {
   __valid: string[]
 }
 
-interface InternalRememberState<TForm extends object> {
-  __rememberable: boolean
-  __remember: () => { data: TForm; errors: FormDataErrors<TForm> }
-  __restore: (restored: { data: TForm; errors: FormDataErrors<TForm> }) => void
-}
-
 export type InertiaForm<TForm extends object> = TForm & InertiaFormProps<TForm>
 export type InertiaPrecognitiveForm<TForm extends object> = InertiaForm<TForm> &
   InertiaFormValidationProps<TForm> &
@@ -148,17 +141,18 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   validateFormDataKeys(initialDefaults)
 
   let cancelToken: CancelToken | null = null
-  let rememberExcludeKeys: FormDataKeys<TForm>[] = []
 
   const {
     form: baseForm,
     setDefaults,
     getTransform,
     getPrecognitionEndpoint,
-    clearRecentlySuccessfulTimeout,
     markAsSuccessful,
     wasDefaultsCalledInOnSuccess,
     resetDefaultsCalledInOnSuccess,
+    setRememberExcludeKeys,
+    resetBeforeSubmit,
+    finishProcessing,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -166,7 +160,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   })
 
   // Add useForm-specific methods
-  const form = baseForm as unknown as InertiaForm<TForm> & InternalRememberState<TForm>
+  const form = baseForm as unknown as InertiaForm<TForm>
 
   const createSubmitMethod =
     (method: Method) =>
@@ -188,9 +182,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancelToken?.(token)
         },
         onBefore: (visit) => {
-          form.wasSuccessful = false
-          form.recentlySuccessful = false
-          clearRecentlySuccessfulTimeout()
+          resetBeforeSubmit()
 
           return options.onBefore?.(visit)
         },
@@ -225,8 +217,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancel?.()
         },
         onFinish: (visit) => {
-          form.processing = false
-          form.progress = null
+          finishProcessing()
           cancelToken = null
 
           return options.onFinish?.(visit)
@@ -255,41 +246,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     },
 
     dontRemember(...keys: FormDataKeys<TForm>[]) {
-      rememberExcludeKeys = keys
+      setRememberExcludeKeys(keys)
       return form
     },
-
-    __rememberable: rememberKey === null,
-
-    __remember() {
-      const formData = form.data()
-      if (rememberExcludeKeys.length > 0) {
-        const filtered = { ...formData } as Record<string, unknown>
-        rememberExcludeKeys.forEach((k) => delete filtered[k as string])
-        return { data: filtered as TForm, errors: form.errors }
-      }
-      return { data: formData, errors: form.errors }
-    },
-
-    __restore(restored: { data: TForm; errors: FormDataErrors<TForm> }) {
-      Object.assign(form, restored.data)
-      form.setError(restored.errors)
-    },
   })
-
-  // Watch for remember functionality
-  watch(
-    form,
-    (newValue) => {
-      const storedData = router.restore(rememberKey!)
-      const newData = cloneDeep(newValue.__remember())
-
-      if (rememberKey && !isEqual(storedData, newData)) {
-        router.remember(newData, rememberKey)
-      }
-    },
-    { immediate: true, deep: true },
-  )
 
   return getPrecognitionEndpoint()
     ? (form as unknown as InertiaPrecognitiveForm<TForm>)
