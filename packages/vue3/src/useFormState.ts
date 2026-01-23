@@ -91,14 +91,9 @@ export interface UseFormStateOptions<TForm extends object> {
 
 export interface UseFormStateReturn<TForm extends object> {
   form: FormState<TForm> & InternalRememberState<TForm>
-  getDefaults: () => TForm
   setDefaults: (newDefaults: TForm) => void
   getTransform: () => UseFormTransformCallback<TForm>
-  getValidatorRef: () => Validator | null
   getPrecognitionEndpoint: () => (() => UrlMethodPair) | null
-  getRecentlySuccessfulTimeoutId: () => ReturnType<typeof setTimeout> | undefined
-  setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout>) => void
-  clearRecentlySuccessfulTimeout: () => void
   markAsSuccessful: () => void
   wasDefaultsCalledInOnSuccess: () => boolean
   resetDefaultsCalledInOnSuccess: () => void
@@ -394,20 +389,11 @@ export default function useFormState<TForm extends object>(
 
   return {
     form: typedForm,
-    getDefaults: () => defaults,
     setDefaults: (newDefaults: TForm) => {
       defaults = newDefaults
     },
     getTransform: () => transform,
-    getValidatorRef: () => validatorRef,
     getPrecognitionEndpoint: () => precognitionEndpoint ?? null,
-    getRecentlySuccessfulTimeoutId: () => recentlySuccessfulTimeoutId,
-    setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout>) => {
-      recentlySuccessfulTimeoutId = id
-    },
-    clearRecentlySuccessfulTimeout: () => {
-      clearTimeout(recentlySuccessfulTimeoutId)
-    },
     markAsSuccessful: () => {
       typedForm.clearErrors()
       typedForm.wasSuccessful = true

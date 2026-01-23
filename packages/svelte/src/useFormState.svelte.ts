@@ -87,15 +87,10 @@ export interface UseFormStateOptions<TForm extends object> {
 
 export interface UseFormStateReturn<TForm extends object> {
   form: FormState<TForm> & InternalRememberState<TForm>
-  getDefaults: () => TForm
   setDefaults: (newDefaults: TForm) => void
   getTransform: () => TransformCallback<TForm>
-  getValidatorRef: () => Validator | null
   getPrecognitionEndpoint: () => (() => UrlMethodPair) | null
   setFormState: <K extends string>(key: K, value: any) => void
-  getRecentlySuccessfulTimeoutId: () => ReturnType<typeof setTimeout> | null
-  setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout> | null) => void
-  clearRecentlySuccessfulTimeout: () => void
   markAsSuccessful: () => void
   wasDefaultsCalledInOnSuccess: () => boolean
   resetDefaultsCalledInOnSuccess: () => void
@@ -403,23 +398,12 @@ export default function useFormState<TForm extends object>(
 
   return {
     form: form as FormState<TForm> & InternalRememberState<TForm>,
-    getDefaults: () => defaults,
     setDefaults: (newDefaults: TForm) => {
       defaults = newDefaults
     },
     getTransform: () => transform,
-    getValidatorRef: () => validatorRef,
     getPrecognitionEndpoint: () => precognitionEndpoint,
     setFormState: setFormStateInternal,
-    getRecentlySuccessfulTimeoutId: () => recentlySuccessfulTimeoutId,
-    setRecentlySuccessfulTimeoutId: (id: ReturnType<typeof setTimeout> | null) => {
-      recentlySuccessfulTimeoutId = id
-    },
-    clearRecentlySuccessfulTimeout: () => {
-      if (recentlySuccessfulTimeoutId) {
-        clearTimeout(recentlySuccessfulTimeoutId)
-      }
-    },
     markAsSuccessful: () => {
       form.clearErrors()
       setFormStateInternal('wasSuccessful', true)

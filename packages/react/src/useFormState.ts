@@ -96,18 +96,13 @@ export interface UseFormStateOptions<TForm extends object> {
 
 export interface UseFormStateReturn<TForm extends object> {
   form: FormState<TForm>
-  defaults: TForm
   setDefaultsState: React.Dispatch<React.SetStateAction<TForm>>
   transformRef: React.MutableRefObject<UseFormTransformCallback<TForm>>
-  validatorRef: React.MutableRefObject<Validator | null>
   precognitionEndpointRef: React.MutableRefObject<(() => UrlMethodPair) | null>
   dataRef: React.MutableRefObject<TForm>
-  recentlySuccessfulTimeoutId: React.MutableRefObject<number | undefined>
   isMounted: React.MutableRefObject<boolean>
   setProcessing: React.Dispatch<React.SetStateAction<boolean>>
   setProgress: React.Dispatch<React.SetStateAction<Progress | null>>
-  setWasSuccessful: React.Dispatch<React.SetStateAction<boolean>>
-  setRecentlySuccessful: React.Dispatch<React.SetStateAction<boolean>>
   markAsSuccessful: () => void
   clearErrors: (...fields: string[]) => void
   setError: (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) => void
@@ -458,18 +453,13 @@ export default function useFormState<TForm extends object>(
 
   return {
     form,
-    defaults,
     setDefaultsState,
     transformRef,
-    validatorRef,
     precognitionEndpointRef,
     dataRef,
-    recentlySuccessfulTimeoutId,
     isMounted,
     setProcessing,
     setProgress,
-    setWasSuccessful,
-    setRecentlySuccessful,
     markAsSuccessful,
     clearErrors,
     setError,
