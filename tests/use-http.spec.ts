@@ -272,7 +272,6 @@ test.describe('useHttp', () => {
       expect(uploadRequest).toBeDefined()
       expect(uploadRequest?.headers()['content-type']).toContain('multipart/form-data')
     })
-
   })
 
   test.describe('Headers', () => {
