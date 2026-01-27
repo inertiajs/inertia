@@ -2,6 +2,7 @@ import test, { expect } from '@playwright/test'
 import { config } from '../../packages/core/src/config'
 import {
   isSameUrlWithoutHash,
+  isSameUrlWithoutQueryOrHash,
   mergeDataIntoQueryString,
   transformUrlAndData,
   urlHasProtocol,
@@ -586,6 +587,43 @@ test.describe('url.ts', () => {
         expect(isSameUrlWithoutHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com'))).toBe(
           false,
         )
+      })
+    })
+  })
+
+  test.describe('isSameUrlWithoutQueryOrHash', () => {
+    const sameCases = [
+      ['/page', '/page', 'identical paths'],
+      ['/page', '/page#section', 'path vs path with hash'],
+      ['/page#one', '/page#two', 'same path, different hashes'],
+      ['/page', '/page?foo=bar', 'path vs path with query'],
+      ['/page?foo=bar', '/page?foo=baz', 'different query values'],
+      ['/page?a=1', '/page?b=2', 'different query params'],
+      ['/page?foo=bar', '/page?foo=bar#section', 'query vs query with hash'],
+      ['/page?foo=bar#one', '/page?baz=qux#two', 'different queries and hashes'],
+      ['https://example.com/page', 'https://example.com/page?foo=bar#hash', 'full URL with query and hash'],
+    ] as const
+
+    const differentCases = [
+      ['/page-a', '/page-b', 'different paths'],
+      ['/page/one', '/page/two', 'different nested paths'],
+      ['https://example.com/page', 'https://other.com/page', 'different hosts'],
+      ['http://example.com/page', 'https://example.com/page', 'different protocols'],
+    ] as const
+
+    sameCases.forEach(([url1, url2, description]) => {
+      test(`returns true for ${description}: ${url1} vs ${url2}`, () => {
+        expect(
+          isSameUrlWithoutQueryOrHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com')),
+        ).toBe(true)
+      })
+    })
+
+    differentCases.forEach(([url1, url2, description]) => {
+      test(`returns false for ${description}: ${url1} vs ${url2}`, () => {
+        expect(
+          isSameUrlWithoutQueryOrHash(new URL(url1, 'https://example.com'), new URL(url2, 'https://example.com')),
+        ).toBe(false)
       })
     })
   })
