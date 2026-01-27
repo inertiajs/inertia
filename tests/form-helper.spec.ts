@@ -305,6 +305,24 @@ test.describe('Form Helper', () => {
     })
   })
 
+  test('it clears errors for fields that are no longer invalid on resubmit', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/form-helper/errors/clear-on-resubmit')
+
+    // Submit with both fields empty
+    await clickAndWaitForResponse(page, 'Submit', undefined, 'button')
+    await expect(page.locator('#name-error')).toHaveText('The name must be at least 3 characters.')
+    await expect(page.locator('#handle-error')).toHaveText('The handle must be at least 3 characters.')
+
+    // Fill name with valid value and resubmit
+    await page.fill('#name', 'John')
+    await clickAndWaitForResponse(page, 'Submit', undefined, 'button')
+
+    // Name error should be cleared, handle error should remain
+    await expect(page.locator('#name-error')).not.toBeVisible()
+    await expect(page.locator('#handle-error')).toHaveText('The handle must be at least 3 characters.')
+  })
+
   test.describe('Dirty', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
