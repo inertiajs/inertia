@@ -38,7 +38,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   }, [pageProps, keys])
 
   const getReloadParams = useCallback<() => Partial<ReloadOptions>>(() => {
-    const reloadParams: Partial<ReloadOptions> = { ...params }
+    const reloadParams: Partial<ReloadOptions> = { preserveErrors: true, ...params }
 
     if (data) {
       reloadParams.only = (Array.isArray(data) ? data : [data]) as string[]

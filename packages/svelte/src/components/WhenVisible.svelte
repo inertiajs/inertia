@@ -71,7 +71,7 @@
   }
 
   function getReloadParams(): Partial<ReloadOptions> {
-    const reloadParams: Partial<ReloadOptions> = { ...params }
+    const reloadParams: Partial<ReloadOptions> = { preserveErrors: true, ...params }
 
     if (data !== '') {
       reloadParams.only = (Array.isArray(data) ? data : [data]) as string[]

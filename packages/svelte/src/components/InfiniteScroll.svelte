@@ -5,6 +5,7 @@
     type InfiniteScrollComponentBaseProps,
     type UseInfiniteScrollProps,
     type InfiniteScrollSlotProps,
+    type ReloadOptions,
     useInfiniteScroll,
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
@@ -21,6 +22,7 @@
     startElement?: string | (() => HTMLElement | null) | null
     endElement?: string | (() => HTMLElement | null) | null
     itemsElement?: string | (() => HTMLElement | null) | null
+    params?: ReloadOptions
     onlyNext?: boolean
     onlyPrevious?: boolean
     previous?: import('svelte').Snippet<[any]>
@@ -42,6 +44,7 @@
     startElement = null,
     endElement = null,
     itemsElement = null,
+    params = {},
     onlyNext = false,
     onlyPrevious = false,
     previous,
@@ -133,6 +136,7 @@
       shouldFetchNext: () => !onlyPrevious,
       shouldFetchPrevious: () => !onlyNext,
       shouldPreserveUrl: () => preserveUrl ?? false,
+      getReloadOptions: () => params,
 
       // Elements
       getTriggerMargin: () => buffer ?? 0,
