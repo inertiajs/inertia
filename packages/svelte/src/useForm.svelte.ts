@@ -453,7 +453,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return onSuccess
         },
         onError: (errors: Errors) => {
-          this.clearErrors().setError(errors as FormDataErrors<TForm>)
+          setFormState('errors', errors as FormDataErrors<TForm>)
+
+          validatorRef?.setErrors(errors)
 
           if (options.onError) {
             return options.onError(errors)

@@ -234,7 +234,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
         onError: (errors) => {
           if (isMounted.current) {
-            setError(errors as FormDataErrors<TForm>)
+            setErrors(errors as FormDataErrors<TForm>)
+            setHasErrors(Object.keys(errors).length > 0)
+            validatorRef.current?.setErrors(errors as Errors)
           }
 
           if (options.onError) {

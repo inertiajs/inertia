@@ -47,7 +47,11 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
     setLoaded(keys.every((key) => pageProps[key] !== undefined))
   }, [pageProps, keys])
 
-  if (loaded) {
+  // Always check that props are actually defined before rendering children,
+  // even if loaded is true, to prevent race conditions during reloads
+  const propsAreDefined = useMemo(() => keys.every((key) => pageProps[key] !== undefined), [keys, pageProps])
+
+  if (loaded && propsAreDefined) {
     return typeof children === 'function' ? children() : children
   }
 

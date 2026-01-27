@@ -1596,4 +1596,34 @@ test.describe('Form Component', () => {
       })
     })
   })
+
+  test.describe('Form Target', () => {
+    test('it opens a new tab when button has formTarget="_blank" on GET forms', async ({ page, context }) => {
+      await page.goto('/form-component/form-target')
+
+      const newPagePromise = context.waitForEvent('page')
+      await page.click('#button-blank')
+      const newPage = await newPagePromise
+
+      await newPage.waitForLoadState()
+      const text = await newPage.locator('body').innerText()
+
+      expect(text).toContain('query:search=test-query&format=csv')
+      await newPage.close()
+    })
+
+    test('it opens a new tab when input has formTarget="_blank" on GET forms', async ({ page, context }) => {
+      await page.goto('/form-component/form-target')
+
+      const newPagePromise = context.waitForEvent('page')
+      await page.click('#input-blank')
+      const newPage = await newPagePromise
+
+      await newPage.waitForLoadState()
+      const text = await newPage.locator('body').innerText()
+
+      expect(text).toContain('query:search=test-query&type=export')
+      await newPage.close()
+    })
+  })
 })
