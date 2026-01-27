@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.11...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.12...master)
 
 - Nothing yet
+
+## [v2.3.12](https://github.com/inertiajs/inertia/compare/v2.3.11...v2.3.12) - 2026-01-27
+
+### What's Changed
+
+* Bump lodash from 4.17.21 to 4.17.23 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2835
+* Bump lodash-es from 4.17.22 to 4.17.23 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2836
+* Fix cancellation of concurrent partial reloads with query parameters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2843
+* Support for the `formTarget` attribute in the `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2844
+* Clear stale form errors on resubmit by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2845
+* Prevent `<Deferred>` from rendering children with undefined props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2846
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.11...v2.3.12
 
 ## [v2.3.11](https://github.com/inertiajs/inertia/compare/v2.3.10...v2.3.11) - 2026-01-20
 
