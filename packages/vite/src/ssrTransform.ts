@@ -1,4 +1,4 @@
-import type { ExportDefaultDeclaration, Identifier, ImportDeclaration, Program, SimpleCallExpression } from 'estree'
+import type { ExpressionStatement, Identifier, ImportDeclaration, Program, SimpleCallExpression } from 'estree'
 import { parseAst } from 'vite'
 import type { InertiaSSROptions } from './ssr'
 
@@ -18,7 +18,7 @@ export function findInertiaAppExport(code: string): boolean {
     return false
   }
 
-  return findExportedCall(ast) !== null
+  return findInertiaCall(ast) !== null
 }
 
 export function wrapWithServerBootstrap(code: string, options: InertiaSSROptions): string | null {
@@ -28,35 +28,32 @@ export function wrapWithServerBootstrap(code: string, options: InertiaSSROptions
     return null
   }
 
-  const match = findExportedCall(ast)
+  const match = findInertiaCall(ast)
 
   if (!match) {
     return null
   }
 
-  const { exportNode, callNode } = match
-  const callCode = code.slice(callNode.start, callNode.end)
+  const callCode = code.slice(match.callNode.start, match.callNode.end)
   const configArg = buildConfigArg(options)
-
   const framework = detectFramework(ast)
   const rendererModule = framework ? SERVER_RENDERERS[framework] : null
 
-  let replacement: string
+  const rendererImport = rendererModule
+    ? `import { renderToString as __inertia_renderToString__ } from '${rendererModule}'\n`
+    : ''
 
-  if (rendererModule) {
-    replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
-import { renderToString as __inertia_renderToString__ } from '${rendererModule}'
-const __inertia_render__ = await ${callCode}
-__inertia_createServer__((page) => __inertia_render__(page, __inertia_renderToString__)${configArg})
-export default __inertia_render__`
-  } else {
-    replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
-const __inertia_render__ = await ${callCode}
+  const renderWrapper = rendererModule
+    ? `const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)`
+    : `const __inertia_render__ = __inertia_app__`
+
+  const replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
+${rendererImport}const __inertia_app__ = await ${callCode}
+${renderWrapper}
 __inertia_createServer__(__inertia_render__${configArg})
 export default __inertia_render__`
-  }
 
-  return code.slice(0, exportNode.start) + replacement + code.slice(exportNode.end)
+  return code.slice(0, match.statementNode.start) + replacement + code.slice(match.statementNode.end)
 }
 
 function safeParse(code: string): Program | null {
@@ -67,40 +64,44 @@ function safeParse(code: string): Program | null {
   }
 }
 
-interface ExportedCall {
-  exportNode: NodeWithPos<ExportDefaultDeclaration>
+interface InertiaCall {
+  statementNode: NodeWithPos<ExpressionStatement>
   callNode: NodeWithPos<SimpleCallExpression>
 }
 
-function findExportedCall(ast: Program): ExportedCall | null {
+function findInertiaCall(ast: Program): InertiaCall | null {
   for (const node of ast.body) {
-    if (node.type !== 'ExportDefaultDeclaration') {
+    if (node.type !== 'ExpressionStatement') {
       continue
     }
 
-    const exportNode = node as NodeWithPos<ExportDefaultDeclaration>
-    let declaration = exportNode.declaration
+    const exprNode = node as NodeWithPos<ExpressionStatement>
+    const callNode = extractCallExpression(exprNode.expression)
 
-    if (declaration.type === 'AwaitExpression') {
-      declaration = declaration.argument
-    }
-
-    if (declaration.type !== 'CallExpression') {
-      continue
-    }
-
-    const callNode = declaration as NodeWithPos<SimpleCallExpression>
-
-    if (callNode.callee.type !== 'Identifier') {
-      continue
-    }
-
-    if (INERTIA_APP_FUNCTIONS.includes((callNode.callee as Identifier).name)) {
-      return { exportNode, callNode }
+    if (callNode && isInertiaAppCall(callNode)) {
+      return { statementNode: exprNode, callNode }
     }
   }
 
   return null
+}
+
+function extractCallExpression(node: unknown): NodeWithPos<SimpleCallExpression> | null {
+  let expr = node as { type: string; argument?: unknown; start: number; end: number }
+
+  if (expr.type === 'AwaitExpression') {
+    expr = expr.argument as typeof expr
+  }
+
+  if (expr.type === 'CallExpression') {
+    return expr as NodeWithPos<SimpleCallExpression>
+  }
+
+  return null
+}
+
+function isInertiaAppCall(node: SimpleCallExpression): boolean {
+  return node.callee.type === 'Identifier' && INERTIA_APP_FUNCTIONS.includes((node.callee as Identifier).name)
 }
 
 function detectFramework(ast: Program): string | null {

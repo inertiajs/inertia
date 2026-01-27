@@ -261,11 +261,11 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `export default configureInertiaApp({ resolve: (name) => name })`
+      const code = `configureInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
       expect(result).toContain("import __inertia_createServer__ from '@inertiajs/core/server'")
-      expect(result).toContain('const __inertia_render__ = await configureInertiaApp')
+      expect(result).toContain('const __inertia_app__ = await configureInertiaApp')
       expect(result).toContain('__inertia_createServer__(__inertia_render__)')
       expect(result).toContain('export default __inertia_render__')
     })
@@ -278,7 +278,7 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `export default createInertiaApp({ resolve: (name) => name })`
+      const code = `createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
       expect(result).toContain('__inertia_createServer__(__inertia_render__)')
@@ -292,13 +292,13 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `export default configureInertiaApp({})`
+      const code = `configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
       expect(result).toContain('__inertia_createServer__(__inertia_render__, {"port":13715,"cluster":true})')
     })
 
-    it('does not transform in dev mode', () => {
+    it('transforms in dev mode for SSR', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
@@ -306,10 +306,10 @@ describe('SSR', () => {
 
       plugin.configResolved!({ ...createMockConfig(logger, false), command: 'serve' } as ResolvedConfig)
 
-      const code = `export default configureInertiaApp({})`
+      const code = `configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toBeNull()
+      expect(result).toContain('__inertia_createServer__')
     })
 
     it('does not transform client builds', () => {
@@ -320,7 +320,7 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `export default configureInertiaApp({})`
+      const code = `configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: false })
 
       expect(result).toBeNull()

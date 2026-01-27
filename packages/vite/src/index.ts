@@ -13,14 +13,12 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : (options.ssr ?? {})
 
   let entry: string | null = null
-  let isDevMode = false
 
   return {
     name: '@inertiajs/vite',
 
     configResolved(config) {
       entry = resolveSSREntry(ssr, config)
-      isDevMode = config.command === 'serve'
 
       if (entry && config.build?.ssr) {
         config.logger.info(`Inertia SSR entry: ${entry}`)
@@ -34,7 +32,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
 
       let result = code
 
-      if (options?.ssr && !isDevMode && findInertiaAppExport(result)) {
+      if (options?.ssr && findInertiaAppExport(result)) {
         result = wrapWithServerBootstrap(result, ssr) ?? result
       }
 

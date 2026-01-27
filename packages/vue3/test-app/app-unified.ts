@@ -6,7 +6,7 @@ window.testing = { Inertia: router }
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
-export default configureInertiaApp({
+configureInertiaApp({
   resolve: async (name) => {
     const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
 

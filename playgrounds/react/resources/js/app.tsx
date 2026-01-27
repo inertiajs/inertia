@@ -1,5 +1,5 @@
 import { configureInertiaApp } from '@inertiajs/react'
 
-export default configureInertiaApp({
+configureInertiaApp({
   title: (title) => `${title} - React Playground`,
 })
