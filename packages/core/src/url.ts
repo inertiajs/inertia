@@ -103,6 +103,10 @@ export const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location)
   return urlWithoutHash(url1).href === urlWithoutHash(url2).href
 }
 
+export const isSameUrlWithoutQueryOrHash = (url1: URL | Location, url2: URL | Location): boolean => {
+  return url1.origin === url2.origin && url1.pathname === url2.pathname
+}
+
 export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
   return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
 }

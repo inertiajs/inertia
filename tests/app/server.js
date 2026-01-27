@@ -2426,6 +2426,35 @@ app.get('/reload/concurrent', (req, res) => {
   )
 })
 
+app.get('/reload/concurrent-with-data', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']
+  const timeframe = req.query.timeframe || 'day'
+
+  if (!partialData) {
+    return inertia.render(req, res, {
+      component: 'Reload/ConcurrentWithData',
+      props: {
+        foo: 'initial foo',
+        bar: 'initial bar',
+        timeframe,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Reload/ConcurrentWithData',
+        props: {
+          foo: partialData.includes('foo') ? `foo reloaded (${timeframe}) at ${Date.now()}` : undefined,
+          bar: partialData.includes('bar') ? `bar reloaded (${timeframe}) at ${Date.now()}` : undefined,
+          timeframe,
+        },
+      }),
+    600,
+  )
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

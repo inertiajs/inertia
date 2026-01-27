@@ -968,6 +968,33 @@ test.describe('Concurrent Reloads', () => {
     )
     expect(reloadRequests).toHaveLength(2)
   })
+
+  test('does not cancel the first request when a second reload with data is fired', async ({ page }) => {
+    await page.goto('/reload/concurrent-with-data')
+
+    await expect(page.locator('#foo')).toHaveText('Foo: initial foo')
+    await expect(page.locator('#bar')).toHaveText('Bar: initial bar')
+
+    requests.listen(page)
+
+    await page.getByRole('button', { name: 'Reload both props with data' }).click()
+
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+    )
+
+    await page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'bar' && response.status() === 200,
+    )
+
+    await expect(page.locator('#foo')).toContainText('foo reloaded (week) at')
+    await expect(page.locator('#bar')).toContainText('bar reloaded (week) at')
+
+    const reloadRequests = requests.requests.filter(
+      (r) => r.headers()['x-inertia-partial-data'] && r.url().includes('/reload/concurrent-with-data'),
+    )
+    expect(reloadRequests).toHaveLength(2)
+  })
 })
 
 test.describe('Error bags', () => {
