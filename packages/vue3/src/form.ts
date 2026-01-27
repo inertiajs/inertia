@@ -227,6 +227,14 @@ const Form = defineComponent({
     }
 
     const submit = (submitter?: FormSubmitter) => {
+      const [url, data] = getUrlAndData(submitter)
+      const formTarget = (submitter as HTMLButtonElement | HTMLInputElement | null)?.getAttribute('formtarget')
+
+      if (formTarget === '_blank' && method.value === 'get') {
+        window.open(url, '_blank')
+        return
+      }
+
       const maybeReset = (resetOption: boolean | string[]) => {
         if (!resetOption) {
           return
@@ -266,8 +274,6 @@ const Form = defineComponent({
         },
         ...props.options,
       }
-
-      const [url, data] = getUrlAndData(submitter)
 
       // We need transform because we can't override the default data with different keys (by design)
       form.transform(() => props.transform(data)).submit(method.value, url, submitOptions)
