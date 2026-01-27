@@ -106,6 +106,12 @@
 
   export function submit(submitter?: FormSubmitter) {
     const [url, data] = getUrlAndData(submitter)
+    const formTarget = (submitter as HTMLButtonElement | HTMLInputElement | null)?.getAttribute('formtarget')
+
+    if (formTarget === '_blank' && _method === 'get') {
+      window.open(url, '_blank')
+      return
+    }
 
     const maybeReset = (resetOption: boolean | string[] | undefined) => {
       if (!resetOption) {

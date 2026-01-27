@@ -199,6 +199,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
     const submit = (submitter?: FormSubmitter) => {
       const [url, data] = getUrlAndData(submitter)
+      const formTarget = (submitter as HTMLButtonElement | HTMLInputElement | null)?.getAttribute('formtarget')
+
+      if (formTarget === '_blank' && resolvedMethod === 'get') {
+        window.open(url, '_blank')
+        return
+      }
 
       const submitOptions: FormSubmitOptions = {
         headers,

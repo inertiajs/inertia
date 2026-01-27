@@ -34,6 +34,12 @@ app.all('/non-inertia', (req, res) =>
   `),
 )
 
+app.get('/non-inertia/download', (req, res) => {
+  const query = new URLSearchParams(req.query).toString()
+  res.setHeader('Content-Type', 'text/plain')
+  res.status(200).send(`query:${query}`)
+})
+
 // SSR test routes (only rendered with SSR when SSR=true)
 app.get('/ssr/page1', (req, res) =>
   inertia.renderSSR(req, res, {
