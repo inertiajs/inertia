@@ -70,6 +70,36 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+// configureInertiaApp (unified) test routes
+app.get('/unified', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'FooBar',
+    },
+  }),
+)
+
+app.get('/unified/navigate', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'Navigated',
+    },
+  }),
+)
+
+app.get('/unified/props', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Unified/Props',
+    props: {
+      foo: 'bar',
+      count: 42,
+      items: ['a', 'b', 'c'],
+    },
+  }),
+)
+
 // Intercepts all CSS and JS assets (including files loaded via code splitting)
 app.get(/.*\.(?:js|css)$/, (req, res) => {
   const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))

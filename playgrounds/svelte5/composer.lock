@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5425743b76ed8b5be7ab98ef1abc9018",
+    "content-hash": "92a90d517924f27036be50dc9d6d2aaa",
     "packages": [
         {
             "name": "brick/math",
@@ -1054,17 +1054,11 @@
         },
         {
             "name": "inertiajs/inertia-laravel",
-            "version": "v2.0.16",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/inertiajs/inertia-laravel.git",
-                "reference": "c060177e1b5120e70d1c26fe7c1007a8c8238f0d"
-            },
+            "version": "2.x-dev",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/c060177e1b5120e70d1c26fe7c1007a8c8238f0d",
-                "reference": "c060177e1b5120e70d1c26fe7c1007a8c8238f0d",
-                "shasum": ""
+                "type": "path",
+                "url": "/Users/pascal/Sites/inertia-laravel",
+                "reference": "0dad798618a63406c93f0965ef5aa9e68cc8a58a"
             },
             "require": {
                 "ext-json": "*",
@@ -1093,14 +1087,29 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "./helpers.php"
-                ],
                 "psr-4": {
                     "Inertia\\": "src"
+                },
+                "files": [
+                    "./helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Inertia\\Tests\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "lint": [
+                    "pint"
+                ],
+                "analyze": [
+                    "phpstan analyze --memory-limit=256M"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -1116,11 +1125,9 @@
                 "inertia",
                 "laravel"
             ],
-            "support": {
-                "issues": "https://github.com/inertiajs/inertia-laravel/issues",
-                "source": "https://github.com/inertiajs/inertia-laravel/tree/v2.0.16"
-            },
-            "time": "2025-12-17T21:57:59+00:00"
+            "transport-options": {
+                "relative": false
+            }
         },
         {
             "name": "laravel/framework",
@@ -8609,7 +8616,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "inertiajs/inertia-laravel": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
