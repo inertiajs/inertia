@@ -12,7 +12,7 @@ export { default as useInfiniteScroll } from './infiniteScroll'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { hide as hideProgress, progress, reveal as revealProgress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
-export { bootstrapSSRServer, buildSSRBody, createComponentResolver, isSSRDevMode, loadInitialPage } from './ssrUtils'
+export { buildSSRBody, createComponentResolver, loadInitialPage } from './ssrUtils'
 export * from './types'
 export {
   hrefToUrl,

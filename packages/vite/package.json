@@ -41,6 +41,7 @@
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "devDependencies": {
+    "@types/estree": "^1.0.8",
     "@types/node": "^24",
     "esbuild": "^0.25.12",
     "esbuild-node-externals": "^1.20.1",

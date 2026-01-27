@@ -11,7 +11,7 @@ export interface InertiaSSROptions {
 
 export const SSR_ENDPOINT = '/__inertia_ssr'
 
-const ssrEntryCandidates = [
+const SSR_ENTRY_CANDIDATES = [
   'resources/js/ssr.ts',
   'resources/js/ssr.tsx',
   'resources/js/ssr.js',
@@ -37,10 +37,11 @@ export function resolveSSREntry(options: InertiaSSROptions, config: ResolvedConf
     }
 
     config.logger.warn(`Inertia SSR entry not found: ${options.entry}`)
+
     return null
   }
 
-  return ssrEntryCandidates.find((path) => existsSync(resolve(config.root, path))) ?? null
+  return SSR_ENTRY_CANDIDATES.find((path) => existsSync(resolve(config.root, path))) ?? null
 }
 
 export async function handleSSRRequest(
@@ -50,34 +51,22 @@ export async function handleSSRRequest(
   res: ServerResponse,
 ): Promise<void> {
   try {
-    const page = await readJson<{ component: string }>(req)
+    const page = await readRequestBody<{ component: string }>(req)
     const start = performance.now()
 
     const render = await loadRenderFunction(server, entry)
     const result = await render(page)
 
     if (!result || typeof result.body !== 'string') {
-      throw new Error(`SSR render must return { head: string[], body: string }. Got: ${JSON.stringify(result)}`)
+      throw new Error(`SSR render must return { head: string[], body: string }`)
     }
 
-    const duration = (performance.now() - start).toFixed(2)
-    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19)
-
-    server.config.logger.info(`\x1b[32m${timestamp}\x1b[0m SSR ${page.component} \x1b[90m${duration}ms\x1b[0m`)
+    logSSRRequest(server, page.component, start)
 
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify(result))
   } catch (error) {
-    server.ssrFixStacktrace(error as Error)
-    server.config.logger.error(`Inertia SSR Error: ${(error as Error).message}`)
-
-    if ((error as Error).stack) {
-      server.config.logger.error((error as Error).stack!)
-    }
-
-    res.setHeader('Content-Type', 'application/json')
-    res.statusCode = 500
-    res.end(JSON.stringify({ error: (error as Error).message, stack: (error as Error).stack }))
+    handleSSRError(server, res, error as Error)
   }
 }
 
@@ -89,17 +78,38 @@ async function loadRenderFunction(
   const render = await Promise.resolve(module.default)
 
   if (typeof render !== 'function') {
-    throw new Error(`SSR entry "${entry}" must export a default render function. Got: ${typeof render}`)
+    throw new Error(`SSR entry "${entry}" must export a render function`)
   }
 
   return render
 }
 
-function readJson<T>(req: IncomingMessage): Promise<T> {
+function readRequestBody<T>(req: IncomingMessage): Promise<T> {
   return new Promise((resolve, reject) => {
     let data = ''
+
     req.on('data', (chunk) => (data += chunk))
     req.on('end', () => resolve(JSON.parse(data)))
     req.on('error', reject)
   })
+}
+
+function logSSRRequest(server: ViteDevServer, component: string, start: number): void {
+  const duration = (performance.now() - start).toFixed(2)
+  const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19)
+
+  server.config.logger.info(`\x1b[32m${timestamp}\x1b[0m SSR ${component} \x1b[90m${duration}ms\x1b[0m`)
+}
+
+function handleSSRError(server: ViteDevServer, res: ServerResponse, error: Error): void {
+  server.ssrFixStacktrace(error)
+  server.config.logger.error(`Inertia SSR: ${error.message}`)
+
+  if (error.stack) {
+    server.config.logger.error(error.stack)
+  }
+
+  res.setHeader('Content-Type', 'application/json')
+  res.statusCode = 500
+  res.end(JSON.stringify({ error: error.message, stack: error.stack }))
 }

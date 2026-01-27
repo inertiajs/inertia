@@ -1,8 +1,6 @@
 import {
-  bootstrapSSRServer,
   buildSSRBody,
   createComponentResolver,
-  isSSRDevMode,
   loadInitialPage,
   setupProgress,
   type InertiaAppSSRResponse,
@@ -26,6 +24,13 @@ type SetupOptions<SharedProps extends PageProps> = {
 export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = {
   id?: string
   resolve?: ComponentResolver
+  pages?:
+    | string
+    | {
+        path: string
+        extension?: string | string[]
+        transform?: (name: string) => string
+      }
   setup?: (options: SetupOptions<SharedProps>) => ReactElement | void
   title?: (title: string) => string
   progress?: Parameters<typeof setupProgress>[0] | false
@@ -56,13 +61,13 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
   if (typeof window === 'undefined') {
-    return handleSSR({ id, resolveComponent, setup, title, useScriptElement })
+    return createSSRRenderer(id, resolveComponent, setup, title, useScriptElement)
   }
 
   const { page, component } = await loadInitialPage<SharedProps, ReactComponent>(id, useScriptElement, resolveComponent)
 
   const appElement = createAppElement(page, component, resolveComponent, title)
-  const finalElement = setup ? setup({ el: appElement, props: page.props as SharedProps }) || appElement : appElement
+  const finalElement = setup ? (setup({ el: appElement, props: page.props as SharedProps }) ?? appElement) : appElement
 
   hydrateRoot(document.getElementById(id)!, finalElement)
 
@@ -71,46 +76,27 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   }
 }
 
-async function handleSSR<SharedProps extends PageProps>({
-  id,
-  resolveComponent,
-  setup,
-  title,
-  useScriptElement,
-}: {
-  id: string
-  resolveComponent: (name: string) => Promise<ReactComponent>
-  setup?: (options: SetupOptions<SharedProps>) => ReactElement | void
-  title?: (title: string) => string
-  useScriptElement: boolean
-}): Promise<InertiaSSRRenderFunction<SharedProps>> {
-  const render = async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
+function createSSRRenderer<SharedProps extends PageProps>(
+  id: string,
+  resolveComponent: (name: string) => Promise<ReactComponent>,
+  setup: ((options: SetupOptions<SharedProps>) => ReactElement | void) | undefined,
+  title: ((title: string) => string) | undefined,
+  useScriptElement: boolean,
+): InertiaSSRRenderFunction<SharedProps> {
+  return async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
     let head: string[] = []
+
     const component = await resolveComponent(page.component)
-
-    const appElement = createAppElement(
-      page,
-      component,
-      resolveComponent,
-      title,
-      (elements: string[]) => (head = elements),
-    )
-
-    const finalElement = setup ? setup({ el: appElement, props: page.props as SharedProps }) || appElement : appElement
+    const appElement = createAppElement(page, component, resolveComponent, title, (elements) => (head = elements))
+    const finalElement = setup
+      ? (setup({ el: appElement, props: page.props as SharedProps }) ?? appElement)
+      : appElement
 
     const html = renderToString(finalElement)
     const body = buildSSRBody(id, page, html, useScriptElement)
 
     return { head, body }
   }
-
-  if (isSSRDevMode()) {
-    return render
-  }
-
-  await bootstrapSSRServer(render as (page: Page) => Promise<InertiaAppSSRResponse>)
-
-  return render
 }
 
 function createAppElement<SharedProps extends PageProps>(

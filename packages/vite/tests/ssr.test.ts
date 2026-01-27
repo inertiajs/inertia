@@ -252,22 +252,53 @@ describe('SSR', () => {
     })
   })
 
-  describe('transforms', () => {
-    it('replaces INERTIA_SSR_DEV with true in dev mode', () => {
+  describe('production SSR transform', () => {
+    it('wraps configureInertiaApp with server bootstrap', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
       const logger = createMockLogger()
 
-      plugin.configResolved!({ ...createMockConfig(logger, false), command: 'serve' } as ResolvedConfig)
+      plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = 'if (import.meta.env.INERTIA_SSR_DEV) { console.log("dev") }'
+      const code = `export default configureInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('if (true)')
+      expect(result).toContain("import __inertia_createServer__ from '@inertiajs/core/server'")
+      expect(result).toContain('const __inertia_render__ = await configureInertiaApp')
+      expect(result).toContain('__inertia_createServer__(__inertia_render__)')
+      expect(result).toContain('export default __inertia_render__')
     })
 
-    it('does not replace INERTIA_SSR_DEV in client code', () => {
+    it('wraps createInertiaApp with server bootstrap', () => {
+      mockExistsSync.mockReturnValue(false)
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const code = `export default createInertiaApp({ resolve: (name) => name })`
+      const result = plugin.transform!(code, 'app.ts', { ssr: true })
+
+      expect(result).toContain('__inertia_createServer__(__inertia_render__)')
+    })
+
+    it('passes SSR config to server', () => {
+      mockExistsSync.mockReturnValue(false)
+
+      const plugin = inertia({ ssr: { port: 13715, cluster: true } })
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const code = `export default configureInertiaApp({})`
+      const result = plugin.transform!(code, 'app.ts', { ssr: true })
+
+      expect(result).toContain('__inertia_createServer__(__inertia_render__, {"port":13715,"cluster":true})')
+    })
+
+    it('does not transform in dev mode', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
@@ -275,40 +306,24 @@ describe('SSR', () => {
 
       plugin.configResolved!({ ...createMockConfig(logger, false), command: 'serve' } as ResolvedConfig)
 
-      const code = 'if (import.meta.env.INERTIA_SSR_DEV) { console.log("dev") }'
-      const result = plugin.transform!(code, 'app.ts', { ssr: false })
+      const code = `export default configureInertiaApp({})`
+      const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
       expect(result).toBeNull()
     })
-  })
 
-  describe('config', () => {
-    it('adds SSR config defines during SSR build', () => {
-      const plugin = inertia({ ssr: { port: 13715, cluster: true } })
+    it('does not transform client builds', () => {
+      mockExistsSync.mockReturnValue(false)
 
-      const result = plugin.config!({ build: { ssr: true } }, { command: 'build', mode: 'production' })
-
-      expect(result).toEqual({
-        define: {
-          'import.meta.env.INERTIA_SSR_CONFIG': JSON.stringify({ port: 13715, cluster: true }),
-        },
-      })
-    })
-
-    it('does not add defines when no SSR options specified', () => {
       const plugin = inertia()
+      const logger = createMockLogger()
 
-      const result = plugin.config!({ build: { ssr: true } }, { command: 'build', mode: 'production' })
+      plugin.configResolved!(createMockConfig(logger, false))
 
-      expect(result).toBeUndefined()
-    })
+      const code = `export default configureInertiaApp({})`
+      const result = plugin.transform!(code, 'app.ts', { ssr: false })
 
-    it('does not add defines for client build', () => {
-      const plugin = inertia({ ssr: { port: 13715 } })
-
-      const result = plugin.config!({}, { command: 'build', mode: 'production' })
-
-      expect(result).toBeUndefined()
+      expect(result).toBeNull()
     })
   })
 })

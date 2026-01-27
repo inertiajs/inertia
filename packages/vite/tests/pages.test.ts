@@ -7,13 +7,12 @@ describe('plugin', () => {
   })
 })
 
-describe('pages transform', () => {
-  describe('pages() function', () => {
+describe('pages property transform', () => {
+  describe('string path', () => {
     it('transforms for Vue', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/vue3'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages('./Pages') })
+        export default createInertiaApp({ pages: './Pages' })
       `)
 
       expect(result).toContain('resolve: async (name)')
@@ -24,8 +23,7 @@ describe('pages transform', () => {
     it('transforms for React with tsx/jsx fallback', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/react'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages('./Pages') })
+        export default createInertiaApp({ pages: './Pages' })
       `)
 
       expect(result).toContain("import.meta.glob('./Pages/**/*{.tsx,.jsx}')")
@@ -36,41 +34,29 @@ describe('pages transform', () => {
     it('transforms for Svelte', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/svelte'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages('./Pages') })
+        export default createInertiaApp({ pages: './Pages' })
       `)
 
       expect(result).toContain("import.meta.glob('./Pages/**/*.svelte')")
       expect(result).toContain('${name}.svelte')
     })
 
-    it('handles custom directory', () => {
-      const result = transform(`
-        import { createInertiaApp } from '@inertiajs/vue3'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages('./src/views') })
-      `)
-
-      expect(result).toContain("import.meta.glob('./src/views/**/*.vue')")
-      expect(result).toContain('./src/views/${name}.vue')
-    })
-
     it('strips trailing slash', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/vue3'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages('./Pages/') })
+        export default createInertiaApp({ pages: './Pages/' })
       `)
 
       expect(result).toContain('./Pages/${name}.vue')
       expect(result).not.toContain('./Pages//')
     })
+  })
 
-    it('transforms with path object', () => {
+  describe('object config', () => {
+    it('transforms with path', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/vue3'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages({ path: './Custom' }) })
+        export default createInertiaApp({ pages: { path: './Custom' } })
       `)
 
       expect(result).toContain("import.meta.glob('./Custom/**/*.vue')")
@@ -80,52 +66,59 @@ describe('pages transform', () => {
     it('transforms with custom extension', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/react'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages({ path: './Pages', extension: '.jsx' }) })
+        export default createInertiaApp({ pages: { path: './Pages', extension: '.jsx' } })
       `)
 
       expect(result).toContain("import.meta.glob('./Pages/**/*.jsx')")
       expect(result).toContain('./Pages/${name}.jsx')
       expect(result).not.toContain('.tsx')
     })
+
+    it('transforms with transform function', () => {
+      const result = transform(`
+        import { createInertiaApp } from '@inertiajs/vue3'
+        export default createInertiaApp({
+          pages: {
+            path: './Pages',
+            transform: (name) => name.replace('/', '-')
+          }
+        })
+      `)
+
+      expect(result).toContain('const resolvedName = ')
+      expect(result).toContain('resolvedName')
+    })
   })
 
   describe('default resolver injection', () => {
-    it('injects resolver when no resolve specified', () => {
-      const result = transform(`
-        import { createInertiaApp } from '@inertiajs/vue3'
-        export default createInertiaApp({ title: (t) => t })
-      `)
-
-      expect(result).toContain('resolve: async (name)')
-      expect(result).toContain("import.meta.glob('./pages/**/*.vue')")
-    })
-
-    it('injects resolver for empty config', () => {
-      const result = transform(`
-        import { createInertiaApp } from '@inertiajs/vue3'
-        export default createInertiaApp({})
-      `)
-
-      expect(result).toContain('resolve: async (name)')
-    })
-
-    it('injects resolver for no-arg call', () => {
+    it('injects default resolver for empty call', () => {
       const result = transform(`
         import { configureInertiaApp } from '@inertiajs/vue3'
         export default configureInertiaApp()
       `)
 
       expect(result).toContain('resolve: async (name)')
+      expect(result).toContain('./pages/')
+      expect(result).toContain('./Pages/')
     })
 
-    it('does not inject when resolve is specified', () => {
+    it('injects default resolver for empty object', () => {
       const result = transform(`
-        import { createInertiaApp } from '@inertiajs/vue3'
-        export default createInertiaApp({ resolve: (name) => import(\`./Pages/\${name}.vue\`) })
+        import { configureInertiaApp } from '@inertiajs/vue3'
+        export default configureInertiaApp({})
       `)
 
-      expect(result).toBeNull()
+      expect(result).toContain('resolve: async (name)')
+    })
+
+    it('injects default resolver with other options', () => {
+      const result = transform(`
+        import { createInertiaApp } from '@inertiajs/vue3'
+        export default createInertiaApp({ title: t => t })
+      `)
+
+      expect(result).toContain('resolve: async (name)')
+      expect(result).toContain('title: t => t')
     })
   })
 
@@ -133,9 +126,8 @@ describe('pages transform', () => {
     it('preserves other options', () => {
       const result = transform(`
         import { createInertiaApp } from '@inertiajs/vue3'
-        import { pages } from '@inertiajs/vite'
         export default createInertiaApp({
-          resolve: pages('./Pages'),
+          pages: './Pages',
           setup({ app }) { app.use(router) },
           progress: { color: 'red' },
         })
@@ -147,13 +139,13 @@ describe('pages transform', () => {
 
     it('does not transform non-JS files', () => {
       const plugin = inertia()
-      const result = plugin.transform!("pages('./Pages')", 'app.vue')
+      const result = plugin.transform!("pages: './Pages'", 'app.vue')
 
       expect(result).toBeNull()
     })
 
     it('does not transform without Inertia import', () => {
-      const result = transform(`const config = { resolve: pages('./Pages') }`)
+      const result = transform(`const config = { pages: './Pages' }`)
 
       expect(result).toBeNull()
     })
@@ -161,8 +153,18 @@ describe('pages transform', () => {
     it('does not transform unknown framework', () => {
       const result = transform(`
         import { createInertiaApp } from 'some-other-package'
-        import { pages } from '@inertiajs/vite'
-        export default createInertiaApp({ resolve: pages('./Pages') })
+        export default createInertiaApp({ pages: './Pages' })
+      `)
+
+      expect(result).toBeNull()
+    })
+
+    it('does not transform when resolve already specified', () => {
+      const result = transform(`
+        import { createInertiaApp } from '@inertiajs/vue3'
+        export default createInertiaApp({
+          resolve: (name) => import(\`./Pages/\${name}.vue\`)
+        })
       `)
 
       expect(result).toBeNull()

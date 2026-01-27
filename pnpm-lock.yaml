@@ -273,6 +273,9 @@ importers:
 
   packages/vite:
     devDependencies:
+      '@types/estree':
+        specifier: ^1.0.8
+        version: 1.0.8
       '@types/node':
         specifier: ^24
         version: 24.10.9

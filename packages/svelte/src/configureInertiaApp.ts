@@ -1,7 +1,5 @@
 import {
-  bootstrapSSRServer,
   buildSSRBody,
-  isSSRDevMode,
   loadInitialPage,
   setupProgress,
   type InertiaAppSSRResponse,
@@ -18,6 +16,13 @@ type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
 export type ConfigureInertiaAppOptions = {
   id?: string
   resolve?: ComponentResolver
+  pages?:
+    | string
+    | {
+        path: string
+        extension?: string | string[]
+        transform?: (name: string) => string
+      }
   progress?: Parameters<typeof setupProgress>[0] | false
   defaults?: SvelteInertiaAppConfig
 }
@@ -44,16 +49,15 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
   if (typeof window === 'undefined') {
-    return handleSSR({ id, resolveComponent, useScriptElement })
+    return createSSRRenderer(id, resolveComponent, useScriptElement)
   }
 
   const { page, component } = await loadInitialPage(id, useScriptElement, resolveComponent)
 
   const target = document.getElementById(id)!
-  const shouldHydrate = target.hasAttribute('data-server-rendered')
   const props = { initialPage: page, initialComponent: component, resolveComponent }
 
-  if (shouldHydrate) {
+  if (target.hasAttribute('data-server-rendered')) {
     svelteHydrate(App, { target, props })
   } else {
     mount(App, { target, props })
@@ -64,16 +68,12 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   }
 }
 
-async function handleSSR<SharedProps extends PageProps>({
-  id,
-  resolveComponent,
-  useScriptElement,
-}: {
-  id: string
-  resolveComponent: (name: string) => Promise<unknown>
-  useScriptElement: boolean
-}): Promise<InertiaSSRRenderFunction<SharedProps>> {
-  const render = async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
+function createSSRRenderer<SharedProps extends PageProps>(
+  id: string,
+  resolveComponent: (name: string) => Promise<unknown>,
+  useScriptElement: boolean,
+): InertiaSSRRenderFunction<SharedProps> {
+  return async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
     const component = await resolveComponent(page.component)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,12 +90,4 @@ async function handleSSR<SharedProps extends PageProps>({
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }
-
-  if (isSSRDevMode()) {
-    return render
-  }
-
-  await bootstrapSSRServer(render as (page: Page) => Promise<InertiaAppSSRResponse>)
-
-  return render
 }

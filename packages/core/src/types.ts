@@ -465,6 +465,13 @@ type FirstLevelOptional<T> = {
 
 interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
+  pages?:
+    | string
+    | {
+        path: string
+        extension?: string | string[]
+        transform?: (name: string) => string
+      }
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
