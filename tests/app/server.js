@@ -1519,6 +1519,35 @@ app.get('/deferred-props/with-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/reload-without-optional-chaining', (req, res) => {
+  const page = parseInt(req.query.page) || 1
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/ReloadWithoutOptionalChaining',
+      url: req.originalUrl,
+      deferredProps: {
+        default: ['results'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/ReloadWithoutOptionalChaining',
+        url: req.originalUrl,
+        props: {
+          results: req.headers['x-inertia-partial-data']?.includes('results')
+            ? { data: [`Item ${page}-1`, `Item ${page}-2`, `Item ${page}-3`], page }
+            : undefined,
+        },
+      }),
+    300,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
