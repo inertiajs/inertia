@@ -335,7 +335,6 @@ test('it does not render children with undefined props during reload (#2758)', a
 
   await gotoPageAndWaitForContent(page, '/deferred-props/reload-without-optional-chaining')
 
-  // Check for errors on initial page load
   expect(consoleMessages.errors).toHaveLength(0)
 
   await expect(page.getByText('Loading results...')).toBeVisible()
@@ -358,9 +357,6 @@ test('it does not render children with undefined props during reload (#2758)', a
 
   await deferredResponsePromise
 
-  // The deferred props should load without any errors
-  // Previously, the component would crash with "Cannot read properties of undefined"
-  // because the Deferred component rendered children while results was still undefined
   await expect(page.locator('#results-data')).toHaveText('Item 2-1, Item 2-2, Item 2-3')
   await expect(page.locator('#results-page')).toHaveText('Page: 2')
 
