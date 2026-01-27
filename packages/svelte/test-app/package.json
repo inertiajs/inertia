@@ -8,6 +8,7 @@
     "type-check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
+    "@types/node": "^24",
     "@eslint/js": "^9.39.2",
     "@sveltejs/eslint-config": "^8.3.4",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
