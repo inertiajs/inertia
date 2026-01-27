@@ -330,6 +330,43 @@ test('router.reload() without only/except triggers deferred props to reload', as
   await expect(page.locator('#results-page')).toHaveText('Page: 2')
 })
 
+test('it does not render children with undefined props during reload (#2758)', async ({ page }) => {
+  consoleMessages.listen(page)
+
+  await gotoPageAndWaitForContent(page, '/deferred-props/reload-without-optional-chaining')
+
+  // Check for errors on initial page load
+  expect(consoleMessages.errors).toHaveLength(0)
+
+  await expect(page.getByText('Loading results...')).toBeVisible()
+
+  await page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'results' && response.status() === 200,
+  )
+
+  await expect(page.getByText('Loading results...')).not.toBeVisible()
+  await expect(page.locator('#results-data')).toHaveText('Item 1-1, Item 1-2, Item 1-3')
+  await expect(page.locator('#results-page')).toHaveText('Page: 1')
+
+  consoleMessages.errors = []
+
+  const deferredResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'results' && response.status() === 200,
+  )
+
+  await page.getByRole('button', { name: 'Reload with page 2' }).click()
+
+  await deferredResponsePromise
+
+  // The deferred props should load without any errors
+  // Previously, the component would crash with "Cannot read properties of undefined"
+  // because the Deferred component rendered children while results was still undefined
+  await expect(page.locator('#results-data')).toHaveText('Item 2-1, Item 2-2, Item 2-3')
+  await expect(page.locator('#results-page')).toHaveText('Page: 2')
+
+  expect(consoleMessages.errors).toHaveLength(0)
+})
+
 test('deferred props do not clear validation errors', async ({ page }) => {
   await gotoPageAndWaitForContent(page, '/deferred-props/with-errors')
 
