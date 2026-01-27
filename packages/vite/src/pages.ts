@@ -1,31 +1,9 @@
-/**
- * Page resolution for Inertia.js applications.
- *
- * Transforms `pages()` calls into `import.meta.glob` resolvers at build time.
- */
-
 export interface PagesOptions {
   path: string
   extension?: string | string[]
   transform?: (name: string) => string
 }
 
-/**
- * Define how pages are resolved.
- *
- * @example
- * ```ts
- * // Simple path
- * resolve: pages('./pages')
- *
- * // With options
- * resolve: pages({
- *   path: './Pages',
- *   extension: '.jsx',
- *   transform: (name) => name.toLowerCase(),
- * })
- * ```
- */
 export function pages(pathOrOptions: string | PagesOptions): string | PagesOptions {
   return pathOrOptions
 }
@@ -38,9 +16,6 @@ const frameworkExtensions: Record<string, string[]> = {
 
 const defaultPagesDirectory = './pages'
 
-/**
- * Transform page resolution in source code.
- */
 export function transformPageResolution(code: string): string | null {
   if (!usesInertia(code)) {
     return null
@@ -96,7 +71,6 @@ function injectDefaultResolver(code: string): string {
     extensions: frameworkExtensions[framework],
   })
 
-  // Try each pattern in order of specificity
   const replacements: [RegExp, string][] = [
     [/(\w+InertiaApp)\(\s*\)/, `$1({ ${resolver} })`],
     [/(\w+InertiaApp)\(\s*\{\s*\}\s*\)/, `$1({ ${resolver} })`],
@@ -120,7 +94,6 @@ interface ResolverConfig {
 
 function evaluatePagesCall(call: string, defaultExtensions: string[]): ResolverConfig | null {
   try {
-    // eslint-disable-next-line no-new-func
     const result = new Function('pages', `return ${call}`)(pages) as string | PagesOptions
 
     if (typeof result === 'string') {
