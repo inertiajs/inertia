@@ -238,7 +238,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           if (isMounted.current) {
             setProcessing(false)
             setProgress(null)
-            setError(errors as FormDataErrors<TForm>)
+            setErrors(errors as FormDataErrors<TForm>)
+            setHasErrors(Object.keys(errors).length > 0)
+            validatorRef.current?.setErrors(errors as Errors)
           }
 
           if (options.onError) {

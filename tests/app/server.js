@@ -359,6 +359,29 @@ app.post('/form-helper/errors', (req, res) =>
   }),
 )
 
+app.get('/form-helper/errors/clear-on-resubmit', (req, res) =>
+  inertia.render(req, res, { component: 'FormHelper/ErrorsClearOnResubmit' }),
+)
+
+app.post('/form-helper/errors/clear-on-resubmit', (req, res) => {
+  const name = req.body['name']
+  const handle = req.body['handle']
+  const errors = {}
+
+  if (!name || name.length < 3) {
+    errors.name = 'The name must be at least 3 characters.'
+  }
+
+  if (!handle || handle.length < 3) {
+    errors.handle = 'The handle must be at least 3 characters.'
+  }
+
+  inertia.render(req, res, {
+    component: 'FormHelper/ErrorsClearOnResubmit',
+    props: { errors },
+  })
+})
+
 app.post('/form-helper/events/errors', (req, res) => {
   setTimeout(() => {
     inertia.render(req, res, {
