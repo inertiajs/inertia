@@ -116,5 +116,32 @@ export default configureInertiaApp({})
 
       expect(result).toContain('const __inertia_render__ = await configureInertiaApp({})')
     })
+
+    it('injects React server renderer', () => {
+      const code = `import { configureInertiaApp } from '@inertiajs/react'
+export default configureInertiaApp({})`
+      const result = wrapWithServerBootstrap(code, {})
+
+      expect(result).toContain("import { renderToString as __inertia_renderToString__ } from 'react-dom/server'")
+      expect(result).toContain('(page) => __inertia_render__(page, __inertia_renderToString__)')
+    })
+
+    it('injects Vue server renderer', () => {
+      const code = `import { configureInertiaApp } from '@inertiajs/vue3'
+export default configureInertiaApp({})`
+      const result = wrapWithServerBootstrap(code, {})
+
+      expect(result).toContain("import { renderToString as __inertia_renderToString__ } from 'vue/server-renderer'")
+      expect(result).toContain('(page) => __inertia_render__(page, __inertia_renderToString__)')
+    })
+
+    it('does not inject renderer for Svelte', () => {
+      const code = `import { configureInertiaApp } from '@inertiajs/svelte'
+export default configureInertiaApp({})`
+      const result = wrapWithServerBootstrap(code, {})
+
+      expect(result).not.toContain('__inertia_renderToString__')
+      expect(result).toContain('__inertia_createServer__(__inertia_render__)')
+    })
   })
 })

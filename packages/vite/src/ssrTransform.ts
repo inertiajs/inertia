@@ -1,10 +1,15 @@
-import type { ExportDefaultDeclaration, Identifier, Program, SimpleCallExpression } from 'estree'
+import type { ExportDefaultDeclaration, Identifier, ImportDeclaration, Program, SimpleCallExpression } from 'estree'
 import { parseAst } from 'vite'
 import type { InertiaSSROptions } from './ssr'
 
 type NodeWithPos<T> = T & { start: number; end: number }
 
 const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
+
+const SERVER_RENDERERS: Record<string, string> = {
+  '@inertiajs/react': 'react-dom/server',
+  '@inertiajs/vue3': 'vue/server-renderer',
+}
 
 export function findInertiaAppExport(code: string): boolean {
   const ast = safeParse(code)
@@ -33,10 +38,23 @@ export function wrapWithServerBootstrap(code: string, options: InertiaSSROptions
   const callCode = code.slice(callNode.start, callNode.end)
   const configArg = buildConfigArg(options)
 
-  const replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
+  const framework = detectFramework(ast)
+  const rendererModule = framework ? SERVER_RENDERERS[framework] : null
+
+  let replacement: string
+
+  if (rendererModule) {
+    replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
+import { renderToString as __inertia_renderToString__ } from '${rendererModule}'
+const __inertia_render__ = await ${callCode}
+__inertia_createServer__((page) => __inertia_render__(page, __inertia_renderToString__)${configArg})
+export default __inertia_render__`
+  } else {
+    replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
 const __inertia_render__ = await ${callCode}
 __inertia_createServer__(__inertia_render__${configArg})
 export default __inertia_render__`
+  }
 
   return code.slice(0, exportNode.start) + replacement + code.slice(exportNode.end)
 }
@@ -79,6 +97,22 @@ function findExportedCall(ast: Program): ExportedCall | null {
 
     if (INERTIA_APP_FUNCTIONS.includes((callNode.callee as Identifier).name)) {
       return { exportNode, callNode }
+    }
+  }
+
+  return null
+}
+
+function detectFramework(ast: Program): string | null {
+  for (const node of ast.body) {
+    if (node.type !== 'ImportDeclaration') {
+      continue
+    }
+
+    const source = (node as ImportDeclaration).source.value as string
+
+    if (source in SERVER_RENDERERS) {
+      return source
     }
   }
 

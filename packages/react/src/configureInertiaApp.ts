@@ -9,10 +9,11 @@ import {
 } from '@inertiajs/core'
 import { createElement, ReactElement } from 'react'
 import { hydrateRoot } from 'react-dom/client'
-import { renderToString } from 'react-dom/server'
 import App from './App'
 import { config } from './index'
 import { ReactComponent, ReactInertiaAppConfig } from './types'
+
+type RenderToString = (element: ReactElement) => string
 
 type ComponentResolver = (name: string) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
 
@@ -39,6 +40,7 @@ export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = {
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
+  renderToString: RenderToString,
 ) => Promise<InertiaAppSSRResponse>
 
 export default async function configureInertiaApp<SharedProps extends PageProps = PageProps>({
@@ -83,7 +85,7 @@ function createSSRRenderer<SharedProps extends PageProps>(
   title: ((title: string) => string) | undefined,
   useScriptElement: boolean,
 ): InertiaSSRRenderFunction<SharedProps> {
-  return async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
+  return async (page: Page<SharedProps>, renderToString: RenderToString): Promise<InertiaAppSSRResponse> => {
     let head: string[] = []
 
     const component = await resolveComponent(page.component)

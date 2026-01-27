@@ -6,7 +6,7 @@ import {
   type Page,
   type PageProps,
 } from '@inertiajs/core'
-import { mount, hydrate as svelteHydrate } from 'svelte'
+import { hydrate, mount } from 'svelte'
 import App from './components/App.svelte'
 import { config } from './index'
 import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
@@ -58,7 +58,7 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   const props = { initialPage: page, initialComponent: component, resolveComponent }
 
   if (target.hasAttribute('data-server-rendered')) {
-    svelteHydrate(App, { target, props })
+    hydrate(App, { target, props })
   } else {
     mount(App, { target, props })
   }

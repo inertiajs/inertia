@@ -8,10 +8,11 @@ import {
   type PageProps,
 } from '@inertiajs/core'
 import { createSSRApp, DefineComponent, h, App as VueApp } from 'vue'
-import { renderToString } from 'vue/server-renderer'
 import App, { plugin } from './app'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
+
+type RenderToString = (app: VueApp) => Promise<string>
 
 type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
@@ -38,6 +39,7 @@ export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = {
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
+  renderToString: RenderToString,
 ) => Promise<InertiaAppSSRResponse>
 
 export default async function configureInertiaApp<SharedProps extends PageProps = PageProps>({
@@ -90,7 +92,7 @@ function createSSRRenderer<SharedProps extends PageProps>(
   title: ((title: string) => string) | undefined,
   useScriptElement: boolean,
 ): InertiaSSRRenderFunction<SharedProps> {
-  return async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
+  return async (page: Page<SharedProps>, renderToString: RenderToString): Promise<InertiaAppSSRResponse> => {
     let head: string[] = []
 
     const component = await resolveComponent(page.component)
