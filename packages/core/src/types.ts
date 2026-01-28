@@ -121,6 +121,29 @@ type ObjectFormDataKeys<T extends object> = string extends keyof T
                       : never
         }[Extract<keyof T, string>]
 
+/**
+ * Extends FormDataKeys with wildcard patterns like 'users.*', 'users.*.email'
+ */
+export type FormDataKeysWithWildcards<T> = FormDataKeys<T> | WildcardPaths<T>
+
+type WildcardPaths<T> = 0 extends 1 & T
+  ? never
+  : T extends object
+    ? {
+        [K in Extract<keyof T, string>]: 0 extends 1 & T[K]
+          ? never
+          : T[K] extends Array<infer U>
+            ?
+                | `${K}.*`
+                | (U extends FormDataConvertibleValue ? never : `${K}.*.${Extract<keyof U, string>}` | `${K}.*.*`)
+            : T[K] extends FormDataConvertibleValue
+              ? never
+              : T[K] extends object
+                ? `${K}.*` | `${K}.${WildcardPaths<T[K]>}`
+                : never
+      }[Extract<keyof T, string>]
+    : never
+
 type PartialFormDataErrors<T> = {
   [K in string extends keyof T ? string : Extract<keyof FormDataError<T>, string>]?: ErrorValue
 }

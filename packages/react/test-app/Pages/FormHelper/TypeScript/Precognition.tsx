@@ -53,4 +53,67 @@ export default () => {
   nestedForm.valid('user.email')
   // @ts-expect-error - Field does not exist
   nestedForm.invalid('user.email')
+
+  type User = {
+    name: string
+    email: string
+  }
+
+  type Company = {
+    name: string
+    addresses: string[]
+  }
+
+  type FormData = {
+    users: User[]
+    profile: {
+      age: number
+      city: string
+    }
+    company: Company
+    nested: {
+      companies: Company[]
+    }
+  }
+
+  const complexForm = useForm<FormData>({
+    users: [],
+    profile: {
+      age: 0,
+      city: '',
+    },
+    company: {
+      name: '',
+      addresses: [],
+    },
+    nested: {
+      companies: [],
+    },
+  }).withPrecognition('post', '/precognition/complex')
+
+  complexForm.validate('users')
+  complexForm.validate('users.*')
+  complexForm.validate('users.*.email')
+  complexForm.validate('users.*.*')
+
+  complexForm.validate('profile')
+  complexForm.validate('profile.*')
+  complexForm.validate('profile.age')
+
+  complexForm.validate('company')
+  complexForm.validate('company.addresses')
+
+  complexForm.validate('nested')
+  complexForm.validate('nested.companies')
+  complexForm.validate('nested.companies.*')
+  complexForm.validate('nested.companies.*.name')
+  complexForm.validate('nested.companies.*.addresses')
+  complexForm.validate('nested.companies.*.*')
+
+  // @ts-expect-error - No such field
+  complexForm.validate('users.*.street')
+  // @ts-expect-error - No such field
+  complexForm.validate('profile.country')
+  // @ts-expect-error - No such depth
+  complexForm.validate('profile.*.*')
 }

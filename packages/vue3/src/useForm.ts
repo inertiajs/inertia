@@ -4,6 +4,7 @@ import {
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
+  FormDataKeysWithWildcards,
   FormDataType,
   FormDataValues,
   Method,
@@ -94,7 +95,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   touch<K extends FormDataKeys<TForm>>(field: K | NamedInputEvent | Array<K>, ...fields: K[]): this
   touched<K extends FormDataKeys<TForm>>(field?: K): boolean
   valid<K extends FormDataKeys<TForm>>(field: K): boolean
-  validate<K extends FormDataKeys<TForm>>(
+  validate<K extends FormDataKeysWithWildcards<TForm>>(
     field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
     config?: PrecognitionValidationConfig<K>,
   ): this
