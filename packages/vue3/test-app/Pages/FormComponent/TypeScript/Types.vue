@@ -22,7 +22,6 @@ function renderFormContent(props: FormComponentSlotProps<UserForm>) {
 
   return 'Form content'
 }
-
 </script>
 
 <template>
