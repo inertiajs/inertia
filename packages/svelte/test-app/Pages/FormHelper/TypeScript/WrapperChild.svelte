@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script lang="ts" generics="T extends Record<string, any>">
   import { useForm } from '@inertiajs/svelte'
 

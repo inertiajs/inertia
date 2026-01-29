@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts" generic="T extends Record<string, any>">
 import { useForm } from '@inertiajs/vue3'
 
