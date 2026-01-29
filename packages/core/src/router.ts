@@ -209,6 +209,36 @@ export class Router {
       return
     }
 
+    let propsSnapshot: Page['props'] | null = null
+
+    if (options.optimistic) {
+      propsSnapshot = cloneDeep(currentPage.get().props)
+
+      const optimisticProps = options.optimistic(currentPage.get().props)
+
+      if (optimisticProps) {
+        currentPage.setPropsQuietly({ ...currentPage.get().props, ...optimisticProps })
+      }
+    }
+
+    const restoreOptimisticSnapshot = () => {
+      if (propsSnapshot) {
+        currentPage.setPropsQuietly(propsSnapshot)
+      }
+    }
+
+    const originalOnError = events.onError
+    events.onError = (errors) => {
+      restoreOptimisticSnapshot()
+      return originalOnError(errors)
+    }
+
+    const originalOnCancel = events.onCancel
+    events.onCancel = () => {
+      restoreOptimisticSnapshot()
+      return originalOnCancel()
+    }
+
     if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
       // Only cancel non-prefetch requests (deferred props + partial reloads)
       this.asyncRequestStream.cancelInFlight({ prefetch: false })

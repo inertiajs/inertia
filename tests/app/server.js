@@ -1306,7 +1306,7 @@ app.get('/deferred-props/many-groups', (req, res) => {
 
 app.get('/deferred-props/instant-reload', (req, res) => {
   const requestedProps = req.headers['x-inertia-partial-data']
-  const delay = requestedProps === 'bar' ? 300 : 0
+  const delay = requestedProps === 'bar' ? 500 : 0
 
   setTimeout(
     () =>
@@ -1486,7 +1486,7 @@ app.get('/deferred-props/with-reload', (req, res) => {
             : undefined,
         },
       }),
-    300,
+    500,
   )
 })
 
@@ -2608,6 +2608,72 @@ app.get('/use-http/transform', (req, res) => inertia.render(req, res, { componen
 app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { component: 'UseHttp/Lifecycle' }))
 app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
 app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
+
+// Optimistic updates
+let optimisticTodoId = 3
+let optimisticTodos = [
+  { id: 1, name: 'Learn Inertia.js', done: true },
+  { id: 2, name: 'Build something awesome', done: false },
+]
+
+app.get('/optimistic', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Optimistic',
+    props: {
+      todos: [...optimisticTodos],
+    },
+  }),
+)
+
+app.post('/optimistic/todos', (req, res) => {
+  const delay = 500
+
+  setTimeout(() => {
+    const name = req.body.name?.trim()
+
+    if (!name || name.length < 3) {
+      return inertia.render(req, res, {
+        url: '/optimistic',
+        component: 'Optimistic',
+        props: {
+          todos: [...optimisticTodos],
+          errors: { name: !name ? 'The name field is required.' : 'The name must be at least 3 characters.' },
+        },
+      })
+    }
+
+    optimisticTodos.push({ id: optimisticTodoId++, name, done: false })
+    res.redirect(303, '/optimistic')
+  }, delay)
+})
+
+app.patch('/optimistic/todos/:id', (req, res) => {
+  setTimeout(() => {
+    const todo = optimisticTodos.find((t) => t.id === parseInt(req.params.id))
+    if (todo) {
+      if (req.body.done !== undefined) {
+        todo.done = req.body.done === 'true' || req.body.done === true
+      }
+    }
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.delete('/optimistic/todos/:id', (req, res) => {
+  setTimeout(() => {
+    optimisticTodos = optimisticTodos.filter((t) => t.id !== parseInt(req.params.id))
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.post('/optimistic/clear', (req, res) => {
+  optimisticTodoId = 3
+  optimisticTodos = [
+    { id: 1, name: 'Learn Inertia.js', done: true },
+    { id: 2, name: 'Build something awesome', done: false },
+  ]
+  res.redirect(303, '/optimistic')
+})
 
 app.all('*page', (req, res) => inertia.render(req, res))
 

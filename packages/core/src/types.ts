@@ -270,6 +270,8 @@ export type CancelToken = {
 
 export type CancelTokenCallback = (cancelToken: CancelToken) => void
 
+export type OptimisticCallback<TProps = Page['props']> = (props: TProps) => Partial<TProps> | void
+
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
   data: T
@@ -442,7 +444,9 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onPrefetching: GlobalEventCallback<'prefetching', T>
 }
 
-export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks<T>>
+export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks<T>> & {
+  optimistic?: OptimisticCallback
+}
 
 export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
   VisitOptions<T>,
@@ -472,7 +476,8 @@ export type PendingVisitOptions = {
 
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
-export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions<T>>
+export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> &
+  Required<Omit<VisitOptions<T>, 'optimistic'>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
