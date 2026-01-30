@@ -53,4 +53,45 @@ export default () => {
   nestedForm.valid('user.email')
   // @ts-expect-error - Field does not exist
   nestedForm.invalid('user.email')
+
+  // Wildcard path support (PrecognitionPath)
+  const wildcardForm = useForm({
+    users: [] as Array<{ name: string; email: string }>,
+    profile: { age: 0, city: '' },
+    company: { name: '', addresses: [] as string[] },
+    nested: { companies: [] as Array<{ name: string; addresses: string[] }> },
+  }).withPrecognition('post', '/precognition/wildcard')
+
+  // Valid array field paths
+  wildcardForm.validate('users')
+  wildcardForm.validate('users.*')
+  wildcardForm.validate('users.*.name')
+  wildcardForm.validate('users.*.email')
+  wildcardForm.validate('users.*.*')
+
+  // Valid object field paths
+  wildcardForm.validate('profile')
+  wildcardForm.validate('profile.*')
+  wildcardForm.validate('profile.age')
+
+  // Valid nested paths
+  wildcardForm.validate('company')
+  wildcardForm.validate('company.addresses')
+  wildcardForm.validate('nested')
+  wildcardForm.validate('nested.companies')
+  wildcardForm.validate('nested.companies.*')
+  wildcardForm.validate('nested.companies.*.name')
+  wildcardForm.validate('nested.companies.*.addresses')
+  wildcardForm.validate('nested.companies.*.*')
+
+  // @ts-expect-error - nonexistent property in array items
+  wildcardForm.validate('users.*.unknown')
+  // @ts-expect-error - missing wildcard for array access
+  wildcardForm.validate('users.email')
+  // @ts-expect-error - invalid deep nesting
+  wildcardForm.validate('profile.age.foo')
+  // @ts-expect-error - field does not exist
+  wildcardForm.validate('nonexistent')
+  // @ts-expect-error - no such field
+  wildcardForm.validate('profile.country')
 }

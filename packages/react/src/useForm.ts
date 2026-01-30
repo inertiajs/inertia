@@ -22,6 +22,7 @@ import {
 import {
   createValidator,
   NamedInputEvent,
+  PrecognitionPath,
   resolveName,
   toSimpleValidationErrors,
   ValidationConfig,
@@ -90,7 +91,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   ) => InertiaPrecognitiveFormProps<TForm>
   touched: <K extends FormDataKeys<TForm>>(field?: K) => boolean
   valid: <K extends FormDataKeys<TForm>>(field: K) => boolean
-  validate: <K extends FormDataKeys<TForm>>(
+  validate: <K extends FormDataKeys<TForm> | PrecognitionPath<TForm>>(
     field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
     config?: PrecognitionValidationConfig<K>,
   ) => InertiaPrecognitiveFormProps<TForm>
