@@ -48,7 +48,7 @@ function injectResolver(
   const resolver = buildDefaultResolver(extensions)
 
   if (!call.options) {
-    return code.slice(0, call.callEnd - 1) + `{ ${resolver} }` + code.slice(call.callEnd)
+    return code.slice(0, call.callEnd - 1) + `{ ${resolver} })` + code.slice(call.callEnd)
   }
 
   if (call.options.isEmpty) {
