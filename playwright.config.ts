@@ -55,6 +55,7 @@ const projects = [
 // Build commands
 const buildCommand = `pnpm -r --filter './packages/${adapter}/test-app' build`
 const buildSSRCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr`
+const buildSSRAutoCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr-auto`
 const serveCommand = `cd tests/app && PACKAGE=${adapter} pnpm serve`
 
 // Web server configuration based on SSR mode
@@ -63,6 +64,11 @@ const webServerConfig = ssrEnabled
       {
         command: `${buildCommand} && ${buildSSRCommand} && node packages/${adapter}/test-app/dist/ssr.js`,
         url: 'http://localhost:13714/health',
+        reuseExistingServer: !runsInCI,
+      },
+      {
+        command: `${buildSSRAutoCommand} && node packages/${adapter}/test-app/dist/ssr-auto.js`,
+        url: 'http://localhost:13718/health',
         reuseExistingServer: !runsInCI,
       },
       {

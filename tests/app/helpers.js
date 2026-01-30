@@ -111,5 +111,49 @@ module.exports = {
 
     return res.status(200).send(html)
   },
+  renderSSRAuto: async (req, res, data) => {
+    data = buildPageData(req, data)
+
+    if (req.get('X-Inertia')) {
+      res.header('Vary', 'Accept')
+      res.header('X-Inertia', true)
+      return res.status(200).json(data)
+    }
+
+    const ssrResult = await ssr.renderAuto(data)
+    const htmlTemplate = fs
+      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
+      .toString()
+
+    const headContent = ssrResult.head ? ssrResult.head.join('\n    ') : ''
+
+    const html = htmlTemplate
+      .replace('{{ headAttribute }}', 'inertia')
+      .replace(/<script>\s*window\.initialPage = '{{ placeholder }}'\s*<\/script>/, headContent)
+      .replace('<div id="app"></div>', ssrResult.body)
+
+    return res.status(200).send(html)
+  },
+  renderAuto: (req, res, data) => {
+    data = buildPageData(req, data)
+    data = processPartialProps(req, data)
+
+    if (req.get('X-Inertia')) {
+      res.header('Vary', 'Accept')
+      res.header('X-Inertia', true)
+      return res.status(200).json(data)
+    }
+
+    // Escape for HTML attribute (configureInertiaApp reads from data-page attribute)
+    const escapedData = JSON.stringify(data).replace(/"/g, '&quot;')
+
+    return res.status(200).send(
+      fs
+        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-auto.html'))
+        .toString()
+        .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
+        .replace('{{ placeholder }}', escapedData),
+    )
+  },
   location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),
 }

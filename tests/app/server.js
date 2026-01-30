@@ -70,6 +70,27 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+// SSR auto-transform test routes (uses the Vite plugin SSR transform)
+app.get('/ssr-auto/page1', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page1',
+    props: {
+      user: { name: 'Auto User', email: 'auto@example.com' },
+      items: ['Auto 1', 'Auto 2', 'Auto 3'],
+      count: 100,
+    },
+  }),
+)
+
+app.get('/ssr-auto/page2', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
 // configureInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
   inertia.renderUnified(req, res, {
@@ -96,6 +117,28 @@ app.get('/unified/props', (req, res) =>
       foo: 'bar',
       count: 42,
       items: ['a', 'b', 'c'],
+    },
+  }),
+)
+
+// Auto transform test routes (pages shorthand transformed by Vite plugin)
+// Uses VitePages directory to prove transform uses the configured path
+app.get('/auto', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Home',
+    props: {
+      example: 'AutoTransform',
+    },
+  }),
+)
+
+app.get('/auto/props', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Props',
+    props: {
+      foo: 'vite-bar',
+      count: 123,
+      items: ['vite', 'plugin', 'test'],
     },
   }),
 )

@@ -334,6 +334,9 @@ importers:
       '@inertiajs/core':
         specifier: workspace:*
         version: link:../../core
+      '@inertiajs/vite':
+        specifier: workspace:*
+        version: link:../../vite
       '@inertiajs/vue3':
         specifier: workspace:*
         version: link:..
