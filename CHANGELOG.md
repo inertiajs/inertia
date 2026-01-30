@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.12...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.13...master)
 
 - Nothing yet
+
+## [v2.3.13](https://github.com/inertiajs/inertia/compare/v2.3.12...v2.3.13) - 2026-01-30
+
+### What's Changed
+
+* Fix `useForm` type inference in generic wrapper components by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2851
+* Support wildcard paths in `validate()` method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2854
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.12...v2.3.13
 
 ## [v2.3.12](https://github.com/inertiajs/inertia/compare/v2.3.11...v2.3.12) - 2026-01-27
 
