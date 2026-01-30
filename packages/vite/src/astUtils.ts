@@ -5,10 +5,17 @@ export type NodeWithPos<T> = T & { start: number; end: number }
 
 const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
 
-const FRAMEWORKS: Record<string, { extensions: string[]; serverRenderer?: string }> = {
-  '@inertiajs/vue3': { extensions: ['.vue'], serverRenderer: 'vue/server-renderer' },
-  '@inertiajs/react': { extensions: ['.tsx', '.jsx'], serverRenderer: 'react-dom/server' },
-  '@inertiajs/svelte': { extensions: ['.svelte'], serverRenderer: 'svelte/server' },
+interface FrameworkConfig {
+  extensions: string[]
+  serverRenderer?: string
+  serverRenderFn?: string
+  extractDefault?: boolean
+}
+
+const FRAMEWORKS: Record<string, FrameworkConfig> = {
+  '@inertiajs/vue3': { extensions: ['.vue'], serverRenderer: 'vue/server-renderer', extractDefault: true },
+  '@inertiajs/react': { extensions: ['.tsx', '.jsx'], serverRenderer: 'react-dom/server', extractDefault: true },
+  '@inertiajs/svelte': { extensions: ['.svelte'], serverRenderer: 'svelte/server', serverRenderFn: 'render' },
 }
 
 export interface InertiaStatement {
@@ -53,6 +60,14 @@ export class ParsedCode {
 
   get serverRenderer(): string | null {
     return this.framework ? (FRAMEWORKS[this.framework].serverRenderer ?? null) : null
+  }
+
+  get serverRenderFn(): string {
+    return this.framework ? (FRAMEWORKS[this.framework].serverRenderFn ?? 'renderToString') : 'renderToString'
+  }
+
+  get extractDefault(): boolean {
+    return this.framework ? (FRAMEWORKS[this.framework].extractDefault ?? false) : true
   }
 
   get inertiaStatement(): InertiaStatement | null {

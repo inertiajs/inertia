@@ -32,9 +32,9 @@ configureInertiaApp({ resolve: (name) => name })`
       expect(wrapWithServerBootstrap(code, {})).toMatchInlineSnapshot(`
         "import { configureInertiaApp } from '@inertiajs/svelte'
         import __inertia_createServer__ from '@inertiajs/core/server'
-        import { render as __inertia_render_fn__ } from 'svelte/server'
+        import { render as __inertia_ssr_render__ } from 'svelte/server'
         const __inertia_app__ = await configureInertiaApp({ resolve: (name) => name })
-        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_render_fn__)
+        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_ssr_render__)
         __inertia_createServer__(__inertia_render__)
         export default __inertia_render__"
       `)
@@ -47,9 +47,9 @@ configureInertiaApp({})`
       expect(wrapWithServerBootstrap(code, {})).toMatchInlineSnapshot(`
         "import { configureInertiaApp } from '@inertiajs/vue3'
         import __inertia_createServer__ from '@inertiajs/core/server'
-        import { renderToString as __inertia_renderToString__ } from 'vue/server-renderer'
+        import { renderToString as __inertia_ssr_render__ } from 'vue/server-renderer'
         const __inertia_app__ = await configureInertiaApp({})
-        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)
+        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_ssr_render__)
         __inertia_createServer__(__inertia_render__)
         export default __inertia_render__"
       `)
@@ -62,9 +62,9 @@ configureInertiaApp({})`
       expect(wrapWithServerBootstrap(code, {})).toMatchInlineSnapshot(`
         "import { configureInertiaApp } from '@inertiajs/react'
         import __inertia_createServer__ from '@inertiajs/core/server'
-        import { renderToString as __inertia_renderToString__ } from 'react-dom/server'
+        import { renderToString as __inertia_ssr_render__ } from 'react-dom/server'
         const __inertia_app__ = await configureInertiaApp({})
-        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)
+        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_ssr_render__)
         __inertia_createServer__(__inertia_render__)
         export default __inertia_render__"
       `)
@@ -77,9 +77,9 @@ configureInertiaApp({})`
       expect(wrapWithServerBootstrap(code, { port: 13715, cluster: true })).toMatchInlineSnapshot(`
         "import { configureInertiaApp } from '@inertiajs/svelte'
         import __inertia_createServer__ from '@inertiajs/core/server'
-        import { render as __inertia_render_fn__ } from 'svelte/server'
+        import { render as __inertia_ssr_render__ } from 'svelte/server'
         const __inertia_app__ = await configureInertiaApp({})
-        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_render_fn__)
+        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_ssr_render__)
         __inertia_createServer__(__inertia_render__, {"port":13715,"cluster":true})
         export default __inertia_render__"
       `)
@@ -109,12 +109,12 @@ initializeTheme()`
         const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
         import __inertia_createServer__ from '@inertiajs/core/server'
-        import { renderToString as __inertia_renderToString__ } from 'vue/server-renderer'
+        import { renderToString as __inertia_ssr_render__ } from 'vue/server-renderer'
         const __inertia_app__ = await createInertiaApp({
             title: (title) => title ? \`\${title} - \${appName}\` : appName,
             progress: { color: '#4B5563' },
         })
-        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)
+        const __inertia_render__ = (page) => __inertia_app__(page, __inertia_ssr_render__)
         __inertia_createServer__(__inertia_render__)
         export default __inertia_render__
 

@@ -12,20 +12,18 @@ export function transformPageResolution(code: string): string | null {
     return null
   }
 
-  const isSvelte = parsed.framework === '@inertiajs/svelte'
-
   if (parsed.pagesProperty) {
-    return replacePages(code, parsed.pagesProperty, parsed.extensions, isSvelte)
+    return replacePages(code, parsed.pagesProperty, parsed.extensions, parsed.extractDefault)
   }
 
   if (parsed.callWithoutResolver) {
-    return injectResolver(code, parsed.callWithoutResolver, parsed.extensions, isSvelte)
+    return injectResolver(code, parsed.callWithoutResolver, parsed.extensions, parsed.extractDefault)
   }
 
   return null
 }
 
-function replacePages(code: string, property: NodeWithPos<Property>, defaultExtensions: string[], isSvelte: boolean): string {
+function replacePages(code: string, property: NodeWithPos<Property>, defaultExtensions: string[], extractDefault: boolean): string {
   const config = extractPagesConfig(property.value, code)
 
   if (!config) {
@@ -37,7 +35,7 @@ function replacePages(code: string, property: NodeWithPos<Property>, defaultExte
     ? (Array.isArray(config.extensions) ? config.extensions : [config.extensions])
     : defaultExtensions
 
-  const resolver = buildResolver(directory, extensions, isSvelte, config.transform)
+  const resolver = buildResolver(directory, extensions, extractDefault, config.transform)
 
   return code.slice(0, property.start) + resolver + code.slice(property.end)
 }
@@ -46,9 +44,9 @@ function injectResolver(
   code: string,
   call: { callEnd: number; options?: { start: number; end: number; isEmpty: boolean } },
   extensions: string[],
-  isSvelte: boolean,
+  extractDefault: boolean,
 ): string {
-  const resolver = buildDefaultResolver(extensions, isSvelte)
+  const resolver = buildDefaultResolver(extensions, extractDefault)
 
   if (!call.options) {
     return code.slice(0, call.callEnd - 1) + `{ ${resolver} })` + code.slice(call.callEnd)
@@ -124,14 +122,12 @@ function extractStringArray(node: Property['value']): string[] | undefined {
     .map((el) => el.value)
 }
 
-function buildResolver(directory: string, extensions: string[], isSvelte: boolean, transform?: string): string {
+function buildResolver(directory: string, extensions: string[], extractDefault: boolean, transform?: string): string {
   const glob = buildGlob(directory, extensions)
   const nameVar = transform ? 'resolvedName' : 'name'
   const lookup = extensions.map((ext) => `pages[\`${directory}/\${${nameVar}}${ext}\`]`).join(' || ')
   const transformLine = transform ? `const resolvedName = (${transform})(name)\n    ` : ''
-  // Svelte expects { default: Component, layout?: ... }, so return the raw module
-  // Vue/React expect the component directly, so extract .default
-  const returnValue = isSvelte ? 'page' : 'page.default ?? page'
+  const returnValue = extractDefault ? 'page.default ?? page' : 'page'
 
   return `resolve: async (name) => {
     ${transformLine}const pages = import.meta.glob('${glob}')
@@ -141,13 +137,11 @@ function buildResolver(directory: string, extensions: string[], isSvelte: boolea
   }`
 }
 
-function buildDefaultResolver(extensions: string[], isSvelte: boolean): string {
+function buildDefaultResolver(extensions: string[], extractDefault: boolean): string {
   const dirs = ['./pages', './Pages']
   const globs = dirs.map((d) => buildGlob(d, extensions))
   const lookup = dirs.flatMap((d) => extensions.map((e) => `pages[\`${d}/\${name}${e}\`]`)).join(' || ')
-  // Svelte expects { default: Component, layout?: ... }, so return the raw module
-  // Vue/React expect the component directly, so extract .default
-  const returnValue = isSvelte ? 'page' : 'page.default ?? page'
+  const returnValue = extractDefault ? 'page.default ?? page' : 'page'
 
   return `resolve: async (name) => {
     const pages = import.meta.glob(['${globs.join("', '")}'])
