@@ -1,4 +1,4 @@
-import type { CallExpression, Identifier, ObjectExpression, Property } from 'estree'
+import type { Property } from 'estree'
 import { type NodeWithPos, ParsedCode } from './astUtils'
 
 export function transformPageResolution(code: string): string | null {
@@ -12,61 +12,59 @@ export function transformPageResolution(code: string): string | null {
     return null
   }
 
-  const pagesProperty = findPagesProperty(parsed, code)
-
-  if (pagesProperty) {
-    return replaceWithResolver(code, pagesProperty, parsed.extensions)
+  if (parsed.pagesProperty) {
+    return replacePages(code, parsed.pagesProperty, parsed.extensions)
   }
 
-  const call = findCallNeedingResolver(parsed)
-
-  if (call) {
-    return injectDefaultResolver(code, call, parsed.extensions)
+  if (parsed.callWithoutResolver) {
+    return injectResolver(code, parsed.callWithoutResolver, parsed.extensions)
   }
 
   return null
 }
 
-interface PagesProperty {
-  start: number
-  end: number
+function replacePages(code: string, property: NodeWithPos<Property>, defaultExtensions: string[]): string {
+  const config = extractPagesConfig(property.value, code)
+
+  if (!config) {
+    return code
+  }
+
+  const directory = config.directory.replace(/\/$/, '')
+  const extensions = config.extensions
+    ? (Array.isArray(config.extensions) ? config.extensions : [config.extensions])
+    : defaultExtensions
+
+  const resolver = buildResolver(directory, extensions, config.transform)
+
+  return code.slice(0, property.start) + resolver + code.slice(property.end)
+}
+
+function injectResolver(
+  code: string,
+  call: { callEnd: number; options?: { start: number; end: number; isEmpty: boolean } },
+  extensions: string[],
+): string {
+  const resolver = buildDefaultResolver(extensions)
+
+  if (!call.options) {
+    return code.slice(0, call.callEnd - 1) + `{ ${resolver} }` + code.slice(call.callEnd)
+  }
+
+  if (call.options.isEmpty) {
+    return code.slice(0, call.options.start) + `{ ${resolver} }` + code.slice(call.options.end)
+  }
+
+  return code.slice(0, call.options.start + 1) + ` ${resolver},` + code.slice(call.options.start + 1)
+}
+
+interface PagesConfig {
   directory: string
   extensions?: string | string[]
   transform?: string
 }
 
-function findPagesProperty(parsed: ParsedCode, code: string): PagesProperty | null {
-  for (const call of parsed.findInertiaCalls()) {
-    if (call.arguments.length === 0 || call.arguments[0].type !== 'ObjectExpression') {
-      continue
-    }
-
-    for (const prop of (call.arguments[0] as ObjectExpression).properties) {
-      if (prop.type !== 'Property' || prop.key.type !== 'Identifier' || prop.key.name !== 'pages') {
-        continue
-      }
-
-      const property = prop as NodeWithPos<Property>
-
-      if (property.start === undefined || property.end === undefined) {
-        continue
-      }
-
-      const result = extractPagesConfig(property.value, code)
-
-      if (result) {
-        return { start: property.start, end: property.end, ...result }
-      }
-    }
-  }
-
-  return null
-}
-
-function extractPagesConfig(
-  node: Property['value'],
-  code: string,
-): { directory: string; extensions?: string | string[]; transform?: string } | null {
+function extractPagesConfig(node: Property['value'], code: string): PagesConfig | null {
   const str = extractString(node)
 
   if (str) {
@@ -121,75 +119,6 @@ function extractStringArray(node: Property['value']): string[] | undefined {
   return node.elements
     .filter((el): el is typeof el & { value: string } => el?.type === 'Literal' && typeof el.value === 'string')
     .map((el) => el.value)
-}
-
-function replaceWithResolver(code: string, property: PagesProperty, defaultExtensions: string[]): string {
-  const directory = property.directory.replace(/\/$/, '')
-  const extensions = property.extensions
-    ? (Array.isArray(property.extensions) ? property.extensions : [property.extensions])
-    : defaultExtensions
-
-  return code.slice(0, property.start) + buildResolver(directory, extensions, property.transform) + code.slice(property.end)
-}
-
-interface CallNeedingResolver {
-  argsStart: number
-  argsEnd: number
-  objectStart?: number
-  objectEnd?: number
-  hasProperties: boolean
-}
-
-function findCallNeedingResolver(parsed: ParsedCode): CallNeedingResolver | null {
-  for (const call of parsed.findInertiaCalls()) {
-    const callee = call.callee as NodeWithPos<Identifier>
-    const callWithPos = call as NodeWithPos<CallExpression>
-
-    if (callee.end === undefined || callWithPos.end === undefined) {
-      continue
-    }
-
-    if (call.arguments.length === 0) {
-      return { argsStart: callee.end, argsEnd: callWithPos.end, hasProperties: false }
-    }
-
-    if (call.arguments[0].type !== 'ObjectExpression') {
-      continue
-    }
-
-    const obj = call.arguments[0] as NodeWithPos<ObjectExpression>
-    const hasExisting = obj.properties.some(
-      (p) => p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
-    )
-
-    if (hasExisting || obj.start === undefined || obj.end === undefined) {
-      continue
-    }
-
-    return {
-      argsStart: callee.end,
-      argsEnd: callWithPos.end,
-      objectStart: obj.start,
-      objectEnd: obj.end,
-      hasProperties: obj.properties.length > 0,
-    }
-  }
-
-  return null
-}
-
-function injectDefaultResolver(code: string, call: CallNeedingResolver, extensions: string[]): string {
-  const resolver = buildDefaultResolver(extensions)
-
-  if (!call.objectStart) {
-    return code.slice(0, call.argsStart) + `({ ${resolver} })` + code.slice(call.argsEnd)
-  }
-
-  if (!call.hasProperties) {
-    return code.slice(0, call.objectStart) + `{ ${resolver} }` + code.slice(call.objectEnd)
-  }
-
-  return code.slice(0, call.objectStart + 1) + ` ${resolver},` + code.slice(call.objectStart + 1)
 }
 
 function buildResolver(directory: string, extensions: string[], transform?: string): string {

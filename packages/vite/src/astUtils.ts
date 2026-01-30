@@ -1,4 +1,4 @@
-import type { CallExpression, ExpressionStatement, Identifier, Program, SimpleCallExpression } from 'estree'
+import type { CallExpression, ExpressionStatement, Identifier, ObjectExpression, Property, Program, SimpleCallExpression } from 'estree'
 import { parseAst } from 'vite'
 
 export type NodeWithPos<T> = T & { start: number; end: number }
@@ -9,6 +9,17 @@ const FRAMEWORKS: Record<string, { extensions: string[]; serverRenderer?: string
   '@inertiajs/vue3': { extensions: ['.vue'], serverRenderer: 'vue/server-renderer' },
   '@inertiajs/react': { extensions: ['.tsx', '.jsx'], serverRenderer: 'react-dom/server' },
   '@inertiajs/svelte': { extensions: ['.svelte'] },
+}
+
+export interface InertiaStatement {
+  statement: NodeWithPos<ExpressionStatement>
+  call: NodeWithPos<SimpleCallExpression>
+}
+
+export interface InertiaCallOptions {
+  start: number
+  end: number
+  isEmpty: boolean
 }
 
 export class ParsedCode {
@@ -44,24 +55,24 @@ export class ParsedCode {
     return this.framework ? (FRAMEWORKS[this.framework].serverRenderer ?? null) : null
   }
 
-  findInertiaCall(): { statementNode: NodeWithPos<ExpressionStatement>; callNode: NodeWithPos<SimpleCallExpression> } | null {
+  get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
       if (node.type !== 'ExpressionStatement') {
         continue
       }
 
-      const statementNode = node as NodeWithPos<ExpressionStatement>
-      let expr = statementNode.expression as { type: string; argument?: unknown; start: number; end: number }
+      const statement = node as NodeWithPos<ExpressionStatement>
+      let expr = statement.expression as { type: string; argument?: unknown; start: number; end: number }
 
       if (expr.type === 'AwaitExpression') {
         expr = expr.argument as typeof expr
       }
 
       if (expr.type === 'CallExpression') {
-        const callNode = expr as NodeWithPos<SimpleCallExpression>
+        const call = expr as NodeWithPos<SimpleCallExpression>
 
-        if (callNode.callee.type === 'Identifier' && INERTIA_APP_FUNCTIONS.includes((callNode.callee as Identifier).name)) {
-          return { statementNode, callNode }
+        if (this.isInertiaCall(call)) {
+          return { statement, call }
         }
       }
     }
@@ -69,34 +80,95 @@ export class ParsedCode {
     return null
   }
 
-  *findInertiaCalls(): Generator<CallExpression> {
-    for (const node of this.walk()) {
-      if (node.type === 'CallExpression') {
-        const call = node as unknown as CallExpression
+  get inertiaCalls(): CallExpression[] {
+    const calls: CallExpression[] = []
 
-        if (call.callee.type === 'Identifier' && INERTIA_APP_FUNCTIONS.includes(call.callee.name)) {
-          yield call
+    this.walkAst(this.ast, (node) => {
+      if (node.type === 'CallExpression' && this.isInertiaCall(node as CallExpression)) {
+        calls.push(node as CallExpression)
+      }
+    })
+
+    return calls
+  }
+
+  get pagesProperty(): NodeWithPos<Property> | null {
+    for (const call of this.inertiaCalls) {
+      if (call.arguments.length === 0 || call.arguments[0].type !== 'ObjectExpression') {
+        continue
+      }
+
+      for (const prop of (call.arguments[0] as ObjectExpression).properties) {
+        if (prop.type !== 'Property' || prop.key.type !== 'Identifier' || prop.key.name !== 'pages') {
+          continue
+        }
+
+        const property = prop as NodeWithPos<Property>
+
+        if (property.start !== undefined && property.end !== undefined) {
+          return property
         }
       }
     }
+
+    return null
   }
 
-  private *walk(node: unknown = this.ast): Generator<{ type: string }> {
+  get callWithoutResolver(): { callEnd: number; options?: InertiaCallOptions } | null {
+    for (const call of this.inertiaCalls) {
+      const callee = call.callee as NodeWithPos<Identifier>
+      const callWithPos = call as NodeWithPos<CallExpression>
+
+      if (callee.end === undefined || callWithPos.end === undefined) {
+        continue
+      }
+
+      if (call.arguments.length === 0) {
+        return { callEnd: callWithPos.end }
+      }
+
+      if (call.arguments[0].type !== 'ObjectExpression') {
+        continue
+      }
+
+      const obj = call.arguments[0] as NodeWithPos<ObjectExpression>
+      const hasResolver = obj.properties.some(
+        (p) => p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
+      )
+
+      if (hasResolver || obj.start === undefined || obj.end === undefined) {
+        continue
+      }
+
+      return {
+        callEnd: callWithPos.end,
+        options: { start: obj.start, end: obj.end, isEmpty: obj.properties.length === 0 },
+      }
+    }
+
+    return null
+  }
+
+  private isInertiaCall(node: CallExpression | SimpleCallExpression): boolean {
+    return node.callee.type === 'Identifier' && INERTIA_APP_FUNCTIONS.includes((node.callee as Identifier).name)
+  }
+
+  private walkAst(node: unknown, callback: (node: { type: string }) => void): void {
     if (!node || typeof node !== 'object') {
       return
     }
 
     if ('type' in node) {
-      yield node as { type: string }
+      callback(node as { type: string })
     }
 
     for (const value of Object.values(node as Record<string, unknown>)) {
       if (Array.isArray(value)) {
         for (const item of value) {
-          yield* this.walk(item)
+          this.walkAst(item, callback)
         }
       } else {
-        yield* this.walk(value)
+        this.walkAst(value, callback)
       }
     }
   }

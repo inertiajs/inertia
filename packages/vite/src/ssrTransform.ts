@@ -2,39 +2,37 @@ import type { InertiaSSROptions } from './ssr'
 import { ParsedCode } from './astUtils'
 
 export function findInertiaAppExport(code: string): boolean {
-  return !!ParsedCode.from(code)?.findInertiaCall()
+  return !!ParsedCode.from(code)?.inertiaStatement
 }
 
 export function wrapWithServerBootstrap(code: string, options: InertiaSSROptions): string | null {
   const parsed = ParsedCode.from(code)
-  const match = parsed?.findInertiaCall()
 
-  if (!match) {
+  if (!parsed?.inertiaStatement) {
     return null
   }
 
-  const callCode = code.slice(match.callNode.start, match.callNode.end)
-  const configArg = buildConfigArg(options)
-  const rendererModule = parsed!.serverRenderer
+  const { statement, call } = parsed.inertiaStatement
+  const callCode = code.slice(call.start, call.end)
+  const renderer = parsed.serverRenderer
 
-  const rendererImport = rendererModule
-    ? `import { renderToString as __inertia_renderToString__ } from '${rendererModule}'\n`
-    : ''
+  const lines = [
+    `import __inertia_createServer__ from '@inertiajs/core/server'`,
+    renderer && `import { renderToString as __inertia_renderToString__ } from '${renderer}'`,
+    `const __inertia_app__ = await ${callCode}`,
+    renderer
+      ? `const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)`
+      : `const __inertia_render__ = __inertia_app__`,
+    `__inertia_createServer__(__inertia_render__${formatOptions(options)})`,
+    `export default __inertia_render__`,
+  ]
 
-  const renderWrapper = rendererModule
-    ? `const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)`
-    : `const __inertia_render__ = __inertia_app__`
+  const replacement = lines.filter(Boolean).join('\n')
 
-  const replacement = `import __inertia_createServer__ from '@inertiajs/core/server'
-${rendererImport}const __inertia_app__ = await ${callCode}
-${renderWrapper}
-__inertia_createServer__(__inertia_render__${configArg})
-export default __inertia_render__`
-
-  return code.slice(0, match.statementNode.start) + replacement + code.slice(match.statementNode.end)
+  return code.slice(0, statement.start) + replacement + code.slice(statement.end)
 }
 
-function buildConfigArg(options: InertiaSSROptions): string {
+function formatOptions(options: InertiaSSROptions): string {
   const config: Record<string, unknown> = {}
 
   if (options.port !== undefined) {
