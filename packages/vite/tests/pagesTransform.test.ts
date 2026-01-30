@@ -67,7 +67,7 @@ export default createInertiaApp({ pages: './Pages' })`
             const pages = import.meta.glob('./Pages/**/*.svelte')
             const page = await (pages[\`./Pages/\${name}.svelte\`])?.()
             if (!page) throw new Error(\`Page not found: \${name}\`)
-            return page.default ?? page
+            return page
           } })"
       `)
     })

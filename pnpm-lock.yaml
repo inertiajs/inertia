@@ -117,6 +117,9 @@ importers:
       '@inertiajs/react':
         specifier: workspace:*
         version: link:..
+      '@inertiajs/vite':
+        specifier: workspace:*
+        version: link:../../vite
       '@vitejs/plugin-react':
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0))
@@ -227,6 +230,9 @@ importers:
       '@inertiajs/svelte':
         specifier: workspace:*
         version: link:..
+      '@inertiajs/vite':
+        specifier: workspace:*
+        version: link:../../vite
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2

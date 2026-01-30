@@ -1,3 +1,4 @@
+import inertia from '@inertiajs/vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
@@ -12,6 +13,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         unified: resolve(__dirname, 'index-unified.html'),
+        auto: resolve(__dirname, 'index-auto.html'),
       },
     },
   },
@@ -20,5 +22,5 @@ export default defineConfig({
       '@': __dirname,
     },
   },
-  plugins: [svelte()],
+  plugins: [inertia(), svelte()],
 })

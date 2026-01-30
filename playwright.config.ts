@@ -18,6 +18,7 @@ const runsOnMac = process.platform === 'darwin'
 const ssrEnabled = process.env.SSR === 'true'
 
 const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
+const ssrAutoPorts = { vue3: 13718, react: 13719, svelte: 13720 }
 const url = `http://localhost:${adapterPorts[adapter]}`
 
 const adapters = ['react', 'svelte', 'vue3']
@@ -68,7 +69,7 @@ const webServerConfig = ssrEnabled
       },
       {
         command: `${buildSSRAutoCommand} && node packages/${adapter}/test-app/dist/ssr-auto.js`,
-        url: 'http://localhost:13718/health',
+        url: `http://localhost:${ssrAutoPorts[adapter]}/health`,
         reuseExistingServer: !runsInCI,
       },
       {

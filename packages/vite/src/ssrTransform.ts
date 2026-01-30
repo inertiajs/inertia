@@ -15,13 +15,18 @@ export function wrapWithServerBootstrap(code: string, options: InertiaSSROptions
   const { statement, call } = parsed.inertiaStatement
   const callCode = code.slice(call.start, call.end)
   const renderer = parsed.serverRenderer
+  const isSvelte = parsed.framework === '@inertiajs/svelte'
+
+  // Svelte uses `render` from svelte/server, while Vue/React use `renderToString`
+  const rendererImportName = isSvelte ? 'render' : 'renderToString'
+  const rendererAlias = isSvelte ? '__inertia_render_fn__' : '__inertia_renderToString__'
 
   const lines = [
     `import __inertia_createServer__ from '@inertiajs/core/server'`,
-    renderer && `import { renderToString as __inertia_renderToString__ } from '${renderer}'`,
+    renderer && `import { ${rendererImportName} as ${rendererAlias} } from '${renderer}'`,
     `const __inertia_app__ = await ${callCode}`,
     renderer
-      ? `const __inertia_render__ = (page) => __inertia_app__(page, __inertia_renderToString__)`
+      ? `const __inertia_render__ = (page) => __inertia_app__(page, ${rendererAlias})`
       : `const __inertia_render__ = __inertia_app__`,
     `__inertia_createServer__(__inertia_render__${formatOptions(options)})`,
     `export default __inertia_render__`,

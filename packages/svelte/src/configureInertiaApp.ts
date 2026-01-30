@@ -9,9 +9,14 @@ import {
 import { hydrate, mount } from 'svelte'
 import App from './components/App.svelte'
 import { config } from './index'
-import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
+import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
 
-type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
+type SvelteRenderResult = { body: string; head: string }
+
+type SvelteServerRender = <T>(
+  component: T,
+  options: { props?: Record<string, unknown> },
+) => SvelteRenderResult
 
 export type ConfigureInertiaAppOptions = {
   id?: string
@@ -29,6 +34,7 @@ export type ConfigureInertiaAppOptions = {
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
+  render: SvelteServerRender,
 ) => Promise<InertiaAppSSRResponse>
 
 export default async function configureInertiaApp<SharedProps extends PageProps = PageProps>({
@@ -70,24 +76,25 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
 
 function createSSRRenderer<SharedProps extends PageProps>(
   id: string,
-  resolveComponent: (name: string) => Promise<unknown>,
+  resolveComponent: ComponentResolver,
   useScriptElement: boolean,
 ): InertiaSSRRenderFunction<SharedProps> {
-  return async (page: Page<SharedProps>): Promise<InertiaAppSSRResponse> => {
-    const component = await resolveComponent(page.component)
+  return async (page: Page<SharedProps>, render: SvelteServerRender): Promise<InertiaAppSSRResponse> => {
+    const component = (await Promise.resolve(resolveComponent(page.component))) as ResolvedComponent
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { html, head, css } = (App as any).render({
-      initialPage: page,
-      initialComponent: component,
-      resolveComponent,
-    }) as SvelteRenderResult
+    const { body: html, head } = render(App, {
+      props: {
+        initialPage: page,
+        initialComponent: component,
+        resolveComponent,
+      },
+    })
 
     const body = buildSSRBody(id, page, html, useScriptElement)
 
     return {
       body,
-      head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
+      head: [head],
     }
   }
 }

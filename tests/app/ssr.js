@@ -1,7 +1,12 @@
 const http = require('http')
 
 const SSR_PORT = 13714
-const SSR_AUTO_PORT = 13718
+const SSR_AUTO_PORTS = {
+  vue3: 13718,
+  react: 13719,
+  svelte: 13720,
+}
+const SSR_AUTO_PORT = SSR_AUTO_PORTS[process.env.PACKAGE || 'vue3']
 
 function renderToPort(port, pageData) {
   return new Promise((resolve, reject) => {

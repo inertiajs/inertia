@@ -8,7 +8,7 @@ const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
 const FRAMEWORKS: Record<string, { extensions: string[]; serverRenderer?: string }> = {
   '@inertiajs/vue3': { extensions: ['.vue'], serverRenderer: 'vue/server-renderer' },
   '@inertiajs/react': { extensions: ['.tsx', '.jsx'], serverRenderer: 'react-dom/server' },
-  '@inertiajs/svelte': { extensions: ['.svelte'] },
+  '@inertiajs/svelte': { extensions: ['.svelte'], serverRenderer: 'svelte/server' },
 }
 
 export interface InertiaStatement {
