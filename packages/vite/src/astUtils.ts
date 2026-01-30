@@ -15,7 +15,7 @@ interface FrameworkConfig {
 const FRAMEWORKS: Record<string, FrameworkConfig> = {
   '@inertiajs/vue3': { extensions: ['.vue'], serverRenderer: 'vue/server-renderer', extractDefault: true },
   '@inertiajs/react': { extensions: ['.tsx', '.jsx'], serverRenderer: 'react-dom/server', extractDefault: true },
-  '@inertiajs/svelte': { extensions: ['.svelte'], serverRenderer: 'svelte/server', serverRenderFn: 'render' },
+  '@inertiajs/svelte': { extensions: ['.svelte'], serverRenderer: 'svelte/server', serverRenderFn: 'render', extractDefault: false },
 }
 
 export interface InertiaStatement {
