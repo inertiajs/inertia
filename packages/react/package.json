@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "2.3.12",
+  "version": "2.3.13",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
