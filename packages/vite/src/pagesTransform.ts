@@ -40,12 +40,14 @@ function replacePages(code: string, property: NodeWithPos<Property>, defaultExte
     return code
   }
 
-  const directory = config.directory.replace(/\/$/, '')
   const extensions = config.extensions
     ? (Array.isArray(config.extensions) ? config.extensions : [config.extensions])
     : defaultExtensions
+  const eager = config.eager ?? true
 
-  const resolver = buildResolver(directory, extensions, extractDefault, config.transform)
+  const resolver = config.directory
+    ? buildResolver(config.directory.replace(/\/$/, ''), extensions, extractDefault, eager, config.transform)
+    : buildDefaultResolver(extensions, extractDefault, eager)
 
   return code.slice(0, property.start) + resolver + code.slice(property.end)
 }
@@ -70,9 +72,10 @@ function injectResolver(
 }
 
 interface PagesConfig {
-  directory: string
+  directory?: string
   extensions?: string | string[]
   transform?: string
+  eager?: boolean
 }
 
 function extractPagesConfig(node: Property['value'], code: string): PagesConfig | null {
@@ -89,6 +92,7 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
   let directory: string | undefined
   let extensions: string | string[] | undefined
   let transform: string | undefined
+  let eager: boolean | undefined
 
   for (const prop of node.properties) {
     if (prop.type !== 'Property' || prop.key.type !== 'Identifier') {
@@ -104,10 +108,16 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
       extensions = extractString(value) ?? extractStringArray(value)
     } else if (key === 'transform' && value.start !== undefined && value.end !== undefined) {
       transform = code.slice(value.start, value.end)
+    } else if (key === 'eager') {
+      eager = extractBoolean(value)
     }
   }
 
-  return directory ? { directory, extensions, transform } : null
+  if (!directory && eager === undefined) {
+    return null
+  }
+
+  return { directory, extensions, transform, eager }
 }
 
 function extractString(node: Property['value']): string | undefined {
@@ -132,31 +142,57 @@ function extractStringArray(node: Property['value']): string[] | undefined {
     .map((el) => el.value)
 }
 
-function buildResolver(directory: string, extensions: string[], extractDefault: boolean, transform?: string): string {
+function extractBoolean(node: Property['value']): boolean | undefined {
+  if (node.type === 'Literal' && typeof node.value === 'boolean') {
+    return node.value
+  }
+
+  return undefined
+}
+
+function buildResolver(directory: string, extensions: string[], extractDefault: boolean, eager: boolean, transform?: string): string {
   const glob = buildGlob(directory, extensions)
   const nameVar = transform ? 'resolvedName' : 'name'
   const lookup = extensions.map((ext) => `pages[\`${directory}/\${${nameVar}}${ext}\`]`).join(' || ')
-  const transformLine = transform ? `const resolvedName = (${transform})(name)\n    ` : ''
-  const returnValue = extractDefault ? 'page.default ?? page' : 'page'
+  const transformLine = transform ? `const resolvedName = (${transform})(name, page)\n    ` : ''
+  const returnValue = extractDefault ? 'module.default ?? module' : 'module'
 
-  return `resolve: async (name) => {
+  if (eager) {
+    return `resolve: (name, page) => {
+    ${transformLine}const pages = import.meta.glob('${glob}', { eager: true })
+    const module = ${lookup}
+    if (!module) throw new Error(\`Page not found: \${name}\`)
+    return ${returnValue}
+  }`
+  }
+
+  return `resolve: async (name, page) => {
     ${transformLine}const pages = import.meta.glob('${glob}')
-    const page = await (${lookup})?.()
-    if (!page) throw new Error(\`Page not found: \${name}\`)
+    const module = await (${lookup})?.()
+    if (!module) throw new Error(\`Page not found: \${name}\`)
     return ${returnValue}
   }`
 }
 
-function buildDefaultResolver(extensions: string[], extractDefault: boolean): string {
+function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = true): string {
   const dirs = ['./pages', './Pages']
   const globs = dirs.map((d) => buildGlob(d, extensions))
   const lookup = dirs.flatMap((d) => extensions.map((e) => `pages[\`${d}/\${name}${e}\`]`)).join(' || ')
-  const returnValue = extractDefault ? 'page.default ?? page' : 'page'
+  const returnValue = extractDefault ? 'module.default ?? module' : 'module'
 
-  return `resolve: async (name) => {
+  if (eager) {
+    return `resolve: (name, page) => {
+    const pages = import.meta.glob(['${globs.join("', '")}'], { eager: true })
+    const module = ${lookup}
+    if (!module) throw new Error(\`Page not found: \${name}\`)
+    return ${returnValue}
+  }`
+  }
+
+  return `resolve: async (name, page) => {
     const pages = import.meta.glob(['${globs.join("', '")}'])
-    const page = await (${lookup})?.()
-    if (!page) throw new Error(\`Page not found: \${name}\`)
+    const module = await (${lookup})?.()
+    if (!module) throw new Error(\`Page not found: \${name}\`)
     return ${returnValue}
   }`
 }
