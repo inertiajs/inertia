@@ -150,51 +150,28 @@ function extractBoolean(node: Property['value']): boolean | undefined {
   return undefined
 }
 
-function buildResolver(directory: string, extensions: string[], extractDefault: boolean, eager: boolean, transform?: string): string {
-  const glob = buildGlob(directory, extensions)
+function buildResolver(directories: string | string[], extensions: string[], extractDefault: boolean, eager: boolean, transform?: string): string {
+  const dirs = Array.isArray(directories) ? directories : [directories]
+  const globs = dirs.map((d) => buildGlob(d, extensions))
+  const glob = globs.length === 1 ? `'${globs[0]}'` : `['${globs.join("', '")}']`
   const nameVar = transform ? 'resolvedName' : 'name'
-  const lookup = extensions.map((ext) => `pages[\`${directory}/\${${nameVar}}${ext}\`]`).join(' || ')
+  const lookup = dirs.flatMap((d) => extensions.map((ext) => `pages[\`${d}/\${${nameVar}}${ext}\`]`)).join(' || ')
   const transformLine = transform ? `const resolvedName = (${transform})(name, page)\n    ` : ''
   const returnValue = extractDefault ? 'module.default ?? module' : 'module'
 
-  if (eager) {
-    return `resolve: (name, page) => {
-    ${transformLine}const pages = import.meta.glob('${glob}', { eager: true })
-    const module = ${lookup}
-    if (!module) throw new Error(\`Page not found: \${name}\`)
-    return ${returnValue}
-  }`
-  }
+  const globOptions = eager ? ', { eager: true }' : ''
+  const moduleLookup = eager ? lookup : `await (${lookup})?.()`
 
   return `resolve: async (name, page) => {
-    ${transformLine}const pages = import.meta.glob('${glob}')
-    const module = await (${lookup})?.()
+    ${transformLine}const pages = import.meta.glob(${glob}${globOptions})
+    const module = ${moduleLookup}
     if (!module) throw new Error(\`Page not found: \${name}\`)
     return ${returnValue}
   }`
 }
 
 function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = true): string {
-  const dirs = ['./pages', './Pages']
-  const globs = dirs.map((d) => buildGlob(d, extensions))
-  const lookup = dirs.flatMap((d) => extensions.map((e) => `pages[\`${d}/\${name}${e}\`]`)).join(' || ')
-  const returnValue = extractDefault ? 'module.default ?? module' : 'module'
-
-  if (eager) {
-    return `resolve: (name, page) => {
-    const pages = import.meta.glob(['${globs.join("', '")}'], { eager: true })
-    const module = ${lookup}
-    if (!module) throw new Error(\`Page not found: \${name}\`)
-    return ${returnValue}
-  }`
-  }
-
-  return `resolve: async (name, page) => {
-    const pages = import.meta.glob(['${globs.join("', '")}'])
-    const module = await (${lookup})?.()
-    if (!module) throw new Error(\`Page not found: \${name}\`)
-    return ${returnValue}
-  }`
+  return buildResolver(['./pages', './Pages'], extensions, extractDefault, eager)
 }
 
 function buildGlob(directory: string, extensions: string[]): string {

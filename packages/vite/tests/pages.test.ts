@@ -15,7 +15,7 @@ describe('pages property transform', () => {
         export default createInertiaApp({ pages: './Pages' })
       `)
 
-      expect(result).toContain('resolve: (name, page)')
+      expect(result).toContain('resolve: async (name, page)')
       expect(result).toContain("import.meta.glob('./Pages/**/*.vue', { eager: true })")
       expect(result).toContain('./Pages/${name}.vue')
     })
@@ -97,7 +97,7 @@ describe('pages property transform', () => {
         export default configureInertiaApp()
       `)
 
-      expect(result).toContain('resolve: (name, page)')
+      expect(result).toContain('resolve: async (name, page)')
       expect(result).toContain('./pages/')
       expect(result).toContain('./Pages/')
     })
@@ -108,7 +108,7 @@ describe('pages property transform', () => {
         export default configureInertiaApp({})
       `)
 
-      expect(result).toContain('resolve: (name, page)')
+      expect(result).toContain('resolve: async (name, page)')
     })
 
     it('injects default resolver with other options', () => {
@@ -117,7 +117,7 @@ describe('pages property transform', () => {
         export default createInertiaApp({ title: t => t })
       `)
 
-      expect(result).toContain('resolve: (name, page)')
+      expect(result).toContain('resolve: async (name, page)')
       expect(result).toContain('title: t => t')
     })
   })
