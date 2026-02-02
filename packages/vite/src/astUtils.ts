@@ -1,25 +1,77 @@
+/**
+ * AST Utilities for Inertia Code Transforms
+ *
+ * This module provides utilities for parsing and analyzing JavaScript/TypeScript code
+ * to find Inertia-specific patterns. We use Vite's built-in `parseAst` (which uses
+ * Rollup's parser under the hood) to parse code into an ESTree-compatible AST.
+ *
+ * The main class `ParsedCode` wraps a parsed AST and provides methods to:
+ * - Detect which Inertia framework adapter is being used (Vue, React, Svelte)
+ * - Find `configureInertiaApp()` or `createInertiaApp()` calls
+ * - Extract the `pages` property for transformation
+ * - Find calls that need a default resolver injected
+ */
+
 import type { CallExpression, ExpressionStatement, Identifier, ObjectExpression, Property, Program, SimpleCallExpression } from 'estree'
 import { parseAst } from 'vite'
 import type { FrameworkConfig } from './types'
 
+/**
+ * Augments an ESTree node type with position information.
+ * Rollup's parser adds `start` and `end` properties to nodes,
+ * which we need for string slicing during code transformation.
+ */
 export type NodeWithPos<T> = T & { start: number; end: number }
 
+/**
+ * The function names that indicate an Inertia app configuration.
+ * We look for calls to these functions to determine where to apply transforms.
+ */
 const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
 
+/**
+ * Represents a standalone Inertia call at the module level.
+ * Used for SSR transform where we need to wrap the entire statement.
+ *
+ * Example of what this matches:
+ * ```js
+ * configureInertiaApp({ resolve: name => name })  // ← This entire statement
+ * ```
+ */
 export interface InertiaStatement {
   statement: NodeWithPos<ExpressionStatement>
   call: NodeWithPos<SimpleCallExpression>
 }
 
+/**
+ * Position information for the options object in an Inertia call.
+ * Used when injecting a default resolver into existing calls.
+ */
 export interface InertiaCallOptions {
   start: number
   end: number
   isEmpty: boolean
 }
 
+/**
+ * Wrapper around a parsed AST that provides Inertia-specific analysis methods.
+ *
+ * Usage:
+ * ```ts
+ * const parsed = ParsedCode.from(code)
+ * if (parsed) {
+ *   const framework = parsed.detectFramework(frameworks)
+ *   const pages = parsed.pagesProperty
+ * }
+ * ```
+ */
 export class ParsedCode {
   private constructor(private ast: Program) {}
 
+  /**
+   * Parse JavaScript/TypeScript code into a ParsedCode instance.
+   * Returns null if parsing fails (invalid syntax).
+   */
   static from(code: string): ParsedCode | null {
     try {
       return new ParsedCode(parseAst(code))
@@ -28,6 +80,17 @@ export class ParsedCode {
     }
   }
 
+  /**
+   * Extract all import source strings from the code.
+   *
+   * For example, given:
+   * ```js
+   * import { createInertiaApp } from '@inertiajs/vue3'
+   * import { Head } from '@inertiajs/vue3'
+   * ```
+   *
+   * Returns: ['@inertiajs/vue3', '@inertiajs/vue3']
+   */
   get importSources(): string[] {
     const sources: string[] = []
 
@@ -40,12 +103,35 @@ export class ParsedCode {
     return sources
   }
 
+  /**
+   * Detect which Inertia framework adapter is being used by checking imports.
+   *
+   * Looks for imports from known framework packages (e.g., '@inertiajs/vue3')
+   * and returns the matching framework configuration.
+   */
   detectFramework(frameworks: Record<string, FrameworkConfig>): { name: string; config: FrameworkConfig } | null {
     const name = this.importSources.find((source) => source in frameworks)
 
     return name ? { name, config: frameworks[name] } : null
   }
 
+  /**
+   * Find a top-level Inertia call statement (not inside any function or export).
+   *
+   * This is used for SSR transform, which needs to wrap code like:
+   * ```js
+   * configureInertiaApp({ ... })
+   * ```
+   *
+   * Into:
+   * ```js
+   * const render = await configureInertiaApp({ ... })
+   * createServer((page) => render(page, renderToString))
+   * ```
+   *
+   * Note: This specifically looks for ExpressionStatements, NOT export defaults.
+   * The SSR entry file should have a bare call, not `export default configureInertiaApp()`.
+   */
   get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
       if (node.type !== 'ExpressionStatement') {
@@ -55,6 +141,7 @@ export class ParsedCode {
       const statement = node as NodeWithPos<ExpressionStatement>
       let expr = statement.expression as { type: string; argument?: unknown; start: number; end: number }
 
+      // Handle `await configureInertiaApp()` - unwrap the await to get the call
       if (expr.type === 'AwaitExpression') {
         expr = expr.argument as typeof expr
       }
@@ -71,6 +158,17 @@ export class ParsedCode {
     return null
   }
 
+  /**
+   * Find ALL Inertia calls anywhere in the code (including nested).
+   *
+   * This is used for pages transform, which needs to find calls like:
+   * ```js
+   * export default createInertiaApp({ pages: './Pages' })
+   * ```
+   *
+   * The call might be inside an export, function, or other expression,
+   * so we walk the entire AST to find all matches.
+   */
   get inertiaCalls(): CallExpression[] {
     const calls: CallExpression[] = []
 
@@ -83,12 +181,26 @@ export class ParsedCode {
     return calls
   }
 
+  /**
+   * Find the `pages` property in an Inertia call's options object.
+   *
+   * Looks for patterns like:
+   * ```js
+   * createInertiaApp({ pages: './Pages' })
+   * createInertiaApp({ pages: { path: './Pages', extension: '.vue' } })
+   * ```
+   *
+   * Returns the Property node with position info so we can replace it
+   * with a generated `resolve` function.
+   */
   get pagesProperty(): NodeWithPos<Property> | null {
     for (const call of this.inertiaCalls) {
+      // Skip calls without arguments or with non-object first argument
       if (call.arguments.length === 0 || call.arguments[0].type !== 'ObjectExpression') {
         continue
       }
 
+      // Look for a `pages` property in the options object
       for (const prop of (call.arguments[0] as ObjectExpression).properties) {
         if (prop.type !== 'Property' || prop.key.type !== 'Identifier' || prop.key.name !== 'pages') {
           continue
@@ -96,6 +208,7 @@ export class ParsedCode {
 
         const property = prop as NodeWithPos<Property>
 
+        // Ensure we have position info for string replacement
         if (property.start !== undefined && property.end !== undefined) {
           return property
         }
@@ -105,6 +218,20 @@ export class ParsedCode {
     return null
   }
 
+  /**
+   * Find an Inertia call that doesn't have a `pages` or `resolve` property.
+   *
+   * This is used to inject a default resolver for calls like:
+   * ```js
+   * configureInertiaApp()                    // Empty call
+   * configureInertiaApp({})                  // Empty options
+   * configureInertiaApp({ title: t => t })   // Options but no resolver
+   * ```
+   *
+   * Returns position info needed to inject the resolver:
+   * - `callEnd`: Position of the closing `)` for empty calls
+   * - `options`: Position of the `{}` for calls with options
+   */
   get callWithoutResolver(): { callEnd: number; options?: InertiaCallOptions } | null {
     for (const call of this.inertiaCalls) {
       const callee = call.callee as NodeWithPos<Identifier>
@@ -114,15 +241,19 @@ export class ParsedCode {
         continue
       }
 
+      // Empty call: configureInertiaApp()
       if (call.arguments.length === 0) {
         return { callEnd: callWithPos.end }
       }
 
+      // Non-object argument - can't inject resolver
       if (call.arguments[0].type !== 'ObjectExpression') {
         continue
       }
 
       const obj = call.arguments[0] as NodeWithPos<ObjectExpression>
+
+      // Check if it already has a pages or resolve property
       const hasResolver = obj.properties.some(
         (p) => p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
       )
@@ -131,6 +262,7 @@ export class ParsedCode {
         continue
       }
 
+      // Found a call with options but no resolver
       return {
         callEnd: callWithPos.end,
         options: { start: obj.start, end: obj.end, isEmpty: obj.properties.length === 0 },
@@ -140,10 +272,17 @@ export class ParsedCode {
     return null
   }
 
+  /**
+   * Check if a call expression is an Inertia app configuration call.
+   */
   private isInertiaCall(node: CallExpression | SimpleCallExpression): boolean {
     return node.callee.type === 'Identifier' && INERTIA_APP_FUNCTIONS.includes((node.callee as Identifier).name)
   }
 
+  /**
+   * Recursively walk all nodes in the AST and call the callback for each.
+   * This is a simple depth-first traversal that handles both arrays and objects.
+   */
   private walkAst(node: unknown, callback: (node: { type: string }) => void): void {
     if (!node || typeof node !== 'object') {
       return

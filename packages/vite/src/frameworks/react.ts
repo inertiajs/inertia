@@ -1,25 +1,48 @@
+/**
+ * React Framework Configuration
+ *
+ * This file defines how the Vite plugin handles React applications.
+ * It serves as a reference for creating custom framework configurations.
+ *
+ * The SSR template shows what the plugin generates. For a user's SSR entry:
+ *
+ * ```js
+ * import { configureInertiaApp } from '@inertiajs/react'
+ *
+ * configureInertiaApp({
+ *   resolve: (name) => resolvePageComponent(name),
+ * })
+ * ```
+ *
+ * The plugin transforms it to:
+ *
+ * ```js
+ * import { configureInertiaApp } from '@inertiajs/react'
+ * import createServer from '@inertiajs/react/server'
+ * import { renderToString } from 'react-dom/server'
+ *
+ * const render = await configureInertiaApp({
+ *   resolve: (name) => resolvePageComponent(name),
+ * })
+ *
+ * createServer((page) => render(page, renderToString))
+ * ```
+ */
+
 import type { FrameworkConfig } from '../types'
 
-/**
- * React framework config
- *
- * This shows how the Vite plugin wraps your configureInertiaApp() call for SSR.
- * Use this as a reference to create your own config for custom frameworks.
- *
- * Manual SSR equivalent:
- *
- *   import { configureInertiaApp } from '@inertiajs/react'
- *   import createServer from '@inertiajs/react/server'
- *   import { renderToString } from 'react-dom/server'
- *
- *   const render = await configureInertiaApp({ ... })
- *
- *   createServer((page) => render(page, renderToString))
- */
 export const config: FrameworkConfig = {
+  // Package name used to detect React usage via import statements
   package: '@inertiajs/react',
+
+  // React components can use either .tsx (TypeScript) or .jsx
+  // The plugin tries .tsx first, then falls back to .jsx
   extensions: ['.tsx', '.jsx'],
+
+  // React components are exported as `export default`, so we need to extract .default
   extractDefault: true,
+
+  // SSR template that wraps the configureInertiaApp call with server bootstrap code
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/react/server'
 import { renderToString } from 'react-dom/server'
