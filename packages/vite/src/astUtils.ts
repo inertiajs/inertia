@@ -1,22 +1,10 @@
 import type { CallExpression, ExpressionStatement, Identifier, ObjectExpression, Property, Program, SimpleCallExpression } from 'estree'
 import { parseAst } from 'vite'
+import type { FrameworkConfig } from './types'
 
 export type NodeWithPos<T> = T & { start: number; end: number }
 
 const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
-
-interface FrameworkConfig {
-  extensions: string[]
-  serverRenderer?: string
-  serverRenderFn?: string
-  extractDefault?: boolean
-}
-
-const FRAMEWORKS: Record<string, FrameworkConfig> = {
-  '@inertiajs/vue3': { extensions: ['.vue'], serverRenderer: 'vue/server-renderer', extractDefault: true },
-  '@inertiajs/react': { extensions: ['.tsx', '.jsx'], serverRenderer: 'react-dom/server', extractDefault: true },
-  '@inertiajs/svelte': { extensions: ['.svelte'], serverRenderer: 'svelte/server', serverRenderFn: 'render', extractDefault: false },
-}
 
 export interface InertiaStatement {
   statement: NodeWithPos<ExpressionStatement>
@@ -40,34 +28,22 @@ export class ParsedCode {
     }
   }
 
-  get framework(): string | null {
+  get importSources(): string[] {
+    const sources: string[] = []
+
     for (const node of this.ast.body) {
       if (node.type === 'ImportDeclaration') {
-        const source = node.source.value as string
-
-        if (source in FRAMEWORKS) {
-          return source
-        }
+        sources.push(node.source.value as string)
       }
     }
 
-    return null
+    return sources
   }
 
-  get extensions(): string[] {
-    return this.framework ? FRAMEWORKS[this.framework].extensions : []
-  }
+  detectFramework(frameworks: Record<string, FrameworkConfig>): { name: string; config: FrameworkConfig } | null {
+    const name = this.importSources.find((source) => source in frameworks)
 
-  get serverRenderer(): string | null {
-    return this.framework ? (FRAMEWORKS[this.framework].serverRenderer ?? null) : null
-  }
-
-  get serverRenderFn(): string {
-    return this.framework ? (FRAMEWORKS[this.framework].serverRenderFn ?? 'renderToString') : 'renderToString'
-  }
-
-  get extractDefault(): boolean {
-    return this.framework ? (FRAMEWORKS[this.framework].extractDefault ?? false) : true
+    return name ? { name, config: frameworks[name] } : null
   }
 
   get inertiaStatement(): InertiaStatement | null {

@@ -1,23 +1,33 @@
 import type { Property } from 'estree'
 import { type NodeWithPos, ParsedCode } from './astUtils'
+import type { FrameworkConfig } from './types'
 
-export function transformPageResolution(code: string): string | null {
+export function transformPageResolution(code: string, frameworks: Record<string, FrameworkConfig>): string | null {
   if (!code.includes('InertiaApp')) {
     return null
   }
 
   const parsed = ParsedCode.from(code)
 
-  if (!parsed?.framework) {
+  if (!parsed) {
     return null
   }
 
+  const framework = parsed.detectFramework(frameworks)
+
+  if (!framework) {
+    return null
+  }
+
+  const extensions = framework.config.extensions
+  const extractDefault = framework.config.extractDefault ?? true
+
   if (parsed.pagesProperty) {
-    return replacePages(code, parsed.pagesProperty, parsed.extensions, parsed.extractDefault)
+    return replacePages(code, parsed.pagesProperty, extensions, extractDefault)
   }
 
   if (parsed.callWithoutResolver) {
-    return injectResolver(code, parsed.callWithoutResolver, parsed.extensions, parsed.extractDefault)
+    return injectResolver(code, parsed.callWithoutResolver, extensions, extractDefault)
   }
 
   return null

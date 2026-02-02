@@ -1,16 +1,31 @@
 import type { Plugin } from 'vite'
 import { transformPageResolution } from './pagesTransform'
+import { defaultFrameworks } from './frameworks/index'
 import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT } from './ssr'
 import { findInertiaAppExport, wrapWithServerBootstrap } from './ssrTransform'
+import type { FrameworkConfig } from './types'
 
 export { InertiaSSROptions }
+export type { SSRTemplate, FrameworkConfig } from './types'
 
 export interface InertiaPluginOptions {
   ssr?: string | InertiaSSROptions
+  frameworks?: FrameworkConfig | FrameworkConfig[]
+}
+
+function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<string, FrameworkConfig> {
+  if (!input) {
+    return {}
+  }
+
+  const configs = Array.isArray(input) ? input : [input]
+
+  return Object.fromEntries(configs.map((config) => [config.package, config]))
 }
 
 export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : (options.ssr ?? {})
+  const frameworks = { ...defaultFrameworks, ...toFrameworkRecord(options.frameworks) }
 
   let entry: string | null = null
 
@@ -33,10 +48,10 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       let result = code
 
       if (options?.ssr && findInertiaAppExport(result)) {
-        result = wrapWithServerBootstrap(result, ssr) ?? result
+        result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster }, frameworks) ?? result
       }
 
-      return transformPageResolution(result) ?? (result !== code ? result : null)
+      return transformPageResolution(result, frameworks) ?? (result !== code ? result : null)
     },
 
     configureServer(server) {

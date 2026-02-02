@@ -253,7 +253,7 @@ describe('SSR', () => {
   })
 
   describe('production SSR transform', () => {
-    it('wraps configureInertiaApp with server bootstrap', () => {
+    it('wraps configureInertiaApp with server bootstrap for Vue', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
@@ -261,16 +261,17 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `configureInertiaApp({ resolve: (name) => name })`
+      const code = `import { configureInertiaApp } from '@inertiajs/vue3'
+configureInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import __inertia_createServer__ from '@inertiajs/core/server'")
-      expect(result).toContain('const __inertia_app__ = await configureInertiaApp')
-      expect(result).toContain('__inertia_createServer__(__inertia_render__)')
-      expect(result).toContain('export default __inertia_render__')
+      expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
+      expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
+      expect(result).toContain('const render = await configureInertiaApp')
+      expect(result).toContain('createServer((page) => render(page, renderToString))')
     })
 
-    it('wraps createInertiaApp with server bootstrap', () => {
+    it('wraps configureInertiaApp with server bootstrap for Svelte', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
@@ -278,10 +279,13 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `createInertiaApp({ resolve: (name) => name })`
+      const code = `import { configureInertiaApp } from '@inertiajs/svelte'
+configureInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('__inertia_createServer__(__inertia_render__)')
+      expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
+      expect(result).toContain("import { render } from 'svelte/server'")
+      expect(result).toContain('createServer((page) => ssr(page, render))')
     })
 
     it('passes SSR config to server', () => {
@@ -292,10 +296,11 @@ describe('SSR', () => {
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const code = `configureInertiaApp({})`
+      const code = `import { configureInertiaApp } from '@inertiajs/vue3'
+configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('__inertia_createServer__(__inertia_render__, {"port":13715,"cluster":true})')
+      expect(result).toContain('createServer((page) => render(page, renderToString), {"port":13715,"cluster":true})')
     })
 
     it('transforms in dev mode for SSR', () => {
@@ -306,13 +311,29 @@ describe('SSR', () => {
 
       plugin.configResolved!({ ...createMockConfig(logger, false), command: 'serve' } as ResolvedConfig)
 
-      const code = `configureInertiaApp({})`
+      const code = `import { configureInertiaApp } from '@inertiajs/vue3'
+configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('__inertia_createServer__')
+      expect(result).toContain('createServer')
     })
 
-    it('does not transform client builds', () => {
+    it('does not apply SSR transform to client builds', () => {
+      mockExistsSync.mockReturnValue(false)
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const code = `import { configureInertiaApp } from '@inertiajs/vue3'
+configureInertiaApp({ resolve: (name) => name })`
+      const result = plugin.transform!(code, 'app.ts', { ssr: false })
+
+      expect(result).toBeNull()
+    })
+
+    it('does not transform when no framework is detected', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
@@ -321,7 +342,7 @@ describe('SSR', () => {
       plugin.configResolved!(createMockConfig(logger, false))
 
       const code = `configureInertiaApp({})`
-      const result = plugin.transform!(code, 'app.ts', { ssr: false })
+      const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
       expect(result).toBeNull()
     })

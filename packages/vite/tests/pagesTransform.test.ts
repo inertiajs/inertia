@@ -1,28 +1,31 @@
 import { describe, expect, it } from 'vitest'
 import { transformPageResolution } from '../src/pagesTransform'
+import { defaultFrameworks } from '../src/frameworks/index'
+
+const transform = (code: string) => transformPageResolution(code, defaultFrameworks)
 
 describe('Pages Transform', () => {
   describe('returns null when no transform needed', () => {
     it('no InertiaApp in code', () => {
-      expect(transformPageResolution(`const foo = 'bar'`)).toBeNull()
+      expect(transform(`const foo = 'bar'`)).toBeNull()
     })
 
     it('invalid syntax', () => {
-      expect(transformPageResolution(`import { createInertiaApp } from '@inertiajs/vue3' {{{ invalid`)).toBeNull()
+      expect(transform(`import { createInertiaApp } from '@inertiajs/vue3' {{{ invalid`)).toBeNull()
     })
 
     it('unknown framework', () => {
       const code = `import { createInertiaApp } from 'unknown-package'
 export default createInertiaApp({ pages: './Pages' })`
 
-      expect(transformPageResolution(code)).toBeNull()
+      expect(transform(code)).toBeNull()
     })
 
     it('resolve already specified', () => {
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 export default createInertiaApp({ resolve: (name) => name })`
 
-      expect(transformPageResolution(code)).toBeNull()
+      expect(transform(code)).toBeNull()
     })
   })
 
@@ -31,7 +34,7 @@ export default createInertiaApp({ resolve: (name) => name })`
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 export default createInertiaApp({ pages: './Pages' })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob('./Pages/**/*.vue')
@@ -46,7 +49,7 @@ export default createInertiaApp({ pages: './Pages' })`
       const code = `import { createInertiaApp } from '@inertiajs/react'
 export default createInertiaApp({ pages: './Pages' })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/react'
         export default createInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob('./Pages/**/*{.tsx,.jsx}')
@@ -61,7 +64,7 @@ export default createInertiaApp({ pages: './Pages' })`
       const code = `import { createInertiaApp } from '@inertiajs/svelte'
 export default createInertiaApp({ pages: './Pages' })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/svelte'
         export default createInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob('./Pages/**/*.svelte')
@@ -76,8 +79,8 @@ export default createInertiaApp({ pages: './Pages' })`
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 export default createInertiaApp({ pages: './Pages/' })`
 
-      expect(transformPageResolution(code)).toContain('./Pages/${name}.vue')
-      expect(transformPageResolution(code)).not.toContain('./Pages//')
+      expect(transform(code)).toContain('./Pages/${name}.vue')
+      expect(transform(code)).not.toContain('./Pages//')
     })
   })
 
@@ -86,7 +89,7 @@ export default createInertiaApp({ pages: './Pages/' })`
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 export default createInertiaApp({ pages: { path: './Views' } })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob('./Views/**/*.vue')
@@ -101,7 +104,7 @@ export default createInertiaApp({ pages: { path: './Views' } })`
       const code = `import { createInertiaApp } from '@inertiajs/react'
 export default createInertiaApp({ pages: { path: './Pages', extension: '.tsx' } })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/react'
         export default createInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob('./Pages/**/*.tsx')
@@ -116,7 +119,7 @@ export default createInertiaApp({ pages: { path: './Pages', extension: '.tsx' } 
       const code = `import { createInertiaApp } from '@inertiajs/react'
 export default createInertiaApp({ pages: { path: './Pages', extension: ['.tsx', '.ts'] } })`
 
-      expect(transformPageResolution(code)).toContain("import.meta.glob('./Pages/**/*{.tsx,.ts}')")
+      expect(transform(code)).toContain("import.meta.glob('./Pages/**/*{.tsx,.ts}')")
     })
 
     it('transforms with transform function', () => {
@@ -128,7 +131,7 @@ export default createInertiaApp({
   }
 })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({
           resolve: async (name) => {
@@ -148,7 +151,7 @@ export default createInertiaApp({
       const code = `import { configureInertiaApp } from '@inertiajs/vue3'
 export default configureInertiaApp()`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { configureInertiaApp } from '@inertiajs/vue3'
         export default configureInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'])
@@ -163,7 +166,7 @@ export default configureInertiaApp()`
       const code = `import { configureInertiaApp } from '@inertiajs/vue3'
 export default configureInertiaApp({})`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { configureInertiaApp } from '@inertiajs/vue3'
         export default configureInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'])
@@ -178,7 +181,7 @@ export default configureInertiaApp({})`
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 export default createInertiaApp({ title: t => t })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name) => {
             const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'])
@@ -199,7 +202,7 @@ export default createInertiaApp({
   progress: { color: 'red' },
 })`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({
           resolve: async (name) => {
@@ -227,7 +230,7 @@ export default createInertiaApp({
 
 // Footer comment`
 
-      expect(transformPageResolution(code)).toMatchInlineSnapshot(`
+      expect(transform(code)).toMatchInlineSnapshot(`
         "// Header comment
         import { createInertiaApp } from '@inertiajs/vue3'
 
