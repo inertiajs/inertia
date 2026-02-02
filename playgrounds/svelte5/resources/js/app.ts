@@ -1,3 +1,5 @@
 import { configureInertiaApp } from '@inertiajs/svelte'
 
-configureInertiaApp()
+configureInertiaApp({
+  pages: './Pages',
+})

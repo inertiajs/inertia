@@ -16,10 +16,12 @@
  * Custom frameworks can be added via the `frameworks` option.
  */
 
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
 import { transformPageResolution } from './pagesTransform'
 import { defaultFrameworks } from './frameworks/index'
-import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT } from './ssr'
+import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT, SSR_ENTRY_CANDIDATES } from './ssr'
 import { findInertiaAppExport, wrapWithServerBootstrap } from './ssrTransform'
 import type { FrameworkConfig } from './types'
 
@@ -90,6 +92,31 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
     name: '@inertiajs/vite',
 
     /**
+     * Modify Vite config before it's resolved.
+     * For SSR builds: auto-detects entry file and enables sourcemaps by default.
+     */
+    config(config, { isSsrBuild }) {
+      if (!isSsrBuild) {
+        return
+      }
+
+      const root = config.root ?? process.cwd()
+      const ssrEntry =
+        ssr.entry ?? SSR_ENTRY_CANDIDATES.find((candidate) => existsSync(resolve(root, candidate)))
+
+      return {
+        build: {
+          sourcemap: ssr.sourcemap !== false ? (config.build?.sourcemap ?? true) : undefined,
+          rollupOptions: ssrEntry
+            ? {
+                input: config.build?.rollupOptions?.input ?? ssrEntry,
+              }
+            : undefined,
+        },
+      }
+    },
+
+    /**
      * After Vite resolves its config, we can determine the SSR entry file.
      * This runs before any transforms, so we know early if SSR is enabled.
      */
@@ -118,7 +145,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       // SSR transform: wrap configureInertiaApp() with server bootstrap code
       // This only applies during SSR builds (options.ssr is true)
       if (options?.ssr && findInertiaAppExport(result)) {
-        result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster }, frameworks) ?? result
+        result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster, debug: ssr.debug }, frameworks) ?? result
       }
 
       // Pages transform: convert `pages: './Pages'` to a full resolve function
@@ -143,7 +170,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           return next()
         }
 
-        await handleSSRRequest(server, entry!, req, res)
+        await handleSSRRequest(server, entry!, req, res, ssr.debug ?? false)
       })
 
       server.config.logger.info(`Inertia SSR dev endpoint: ${SSR_ENDPOINT}`)

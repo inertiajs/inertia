@@ -14,7 +14,7 @@
  * })
  * ```
  *
- * The plugin transforms it to:
+ * In production, the plugin transforms it to:
  *
  * ```js
  * import { configureInertiaApp } from '@inertiajs/react'
@@ -27,6 +27,8 @@
  *
  * createServer((page) => render(page, renderToString))
  * ```
+ *
+ * In development, it exports the render function directly for the Vite dev server.
  */
 
 import type { FrameworkConfig } from '../types'
@@ -43,12 +45,19 @@ export const config: FrameworkConfig = {
   extractDefault: true,
 
   // SSR template that wraps the configureInertiaApp call with server bootstrap code
+  // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/react/server'
 import { renderToString } from 'react-dom/server'
 
 const render = await ${configureCall}
 
-createServer((page) => render(page, renderToString)${options})
+const renderPage = (page) => render(page, renderToString)
+
+if (!import.meta.hot) {
+  createServer(renderPage${options})
+}
+
+export default renderPage
 `,
 }

@@ -250,9 +250,144 @@ describe('SSR', () => {
       expect(server.ssrFixStacktrace).toHaveBeenCalledWith(error)
       expect(res.statusCode).toBe(500)
     })
+
+    it('returns structured error response with type and hint', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const error = new Error('window is not defined')
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockRejectedValue(error),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Dashboard' }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      expect(res.statusCode).toBe(500)
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.type).toBe('browser-api')
+      expect(response.browserApi).toBe('window')
+      expect(response.component).toBe('Dashboard')
+      expect(response.hint).toContain('lifecycle hook')
+      expect(response.timestamp).toBeDefined()
+    })
+
+    it('includes component name in error response', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockRejectedValue(new Error("Cannot find module './Pages/Users'")),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Users/Index' }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.type).toBe('component-resolution')
+      expect(response.component).toBe('Users/Index')
+    })
+
+    it('logs error with hint to console', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockRejectedValue(new Error('document is not defined')),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test' }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      expect(logger.error).toHaveBeenCalled()
+      const loggedMessage = logger.error.mock.calls[0][0]
+      expect(loggedMessage).toContain('SSR ERROR')
+      expect(loggedMessage).toContain('Test')
+      expect(loggedMessage).toContain('Hint')
+    })
+
+    it('includes stack trace when debug mode is enabled', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia({ ssr: { debug: true } })
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const error = new Error('window is not defined')
+      error.stack = 'Error: window is not defined\n    at Dashboard.vue:10'
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockRejectedValue(error),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Dashboard' }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const loggedMessage = logger.error.mock.calls[0][0]
+      expect(loggedMessage).toContain('Dashboard.vue:10')
+    })
+
+    it('does not include stack trace when debug mode is disabled', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia({ ssr: { debug: false } })
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const error = new Error('window is not defined')
+      error.stack = 'Error: window is not defined\n    at Dashboard.vue:10'
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockRejectedValue(error),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Dashboard' }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const loggedMessage = logger.error.mock.calls[0][0]
+      expect(loggedMessage).not.toContain('Stack trace:')
+    })
   })
 
-  describe('production SSR transform', () => {
+  describe('SSR transform', () => {
     it('wraps configureInertiaApp with server bootstrap for Vue', () => {
       mockExistsSync.mockReturnValue(false)
 
@@ -268,7 +403,10 @@ configureInertiaApp({ resolve: (name) => name })`
       expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
       expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
       expect(result).toContain('const render = await configureInertiaApp')
-      expect(result).toContain('createServer((page) => render(page, renderToString))')
+      expect(result).toContain('const renderPage = (page) => render(page, renderToString)')
+      expect(result).toContain('if (!import.meta.hot)')
+      expect(result).toContain('createServer(renderPage)')
+      expect(result).toContain('export default renderPage')
     })
 
     it('wraps configureInertiaApp with server bootstrap for Svelte', () => {
@@ -285,7 +423,10 @@ configureInertiaApp({ resolve: (name) => name })`
 
       expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
       expect(result).toContain("import { render } from 'svelte/server'")
-      expect(result).toContain('createServer((page) => ssr(page, render))')
+      expect(result).toContain('const renderPage = (page) => ssr(page, render)')
+      expect(result).toContain('if (!import.meta.hot)')
+      expect(result).toContain('createServer(renderPage)')
+      expect(result).toContain('export default renderPage')
     })
 
     it('passes SSR config to server', () => {
@@ -300,22 +441,26 @@ configureInertiaApp({ resolve: (name) => name })`
 configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('createServer((page) => render(page, renderToString), {"port":13715,"cluster":true})')
+      expect(result).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
     })
 
-    it('transforms in dev mode for SSR', () => {
+    it('uses same transform for both dev and production', () => {
       mockExistsSync.mockReturnValue(false)
 
       const plugin = inertia()
       const logger = createMockLogger()
 
+      // Even in dev mode (command: 'serve'), the transform is the same
+      // Runtime detection via import.meta.hot handles the difference
       plugin.configResolved!({ ...createMockConfig(logger, false), command: 'serve' } as ResolvedConfig)
 
       const code = `import { configureInertiaApp } from '@inertiajs/vue3'
 configureInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('createServer')
+      expect(result).toContain('export default renderPage')
+      expect(result).toContain('if (!import.meta.hot)')
+      expect(result).toContain('createServer(renderPage)')
     })
 
     it('does not apply SSR transform to client builds', () => {

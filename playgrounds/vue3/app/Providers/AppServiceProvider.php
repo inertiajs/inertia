@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Inertia\Ssr\SsrRenderFailed;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Event::listen(SsrRenderFailed::class, function (SsrRenderFailed $event) {
+            logger()->info('SSR Error Event', [
+                'component' => $event->component(),
+                'url' => $event->url(),
+                'error' => $event->error,
+                'type' => $event->type,
+                'hint' => $event->hint,
+            ]);
+        });
     }
 }

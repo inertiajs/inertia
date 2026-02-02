@@ -1,14 +1,27 @@
-import { createServer, IncomingMessage } from 'http'
+import { createServer, IncomingMessage, ServerResponse } from 'http'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
+import { spawnSync } from 'node:child_process'
 import * as process from 'process'
+import { classifySSRError, formatConsoleError } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 
+// Re-launch with --enable-source-maps if not already enabled
+// This ensures error stack traces show original source file locations
+if (!process.execArgv.includes('--enable-source-maps')) {
+  const result = spawnSync(process.execPath, ['--enable-source-maps', ...process.argv.slice(1)], {
+    stdio: 'inherit',
+  })
+
+  process.exit(result.status ?? 0)
+}
+
 type AppCallback = (page: Page) => InertiaAppResponse
-type RouteHandler = (request: IncomingMessage) => Promise<unknown>
+type RouteHandler = (request: IncomingMessage, response: ServerResponse) => Promise<unknown>
 type ServerOptions = {
   port?: number
   cluster?: boolean
+  debug?: boolean
 }
 type Port = number
 
@@ -23,6 +36,7 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
 export default (render: AppCallback, options?: Port | ServerOptions): void => {
   const _port = typeof options === 'number' ? options : (options?.port ?? 13714)
   const _useCluster = typeof options === 'object' && options?.cluster !== undefined ? options.cluster : false
+  const _debug = typeof options === 'object' && options?.debug !== undefined ? options.debug : false
 
   const log = (message: string) => {
     console.log(
@@ -42,21 +56,55 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
     return
   }
 
+  const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
+    const page: Page = JSON.parse(await readableToString(request))
+
+    // Suppress framework warnings during render when debug mode is enabled
+    // These are typically verbose Vue/React warnings that clutter the output
+    const originalWarn = console.warn
+    if (_debug) {
+      console.warn = () => {}
+    }
+
+    try {
+      const result = await render(page)
+
+      response.writeHead(200, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify(result))
+    } catch (e) {
+      const error = e as Error
+      const classified = classifySSRError(error, page.component, page.url)
+
+      if (_debug) {
+        console.error(formatConsoleError(classified))
+      } else {
+        console.error(`SSR Error [${page.component}]: ${error.message}`)
+      }
+
+      response.writeHead(500, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify(classified))
+    } finally {
+      console.warn = originalWarn
+    }
+  }
+
   const routes: Record<string, RouteHandler> = {
-    '/health': async () => ({ status: 'OK', timestamp: Date.now() }),
+    '/health': async (_request, response) => {
+      response.writeHead(200, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify({ status: 'OK', timestamp: Date.now() }))
+    },
     '/shutdown': () => process.exit(),
-    '/render': async (request) => render(JSON.parse(await readableToString(request))),
-    '/404': async () => ({ status: 'NOT_FOUND', timestamp: Date.now() }),
+    '/render': handleRender,
   }
 
   createServer(async (request, response) => {
-    const dispatchRoute = routes[<string>request.url] || routes['/404']
+    const dispatchRoute = routes[<string>request.url]
 
-    try {
-      response.writeHead(200, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
-      response.write(JSON.stringify(await dispatchRoute(request)))
-    } catch (e) {
-      console.error(e)
+    if (dispatchRoute) {
+      await dispatchRoute(request, response)
+    } else {
+      response.writeHead(404, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify({ status: 'NOT_FOUND', timestamp: Date.now() }))
     }
 
     response.end()

@@ -25,7 +25,14 @@
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * createServer((page) => render(page, renderToString))
+ * const renderPage = (page) => render(page, renderToString)
+ *
+ * // Only start server in production (import.meta.hot is only available in Vite dev)
+ * if (!import.meta.hot) {
+ *   createServer(renderPage)
+ * }
+ *
+ * export default renderPage
  * ```
  */
 
@@ -42,12 +49,19 @@ export const config: FrameworkConfig = {
   extractDefault: true,
 
   // SSR template that wraps the configureInertiaApp call with server bootstrap code
+  // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/vue3/server'
 import { renderToString } from 'vue/server-renderer'
 
 const render = await ${configureCall}
 
-createServer((page) => render(page, renderToString)${options})
+const renderPage = (page) => render(page, renderToString)
+
+if (!import.meta.hot) {
+  createServer(renderPage${options})
+}
+
+export default renderPage
 `,
 }

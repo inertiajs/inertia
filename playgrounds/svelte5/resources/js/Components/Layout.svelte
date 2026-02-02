@@ -17,6 +17,7 @@
   <a href="/data-table" use:inertia class="hover:underline">Table</a>
   <a href="/once/1" use:inertia class="hover:underline">Once</a>
   <a href="/flash" use:inertia class="hover:underline">Flash</a>
+  <a href="/ssr-debug" use:inertia class="hover:underline">SSR Debug</a>
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
 </nav>
 

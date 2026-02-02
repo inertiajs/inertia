@@ -39,7 +39,13 @@ configureInertiaApp({ resolve: (name) => name })`
 
         const ssr = await configureInertiaApp({ resolve: (name) => name })
 
-        createServer((page) => ssr(page, render))"
+        const renderPage = (page) => ssr(page, render)
+
+        if (!import.meta.hot) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
       `)
     })
 
@@ -54,7 +60,13 @@ configureInertiaApp({})`
 
         const render = await configureInertiaApp({})
 
-        createServer((page) => render(page, renderToString))"
+        const renderPage = (page) => render(page, renderToString)
+
+        if (!import.meta.hot) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
       `)
     })
 
@@ -69,7 +81,13 @@ configureInertiaApp({})`
 
         const render = await configureInertiaApp({})
 
-        createServer((page) => render(page, renderToString))"
+        const renderPage = (page) => render(page, renderToString)
+
+        if (!import.meta.hot) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
       `)
     })
 
@@ -84,7 +102,13 @@ configureInertiaApp({})`
 
         const ssr = await configureInertiaApp({})
 
-        createServer((page) => ssr(page, render), {"port":13715,"cluster":true})"
+        const renderPage = (page) => ssr(page, render)
+
+        if (!import.meta.hot) {
+          createServer(renderPage, {"port":13715,"cluster":true})
+        }
+
+        export default renderPage"
       `)
     })
 
@@ -119,7 +143,13 @@ initializeTheme()`
             progress: { color: '#4B5563' },
         })
 
-        createServer((page) => render(page, renderToString))
+        const renderPage = (page) => render(page, renderToString)
+
+        if (!import.meta.hot) {
+          createServer(renderPage)
+        }
+
+        export default renderPage
 
         initializeTheme()"
       `)

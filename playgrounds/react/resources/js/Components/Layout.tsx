@@ -52,6 +52,9 @@ export default function Layout({ children, padding = true }: { children: React.R
         <Link href="/flash" className="hover:underline">
           Flash
         </Link>
+        <Link href="/ssr-debug" className="hover:underline">
+          SSR Debug
+        </Link>
         <Link href="/logout" method="post" className="hover:underline">
           Logout
         </Link>

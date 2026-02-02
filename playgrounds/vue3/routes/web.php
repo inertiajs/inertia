@@ -570,3 +570,10 @@ Route::get('/once/{page}', function (int $page) {
         'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
     ]);
 });
+
+Route::get('/ssr-debug', fn () => inertia('SsrDebug'));
+Route::get('/ssr-debug/window', fn () => inertia('SsrDebug/WindowError'));
+Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));
+Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageError'));
+Route::get('/ssr-debug/render', fn () => inertia('SsrDebug/RenderError'));
+Route::get('/ssr-debug/non-existent', fn () => inertia('SsrDebug/NonExistentComponent'));

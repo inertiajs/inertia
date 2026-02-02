@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && vite build --ssr"
+    "build": "vite build && vite build --ssr"
   },
   "devDependencies": {
     "@inertiajs/core": "workspace:*",

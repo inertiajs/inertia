@@ -11,6 +11,10 @@
  * The function receives the original `configureInertiaApp(...)` call as a string
  * and should return code that wraps it with server bootstrap logic.
  *
+ * The generated code uses `import.meta.hot` to detect dev mode at runtime:
+ * - In dev: `import.meta.hot` exists, so createServer is skipped
+ * - In production: `import.meta.hot` is undefined, so createServer runs
+ *
  * @param configureCall - The original configureInertiaApp(...) call, e.g., `configureInertiaApp({ resolve: ... })`
  * @param options - Formatted SSR options string, e.g., `, {"port":13715}` or empty string
  *
@@ -21,8 +25,13 @@
  *   import { renderToString } from 'vue/server-renderer'
  *
  *   const render = await ${configureCall}
+ *   const renderPage = (page) => render(page, renderToString)
  *
- *   createServer((page) => render(page, renderToString)${options})
+ *   if (!import.meta.hot) {
+ *     createServer(renderPage${options})
+ *   }
+ *
+ *   export default renderPage
  * `
  * ```
  */
@@ -96,6 +105,12 @@ export interface SSROptions {
    * Cluster mode spawns multiple worker processes for better performance.
    */
   cluster?: boolean
+
+  /**
+   * Enable debug mode for more verbose error logging.
+   * When enabled, SSR errors show helpful hints and formatted output.
+   */
+  debug?: boolean
 }
 
 /**

@@ -62,6 +62,10 @@ export function findInertiaAppExport(code: string): boolean {
  *
  * The SSR template is defined in each framework's config file (e.g., `frameworks/vue.ts`).
  *
+ * The generated code uses `import.meta.hot` to detect dev vs production at runtime:
+ * - In dev: `import.meta.hot` exists, so createServer is skipped (Vite handles HTTP)
+ * - In production: `import.meta.hot` is undefined, so createServer runs
+ *
  * @returns The transformed code, or null if no transformation was needed
  */
 export function wrapWithServerBootstrap(
@@ -88,7 +92,6 @@ export function wrapWithServerBootstrap(
   const configureCall = code.slice(call.start, call.end)
 
   // Apply the framework's SSR template to wrap the call
-  // The template adds imports and wraps with createServer()
   const ssrCode = framework.config.ssr(configureCall, formatSSROptions(options)).trim()
 
   // Replace the original statement with the wrapped version

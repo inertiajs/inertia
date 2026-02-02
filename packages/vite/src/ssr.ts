@@ -22,6 +22,7 @@ import { existsSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { resolve } from 'node:path'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
+import { classifySSRError, formatConsoleError } from './ssrErrors'
 
 /**
  * SSR configuration options for the Vite plugin.
@@ -42,6 +43,19 @@ export interface InertiaSSROptions {
    * Enable cluster mode for the SSR server (used in production builds).
    */
   cluster?: boolean
+
+  /**
+   * Enable debug mode for more verbose error logging.
+   * When enabled, full stack traces are included in console output.
+   */
+  debug?: boolean
+
+  /**
+   * Generate sourcemaps for SSR builds.
+   * Enables mapping error stack traces back to original source files.
+   * Defaults to true. Set to false to disable.
+   */
+  sourcemap?: boolean
 }
 
 /**
@@ -57,7 +71,7 @@ export const SSR_ENDPOINT = '/__inertia_ssr'
  * 1. Dedicated SSR files (ssr.ts/tsx/js/jsx) - Laravel structure then src structure
  * 2. App entry files (app.ts/tsx/js/jsx) - fallback if no dedicated SSR file
  */
-const SSR_ENTRY_CANDIDATES = [
+export const SSR_ENTRY_CANDIDATES = [
   // Laravel structure - dedicated SSR file
   'resources/js/ssr.ts',
   'resources/js/ssr.tsx',
@@ -115,10 +129,36 @@ export async function handleSSRRequest(
   entry: string,
   req: IncomingMessage,
   res: ServerResponse,
+  debug: boolean = false,
 ): Promise<void> {
+  let component: string | undefined
+  let url: string | undefined
+
+  // Suppress verbose framework warnings during SSR (Vue, React, etc.)
+  // We'll show our own cleaner error message instead
+  const originalWarn = console.warn
+  const suppressedWarnings: string[] = []
+
+  console.warn = (...args: unknown[]) => {
+    const message = args[0]?.toString() ?? ''
+
+    // Suppress Vue's verbose component trace warnings
+    if (message.includes('[Vue warn]') || message.includes('at <')) {
+      if (debug) {
+        suppressedWarnings.push(args.map(String).join(' '))
+      }
+
+      return
+    }
+
+    originalWarn.apply(console, args)
+  }
+
   try {
     // Parse the page data from the request body
-    const page = await readRequestBody<{ component: string }>(req)
+    const page = await readRequestBody<{ component: string; url: string }>(req)
+    component = page.component
+    url = page.url
     const start = performance.now()
 
     // Load and execute the SSR entry module
@@ -137,7 +177,9 @@ export async function handleSSRRequest(
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify(result))
   } catch (error) {
-    handleSSRError(server, res, error as Error)
+    handleSSRError(server, res, error as Error, component, url, debug, suppressedWarnings)
+  } finally {
+    console.warn = originalWarn
   }
 }
 
@@ -198,21 +240,29 @@ function logSSRRequest(server: ViteDevServer, component: string, start: number):
 /**
  * Handle an error that occurred during SSR rendering.
  *
- * Logs the error with a fixed stack trace (Vite maps source locations)
- * and returns a 500 response with error details.
+ * Classifies the error, logs helpful debugging information,
+ * and returns a structured error response to Laravel.
  */
-function handleSSRError(server: ViteDevServer, res: ServerResponse, error: Error): void {
+function handleSSRError(
+  server: ViteDevServer,
+  res: ServerResponse,
+  error: Error,
+  component?: string,
+  url?: string,
+  debug: boolean = false,
+  suppressedWarnings: string[] = [],
+): void {
   // Fix the stack trace to show original source locations
   server.ssrFixStacktrace(error)
 
-  server.config.logger.error(`Inertia SSR: ${error.message}`)
+  // Classify the error and generate helpful hints
+  const classified = classifySSRError(error, component, url)
 
-  if (error.stack) {
-    server.config.logger.error(error.stack)
-  }
+  // Log formatted error with hints (use project root to make paths relative)
+  server.config.logger.error(formatConsoleError(classified, server.config.root, debug, suppressedWarnings))
 
-  // Return error details to Laravel for debugging
+  // Return structured error details to Laravel
   res.setHeader('Content-Type', 'application/json')
   res.statusCode = 500
-  res.end(JSON.stringify({ error: error.message, stack: error.stack }))
+  res.end(JSON.stringify(classified))
 }
