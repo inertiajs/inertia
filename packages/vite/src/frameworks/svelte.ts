@@ -1,4 +1,4 @@
-import type { FrameworkConfig } from './types'
+import type { FrameworkConfig } from '../types'
 
 /**
  * Svelte framework config
