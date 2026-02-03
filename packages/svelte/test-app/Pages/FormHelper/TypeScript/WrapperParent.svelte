@@ -13,6 +13,8 @@
   }
 </script>
 
-<WrapperChild data={dummyForm} let:form>
-  {form.children.map((child) => child.title)}
+<WrapperChild data={dummyForm}>
+  {#snippet children(form)}
+    {form.children.map((child) => child.title)}
+  {/snippet}
 </WrapperChild>

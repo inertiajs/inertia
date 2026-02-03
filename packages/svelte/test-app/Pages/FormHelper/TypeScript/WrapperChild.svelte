@@ -1,12 +1,14 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script lang="ts" generics="T extends Record<string, any>">
-  import { useForm } from '@inertiajs/svelte'
+  import { useForm, type InertiaForm } from '@inertiajs/svelte'
+  import type { Snippet } from 'svelte'
 
-  export let data: T
+  let { data, children }: { data: T; children: Snippet<[InertiaForm<T>]> } = $props()
 
+  // svelte-ignore state_referenced_locally
   const form = useForm(data)
 </script>
 
 <form>
-  <slot form={$form} />
+  {@render children(form)}
 </form>
