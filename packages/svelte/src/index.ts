@@ -20,6 +20,7 @@ export {
   type InertiaPrecognitiveForm,
 } from './useForm.svelte'
 export { default as useHttp } from './useHttp.svelte'
+export { default as useOptimistic } from './useOptimistic.svelte'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch.svelte'
 export { default as useRemember } from './useRemember.svelte'

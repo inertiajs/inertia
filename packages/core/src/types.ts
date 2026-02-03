@@ -831,8 +831,9 @@ export type UseHttpOptions<TResponse = unknown> = {
   onCancelToken?: (cancelToken: CancelToken) => void
 }
 
-export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+export type UseHttpSubmitOptions<TForm = unknown, TResponse = unknown> = UseHttpOptions<TResponse> & {
   headers?: HttpRequestHeaders
+  optimistic?: (currentData: TForm) => Partial<TForm>
 }
 
 declare global {

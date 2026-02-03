@@ -57,11 +57,11 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
     <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
     (errors: FormDataErrors<TForm>): void
   }
-  get: (url: string, options?: UseHttpSubmitOptions<TResponse>) => Promise<TResponse>
-  post: (url: string, options?: UseHttpSubmitOptions<TResponse>) => Promise<TResponse>
-  put: (url: string, options?: UseHttpSubmitOptions<TResponse>) => Promise<TResponse>
-  patch: (url: string, options?: UseHttpSubmitOptions<TResponse>) => Promise<TResponse>
-  delete: (url: string, options?: UseHttpSubmitOptions<TResponse>) => Promise<TResponse>
+  get: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
+  post: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
+  put: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
+  patch: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
+  delete: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => UseHttpProps<TForm, TResponse>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => UseHttpPrecognitiveProps<TForm, TResponse>
@@ -154,7 +154,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
   })
 
   const submit = useCallback(
-    async (method: Method, url: string, options: UseHttpSubmitOptions<TResponse>): Promise<TResponse> => {
+    async (method: Method, url: string, options: UseHttpSubmitOptions<TForm, TResponse>): Promise<TResponse> => {
       const onBefore = options.onBefore?.()
 
       if (onBefore === false) {
@@ -174,6 +174,15 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       }
 
       options.onCancelToken?.(cancelToken)
+
+      let snapshot: TForm | undefined
+
+      if (options.optimistic) {
+        snapshot = cloneDeep(dataRef.current)
+        const optimisticData = options.optimistic(snapshot)
+
+        baseForm.setData((current: TForm) => ({ ...current, ...optimisticData }))
+      }
 
       if (isMounted.current) {
         setProcessing(true)
@@ -248,6 +257,10 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
         throw new HttpResponseError(`Request failed with status ${httpResponse.status}`, httpResponse)
       } catch (error: unknown) {
+        if (snapshot && isMounted.current) {
+          baseForm.setData(snapshot)
+        }
+
         if (error instanceof HttpResponseError) {
           if (error.response.status === 422) {
             const responseData = JSON.parse(error.response.data)
@@ -269,9 +282,9 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           throw error
         }
 
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (error instanceof HttpCancelledError || (error instanceof Error && error.name === 'AbortError')) {
           options.onCancel?.()
-          throw new HttpCancelledError()
+          throw error instanceof HttpCancelledError ? error : new HttpCancelledError()
         }
 
         throw error
@@ -295,7 +308,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
   const createSubmitMethod =
     (method: Method) =>
-    async (url: string, options: UseHttpSubmitOptions<TResponse> = {}): Promise<TResponse> => {
+    async (url: string, options: UseHttpSubmitOptions<TForm, TResponse> = {}): Promise<TResponse> => {
       return submit(method, url, options)
     }
 
