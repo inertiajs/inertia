@@ -24,7 +24,7 @@ export {
   urlToString,
   urlWithoutHash,
 } from './url'
-export { xhrHttpClient } from './xhrHttpClient'
+export { XhrHttpClient, xhrHttpClient } from './xhrHttpClient'
 export { type Config, type Router }
 
 export const router = new Router()
