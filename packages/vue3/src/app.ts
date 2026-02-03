@@ -53,7 +53,12 @@ function isComponent(value: unknown): value is LayoutComponent {
 }
 
 function isRenderFunction(value: unknown): boolean {
-  return typeof value === 'function' && !isComponent(value)
+  if (typeof value !== 'function') {
+    return false
+  }
+
+  const fn = value as Function
+  return fn.length === 2 && typeof fn.prototype === 'undefined'
 }
 
 export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
@@ -142,8 +147,8 @@ const App: InertiaApp = defineComponent({
         }
 
         if (component.value.layout) {
-          if (typeof component.value.layout === 'function') {
-            return component.value.layout(h, child)
+          if (isRenderFunction(component.value.layout)) {
+            return (component.value.layout as Function)(h, child)
           }
 
           const layouts = normalizeLayouts(component.value.layout, isComponent, isRenderFunction)

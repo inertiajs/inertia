@@ -33,7 +33,12 @@ function isComponent(value: unknown): value is ReactComponent {
 }
 
 function isRenderFunction(value: unknown): boolean {
-  return typeof value === 'function' && !isComponent(value)
+  if (typeof value !== 'function') {
+    return false
+  }
+
+  const fn = value as Function
+  return fn.length === 1 && typeof fn.prototype === 'undefined'
 }
 
 let currentIsInitialPage = true
