@@ -6,6 +6,9 @@ import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
+
+// Re-export SSR error utilities for use by @inertiajs/vite
+export { BROWSER_APIS, type SSRErrorType, type ClassifiedSSRError } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 
 // Cache parsed sourcemaps for performance

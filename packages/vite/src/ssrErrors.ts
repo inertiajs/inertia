@@ -7,76 +7,9 @@
  * in the Node.js server environment.
  */
 
-/**
- * Types of SSR errors that can be detected.
- */
-export type SSRErrorType = 'browser-api' | 'component-resolution' | 'render' | 'unknown'
+import { BROWSER_APIS, type SSRErrorType, type ClassifiedSSRError } from '@inertiajs/core/server'
 
-/**
- * A classified SSR error with helpful context for debugging.
- */
-export interface ClassifiedSSRError {
-  /** The original error message */
-  error: string
-
-  /** The type of error detected */
-  type: SSRErrorType
-
-  /** The component being rendered when the error occurred */
-  component?: string
-
-  /** The URL being rendered when the error occurred */
-  url?: string
-
-  /** The browser API that was accessed (if type is browser-api) */
-  browserApi?: string
-
-  /** A helpful hint on how to fix the error */
-  hint: string
-
-  /** The original stack trace */
-  stack?: string
-
-  /** The source location (file:line:column) extracted from the stack trace */
-  sourceLocation?: string
-
-  /** When the error occurred */
-  timestamp: string
-}
-
-/**
- * Browser APIs that don't exist in Node.js and their descriptions.
- * These are commonly accessed by browser-only libraries or code.
- */
-const BROWSER_APIS: Record<string, string> = {
-  window: 'The global window object',
-  document: 'The DOM document object',
-  localStorage: 'Browser local storage',
-  sessionStorage: 'Browser session storage',
-  navigator: 'The navigator object (contains browser info)',
-  location: 'The location object (contains URL info)',
-  history: 'The browser history API',
-  matchMedia: 'The matchMedia function (CSS media queries)',
-  IntersectionObserver: 'The IntersectionObserver API (visibility detection)',
-  ResizeObserver: 'The ResizeObserver API (element size monitoring)',
-  MutationObserver: 'The MutationObserver API (DOM change detection)',
-  requestAnimationFrame: 'The requestAnimationFrame function',
-  cancelAnimationFrame: 'The cancelAnimationFrame function',
-  fetch: 'The fetch API (use node-fetch or axios instead)',
-  XMLHttpRequest: 'The XMLHttpRequest API',
-  HTMLElement: 'HTML element constructors',
-  CustomEvent: 'The CustomEvent constructor',
-  getComputedStyle: 'The getComputedStyle function',
-  addEventListener: 'Global event listeners',
-  removeEventListener: 'Global event listeners',
-  innerWidth: 'Browser viewport dimensions',
-  innerHeight: 'Browser viewport dimensions',
-  scrollTo: 'Browser scroll functions',
-  scrollBy: 'Browser scroll functions',
-  alert: 'Browser alert dialog',
-  confirm: 'Browser confirm dialog',
-  prompt: 'Browser prompt dialog',
-}
+export { BROWSER_APIS, type SSRErrorType, type ClassifiedSSRError }
 
 /**
  * Framework-specific lifecycle hook names for the hint messages.

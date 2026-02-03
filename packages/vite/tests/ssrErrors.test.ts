@@ -81,14 +81,14 @@ describe('SSR Errors', () => {
       expect(detectBrowserApi(error)).toBe('XMLHttpRequest')
     })
 
-    it('detects HTMLElement', () => {
-      const error = new Error('HTMLElement is not defined')
-      expect(detectBrowserApi(error)).toBe('HTMLElement')
+    it('detects matchMedia', () => {
+      const error = new Error('matchMedia is not defined')
+      expect(detectBrowserApi(error)).toBe('matchMedia')
     })
 
-    it('detects CustomEvent', () => {
-      const error = new Error('CustomEvent is not defined')
-      expect(detectBrowserApi(error)).toBe('CustomEvent')
+    it('detects requestAnimationFrame', () => {
+      const error = new Error('requestAnimationFrame is not defined')
+      expect(detectBrowserApi(error)).toBe('requestAnimationFrame')
     })
 
     it('detects property access patterns', () => {

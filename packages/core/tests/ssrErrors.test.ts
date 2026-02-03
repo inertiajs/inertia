@@ -28,8 +28,8 @@ describe('SSR Errors', () => {
         'IntersectionObserver',
         'ResizeObserver',
         'fetch',
-        'HTMLElement',
-        'CustomEvent',
+        'matchMedia',
+        'requestAnimationFrame',
       ]
 
       for (const api of apis) {

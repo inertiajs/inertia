@@ -284,6 +284,10 @@ importers:
         version: 7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)
 
   packages/vite:
+    dependencies:
+      '@inertiajs/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/estree':
         specifier: ^1.0.8

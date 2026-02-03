@@ -31,34 +31,45 @@ export interface ClassifiedSSRError {
   timestamp: string
 }
 
-const BROWSER_APIS: Record<string, string> = {
+export const BROWSER_APIS: Record<string, string> = {
+  // Global objects
   window: 'The global window object',
   document: 'The DOM document object',
-  localStorage: 'Browser local storage',
-  sessionStorage: 'Browser session storage',
   navigator: 'The navigator object',
   location: 'The location object',
   history: 'The browser history API',
+  screen: 'The screen object',
+  localStorage: 'Browser local storage',
+  sessionStorage: 'Browser session storage',
+
+  // Viewport properties (accessed via window.X)
+  innerWidth: 'Browser viewport width',
+  innerHeight: 'Browser viewport height',
+  outerWidth: 'Browser window width',
+  outerHeight: 'Browser window height',
+  scrollX: 'Horizontal scroll position',
+  scrollY: 'Vertical scroll position',
+  devicePixelRatio: 'The device pixel ratio',
   matchMedia: 'The matchMedia function',
+
+  // Observers (commonly instantiated at module level)
   IntersectionObserver: 'The IntersectionObserver API',
   ResizeObserver: 'The ResizeObserver API',
   MutationObserver: 'The MutationObserver API',
+
+  // Timing functions (commonly called at module level)
   requestAnimationFrame: 'The requestAnimationFrame function',
-  cancelAnimationFrame: 'The cancelAnimationFrame function',
+  requestIdleCallback: 'The requestIdleCallback function',
+
+  // Constructors that might be used at module level
+  Image: 'The Image constructor',
+  Audio: 'The Audio constructor',
+  Worker: 'The Worker constructor',
+  BroadcastChannel: 'The BroadcastChannel constructor',
+
+  // Network (older Node.js versions)
   fetch: 'The fetch API',
   XMLHttpRequest: 'The XMLHttpRequest API',
-  HTMLElement: 'HTML element constructors',
-  CustomEvent: 'The CustomEvent constructor',
-  getComputedStyle: 'The getComputedStyle function',
-  addEventListener: 'Global event listeners',
-  removeEventListener: 'Global event listeners',
-  innerWidth: 'Browser viewport dimensions',
-  innerHeight: 'Browser viewport dimensions',
-  scrollTo: 'Browser scroll functions',
-  scrollBy: 'Browser scroll functions',
-  alert: 'Browser alert dialog',
-  confirm: 'Browser confirm dialog',
-  prompt: 'Browser prompt dialog',
 }
 
 function detectBrowserApi(error: Error): string | null {
