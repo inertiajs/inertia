@@ -2,6 +2,7 @@ import {
   createHeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  normalizeLayouts,
   Page,
   PageHandler,
   PageProps,
@@ -10,8 +11,30 @@ import {
 import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
 import HeadContext from './HeadContext'
+import { LayoutPropsContext, resetLayoutProps } from './layoutProps'
 import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
+
+function isComponent(value: unknown): value is ReactComponent {
+  if (!value) {
+    return false
+  }
+
+  if (typeof value === 'object' && '$$typeof' in value) {
+    return true
+  }
+
+  if (typeof value === 'function') {
+    const fn = value as Function & { displayName?: string }
+    return fn.name !== '' || fn.displayName !== undefined
+  }
+
+  return false
+}
+
+function isRenderFunction(value: unknown): boolean {
+  return typeof value === 'function' && !isComponent(value)
+}
 
 let currentIsInitialPage = true
 let routerIsInitialized = false
@@ -86,6 +109,10 @@ export default function App<SharedProps extends PageProps = PageProps>({
         return
       }
 
+      if (!preserveState) {
+        resetLayoutProps()
+      }
+
       flushSync(() =>
         setCurrent((current) => ({
           component,
@@ -111,15 +138,20 @@ export default function App<SharedProps extends PageProps = PageProps>({
     (({ Component, props, key }) => {
       const child = createElement(Component, { key, ...props })
 
-      if (typeof Component.layout === 'function') {
+      if (isRenderFunction(Component.layout)) {
         return (Component.layout as LayoutFunction)(child)
       }
 
-      if (Array.isArray(Component.layout)) {
-        return (Component.layout as any)
-          .concat(child)
-          .reverse()
-          .reduce((children: any, Layout: any) => createElement(Layout, { children, ...props }))
+      const layouts = normalizeLayouts(Component.layout, isComponent, isRenderFunction)
+
+      if (layouts.length > 0) {
+        return layouts.reduceRight((childNode, layout) => {
+          return createElement(
+            LayoutPropsContext.Provider,
+            { value: { staticProps: { ...props, ...layout.props }, name: layout.name } },
+            createElement(layout.component, { ...props, ...layout.props }, childNode),
+          )
+        }, child)
       }
 
       return child

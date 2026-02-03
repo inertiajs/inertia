@@ -9,6 +9,13 @@ export { objectToFormData } from './formData'
 export { formDataToObject } from './formObject'
 export { default as createHeadManager } from './head'
 export { default as useInfiniteScroll } from './infiniteScroll'
+export {
+  createLayoutPropsStore,
+  mergeLayoutProps,
+  normalizeLayouts,
+  type LayoutDefinition,
+  type LayoutPropsStore,
+} from './layout'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { hide as hideProgress, progress, reveal as revealProgress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'

@@ -10,10 +10,13 @@
 </script>
 
 <script lang="ts">
+  import type { Component } from 'svelte'
   import type { LayoutType, LayoutResolver } from '../types'
+  import { normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page.svelte'
+  import { resetLayoutProps } from '../layoutProps.svelte'
 
   interface Props {
     initialComponent: InertiaAppProps['initialComponent']
@@ -43,6 +46,10 @@
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
+        if (!args.preserveState) {
+          resetLayoutProps()
+        }
+
         component = args.component
         page = args.page
 
@@ -54,61 +61,63 @@
     })
   }
 
-  /**
-   * Resolves the render props for the current page component, including layouts.
-   */
+  function isComponent(value: unknown): value is Component {
+    if (!value) {
+      return false
+    }
+
+    if (typeof value === 'function') {
+      const fn = value as Function & { name?: string }
+      return fn.name !== ''
+    }
+
+    if (typeof value === 'object' && '$$' in value) {
+      return true
+    }
+
+    return false
+  }
+
+  function isRenderFunction(value: unknown): boolean {
+    return (
+      typeof value === 'function' &&
+      (value as Function).length === 2 &&
+      typeof (value as Function).prototype === 'undefined'
+    )
+  }
+
   function resolveRenderProps(component: ResolvedComponent, page: Page, key: number | null = null): RenderProps {
-    // If the component does not exists, it will throw on component.default and component.layout here
     const child = h(component.default, page.props, [], key)
     const layout = component.layout
 
     return layout ? resolveLayout(layout, child, page.props, key) : child
   }
 
-  /**
-   * Builds the nested layout structure by wrapping the child component with the provided layouts.
-   *
-   * Resulting nested structure:
-   *
-   *    {
-   *      "component": OuterLayout,
-   *      "key": 123456,
-   *      "children": [{
-   *        "component": InnerLayout,
-   *        "key": 123456,
-   *        "children": [{
-   *          "component": PageComponent,
-   *          "key": 123456,
-   *          "children": [],
-   *        }],
-   *      }],
-   *    }
-   */
   function resolveLayout(
     layout: LayoutType,
     child: RenderProps,
     pageProps: PageProps,
     key: number | null,
   ): RenderProps {
-    if (isLayoutFunction(layout)) {
-      return layout(h, child)
+    if (isRenderFunction(layout)) {
+      return (layout as LayoutResolver)(h, child)
     }
 
-    if (Array.isArray(layout)) {
-      return layout
+    const layouts = normalizeLayouts(layout, isComponent, isRenderFunction)
+
+    if (layouts.length > 0) {
+      return layouts
         .slice()
         .reverse()
-        .reduce((currentRender, layoutComponent) => h(layoutComponent, pageProps, [currentRender], key), child)
+        .reduce((child, layout) => {
+          const renderProps = h(layout.component, { ...pageProps, ...layout.props }, [child], key)
+          renderProps.name = layout.name
+          renderProps.staticProps = layout.props
+          return renderProps
+        }, child)
     }
 
-    return h(layout, pageProps, child ? [child] : [], key)
-  }
-
-  /**
-   * Type guard to check if layout is a LayoutResolver
-   */
-  function isLayoutFunction(layout: LayoutType): layout is LayoutResolver {
-    return typeof layout === 'function' && layout.length === 2 && typeof layout.prototype === 'undefined'
+    return child
   }
 </script>
 

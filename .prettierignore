@@ -15,6 +15,9 @@ pnpm-lock.yaml
 *.timestamp-*.mjs
 
 # Vue files with parsing issues (dual script blocks)
+packages/vue3/test-app/Pages/LayoutProps/Named.vue
+packages/vue3/test-app/Pages/LayoutProps/NamedStatic.vue
+packages/vue3/test-app/Pages/LayoutProps/Nested.vue
 packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Nested/PageA.vue
 packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Nested/PageB.vue
 packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Simple/PageA.vue
