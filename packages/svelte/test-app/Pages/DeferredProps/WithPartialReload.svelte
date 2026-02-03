@@ -26,7 +26,7 @@
       {#if reloading}
         <span id="reloading-indicator">Reloading...</span>
       {/if}
-      {#each users ?? [] as user}
+      {#each users ?? [] as user (user.id)}
         <span>{user.name}</span>
       {/each}
     {/snippet}
