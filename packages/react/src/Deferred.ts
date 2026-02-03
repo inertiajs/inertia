@@ -1,20 +1,26 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'
 
-const urlWithoutHash = (url: URL | Location): URL => {
-  url = new URL(url.href)
-  url.hash = ''
+const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
+  if (only.length > 0 || except.length > 0) {
+    return true
+  }
 
-  return url
+  if (only.length > 0) {
+    return keys.some((key) => only.includes(key))
+  }
+
+  return keys.some((key) => !except.includes(key))
 }
 
-const isSameUrlWithoutHash = (url1: URL | Location, url2: URL | Location): boolean => {
-  return urlWithoutHash(url1).href === urlWithoutHash(url2).href
+interface DeferredSlotProps {
+  reloading: boolean
 }
 
 interface DeferredProps {
-  children: ReactNode | (() => ReactNode)
+  children: ReactNode | ((props: DeferredSlotProps) => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data: string | string[]
 }
@@ -25,34 +31,53 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   }
 
   const [loaded, setLoaded] = useState(false)
+  const [reloading, setReloading] = useState(false)
+  const activeReloads = useRef(new Set<object>())
   const pageProps = usePage().props
   const keys = useMemo(() => (Array.isArray(data) ? data : [data]), [data])
 
   useEffect(() => {
-    const removeListener = router.on('start', (e) => {
-      const isPartialVisit = e.detail.visit.only.length > 0 || e.detail.visit.except.length > 0
-      const isReloadingKey = e.detail.visit.only.find((key) => keys.includes(key))
+    const removeStartListener = router.on('start', (e) => {
+      const visit = e.detail.visit
 
-      if (isSameUrlWithoutHash(e.detail.visit.url, window.location) && (!isPartialVisit || isReloadingKey)) {
-        setLoaded(false)
+      if (
+        visit.preserveState === true &&
+        isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
+        keysAreBeingReloaded(visit.only, visit.except, keys)
+      ) {
+        activeReloads.current.add(visit)
+        setReloading(true)
+      }
+    })
+
+    const removeFinishListener = router.on('finish', (e) => {
+      const visit = e.detail.visit
+
+      if (activeReloads.current.has(visit)) {
+        activeReloads.current.delete(visit)
+        setReloading(activeReloads.current.size > 0)
       }
     })
 
     return () => {
-      removeListener()
+      removeStartListener()
+      removeFinishListener()
+      activeReloads.current.clear()
     }
-  }, [])
+  }, [keys])
 
   useEffect(() => {
     setLoaded(keys.every((key) => pageProps[key] !== undefined))
   }, [pageProps, keys])
 
-  // Always check that props are actually defined before rendering children,
-  // even if loaded is true, to prevent race conditions during reloads
   const propsAreDefined = useMemo(() => keys.every((key) => pageProps[key] !== undefined), [keys, pageProps])
 
   if (loaded && propsAreDefined) {
-    return typeof children === 'function' ? children() : children
+    if (typeof children === 'function') {
+      return children({ reloading })
+    }
+
+    return children
   }
 
   return typeof fallback === 'function' ? fallback() : fallback
