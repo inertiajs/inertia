@@ -1,12 +1,12 @@
+import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import cluster from 'node:cluster'
+import { existsSync, readFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
-import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping'
-import { readFileSync, existsSync } from 'node:fs'
 
 // Cache parsed sourcemaps for performance
 const sourceMaps = new Map<string, TraceMap>()
@@ -70,19 +70,18 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
   })
 
 export default (render: AppCallback, options?: Port | ServerOptions): void => {
-  const _port = typeof options === 'number' ? options : (options?.port ?? 13714)
-  const _useCluster = typeof options === 'object' && options?.cluster !== undefined ? options.cluster : false
-  const _debug = typeof options === 'object' && options?.debug !== undefined ? options.debug : false
+  const opts = typeof options === 'number' ? { port: options } : options
+  const { port = 13714, cluster: useCluster = false, debug = false } = opts ?? {}
 
   const log = (message: string) => {
     console.log(
-      _useCluster && !cluster.isPrimary
+      useCluster && !cluster.isPrimary
         ? `[${cluster.worker?.id ?? 'N/A'} / ${cluster.worker?.process?.pid ?? 'N/A'}] ${message}`
         : message,
     )
   }
 
-  if (_useCluster && cluster.isPrimary) {
+  if (useCluster && cluster.isPrimary) {
     log('Primary Inertia SSR server process started...')
 
     for (let i = 0; i < availableParallelism(); i++) {
@@ -98,7 +97,8 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
     // Suppress framework warnings during render when debug mode is enabled
     // These are typically verbose Vue/React warnings that clutter the output
     const originalWarn = console.warn
-    if (_debug) {
+
+    if (debug) {
       console.warn = () => {}
     }
 
@@ -111,7 +111,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
       const error = e as Error
       const classified = classifySSRError(error, page.component, page.url)
 
-      if (_debug) {
+      if (debug) {
         console.error(formatConsoleError(classified))
       } else {
         console.error(`SSR Error [${page.component}]: ${error.message}`)
@@ -125,26 +125,23 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
   }
 
   const routes: Record<string, RouteHandler> = {
-    '/health': async (_request, response) => {
-      response.writeHead(200, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
-      response.write(JSON.stringify({ status: 'OK', timestamp: Date.now() }))
-    },
+    '/health': async () => ({ status: 'OK', timestamp: Date.now() }),
     '/shutdown': () => process.exit(),
     '/render': handleRender,
+    '/404': async () => ({ status: 'NOT_FOUND', timestamp: Date.now() }),
   }
 
   createServer(async (request, response) => {
-    const dispatchRoute = routes[<string>request.url]
+    const dispatchRoute = routes[request.url as string] ?? routes['/404']
+    const result = await dispatchRoute(request, response)
 
-    if (dispatchRoute) {
-      await dispatchRoute(request, response)
-    } else {
-      response.writeHead(404, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
-      response.write(JSON.stringify({ status: 'NOT_FOUND', timestamp: Date.now() }))
+    if (!response.headersSent) {
+      response.writeHead(200, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify(result))
     }
 
     response.end()
-  }).listen(_port, () => log('Inertia SSR server started.'))
+  }).listen(port, () => log('Inertia SSR server started.'))
 
-  log(`Starting SSR server on port ${_port}...`)
+  log(`Starting SSR server on port ${port}...`)
 }
