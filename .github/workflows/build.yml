@@ -27,5 +27,5 @@ jobs:
       - name: Build Inertia
         run: pnpm build:all
 
-      - name: Test Vite Plugin
-        run: pnpm --filter @inertiajs/vite test
+      - name: Test Core and Vite Plugin
+        run: pnpm --filter './packages/{core,vite}' test
