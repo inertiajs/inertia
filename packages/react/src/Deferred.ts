@@ -4,7 +4,7 @@ import { router } from '.'
 import usePage from './usePage'
 
 const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
-  if (only.length > 0 || except.length > 0) {
+  if (only.length === 0 && except.length === 0) {
     return true
   }
 

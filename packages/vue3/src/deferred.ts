@@ -2,7 +2,7 @@ import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
 import { defineComponent, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
 
 const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
-  if (only.length > 0 || except.length > 0) {
+  if (only.length === 0 && except.length === 0) {
     return true
   }
 
