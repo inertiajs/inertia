@@ -1,3 +1,5 @@
+import { isEqual } from 'lodash-es'
+
 export interface LayoutDefinition<Component> {
   component: Component
   props: Record<string, unknown>
@@ -11,16 +13,6 @@ export interface LayoutPropsStore {
   reset(): void
   subscribe(callback: () => void): () => void
   getSnapshot(): { shared: Record<string, unknown>; named: Record<string, Record<string, unknown>> }
-}
-
-function hasChanges(current: Record<string, unknown>, updates: Record<string, unknown>): boolean {
-  for (const key in updates) {
-    if (current[key] !== updates[key]) {
-      return true
-    }
-  }
-
-  return false
 }
 
 export function createLayoutPropsStore(): LayoutPropsStore {
@@ -48,21 +40,26 @@ export function createLayoutPropsStore(): LayoutPropsStore {
 
   return {
     set(props) {
-      if (!hasChanges(shared, props)) {
+      const merged = { ...shared, ...props }
+
+      if (isEqual(shared, merged)) {
         return
       }
 
-      shared = { ...shared, ...props }
+      shared = merged
       updateSnapshot()
       scheduleNotify()
     },
 
     setFor(name, props) {
-      if (!hasChanges(named[name] || {}, props)) {
+      const current = named[name] || {}
+      const merged = { ...current, ...props }
+
+      if (isEqual(current, merged)) {
         return
       }
 
-      named = { ...named, [name]: { ...named[name], ...props } }
+      named = { ...named, [name]: merged }
       updateSnapshot()
       scheduleNotify()
     },
