@@ -34,6 +34,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@jridgewell/trace-mapping':
+        specifier: ^0.3.31
+        version: 0.3.31
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -65,6 +68,9 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)
 
   packages/react:
     dependencies:

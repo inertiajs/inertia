@@ -1,20 +1,56 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
-import { spawnSync } from 'node:child_process'
+import path from 'node:path'
 import * as process from 'process'
-import { classifySSRError, formatConsoleError } from './ssrErrors'
+import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
+import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping'
+import { readFileSync, existsSync } from 'node:fs'
 
-// Re-launch with --enable-source-maps if not already enabled
-// This ensures error stack traces show original source file locations
-if (!process.execArgv.includes('--enable-source-maps')) {
-  const result = spawnSync(process.execPath, ['--enable-source-maps', ...process.argv.slice(1)], {
-    stdio: 'inherit',
-  })
+// Cache parsed sourcemaps for performance
+const sourceMaps = new Map<string, TraceMap>()
 
-  process.exit(result.status ?? 0)
-}
+setSourceMapResolver((file: string, line: number, column: number) => {
+  // Only resolve for bundled SSR files
+  if (!file.includes('/ssr/') || !file.endsWith('.js')) {
+    return null
+  }
+
+  const mapFile = file + '.map'
+
+  if (!existsSync(mapFile)) {
+    return null
+  }
+
+  let traceMap = sourceMaps.get(mapFile)
+
+  if (!traceMap) {
+    try {
+      const mapContent = readFileSync(mapFile, 'utf-8')
+      traceMap = new TraceMap(mapContent)
+      sourceMaps.set(mapFile, traceMap)
+    } catch {
+      return null
+    }
+  }
+
+  const original = originalPositionFor(traceMap, { line, column })
+
+  if (original.source) {
+    // Resolve the source path relative to the sourcemap location
+    const mapDir = path.dirname(mapFile)
+    const resolvedPath = path.resolve(mapDir, original.source)
+
+    return {
+      file: resolvedPath,
+      line: original.line ?? line,
+      column: original.column ?? column,
+    }
+  }
+
+  return null
+})
 
 type AppCallback = (page: Page) => InertiaAppResponse
 type RouteHandler = (request: IncomingMessage, response: ServerResponse) => Promise<unknown>

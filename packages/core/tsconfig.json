@@ -1,4 +1,5 @@
 {
+  "exclude": ["tests"],
   "compilerOptions": {
     "rootDir": "src",
     "noEmitOnError": true,

@@ -7,6 +7,18 @@
 
 export type SSRErrorType = 'browser-api' | 'component-resolution' | 'render' | 'unknown'
 
+type SourceMapResolver = (
+  file: string,
+  line: number,
+  column: number,
+) => { file: string; line: number; column: number } | null
+
+let sourceMapResolver: SourceMapResolver | null = null
+
+export function setSourceMapResolver(resolver: SourceMapResolver): void {
+  sourceMapResolver = resolver
+}
+
 export interface ClassifiedSSRError {
   error: string
   type: SSRErrorType
@@ -32,8 +44,21 @@ const BROWSER_APIS: Record<string, string> = {
   ResizeObserver: 'The ResizeObserver API',
   MutationObserver: 'The MutationObserver API',
   requestAnimationFrame: 'The requestAnimationFrame function',
+  cancelAnimationFrame: 'The cancelAnimationFrame function',
   fetch: 'The fetch API',
   XMLHttpRequest: 'The XMLHttpRequest API',
+  HTMLElement: 'HTML element constructors',
+  CustomEvent: 'The CustomEvent constructor',
+  getComputedStyle: 'The getComputedStyle function',
+  addEventListener: 'Global event listeners',
+  removeEventListener: 'Global event listeners',
+  innerWidth: 'Browser viewport dimensions',
+  innerHeight: 'Browser viewport dimensions',
+  scrollTo: 'Browser scroll functions',
+  scrollBy: 'Browser scroll functions',
+  alert: 'Browser alert dialog',
+  confirm: 'Browser confirm dialog',
+  prompt: 'Browser prompt dialog',
 }
 
 function detectBrowserApi(error: Error): string | null {
@@ -92,16 +117,25 @@ function extractSourceLocation(stack?: string): string | undefined {
 
     let match = line.match(/\(([^)]+):(\d+):(\d+)\)/)
 
-    if (match) {
-      const path = match[1].replace(/^file:\/\//, '')
-
-      return `${path}:${match[2]}:${match[3]}`
+    if (!match) {
+      match = line.match(/at\s+(?:file:\/\/)?(.+):(\d+):(\d+)\s*$/)
     }
 
-    match = line.match(/at\s+(?:file:\/\/)?(.+):(\d+):(\d+)\s*$/)
-
     if (match) {
-      return `${match[1]}:${match[2]}:${match[3]}`
+      const file = match[1].replace(/^file:\/\//, '')
+      const lineNum = parseInt(match[2], 10)
+      const colNum = parseInt(match[3], 10)
+
+      // Try to resolve through sourcemap
+      if (sourceMapResolver) {
+        const resolved = sourceMapResolver(file, lineNum, colNum)
+
+        if (resolved) {
+          return `${resolved.file}:${resolved.line}:${resolved.column}`
+        }
+      }
+
+      return `${file}:${lineNum}:${colNum}`
     }
   }
 
