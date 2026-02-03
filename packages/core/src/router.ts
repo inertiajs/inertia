@@ -39,7 +39,13 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
+import {
+  hrefToUrl,
+  isSameUrlWithoutHash,
+  isSameUrlWithoutQueryOrHash,
+  isUrlMethodPair,
+  transformUrlAndData,
+} from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -209,7 +215,16 @@ export class Router {
       return
     }
 
-    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
+    const currentPageUrl = hrefToUrl(currentPage.get().url)
+    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
+
+    // For partial reloads, only compare the base URL (origin + pathname) to allow
+    // concurrent requests with different query params to the same page
+    const isSamePage = isPartialReload
+      ? isSameUrlWithoutQueryOrHash(visit.url, currentPageUrl)
+      : isSameUrlWithoutHash(visit.url, currentPageUrl)
+
+    if (!isSamePage) {
       // Only cancel non-prefetch requests (deferred props + partial reloads)
       this.asyncRequestStream.cancelInFlight({ prefetch: false })
     }

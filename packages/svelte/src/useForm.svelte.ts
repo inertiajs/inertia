@@ -22,7 +22,7 @@ import type {
   VisitOptions,
 } from '@inertiajs/core'
 import { router, UseFormUtils } from '@inertiajs/core'
-import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
 import { createValidator, resolveName, toSimpleValidationErrors } from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { config } from '.'
@@ -99,7 +99,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   touch<K extends FormDataKeys<TForm>>(field: K | NamedInputEvent | Array<K>, ...fields: K[]): this
   touched<K extends FormDataKeys<TForm>>(field?: K): boolean
   valid<K extends FormDataKeys<TForm>>(field: K): boolean
-  validate<K extends FormDataKeys<TForm>>(
+  validate<K extends FormDataKeys<TForm> | PrecognitionPath<TForm>>(
     field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
     config?: PrecognitionValidationConfig<K>,
   ): this
@@ -123,9 +123,11 @@ export type InertiaPrecognitiveForm<TForm extends object> = InertiaForm<TForm> &
 
 type ReservedFormKeys = keyof InertiaFormProps<any>
 
-type ValidateFormData<T> = {
-  [K in keyof T]: K extends ReservedFormKeys ? ['Error: This field name is reserved by useForm:', K] : T[K]
-}
+type ValidateFormData<T> = string extends keyof T
+  ? T
+  : {
+      [K in keyof T]: K extends ReservedFormKeys ? ['Error: This field name is reserved by useForm:', K] : T[K]
+    }
 
 export default function useForm<TForm extends FormDataType<TForm>>(
   method: Method | (() => Method),
@@ -453,7 +455,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return onSuccess
         },
         onError: (errors: Errors) => {
-          this.clearErrors().setError(errors as FormDataErrors<TForm>)
+          setFormState('errors', errors as FormDataErrors<TForm>)
+
+          validatorRef?.setErrors(errors)
 
           if (options.onError) {
             return options.onError(errors)
