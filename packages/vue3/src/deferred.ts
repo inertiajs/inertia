@@ -75,6 +75,6 @@ export default defineComponent({
 
     return keys.every((key) => this.$page.props[key] !== undefined)
       ? this.$slots.default?.({ reloading: this.reloading })
-      : this.$slots.fallback()
+      : this.$slots.fallback({})
   },
 })
