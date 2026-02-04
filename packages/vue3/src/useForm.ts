@@ -187,7 +187,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       // We're dynamically adding precognition properties to 'this', so we assert the type
       const formWithPrecognition = this as any as InertiaPrecognitiveForm<TForm>
 
-      let withAllErrors = false
+      let withAllErrors: boolean | null = null
       const validator = createValidator((client) => {
         const { method, url } = precognitionEndpoint!()
         const transformedData = cloneDeep(transform(this.data())) as Record<string, unknown>
@@ -208,7 +208,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           formWithPrecognition.__touched = validator.touched()
         })
         .on('errorsChanged', () => {
-          const validationErrors = withAllErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
+          const validationErrors =
+            (withAllErrors ?? config.get('form.withAllErrors'))
+              ? validator.errors()
+              : toSimpleValidationErrors(validator.errors())
 
           this.errors = {} as FormDataErrors<TForm>
 

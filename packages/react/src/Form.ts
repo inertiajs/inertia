@@ -1,4 +1,5 @@
 import {
+  config,
   FormComponentProps,
   FormComponentRef,
   FormComponentResetSymbol,
@@ -75,7 +76,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       invalidateCacheTags = [],
       validateFiles = false,
       validationTimeout = 1500,
-      withAllErrors = false,
+      withAllErrors,
       children,
       ...props
     },
@@ -97,7 +98,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       form.validateFiles()
     }
 
-    if (withAllErrors) {
+    if (withAllErrors ?? config.get('form.withAllErrors')) {
       form.withAllErrors()
     }
 

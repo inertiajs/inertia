@@ -158,7 +158,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   const [validating, setValidating] = useState(false)
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
-  const withAllErrors = useRef(false)
+  const withAllErrors = useRef<boolean | null>(null)
 
   useEffect(() => {
     isMounted.current = true
@@ -533,9 +533,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           setTouchedFields(validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors = withAllErrors.current
-            ? validator.errors()
-            : toSimpleValidationErrors(validator.errors())
+          const validationErrors =
+            (withAllErrors.current ?? config.get('form.withAllErrors'))
+              ? validator.errors()
+              : toSimpleValidationErrors(validator.errors())
 
           setErrors(validationErrors as FormDataErrors<TForm>)
           setHasErrors(Object.keys(validationErrors).length > 0)

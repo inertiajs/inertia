@@ -1,4 +1,5 @@
 import {
+  config,
   Errors,
   FormComponentProps,
   FormComponentRef,
@@ -142,7 +143,7 @@ const Form = defineComponent({
     },
     withAllErrors: {
       type: Boolean as PropType<FormComponentProps['withAllErrors']>,
-      default: false,
+      default: undefined,
     },
   },
   setup(props, { slots, attrs, expose }) {
@@ -164,7 +165,7 @@ const Form = defineComponent({
       form.validateFiles()
     }
 
-    if (props.withAllErrors) {
+    if (props.withAllErrors ?? config.get('form.withAllErrors')) {
       form.withAllErrors()
     }
 

@@ -184,7 +184,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     const formWithPrecognition = () =>
       getStore(store) as any as InertiaPrecognitiveForm<TForm> & InternalPrecognitionState
 
-    let withAllErrors = false
+    let withAllErrors: boolean | null = null
 
     if (!validatorRef) {
       const validator = createValidator((client) => {
@@ -207,7 +207,10 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           setFormState('__touched', validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors = withAllErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
+          const validationErrors =
+            (withAllErrors ?? config.get('form.withAllErrors'))
+              ? validator.errors()
+              : toSimpleValidationErrors(validator.errors())
 
           setFormState('errors', {} as FormDataErrors<TForm>)
           formWithPrecognition().setError(validationErrors as FormDataErrors<TForm>)

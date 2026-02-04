@@ -532,6 +532,7 @@ export type InertiaAppConfig = {
   form: {
     recentlySuccessfulDuration: number
     forceIndicesArrayFormatInFormData: boolean
+    withAllErrors: boolean
   }
   // experimental: {
   //   /* not guaranteed */
