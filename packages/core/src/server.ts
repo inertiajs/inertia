@@ -133,7 +133,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
     '/404': async () => ({ status: 'NOT_FOUND', timestamp: Date.now() }),
   }
 
-  createServer(async (request, response) => {
+  const server = createServer(async (request, response) => {
     const dispatchRoute = routes[request.url as string] ?? routes['/404']
     const result = await dispatchRoute(request, response)
 
@@ -143,7 +143,19 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
     }
 
     response.end()
-  }).listen(port, () => log('Inertia SSR server started.'))
+  })
+
+  server.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EADDRINUSE') {
+      // Port already in use - likely a Vite dev server restart
+      // Just log and continue, the render function is still usable
+      log(`Port ${port} already in use, skipping server start`)
+    } else {
+      throw error
+    }
+  })
+
+  server.listen(port, () => log('Inertia SSR server started.'))
 
   log(`Starting SSR server on port ${port}...`)
 
