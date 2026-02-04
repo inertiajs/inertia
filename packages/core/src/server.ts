@@ -6,10 +6,10 @@ import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
+import { InertiaAppResponse, Page } from './types'
 
 // Re-export SSR error utilities for use by @inertiajs/vite
-export { BROWSER_APIS, type SSRErrorType, type ClassifiedSSRError } from './ssrErrors'
-import { InertiaAppResponse, Page } from './types'
+export { BROWSER_APIS, type ClassifiedSSRError, type SSRErrorType } from './ssrErrors'
 
 // Cache parsed sourcemaps for performance
 const sourceMaps = new Map<string, TraceMap>()
@@ -148,8 +148,6 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
   server.on('error', (error: NodeJS.ErrnoException) => {
     if (error.code === 'EADDRINUSE') {
       // Port already in use - likely a Vite dev server restart
-      // Just log and continue, the render function is still usable
-      log(`Port ${port} already in use, skipping server start`)
     } else {
       throw error
     }
