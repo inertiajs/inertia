@@ -26,7 +26,6 @@ import {
   Page,
   PageFlashData,
   PendingVisit,
-  PendingVisitOptions,
   PollOptions,
   PrefetchedResponse,
   PrefetchOptions,
@@ -535,11 +534,7 @@ export class Router {
     }
   }
 
-  protected getPendingVisit(
-    href: string | URL | UrlMethodPair,
-    options: VisitOptions,
-    pendingVisitOptions: Partial<PendingVisitOptions> = {},
-  ): PendingVisit {
+  protected getPendingVisit(href: string | URL | UrlMethodPair, options: VisitOptions): PendingVisit {
     if (isUrlMethodPair(href)) {
       const urlMethodPair = href
       href = urlMethodPair.url
@@ -589,7 +584,6 @@ export class Router {
       completed: false,
       interrupted: false,
       ...mergedOptions,
-      ...pendingVisitOptions,
       url,
       data: _data,
     }
