@@ -436,4 +436,45 @@ test.describe('useHttp', () => {
       await expect(page.locator('#current-values')).toContainText('Name: changed, Email: test@example.com')
     })
   })
+
+  test.describe('Submit', () => {
+    test('it submits using the Wayfinder endpoint', async ({ page }) => {
+      await page.goto('/use-http/submit')
+
+      await page.fill('#submit-name', 'John Doe')
+      await page.fill('#submit-email', 'john@example.com')
+      await page.click('#submit-button')
+
+      await expect(page.locator('#submit-result')).toBeVisible()
+      await expect(page.locator('#submit-result')).toContainText('Submit Success - ID: 123')
+      await expect(page.locator('#submit-result')).toContainText('Name: John Doe')
+      await expect(page.locator('#submit-result')).toContainText('Email: john@example.com')
+    })
+
+    test('it submits with explicit method and URL', async ({ page }) => {
+      await page.goto('/use-http/submit')
+
+      await page.fill('#submit-name', 'Jane Doe')
+      await page.fill('#submit-email', 'jane@example.com')
+      await page.click('#submit-method-button')
+
+      await expect(page.locator('#submit-method-result')).toBeVisible()
+      await expect(page.locator('#submit-method-result')).toContainText('PUT Success - ID: 99')
+      await expect(page.locator('#submit-method-result')).toContainText('Name: Jane Doe')
+      await expect(page.locator('#submit-method-result')).toContainText('Email: jane@example.com')
+    })
+
+    test('it submits with UrlMethodPair object', async ({ page }) => {
+      await page.goto('/use-http/submit')
+
+      await page.fill('#submit-name', 'Bob Smith')
+      await page.fill('#submit-email', 'bob@example.com')
+      await page.click('#submit-wayfinder-button')
+
+      await expect(page.locator('#submit-wayfinder-result')).toBeVisible()
+      await expect(page.locator('#submit-wayfinder-result')).toContainText('PATCH Success - ID: 88')
+      await expect(page.locator('#submit-wayfinder-result')).toContainText('Name: Bob Smith')
+      await expect(page.locator('#submit-wayfinder-result')).toContainText('Email: bob@example.com')
+    })
+  })
 })
