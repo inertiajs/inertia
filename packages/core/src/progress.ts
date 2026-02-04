@@ -49,8 +49,6 @@ class Progress {
 }
 
 export const progress = new Progress()
-export const reveal = progress.reveal
-export const hide = progress.hide
 
 function addEventListeners(delay: number): void {
   document.addEventListener('inertia:start', (e) => handleStartEvent(e, delay))

@@ -94,15 +94,6 @@
       () => _method,
       () => getUrlAndData()[0],
     )
-    .setValidationTimeout(validationTimeout!)
-
-  if (validateFiles) {
-    form.validateFiles()
-  }
-
-  if (withAllErrors) {
-    form.withAllErrors()
-  }
 
   form.transform(getTransformedData)
 
@@ -287,6 +278,10 @@
       form.validateFiles()
     } else {
       form.withoutFileValidation()
+    }
+
+    if (withAllErrors) {
+      form.withAllErrors()
     }
   })
 
