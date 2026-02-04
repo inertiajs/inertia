@@ -4,7 +4,6 @@ import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
   getInitialPageFromDOM,
-  InertiaAppResponse,
   InertiaAppSSRResponse,
   Page,
   PageProps,
@@ -57,6 +56,13 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOpti
   render?: undefined
 }
 
+type RenderToString = (app: VueApp) => Promise<string>
+
+type RenderFunction<SharedProps extends PageProps> = (
+  page: Page<SharedProps>,
+  renderToString: RenderToString,
+) => Promise<InertiaAppSSRResponse>
+
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
 ): Promise<void>
@@ -65,7 +71,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 ): Promise<InertiaAppSSRResponse>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
   options: InertiaAppOptionsAuto<SharedProps>,
-): Promise<void>
+): Promise<void | RenderFunction<SharedProps>>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
@@ -75,15 +81,55 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   page,
   render,
   defaults = {},
-}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps> | InertiaAppOptionsAuto<SharedProps>): InertiaAppResponse {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps> | InertiaAppOptionsAuto<SharedProps>): Promise<
+  InertiaAppSSRResponse | RenderFunction<SharedProps> | void
+> {
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve!(name, page)).then((module) => module.default || module)
+
+  // SSR render function factory - when on server without page/render, return a render function
+  // This is used by the Vite plugin's SSR transform
+  if (isServer && !page && !render) {
+    return async (page: Page<SharedProps>, renderToString: RenderToString) => {
+      let head: string[] = []
+
+      const initialComponent = await resolveComponent(page.component, page)
+
+      const props: InertiaAppProps<SharedProps> = {
+        initialPage: page,
+        initialComponent,
+        resolveComponent,
+        titleCallback: title,
+        onHeadUpdate: (elements: string[]) => (head = elements),
+      }
+
+      let vueApp: VueApp
+
+      if (setup) {
+        vueApp = (setup as (options: SetupOptions<null, SharedProps>) => VueApp)({
+          el: null,
+          App,
+          props,
+          plugin,
+        })
+      } else {
+        vueApp = createSSRApp({ render: () => h(App, props) })
+        vueApp.use(plugin)
+      }
+
+      const html = await renderToString(vueApp)
+      const body = buildSSRBody(id, page, html, useScriptElement)
+
+      return { head, body }
+    }
+  }
+
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
 
   let head: string[] = []
 

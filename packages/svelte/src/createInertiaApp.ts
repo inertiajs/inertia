@@ -3,8 +3,9 @@ import {
   getInitialPageFromDOM,
   router,
   setupProgress,
+  type CreateInertiaAppOptions,
   type CreateInertiaAppOptionsForCSR,
-  type InertiaAppResponse,
+  type InertiaAppSSRResponse,
   type Page,
   type PageProps,
 } from '@inertiajs/core'
@@ -21,7 +22,7 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: InertiaAppProps<SharedProps>
 }
 
-type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<SharedProps>,
@@ -29,6 +30,28 @@ type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsF
   SvelteInertiaAppConfig
 >
 
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
+  ComponentResolver,
+  SetupOptions<SharedProps>,
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
+> & {
+  page?: Page<SharedProps>
+}
+
+type SvelteServerRender = (component: typeof App, options: { props: InertiaAppProps<PageProps> }) => SvelteRenderResult
+
+type RenderFunction<SharedProps extends PageProps> = (
+  page: Page<SharedProps>,
+  render: SvelteServerRender,
+) => Promise<InertiaAppSSRResponse>
+
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<InertiaAppSSRResponse | void>
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsAuto<SharedProps>,
+): Promise<void | RenderFunction<SharedProps>>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
@@ -36,14 +59,48 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   defaults = {},
-}: InertiaAppOptions<SharedProps>): InertiaAppResponse {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsAuto<SharedProps>): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
 
-  const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve(name, page))
+  const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve!(name, page))
+
+  // SSR render function factory - when on server without page, return a render function
+  // This is used by the Vite plugin's SSR transform
+  if (isServer && !page) {
+    return async (page: Page<SharedProps>, render: SvelteServerRender) => {
+      const initialComponent = (await resolveComponent(page.component, page)) as ResolvedComponent
+
+      const props: InertiaAppProps<SharedProps> = {
+        initialPage: page,
+        initialComponent,
+        resolveComponent,
+      }
+
+      let svelteApp: SvelteRenderResult
+
+      if (setup) {
+        const result = await setup({ el: null, App, props })
+        if (!result) {
+          throw new Error('Inertia SSR setup function must return a render result ({ body, head })')
+        }
+        svelteApp = result
+      } else {
+        svelteApp = render(App, { props })
+      }
+
+      const body = buildSSRBody(id, page, svelteApp.body, useScriptElement)
+
+      return {
+        body,
+        head: [svelteApp.head],
+      }
+    }
+  }
+
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
@@ -52,6 +109,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent }
 
+  // SSR with page provided (legacy pattern used by ssr.ts)
   if (isServer) {
     if (!setup) {
       throw new Error('Inertia SSR requires a setup function that returns a render result ({ body, head })')
@@ -71,6 +129,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     return
   }
 
+  // CSR
   const target = document.getElementById(id)!
 
   if (setup) {
