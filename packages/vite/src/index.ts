@@ -142,7 +142,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
 
       let result = code
 
-      // SSR transform: wrap configureInertiaApp() with server bootstrap code
+      // SSR transform: wrap createInertiaApp() with server bootstrap code
       // This only applies during SSR builds (options.ssr is true)
       if (options?.ssr && findInertiaAppExport(result)) {
         result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster, debug: ssr.debug }, frameworks) ?? result

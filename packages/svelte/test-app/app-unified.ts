@@ -1,11 +1,11 @@
 import type { VisitOptions } from '@inertiajs/core'
-import { configureInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
+import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
 
 window.testing = { Inertia: router }
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
-configureInertiaApp({
+createInertiaApp({
   resolve: async (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.svelte', { eager: true })
 

@@ -8,14 +8,14 @@
 /**
  * A function that generates SSR bootstrap code for a framework.
  *
- * The function receives the original `configureInertiaApp(...)` call as a string
+ * The function receives the original `createInertiaApp(...)` call as a string
  * and should return code that wraps it with server bootstrap logic.
  *
  * The generated code uses `import.meta.hot` to detect dev mode at runtime:
  * - In dev: `import.meta.hot` exists, so createServer is skipped
  * - In production: `import.meta.hot` is undefined, so createServer runs
  *
- * @param configureCall - The original configureInertiaApp(...) call, e.g., `configureInertiaApp({ resolve: ... })`
+ * @param configureCall - The original createInertiaApp(...) call, e.g., `createInertiaApp({ resolve: ... })`
  * @param options - Formatted SSR options string, e.g., `, {"port":13715}` or empty string
  *
  * @example

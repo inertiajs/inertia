@@ -1,6 +1,6 @@
-import { configureInertiaApp } from '@inertiajs/react'
+import { createInertiaApp } from '@inertiajs/react'
 
-configureInertiaApp({
+createInertiaApp({
   pages: './Pages',
   title: (title) => `${title} - React Playground`,
 })

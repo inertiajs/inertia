@@ -77,7 +77,7 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    // Escape for HTML attribute (configureInertiaApp reads from data-page attribute)
+    // Escape for HTML attribute (createInertiaApp reads from data-page attribute)
     const escapedData = JSON.stringify(data).replace(/"/g, '&quot;')
 
     return res.status(200).send(
@@ -144,7 +144,7 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    // Escape for HTML attribute (configureInertiaApp reads from data-page attribute)
+    // Escape for HTML attribute (createInertiaApp reads from data-page attribute)
     const escapedData = JSON.stringify(data).replace(/"/g, '&quot;')
 
     return res.status(200).send(

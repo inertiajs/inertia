@@ -1,12 +1,12 @@
 import type { VisitOptions } from '@inertiajs/core'
-import { configureInertiaApp, router } from '@inertiajs/vue3'
+import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 
 window.testing = { Inertia: router }
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
-configureInertiaApp({
+createInertiaApp({
   resolve: async (name) => {
     const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
 

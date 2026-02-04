@@ -7,9 +7,9 @@
  * The SSR template shows what the plugin generates. For a user's SSR entry:
  *
  * ```js
- * import { configureInertiaApp } from '@inertiajs/vue3'
+ * import { createInertiaApp } from '@inertiajs/vue3'
  *
- * configureInertiaApp({
+ * createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  * ```
@@ -17,11 +17,11 @@
  * The plugin transforms it to:
  *
  * ```js
- * import { configureInertiaApp } from '@inertiajs/vue3'
+ * import { createInertiaApp } from '@inertiajs/vue3'
  * import createServer from '@inertiajs/vue3/server'
  * import { renderToString } from 'vue/server-renderer'
  *
- * const render = await configureInertiaApp({
+ * const render = await createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
@@ -48,7 +48,7 @@ export const config: FrameworkConfig = {
   // Vue components are exported as `export default`, so we need to extract .default
   extractDefault: true,
 
-  // SSR template that wraps the configureInertiaApp call with server bootstrap code
+  // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/vue3/server'

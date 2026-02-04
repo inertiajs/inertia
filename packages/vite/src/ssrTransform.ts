@@ -5,11 +5,11 @@
  * with server bootstrap code. Instead of manually writing the server setup:
  *
  * ```js
- * import { configureInertiaApp } from '@inertiajs/vue3'
+ * import { createInertiaApp } from '@inertiajs/vue3'
  * import createServer from '@inertiajs/vue3/server'
  * import { renderToString } from 'vue/server-renderer'
  *
- * const render = await configureInertiaApp({ ... })
+ * const render = await createInertiaApp({ ... })
  *
  * createServer((page) => render(page, renderToString))
  * ```
@@ -17,9 +17,9 @@
  * Users can simply write:
  *
  * ```js
- * import { configureInertiaApp } from '@inertiajs/vue3'
+ * import { createInertiaApp } from '@inertiajs/vue3'
  *
- * configureInertiaApp({ ... })
+ * createInertiaApp({ ... })
  * ```
  *
  * The plugin automatically detects the framework and injects the appropriate
@@ -36,13 +36,13 @@ import { type FrameworkConfig, type SSROptions, formatSSROptions } from './types
  * Returns true for code like:
  *
  * ```js
- * configureInertiaApp({ ... })
+ * createInertiaApp({ ... })
  * ```
  *
  * But NOT for:
  *
  * ```js
- * export default configureInertiaApp({ ... })
+ * export default createInertiaApp({ ... })
  * ```
  *
  * The SSR entry should have a bare call, not an export, because we need
@@ -56,7 +56,7 @@ export function findInertiaAppExport(code: string): boolean {
  * Wrap the Inertia app configuration with server bootstrap code.
  *
  * This transform:
- * 1. Finds the `configureInertiaApp()` or `createInertiaApp()` call
+ * 1. Finds the `createInertiaApp()` or `createInertiaApp()` call
  * 2. Detects which framework is being used (Vue, React, Svelte)
  * 3. Wraps the call with the framework's SSR template
  *
@@ -87,7 +87,7 @@ export function wrapWithServerBootstrap(
     return null
   }
 
-  // Extract the original configureInertiaApp(...) call as a string
+  // Extract the original createInertiaApp(...) call as a string
   const { statement, call } = parsed.inertiaStatement
   const configureCall = code.slice(call.start, call.end)
 

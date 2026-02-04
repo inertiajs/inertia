@@ -7,9 +7,9 @@
  * The SSR template shows what the plugin generates. For a user's SSR entry:
  *
  * ```js
- * import { configureInertiaApp } from '@inertiajs/svelte'
+ * import { createInertiaApp } from '@inertiajs/svelte'
  *
- * configureInertiaApp({
+ * createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  * ```
@@ -17,11 +17,11 @@
  * The plugin transforms it to:
  *
  * ```js
- * import { configureInertiaApp } from '@inertiajs/svelte'
+ * import { createInertiaApp } from '@inertiajs/svelte'
  * import createServer from '@inertiajs/svelte/server'
  * import { render } from 'svelte/server'
  *
- * const ssr = await configureInertiaApp({
+ * const ssr = await createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
@@ -49,7 +49,7 @@ export const config: FrameworkConfig = {
   // This is different from Vue/React where components use `export default`
   extractDefault: false,
 
-  // SSR template that wraps the configureInertiaApp call with server bootstrap code
+  // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
   // Note: Svelte uses a different variable name (ssr) and render function import
   ssr: (configureCall, options) => `

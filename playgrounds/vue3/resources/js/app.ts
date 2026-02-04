@@ -1,6 +1,6 @@
-import { configureInertiaApp } from '@inertiajs/vue3'
+import { createInertiaApp } from '@inertiajs/vue3'
 
-configureInertiaApp({
+createInertiaApp({
   pages: './Pages',
   title: (title) => `${title} - Vue 3 Playground`,
 })

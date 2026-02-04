@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test.describe('configureInertiaApp', () => {
+test.describe('createInertiaApp', () => {
   test('it renders a page with props', async ({ page }) => {
     await page.goto('/unified/props')
 

@@ -1,11 +1,11 @@
 import type { VisitOptions } from '@inertiajs/core'
-import { configureInertiaApp, type ResolvedComponent, router } from '@inertiajs/react'
+import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/react'
 
 window.testing = { Inertia: router }
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
-configureInertiaApp({
+createInertiaApp({
   resolve: async (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.tsx', { eager: true })
 
