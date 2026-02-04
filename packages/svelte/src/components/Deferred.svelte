@@ -12,9 +12,11 @@
   const keys = $derived(Array.isArray(data) ? data : [data])
   const loaded = $derived(keys.every((key) => typeof page.props[key] !== 'undefined'))
 
-  if (!fallback) {
-    throw new Error('`<Deferred>` requires a `fallback` snippet')
-  }
+  $effect.pre(() => {
+    if (!fallback) {
+      throw new Error('`<Deferred>` requires a `fallback` snippet')
+    }
+  })
 </script>
 
 {#if loaded}
