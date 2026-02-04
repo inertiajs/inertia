@@ -17,13 +17,13 @@
 <div class="mt-6 max-w-2xl space-y-4">
   <p class="text-gray-700">
     This page demonstrates the improved SSR error messages in the Vite plugin. Click on any of the links below to
-    trigger a specific SSR error. Check your <strong>Vite dev server console</strong> to see the helpful error messages
-    with hints on how to fix them.
+    trigger a specific SSR error. Check your <strong>Vite dev server console</strong> to see the helpful error messages with
+    hints on how to fix them.
   </p>
 
   <div class="rounded-lg bg-yellow-50 p-4 text-yellow-800">
-    <strong>Note:</strong> When SSR fails, Laravel falls back to client-side rendering, so the page will still load. The
-    important part is the error message in your terminal.
+    <strong>Note:</strong> When SSR fails, Laravel falls back to client-side rendering, so the page will still load. The important
+    part is the error message in your terminal.
   </div>
 </div>
 

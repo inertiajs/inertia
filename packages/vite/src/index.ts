@@ -19,14 +19,14 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
-import { transformPageResolution } from './pagesTransform'
 import { defaultFrameworks } from './frameworks/index'
+import { transformPageResolution } from './pagesTransform'
 import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT, SSR_ENTRY_CANDIDATES } from './ssr'
 import { findInertiaAppExport, wrapWithServerBootstrap } from './ssrTransform'
 import type { FrameworkConfig } from './types'
 
+export type { FrameworkConfig, SSRTemplate } from './types'
 export { InertiaSSROptions }
-export type { SSRTemplate, FrameworkConfig } from './types'
 
 export interface InertiaPluginOptions {
   /**
@@ -101,8 +101,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       }
 
       const root = config.root ?? process.cwd()
-      const ssrEntry =
-        ssr.entry ?? SSR_ENTRY_CANDIDATES.find((candidate) => existsSync(resolve(root, candidate)))
+      const ssrEntry = ssr.entry ?? SSR_ENTRY_CANDIDATES.find((candidate) => existsSync(resolve(root, candidate)))
 
       return {
         build: {
@@ -145,7 +144,12 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       // SSR transform: wrap createInertiaApp() with server bootstrap code
       // This only applies during SSR builds (options.ssr is true)
       if (options?.ssr && findInertiaAppExport(result)) {
-        result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster, handleErrors: ssr.handleErrors }, frameworks) ?? result
+        result =
+          wrapWithServerBootstrap(
+            result,
+            { port: ssr.port, cluster: ssr.cluster, handleErrors: ssr.handleErrors },
+            frameworks,
+          ) ?? result
       }
 
       // Pages transform: convert `pages: './Pages'` to a full resolve function

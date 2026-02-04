@@ -89,11 +89,10 @@
     return transform!(data)
   }
 
-  const form = useForm<Record<string, any>>({})
-    .withPrecognition(
-      () => _method,
-      () => getUrlAndData()[0],
-    )
+  const form = useForm<Record<string, any>>({}).withPrecognition(
+    () => _method,
+    () => getUrlAndData()[0],
+  )
 
   form.transform(getTransformedData)
 

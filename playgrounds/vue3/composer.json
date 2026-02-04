@@ -71,9 +71,11 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "repositories": [{
-        "name": "inertia-laravel",
-        "type": "path",
-        "url": "/Users/pascal/Sites/inertia-laravel"
-    }]
+    "repositories": [
+        {
+            "name": "inertia-laravel",
+            "type": "path",
+            "url": "/Users/pascal/Sites/inertia-laravel"
+        }
+    ]
 }

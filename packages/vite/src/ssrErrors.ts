@@ -7,9 +7,9 @@
  * in the Node.js server environment.
  */
 
-import { BROWSER_APIS, type SSRErrorType, type ClassifiedSSRError } from '@inertiajs/core/server'
+import { BROWSER_APIS, type ClassifiedSSRError, type SSRErrorType } from '@inertiajs/core/server'
 
-export { BROWSER_APIS, type SSRErrorType, type ClassifiedSSRError }
+export { BROWSER_APIS, type ClassifiedSSRError, type SSRErrorType }
 
 /**
  * Framework-specific lifecycle hook names for the hint messages.
@@ -284,10 +284,7 @@ export function formatConsoleError(
   }
 
   if (suppressedWarnings.length > 0) {
-    lines.push(
-      `  ${colors.dim}Suppressed ${suppressedWarnings.length} framework warning(s).${colors.reset}`,
-      '',
-    )
+    lines.push(`  ${colors.dim}Suppressed ${suppressedWarnings.length} framework warning(s).${colors.reset}`, '')
   }
 
   return lines.join('\n')

@@ -88,7 +88,12 @@ export function transformPageResolution(code: string, frameworks: Record<string,
  * Input:  `{ pages: './Pages', title: t => t }`
  * Output: `{ resolve: async (name, page) => { ... }, title: t => t }`
  */
-function replacePages(code: string, property: NodeWithPos<Property>, defaultExtensions: string[], extractDefault: boolean): string {
+function replacePages(
+  code: string,
+  property: NodeWithPos<Property>,
+  defaultExtensions: string[],
+  extractDefault: boolean,
+): string {
   const config = extractPagesConfig(property.value, code)
 
   if (!config) {
@@ -97,7 +102,9 @@ function replacePages(code: string, property: NodeWithPos<Property>, defaultExte
 
   // Use custom extensions if provided, otherwise use framework defaults
   const extensions = config.extensions
-    ? (Array.isArray(config.extensions) ? config.extensions : [config.extensions])
+    ? Array.isArray(config.extensions)
+      ? config.extensions
+      : [config.extensions]
     : defaultExtensions
 
   // Default to eager loading (synchronous imports) for better performance
@@ -267,7 +274,13 @@ function extractBoolean(node: Property['value']): boolean | undefined {
  * @param eager - Whether to use eager loading (synchronous) or lazy loading (dynamic import)
  * @param transform - Optional transform function to modify the page name
  */
-function buildResolver(directories: string | string[], extensions: string[], extractDefault: boolean, eager: boolean, transform?: string): string {
+function buildResolver(
+  directories: string | string[],
+  extensions: string[],
+  extractDefault: boolean,
+  eager: boolean,
+  transform?: string,
+): string {
   const dirs = Array.isArray(directories) ? directories : [directories]
 
   // Build glob patterns: './Pages/**/*.vue' or ['./pages/**/*.vue', './Pages/**/*.vue']

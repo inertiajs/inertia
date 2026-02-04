@@ -12,7 +12,15 @@
  * - Find calls that need a default resolver injected
  */
 
-import type { CallExpression, ExpressionStatement, Identifier, ObjectExpression, Property, Program, SimpleCallExpression } from 'estree'
+import type {
+  CallExpression,
+  ExpressionStatement,
+  Identifier,
+  ObjectExpression,
+  Program,
+  Property,
+  SimpleCallExpression,
+} from 'estree'
 import { parseAst } from 'vite'
 import type { FrameworkConfig } from './types'
 
@@ -297,7 +305,8 @@ export class ParsedCode {
 
       // Check if it already has a pages or resolve property
       const hasResolver = obj.properties.some(
-        (p) => p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
+        (p) =>
+          p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
       )
 
       if (hasResolver || obj.start === undefined || obj.end === undefined) {

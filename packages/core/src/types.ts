@@ -517,12 +517,7 @@ export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
 
-export interface CreateInertiaAppOptions<
-  TComponentResolver,
-  TSetupOptions,
-  TSetupReturn,
-  TAdditionalInertiaAppConfig,
-> {
+export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   resolve?: TComponentResolver
   pages?: PagesOption

@@ -28,7 +28,10 @@ export async function loadInitialPage<T extends PageProps, C>(
 ): Promise<{ page: Page<T>; component: C }> {
   const page = getInitialPageFromDOM<Page<T>>(id, useScriptElement)!
 
-  const [component] = await Promise.all([resolveComponent(page.component, page), router.decryptHistory().catch(() => {})])
+  const [component] = await Promise.all([
+    resolveComponent(page.component, page),
+    router.decryptHistory().catch(() => {}),
+  ])
 
   return { page, component }
 }

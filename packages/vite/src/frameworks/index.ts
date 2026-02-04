@@ -10,9 +10,9 @@
  */
 
 import type { FrameworkConfig } from '../types'
-import { config as vue } from './vue'
 import { config as react } from './react'
 import { config as svelte } from './svelte'
+import { config as vue } from './vue'
 
 /**
  * Array of all built-in framework configurations.

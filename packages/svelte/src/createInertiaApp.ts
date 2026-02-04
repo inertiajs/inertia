@@ -59,7 +59,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   defaults = {},
-}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsAuto<SharedProps>): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
+}: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsAuto<SharedProps>): Promise<
+  InertiaAppSSRResponse | RenderFunction<SharedProps> | void
+> {
   config.replace(defaults)
 
   const isServer = typeof window === 'undefined'

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from '../src/ssrErrors'
 
 describe('SSR Errors', () => {

@@ -22,7 +22,7 @@ describe('SSR Errors', () => {
     })
 
     it('detects localStorage', () => {
-      const error = new Error("ReferenceError: localStorage is not defined")
+      const error = new Error('ReferenceError: localStorage is not defined')
       expect(detectBrowserApi(error)).toBe('localStorage')
     })
 
@@ -32,7 +32,7 @@ describe('SSR Errors', () => {
     })
 
     it('detects navigator', () => {
-      const error = new Error("navigator is not defined")
+      const error = new Error('navigator is not defined')
       expect(detectBrowserApi(error)).toBe('navigator')
     })
 
@@ -241,7 +241,8 @@ describe('SSR Errors', () => {
         component: 'Dashboard',
         browserApi: 'window',
         hint: 'Wrap in lifecycle hook',
-        stack: 'Error: window is not defined\n    at setup (/path/to/Dashboard.vue:10:5)\n    at node_modules/vue/dist/vue.js:123:45',
+        stack:
+          'Error: window is not defined\n    at setup (/path/to/Dashboard.vue:10:5)\n    at node_modules/vue/dist/vue.js:123:45',
         sourceLocation: '/path/to/Dashboard.vue:10:5',
         timestamp: '2024-01-15T10:30:45.000Z',
       }
@@ -310,7 +311,8 @@ describe('SSR Errors', () => {
         component: 'Dashboard',
         browserApi: 'window',
         hint: 'Wrap in lifecycle hook',
-        stack: 'Error: window is not defined\n    at setup (/path/to/Dashboard.vue:10:5)\n    at callWithErrorHandling (node_modules/vue/dist/vue.js:123:45)',
+        stack:
+          'Error: window is not defined\n    at setup (/path/to/Dashboard.vue:10:5)\n    at callWithErrorHandling (node_modules/vue/dist/vue.js:123:45)',
         sourceLocation: '/path/to/Dashboard.vue:10:5',
         timestamp: '2024-01-15T10:30:45.000Z',
       }

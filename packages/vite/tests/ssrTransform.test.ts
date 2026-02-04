@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { findInertiaAppExport, wrapWithServerBootstrap } from '../src/ssrTransform'
 import { defaultFrameworks } from '../src/frameworks/index'
+import { findInertiaAppExport, wrapWithServerBootstrap } from '../src/ssrTransform'
 
 const wrap = (code: string, options = {}) => wrapWithServerBootstrap(code, options, defaultFrameworks)
 

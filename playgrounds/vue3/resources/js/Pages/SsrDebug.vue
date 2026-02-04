@@ -29,21 +29,15 @@ import { Head, Link } from '@inertiajs/vue3'
 
   <ul class="mt-4 space-y-2">
     <li>
-      <Link href="/ssr-debug/window" class="text-blue-700 underline">
-        window is not defined
-      </Link>
+      <Link href="/ssr-debug/window" class="text-blue-700 underline"> window is not defined </Link>
       <span class="ml-2 text-gray-500">- Accessing window.innerWidth at module level</span>
     </li>
     <li>
-      <Link href="/ssr-debug/document" class="text-blue-700 underline">
-        document is not defined
-      </Link>
+      <Link href="/ssr-debug/document" class="text-blue-700 underline"> document is not defined </Link>
       <span class="ml-2 text-gray-500">- Accessing document.body at module level</span>
     </li>
     <li>
-      <Link href="/ssr-debug/localstorage" class="text-blue-700 underline">
-        localStorage is not defined
-      </Link>
+      <Link href="/ssr-debug/localstorage" class="text-blue-700 underline"> localStorage is not defined </Link>
       <span class="ml-2 text-gray-500">- Accessing localStorage at module level</span>
     </li>
   </ul>
@@ -53,9 +47,7 @@ import { Head, Link } from '@inertiajs/vue3'
 
   <ul class="mt-4 space-y-2">
     <li>
-      <Link href="/ssr-debug/render" class="text-blue-700 underline">
-        Generic render error
-      </Link>
+      <Link href="/ssr-debug/render" class="text-blue-700 underline"> Generic render error </Link>
       <span class="ml-2 text-gray-500">- Throwing an error in component setup</span>
     </li>
   </ul>
@@ -65,15 +57,15 @@ import { Head, Link } from '@inertiajs/vue3'
 
   <ul class="mt-4 space-y-2">
     <li>
-      <Link href="/ssr-debug/non-existent" class="text-blue-700 underline">
-        Component not found
-      </Link>
+      <Link href="/ssr-debug/non-existent" class="text-blue-700 underline"> Component not found </Link>
       <span class="ml-2 text-gray-500">- Rendering a non-existent component</span>
     </li>
   </ul>
 
   <h2 class="mt-8 text-xl font-semibold">Expected Console Output</h2>
-  <p class="mt-2 text-gray-600">When you click one of the links above, you should see something like this in your Vite console:</p>
+  <p class="mt-2 text-gray-600">
+    When you click one of the links above, you should see something like this in your Vite console:
+  </p>
 
   <pre class="mt-4 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
 2024-01-15 10:30:45 SSR Error [SsrDebug/WindowError]
@@ -82,5 +74,6 @@ ReferenceError: window is not defined
 Hint: The global window object doesn't exist in Node.js.
 Wrap browser-specific code in a onMounted/useEffect/onMount
 lifecycle hook, or check "typeof window !== 'undefined'"
-before using it.</pre>
+before using it.</pre
+  >
 </template>

@@ -1,14 +1,6 @@
 import { Link } from '@inertiajs/react'
 
-export default ({
-  foo,
-  count,
-  items,
-}: {
-  foo: string
-  count: number
-  items: string[]
-}) => {
+export default ({ foo, count, items }: { foo: string; count: number; items: string[] }) => {
   return (
     <div>
       <h1 data-testid="props-title">Vite Props Page</h1>

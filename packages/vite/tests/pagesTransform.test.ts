@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { transformPageResolution } from '../src/pagesTransform'
 import { defaultFrameworks } from '../src/frameworks/index'
+import { transformPageResolution } from '../src/pagesTransform'
 
 const transform = (code: string) => transformPageResolution(code, defaultFrameworks)
 
