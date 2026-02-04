@@ -2,6 +2,7 @@ import {
   buildSSRBody,
   loadInitialPage,
   setupProgress,
+  type ConfigureInertiaAppOptions as ConfigureInertiaAppOptionsBase,
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
@@ -18,19 +19,10 @@ type SvelteServerRender = <T>(
   options: { props?: Record<string, unknown> },
 ) => SvelteRenderResult
 
-export type ConfigureInertiaAppOptions = {
-  id?: string
-  resolve?: ComponentResolver
-  pages?:
-    | string
-    | {
-        path: string
-        extension?: string | string[]
-        transform?: (name: string) => string
-      }
-  progress?: Parameters<typeof setupProgress>[0] | false
-  defaults?: SvelteInertiaAppConfig
-}
+export type ConfigureInertiaAppOptions = Omit<
+  ConfigureInertiaAppOptionsBase<ComponentResolver, never, never, SvelteInertiaAppConfig>,
+  'setup' | 'title'
+>
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,

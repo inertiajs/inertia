@@ -3,6 +3,7 @@ import {
   createComponentResolver,
   loadInitialPage,
   setupProgress,
+  type ConfigureInertiaAppOptions as ConfigureInertiaAppOptionsBase,
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
@@ -22,21 +23,12 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: SharedProps
 }
 
-export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = {
-  id?: string
-  resolve?: ComponentResolver
-  pages?:
-    | string
-    | {
-        path: string
-        extension?: string | string[]
-        transform?: (name: string) => string
-      }
-  setup?: (options: SetupOptions<SharedProps>) => ReactElement | void
-  title?: (title: string) => string
-  progress?: Parameters<typeof setupProgress>[0] | false
-  defaults?: ReactInertiaAppConfig
-}
+export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = ConfigureInertiaAppOptionsBase<
+  ComponentResolver,
+  SetupOptions<SharedProps>,
+  ReactElement | void,
+  ReactInertiaAppConfig
+>
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,

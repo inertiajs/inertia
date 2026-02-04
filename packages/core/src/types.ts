@@ -463,6 +463,13 @@ type FirstLevelOptional<T> = {
   [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
 }
 
+type ProgressOptions = {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
 interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
   pages?:
@@ -486,14 +493,7 @@ export interface CreateInertiaAppOptionsForCSR<
 > extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   page?: Page<SharedProps>
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
+  progress?: ProgressOptions | false
   render?: undefined
 }
 
@@ -514,6 +514,29 @@ export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
+
+export type PagesOption =
+  | string
+  | {
+      path: string
+      extension?: string | string[]
+      transform?: (name: string) => string
+    }
+
+export interface ConfigureInertiaAppOptions<
+  TComponentResolver,
+  TSetupOptions,
+  TSetupReturn,
+  TAdditionalInertiaAppConfig,
+> {
+  id?: string
+  resolve?: TComponentResolver
+  pages?: PagesOption
+  setup?: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
+  progress?: ProgressOptions | false
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+}
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
