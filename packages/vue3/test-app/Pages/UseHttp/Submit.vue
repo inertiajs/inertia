@@ -86,9 +86,7 @@ const performSubmitWithWayfinder = async () => {
     <!-- Submit with UrlMethodPair object -->
     <section id="submit-wayfinder-test">
       <h2>Submit with UrlMethodPair</h2>
-      <button @click="performSubmitWithWayfinder" id="submit-wayfinder-button">
-        Submit (PATCH /api/users/88)
-      </button>
+      <button @click="performSubmitWithWayfinder" id="submit-wayfinder-button">Submit (PATCH /api/users/88)</button>
       <div v-if="submitWithWayfinderResult" id="submit-wayfinder-result">
         PATCH Success - ID: {{ submitWithWayfinderResult.id }}, Name: {{ submitWithWayfinderResult.user.name }}, Email:
         {{ submitWithWayfinderResult.user.email }}
