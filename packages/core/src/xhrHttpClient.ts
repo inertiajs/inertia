@@ -1,5 +1,5 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
-import { HttpClient, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
+import { HttpClient, HttpClientOptions, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'))
@@ -42,16 +42,24 @@ function setHeaders(xhr: XMLHttpRequest, config: HttpRequestConfig): void {
  * Inertia's built-in HTTP client using XMLHttpRequest
  */
 export class XhrHttpClient implements HttpClient {
+  protected xsrfCookieName: string
+  protected xsrfHeaderName: string
+
+  constructor(options: HttpClientOptions = {}) {
+    this.xsrfCookieName = options.xsrfCookieName ?? 'XSRF-TOKEN'
+    this.xsrfHeaderName = options.xsrfHeaderName ?? 'X-XSRF-TOKEN'
+  }
+
   public request(config: HttpRequestConfig): Promise<HttpResponse> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
 
       xhr.open(config.method.toUpperCase(), config.url, true)
 
-      const xsrfToken = getCookie('XSRF-TOKEN')
+      const xsrfToken = getCookie(this.xsrfCookieName)
 
       if (xsrfToken) {
-        xhr.setRequestHeader('X-XSRF-TOKEN', xsrfToken)
+        xhr.setRequestHeader(this.xsrfHeaderName, xsrfToken)
       }
 
       let body: Document | XMLHttpRequestBodyInit | null = null
@@ -86,8 +94,8 @@ export class XhrHttpClient implements HttpClient {
         config.signal.addEventListener('abort', () => xhr.abort())
       }
 
-      xhr.onabort = () => reject(new HttpCancelledError())
-      xhr.onerror = () => reject(new HttpNetworkError('Network error'))
+      xhr.onabort = () => reject(new HttpCancelledError('Request was cancelled', config.url))
+      xhr.onerror = () => reject(new HttpNetworkError('Network error', config.url))
 
       xhr.onload = () => {
         const response: HttpResponse = {
@@ -97,7 +105,7 @@ export class XhrHttpClient implements HttpClient {
         }
 
         if (xhr.status >= 400) {
-          reject(new HttpResponseError(`Request failed with status ${xhr.status}`, response))
+          reject(new HttpResponseError(`Request failed with status ${xhr.status}`, response, config.url))
         } else {
           resolve(response)
         }

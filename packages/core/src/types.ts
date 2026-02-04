@@ -16,7 +16,6 @@ export interface HttpRequestConfig {
   method: Method
   url: string
   data?: unknown
-  params?: Record<string, unknown>
   headers?: HttpRequestHeaders
   signal?: AbortSignal
   onUploadProgress?: (event: HttpProgressEvent) => void
@@ -30,6 +29,11 @@ export interface HttpResponse {
 
 export interface HttpClient {
   request(config: HttpRequestConfig): Promise<HttpResponse>
+}
+
+export interface HttpClientOptions {
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 
 export interface PageFlashData {
@@ -492,8 +496,8 @@ interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupRetur
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
-  /** HTTP client to use for requests. Defaults to FetchHttpClient. */
-  http?: HttpClient
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
 }
 
 export interface CreateInertiaAppOptionsForCSR<

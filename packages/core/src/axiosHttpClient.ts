@@ -66,7 +66,6 @@ export class AxiosHttpClient implements HttpClient {
         method: config.method,
         url: config.url,
         data: config.data,
-        params: config.params,
         headers: config.headers as Record<string, string>,
         signal: config.signal,
         responseType: 'text',
@@ -84,7 +83,7 @@ export class AxiosHttpClient implements HttpClient {
       const axiosModule = await import('axios')
 
       if (axiosModule.default.isCancel(error)) {
-        throw new HttpCancelledError()
+        throw new HttpCancelledError('Request was cancelled', config.url)
       }
 
       if (error && typeof error === 'object' && 'response' in error) {
@@ -95,11 +94,12 @@ export class AxiosHttpClient implements HttpClient {
           headers: normalizeHeaders(axiosError.response.headers),
         }
 
-        throw new HttpResponseError(`Request failed with status ${axiosError.response.status}`, httpResponse)
+        throw new HttpResponseError(`Request failed with status ${axiosError.response.status}`, httpResponse, config.url)
       }
 
       throw new HttpNetworkError(
         error instanceof Error ? error.message : 'Network error',
+        config.url,
         error instanceof Error ? error : undefined,
       )
     }

@@ -14,7 +14,7 @@ export { getHttpClient, setHttpClient } from './http'
 export { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 export { default as useInfiniteScroll } from './infiniteScroll'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
-export { hide as hideProgress, progress, reveal as revealProgress, default as setupProgress } from './progress'
+export { progress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
 export * from './types'
 export {
@@ -25,7 +25,7 @@ export {
   urlToString,
   urlWithoutHash,
 } from './url'
-export { xhrHttpClient } from './xhrHttpClient'
+export { XhrHttpClient, xhrHttpClient } from './xhrHttpClient'
 export { type Config, type Router }
 
 export const router = new Router()

@@ -26,7 +26,6 @@ import {
   Page,
   PageFlashData,
   PendingVisit,
-  PendingVisitOptions,
   PollOptions,
   PrefetchedResponse,
   PrefetchOptions,
@@ -39,7 +38,13 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
-import { hrefToUrl, isSameUrlWithoutHash, isUrlMethodPair, transformUrlAndData } from './url'
+import {
+  hrefToUrl,
+  isSameUrlWithoutHash,
+  isSameUrlWithoutQueryOrHash,
+  isUrlMethodPair,
+  transformUrlAndData,
+} from './url'
 
 export class Router {
   protected syncRequestStream = new RequestStream({
@@ -209,7 +214,16 @@ export class Router {
       return
     }
 
-    if (!isSameUrlWithoutHash(visit.url, hrefToUrl(currentPage.get().url))) {
+    const currentPageUrl = hrefToUrl(currentPage.get().url)
+    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
+
+    // For partial reloads, only compare the base URL (origin + pathname) to allow
+    // concurrent requests with different query params to the same page
+    const isSamePage = isPartialReload
+      ? isSameUrlWithoutQueryOrHash(visit.url, currentPageUrl)
+      : isSameUrlWithoutHash(visit.url, currentPageUrl)
+
+    if (!isSamePage) {
       // Only cancel non-prefetch requests (deferred props + partial reloads)
       this.asyncRequestStream.cancelInFlight({ prefetch: false })
     }
@@ -520,11 +534,7 @@ export class Router {
     }
   }
 
-  protected getPendingVisit(
-    href: string | URL | UrlMethodPair,
-    options: VisitOptions,
-    pendingVisitOptions: Partial<PendingVisitOptions> = {},
-  ): PendingVisit {
+  protected getPendingVisit(href: string | URL | UrlMethodPair, options: VisitOptions): PendingVisit {
     if (isUrlMethodPair(href)) {
       const urlMethodPair = href
       href = urlMethodPair.url
@@ -574,7 +584,6 @@ export class Router {
       completed: false,
       interrupted: false,
       ...mergedOptions,
-      ...pendingVisitOptions,
       url,
       data: _data,
     }

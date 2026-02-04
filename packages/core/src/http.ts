@@ -1,5 +1,5 @@
-import { HttpClient } from './types'
-import { xhrHttpClient } from './xhrHttpClient'
+import { HttpClient, HttpClientOptions } from './types'
+import { XhrHttpClient, xhrHttpClient } from './xhrHttpClient'
 
 let httpClient: HttpClient = xhrHttpClient
 
@@ -13,6 +13,10 @@ export function getHttpClient(): HttpClient {
 /**
  * Set the HTTP client to use for all Inertia requests
  */
-export function setHttpClient(client: HttpClient): void {
-  httpClient = client
+export function setHttpClient(client: HttpClient | HttpClientOptions): void {
+  httpClient = isHttpClientOptions(client) ? new XhrHttpClient(client) : client
+}
+
+function isHttpClientOptions(client: HttpClient | HttpClientOptions): client is HttpClientOptions {
+  return !('request' in client)
 }

@@ -34,6 +34,12 @@ app.all('/non-inertia', (req, res) =>
   `),
 )
 
+app.get('/non-inertia/download', (req, res) => {
+  const query = new URLSearchParams(req.query).toString()
+  res.setHeader('Content-Type', 'text/plain')
+  res.status(200).send(`query:${query}`)
+})
+
 // SSR test routes (only rendered with SSR when SSR=true)
 app.get('/ssr/page1', (req, res) =>
   inertia.renderSSR(req, res, {
@@ -352,6 +358,29 @@ app.post('/form-helper/errors', (req, res) =>
     props: { errors: { name: 'Some name error', handle: 'The Handle was invalid' } },
   }),
 )
+
+app.get('/form-helper/errors/clear-on-resubmit', (req, res) =>
+  inertia.render(req, res, { component: 'FormHelper/ErrorsClearOnResubmit' }),
+)
+
+app.post('/form-helper/errors/clear-on-resubmit', (req, res) => {
+  const name = req.body['name']
+  const handle = req.body['handle']
+  const errors = {}
+
+  if (!name || name.length < 3) {
+    errors.name = 'The name must be at least 3 characters.'
+  }
+
+  if (!handle || handle.length < 3) {
+    errors.handle = 'The handle must be at least 3 characters.'
+  }
+
+  inertia.render(req, res, {
+    component: 'FormHelper/ErrorsClearOnResubmit',
+    props: { errors },
+  })
+})
 
 app.post('/form-helper/events/errors', (req, res) => {
   setTimeout(() => {
@@ -1490,6 +1519,35 @@ app.get('/deferred-props/with-reload', (req, res) => {
   )
 })
 
+app.get('/deferred-props/reload-without-optional-chaining', (req, res) => {
+  const page = parseInt(req.query.page) || 1
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/ReloadWithoutOptionalChaining',
+      url: req.originalUrl,
+      deferredProps: {
+        default: ['results'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/ReloadWithoutOptionalChaining',
+        url: req.originalUrl,
+        props: {
+          results: req.headers['x-inertia-partial-data']?.includes('results')
+            ? { data: [`Item ${page}-1`, `Item ${page}-2`, `Item ${page}-3`], page }
+            : undefined,
+        },
+      }),
+    300,
+  )
+})
+
 app.get('/svelte/props-and-page-store', (req, res) =>
   inertia.render(req, res, { component: 'Svelte/PropsAndPageStore', props: { foo: req.query.foo || 'default' } }),
 )
@@ -2608,6 +2666,35 @@ app.get('/use-http/transform', (req, res) => inertia.render(req, res, { componen
 app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { component: 'UseHttp/Lifecycle' }))
 app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
 app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
+
+app.get('/reload/concurrent-with-data', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']
+  const timeframe = req.query.timeframe || 'day'
+
+  if (!partialData) {
+    return inertia.render(req, res, {
+      component: 'Reload/ConcurrentWithData',
+      props: {
+        foo: 'initial foo',
+        bar: 'initial bar',
+        timeframe,
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Reload/ConcurrentWithData',
+        props: {
+          foo: partialData.includes('foo') ? `foo reloaded (${timeframe}) at ${Date.now()}` : undefined,
+          bar: partialData.includes('bar') ? `bar reloaded (${timeframe}) at ${Date.now()}` : undefined,
+          timeframe,
+        },
+      }),
+    600,
+  )
+})
 
 app.all('*page', (req, res) => inertia.render(req, res))
 
