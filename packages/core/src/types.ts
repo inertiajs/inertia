@@ -671,6 +671,11 @@ export type UseFormSubmitArguments =
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
 
+export type UseHttpSubmitArguments<TResponse = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
+  | [UseHttpSubmitOptions<TResponse>?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'

@@ -21,6 +21,7 @@ import {
   UseFormTransformCallback,
   UseFormUtils,
   UseFormWithPrecognitionArguments,
+  UseHttpSubmitArguments,
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
@@ -46,6 +47,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
+  submit(...args: UseHttpSubmitArguments<TResponse>): Promise<TResponse>
   get(url: string, options?: UseHttpSubmitOptions<TResponse>): Promise<TResponse>
   post(url: string, options?: UseHttpSubmitOptions<TResponse>): Promise<TResponse>
   put(url: string, options?: UseHttpSubmitOptions<TResponse>): Promise<TResponse>
@@ -256,6 +258,12 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     }
 
   Object.assign(form, {
+    submit(...args: UseHttpSubmitArguments<TResponse>) {
+      const parsed = UseFormUtils.parseSubmitArguments(args as any, getPrecognitionEndpoint())
+
+      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TResponse>)
+    },
+
     get: createSubmitMethod('get'),
     post: createSubmitMethod('post'),
     put: createSubmitMethod('put'),
