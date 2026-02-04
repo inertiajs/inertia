@@ -145,7 +145,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       // SSR transform: wrap createInertiaApp() with server bootstrap code
       // This only applies during SSR builds (options.ssr is true)
       if (options?.ssr && findInertiaAppExport(result)) {
-        result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster, debug: ssr.debug }, frameworks) ?? result
+        result = wrapWithServerBootstrap(result, { port: ssr.port, cluster: ssr.cluster, prettyErrors: ssr.prettyErrors }, frameworks) ?? result
       }
 
       // Pages transform: convert `pages: './Pages'` to a full resolve function
@@ -170,7 +170,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           return next()
         }
 
-        await handleSSRRequest(server, entry!, req, res, ssr.debug ?? false)
+        await handleSSRRequest(server, entry!, req, res, ssr.prettyErrors ?? true)
       })
 
       server.config.logger.info(`Inertia SSR dev endpoint: ${SSR_ENDPOINT}`)

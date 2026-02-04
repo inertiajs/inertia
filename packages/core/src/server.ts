@@ -60,7 +60,7 @@ type RouteHandler = (request: IncomingMessage, response: ServerResponse) => Prom
 type ServerOptions = {
   port?: number
   cluster?: boolean
-  debug?: boolean
+  prettyErrors?: boolean
 }
 type Port = number
 
@@ -74,7 +74,7 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
 
 export default (render: AppCallback, options?: Port | ServerOptions): AppCallback => {
   const opts = typeof options === 'number' ? { port: options } : options
-  const { port = 13714, cluster: useCluster = false, debug = false } = opts ?? {}
+  const { port = 13714, cluster: useCluster = false, prettyErrors = true } = opts ?? {}
 
   const log = (message: string) => {
     console.log(
@@ -97,11 +97,10 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
   const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
     const page: Page = JSON.parse(await readableToString(request))
 
-    // Suppress framework warnings during render when debug mode is enabled
-    // These are typically verbose Vue/React warnings that clutter the output
+    // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn
 
-    if (debug) {
+    if (prettyErrors) {
       console.warn = () => {}
     }
 
@@ -114,7 +113,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
       const error = e as Error
       const classified = classifySSRError(error, page.component, page.url)
 
-      if (debug) {
+      if (prettyErrors) {
         console.error(formatConsoleError(classified))
       } else {
         console.error(`SSR Error [${page.component}]: ${error.message}`)

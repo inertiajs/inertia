@@ -91,7 +91,7 @@ app.get('/ssr-auto/page2', (req, res) =>
   }),
 )
 
-// configureInertiaApp (unified) test routes
+// createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
   inertia.renderUnified(req, res, {
     component: 'Home',

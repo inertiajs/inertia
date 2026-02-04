@@ -334,10 +334,10 @@ describe('SSR', () => {
       expect(loggedMessage).toContain('Hint')
     })
 
-    it('includes stack trace when debug mode is enabled', async () => {
+    it('includes stack trace when prettyErrors is enabled', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
-      const plugin = inertia({ ssr: { debug: true } })
+      const plugin = inertia({ ssr: { prettyErrors: true } })
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
@@ -360,10 +360,10 @@ describe('SSR', () => {
       expect(loggedMessage).toContain('Dashboard.vue:10')
     })
 
-    it('does not include stack trace when debug mode is disabled', async () => {
+    it('does not include stack trace when prettyErrors is disabled', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
-      const plugin = inertia({ ssr: { debug: false } })
+      const plugin = inertia({ ssr: { prettyErrors: false } })
       const logger = createMockLogger()
       const server = createMockServer(logger)
 

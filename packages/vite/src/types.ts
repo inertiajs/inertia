@@ -107,10 +107,11 @@ export interface SSROptions {
   cluster?: boolean
 
   /**
-   * Enable debug mode for more verbose error logging.
-   * When enabled, SSR errors show helpful hints and formatted output.
+   * Enable pretty error formatting for SSR errors.
+   * When enabled, errors show helpful hints and formatted output.
+   * Defaults to true.
    */
-  debug?: boolean
+  prettyErrors?: boolean
 }
 
 /**
