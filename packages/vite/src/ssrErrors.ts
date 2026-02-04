@@ -237,15 +237,21 @@ function extractSourceLocation(stack?: string): string | null {
  *
  * @param classified - The classified error
  * @param root - Project root path for making source locations relative
- * @param prettyErrors - Whether to include full stack traces and suppressed warnings
+ * @param handleErrors - Whether to show detailed formatted output or a simple one-liner
  * @param suppressedWarnings - Framework warnings that were suppressed
  */
 export function formatConsoleError(
   classified: ClassifiedSSRError,
   root?: string,
-  prettyErrors: boolean = true,
+  handleErrors: boolean = true,
   suppressedWarnings: string[] = [],
 ): string {
+  // Simple one-liner when handleErrors is disabled
+  if (!handleErrors) {
+    const component = classified.component ? `[${classified.component}]` : ''
+    return `SSR Error ${component}: ${classified.error}`
+  }
+
   const componentPart = classified.component ? `  ${colors.cyan}${classified.component}${colors.reset}` : ''
 
   const lines = [
@@ -273,11 +279,11 @@ export function formatConsoleError(
 
   lines.push('', `  ${colors.yellow}Hint${colors.reset}  ${classified.hint}`, '')
 
-  if (prettyErrors && classified.stack) {
+  if (classified.stack) {
     lines.push(`  ${colors.dim}${classified.stack.split('\n').join('\n  ')}${colors.reset}`, '')
   }
 
-  if (prettyErrors && suppressedWarnings.length > 0) {
+  if (suppressedWarnings.length > 0) {
     lines.push(
       `  ${colors.dim}Suppressed ${suppressedWarnings.length} framework warning(s).${colors.reset}`,
       '',

@@ -107,11 +107,11 @@ export interface SSROptions {
   cluster?: boolean
 
   /**
-   * Enable pretty error formatting for SSR errors.
-   * When enabled, errors show helpful hints and formatted output.
+   * Handle SSR errors gracefully with formatted output and helpful hints.
+   * When disabled, errors are thrown raw for debugging.
    * Defaults to true.
    */
-  prettyErrors?: boolean
+  handleErrors?: boolean
 }
 
 /**

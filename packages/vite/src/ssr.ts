@@ -45,11 +45,11 @@ export interface InertiaSSROptions {
   cluster?: boolean
 
   /**
-   * Enable pretty error formatting for SSR errors.
-   * When enabled, errors show helpful hints and formatted output.
+   * Handle SSR errors gracefully with formatted output and helpful hints.
+   * When disabled, errors are thrown raw for debugging.
    * Defaults to true.
    */
-  prettyErrors?: boolean
+  handleErrors?: boolean
 
   /**
    * Generate sourcemaps for SSR builds.
@@ -130,7 +130,7 @@ export async function handleSSRRequest(
   entry: string,
   req: IncomingMessage,
   res: ServerResponse,
-  prettyErrors: boolean = true,
+  handleErrors: boolean = true,
 ): Promise<void> {
   let component: string | undefined
   let url: string | undefined
@@ -145,7 +145,7 @@ export async function handleSSRRequest(
 
     // Suppress Vue's verbose component trace warnings
     if (message.includes('[Vue warn]') || message.includes('at <')) {
-      if (prettyErrors) {
+      if (handleErrors) {
         suppressedWarnings.push(args.map(String).join(' '))
       }
 
@@ -178,7 +178,7 @@ export async function handleSSRRequest(
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify(result))
   } catch (error) {
-    handleSSRError(server, res, error as Error, component, url, prettyErrors, suppressedWarnings)
+    handleSSRError(server, res, error as Error, component, url, handleErrors, suppressedWarnings)
   } finally {
     console.warn = originalWarn
   }
@@ -263,17 +263,22 @@ function handleSSRError(
   error: Error,
   component?: string,
   url?: string,
-  prettyErrors: boolean = true,
+  handleErrors: boolean = true,
   suppressedWarnings: string[] = [],
 ): void {
   // Fix the stack trace to show original source locations
   server.ssrFixStacktrace(error)
 
+  // When handleErrors is disabled, just throw the raw error
+  if (!handleErrors) {
+    throw error
+  }
+
   // Classify the error and generate helpful hints
   const classified = classifySSRError(error, component, url)
 
   // Log formatted error with hints (use project root to make paths relative)
-  server.config.logger.error(formatConsoleError(classified, server.config.root, prettyErrors, suppressedWarnings))
+  server.config.logger.error(formatConsoleError(classified, server.config.root, handleErrors, suppressedWarnings))
 
   // Return structured error details to Laravel
   res.setHeader('Content-Type', 'application/json')

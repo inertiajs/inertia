@@ -334,10 +334,10 @@ describe('SSR', () => {
       expect(loggedMessage).toContain('Hint')
     })
 
-    it('includes stack trace when prettyErrors is enabled', async () => {
+    it('includes stack trace when handleErrors is enabled', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
-      const plugin = inertia({ ssr: { prettyErrors: true } })
+      const plugin = inertia({ ssr: { handleErrors: true } })
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
@@ -360,10 +360,10 @@ describe('SSR', () => {
       expect(loggedMessage).toContain('Dashboard.vue:10')
     })
 
-    it('does not include stack trace when prettyErrors is disabled', async () => {
+    it('throws raw error when handleErrors is disabled', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
-      const plugin = inertia({ ssr: { prettyErrors: false } })
+      const plugin = inertia({ ssr: { handleErrors: false } })
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
@@ -380,10 +380,7 @@ describe('SSR', () => {
       const req = createMockRequest('POST', JSON.stringify({ component: 'Dashboard' }))
       const res = createMockResponse()
 
-      await middleware(req, res, vi.fn())
-
-      const loggedMessage = logger.error.mock.calls[0][0]
-      expect(loggedMessage).not.toContain('Stack trace:')
+      await expect(middleware(req, res, vi.fn())).rejects.toThrow('window is not defined')
     })
 
     it('returns 500 with helpful message when request body is empty', async () => {

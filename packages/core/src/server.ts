@@ -60,7 +60,7 @@ type RouteHandler = (request: IncomingMessage, response: ServerResponse) => Prom
 type ServerOptions = {
   port?: number
   cluster?: boolean
-  prettyErrors?: boolean
+  handleErrors?: boolean
 }
 type Port = number
 
@@ -74,7 +74,7 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
 
 export default (render: AppCallback, options?: Port | ServerOptions): AppCallback => {
   const opts = typeof options === 'number' ? { port: options } : options
-  const { port = 13714, cluster: useCluster = false, prettyErrors = true } = opts ?? {}
+  const { port = 13714, cluster: useCluster = false, handleErrors = true } = opts ?? {}
 
   const log = (message: string) => {
     console.log(
@@ -100,7 +100,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
     // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn
 
-    if (prettyErrors) {
+    if (handleErrors) {
       console.warn = () => {}
     }
 
@@ -111,13 +111,13 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
       response.write(JSON.stringify(result))
     } catch (e) {
       const error = e as Error
-      const classified = classifySSRError(error, page.component, page.url)
 
-      if (prettyErrors) {
-        console.error(formatConsoleError(classified))
-      } else {
-        console.error(`SSR Error [${page.component}]: ${error.message}`)
+      if (!handleErrors) {
+        throw error
       }
+
+      const classified = classifySSRError(error, page.component, page.url)
+      console.error(formatConsoleError(classified))
 
       response.writeHead(500, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
       response.write(JSON.stringify(classified))
