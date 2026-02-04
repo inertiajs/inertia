@@ -14,7 +14,7 @@ export default defineConfig({
       ssr: 'resources/js/ssr.ts',
       refresh: true,
     }),
-    inertia(),
+    inertia({ ssr: { handleErrors: false } }),
     vue({
       template: {
         transformAssetUrls: {
