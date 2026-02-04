@@ -94,8 +94,8 @@ export class XhrHttpClient implements HttpClient {
         config.signal.addEventListener('abort', () => xhr.abort())
       }
 
-      xhr.onabort = () => reject(new HttpCancelledError())
-      xhr.onerror = () => reject(new HttpNetworkError('Network error'))
+      xhr.onabort = () => reject(new HttpCancelledError('Request was cancelled', config.url))
+      xhr.onerror = () => reject(new HttpNetworkError('Network error', config.url))
 
       xhr.onload = () => {
         const response: HttpResponse = {
@@ -105,7 +105,7 @@ export class XhrHttpClient implements HttpClient {
         }
 
         if (xhr.status >= 400) {
-          reject(new HttpResponseError(`Request failed with status ${xhr.status}`, response))
+          reject(new HttpResponseError(`Request failed with status ${xhr.status}`, response, config.url))
         } else {
           resolve(response)
         }

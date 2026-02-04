@@ -16,7 +16,6 @@ export interface HttpRequestConfig {
   method: Method
   url: string
   data?: unknown
-  params?: Record<string, unknown>
   headers?: HttpRequestHeaders
   signal?: AbortSignal
   onUploadProgress?: (event: HttpProgressEvent) => void
