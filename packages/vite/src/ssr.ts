@@ -219,7 +219,20 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
     let data = ''
 
     req.on('data', (chunk) => (data += chunk))
-    req.on('end', () => resolve(JSON.parse(data)))
+
+    req.on('end', () => {
+      if (!data.trim()) {
+        reject(new Error('Request body is empty'))
+        return
+      }
+
+      try {
+        resolve(JSON.parse(data))
+      } catch (error) {
+        reject(new Error(`Invalid JSON in request body: ${error instanceof Error ? error.message : 'Unknown error'}`))
+      }
+    })
+
     req.on('error', reject)
   })
 }

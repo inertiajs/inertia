@@ -385,6 +385,50 @@ describe('SSR', () => {
       const loggedMessage = logger.error.mock.calls[0][0]
       expect(loggedMessage).not.toContain('Stack trace:')
     })
+
+    it('returns 500 with helpful message when request body is empty', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', '')
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      expect(res.statusCode).toBe(500)
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.error).toBe('Request body is empty')
+    })
+
+    it('returns 500 with helpful message when request body is invalid JSON', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', '{ invalid json }')
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      expect(res.statusCode).toBe(500)
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.error).toContain('Invalid JSON in request body')
+    })
   })
 
   describe('SSR transform', () => {
