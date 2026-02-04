@@ -271,7 +271,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
         if (error instanceof Error && error.name === 'AbortError') {
           options.onCancel?.()
-          throw new HttpCancelledError()
+          throw new HttpCancelledError('Request was cancelled', url)
         }
 
         throw error

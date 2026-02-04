@@ -217,7 +217,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         return responseData
       }
 
-      throw new HttpResponseError(`Request failed with status ${response.status}`, response)
+      throw new HttpResponseError(`Request failed with status ${response.status}`, response, url)
     } catch (error: unknown) {
       if (error instanceof HttpResponseError) {
         if (error.response.status === 422) {
@@ -238,7 +238,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
       if (error instanceof Error && error.name === 'AbortError') {
         options.onCancel?.()
-        throw new HttpCancelledError()
+        throw new HttpCancelledError('Request was cancelled', url)
       }
 
       throw error
