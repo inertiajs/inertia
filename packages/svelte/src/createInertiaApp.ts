@@ -4,6 +4,7 @@ import {
   router,
   setupProgress,
   type CreateInertiaAppOptions as CreateInertiaAppOptionsBase,
+  type CreateInertiaAppOptionsForCSR,
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
@@ -26,28 +27,49 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: InertiaAppProps<SharedProps>
 }
 
-export type CreateInertiaAppOptions<SharedProps extends PageProps = PageProps> = Omit<
-  CreateInertiaAppOptionsBase<ComponentResolver, SetupOptions<SharedProps>, SvelteRenderResult | void, SvelteInertiaAppConfig>,
-  'title'
-> & {
-  page?: Page<SharedProps>
-  render?: SvelteServerRender
-}
+// Legacy type for CSR with setup (setup required)
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<SharedProps>,
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
+>
+
+// Auto type for Vite plugin (setup optional)
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptionsBase<
+  ComponentResolver,
+  SetupOptions<SharedProps>,
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
+>
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
   render: SvelteServerRender,
 ) => Promise<InertiaAppSSRResponse>
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
-  id = 'app',
-  resolve,
-  setup,
-  progress = {},
-  page,
-  render,
-  defaults = {},
-}: CreateInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | InertiaAppSSRResponse | void> {
+// Overload 1: CSR with setup (returns void)
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<void>
+// Overload 2: Auto/Vite plugin (setup optional, returns SSR function or void)
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options?: InertiaAppOptionsAuto<SharedProps>,
+): Promise<InertiaSSRRenderFunction<SharedProps> | void>
+// Implementation
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
+): Promise<InertiaSSRRenderFunction<SharedProps> | InertiaAppSSRResponse | void> {
+  const {
+    id = 'app',
+    resolve,
+    setup,
+    progress = {},
+    page,
+    defaults = {},
+  } = options as any
+
   config.replace(defaults)
 
   if (!resolve) {
@@ -59,8 +81,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const resolveComponent = (name: string, p?: Page) => Promise.resolve(resolve(name, p))
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
+  // SSR path: Return render function for Vite plugin transform
   if (typeof window === 'undefined') {
-    // Legacy pattern: page + setup provided (Svelte calls render in setup)
+    // Legacy SSR pattern: page provided with setup that returns render result
     if (page && setup) {
       const component = (await Promise.resolve(resolveComponent(page.component, page))) as ResolvedComponent
 
@@ -84,17 +107,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       }
     }
 
-    const ssrRenderer = createSSRRenderer<SharedProps>(id, resolveComponent, setup, useScriptElement)
-
-    // Backward compat: if page/render provided, render immediately (like createInertiaApp)
-    if (page && render) {
-      return ssrRenderer(page, render)
-    }
-
-    // Default: return render function (used by Vite plugin transform and createServer)
-    return ssrRenderer
+    // Vite plugin: return render function
+    return createSSRRenderer<SharedProps>(id, resolveComponent, setup, useScriptElement)
   }
 
+  // CSR path
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
 
   const [component] = await Promise.all([
@@ -102,12 +119,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.decryptHistory().catch(() => {}),
   ])
 
-  const target = document.getElementById(id)!
   const props: InertiaAppProps<SharedProps> = {
     initialPage,
     initialComponent: component,
     resolveComponent,
   }
+
+  const target = document.getElementById(id)!
 
   if (setup) {
     setup({ el: target, App, props })

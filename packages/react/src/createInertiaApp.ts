@@ -5,51 +5,85 @@ import {
   router,
   setupProgress,
   type CreateInertiaAppOptions as CreateInertiaAppOptionsBase,
+  type CreateInertiaAppOptionsForCSR,
+  type CreateInertiaAppOptionsForSSR,
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
 } from '@inertiajs/core'
 import { createElement, ReactElement } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
+import { renderToString } from 'react-dom/server'
 import App, { InertiaApp, InertiaAppProps } from './App'
 import { config } from './index'
 import { ReactComponent, ReactInertiaAppConfig } from './types'
 
-type RenderToString = (element: ReactElement) => string
-
-type ComponentResolver = (name: string, page?: Page) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
-
-type SetupOptions<SharedProps extends PageProps> = {
-  el: HTMLElement | null
+export type SetupOptions<ElementType, SharedProps extends PageProps> = {
+  el: ElementType
   App: InertiaApp
   props: InertiaAppProps<SharedProps>
 }
 
-export type CreateInertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsBase<
+type ComponentResolver = (name: string, page?: Page) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
+
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+  SharedProps,
   ComponentResolver,
-  SetupOptions<SharedProps>,
-  ReactElement | void,
+  SetupOptions<HTMLElement, SharedProps>,
+  void,
+  ReactInertiaAppConfig
+>
+
+type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
+  SharedProps,
+  ComponentResolver,
+  SetupOptions<null, SharedProps>,
+  ReactElement,
   ReactInertiaAppConfig
 > & {
-  page?: Page<SharedProps>
-  render?: RenderToString
+  render: typeof renderToString
 }
+
+// Options for Vite plugin auto-transform (setup is optional)
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptionsBase<
+  ComponentResolver,
+  SetupOptions<HTMLElement | null, SharedProps>,
+  ReactElement | void,
+  ReactInertiaAppConfig
+>
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
-  renderToString: RenderToString,
+  renderToString: (element: ReactElement) => string,
 ) => Promise<InertiaAppSSRResponse>
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
-  id = 'app',
-  resolve,
-  setup,
-  title,
-  progress = {},
-  page,
-  render,
-  defaults = {},
-}: CreateInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | InertiaAppSSRResponse | void> {
+// Overload 1: CSR with setup (returns void)
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<void>
+// Overload 2: SSR with setup + page + render (returns SSR response)
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForSSR<SharedProps>,
+): Promise<InertiaAppSSRResponse>
+// Overload 3: Auto/Vite plugin (setup optional, returns SSR function or void)
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options?: InertiaAppOptionsAuto<SharedProps>,
+): Promise<InertiaSSRRenderFunction<SharedProps> | void>
+// Implementation
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps> | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
+): Promise<InertiaSSRRenderFunction<SharedProps> | InertiaAppSSRResponse | void> {
+  const {
+    id = 'app',
+    resolve,
+    setup,
+    title,
+    progress = {},
+    page,
+    render,
+    defaults = {},
+  } = options as any
+
   config.replace(defaults)
 
   if (!resolve) {
@@ -58,21 +92,23 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     )
   }
 
-  const resolveComponent = createComponentResolver(resolve)
+  const resolveComponent = createComponentResolver(resolve) as (name: string, page?: Page) => Promise<ReactComponent>
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
+  // SSR path
   if (typeof window === 'undefined') {
-    const ssrRenderer = createSSRRenderer<SharedProps>(id, resolveComponent, setup, title, useScriptElement)
+    const ssrRenderer = createSSRRenderer<SharedProps>(id, resolveComponent, setup as any, title, useScriptElement)
 
-    // Backward compat: if page/render provided, render immediately (like createInertiaApp)
+    // Legacy SSR: if page/render provided, render immediately
     if (page && render) {
       return ssrRenderer(page, render)
     }
 
-    // Default: return render function (used by Vite plugin transform and createServer)
+    // Vite plugin: return render function
     return ssrRenderer
   }
 
+  // CSR path
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
 
   const [component] = await Promise.all([
@@ -82,19 +118,23 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const props: InertiaAppProps<SharedProps> = {
     initialPage,
-    initialComponent: component,
-    resolveComponent,
+    initialComponent: component as ReactComponent,
+    resolveComponent: resolveComponent as (name: string, page?: Page) => ReactComponent | Promise<ReactComponent>,
     titleCallback: title,
   }
 
   const el = document.getElementById(id)!
 
   if (setup) {
-    setup({ el, App, props })
+    setup({
+      el,
+      App,
+      props,
+    })
   } else if (el.hasAttribute('data-server-rendered')) {
-    hydrateRoot(el, createAppElement(props))
+    hydrateRoot(el, createElement(App, props))
   } else {
-    createRoot(el).render(createAppElement(props))
+    createRoot(el).render(createElement(App, props))
   }
 
   if (progress) {
@@ -105,11 +145,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 function createSSRRenderer<SharedProps extends PageProps>(
   id: string,
   resolveComponent: (name: string, page?: Page) => Promise<ReactComponent>,
-  setup: ((options: SetupOptions<SharedProps>) => ReactElement | void) | undefined,
+  setup: ((options: SetupOptions<null, SharedProps>) => ReactElement) | undefined,
   title: ((title: string) => string) | undefined,
   useScriptElement: boolean,
 ): InertiaSSRRenderFunction<SharedProps> {
-  return async (page: Page<SharedProps>, renderToString: RenderToString): Promise<InertiaAppSSRResponse> => {
+  return async (page: Page<SharedProps>, renderToString: (element: ReactElement) => string): Promise<InertiaAppSSRResponse> => {
     let head: string[] = []
 
     const component = await resolveComponent(page.component, page)
@@ -122,17 +162,21 @@ function createSSRRenderer<SharedProps extends PageProps>(
       onHeadUpdate: (elements) => (head = elements),
     }
 
-    const element = setup
-      ? (setup({ el: null, App, props }) ?? createAppElement(props))
-      : createAppElement(props)
+    let element: ReactElement
+
+    if (setup) {
+      element = setup({
+        el: null,
+        App,
+        props,
+      }) ?? createElement(App, props)
+    } else {
+      element = createElement(App, props)
+    }
 
     const html = renderToString(element)
     const body = buildSSRBody(id, page, html, useScriptElement)
 
     return { head, body }
   }
-}
-
-function createAppElement<SharedProps extends PageProps>(props: InertiaAppProps<SharedProps>): ReactElement {
-  return createElement(App, props)
 }
