@@ -1,9 +1,10 @@
 import {
   buildSSRBody,
   createComponentResolver,
-  loadInitialPage,
+  getInitialPageFromDOM,
+  router,
   setupProgress,
-  type ConfigureInertiaAppOptions as ConfigureInertiaAppOptionsBase,
+  type CreateInertiaAppOptions as CreateInertiaAppOptionsBase,
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
@@ -24,7 +25,7 @@ type SetupOptions<SharedProps extends PageProps> = {
   plugin: Plugin
 }
 
-export type CreateInertiaAppOptions<SharedProps extends PageProps> = ConfigureInertiaAppOptionsBase<
+export type CreateInertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsBase<
   ComponentResolver,
   SetupOptions<SharedProps>,
   VueApp | void,
@@ -72,11 +73,12 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     return ssrRenderer
   }
 
-  const { page: initialPage, component } = await loadInitialPage<SharedProps, DefineComponent>(
-    id,
-    useScriptElement,
-    resolveComponent,
-  )
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
+
+  const [component] = await Promise.all([
+    resolveComponent(initialPage.component, initialPage),
+    router.decryptHistory().catch(() => {}),
+  ])
 
   const props: InertiaAppProps<SharedProps> = {
     initialPage,

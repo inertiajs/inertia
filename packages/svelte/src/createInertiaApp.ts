@@ -1,8 +1,9 @@
 import {
   buildSSRBody,
-  loadInitialPage,
+  getInitialPageFromDOM,
+  router,
   setupProgress,
-  type ConfigureInertiaAppOptions as ConfigureInertiaAppOptionsBase,
+  type CreateInertiaAppOptions as CreateInertiaAppOptionsBase,
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
@@ -26,7 +27,7 @@ type SetupOptions<SharedProps extends PageProps> = {
 }
 
 export type CreateInertiaAppOptions<SharedProps extends PageProps = PageProps> = Omit<
-  ConfigureInertiaAppOptionsBase<ComponentResolver, SetupOptions<SharedProps>, SvelteRenderResult | void, SvelteInertiaAppConfig>,
+  CreateInertiaAppOptionsBase<ComponentResolver, SetupOptions<SharedProps>, SvelteRenderResult | void, SvelteInertiaAppConfig>,
   'title'
 > & {
   page?: Page<SharedProps>
@@ -59,6 +60,30 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
   if (typeof window === 'undefined') {
+    // Legacy pattern: page + setup provided (Svelte calls render in setup)
+    if (page && setup) {
+      const component = (await Promise.resolve(resolveComponent(page.component, page))) as ResolvedComponent
+
+      const props: InertiaAppProps<SharedProps> = {
+        initialPage: page,
+        initialComponent: component,
+        resolveComponent,
+      }
+
+      const result = setup({ el: null, App, props })
+
+      if (!result) {
+        throw new Error('Inertia SSR setup function must return a render result ({ body, head })')
+      }
+
+      const body = buildSSRBody(id, page, result.body, useScriptElement)
+
+      return {
+        body,
+        head: [result.head],
+      }
+    }
+
     const ssrRenderer = createSSRRenderer<SharedProps>(id, resolveComponent, setup, useScriptElement)
 
     // Backward compat: if page/render provided, render immediately (like createInertiaApp)
@@ -70,7 +95,12 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     return ssrRenderer
   }
 
-  const { page: initialPage, component } = await loadInitialPage<SharedProps, ResolvedComponent>(id, useScriptElement, resolveComponent)
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
+
+  const [component] = await Promise.all([
+    resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
+    router.decryptHistory().catch(() => {}),
+  ])
 
   const target = document.getElementById(id)!
   const props: InertiaAppProps<SharedProps> = {
