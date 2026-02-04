@@ -29,7 +29,10 @@ export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = Configur
   SetupOptions<SharedProps>,
   ReactElement | void,
   ReactInertiaAppConfig
->
+> & {
+  page?: Page<SharedProps>
+  render?: RenderToString
+}
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
@@ -42,8 +45,10 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   setup,
   title,
   progress = {},
+  page,
+  render,
   defaults = {},
-}: ConfigureInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | void> {
+}: ConfigureInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | InertiaAppSSRResponse | void> {
   config.replace(defaults)
 
   if (!resolve) {
@@ -56,13 +61,21 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
   if (typeof window === 'undefined') {
-    return createSSRRenderer(id, resolveComponent, setup, title, useScriptElement)
+    const ssrRenderer = createSSRRenderer<SharedProps>(id, resolveComponent, setup, title, useScriptElement)
+
+    // Backward compat: if page/render provided, render immediately (like createInertiaApp)
+    if (page && render) {
+      return ssrRenderer(page, render)
+    }
+
+    // Default: return render function (used by Vite plugin transform and createServer)
+    return ssrRenderer
   }
 
-  const { page, component } = await loadInitialPage<SharedProps, ReactComponent>(id, useScriptElement, resolveComponent)
+  const { page: initialPage, component } = await loadInitialPage<SharedProps, ReactComponent>(id, useScriptElement, resolveComponent)
 
   const props: InertiaAppProps<SharedProps> = {
-    initialPage: page,
+    initialPage,
     initialComponent: component,
     resolveComponent,
     titleCallback: title,

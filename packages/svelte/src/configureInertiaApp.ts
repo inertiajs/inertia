@@ -28,7 +28,10 @@ type SetupOptions<SharedProps extends PageProps> = {
 export type ConfigureInertiaAppOptions<SharedProps extends PageProps = PageProps> = Omit<
   ConfigureInertiaAppOptionsBase<ComponentResolver, SetupOptions<SharedProps>, SvelteRenderResult | void, SvelteInertiaAppConfig>,
   'title'
->
+> & {
+  page?: Page<SharedProps>
+  render?: SvelteServerRender
+}
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
   page: Page<SharedProps>,
@@ -40,8 +43,10 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
   resolve,
   setup,
   progress = {},
+  page,
+  render,
   defaults = {},
-}: ConfigureInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | void> {
+}: ConfigureInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | InertiaAppSSRResponse | void> {
   config.replace(defaults)
 
   if (!resolve) {
@@ -50,18 +55,26 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
     )
   }
 
-  const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve(name, page))
+  const resolveComponent = (name: string, p?: Page) => Promise.resolve(resolve(name, p))
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
   if (typeof window === 'undefined') {
-    return createSSRRenderer(id, resolveComponent, setup, useScriptElement)
+    const ssrRenderer = createSSRRenderer<SharedProps>(id, resolveComponent, setup, useScriptElement)
+
+    // Backward compat: if page/render provided, render immediately (like createInertiaApp)
+    if (page && render) {
+      return ssrRenderer(page, render)
+    }
+
+    // Default: return render function (used by Vite plugin transform and createServer)
+    return ssrRenderer
   }
 
-  const { page, component } = await loadInitialPage<SharedProps, ResolvedComponent>(id, useScriptElement, resolveComponent)
+  const { page: initialPage, component } = await loadInitialPage<SharedProps, ResolvedComponent>(id, useScriptElement, resolveComponent)
 
   const target = document.getElementById(id)!
   const props: InertiaAppProps<SharedProps> = {
-    initialPage: page,
+    initialPage,
     initialComponent: component,
     resolveComponent,
   }
