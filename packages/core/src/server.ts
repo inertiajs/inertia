@@ -72,7 +72,7 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
     readable.on('error', (err) => reject(err))
   })
 
-export default (render: AppCallback, options?: Port | ServerOptions): void => {
+export default (render: AppCallback, options?: Port | ServerOptions): AppCallback => {
   const opts = typeof options === 'number' ? { port: options } : options
   const { port = 13714, cluster: useCluster = false, debug = false } = opts ?? {}
 
@@ -91,7 +91,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
       cluster.fork()
     }
 
-    return
+    return render
   }
 
   const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
@@ -147,4 +147,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
   }).listen(port, () => log('Inertia SSR server started.'))
 
   log(`Starting SSR server on port ${port}...`)
+
+  // Return the render callback so it can be exported for Vite SSR dev mode
+  return render
 }

@@ -116,9 +116,9 @@ function replacePages(code: string, property: NodeWithPos<Property>, defaultExte
  * Inject a default resolver into a call that doesn't have one.
  *
  * Handles three cases:
- * 1. Empty call:    `configureInertiaApp()`     → `configureInertiaApp({ resolve: ... })`
- * 2. Empty object:  `configureInertiaApp({})`   → `configureInertiaApp({ resolve: ... })`
- * 3. Other options: `configureInertiaApp({a})` → `configureInertiaApp({ resolve: ..., a})`
+ * 1. Empty call:    `createInertiaApp()`     → `createInertiaApp({ resolve: ... })`
+ * 2. Empty object:  `createInertiaApp({})`   → `createInertiaApp({ resolve: ... })`
+ * 3. Other options: `createInertiaApp({a})` → `createInertiaApp({ resolve: ..., a})`
  */
 function injectResolver(
   code: string,

@@ -6,10 +6,6 @@ const wrap = (code: string, options = {}) => wrapWithServerBootstrap(code, optio
 
 describe('SSR Transform', () => {
   describe('findInertiaAppExport', () => {
-    it('finds configureInertiaApp call', () => {
-      expect(findInertiaAppExport(`configureInertiaApp({ resolve: name => name })`)).toBe(true)
-    })
-
     it('finds createInertiaApp call', () => {
       expect(findInertiaAppExport(`createInertiaApp({ resolve: name => name })`)).toBe(true)
     })
@@ -23,21 +19,29 @@ describe('SSR Transform', () => {
     })
 
     it('returns false for export default', () => {
-      expect(findInertiaAppExport(`export default configureInertiaApp({})`)).toBe(false)
+      expect(findInertiaAppExport(`export default createInertiaApp({})`)).toBe(false)
+    })
+
+    it('finds createServer call (legacy pattern)', () => {
+      expect(findInertiaAppExport(`createServer((page) => createInertiaApp({ page }))`)).toBe(true)
+    })
+
+    it('returns false for export default createServer', () => {
+      expect(findInertiaAppExport(`export default createServer((page) => createInertiaApp({ page }))`)).toBe(false)
     })
   })
 
   describe('wrapWithServerBootstrap', () => {
     it('wraps with server bootstrap for Svelte', () => {
-      const code = `import { configureInertiaApp } from '@inertiajs/svelte'
-configureInertiaApp({ resolve: (name) => name })`
+      const code = `import { createInertiaApp } from '@inertiajs/svelte'
+createInertiaApp({ resolve: (name) => name })`
 
       expect(wrap(code)).toMatchInlineSnapshot(`
-        "import { configureInertiaApp } from '@inertiajs/svelte'
+        "import { createInertiaApp } from '@inertiajs/svelte'
         import createServer from '@inertiajs/svelte/server'
         import { render } from 'svelte/server'
 
-        const ssr = await configureInertiaApp({ resolve: (name) => name })
+        const ssr = await createInertiaApp({ resolve: (name) => name })
 
         const renderPage = (page) => ssr(page, render)
 
@@ -50,15 +54,15 @@ configureInertiaApp({ resolve: (name) => name })`
     })
 
     it('wraps with server bootstrap for Vue', () => {
-      const code = `import { configureInertiaApp } from '@inertiajs/vue3'
-configureInertiaApp({})`
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({})`
 
       expect(wrap(code)).toMatchInlineSnapshot(`
-        "import { configureInertiaApp } from '@inertiajs/vue3'
+        "import { createInertiaApp } from '@inertiajs/vue3'
         import createServer from '@inertiajs/vue3/server'
         import { renderToString } from 'vue/server-renderer'
 
-        const render = await configureInertiaApp({})
+        const render = await createInertiaApp({})
 
         const renderPage = (page) => render(page, renderToString)
 
@@ -71,15 +75,15 @@ configureInertiaApp({})`
     })
 
     it('wraps with server bootstrap for React', () => {
-      const code = `import { configureInertiaApp } from '@inertiajs/react'
-configureInertiaApp({})`
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+createInertiaApp({})`
 
       expect(wrap(code)).toMatchInlineSnapshot(`
-        "import { configureInertiaApp } from '@inertiajs/react'
+        "import { createInertiaApp } from '@inertiajs/react'
         import createServer from '@inertiajs/react/server'
         import { renderToString } from 'react-dom/server'
 
-        const render = await configureInertiaApp({})
+        const render = await createInertiaApp({})
 
         const renderPage = (page) => render(page, renderToString)
 
@@ -92,15 +96,15 @@ configureInertiaApp({})`
     })
 
     it('includes port and cluster config', () => {
-      const code = `import { configureInertiaApp } from '@inertiajs/svelte'
-configureInertiaApp({})`
+      const code = `import { createInertiaApp } from '@inertiajs/svelte'
+createInertiaApp({})`
 
       expect(wrap(code, { port: 13715, cluster: true })).toMatchInlineSnapshot(`
-        "import { configureInertiaApp } from '@inertiajs/svelte'
+        "import { createInertiaApp } from '@inertiajs/svelte'
         import createServer from '@inertiajs/svelte/server'
         import { render } from 'svelte/server'
 
-        const ssr = await configureInertiaApp({})
+        const ssr = await createInertiaApp({})
 
         const renderPage = (page) => ssr(page, render)
 
@@ -153,6 +157,51 @@ initializeTheme()`
 
         initializeTheme()"
       `)
+    })
+
+    it('adds export default to legacy createServer pattern', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+import createServer from '@inertiajs/vue3/server'
+import { createSSRApp, h } from 'vue'
+import { renderToString } from 'vue/server-renderer'
+
+createServer((page) =>
+  createInertiaApp({
+    page,
+    render: renderToString,
+    resolve: (name) => name,
+    setup({ App, props, plugin }) {
+      return createSSRApp({ render: () => h(App, props) }).use(plugin)
+    },
+  }),
+)`
+
+      expect(wrap(code)).toMatchInlineSnapshot(`
+        "import { createInertiaApp } from '@inertiajs/vue3'
+        import createServer from '@inertiajs/vue3/server'
+        import { createSSRApp, h } from 'vue'
+        import { renderToString } from 'vue/server-renderer'
+
+        export default createServer((page) =>
+          createInertiaApp({
+            page,
+            render: renderToString,
+            resolve: (name) => name,
+            setup({ App, props, plugin }) {
+              return createSSRApp({ render: () => h(App, props) }).use(plugin)
+            },
+          }),
+        )"
+      `)
+    })
+
+    it('does not transform createServer if already exported', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+import createServer from '@inertiajs/vue3/server'
+
+export default createServer((page) => createInertiaApp({ page }))`
+
+      expect(wrap(code)).toBeNull()
     })
   })
 })

@@ -30,7 +30,8 @@ import { ParsedCode } from './astUtils'
 import { type FrameworkConfig, type SSROptions, formatSSROptions } from './types'
 
 /**
- * Check if the code contains a top-level Inertia app configuration call.
+ * Check if the code contains a top-level Inertia app configuration call
+ * or a createServer call that needs transformation.
  *
  * This is used as a quick check before applying the full transform.
  * Returns true for code like:
@@ -39,7 +40,13 @@ import { type FrameworkConfig, type SSROptions, formatSSROptions } from './types
  * createInertiaApp({ ... })
  * ```
  *
- * But NOT for:
+ * Or for legacy createServer patterns:
+ *
+ * ```js
+ * createServer((page) => createInertiaApp({ ... }))
+ * ```
+ *
+ * But NOT for code that already has an export:
  *
  * ```js
  * export default createInertiaApp({ ... })
@@ -49,7 +56,8 @@ import { type FrameworkConfig, type SSROptions, formatSSROptions } from './types
  * to wrap it with server bootstrap code.
  */
 export function findInertiaAppExport(code: string): boolean {
-  return !!ParsedCode.from(code)?.inertiaStatement
+  const parsed = ParsedCode.from(code)
+  return !!(parsed?.inertiaStatement || parsed?.createServerStatement)
 }
 
 /**
@@ -66,6 +74,13 @@ export function findInertiaAppExport(code: string): boolean {
  * - In dev: `import.meta.hot` exists, so createServer is skipped (Vite handles HTTP)
  * - In production: `import.meta.hot` is undefined, so createServer runs
  *
+ * For backwards compatibility, it also handles the legacy createServer pattern:
+ * ```js
+ * createServer((page) => createInertiaApp({ ... }))
+ * ```
+ *
+ * By adding `export default` so Vite's SSR dev mode can access the render function.
+ *
  * @returns The transformed code, or null if no transformation was needed
  */
 export function wrapWithServerBootstrap(
@@ -75,26 +90,39 @@ export function wrapWithServerBootstrap(
 ): string | null {
   const parsed = ParsedCode.from(code)
 
-  // Must have a top-level Inertia call to transform
-  if (!parsed?.inertiaStatement) {
+  if (!parsed) {
     return null
   }
 
-  // Detect framework and ensure it has SSR support
-  const framework = parsed.detectFramework(frameworks)
+  // Handle the new pattern: bare createInertiaApp() call
+  if (parsed.inertiaStatement) {
+    // Detect framework and ensure it has SSR support
+    const framework = parsed.detectFramework(frameworks)
 
-  if (!framework?.config.ssr) {
-    return null
+    if (!framework?.config.ssr) {
+      return null
+    }
+
+    // Extract the original createInertiaApp(...) call as a string
+    const { statement, call } = parsed.inertiaStatement
+    const configureCall = code.slice(call.start, call.end)
+
+    // Apply the framework's SSR template to wrap the call
+    const ssrCode = framework.config.ssr(configureCall, formatSSROptions(options)).trim()
+
+    // Replace the original statement with the wrapped version
+    // This preserves any code before/after the Inertia call
+    return code.slice(0, statement.start) + ssrCode + code.slice(statement.end)
   }
 
-  // Extract the original createInertiaApp(...) call as a string
-  const { statement, call } = parsed.inertiaStatement
-  const configureCall = code.slice(call.start, call.end)
+  // Handle the legacy pattern: createServer((page) => createInertiaApp({ ... }))
+  // We just need to add `export default` so Vite can access the render function
+  if (parsed.createServerStatement) {
+    const statement = parsed.createServerStatement
 
-  // Apply the framework's SSR template to wrap the call
-  const ssrCode = framework.config.ssr(configureCall, formatSSROptions(options)).trim()
+    // Add `export default` before the createServer call
+    return code.slice(0, statement.start) + 'export default ' + code.slice(statement.start)
+  }
 
-  // Replace the original statement with the wrapped version
-  // This preserves any code before/after the Inertia call
-  return code.slice(0, statement.start) + ssrCode + code.slice(statement.end)
+  return null
 }

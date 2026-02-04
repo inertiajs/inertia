@@ -7,7 +7,7 @@
  *
  * The main class `ParsedCode` wraps a parsed AST and provides methods to:
  * - Detect which Inertia framework adapter is being used (Vue, React, Svelte)
- * - Find `configureInertiaApp()` or `createInertiaApp()` calls
+ * - Find `createInertiaApp()` or `createInertiaApp()` calls
  * - Extract the `pages` property for transformation
  * - Find calls that need a default resolver injected
  */
@@ -24,10 +24,16 @@ import type { FrameworkConfig } from './types'
 export type NodeWithPos<T> = T & { start: number; end: number }
 
 /**
- * The function names that indicate an Inertia app configuration.
- * We look for calls to these functions to determine where to apply transforms.
+ * The function name that indicates an Inertia app configuration.
+ * We look for calls to this function to determine where to apply transforms.
  */
-const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
+const INERTIA_APP_FUNCTION = 'createInertiaApp'
+
+/**
+ * The function name for the legacy SSR server pattern.
+ * We need to detect `createServer(...)` calls to add export default for backwards compatibility.
+ */
+const CREATE_SERVER_FUNCTION = 'createServer'
 
 /**
  * Represents a standalone Inertia call at the module level.
@@ -35,7 +41,7 @@ const INERTIA_APP_FUNCTIONS = ['configureInertiaApp', 'createInertiaApp']
  *
  * Example of what this matches:
  * ```js
- * configureInertiaApp({ resolve: name => name })  // ← This entire statement
+ * createInertiaApp({ resolve: name => name })  // ← This entire statement
  * ```
  */
 export interface InertiaStatement {
@@ -120,17 +126,17 @@ export class ParsedCode {
    *
    * This is used for SSR transform, which needs to wrap code like:
    * ```js
-   * configureInertiaApp({ ... })
+   * createInertiaApp({ ... })
    * ```
    *
    * Into:
    * ```js
-   * const render = await configureInertiaApp({ ... })
+   * const render = await createInertiaApp({ ... })
    * createServer((page) => render(page, renderToString))
    * ```
    *
    * Note: This specifically looks for ExpressionStatements, NOT export defaults.
-   * The SSR entry file should have a bare call, not `export default configureInertiaApp()`.
+   * The SSR entry file should have a bare call, not `export default createInertiaApp()`.
    */
   get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
@@ -141,7 +147,7 @@ export class ParsedCode {
       const statement = node as NodeWithPos<ExpressionStatement>
       let expr = statement.expression as { type: string; argument?: unknown; start: number; end: number }
 
-      // Handle `await configureInertiaApp()` - unwrap the await to get the call
+      // Handle `await createInertiaApp()` - unwrap the await to get the call
       if (expr.type === 'AwaitExpression') {
         expr = expr.argument as typeof expr
       }
@@ -151,6 +157,42 @@ export class ParsedCode {
 
         if (this.isInertiaCall(call)) {
           return { statement, call }
+        }
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Find a top-level createServer() call statement that doesn't have an export.
+   *
+   * This is used for backwards compatibility with the legacy SSR pattern:
+   * ```js
+   * createServer((page) => createInertiaApp({ page, render, ... }))
+   * ```
+   *
+   * We need to transform this to:
+   * ```js
+   * export default createServer((page) => createInertiaApp({ page, render, ... }))
+   * ```
+   *
+   * So that Vite's SSR dev mode can access the render function.
+   */
+  get createServerStatement(): NodeWithPos<ExpressionStatement> | null {
+    for (const node of this.ast.body) {
+      if (node.type !== 'ExpressionStatement') {
+        continue
+      }
+
+      const statement = node as NodeWithPos<ExpressionStatement>
+      const expr = statement.expression
+
+      if (expr.type === 'CallExpression') {
+        const call = expr as SimpleCallExpression
+
+        if (call.callee.type === 'Identifier' && (call.callee as Identifier).name === CREATE_SERVER_FUNCTION) {
+          return statement
         }
       }
     }
@@ -223,9 +265,9 @@ export class ParsedCode {
    *
    * This is used to inject a default resolver for calls like:
    * ```js
-   * configureInertiaApp()                    // Empty call
-   * configureInertiaApp({})                  // Empty options
-   * configureInertiaApp({ title: t => t })   // Options but no resolver
+   * createInertiaApp()                    // Empty call
+   * createInertiaApp({})                  // Empty options
+   * createInertiaApp({ title: t => t })   // Options but no resolver
    * ```
    *
    * Returns position info needed to inject the resolver:
@@ -241,7 +283,7 @@ export class ParsedCode {
         continue
       }
 
-      // Empty call: configureInertiaApp()
+      // Empty call: createInertiaApp()
       if (call.arguments.length === 0) {
         return { callEnd: callWithPos.end }
       }
@@ -276,7 +318,7 @@ export class ParsedCode {
    * Check if a call expression is an Inertia app configuration call.
    */
   private isInertiaCall(node: CallExpression | SimpleCallExpression): boolean {
-    return node.callee.type === 'Identifier' && INERTIA_APP_FUNCTIONS.includes((node.callee as Identifier).name)
+    return node.callee.type === 'Identifier' && (node.callee as Identifier).name === INERTIA_APP_FUNCTION
   }
 
   /**

@@ -93,8 +93,8 @@ describe('pages property transform', () => {
   describe('default resolver injection', () => {
     it('injects default resolver for empty call', () => {
       const result = transform(`
-        import { configureInertiaApp } from '@inertiajs/vue3'
-        export default configureInertiaApp()
+        import { createInertiaApp } from '@inertiajs/vue3'
+        export default createInertiaApp()
       `)
 
       expect(result).toContain('resolve: async (name, page)')
@@ -104,8 +104,8 @@ describe('pages property transform', () => {
 
     it('injects default resolver for empty object', () => {
       const result = transform(`
-        import { configureInertiaApp } from '@inertiajs/vue3'
-        export default configureInertiaApp({})
+        import { createInertiaApp } from '@inertiajs/vue3'
+        export default createInertiaApp({})
       `)
 
       expect(result).toContain('resolve: async (name, page)')
