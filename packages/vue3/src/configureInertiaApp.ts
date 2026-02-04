@@ -8,24 +8,26 @@ import {
   type Page,
   type PageProps,
 } from '@inertiajs/core'
-import { createSSRApp, DefineComponent, h, App as VueApp } from 'vue'
-import App, { plugin } from './app'
+import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
+import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
 
 type RenderToString = (app: VueApp) => Promise<string>
 
-type ComponentResolver = (name: string) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
+type ComponentResolver = (name: string, page?: Page) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
 type SetupOptions<SharedProps extends PageProps> = {
-  app: VueApp
-  props: SharedProps
+  el: HTMLElement | null
+  App: InertiaApp
+  props: InertiaAppProps<SharedProps>
+  plugin: Plugin
 }
 
 export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = ConfigureInertiaAppOptionsBase<
   ComponentResolver,
   SetupOptions<SharedProps>,
-  void,
+  VueApp | void,
   VueInertiaAppConfig
 >
 
@@ -63,14 +65,25 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
     resolveComponent,
   )
 
-  const vueApp = createVueApp(page, component, resolveComponent, title)
-  vueApp.use(plugin)
-
-  if (setup) {
-    setup({ app: vueApp, props: page.props as SharedProps })
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage: page,
+    initialComponent: component,
+    resolveComponent,
+    titleCallback: title,
   }
 
-  vueApp.mount(`#${id}`)
+  if (setup) {
+    setup({
+      el: document.getElementById(id)!,
+      App,
+      props,
+      plugin,
+    })
+  } else {
+    const vueApp = createVueApp(props)
+    vueApp.use(plugin)
+    vueApp.mount(`#${id}`)
+  }
 
   if (progress) {
     setupProgress(progress)
@@ -79,21 +92,36 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
 
 function createSSRRenderer<SharedProps extends PageProps>(
   id: string,
-  resolveComponent: (name: string) => Promise<DefineComponent>,
-  setup: ((options: SetupOptions<SharedProps>) => void) | undefined,
+  resolveComponent: (name: string, page?: Page) => Promise<DefineComponent>,
+  setup: ((options: SetupOptions<SharedProps>) => VueApp | void) | undefined,
   title: ((title: string) => string) | undefined,
   useScriptElement: boolean,
 ): InertiaSSRRenderFunction<SharedProps> {
   return async (page: Page<SharedProps>, renderToString: RenderToString): Promise<InertiaAppSSRResponse> => {
     let head: string[] = []
 
-    const component = await resolveComponent(page.component)
-    const vueApp = createVueApp(page, component, resolveComponent, title, (elements) => (head = elements))
+    const component = await resolveComponent(page.component, page)
 
-    vueApp.use(plugin)
+    const props: InertiaAppProps<SharedProps> = {
+      initialPage: page,
+      initialComponent: component,
+      resolveComponent,
+      titleCallback: title,
+      onHeadUpdate: (elements) => (head = elements),
+    }
+
+    let vueApp: VueApp
 
     if (setup) {
-      setup({ app: vueApp, props: page.props as SharedProps })
+      vueApp = setup({
+        el: null,
+        App,
+        props,
+        plugin,
+      }) as VueApp
+    } else {
+      vueApp = createVueApp(props)
+      vueApp.use(plugin)
     }
 
     const html = await renderToString(vueApp)
@@ -103,21 +131,8 @@ function createSSRRenderer<SharedProps extends PageProps>(
   }
 }
 
-function createVueApp<SharedProps extends PageProps>(
-  page: Page<SharedProps>,
-  component: DefineComponent,
-  resolveComponent: (name: string) => Promise<DefineComponent>,
-  title?: (title: string) => string,
-  onHeadUpdate?: (elements: string[]) => void,
-): VueApp {
+function createVueApp<SharedProps extends PageProps>(props: InertiaAppProps<SharedProps>): VueApp {
   return createSSRApp({
-    render: () =>
-      h(App, {
-        initialPage: page,
-        initialComponent: component,
-        resolveComponent,
-        titleCallback: title,
-        onHeadUpdate,
-      }),
+    render: () => h(App, props),
   })
 }

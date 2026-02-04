@@ -10,17 +10,18 @@ import {
 } from '@inertiajs/core'
 import { createElement, ReactElement } from 'react'
 import { hydrateRoot } from 'react-dom/client'
-import App from './App'
+import App, { InertiaApp, InertiaAppProps } from './App'
 import { config } from './index'
 import { ReactComponent, ReactInertiaAppConfig } from './types'
 
 type RenderToString = (element: ReactElement) => string
 
-type ComponentResolver = (name: string) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
+type ComponentResolver = (name: string, page?: Page) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
 
 type SetupOptions<SharedProps extends PageProps> = {
-  el: ReactElement
-  props: SharedProps
+  el: HTMLElement | null
+  App: InertiaApp
+  props: InertiaAppProps<SharedProps>
 }
 
 export type ConfigureInertiaAppOptions<SharedProps extends PageProps> = ConfigureInertiaAppOptionsBase<
@@ -60,10 +61,26 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
 
   const { page, component } = await loadInitialPage<SharedProps, ReactComponent>(id, useScriptElement, resolveComponent)
 
-  const appElement = createAppElement(page, component, resolveComponent, title)
-  const finalElement = setup ? (setup({ el: appElement, props: page.props as SharedProps }) ?? appElement) : appElement
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage: page,
+    initialComponent: component,
+    resolveComponent,
+    titleCallback: title,
+  }
 
-  hydrateRoot(document.getElementById(id)!, finalElement)
+  if (setup) {
+    const element = setup({
+      el: document.getElementById(id)!,
+      App,
+      props,
+    })
+
+    if (element) {
+      hydrateRoot(document.getElementById(id)!, element)
+    }
+  } else {
+    hydrateRoot(document.getElementById(id)!, createAppElement(props))
+  }
 
   if (progress) {
     setupProgress(progress)
@@ -72,7 +89,7 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
 
 function createSSRRenderer<SharedProps extends PageProps>(
   id: string,
-  resolveComponent: (name: string) => Promise<ReactComponent>,
+  resolveComponent: (name: string, page?: Page) => Promise<ReactComponent>,
   setup: ((options: SetupOptions<SharedProps>) => ReactElement | void) | undefined,
   title: ((title: string) => string) | undefined,
   useScriptElement: boolean,
@@ -80,31 +97,27 @@ function createSSRRenderer<SharedProps extends PageProps>(
   return async (page: Page<SharedProps>, renderToString: RenderToString): Promise<InertiaAppSSRResponse> => {
     let head: string[] = []
 
-    const component = await resolveComponent(page.component)
-    const appElement = createAppElement(page, component, resolveComponent, title, (elements) => (head = elements))
-    const finalElement = setup
-      ? (setup({ el: appElement, props: page.props as SharedProps }) ?? appElement)
-      : appElement
+    const component = await resolveComponent(page.component, page)
 
-    const html = renderToString(finalElement)
+    const props: InertiaAppProps<SharedProps> = {
+      initialPage: page,
+      initialComponent: component,
+      resolveComponent,
+      titleCallback: title,
+      onHeadUpdate: (elements) => (head = elements),
+    }
+
+    const element = setup
+      ? (setup({ el: null, App, props }) ?? createAppElement(props))
+      : createAppElement(props)
+
+    const html = renderToString(element)
     const body = buildSSRBody(id, page, html, useScriptElement)
 
     return { head, body }
   }
 }
 
-function createAppElement<SharedProps extends PageProps>(
-  page: Page<SharedProps>,
-  component: ReactComponent,
-  resolveComponent: (name: string) => Promise<ReactComponent>,
-  title?: (title: string) => string,
-  onHeadUpdate?: (elements: string[]) => void,
-): ReactElement {
-  return createElement(App, {
-    initialPage: page,
-    initialComponent: component,
-    resolveComponent,
-    titleCallback: title,
-    onHeadUpdate,
-  })
+function createAppElement<SharedProps extends PageProps>(props: InertiaAppProps<SharedProps>): ReactElement {
+  return createElement(App, props)
 }

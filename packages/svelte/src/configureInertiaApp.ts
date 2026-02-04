@@ -8,7 +8,7 @@ import {
   type PageProps,
 } from '@inertiajs/core'
 import { hydrate, mount } from 'svelte'
-import App from './components/App.svelte'
+import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
 import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
 
@@ -19,9 +19,15 @@ type SvelteServerRender = <T>(
   options: { props?: Record<string, unknown> },
 ) => SvelteRenderResult
 
-export type ConfigureInertiaAppOptions = Omit<
-  ConfigureInertiaAppOptionsBase<ComponentResolver, never, never, SvelteInertiaAppConfig>,
-  'setup' | 'title'
+type SetupOptions<SharedProps extends PageProps> = {
+  el: HTMLElement | null
+  App: typeof App
+  props: InertiaAppProps<SharedProps>
+}
+
+export type ConfigureInertiaAppOptions<SharedProps extends PageProps = PageProps> = Omit<
+  ConfigureInertiaAppOptionsBase<ComponentResolver, SetupOptions<SharedProps>, SvelteRenderResult | void, SvelteInertiaAppConfig>,
+  'title'
 >
 
 export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> = (
@@ -32,9 +38,10 @@ export type InertiaSSRRenderFunction<SharedProps extends PageProps = PageProps> 
 export default async function configureInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
   resolve,
+  setup,
   progress = {},
   defaults = {},
-}: ConfigureInertiaAppOptions = {}): Promise<InertiaSSRRenderFunction<SharedProps> | void> {
+}: ConfigureInertiaAppOptions<SharedProps> = {}): Promise<InertiaSSRRenderFunction<SharedProps> | void> {
   config.replace(defaults)
 
   if (!resolve) {
@@ -43,19 +50,25 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
     )
   }
 
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name))
+  const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve(name, page))
   const useScriptElement = config.get('future.useScriptElementForInitialPage')
 
   if (typeof window === 'undefined') {
-    return createSSRRenderer(id, resolveComponent, useScriptElement)
+    return createSSRRenderer(id, resolveComponent, setup, useScriptElement)
   }
 
-  const { page, component } = await loadInitialPage(id, useScriptElement, resolveComponent)
+  const { page, component } = await loadInitialPage<SharedProps, ResolvedComponent>(id, useScriptElement, resolveComponent)
 
   const target = document.getElementById(id)!
-  const props = { initialPage: page, initialComponent: component, resolveComponent }
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage: page,
+    initialComponent: component,
+    resolveComponent,
+  }
 
-  if (target.hasAttribute('data-server-rendered')) {
+  if (setup) {
+    setup({ el: target, App, props })
+  } else if (target.hasAttribute('data-server-rendered')) {
     hydrate(App, { target, props })
   } else {
     mount(App, { target, props })
@@ -69,18 +82,37 @@ export default async function configureInertiaApp<SharedProps extends PageProps 
 function createSSRRenderer<SharedProps extends PageProps>(
   id: string,
   resolveComponent: ComponentResolver,
+  setup: ((options: SetupOptions<SharedProps>) => SvelteRenderResult | void) | undefined,
   useScriptElement: boolean,
 ): InertiaSSRRenderFunction<SharedProps> {
   return async (page: Page<SharedProps>, render: SvelteServerRender): Promise<InertiaAppSSRResponse> => {
-    const component = (await Promise.resolve(resolveComponent(page.component))) as ResolvedComponent
+    const component = (await Promise.resolve(resolveComponent(page.component, page))) as ResolvedComponent
 
-    const { body: html, head } = render(App, {
-      props: {
-        initialPage: page,
-        initialComponent: component,
-        resolveComponent,
-      },
-    })
+    const props: InertiaAppProps<SharedProps> = {
+      initialPage: page,
+      initialComponent: component,
+      resolveComponent,
+    }
+
+    let html: string
+    let head: string
+
+    if (setup) {
+      const result = setup({ el: null, App, props })
+
+      if (result) {
+        html = result.body
+        head = result.head
+      } else {
+        const rendered = render(App, { props: props as unknown as Record<string, unknown> })
+        html = rendered.body
+        head = rendered.head
+      }
+    } else {
+      const rendered = render(App, { props: props as unknown as Record<string, unknown> })
+      html = rendered.body
+      head = rendered.head
+    }
 
     const body = buildSSRBody(id, page, html, useScriptElement)
 
