@@ -94,7 +94,11 @@ export class AxiosHttpClient implements HttpClient {
           headers: normalizeHeaders(axiosError.response.headers),
         }
 
-        throw new HttpResponseError(`Request failed with status ${axiosError.response.status}`, httpResponse, config.url)
+        throw new HttpResponseError(
+          `Request failed with status ${axiosError.response.status}`,
+          httpResponse,
+          config.url,
+        )
       }
 
       throw new HttpNetworkError(
