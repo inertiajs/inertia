@@ -1,5 +1,5 @@
 import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
-import { getHttpClient } from './http'
+import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
@@ -46,7 +46,8 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
-    return getHttpClient()
+    return http
+      .getClient()
       .request({
         method: this.requestParams.all().method,
         url: urlWithoutHash(this.requestParams.all().url).href,

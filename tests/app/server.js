@@ -2697,6 +2697,12 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
+app.get('/http-handlers', (req, res) => inertia.render(req, res, { component: 'HttpHandlers', props: {} }))
+
+app.get('/http-handlers/error', (req, res) => {
+  res.status(500).send('Internal Server Error')
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

@@ -1,5 +1,6 @@
 import type { AxiosInstance, AxiosProgressEvent } from 'axios'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
+import { httpHandlers } from './httpHandlers'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
 
 /**
@@ -59,6 +60,26 @@ export class AxiosHttpClient implements HttpClient {
   }
 
   async request(config: HttpRequestConfig): Promise<HttpResponse> {
+    const processedConfig = await httpHandlers.processRequest(config)
+
+    try {
+      const response = await this.doRequest(processedConfig)
+
+      return await httpHandlers.processResponse(response)
+    } catch (error) {
+      if (
+        error instanceof HttpResponseError ||
+        error instanceof HttpNetworkError ||
+        error instanceof HttpCancelledError
+      ) {
+        await httpHandlers.processError(error)
+      }
+
+      throw error
+    }
+  }
+
+  protected async doRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     const axios = await this.getAxios()
 
     try {
@@ -94,7 +115,11 @@ export class AxiosHttpClient implements HttpClient {
           headers: normalizeHeaders(axiosError.response.headers),
         }
 
-        throw new HttpResponseError(`Request failed with status ${axiosError.response.status}`, httpResponse, config.url)
+        throw new HttpResponseError(
+          `Request failed with status ${axiosError.response.status}`,
+          httpResponse,
+          config.url,
+        )
       }
 
       throw new HttpNetworkError(

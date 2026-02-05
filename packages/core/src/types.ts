@@ -1,4 +1,5 @@
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import type { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { Response } from './response'
 
 export type HttpRequestHeaders = Record<string, unknown>
@@ -35,6 +36,14 @@ export interface HttpClientOptions {
   xsrfCookieName?: string
   xsrfHeaderName?: string
 }
+
+export type HttpRequestHandler = (config: HttpRequestConfig) => HttpRequestConfig | Promise<HttpRequestConfig>
+
+export type HttpResponseHandler = (response: HttpResponse) => HttpResponse | Promise<HttpResponse>
+
+export type HttpErrorHandler = (
+  error: HttpResponseError | HttpNetworkError | HttpCancelledError,
+) => void | Promise<void>
 
 export interface PageFlashData {
   [key: string]: unknown

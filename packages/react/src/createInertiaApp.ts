@@ -2,12 +2,12 @@ import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
   getInitialPageFromDOM,
+  http as httpModule,
   InertiaAppResponse,
   InertiaAppSSRResponse,
   Page,
   PageProps,
   router,
-  setHttpClient,
   setupProgress,
 } from '@inertiajs/core'
 import { createElement, Fragment, ReactElement } from 'react'
@@ -66,7 +66,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   config.replace(defaults)
 
   if (http) {
-    setHttpClient(http)
+    httpModule.setClient(http)
   }
 
   const isServer = typeof window === 'undefined'
