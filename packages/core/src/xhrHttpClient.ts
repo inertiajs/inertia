@@ -1,4 +1,5 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
+import { httpHandlers } from './httpHandlers'
 import { HttpClient, HttpClientOptions, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
 
 function getCookie(name: string): string | null {
@@ -50,7 +51,27 @@ export class XhrHttpClient implements HttpClient {
     this.xsrfHeaderName = options.xsrfHeaderName ?? 'X-XSRF-TOKEN'
   }
 
-  public request(config: HttpRequestConfig): Promise<HttpResponse> {
+  public async request(config: HttpRequestConfig): Promise<HttpResponse> {
+    const processedConfig = await httpHandlers.processRequest(config)
+
+    try {
+      const response = await this.doRequest(processedConfig)
+
+      return await httpHandlers.processResponse(response)
+    } catch (error) {
+      if (
+        error instanceof HttpResponseError ||
+        error instanceof HttpNetworkError ||
+        error instanceof HttpCancelledError
+      ) {
+        await httpHandlers.processError(error)
+      }
+
+      throw error
+    }
+  }
+
+  protected doRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
 
