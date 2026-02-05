@@ -1,4 +1,4 @@
-import { cloneDeep, get, set } from 'lodash-es'
+import { cloneDeep, get, isEqual, set } from 'lodash-es'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
@@ -234,21 +234,28 @@ export class Router {
       this.syncRequestStream.interruptInFlight()
     }
 
-    let propsSnapshot: Page['props'] | null = null
+    let propsSnapshot: Partial<Page['props']> | null = null
 
     if (options.optimistic) {
-      propsSnapshot = cloneDeep(currentPage.get().props)
-
-      const optimisticProps = options.optimistic(currentPage.get().props)
+      const currentProps = currentPage.get().props
+      const optimisticProps = options.optimistic(currentProps)
 
       if (optimisticProps) {
-        currentPage.setPropsQuietly({ ...currentPage.get().props, ...optimisticProps })
+        propsSnapshot = {}
+
+        for (const key of Object.keys(optimisticProps)) {
+          if (!isEqual(currentProps[key], optimisticProps[key])) {
+            propsSnapshot[key] = cloneDeep(currentProps[key])
+          }
+        }
+
+        currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
       }
     }
 
     const restoreOptimisticSnapshot = () => {
-      if (propsSnapshot) {
-        currentPage.setPropsQuietly(propsSnapshot)
+      if (propsSnapshot && Object.keys(propsSnapshot).length > 0) {
+        currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
       }
     }
 

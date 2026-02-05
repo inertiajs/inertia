@@ -2732,6 +2732,7 @@ app.post('/optimistic/todos', (req, res) => {
         props: {
           todos: [...optimisticTodos],
           errors: { name: !name ? 'The name field is required.' : 'The name must be at least 3 characters.' },
+          serverTimestamp: Date.now(),
         },
       })
     }

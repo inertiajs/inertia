@@ -7,17 +7,23 @@ interface Todo {
   done: boolean
 }
 
-export default ({ todos }: { todos: Todo[] }) => {
+export default ({
+  todos,
+  errors,
+  serverTimestamp,
+}: {
+  todos: Todo[]
+  errors?: Record<string, string>
+  serverTimestamp?: number
+}) => {
   const [newTodoName, setNewTodoName] = useState('')
   const [errorCount, setErrorCount] = useState(0)
   const [successCount, setSuccessCount] = useState(0)
-  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const addTodo = () => {
     const name = newTodoName.trim()
     const optimisticName = name || '(empty todo...)'
     setNewTodoName('')
-    setErrors({})
 
     router.post(
       '/optimistic/todos',
@@ -31,10 +37,9 @@ export default ({ todos }: { todos: Todo[] }) => {
           setSuccessCount((c) => c + 1)
           setNewTodoName('')
         },
-        onError: (err) => {
+        onError: () => {
           setErrorCount((c) => c + 1)
           setNewTodoName(name)
-          setErrors(err as Record<string, string>)
           document.getElementById('new-todo')?.focus()
         },
       },
@@ -111,6 +116,7 @@ export default ({ todos }: { todos: Todo[] }) => {
       <div className="counters">
         <div id="success-count">Success: {successCount}</div>
         <div id="error-count">Error: {errorCount}</div>
+        {serverTimestamp && <div id="server-timestamp">Server timestamp: {serverTimestamp}</div>}
       </div>
     </div>
   )

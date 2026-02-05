@@ -10,18 +10,18 @@ interface Todo {
 
 defineProps<{
   todos: Todo[]
+  errors?: Record<string, string>
+  serverTimestamp?: number
 }>()
 
 const newTodoName = ref('')
 const errorCount = ref(0)
 const successCount = ref(0)
-const errors = ref({})
 
 const addTodo = () => {
   const name = newTodoName.value.trim()
   const optimisticName = name || '(empty todo...)'
   newTodoName.value = ''
-  errors.value = {}
 
   router.post(
     '/optimistic/todos',
@@ -35,10 +35,9 @@ const addTodo = () => {
         successCount.value++
         newTodoName.value = ''
       },
-      onError: (err) => {
+      onError: () => {
         errorCount.value++
         newTodoName.value = name
-        errors.value = err
         document.getElementById('new-todo')?.focus()
       },
     },
@@ -107,6 +106,7 @@ const clearTodos = () => {
     <div class="counters">
       <div id="success-count">Success: {{ successCount }}</div>
       <div id="error-count">Error: {{ errorCount }}</div>
+      <div v-if="serverTimestamp" id="server-timestamp">Server timestamp: {{ serverTimestamp }}</div>
     </div>
   </div>
 </template>

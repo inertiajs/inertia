@@ -2,17 +2,17 @@
   import { router } from '@inertiajs/svelte'
 
   export let todos
+  export let errors = {}
+  export let serverTimestamp = null
 
   let newTodoName = ''
   let errorCount = 0
   let successCount = 0
-  let errors = {}
 
   const addTodo = () => {
     const name = newTodoName.trim()
     const optimisticName = name || '(empty todo...)'
     newTodoName = ''
-    errors = {}
 
     router.post(
       '/optimistic/todos',
@@ -26,10 +26,9 @@
           successCount++
           newTodoName = ''
         },
-        onError: (err) => {
+        onError: () => {
           errorCount++
           newTodoName = name
-          errors = err
           document.getElementById('new-todo')?.focus()
         },
       },
@@ -107,5 +106,8 @@
   <div class="counters">
     <div id="success-count">Success: {successCount}</div>
     <div id="error-count">Error: {errorCount}</div>
+    {#if serverTimestamp}
+      <div id="server-timestamp">Server timestamp: {serverTimestamp}</div>
+    {/if}
   </div>
 </div>
