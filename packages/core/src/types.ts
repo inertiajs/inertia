@@ -681,6 +681,11 @@ export type UseFormSubmitArguments =
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
 
+export type UseHttpSubmitArguments<TResponse = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
+  | [UseHttpSubmitOptions<TResponse>?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
@@ -827,6 +832,21 @@ export interface InfiniteScrollComponentBaseProps {
   autoScroll?: boolean
   onlyNext?: boolean
   onlyPrevious?: boolean
+}
+
+export type UseHttpOptions<TResponse = unknown> = {
+  onBefore?: () => boolean | void
+  onStart?: () => void
+  onProgress?: (progress: HttpProgressEvent) => void
+  onSuccess?: (response: TResponse) => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onCancelToken?: (cancelToken: CancelToken) => void
+}
+
+export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+  headers?: HttpRequestHeaders
 }
 
 declare global {
