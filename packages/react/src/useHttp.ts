@@ -7,8 +7,8 @@ import {
   FormDataKeys,
   FormDataType,
   FormDataValues,
-  getHttpClient,
   hasFiles,
+  http,
   HttpCancelledError,
   HttpProgressEvent,
   HttpResponseError,
@@ -206,10 +206,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         }
       }
 
-      const httpClient = getHttpClient()
-
       try {
-        const httpResponse = await httpClient.request({
+        const httpResponse = await http.getClient().request({
           method,
           url: requestUrl,
           data: requestData,

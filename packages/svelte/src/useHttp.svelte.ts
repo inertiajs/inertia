@@ -18,8 +18,8 @@ import type {
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
 import {
-  getHttpClient,
   hasFiles,
+  http,
   HttpCancelledError,
   HttpResponseError,
   mergeDataIntoQueryString,
@@ -181,10 +181,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       }
     }
 
-    const httpClient = getHttpClient()
-
     try {
-      const response = await httpClient.request({
+      const response = await http.getClient().request({
         method,
         url: requestUrl,
         data: requestData,
