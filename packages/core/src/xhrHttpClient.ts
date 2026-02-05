@@ -1,6 +1,13 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
-import { FormDataConvertible, HttpClient, HttpClientOptions, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
+import {
+  FormDataConvertible,
+  HttpClient,
+  HttpClientOptions,
+  HttpRequestConfig,
+  HttpResponse,
+  HttpResponseHeaders,
+} from './types'
 import { mergeDataIntoQueryString } from './url'
 
 function getCookie(name: string): string | null {
