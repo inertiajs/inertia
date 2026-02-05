@@ -7,8 +7,8 @@ import {
   FormDataKeys,
   FormDataType,
   FormDataValues,
-  getHttpClient,
   hasFiles,
+  http,
   HttpCancelledError,
   HttpProgressEvent,
   HttpResponseError,
@@ -21,6 +21,7 @@ import {
   UseFormTransformCallback,
   UseFormUtils,
   UseFormWithPrecognitionArguments,
+  UseHttpSubmitArguments,
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
@@ -57,6 +58,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
     <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
     (errors: FormDataErrors<TForm>): void
   }
+  submit: (...args: UseHttpSubmitArguments<TResponse>) => Promise<TResponse>
   get: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
   post: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
   put: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
@@ -213,10 +215,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         }
       }
 
-      const httpClient = getHttpClient()
-
       try {
-        const httpResponse = await httpClient.request({
+        const httpResponse = await http.getClient().request({
           method,
           url: requestUrl,
           data: requestData,
@@ -284,7 +284,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
         if (error instanceof HttpCancelledError || (error instanceof Error && error.name === 'AbortError')) {
           options.onCancel?.()
-          throw error instanceof HttpCancelledError ? error : new HttpCancelledError()
+          throw new HttpCancelledError('Request was cancelled', url)
         }
 
         throw error
@@ -312,9 +312,19 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       return submit(method, url, options)
     }
 
+  const submitWithArgs = useCallback(
+    (...args: UseHttpSubmitArguments<TResponse>): Promise<TResponse> => {
+      const parsed = UseFormUtils.parseSubmitArguments(args as any, precognitionEndpointRef.current)
+
+      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TResponse>)
+    },
+    [submit],
+  )
+
   // Add useHttp-specific methods to the form object (mutate in place like Svelte)
   Object.assign(baseForm, {
     response,
+    submit: submitWithArgs,
     get: createSubmitMethod('get'),
     post: createSubmitMethod('post'),
     put: createSubmitMethod('put'),

@@ -18,7 +18,7 @@ import {
   UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
-import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep } from 'lodash-es'
 import { useCallback, useRef, useState } from 'react'
 import { useIsomorphicLayoutEffect } from './react'
@@ -75,7 +75,7 @@ export interface InertiaFormValidationProps<TForm extends object> {
   ) => InertiaPrecognitiveFormProps<TForm>
   touched: <K extends FormDataKeys<TForm>>(field?: K) => boolean
   valid: <K extends FormDataKeys<TForm>>(field: K) => boolean
-  validate: <K extends FormDataKeys<TForm>>(
+  validate: <K extends FormDataKeys<TForm> | PrecognitionPath<TForm>>(
     field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
     config?: PrecognitionValidationConfig<K>,
   ) => InertiaPrecognitiveFormProps<TForm>
@@ -137,6 +137,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setProcessing,
     setProgress,
     markAsSuccessful,
+    clearErrors,
     setError,
     defaultsCalledInOnSuccessRef,
     resetBeforeSubmit,
@@ -224,6 +225,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
         onError: (errors) => {
           if (isMounted.current) {
+            clearErrors()
             setError(errors as FormDataErrors<TForm>)
           }
 
@@ -251,7 +253,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         router[method](url, transformedData, _options)
       }
     },
-    [baseForm.data, setError, transformRef],
+    [baseForm.data, clearErrors, setError, transformRef],
   )
 
   const cancel = useCallback(() => {

@@ -14,11 +14,12 @@ import type {
   UseFormArguments,
   UseFormTransformCallback,
   UseFormWithPrecognitionArguments,
+  UseHttpSubmitArguments,
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
 import {
-  getHttpClient,
   hasFiles,
+  http,
   HttpCancelledError,
   HttpResponseError,
   mergeDataIntoQueryString,
@@ -50,6 +51,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
+  submit(...args: UseHttpSubmitArguments<TResponse>): Promise<TResponse>
   get(url: string, options?: UseHttpSubmitOptions<TForm, TResponse>): Promise<TResponse>
   post(url: string, options?: UseHttpSubmitOptions<TForm, TResponse>): Promise<TResponse>
   put(url: string, options?: UseHttpSubmitOptions<TForm, TResponse>): Promise<TResponse>
@@ -194,10 +196,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       }
     }
 
-    const httpClient = getHttpClient()
-
     try {
-      const response = await httpClient.request({
+      const response = await http.getClient().request({
         method,
         url: requestUrl,
         data: requestData,
@@ -230,7 +230,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         return responseData
       }
 
-      throw new HttpResponseError(`Request failed with status ${response.status}`, response)
+      throw new HttpResponseError(`Request failed with status ${response.status}`, response, url)
     } catch (error: unknown) {
       if (snapshot) {
         Object.keys(snapshot).forEach((key) => {
@@ -257,7 +257,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
       if (error instanceof HttpCancelledError || (error instanceof Error && error.name === 'AbortError')) {
         options.onCancel?.()
-        throw error instanceof HttpCancelledError ? error : new HttpCancelledError()
+        throw new HttpCancelledError('Request was cancelled', url)
       }
 
       throw error
@@ -280,6 +280,12 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
   // Add useHttp-specific methods to the form object
   Object.assign(baseForm, {
+    submit(...args: UseHttpSubmitArguments<TResponse>) {
+      const parsed = UseFormUtils.parseSubmitArguments(args as any, getPrecognitionEndpoint())
+
+      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TResponse>)
+    },
+
     get: createSubmitMethod('get'),
     post: createSubmitMethod('post'),
     put: createSubmitMethod('put'),

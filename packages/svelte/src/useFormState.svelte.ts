@@ -367,14 +367,16 @@ export default function useFormState<TForm extends object>(
   }
 
   $effect(() => {
-    if (form.isDirty === isEqual(form.data(), defaults)) {
-      setFormStateInternal('isDirty', !form.isDirty)
+    const newIsDirty = !isEqual(form.data(), defaults)
+
+    if (form.isDirty !== newIsDirty) {
+      setFormStateInternal('isDirty', newIsDirty)
     }
 
     const hasErrors = Object.keys(form.errors).length > 0
 
     if (form.hasErrors !== hasErrors) {
-      setFormStateInternal('hasErrors', !form.hasErrors)
+      setFormStateInternal('hasErrors', hasErrors)
     }
   })
 

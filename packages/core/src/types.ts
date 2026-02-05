@@ -1,4 +1,5 @@
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import type { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { Response } from './response'
 
 export type HttpRequestHeaders = Record<string, unknown>
@@ -16,7 +17,6 @@ export interface HttpRequestConfig {
   method: Method
   url: string
   data?: unknown
-  params?: Record<string, unknown>
   headers?: HttpRequestHeaders
   signal?: AbortSignal
   onUploadProgress?: (event: HttpProgressEvent) => void
@@ -31,6 +31,19 @@ export interface HttpResponse {
 export interface HttpClient {
   request(config: HttpRequestConfig): Promise<HttpResponse>
 }
+
+export interface HttpClientOptions {
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
+}
+
+export type HttpRequestHandler = (config: HttpRequestConfig) => HttpRequestConfig | Promise<HttpRequestConfig>
+
+export type HttpResponseHandler = (response: HttpResponse) => HttpResponse | Promise<HttpResponse>
+
+export type HttpErrorHandler = (
+  error: HttpResponseError | HttpNetworkError | HttpCancelledError,
+) => void | Promise<void>
 
 export interface PageFlashData {
   [key: string]: unknown
@@ -497,8 +510,8 @@ interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupRetur
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
-  /** HTTP client to use for requests. Defaults to FetchHttpClient. */
-  http?: HttpClient
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -671,6 +684,11 @@ export type UseFormSubmitArguments =
   | [Method, string, UseFormSubmitOptions?]
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
+
+export type UseHttpSubmitArguments<TResponse = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
+  | [UseHttpSubmitOptions<TResponse>?]
 
 export type FormComponentOptions = Pick<
   VisitOptions,
