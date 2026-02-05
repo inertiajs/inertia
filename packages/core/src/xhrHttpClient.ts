@@ -1,6 +1,7 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
-import { HttpClient, HttpClientOptions, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
+import { FormDataConvertible, HttpClient, HttpClientOptions, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
+import { mergeDataIntoQueryString } from './url'
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'))
@@ -39,6 +40,17 @@ function setHeaders(xhr: XMLHttpRequest, config: HttpRequestConfig): void {
   })
 }
 
+function buildUrlWithParams(url: string, params?: Record<string, unknown>): string {
+  if (!params || Object.keys(params).length === 0) {
+    return url
+  }
+
+  // Pass 'get' to force merging params into URL regardless of actual method (matches Axios behavior)
+  const [urlWithParams] = mergeDataIntoQueryString('get', url, params as Record<string, FormDataConvertible>)
+
+  return urlWithParams
+}
+
 /**
  * Inertia's built-in HTTP client using XMLHttpRequest
  */
@@ -74,8 +86,9 @@ export class XhrHttpClient implements HttpClient {
   protected doRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
+      const url = buildUrlWithParams(config.url, config.params)
 
-      xhr.open(config.method.toUpperCase(), config.url, true)
+      xhr.open(config.method.toUpperCase(), url, true)
 
       const xsrfToken = getCookie(this.xsrfCookieName)
 

@@ -87,6 +87,7 @@ export class AxiosHttpClient implements HttpClient {
         method: config.method,
         url: config.url,
         data: config.data,
+        params: config.params,
         headers: config.headers as Record<string, string>,
         signal: config.signal,
         responseType: 'text',
