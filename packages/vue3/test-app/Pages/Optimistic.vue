@@ -14,7 +14,6 @@ defineProps<{
 
 const newTodoName = ref('')
 const errorCount = ref(0)
-const cancelCount = ref(0)
 const successCount = ref(0)
 const errors = ref({})
 
@@ -108,7 +107,6 @@ const clearTodos = () => {
     <div class="counters">
       <div id="success-count">Success: {{ successCount }}</div>
       <div id="error-count">Error: {{ errorCount }}</div>
-      <div id="cancel-count">Cancel: {{ cancelCount }}</div>
     </div>
   </div>
 </template>

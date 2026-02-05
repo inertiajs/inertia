@@ -10,7 +10,6 @@ interface Todo {
 export default ({ todos }: { todos: Todo[] }) => {
   const [newTodoName, setNewTodoName] = useState('')
   const [errorCount, setErrorCount] = useState(0)
-  const [cancelCount, setCancelCount] = useState(0)
   const [successCount, setSuccessCount] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -112,7 +111,6 @@ export default ({ todos }: { todos: Todo[] }) => {
       <div className="counters">
         <div id="success-count">Success: {successCount}</div>
         <div id="error-count">Error: {errorCount}</div>
-        <div id="cancel-count">Cancel: {cancelCount}</div>
       </div>
     </div>
   )

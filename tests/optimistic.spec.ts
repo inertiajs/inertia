@@ -37,3 +37,23 @@ test('it rolls back optimistic update on error', async ({ page }) => {
   await expect(page.locator('#error-count')).toContainText('Error: 1', { timeout: 10000 })
   await expect(page.locator('#todo-list li')).toHaveCount(2)
 })
+
+test('it rolls back first optimistic update when second visit cancels it', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/optimistic')
+
+  await expect(page.locator('#todo-list li')).toHaveCount(2)
+
+  // Rapidly submit two invalid todos - second visit cancels first
+  await page.locator('#add-btn').click()
+  await page.locator('#add-btn').click()
+
+  // Second click cancels first (restoring its optimistic state), then applies its own
+  // So we should see 3 items (2 original + 1 from second optimistic update)
+  await expect(page.locator('#todo-list li')).toHaveCount(3)
+
+  // Only the second request completes (first was cancelled), and it fails
+  await expect(page.locator('#error-count')).toContainText('Error: 1', { timeout: 10000 })
+  await expect(page.locator('#todo-list li')).toHaveCount(2)
+})

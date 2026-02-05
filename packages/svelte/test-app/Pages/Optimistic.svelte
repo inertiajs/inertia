@@ -5,7 +5,6 @@
 
   let newTodoName = ''
   let errorCount = 0
-  let cancelCount = 0
   let successCount = 0
   let errors = {}
 
@@ -108,6 +107,5 @@
   <div class="counters">
     <div id="success-count">Success: {successCount}</div>
     <div id="error-count">Error: {errorCount}</div>
-    <div id="cancel-count">Cancel: {cancelCount}</div>
   </div>
 </div>
