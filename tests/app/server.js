@@ -2609,39 +2609,6 @@ app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { componen
 app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
 app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
 
-// useOptimistic hook
-app.get('/use-optimistic', (req, res) => inertia.render(req, res, { component: 'UseOptimistic' }))
-
-app.patch('/api/optimistic/feature', upload.none(), (req, res) => {
-  setTimeout(() => {
-    res.json({ success: true, enabled: req.body.enabled })
-  }, 300)
-})
-
-app.patch('/api/optimistic/review', upload.none(), (req, res) => {
-  setTimeout(() => {
-    res.json({ success: true, rating: parseInt(req.body.rating) })
-  }, 300)
-})
-
-app.post('/api/optimistic/counter', upload.none(), (req, res) => {
-  setTimeout(() => {
-    res.json({ success: true, count: parseInt(req.body.count) })
-  }, 300)
-})
-
-app.patch('/api/optimistic/error', upload.none(), (req, res) => {
-  setTimeout(() => {
-    res.status(500).json({ message: 'Server error' })
-  }, 300)
-})
-
-app.patch('/api/optimistic/slow', upload.none(), (req, res) => {
-  setTimeout(() => {
-    res.json({ success: true, value: req.body.value })
-  }, 2000)
-})
-
 // Optimistic updates
 let optimisticTodoId = 3
 let optimisticTodos = [
