@@ -280,7 +280,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     submit(...args: UseHttpSubmitArguments<TResponse>) {
       const parsed = UseFormUtils.parseSubmitArguments(args as any, getPrecognitionEndpoint())
 
-      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TResponse>)
+      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TForm, TResponse>)
     },
 
     get: createSubmitMethod('get'),
