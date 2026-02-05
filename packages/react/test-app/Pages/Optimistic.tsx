@@ -72,6 +72,19 @@ export default ({
     router.post('/optimistic/clear')
   }
 
+  const triggerServerError = () => {
+    router.post(
+      '/optimistic/server-error',
+      {},
+      {
+        preserveScroll: true,
+        optimistic: (pageProps) => ({
+          todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: 'Will fail...', done: false }],
+        }),
+      },
+    )
+  }
+
   return (
     <div>
       <h1>Optimistic Updates</h1>
@@ -110,6 +123,9 @@ export default ({
       <div className="actions">
         <button id="clear-btn" onClick={clearTodos}>
           Reset
+        </button>
+        <button id="server-error-btn" onClick={triggerServerError}>
+          Trigger Server Error
         </button>
       </div>
 

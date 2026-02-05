@@ -75,6 +75,29 @@ test('it only snapshots props that actually changed (preserves other server resp
   await expect(page.locator('#server-timestamp')).toContainText('Server timestamp:')
 })
 
+test('it rolls back optimistic update on server error (500)', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/optimistic')
+
+  await expect(page.locator('#todo-list li')).toHaveCount(2)
+
+  // Trigger server error with optimistic update
+  await page.locator('#server-error-btn').click()
+
+  // Optimistic update should be applied immediately
+  await expect(page.locator('#todo-list li')).toHaveCount(3)
+  await expect(page.locator('#todo-list')).toContainText('Will fail...')
+
+  // Wait for error modal to appear (it's a plain div with an iframe containing the error)
+  await expect(page.locator('iframe')).toBeVisible({ timeout: 10000 })
+
+  // After server error, the optimistic update should be rolled back
+  // (happens via onFinish since onSuccess was never called)
+  await expect(page.locator('#todo-list li')).toHaveCount(2)
+  await expect(page.locator('#todo-list')).not.toContainText('Will fail...')
+})
+
 test('it rolls back first optimistic update when second visit cancels it', async ({ page }) => {
   pageLoads.watch(page)
 

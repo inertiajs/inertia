@@ -234,14 +234,12 @@ export class Router {
       this.syncRequestStream.interruptInFlight()
     }
 
-    let propsSnapshot: Partial<Page['props']> | null = null
-
     if (options.optimistic) {
       const currentProps = currentPage.get().props
       const optimisticProps = options.optimistic(currentProps)
 
       if (optimisticProps) {
-        propsSnapshot = {}
+        const propsSnapshot: Partial<Page['props']> = {}
 
         for (const key of Object.keys(optimisticProps)) {
           if (!isEqual(currentProps[key], optimisticProps[key])) {
@@ -249,26 +247,26 @@ export class Router {
           }
         }
 
-        currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
+        if (Object.keys(propsSnapshot).length > 0) {
+          currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
+
+          let shouldRestore = true
+
+          const originalOnSuccess = events.onSuccess
+          events.onSuccess = (page) => {
+            shouldRestore = false
+            return originalOnSuccess(page)
+          }
+
+          const originalOnFinish = events.onFinish
+          events.onFinish = (visit) => {
+            if (shouldRestore) {
+              currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
+            }
+            return originalOnFinish(visit)
+          }
+        }
       }
-    }
-
-    const restoreOptimisticSnapshot = () => {
-      if (propsSnapshot && Object.keys(propsSnapshot).length > 0) {
-        currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
-      }
-    }
-
-    const originalOnError = events.onError
-    events.onError = (errors) => {
-      restoreOptimisticSnapshot()
-      return originalOnError(errors)
-    }
-
-    const originalOnCancel = events.onCancel
-    events.onCancel = () => {
-      restoreOptimisticSnapshot()
-      return originalOnCancel()
     }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {

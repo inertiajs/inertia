@@ -61,6 +61,19 @@
     router.post('/optimistic/clear')
   }
 
+  const triggerServerError = () => {
+    router.post(
+      '/optimistic/server-error',
+      {},
+      {
+        preserveScroll: true,
+        optimistic: (pageProps) => ({
+          todos: [...pageProps.todos, { id: Date.now(), name: 'Will fail...', done: false }],
+        }),
+      },
+    )
+  }
+
   const handleKeyUp = (e) => {
     if (e.key === 'Enter') {
       addTodo()
@@ -101,6 +114,7 @@
 
   <div class="actions">
     <button id="clear-btn" on:click={clearTodos}>Reset</button>
+    <button id="server-error-btn" on:click={triggerServerError}>Trigger Server Error</button>
   </div>
 
   <div class="counters">

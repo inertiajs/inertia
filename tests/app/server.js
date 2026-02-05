@@ -2770,6 +2770,12 @@ app.post('/optimistic/clear', (req, res) => {
   res.redirect(303, '/optimistic')
 })
 
+app.post('/optimistic/server-error', (req, res) => {
+  setTimeout(() => {
+    res.status(500).send('Internal Server Error')
+  }, 500)
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

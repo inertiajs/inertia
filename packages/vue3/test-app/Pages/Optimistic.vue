@@ -69,6 +69,19 @@ const deleteTodo = (todo: Todo) => {
 const clearTodos = () => {
   router.post('/optimistic/clear')
 }
+
+const triggerServerError = () => {
+  router.post(
+    '/optimistic/server-error',
+    {},
+    {
+      preserveScroll: true,
+      optimistic: (pageProps) => ({
+        todos: [...pageProps.todos, { id: Date.now(), name: 'Will fail...', done: false }],
+      }),
+    },
+  )
+}
 </script>
 
 <template>
@@ -101,6 +114,7 @@ const clearTodos = () => {
 
     <div class="actions">
       <button id="clear-btn" @click="clearTodos">Reset</button>
+      <button id="server-error-btn" @click="triggerServerError">Trigger Server Error</button>
     </div>
 
     <div class="counters">
