@@ -1,12 +1,50 @@
-import { AxiosProgressEvent, AxiosResponse } from 'axios'
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import type { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { Response } from './response'
 
-declare module 'axios' {
-  export interface AxiosProgressEvent {
-    percentage: number | undefined
-  }
+export type HttpRequestHeaders = Record<string, unknown>
+
+export type HttpResponseHeaders = Record<string, string>
+
+export interface HttpProgressEvent {
+  progress: number | undefined
+  loaded: number
+  total: number | undefined
+  percentage?: number
 }
+
+export interface HttpRequestConfig {
+  method: Method
+  url: string
+  data?: unknown
+  params?: Record<string, unknown>
+  headers?: HttpRequestHeaders
+  signal?: AbortSignal
+  onUploadProgress?: (event: HttpProgressEvent) => void
+}
+
+export interface HttpResponse {
+  status: number
+  data: string
+  headers: HttpResponseHeaders
+}
+
+export interface HttpClient {
+  request(config: HttpRequestConfig): Promise<HttpResponse>
+}
+
+export interface HttpClientOptions {
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
+}
+
+export type HttpRequestHandler = (config: HttpRequestConfig) => HttpRequestConfig | Promise<HttpRequestConfig>
+
+export type HttpResponseHandler = (response: HttpResponse) => HttpResponse | Promise<HttpResponse>
+
+export type HttpErrorHandler = (
+  error: HttpResponseError | HttpNetworkError | HttpCancelledError,
+) => void | Promise<void>
 
 export interface PageFlashData {
   [key: string]: unknown
@@ -234,7 +272,7 @@ export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
 export type QueryStringArrayFormatOption = 'indices' | 'brackets'
 
-export type Progress = AxiosProgressEvent
+export type Progress = HttpProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
@@ -331,9 +369,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   invalid: {
-    parameters: [AxiosResponse]
+    parameters: [HttpResponse]
     details: {
-      response: AxiosResponse
+      response: HttpResponse
     }
     result: boolean | void
   }
@@ -345,9 +383,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: boolean | void
   }
   prefetched: {
-    parameters: [AxiosResponse, ActiveVisit<T>]
+    parameters: [HttpResponse, ActiveVisit<T>]
     details: {
-      response: AxiosResponse
+      response: HttpResponse
       fetchedAt: number
       visit: ActiveVisit<T>
     }
@@ -468,6 +506,8 @@ interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupRetur
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -641,6 +681,11 @@ export type UseFormSubmitArguments =
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
 
+export type UseHttpSubmitArguments<TResponse = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
+  | [UseHttpSubmitOptions<TResponse>?]
+
 export type FormComponentOptions = Pick<
   VisitOptions,
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
@@ -787,6 +832,21 @@ export interface InfiniteScrollComponentBaseProps {
   autoScroll?: boolean
   onlyNext?: boolean
   onlyPrevious?: boolean
+}
+
+export type UseHttpOptions<TResponse = unknown> = {
+  onBefore?: () => boolean | void
+  onStart?: () => void
+  onProgress?: (progress: HttpProgressEvent) => void
+  onSuccess?: (response: TResponse) => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onCancelToken?: (cancelToken: CancelToken) => void
+}
+
+export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+  headers?: HttpRequestHeaders
 }
 
 declare global {

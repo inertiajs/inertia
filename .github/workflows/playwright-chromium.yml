@@ -3,25 +3,26 @@ on: [push, pull_request]
 jobs:
   test-chromium:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Chromium (${{ matrix.adapter }})
+    name: Chromium (${{ matrix.adapter }}${{ matrix.http == 'axios' && ', axios' || '' }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
+        http: ['default', 'axios']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22.14
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -35,12 +36,14 @@ jobs:
 
       - name: Run Playwright Tests
         run: pnpm test:${{ matrix.adapter }}
+        env:
+          VITE_HTTP_CLIENT: ${{ matrix.http }}
 
       - name: Upload failure screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-${{ matrix.http }}
           path: test-results
 
   test-chromium-ssr:
@@ -53,17 +56,17 @@ jobs:
         adapter: ['vue', 'react', 'svelte']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22.14
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -80,7 +83,7 @@ jobs:
 
       - name: Upload failure screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr
           path: test-results

@@ -48,7 +48,7 @@ export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page) => {
 }
 
 export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, visit) => {
-  return fireEvent('prefetched', { detail: { fetchedAt: Date.now(), response: response.data, visit } })
+  return fireEvent('prefetched', { detail: { fetchedAt: Date.now(), response, visit } })
 }
 
 export const firePrefetchingEvent: GlobalEventTrigger<'prefetching'> = (visit) => {
