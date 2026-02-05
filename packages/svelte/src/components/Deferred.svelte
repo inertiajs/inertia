@@ -58,9 +58,11 @@
     }
   })
 
-  if (!fallback) {
-    throw new Error('`<Deferred>` requires a `fallback` snippet')
-  }
+  $effect.pre(() => {
+    if (!fallback) {
+      throw new Error('`<Deferred>` requires a `fallback` snippet')
+    }
+  })
 </script>
 
 {#if loaded}

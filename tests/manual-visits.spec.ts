@@ -18,8 +18,6 @@ test('visits a different page', async ({ page }) => {
 })
 
 test('can make a location visit', async ({ page }) => {
-  test.skip(process.env.PACKAGE === 'svelte', 'Skipping for now until we diagnose')
-
   pageLoads.watch(page, 2)
   await page.goto('/visits/location')
   await clickAndWaitForResponse(page, 'Location visit', 'dump/get')
