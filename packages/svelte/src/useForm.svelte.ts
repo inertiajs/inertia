@@ -7,6 +7,7 @@ import type {
   FormDataKeys,
   FormDataType,
   FormDataValues,
+  HttpProgressEvent,
   Method,
   Page,
   PendingVisit,
@@ -21,7 +22,6 @@ import type {
   VisitOptions,
 } from '@inertiajs/core'
 import { router, UseFormUtils } from '@inertiajs/core'
-import type { AxiosProgressEvent } from 'axios'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
 import { createValidator, resolveName, toSimpleValidationErrors } from 'laravel-precognition'
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
@@ -430,7 +430,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
             return options.onStart(visit)
           }
         },
-        onProgress: (event?: AxiosProgressEvent) => {
+        onProgress: (event?: HttpProgressEvent) => {
           setFormState('progress', event || null)
 
           if (options.onProgress) {
