@@ -91,4 +91,21 @@ test.describe('HTTP Handlers', () => {
     expect(messages).toContain('request-handler-called')
     expect(messages).toContain('response-handler-called:200')
   })
+
+  test('it can add query params via onRequest handler', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/http-handlers')
+
+    await page.getByRole('button', { name: 'Register Params Handler' }).click()
+
+    const responsePromise = page.waitForResponse('**/dump/get**')
+    await page.getByRole('button', { name: 'Make Request' }).click()
+    await responsePromise
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    expect(dump.query).toEqual({ foo: 'bar', baz: 'qux' })
+
+    const messages = await getMessages(page)
+    expect(messages).toContain('params-handler-called')
+  })
 })
