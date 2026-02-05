@@ -90,20 +90,10 @@
     return transform!(data)
   }
 
-  const form = useForm<Record<string, any>>({})
-    .withPrecognition(
-      () => _method,
-      () => getUrlAndData()[0],
-    )
-    .setValidationTimeout(validationTimeout!)
-
-  if (validateFiles) {
-    form.validateFiles()
-  }
-
-  if (withAllErrors) {
-    form.withAllErrors()
-  }
+  const form = useForm<Record<string, any>>({}).withPrecognition(
+    () => _method,
+    () => getUrlAndData()[0],
+  )
 
   form.transform(getTransformedData)
 
@@ -288,6 +278,10 @@
       form.validateFiles()
     } else {
       form.withoutFileValidation()
+    }
+
+    if (withAllErrors) {
+      form.withAllErrors()
     }
   })
 

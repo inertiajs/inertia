@@ -1,11 +1,26 @@
-import type { Page, VisitOptions } from '@inertiajs/core'
-import { type ResolvedComponent, createInertiaApp, router } from '@inertiajs/react'
+import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
+import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 
 window.testing = { Inertia: router }
 window.resolverReceivedPage = null as Page | null
 
-const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
+const params = new URLSearchParams(window.location.search)
+
+function getHttpConfig(): HttpClient | HttpClientOptions | undefined {
+  const customXsrf = params.get('customXsrf')
+
+  if (customXsrf) {
+    return { xsrfCookieName: customXsrf, xsrfHeaderName: `X-${customXsrf}` }
+  }
+
+  if (import.meta.env.VITE_HTTP_CLIENT === 'axios') {
+    return axiosAdapter()
+  }
+
+  return undefined
+}
 
 createInertiaApp({
   page: window.initialPage,
@@ -31,7 +46,8 @@ createInertiaApp({
     delay: 0,
     color: 'red',
   },
-  ...(withAppDefaults && {
+  http: getHttpConfig(),
+  ...(params.has('withAppDefaults') && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {
         return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }

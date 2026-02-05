@@ -2,6 +2,7 @@ import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
   getInitialPageFromDOM,
+  http as httpModule,
   InertiaAppResponse,
   InertiaAppSSRResponse,
   Page,
@@ -60,8 +61,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   page,
   render,
   defaults = {},
+  http,
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   config.replace(defaults)
+
+  if (http) {
+    httpModule.setClient(http)
+  }
 
   const isServer = typeof window === 'undefined'
   const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')

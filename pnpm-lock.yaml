@@ -37,12 +37,9 @@ importers:
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
-      axios:
-        specifier: ^1.13.2
-        version: 1.13.2
       laravel-precognition:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -53,6 +50,9 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.10.9
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       es-check:
         specifier: ^9.5.3
         version: 9.5.3
@@ -75,8 +75,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -176,8 +176,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -280,8 +280,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -2202,8 +2202,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  laravel-precognition@1.0.0:
-    resolution: {integrity: sha512-hvXPT7dayCQAidxnsY0hab9Q+Y2rsh7xRpH9uiFtXN8Dekc3tIZt+NrxrOZ9N5SwHBmRBze/Bv+ElfXac0kD6g==}
+  laravel-precognition@1.0.1:
+    resolution: {integrity: sha512-BYaDUjEclKbxuQTG9yZnRjjD7ag1Xh+8hGOXmcrw91/vpbIOJ8cSFADTI0kvwetIr3AM1vOJzYwaoA9+KHhLwA==}
 
   laravel-vite-plugin@2.0.1:
     resolution: {integrity: sha512-zQuvzWfUKQu9oNVi1o0RZAJCwhGsdhx4NEOyrVQwJHaWDseGP9tl7XUPLY2T8Cj6+IrZ6lmyxlR1KC8unf3RLA==}
@@ -5058,7 +5058,7 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@1.0.0:
+  laravel-precognition@1.0.1:
     dependencies:
       axios: 1.13.2
       lodash-es: 4.17.23
