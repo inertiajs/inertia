@@ -45,6 +45,19 @@ function registerErrorHandler() {
   window._http_handler_unsubscribers.push(off)
 }
 
+function registerParamsHandler() {
+  const off = http.onRequest((config) => {
+    window._http_handler_messages.push('params-handler-called')
+
+    return {
+      ...config,
+      params: { foo: 'bar', baz: 'qux' },
+    }
+  })
+
+  window._http_handler_unsubscribers.push(off)
+}
+
 function unregisterAll() {
   window._http_handler_unsubscribers.forEach((fn) => fn())
   window._http_handler_unsubscribers = []
@@ -69,6 +82,7 @@ onUnmounted(() => window._http_handler_unsubscribers.forEach((fn) => fn()))
     <button @click="registerRequestHandler">Register Request Handler</button>
     <button @click="registerResponseHandler">Register Response Handler</button>
     <button @click="registerErrorHandler">Register Error Handler</button>
+    <button @click="registerParamsHandler">Register Params Handler</button>
     <button @click="unregisterAll">Unregister All</button>
     <button @click="makeRequest">Make Request</button>
     <button @click="makeErrorRequest">Make Error Request</button>
