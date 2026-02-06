@@ -125,12 +125,12 @@ export const requestAnimationFrame = (cb: () => void, times: number = 1): void =
   })
 }
 
-export const getInitialPageFromDOM = <T>(id: string, useScriptElement: boolean = false): T | null => {
+export const getInitialPageFromDOM = <T>(id: string, useDataElement: boolean = false): T | null => {
   if (typeof window === 'undefined') {
     return null
   }
 
-  if (!useScriptElement) {
+  if (useDataElement) {
     const el = document.getElementById(id)
 
     if (el?.dataset.page) {

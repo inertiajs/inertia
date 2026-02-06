@@ -1,16 +1,12 @@
-import { config, router } from '@inertiajs/react'
+import { router } from '@inertiajs/react'
 
-export default ({ dialog }: { dialog: boolean }) => {
+export default () => {
   const invalidVisit = () => {
     router.post('/non-inertia')
   }
 
   const invalidVisitJson = () => {
     router.post('/json')
-  }
-
-  if (dialog) {
-    config.set('future.useDialogForErrorModal', true)
   }
 
   return (

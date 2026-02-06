@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { config, Link } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
 const props = defineProps<{
@@ -23,10 +23,6 @@ watch(
     effectBCount.value++
   },
 )
-
-function enable() {
-  config.set('future.preserveEqualProps', true)
-}
 </script>
 
 <template>
@@ -37,6 +33,5 @@ function enable() {
     <p id="effect-a">Effect A Count: {{ effectACount }}</p>
     <p id="effect-b">Effect B Count: {{ effectBCount }}</p>
     <Link method="post" preserve-state href="/preserve-equal-props/back"> Submit and redirect back </Link>
-    <button @click="enable">Enable</button>
   </div>
 </template>

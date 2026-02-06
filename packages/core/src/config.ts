@@ -75,11 +75,8 @@ export const config = new Config<InertiaAppConfig>({
     recentlySuccessfulDuration: 2_000,
     forceIndicesArrayFormatInFormData: true,
   },
-  future: {
-    preserveEqualProps: false,
-    useDataInertiaHeadAttribute: false,
-    useDialogForErrorModal: false,
-    useScriptElementForInitialPage: false,
+  legacy: {
+    useDataElementForInitialPage: false,
   },
   prefetch: {
     cacheFor: 30_000,
