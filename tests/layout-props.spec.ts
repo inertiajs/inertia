@@ -67,11 +67,19 @@ test.describe('layout props', () => {
     await expect(page.locator('.content-layout')).toHaveAttribute('data-max-width', '4xl')
   })
 
-  test('it uses defaults when no props are set', async ({ page }) => {
-    await page.goto('/layout-props/basic')
+  test('it uses all defaults when page does not set any layout props', async ({ page }) => {
+    await page.goto('/layout-props/default')
 
-    // The layout has defaults: title: 'Default Title', showSidebar: true, theme: 'light'
-    // But the page overrides title and showSidebar, so theme should still be 'light' (default)
+    await expect(page.locator('.app-title')).toHaveText('Default Title')
+    await expect(page.locator('.sidebar')).toBeVisible()
     await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'light')
+
+    // Navigate to a page with static overrides
+    await page.getByRole('link', { name: 'Go to Static Page' }).click()
+
+    await expect(page).toHaveURL('/layout-props/static')
+    await expect(page.locator('.app-title')).toHaveText('Static Props Page')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+    await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'dark')
   })
 })

@@ -46,14 +46,13 @@
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
+        component = args.component
+        page = args.page
+        key = args.preserveState ? key : Date.now()
+
         if (!args.preserveState) {
           resetLayoutProps()
         }
-
-        component = args.component
-        page = args.page
-
-        key = args.preserveState ? key : Date.now()
       },
       onFlash: (flash) => {
         page = { ...page, flash }

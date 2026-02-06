@@ -19,11 +19,11 @@ export function resetLayoutProps(): void {
 export const LAYOUT_CONTEXT_KEY = Symbol('inertia-layout')
 
 export function useLayoutProps<T extends Record<string, unknown>>(defaults: T): Readable<T> {
-  const context = getContext<{ staticProps: Record<string, unknown>; name?: string } | undefined>(LAYOUT_CONTEXT_KEY)
-  const staticProps = context?.staticProps ?? {}
-  const name = context?.name
+  const context = getContext<{ readonly staticProps: Record<string, unknown>; readonly name?: string } | undefined>(LAYOUT_CONTEXT_KEY)
 
   const resolve = () => {
+    const staticProps = context?.staticProps ?? {}
+    const name = context?.name
     const { shared, named } = store.get()
     const dynamicProps = name ? { ...shared, ...named[name] } : shared
     return mergeLayoutProps(defaults, staticProps, dynamicProps)
