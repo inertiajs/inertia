@@ -732,7 +732,10 @@ export type FormComponentMethods<TForm extends object = Record<string, any>> = {
   validator: () => Validator
 }
 
-export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
+export type FormComponentonSubmitCompleteArguments<TForm extends object = Record<string, any>> = Pick<
+  FormComponentMethods<TForm>,
+  'reset' | 'defaults'
+>
 
 export type FormComponentState<TForm extends object = Record<string, any>> = {
   errors: FormDataErrors<TForm>

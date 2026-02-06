@@ -1,6 +1,6 @@
 <!-- This component is used for checking the TypeScript implementation; there is no Playwright test depending on it. -->
 <script lang="ts">
-  import type { FormComponentSlotProps } from '@inertiajs/core'
+  import type { FormComponentSlotProps, FormComponentonSubmitCompleteArguments } from '@inertiajs/core'
 
   interface UserForm {
     name: string
@@ -22,6 +22,18 @@
 
     return 'Form content'
   }
+
+  function handleSubmitComplete(props: FormComponentonSubmitCompleteArguments<UserForm>) {
+    const { reset, defaults } = props
+
+    reset('name')
+    reset('email')
+
+    // @ts-expect-error - 'invalid_field' should not be a valid key
+    reset('invalid_field')
+
+    defaults()
+  }
 </script>
 
-<div>{renderFormContent.toString()}</div>
+<div>{renderFormContent.toString()}{handleSubmitComplete.toString()}</div>
