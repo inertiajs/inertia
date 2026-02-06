@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
+import { router, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 interface Todo {
@@ -18,31 +18,31 @@ const newTodoName = ref('')
 const errorCount = ref(0)
 const successCount = ref(0)
 
+const addForm = useForm({ name: '' })
+
 const addTodo = () => {
   const name = newTodoName.value.trim()
   const optimisticName = name || '(empty todo...)'
   newTodoName.value = ''
 
-  router
+  addForm.name = name
+
+  addForm
     .optimistic<{ todos: Todo[] }>((props) => ({
       todos: [...props.todos, { id: Date.now(), name: optimisticName, done: false }],
     }))
-    .post(
-      '/optimistic/todos',
-      { name },
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          successCount.value++
-          newTodoName.value = ''
-        },
-        onError: () => {
-          errorCount.value++
-          newTodoName.value = name
-          document.getElementById('new-todo')?.focus()
-        },
+    .post('/optimistic/todos', {
+      preserveScroll: true,
+      onSuccess: () => {
+        successCount.value++
+        newTodoName.value = ''
       },
-    )
+      onError: () => {
+        errorCount.value++
+        newTodoName.value = name
+        document.getElementById('new-todo')?.focus()
+      },
+    })
 }
 
 const toggleTodo = (todo: Todo) => {

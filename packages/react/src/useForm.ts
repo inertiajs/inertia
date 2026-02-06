@@ -6,6 +6,7 @@ import {
   FormDataType,
   FormDataValues,
   Method,
+  OptimisticCallback,
   Progress,
   RequestPayload,
   router,
@@ -63,6 +64,7 @@ export interface InertiaFormProps<TForm extends object> {
   delete: (url: string, options?: UseFormSubmitOptions) => void
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => InertiaFormProps<TForm>
+  optimistic: <TProps>(callback: OptimisticCallback<TProps>) => InertiaFormProps<TForm>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormProps<TForm>
 }
 
@@ -118,6 +120,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
 
   const cancelToken = useRef<CancelToken | null>(null)
   const excludeKeysRef = useRef<FormDataKeys<TForm>[]>([])
+  const pendingOptimisticRef = useRef<OptimisticCallback | null>(null)
 
   // For remember functionality, we need custom state hooks
   const useDataState = rememberKey
@@ -245,6 +248,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
       }
 
+      _options.optimistic = _options.optimistic ?? pendingOptimisticRef.current ?? undefined
+      pendingOptimisticRef.current = null
+
       const transformedData = transformRef.current(baseForm.data) as RequestPayload
 
       if (method === 'delete') {
@@ -279,6 +285,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     cancel,
     dontRemember: <K extends FormDataKeys<TForm>>(...keys: K[]) => {
       excludeKeysRef.current = keys
+      return form
+    },
+
+    optimistic: <TProps,>(callback: OptimisticCallback<TProps>) => {
+      pendingOptimisticRef.current = callback as OptimisticCallback
       return form
     },
   })

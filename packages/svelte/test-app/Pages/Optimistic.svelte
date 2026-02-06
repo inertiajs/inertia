@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
+  import { router, useForm } from '@inertiajs/svelte'
 
   interface Todo {
     id: number
@@ -15,31 +15,31 @@
   let errorCount = 0
   let successCount = 0
 
+  const addForm = useForm({ name: '' })
+
   const addTodo = () => {
     const name = newTodoName.trim()
     const optimisticName = name || '(empty todo...)'
     newTodoName = ''
 
-    router
+    addForm.name = name
+
+    addForm
       .optimistic<{ todos: Todo[] }>((props) => ({
         todos: [...props.todos, { id: Date.now(), name: optimisticName, done: false }],
       }))
-      .post(
-        '/optimistic/todos',
-        { name },
-        {
-          preserveScroll: true,
-          onSuccess: () => {
-            successCount++
-            newTodoName = ''
-          },
-          onError: () => {
-            errorCount++
-            newTodoName = name
-            document.getElementById('new-todo')?.focus()
-          },
+      .post('/optimistic/todos', {
+        preserveScroll: true,
+        onSuccess: () => {
+          successCount++
+          newTodoName = ''
         },
-      )
+        onError: () => {
+          errorCount++
+          newTodoName = name
+          document.getElementById('new-todo')?.focus()
+        },
+      })
   }
 
   const toggleTodo = (todo: Todo) => {

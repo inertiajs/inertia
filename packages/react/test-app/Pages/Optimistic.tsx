@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react'
+import { router, useForm } from '@inertiajs/react'
 import { useState } from 'react'
 
 interface Todo {
@@ -20,31 +20,31 @@ export default ({
   const [errorCount, setErrorCount] = useState(0)
   const [successCount, setSuccessCount] = useState(0)
 
+  const addForm = useForm({ name: '' })
+
   const addTodo = () => {
     const name = newTodoName.trim()
     const optimisticName = name || '(empty todo...)'
     setNewTodoName('')
 
-    router
+    addForm.transform(() => ({ name }))
+
+    addForm
       .optimistic<{ todos: Todo[] }>((props) => ({
         todos: [...props.todos, { id: Date.now(), name: optimisticName, done: false }],
       }))
-      .post(
-        '/optimistic/todos',
-        { name },
-        {
-          preserveScroll: true,
-          onSuccess: () => {
-            setSuccessCount((c) => c + 1)
-            setNewTodoName('')
-          },
-          onError: () => {
-            setErrorCount((c) => c + 1)
-            setNewTodoName(name)
-            document.getElementById('new-todo')?.focus()
-          },
+      .post('/optimistic/todos', {
+        preserveScroll: true,
+        onSuccess: () => {
+          setSuccessCount((c) => c + 1)
+          setNewTodoName('')
         },
-      )
+        onError: () => {
+          setErrorCount((c) => c + 1)
+          setNewTodoName(name)
+          document.getElementById('new-todo')?.focus()
+        },
+      })
   }
 
   const toggleTodo = (todo: Todo) => {
