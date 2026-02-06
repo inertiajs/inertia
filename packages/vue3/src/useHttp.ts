@@ -55,6 +55,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   delete(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  optimistic(callback: (currentData: TForm) => Partial<TForm>): this
   withPrecognition(...args: UseFormWithPrecognitionArguments): UseHttpPrecognitiveProps<TForm, TResponse>
 }
 
@@ -114,6 +115,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
   const { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
 
   let abortController: AbortController | null = null
+  let pendingOptimisticCallback: ((currentData: TForm) => Partial<TForm>) | null = null
 
   const {
     form: baseForm,
@@ -159,6 +161,9 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     }
 
     options.onCancelToken?.(cancelToken)
+
+    options.optimistic = options.optimistic ?? pendingOptimisticCallback ?? undefined
+    pendingOptimisticCallback = null
 
     let snapshot: TForm | undefined
 
@@ -297,6 +302,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
     dontRemember(...keys: FormDataKeys<TForm>[]) {
       setRememberExcludeKeys(keys)
+      return form
+    },
+
+    optimistic(callback: (currentData: TForm) => Partial<TForm>) {
+      pendingOptimisticCallback = callback
       return form
     },
   })

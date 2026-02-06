@@ -60,6 +60,8 @@ export class Router {
 
   protected clientVisitQueue = new Queue<Promise<void>>()
 
+  protected pendingOptimisticCallback: OptimisticCallback | null = null
+
   public init<ComponentType = Component>({
     initialPage,
     resolveComponent,
@@ -90,6 +92,12 @@ export class Router {
     eventHandler.on('historyQuotaExceeded', (url) => {
       window.location.href = url
     })
+  }
+
+  public optimistic<TProps>(callback: OptimisticCallback<TProps>): this {
+    this.pendingOptimisticCallback = callback as OptimisticCallback
+
+    return this
   }
 
   public get<T extends RequestPayload = RequestPayload>(
@@ -234,6 +242,9 @@ export class Router {
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
     }
+
+    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback ?? undefined
+    this.pendingOptimisticCallback = null
 
     if (options.optimistic) {
       this.applyOptimisticUpdate(options.optimistic, events)

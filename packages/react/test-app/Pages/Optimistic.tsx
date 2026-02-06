@@ -25,47 +25,42 @@ export default ({
     const optimisticName = name || '(empty todo...)'
     setNewTodoName('')
 
-    router.post(
-      '/optimistic/todos',
-      { name },
-      {
-        preserveScroll: true,
-        optimistic: (pageProps) => ({
-          todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: optimisticName, done: false }],
-        }),
-        onSuccess: () => {
-          setSuccessCount((c) => c + 1)
-          setNewTodoName('')
+    router
+      .optimistic<{ todos: Todo[] }>((props) => ({
+        todos: [...props.todos, { id: Date.now(), name: optimisticName, done: false }],
+      }))
+      .post(
+        '/optimistic/todos',
+        { name },
+        {
+          preserveScroll: true,
+          onSuccess: () => {
+            setSuccessCount((c) => c + 1)
+            setNewTodoName('')
+          },
+          onError: () => {
+            setErrorCount((c) => c + 1)
+            setNewTodoName(name)
+            document.getElementById('new-todo')?.focus()
+          },
         },
-        onError: () => {
-          setErrorCount((c) => c + 1)
-          setNewTodoName(name)
-          document.getElementById('new-todo')?.focus()
-        },
-      },
-    )
+      )
   }
 
   const toggleTodo = (todo: Todo) => {
-    router.patch(
-      `/optimistic/todos/${todo.id}`,
-      { done: !todo.done },
-      {
-        preserveScroll: true,
-        optimistic: (pageProps) => ({
-          todos: (pageProps.todos as Todo[]).map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
-        }),
-      },
-    )
+    router
+      .optimistic<{ todos: Todo[] }>((props) => ({
+        todos: props.todos.map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
+      }))
+      .patch(`/optimistic/todos/${todo.id}`, { done: !todo.done }, { preserveScroll: true })
   }
 
   const deleteTodo = (todo: Todo) => {
-    router.delete(`/optimistic/todos/${todo.id}`, {
-      preserveScroll: true,
-      optimistic: (pageProps) => ({
-        todos: (pageProps.todos as Todo[]).filter((t) => t.id !== todo.id),
-      }),
-    })
+    router
+      .optimistic<{ todos: Todo[] }>((props) => ({
+        todos: props.todos.filter((t) => t.id !== todo.id),
+      }))
+      .delete(`/optimistic/todos/${todo.id}`, { preserveScroll: true })
   }
 
   const clearTodos = () => {
@@ -73,16 +68,11 @@ export default ({
   }
 
   const triggerServerError = () => {
-    router.post(
-      '/optimistic/server-error',
-      {},
-      {
-        preserveScroll: true,
-        optimistic: (pageProps) => ({
-          todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: 'Will fail...', done: false }],
-        }),
-      },
-    )
+    router
+      .optimistic<{ todos: Todo[] }>((props) => ({
+        todos: [...props.todos, { id: Date.now(), name: 'Will fail...', done: false }],
+      }))
+      .post('/optimistic/server-error', {}, { preserveScroll: true })
   }
 
   return (
