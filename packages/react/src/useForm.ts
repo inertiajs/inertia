@@ -32,7 +32,7 @@ type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
   only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
 }
 
-export interface InertiaFormProps<TForm extends object> {
+export interface InertiaFormProps<TForm extends Record<string, any>> {
   data: TForm
   isDirty: boolean
   errors: FormDataErrors<TForm>
@@ -66,7 +66,7 @@ export interface InertiaFormProps<TForm extends object> {
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormProps<TForm>
 }
 
-export interface InertiaFormValidationProps<TForm extends object> {
+export interface InertiaFormValidationProps<TForm extends Record<string, any>> {
   invalid: <K extends FormDataKeys<TForm>>(field: K) => boolean
   setValidationTimeout: (duration: number) => InertiaPrecognitiveFormProps<TForm>
   touch: <K extends FormDataKeys<TForm>>(
@@ -89,8 +89,8 @@ export interface InertiaFormValidationProps<TForm extends object> {
   forgetError: <K extends FormDataKeys<TForm> | NamedInputEvent>(field: K) => InertiaPrecognitiveFormProps<TForm>
 }
 
-export type InertiaForm<TForm extends object> = InertiaFormProps<TForm>
-export type InertiaPrecognitiveFormProps<TForm extends object> = InertiaFormProps<TForm> &
+export type InertiaForm<TForm extends Record<string, any>> = InertiaFormProps<TForm>
+export type InertiaPrecognitiveFormProps<TForm extends Record<string, any>> = InertiaFormProps<TForm> &
   InertiaFormValidationProps<TForm>
 
 export default function useForm<TForm extends FormDataType<TForm>>(

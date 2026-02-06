@@ -3,6 +3,7 @@ import type { SvelteInertiaAppConfig } from './types'
 
 export { http, progress, router } from '@inertiajs/core'
 export { default as App } from './components/App.svelte'
+export { createForm } from './components/createForm'
 export { default as Deferred } from './components/Deferred.svelte'
 export { default as Form } from './components/Form.svelte'
 export { useFormContext } from './components/formContext'

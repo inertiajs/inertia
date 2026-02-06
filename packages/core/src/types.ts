@@ -709,30 +709,36 @@ export type FormComponentProps = Partial<
   withAllErrors?: boolean
 }
 
-export type FormComponentMethods = {
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
+export type FormComponentMethods<TForm extends object = Record<string, any>> = {
+  clearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  resetAndClearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   setError: {
-    (field: string, value: ErrorValue): void
-    (errors: Record<string, ErrorValue>): void
+    <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
+    (errors: FormDataErrors<TForm>): void
   }
-  reset: (...fields: string[]) => void
+  reset: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   submit: () => void
   defaults: () => void
-  getData: () => Record<string, FormDataConvertible>
+  getData: () => TForm
   getFormData: () => FormData
-  valid: (field: string) => boolean
-  invalid: (field: string) => boolean
-  validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => void
-  touch: (...fields: string[]) => void
-  touched: (field?: string) => boolean
+  valid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  invalid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  validate: <K extends FormDataKeys<TForm>>(
+    field?: K | NamedInputEvent | ValidationConfig,
+    config?: ValidationConfig,
+  ) => void
+  touch: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  touched: <K extends FormDataKeys<TForm>>(field?: K) => boolean
   validator: () => Validator
 }
 
-export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
+export type FormComponentonSubmitCompleteArguments<TForm extends object = Record<string, any>> = Pick<
+  FormComponentMethods<TForm>,
+  'reset' | 'defaults'
+>
 
-export type FormComponentState = {
-  errors: Record<string, ErrorValue>
+export type FormComponentState<TForm extends object = Record<string, any>> = {
+  errors: FormDataErrors<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -742,9 +748,10 @@ export type FormComponentState = {
   validating: boolean
 }
 
-export type FormComponentSlotProps = FormComponentMethods & FormComponentState
+export type FormComponentSlotProps<TForm extends object = Record<string, any>> = FormComponentMethods<TForm> &
+  FormComponentState<TForm>
 
-export type FormComponentRef = FormComponentSlotProps
+export type FormComponentRef<TForm extends object = Record<string, any>> = FormComponentSlotProps<TForm>
 
 export interface UseInfiniteScrollOptions {
   // Core data

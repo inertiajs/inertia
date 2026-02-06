@@ -7,6 +7,7 @@
     type Errors,
     type FormComponentProps,
     type FormComponentRef,
+    type FormComponentSlotProps,
     type Method,
     type FormDataConvertible,
     type VisitOptions,
@@ -47,7 +48,7 @@
     validateFiles?: FormComponentProps['validateFiles']
     validationTimeout?: FormComponentProps['validationTimeout']
     withAllErrors?: FormComponentProps['withAllErrors']
-    children?: import('svelte').Snippet<[any]>
+    children?: import('svelte').Snippet<[FormComponentSlotProps]>
     [key: string]: any
   }
 
