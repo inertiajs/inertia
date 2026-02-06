@@ -1,4 +1,4 @@
-<script context="module">
+<script module>
   export { default as layout } from '../Components/Layout.svelte'
 </script>
 
@@ -8,13 +8,11 @@
   import TestGrid from '../Components/TestGrid.svelte'
   import TestGridItem from '../Components/TestGridItem.svelte'
 
-  export let appName
-  export let users = []
-  export let companies = []
+  let { appName, users = [], companies = [] } = $props()
 
-  let userPollCount = 0
-  let hookPollCount = 0
-  let companyPollCount = 0
+  let userPollCount = $state(0)
+  let hookPollCount = $state(0)
+  let companyPollCount = $state(0)
 
   const triggerAsyncRedirect = () => {
     router.get(
@@ -72,9 +70,9 @@
 
 <TestGrid>
   <TestGridItem>
-    <svelte:fragment slot="title">
+    {#snippet title()}
       User Poll Request Count: {userPollCount}
-    </svelte:fragment>
+    {/snippet}
     <div>
       {#each users as user}
         <div>{user}</div>
@@ -82,9 +80,9 @@
     </div>
   </TestGridItem>
   <TestGridItem>
-    <svelte:fragment slot="title">
+    {#snippet title()}
       Companies Poll Request Count: {companyPollCount}
-    </svelte:fragment>
+    {/snippet}
     <div>
       {#each companies as company}
         <div>{company}</div>
@@ -92,11 +90,11 @@
     </div>
   </TestGridItem>
   <TestGridItem>
-    <svelte:fragment slot="title">
+    {#snippet title()}
       Hook Poll Request Count: {hookPollCount}
-    </svelte:fragment>
+    {/snippet}
   </TestGridItem>
   <TestGridItem>
-    <button on:click={() => triggerAsyncRedirect()}>Trigger Async Redirect</button>
+    <button onclick={() => triggerAsyncRedirect()}>Trigger Async Redirect</button>
   </TestGridItem>
 </TestGrid>
