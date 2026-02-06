@@ -288,7 +288,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       return form
     },
 
-    optimistic: <TProps,>(callback: OptimisticCallback<TProps>) => {
+    optimistic: <TProps>(callback: OptimisticCallback<TProps>) => {
       pendingOptimisticRef.current = callback as OptimisticCallback
       return form
     },

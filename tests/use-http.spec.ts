@@ -512,6 +512,5 @@ test.describe('useHttp', () => {
       await expect(page.locator('#optimistic-inline-success')).toBeVisible()
       await expect(page.locator('#optimistic-inline-processing')).not.toBeVisible()
     })
-
-})
+  })
 })
