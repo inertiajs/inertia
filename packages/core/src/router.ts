@@ -220,6 +220,7 @@ export class Router {
 
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
+      this.pendingOptimisticCallback = null
       return
     }
 
