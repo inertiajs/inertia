@@ -106,15 +106,12 @@
     const layouts = normalizeLayouts(layout, isComponent, isRenderFunction)
 
     if (layouts.length > 0) {
-      return layouts
-        .slice()
-        .reverse()
-        .reduce((child, layout) => {
-          return {
-            ...h(layout.component, { ...pageProps, ...layout.props }, [child], key),
-            name: layout.name,
-          }
-        }, child)
+      return layouts.reduceRight((child, layout) => {
+        return {
+          ...h(layout.component, { ...pageProps, ...layout.props }, [child], key),
+          name: layout.name,
+        }
+      }, child)
     }
 
     return child
