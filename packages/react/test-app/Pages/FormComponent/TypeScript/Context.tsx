@@ -6,7 +6,7 @@ interface UserForm {
   email: string
 }
 
-export default function Context() {
+export default () => {
   const form = useFormContext<UserForm>()
 
   if (!form) {

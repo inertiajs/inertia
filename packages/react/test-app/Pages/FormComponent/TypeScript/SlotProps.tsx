@@ -6,7 +6,7 @@ interface UserForm {
   email: string
 }
 
-export default function SlotProps() {
+export default () => {
   return (
     <Form<UserForm> action="/users" method="post">
       {({ errors, getData, clearErrors, reset, setError, valid, invalid }) => {

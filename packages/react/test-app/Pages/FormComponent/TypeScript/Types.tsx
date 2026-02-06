@@ -22,6 +22,6 @@ function renderFormContent(props: FormComponentSlotProps<UserForm>) {
   return <div>Form content</div>
 }
 
-export default function Types() {
+export default () => {
   return <div>{renderFormContent.toString()}</div>
 }

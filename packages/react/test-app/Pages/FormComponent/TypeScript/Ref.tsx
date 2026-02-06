@@ -8,7 +8,7 @@ interface UserForm {
   email: string
 }
 
-export default function Ref() {
+export default () => {
   const formRef = useRef<FormComponentRef<UserForm>>(null)
 
   return (
