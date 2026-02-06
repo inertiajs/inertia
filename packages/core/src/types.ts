@@ -368,14 +368,14 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
-  invalid: {
+  httpException: {
     parameters: [HttpResponse]
     details: {
       response: HttpResponse
     }
     result: boolean | void
   }
-  exception: {
+  networkError: {
     parameters: [Error]
     details: {
       exception: Error
@@ -451,6 +451,8 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancel: GlobalEventCallback<'cancel', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
+  onHttpException: GlobalEventCallback<'httpException', T>
+  onNetworkError: GlobalEventCallback<'networkError', T>
   onFlash: GlobalEventCallback<'flash', T>
   onPrefetched: GlobalEventCallback<'prefetched', T>
   onPrefetching: GlobalEventCallback<'prefetching', T>
@@ -855,8 +857,8 @@ declare global {
     'inertia:progress': GlobalEvent<'progress'>
     'inertia:success': GlobalEvent<'success'>
     'inertia:error': GlobalEvent<'error'>
-    'inertia:invalid': GlobalEvent<'invalid'>
-    'inertia:exception': GlobalEvent<'exception'>
+    'inertia:httpException': GlobalEvent<'httpException'>
+    'inertia:networkError': GlobalEvent<'networkError'>
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>

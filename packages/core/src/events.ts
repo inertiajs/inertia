@@ -15,16 +15,16 @@ export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors) => {
   return fireEvent('error', { detail: { errors } })
 }
 
-export const fireExceptionEvent: GlobalEventTrigger<'exception'> = (exception) => {
-  return fireEvent('exception', { cancelable: true, detail: { exception } })
+export const fireNetworkErrorEvent: GlobalEventTrigger<'networkError'> = (exception) => {
+  return fireEvent('networkError', { cancelable: true, detail: { exception } })
 }
 
 export const fireFinishEvent: GlobalEventTrigger<'finish'> = (visit) => {
   return fireEvent('finish', { detail: { visit } })
 }
 
-export const fireInvalidEvent: GlobalEventTrigger<'invalid'> = (response) => {
-  return fireEvent('invalid', { cancelable: true, detail: { response } })
+export const fireHttpExceptionEvent: GlobalEventTrigger<'httpException'> = (response) => {
+  return fireEvent('httpException', { cancelable: true, detail: { response } })
 }
 
 export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) => {
