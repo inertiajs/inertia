@@ -19,7 +19,9 @@ export function resetLayoutProps(): void {
 export const LAYOUT_CONTEXT_KEY = Symbol('inertia-layout')
 
 export function useLayoutProps<T extends Record<string, unknown>>(defaults: T): Readable<T> {
-  const context = getContext<{ readonly staticProps: Record<string, unknown>; readonly name?: string } | undefined>(LAYOUT_CONTEXT_KEY)
+  const context = getContext<{ readonly staticProps: Record<string, unknown>; readonly name?: string } | undefined>(
+    LAYOUT_CONTEXT_KEY,
+  )
 
   const resolve = () => {
     const staticProps = context?.staticProps ?? {}

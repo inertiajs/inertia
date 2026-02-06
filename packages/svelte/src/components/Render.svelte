@@ -47,7 +47,14 @@
 
   // svelte-ignore state_referenced_locally
   if (children.length > 0) {
-    setContext(LAYOUT_CONTEXT_KEY, { get staticProps() { return props }, get name() { return name } })
+    setContext(LAYOUT_CONTEXT_KEY, {
+      get staticProps() {
+        return props
+      },
+      get name() {
+        return name
+      },
+    })
   }
 </script>
 
