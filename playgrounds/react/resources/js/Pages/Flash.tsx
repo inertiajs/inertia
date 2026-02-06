@@ -85,6 +85,6 @@ const Flash = () => {
   )
 }
 
-Flash.layout = (page) => <Layout children={page} />
+Flash.layout = Layout
 
 export default Flash

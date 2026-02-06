@@ -716,6 +716,14 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
 )
 
+app.get('/layout-props/basic', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/navigate', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/nested', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named-static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/default', (req, res) => inertia.render(req, res, {}))
+
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )

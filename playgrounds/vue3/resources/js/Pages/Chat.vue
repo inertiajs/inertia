@@ -1,6 +1,6 @@
 <script lang="ts">
 import Layout from '../Components/Layout.vue'
-export default { layout: (h, page) => h(Layout, { padding: false }, () => page) }
+export default { layout: [Layout, { padding: false }] }
 </script>
 
 <script setup lang="ts">

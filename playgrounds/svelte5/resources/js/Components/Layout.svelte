@@ -1,7 +1,9 @@
 <script>
-  import { inertia, page } from '@inertiajs/svelte'
+  import { inertia, page, useLayoutProps } from '@inertiajs/svelte'
 
   let { children } = $props()
+
+  const layoutProps = useLayoutProps({ padding: true })
 </script>
 
 <nav class="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white">
@@ -20,6 +22,6 @@
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
 </nav>
 
-<main class="px-10 py-8">
+<main class={$layoutProps.padding ? 'px-10 py-8' : ''}>
   {@render children()}
 </main>

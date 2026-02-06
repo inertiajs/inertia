@@ -39,6 +39,6 @@ const PhotoHorizontal = ({
   )
 }
 
-PhotoHorizontal.layout = (page: React.ReactElement) => <Layout>{page}</Layout>
+PhotoHorizontal.layout = Layout
 
 export default PhotoHorizontal

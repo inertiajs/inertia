@@ -53,6 +53,6 @@ const Defer = ({
   )
 }
 
-Defer.layout = (page) => <Layout children={page} />
+Defer.layout = Layout
 
 export default Defer
