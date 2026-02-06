@@ -150,7 +150,7 @@ function extract<T>(item: unknown, isComponent: ComponentCheck<T>): { component:
   if (isComponent(item)) {
     return { component: item, props: {} }
   }
-  throw new Error('Invalid layout definition')
+  throw new Error(`Invalid layout definition: received ${typeof item}`)
 }
 
 /**

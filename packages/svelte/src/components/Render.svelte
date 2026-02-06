@@ -8,7 +8,6 @@
     children?: RenderProps[]
     key?: number | null
     name?: string
-    staticProps?: Record<string, unknown>
   }
 
   export type RenderFunction = {
@@ -44,12 +43,11 @@
   import { LAYOUT_CONTEXT_KEY } from '../layoutProps.svelte'
 
   // svelte-ignore state_referenced_locally
-  const { component, props = {}, children = [], key = null, name, staticProps }: RenderProps = $props()
+  const { component, props = {}, children = [], key = null, name }: RenderProps = $props()
 
-  // Context is intentionally set once during initialization
   // svelte-ignore state_referenced_locally
-  if (name !== undefined || staticProps !== undefined) {
-    setContext(LAYOUT_CONTEXT_KEY, { staticProps: staticProps || props, name })
+  if (children.length > 0) {
+    setContext(LAYOUT_CONTEXT_KEY, { staticProps: props, name })
   }
 </script>
 

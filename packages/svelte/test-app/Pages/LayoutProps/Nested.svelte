@@ -11,7 +11,6 @@
 <script lang="ts">
   import { Link, setLayoutProps } from '@inertiajs/svelte'
 
-  // Call setLayoutProps directly (not in $effect to avoid infinite loops)
   setLayoutProps({
     theme: 'dark',
     maxWidth: 'xl',

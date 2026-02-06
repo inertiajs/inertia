@@ -11,7 +11,7 @@
 
   setLayoutProps({
     title: 'Basic Layout Props',
-    showSidebar: true,
+    showSidebar: sidebarVisible,
   })
 
   function toggleSidebar() {

@@ -110,10 +110,10 @@
         .slice()
         .reverse()
         .reduce((child, layout) => {
-          const renderProps = h(layout.component, { ...pageProps, ...layout.props }, [child], key)
-          renderProps.name = layout.name
-          renderProps.staticProps = layout.props
-          return renderProps
+          return {
+            ...h(layout.component, { ...pageProps, ...layout.props }, [child], key),
+            name: layout.name,
+          }
         }, child)
     }
 
