@@ -2561,6 +2561,18 @@ app.post('/api/error', upload.none(), (req, res) => {
   res.status(500).json({ message: 'Internal server error' })
 })
 
+app.post('/api/optimistic-todo', upload.none(), (req, res) => {
+  setTimeout(() => {
+    const name = req.body.name?.trim()
+
+    if (!name) {
+      return res.status(422).json({ errors: { name: 'The name field is required.' } })
+    }
+
+    res.json({ success: true, id: Date.now(), name })
+  }, 500)
+})
+
 // File upload endpoint
 app.post('/api/upload', upload.any(), (req, res) => {
   const files = (req.files || []).map((file) => ({

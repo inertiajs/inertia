@@ -477,4 +477,41 @@ test.describe('useHttp', () => {
       await expect(page.locator('#submit-wayfinder-result')).toContainText('Email: bob@example.com')
     })
   })
+
+  test.describe('Optimistic', () => {
+    test('it applies optimistic updates using the fluent API', async ({ page }) => {
+      await page.goto('/use-http')
+
+      await page.fill('#optimistic-name', 'My Todo')
+      await expect(page.locator('#optimistic-current-name')).toContainText('Name: My Todo')
+
+      await page.click('#optimistic-button')
+
+      // Optimistic update should immediately show " (saving...)" suffix
+      await expect(page.locator('#optimistic-current-name')).toContainText('Name: My Todo (saving...)')
+      await expect(page.locator('#optimistic-processing')).toBeVisible()
+
+      // After the request completes, the name should remain
+      await expect(page.locator('#optimistic-success')).toBeVisible()
+      await expect(page.locator('#optimistic-processing')).not.toBeVisible()
+    })
+
+    test('it applies optimistic updates using the inline option', async ({ page }) => {
+      await page.goto('/use-http')
+
+      await page.fill('#optimistic-inline-name', 'Inline Todo')
+      await expect(page.locator('#optimistic-inline-current-name')).toContainText('Name: Inline Todo')
+
+      await page.click('#optimistic-inline-button')
+
+      // Optimistic update should immediately show " (saving...)" suffix
+      await expect(page.locator('#optimistic-inline-current-name')).toContainText('Name: Inline Todo (saving...)')
+      await expect(page.locator('#optimistic-inline-processing')).toBeVisible()
+
+      // After the request completes, the name should remain
+      await expect(page.locator('#optimistic-inline-success')).toBeVisible()
+      await expect(page.locator('#optimistic-inline-processing')).not.toBeVisible()
+    })
+
+})
 })
