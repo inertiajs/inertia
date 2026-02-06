@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, useLayoutProps, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
-
-const props = withDefaults(
-  defineProps<{
-    padding?: boolean
-  }>(),
-  {
-    padding: true,
-  },
-)
 
 const page = usePage()
 
 const appName = computed(() => page.props.appName)
+const layoutProps = useLayoutProps({ padding: true })
 </script>
 
 <template>
@@ -37,7 +29,7 @@ const appName = computed(() => page.props.appName)
     <Link href="/once/1" class="hover:underline">Once</Link>
     <Link href="/flash" class="hover:underline">Flash</Link>
   </nav>
-  <main :class="padding ? 'px-10 py-8' : ''">
+  <main :class="layoutProps.padding ? 'px-10 py-8' : ''">
     <slot />
   </main>
 </template>

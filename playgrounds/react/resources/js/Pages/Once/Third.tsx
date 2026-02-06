@@ -14,6 +14,6 @@ const Third = ({ foo, bar, baz3, qux }: { foo: string; bar: string; baz3: string
   )
 }
 
-Third.layout = (page: React.ReactNode) => <Layout children={page} />
+Third.layout = Layout
 
 export default Third

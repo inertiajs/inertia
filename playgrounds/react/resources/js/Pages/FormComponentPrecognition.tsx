@@ -257,6 +257,6 @@ const FormComponentPrecognition = () => {
   )
 }
 
-FormComponentPrecognition.layout = (page) => <Layout children={page} />
+FormComponentPrecognition.layout = Layout
 
 export default FormComponentPrecognition

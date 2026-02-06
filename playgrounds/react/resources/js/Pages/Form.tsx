@@ -79,6 +79,6 @@ const Form = () => {
   )
 }
 
-Form.layout = (page) => <Layout children={page} />
+Form.layout = Layout
 
 export default Form

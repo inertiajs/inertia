@@ -74,6 +74,6 @@ const Article = () => {
   )
 }
 
-Article.layout = (page) => <Layout children={page} />
+Article.layout = Layout
 
 export default Article

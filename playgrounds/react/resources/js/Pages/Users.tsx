@@ -30,6 +30,6 @@ const Users = ({ users }) => {
   )
 }
 
-Users.layout = (page) => <Layout children={page} />
+Users.layout = Layout
 
 export default Users
