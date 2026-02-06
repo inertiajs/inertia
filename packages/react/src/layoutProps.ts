@@ -21,7 +21,7 @@ export const LayoutPropsContext = createContext<{ staticProps: Record<string, un
 
 export function useLayoutProps<T extends Record<string, unknown>>(defaults: T): T {
   const { staticProps, name } = useContext(LayoutPropsContext)
-  const { shared, named } = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const { shared, named } = useSyncExternalStore(store.subscribe, store.get, store.get)
 
   return useMemo(() => {
     const dynamicProps = name ? { ...shared, ...named[name] } : shared

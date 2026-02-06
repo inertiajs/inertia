@@ -25,8 +25,8 @@ function isComponent(value: unknown): value is ReactComponent {
   }
 
   if (typeof value === 'function') {
-    const fn = value as Function & { displayName?: string }
-    return fn.name !== '' || fn.displayName !== undefined
+    const fn = value as Function & { displayName?: string; prototype?: { isReactComponent?: boolean } }
+    return fn.prototype?.isReactComponent === true || fn.name !== '' || fn.displayName !== undefined
   }
 
   return false

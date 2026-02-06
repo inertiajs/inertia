@@ -22,7 +22,7 @@ import {
   ref,
   shallowRef,
 } from 'vue'
-import { resetLayoutProps, resolveLayoutProps } from './layoutProps'
+import { LayoutProvider, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
@@ -158,15 +158,8 @@ const App: InertiaApp = defineComponent({
               const layoutComponent = layout.component as DefineComponent
               layoutComponent.inheritAttrs = !!layoutComponent.inheritAttrs
 
-              return h(
-                layoutComponent,
-                {
-                  ...page.value!.props,
-                  ...layout.props,
-                  ...resolveLayoutProps(layout.name),
-                  ...(layout.name ? { __layoutName: layout.name } : {}),
-                },
-                () => childNode,
+              return h(LayoutProvider, { layoutName: layout.name }, () =>
+                h(layoutComponent, { ...page.value!.props, ...layout.props }, () => childNode),
               )
             }, child)
           }

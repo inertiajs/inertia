@@ -1,11 +1,11 @@
 import { createLayoutPropsStore, mergeLayoutProps } from '@inertiajs/core'
-import { computed, ComputedRef, ref, useAttrs } from 'vue'
+import { computed, ComputedRef, defineComponent, inject, InjectionKey, provide, ref, useAttrs } from 'vue'
 
 const store = createLayoutPropsStore()
-const state = ref(store.getSnapshot())
+const state = ref(store.get())
 
 store.subscribe(() => {
-  state.value = store.getSnapshot()
+  state.value = store.get()
 })
 
 export function setLayoutProps(props: Record<string, unknown>): void {
@@ -20,14 +20,23 @@ export function resetLayoutProps(): void {
   store.reset()
 }
 
-export function resolveLayoutProps(name?: string): Record<string, unknown> {
-  const { shared, named } = state.value
-  return name ? { ...shared, ...named[name] } : shared
-}
+export const LAYOUT_CONTEXT_KEY: InjectionKey<string | undefined> = Symbol('inertia-layout')
+
+export const LayoutProvider = defineComponent({
+  inheritAttrs: false,
+  props: {
+    layoutName: String,
+  },
+  setup(props, { slots }) {
+    provide(LAYOUT_CONTEXT_KEY, props.layoutName)
+
+    return () => slots.default?.()
+  },
+})
 
 export function useLayoutProps<T extends Record<string, unknown>>(defaults: T): ComputedRef<T> {
   const attrs = useAttrs()
-  const name = attrs.__layoutName as string | undefined
+  const name = inject(LAYOUT_CONTEXT_KEY, undefined)
 
   return computed(() => {
     const { shared, named } = state.value

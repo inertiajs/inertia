@@ -9,10 +9,9 @@ export interface LayoutDefinition<Component> {
 export interface LayoutPropsStore {
   set(props: Record<string, unknown>): void
   setFor(name: string, props: Record<string, unknown>): void
-  get(name?: string): Record<string, unknown>
+  get(): { shared: Record<string, unknown>; named: Record<string, Record<string, unknown>> }
   reset(): void
   subscribe(callback: () => void): () => void
-  getSnapshot(): { shared: Record<string, unknown>; named: Record<string, Record<string, unknown>> }
 }
 
 export function createLayoutPropsStore(): LayoutPropsStore {
@@ -26,7 +25,7 @@ export function createLayoutPropsStore(): LayoutPropsStore {
     snapshot = { shared, named }
   }
 
-  const scheduleNotify = () => {
+  const notify = () => {
     if (pendingNotify) {
       return
     }
@@ -48,7 +47,7 @@ export function createLayoutPropsStore(): LayoutPropsStore {
 
       shared = merged
       updateSnapshot()
-      scheduleNotify()
+      notify()
     },
 
     setFor(name, props) {
@@ -61,18 +60,14 @@ export function createLayoutPropsStore(): LayoutPropsStore {
 
       named = { ...named, [name]: merged }
       updateSnapshot()
-      scheduleNotify()
-    },
-
-    get(name) {
-      return name ? { ...named[name] } : { ...shared }
+      notify()
     },
 
     reset() {
       shared = {}
       named = {}
       updateSnapshot()
-      scheduleNotify()
+      notify()
     },
 
     subscribe(callback) {
@@ -80,10 +75,25 @@ export function createLayoutPropsStore(): LayoutPropsStore {
       return () => listeners.delete(callback)
     },
 
-    getSnapshot: () => snapshot,
+    get: () => snapshot,
   }
 }
 
+/**
+ * Merges layout props from three sources with priority: dynamic > static > defaults.
+ * Only keys present in `defaults` are included in the result.
+ *
+ * @example
+ * ```ts
+ * mergeLayoutProps(
+ *   { title: 'Default', showSidebar: true },  // defaults declared in useLayoutProps()
+ *   { title: 'My Page', color: 'blue' },       // static props from layout definition
+ *   { showSidebar: false, fontSize: 16 },       // dynamic props from setLayoutProps()
+ * )
+ * // => { title: 'My Page', showSidebar: false }
+ * // 'color' and 'fontSize' are excluded because they're not declared in defaults
+ * ```
+ */
 export function mergeLayoutProps<T extends Record<string, unknown>>(
   defaults: T,
   staticProps: Record<string, unknown>,

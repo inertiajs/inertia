@@ -29,9 +29,9 @@
 
 <div>
   <h2>Named Layouts Page</h2>
-  <p>This page uses named layouts.</p>
-  <p>AppLayout: title from setLayoutProps</p>
-  <p>ContentLayout: maxWidth="2xl" (from setLayoutPropsFor)</p>
+  <p>This page uses named layouts with setLayoutPropsFor.</p>
+  <p>App layout should have sidebar visible and light theme.</p>
+  <p>Content layout should have xl padding and 2xl maxWidth.</p>
 
   <nav>
     <Link href="/layout-props/basic">Go to Basic Page</Link>

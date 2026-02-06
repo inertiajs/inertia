@@ -9,9 +9,9 @@
 </script>
 
 <div>
-  <h2>Static Props Page</h2>
-  <p>This page uses static props via tuple syntax.</p>
-  <p>Title should be "Static Props Page" and theme should be "dark".</p>
+  <h2>Static Layout Props Page</h2>
+  <p>This page uses static props defined in the layout tuple.</p>
+  <p>The title should be "Static Props Page", sidebar should be hidden, theme should be "dark".</p>
 
   <nav>
     <Link href="/layout-props/basic">Go to Basic Page</Link>

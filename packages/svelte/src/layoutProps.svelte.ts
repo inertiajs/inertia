@@ -24,7 +24,7 @@ export function useLayoutProps<T extends Record<string, unknown>>(defaults: T): 
   const name = context?.name
 
   const resolve = () => {
-    const { shared, named } = store.getSnapshot()
+    const { shared, named } = store.get()
     const dynamicProps = name ? { ...shared, ...named[name] } : shared
     return mergeLayoutProps(defaults, staticProps, dynamicProps)
   }
