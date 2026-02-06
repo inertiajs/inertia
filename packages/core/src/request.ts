@@ -1,4 +1,10 @@
-import { fireFinishEvent, fireNetworkErrorEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
+import {
+  fireFinishEvent,
+  fireNetworkErrorEvent,
+  firePrefetchingEvent,
+  fireProgressEvent,
+  fireStartEvent,
+} from './events'
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { page as currentPage } from './page'

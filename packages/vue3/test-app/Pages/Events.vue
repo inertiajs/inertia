@@ -647,11 +647,15 @@ const callbackSuccessErrorPromise = (eventName: string) => {
 
     <!-- Events: HTTP Exception -->
     <a href="#" @click.prevent="httpExceptionVisit" class="http-exception">HTTP Exception Event</a>
-    <a href="#" @click.prevent="httpExceptionPreventVisit" class="http-exception-prevent">HTTP Exception Event (Prevent)</a>
+    <a href="#" @click.prevent="httpExceptionPreventVisit" class="http-exception-prevent"
+      >HTTP Exception Event (Prevent)</a
+    >
 
     <!-- Events: Network Error -->
     <a href="#" @click.prevent="networkErrorVisit" class="network-error">Network Error Event</a>
-    <a href="#" @click.prevent="networkErrorPreventVisit" class="network-error-prevent">Network Error Event (Prevent)</a>
+    <a href="#" @click.prevent="networkErrorPreventVisit" class="network-error-prevent"
+      >Network Error Event (Prevent)</a
+    >
 
     <!-- Events: Finish -->
     <a href="#" @click.prevent="finishVisit" class="finish">Finish Event</a>
