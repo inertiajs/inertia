@@ -58,12 +58,12 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
     <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
     (errors: FormDataErrors<TForm>): void
   }
-  submit: (...args: UseHttpSubmitArguments<TResponse>) => Promise<TResponse>
-  get: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
-  post: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
-  put: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
-  patch: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
-  delete: (url: string, options?: UseHttpSubmitOptions<TForm, TResponse>) => Promise<TResponse>
+  submit: (...args: UseHttpSubmitArguments<TResponse, TForm>) => Promise<TResponse>
+  get: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
+  post: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
+  put: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
+  patch: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
+  delete: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => UseHttpProps<TForm, TResponse>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => UseHttpPrecognitiveProps<TForm, TResponse>
@@ -156,7 +156,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
   })
 
   const submit = useCallback(
-    async (method: Method, url: string, options: UseHttpSubmitOptions<TForm, TResponse>): Promise<TResponse> => {
+    async (method: Method, url: string, options: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse> => {
       const onBefore = options.onBefore?.()
 
       if (onBefore === false) {
@@ -308,15 +308,15 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
   const createSubmitMethod =
     (method: Method) =>
-    async (url: string, options: UseHttpSubmitOptions<TForm, TResponse> = {}): Promise<TResponse> => {
+    async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> => {
       return submit(method, url, options)
     }
 
   const submitWithArgs = useCallback(
-    (...args: UseHttpSubmitArguments<TResponse>): Promise<TResponse> => {
+    (...args: UseHttpSubmitArguments<TResponse, TForm>): Promise<TResponse> => {
       const parsed = UseFormUtils.parseSubmitArguments(args as any, precognitionEndpointRef.current)
 
-      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TForm, TResponse>)
+      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TResponse, TForm>)
     },
     [submit],
   )
