@@ -1,5 +1,5 @@
 import { get, isEqual, set } from 'lodash-es'
-import { config, router } from '.'
+import { router } from '.'
 import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
@@ -10,7 +10,6 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
-import modal from './modal'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
@@ -130,7 +129,7 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return config.get('future.useDialogForErrorModal') ? dialog.show(response.data) : modal.show(response.data)
+      return dialog.show(response.data)
     }
   }
 
@@ -252,7 +251,7 @@ export class Response {
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
-    if (pageResponse.component !== currentPage.get().component || config.get('future.preserveEqualProps') !== true) {
+    if (pageResponse.component !== currentPage.get().component) {
       return
     }
 

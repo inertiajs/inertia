@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { config, Link } from '@inertiajs/svelte'
+  import { Link } from '@inertiajs/svelte'
   import { untrack } from 'svelte'
 
   type NestedA = { count: number }
@@ -12,47 +12,34 @@
 
   let { nestedA, nestedB }: Props = $props()
 
-  let effectACount = $state(0)
-  let effectBCount = $state(0)
+  let effectACount = $state(1)
+  let effectBCount = $state(1)
 
   // svelte-ignore state_referenced_locally
-  let previousNestedA = $state(nestedA)
-  // svelte-ignore state_referenced_locally
-  let previousNestedB = $state(nestedB)
+  let previousNestedAJson = $state(JSON.stringify(nestedA))
 
   $effect(() => {
-    const preserve = untrack(() => config.get('future.preserveEqualProps'))
+    const currentJson = JSON.stringify(nestedA)
 
-    // Even when `preserveEqualProps` is enabled, Svelte will wrap incoming props
-    // in a new reactive Proxy on each update. That means the reference to `nestedA`
-    // changes every time, regardless of whether the underlying object from Inertia
-    // was preserved or not. To avoid false positives, we compare by value when
-    // `preserveEqualProps` is enabled, and by reference otherwise.
-    const isDifferent = preserve
-      ? (a: NestedA, b: NestedA) => JSON.stringify(a) !== JSON.stringify(b)
-      : (a: NestedA, b: NestedA) => a !== b
-
-    if (isDifferent(nestedA, previousNestedA)) {
+    if (currentJson !== previousNestedAJson) {
       effectACount++
-      previousNestedA = preserve ? structuredClone(nestedA) : nestedA
+      previousNestedAJson = currentJson
     }
   })
 
+  // svelte-ignore state_referenced_locally
+  let previousNestedBJson = $state(JSON.stringify(nestedB))
+
   $effect(() => {
-    if (nestedB !== previousNestedB) {
+    const currentJson = JSON.stringify(nestedB)
+
+    if (currentJson !== previousNestedBJson) {
       untrack(() => {
         effectBCount++
-        previousNestedB = nestedB
+        previousNestedBJson = currentJson
       })
     }
   })
-
-  function enable() {
-    config.set('future.preserveEqualProps', true)
-    setTimeout(() => {
-      console.log(config.get('future.preserveEqualProps'))
-    }, 300)
-  }
 </script>
 
 <div>
@@ -62,5 +49,4 @@
   <p id="effect-a">Effect A Count: {effectACount}</p>
   <p id="effect-b">Effect B Count: {effectBCount}</p>
   <Link method="post" href="/preserve-equal-props/back">Submit and redirect back</Link>
-  <button onclick={enable}>Enable</button>
 </div>

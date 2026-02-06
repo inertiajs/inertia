@@ -1,11 +1,5 @@
 <script lang="ts">
-  import { config, router } from '@inertiajs/svelte'
-
-  interface Props {
-    dialog?: boolean
-  }
-
-  let { dialog = false }: Props = $props()
+  import { router } from '@inertiajs/svelte'
 
   const invalidVisit = () => {
     router.post('/non-inertia')
@@ -14,12 +8,6 @@
   const invalidVisitJson = () => {
     router.post('/json')
   }
-
-  $effect(() => {
-    if (dialog) {
-      config.set('future.useDialogForErrorModal', true)
-    }
-  })
 </script>
 
 <div>

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { config, Head } from '@inertiajs/vue3'
-
-config.set('future.useDataInertiaHeadAttribute', true)
+import { Head } from '@inertiajs/vue3'
 </script>
 
 <template>
