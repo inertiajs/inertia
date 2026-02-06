@@ -1,9 +1,15 @@
-<script>
+<script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  export let todos
-  export let errors = {}
-  export let serverTimestamp = null
+  interface Todo {
+    id: number
+    name: string
+    done: boolean
+  }
+
+  export let todos: Todo[]
+  export let errors: Record<string, string> = {}
+  export let serverTimestamp: number | null = null
 
   let newTodoName = ''
   let errorCount = 0
@@ -20,7 +26,7 @@
       {
         preserveScroll: true,
         optimistic: (pageProps) => ({
-          todos: [...pageProps.todos, { id: Date.now(), name: optimisticName, done: false }],
+          todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: optimisticName, done: false }],
         }),
         onSuccess: () => {
           successCount++
@@ -35,24 +41,24 @@
     )
   }
 
-  const toggleTodo = (todo) => {
+  const toggleTodo = (todo: Todo) => {
     router.patch(
       `/optimistic/todos/${todo.id}`,
       { done: !todo.done },
       {
         preserveScroll: true,
         optimistic: (pageProps) => ({
-          todos: pageProps.todos.map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
+          todos: (pageProps.todos as Todo[]).map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
         }),
       },
     )
   }
 
-  const deleteTodo = (todo) => {
+  const deleteTodo = (todo: Todo) => {
     router.delete(`/optimistic/todos/${todo.id}`, {
       preserveScroll: true,
       optimistic: (pageProps) => ({
-        todos: pageProps.todos.filter((t) => t.id !== todo.id),
+        todos: (pageProps.todos as Todo[]).filter((t) => t.id !== todo.id),
       }),
     })
   }
@@ -68,13 +74,13 @@
       {
         preserveScroll: true,
         optimistic: (pageProps) => ({
-          todos: [...pageProps.todos, { id: Date.now(), name: 'Will fail...', done: false }],
+          todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: 'Will fail...', done: false }],
         }),
       },
     )
   }
 
-  const handleKeyUp = (e) => {
+  const handleKeyUp = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       addTodo()
     }

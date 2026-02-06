@@ -306,6 +306,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   preserveUrl: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
+  optimistic?: OptimisticCallback
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -458,9 +459,7 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onPrefetching: GlobalEventCallback<'prefetching', T>
 }
 
-export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks<T>> & {
-  optimistic?: OptimisticCallback
-}
+export type VisitOptions<T extends RequestPayload = RequestPayload> = Partial<Visit<T> & VisitCallbacks<T>>
 
 export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
   VisitOptions<T>,

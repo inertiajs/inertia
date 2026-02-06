@@ -31,7 +31,7 @@ export default ({
       {
         preserveScroll: true,
         optimistic: (pageProps) => ({
-          todos: [...pageProps.todos, { id: Date.now(), name: optimisticName, done: false }],
+          todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: optimisticName, done: false }],
         }),
         onSuccess: () => {
           setSuccessCount((c) => c + 1)

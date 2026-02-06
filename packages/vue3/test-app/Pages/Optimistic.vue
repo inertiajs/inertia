@@ -29,7 +29,7 @@ const addTodo = () => {
     {
       preserveScroll: true,
       optimistic: (pageProps) => ({
-        todos: [...pageProps.todos, { id: Date.now(), name: optimisticName, done: false }],
+        todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: optimisticName, done: false }],
       }),
       onSuccess: () => {
         successCount.value++
@@ -51,7 +51,7 @@ const toggleTodo = (todo: Todo) => {
     {
       preserveScroll: true,
       optimistic: (pageProps) => ({
-        todos: pageProps.todos.map((t: Todo) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
+        todos: (pageProps.todos as Todo[]).map((t) => (t.id === todo.id ? { ...t, done: !t.done } : t)),
       }),
     },
   )
@@ -61,7 +61,7 @@ const deleteTodo = (todo: Todo) => {
   router.delete(`/optimistic/todos/${todo.id}`, {
     preserveScroll: true,
     optimistic: (pageProps) => ({
-      todos: pageProps.todos.filter((t: Todo) => t.id !== todo.id),
+      todos: (pageProps.todos as Todo[]).filter((t) => t.id !== todo.id),
     }),
   })
 }
@@ -77,7 +77,7 @@ const triggerServerError = () => {
     {
       preserveScroll: true,
       optimistic: (pageProps) => ({
-        todos: [...pageProps.todos, { id: Date.now(), name: 'Will fail...', done: false }],
+        todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: 'Will fail...', done: false }],
       }),
     },
   )
