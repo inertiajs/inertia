@@ -23,6 +23,7 @@ import {
   GlobalEventResult,
   InFlightPrefetch,
   Method,
+  OptimisticCallback,
   Page,
   PageFlashData,
   PendingVisit,
@@ -235,38 +236,7 @@ export class Router {
     }
 
     if (options.optimistic) {
-      const currentProps = currentPage.get().props
-      const optimisticProps = options.optimistic(currentProps)
-
-      if (optimisticProps) {
-        const propsSnapshot: Partial<Page['props']> = {}
-
-        for (const key of Object.keys(optimisticProps)) {
-          if (!isEqual(currentProps[key], optimisticProps[key])) {
-            propsSnapshot[key] = cloneDeep(currentProps[key])
-          }
-        }
-
-        if (Object.keys(propsSnapshot).length > 0) {
-          currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
-
-          let shouldRestore = true
-
-          const originalOnSuccess = events.onSuccess
-          events.onSuccess = (page) => {
-            shouldRestore = false
-            return originalOnSuccess(page)
-          }
-
-          const originalOnFinish = events.onFinish
-          events.onFinish = (visit) => {
-            if (shouldRestore) {
-              currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
-            }
-            return originalOnFinish(visit)
-          }
-        }
-      }
+      this.applyOptimisticUpdate(options.optimistic, events)
     }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
@@ -646,6 +616,46 @@ export class Router {
       onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
+    }
+  }
+
+  protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks): void {
+    const optimisticProps = optimistic(cloneDeep(currentPage.get().props))
+
+    if (!optimisticProps) {
+      return
+    }
+
+    const currentProps = cloneDeep(currentPage.get().props)
+    const propsSnapshot: Partial<Page['props']> = {}
+
+    for (const key of Object.keys(optimisticProps)) {
+      if (!isEqual(currentProps[key], optimisticProps[key])) {
+        propsSnapshot[key] = cloneDeep(currentProps[key])
+      }
+    }
+
+    if (Object.keys(propsSnapshot).length === 0) {
+      return
+    }
+
+    currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
+
+    let shouldRestore = true
+
+    const originalOnSuccess = events.onSuccess
+    events.onSuccess = (page) => {
+      shouldRestore = false
+      return originalOnSuccess(page)
+    }
+
+    const originalOnFinish = events.onFinish
+    events.onFinish = (visit) => {
+      if (shouldRestore) {
+        currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
+      }
+
+      return originalOnFinish(visit)
     }
   }
 
