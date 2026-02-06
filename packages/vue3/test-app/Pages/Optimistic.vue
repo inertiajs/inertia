@@ -66,12 +66,16 @@ const clearTodos = () => {
 }
 
 const triggerServerError = () => {
-  router.post('/optimistic/server-error', {}, {
-    preserveScroll: true,
-    optimistic: (pageProps) => ({
-      todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: 'Will fail...', done: false }],
-    }),
-  })
+  router.post(
+    '/optimistic/server-error',
+    {},
+    {
+      preserveScroll: true,
+      optimistic: (pageProps) => ({
+        todos: [...(pageProps.todos as Todo[]), { id: Date.now(), name: 'Will fail...', done: false }],
+      }),
+    },
+  )
 }
 </script>
 

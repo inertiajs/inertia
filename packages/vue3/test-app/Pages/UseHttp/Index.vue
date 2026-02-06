@@ -253,7 +253,9 @@ const triggerServerError = async () => {
       <div id="optimistic-inline-current-name">Name: {{ optimisticInlineForm.name }}</div>
       <div v-if="optimisticInlineForm.processing" id="optimistic-inline-processing">Processing...</div>
       <div v-if="optimisticInlineForm.wasSuccessful" id="optimistic-inline-success">Success!</div>
-      <div v-if="optimisticInlineForm.errors.name" id="optimistic-inline-error">{{ optimisticInlineForm.errors.name }}</div>
+      <div v-if="optimisticInlineForm.errors.name" id="optimistic-inline-error">
+        {{ optimisticInlineForm.errors.name }}
+      </div>
     </section>
 
     <!-- Cancel Request Test -->
