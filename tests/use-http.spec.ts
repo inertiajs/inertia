@@ -480,7 +480,7 @@ test.describe('useHttp', () => {
 
   test.describe('Optimistic', () => {
     test('it applies optimistic updates using the fluent API', async ({ page }) => {
-      await page.goto('/use-http')
+      await page.goto('/use-http/optimistic')
 
       await page.fill('#optimistic-name', 'My Todo')
       await expect(page.locator('#optimistic-current-name')).toContainText('Name: My Todo')
@@ -497,7 +497,7 @@ test.describe('useHttp', () => {
     })
 
     test('it applies optimistic updates using the inline option', async ({ page }) => {
-      await page.goto('/use-http')
+      await page.goto('/use-http/optimistic')
 
       await page.fill('#optimistic-inline-name', 'Inline Todo')
       await expect(page.locator('#optimistic-inline-current-name')).toContainText('Name: Inline Todo')
