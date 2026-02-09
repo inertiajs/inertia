@@ -26,6 +26,7 @@ export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
 export * from './types'
 export {
   hrefToUrl,
+  isSameUrlWithoutQueryOrHash,
   isUrlMethodPair,
   mergeDataIntoQueryString,
   urlHasProtocol,
