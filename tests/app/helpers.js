@@ -83,15 +83,14 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    // Escape for HTML attribute (createInertiaApp reads from data-page attribute)
-    const escapedData = JSON.stringify(data).replace(/"/g, '&quot;')
+    const jsonData = JSON.stringify(data).replace(/\//g, '\\/')
 
     return res.status(200).send(
       fs
         .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-unified.html'))
         .toString()
         .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
-        .replace('{{ placeholder }}', escapedData),
+        .replace('{{ placeholder }}', jsonData),
     )
   },
   renderSSR: async (req, res, data) => {
