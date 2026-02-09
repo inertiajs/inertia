@@ -50,6 +50,6 @@ const DataTable = ({
   )
 }
 
-DataTable.layout = (page: React.ReactElement) => <Layout>{page}</Layout>
+DataTable.layout = Layout
 
 export default DataTable

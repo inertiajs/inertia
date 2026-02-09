@@ -1,5 +1,6 @@
 import {
   getInitialPageFromDOM,
+  http as httpModule,
   router,
   setupProgress,
   type CreateInertiaAppOptionsForCSR,
@@ -37,12 +38,17 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   defaults = {},
+  http,
 }: InertiaAppOptions<SharedProps>): InertiaAppResponse {
   config.replace(defaults)
 
+  if (http) {
+    httpModule.setClient(http)
+  }
+
   const isServer = typeof window === 'undefined'
-  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
+  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
 
   const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve(name, page))
 
@@ -63,9 +69,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const { body, head, css } = svelteApp
 
     return {
-      body: useScriptElementForInitialPage
-        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${body}</div>`
-        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`,
+      body: useDataAttribute
+        ? `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`
+        : `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${body}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
     }
   }

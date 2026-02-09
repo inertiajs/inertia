@@ -2,6 +2,7 @@ import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
   getInitialPageFromDOM,
+  http as httpModule,
   InertiaAppResponse,
   InertiaAppSSRResponse,
   Page,
@@ -60,12 +61,17 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   page,
   render,
   defaults = {},
+  http,
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsForSSR<SharedProps>): InertiaAppResponse {
   config.replace(defaults)
 
+  if (http) {
+    httpModule.setClient(http)
+  }
+
   const isServer = typeof window === 'undefined'
-  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
+  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve(name, page)).then((module) => {
@@ -110,7 +116,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render) {
     const element = () => {
-      if (!useScriptElementForInitialPage) {
+      if (useDataAttribute) {
         return createElement(
           'div',
           {

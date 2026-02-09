@@ -1,8 +1,7 @@
 <script>
-  let className = ''
-  export { className as class }
+  let { class: className = '', children, ...restProps } = $props()
 </script>
 
-<div {...$$restProps} class="mt-6 grid grid-cols-3 gap-4 {className}">
-  <slot />
+<div {...restProps} class="mt-6 grid grid-cols-3 gap-4 {className}">
+  {@render children()}
 </div>

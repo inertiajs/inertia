@@ -1,8 +1,6 @@
-import { config, Head } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 
 export default () => {
-  config.set('future.useDataInertiaHeadAttribute', true)
-
   return (
     <>
       <Head title="Test Head Component">

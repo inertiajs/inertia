@@ -73,6 +73,6 @@ const Poll = ({ users, companies }) => {
   )
 }
 
-Poll.layout = (page) => <Layout children={page} />
+Poll.layout = Layout
 
 export default Poll

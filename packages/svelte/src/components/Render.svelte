@@ -7,6 +7,7 @@
     props?: PageProps
     children?: RenderProps[]
     key?: number | null
+    name?: string
   }
 
   export type RenderFunction = {
@@ -38,15 +39,26 @@
 
 <script lang="ts">
   import Render from './Render.svelte'
+  import { setContext } from 'svelte'
+  import { LAYOUT_CONTEXT_KEY } from '../layoutProps.svelte'
 
-  const { component, props = {}, children = [], key = null }: RenderProps = $props()
+  // svelte-ignore state_referenced_locally
+  const { component, props = {}, children = [], key = null, name }: RenderProps = $props()
+
+  // svelte-ignore state_referenced_locally
+  if (children.length > 0) {
+    setContext(LAYOUT_CONTEXT_KEY, {
+      get staticProps() {
+        return props
+      },
+      get name() {
+        return name
+      },
+    })
+  }
 </script>
 
 {#if component}
-  <!--
-  Add the `key` only to the last (page) component in the tree.
-  This ensures that the page component re-renders when `preserveState` is disabled,
-  while the layout components are persisted across page changes. -->
   {#key children?.length === 0 ? key : null}
     {#if children.length > 0}
       {@const SvelteComponent = component}

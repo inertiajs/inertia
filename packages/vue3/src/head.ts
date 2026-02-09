@@ -45,8 +45,7 @@ const Head: InertiaHead = defineComponent({
     },
     renderTagStart(node: VNode) {
       node.props = node.props || {}
-      node.props[this.provider.preferredAttribute()] =
-        node.props['head-key'] !== undefined ? node.props['head-key'] : ''
+      node.props['data-inertia'] = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
 
       const attrs = Object.keys(node.props).reduce((carry, name) => {
         const value = String(node.props![name])
@@ -114,7 +113,7 @@ const Head: InertiaHead = defineComponent({
     },
     addTitleElement(elements: string[]) {
       if (this.title && !elements.find((tag) => tag.startsWith('<title'))) {
-        elements.push(`<title ${this.provider.preferredAttribute()}>${this.title}</title>`)
+        elements.push(`<title data-inertia="">${this.title}</title>`)
       }
 
       return elements

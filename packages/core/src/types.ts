@@ -1,12 +1,50 @@
-import { AxiosProgressEvent, AxiosResponse } from 'axios'
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import type { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { Response } from './response'
 
-declare module 'axios' {
-  export interface AxiosProgressEvent {
-    percentage: number | undefined
-  }
+export type HttpRequestHeaders = Record<string, unknown>
+
+export type HttpResponseHeaders = Record<string, string>
+
+export interface HttpProgressEvent {
+  progress: number | undefined
+  loaded: number
+  total: number | undefined
+  percentage?: number
 }
+
+export interface HttpRequestConfig {
+  method: Method
+  url: string
+  data?: unknown
+  params?: Record<string, unknown>
+  headers?: HttpRequestHeaders
+  signal?: AbortSignal
+  onUploadProgress?: (event: HttpProgressEvent) => void
+}
+
+export interface HttpResponse {
+  status: number
+  data: string
+  headers: HttpResponseHeaders
+}
+
+export interface HttpClient {
+  request(config: HttpRequestConfig): Promise<HttpResponse>
+}
+
+export interface HttpClientOptions {
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
+}
+
+export type HttpRequestHandler = (config: HttpRequestConfig) => HttpRequestConfig | Promise<HttpRequestConfig>
+
+export type HttpResponseHandler = (response: HttpResponse) => HttpResponse | Promise<HttpResponse>
+
+export type HttpErrorHandler = (
+  error: HttpResponseError | HttpNetworkError | HttpCancelledError,
+) => void | Promise<void>
 
 export interface PageFlashData {
   [key: string]: unknown
@@ -234,7 +272,7 @@ export type PreserveStateOption = boolean | 'errors' | ((page: Page) => boolean)
 
 export type QueryStringArrayFormatOption = 'indices' | 'brackets'
 
-export type Progress = AxiosProgressEvent
+export type Progress = HttpProgressEvent
 
 export type LocationVisit = {
   preserveScroll: boolean
@@ -332,9 +370,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   invalid: {
-    parameters: [AxiosResponse]
+    parameters: [HttpResponse]
     details: {
-      response: AxiosResponse
+      response: HttpResponse
     }
     result: boolean | void
   }
@@ -346,9 +384,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: boolean | void
   }
   prefetched: {
-    parameters: [AxiosResponse, ActiveVisit<T>]
+    parameters: [HttpResponse, ActiveVisit<T>]
     details: {
-      response: AxiosResponse
+      response: HttpResponse
       fetchedAt: number
       visit: ActiveVisit<T>
     }
@@ -469,6 +507,8 @@ interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupRetur
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -512,7 +552,6 @@ export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   createProvider: () => {
-    preferredAttribute: () => 'data-inertia' | 'inertia'
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
     disconnect: () => void
@@ -534,15 +573,8 @@ export type InertiaAppConfig = {
     recentlySuccessfulDuration: number
     forceIndicesArrayFormatInFormData: boolean
   }
-  // experimental: {
-  //   /* not guaranteed */
-  // }
-  future: {
-    /* planned defaults */
-    preserveEqualProps: boolean
-    useDataInertiaHeadAttribute: boolean
-    useDialogForErrorModal: boolean
-    useScriptElementForInitialPage: boolean
+  legacy: {
+    useDataAttributeForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
@@ -627,7 +659,10 @@ export type UseFormWithPrecognitionArguments =
   | [Method | (() => Method), string | (() => string)]
   | [UrlMethodPair | (() => UrlMethodPair)]
 
-type UseFormInertiaArguments<TForm> = [data: TForm | (() => TForm)] | [rememberKey: string, data: TForm | (() => TForm)]
+type UseFormInertiaArguments<TForm> =
+  | []
+  | [data: TForm | (() => TForm)]
+  | [rememberKey: string, data: TForm | (() => TForm)]
 type UseFormPrecognitionArguments<TForm> =
   | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
   | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
@@ -638,6 +673,11 @@ export type UseFormSubmitArguments =
   | [Method, string, UseFormSubmitOptions?]
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
+
+export type UseHttpSubmitArguments<TResponse = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
+  | [UseHttpSubmitOptions<TResponse>?]
 
 export type FormComponentOptions = Pick<
   VisitOptions,
@@ -662,30 +702,36 @@ export type FormComponentProps = Partial<
   withAllErrors?: boolean
 }
 
-export type FormComponentMethods = {
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
+export type FormComponentMethods<TForm extends object = Record<string, any>> = {
+  clearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  resetAndClearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   setError: {
-    (field: string, value: ErrorValue): void
-    (errors: Record<string, ErrorValue>): void
+    <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
+    (errors: FormDataErrors<TForm>): void
   }
-  reset: (...fields: string[]) => void
+  reset: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   submit: () => void
   defaults: () => void
-  getData: () => Record<string, FormDataConvertible>
+  getData: () => TForm
   getFormData: () => FormData
-  valid: (field: string) => boolean
-  invalid: (field: string) => boolean
-  validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => void
-  touch: (...fields: string[]) => void
-  touched: (field?: string) => boolean
+  valid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  invalid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  validate: <K extends FormDataKeys<TForm>>(
+    field?: K | NamedInputEvent | ValidationConfig,
+    config?: ValidationConfig,
+  ) => void
+  touch: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  touched: <K extends FormDataKeys<TForm>>(field?: K) => boolean
   validator: () => Validator
 }
 
-export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
+export type FormComponentonSubmitCompleteArguments<TForm extends object = Record<string, any>> = Pick<
+  FormComponentMethods<TForm>,
+  'reset' | 'defaults'
+>
 
-export type FormComponentState = {
-  errors: Record<string, ErrorValue>
+export type FormComponentState<TForm extends object = Record<string, any>> = {
+  errors: FormDataErrors<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -695,9 +741,10 @@ export type FormComponentState = {
   validating: boolean
 }
 
-export type FormComponentSlotProps = FormComponentMethods & FormComponentState
+export type FormComponentSlotProps<TForm extends object = Record<string, any>> = FormComponentMethods<TForm> &
+  FormComponentState<TForm>
 
-export type FormComponentRef = FormComponentSlotProps
+export type FormComponentRef<TForm extends object = Record<string, any>> = FormComponentSlotProps<TForm>
 
 export interface UseInfiniteScrollOptions {
   // Core data
@@ -786,6 +833,21 @@ export interface InfiniteScrollComponentBaseProps {
   autoScroll?: boolean
   onlyNext?: boolean
   onlyPrevious?: boolean
+}
+
+export type UseHttpOptions<TResponse = unknown> = {
+  onBefore?: () => boolean | void
+  onStart?: () => void
+  onProgress?: (progress: HttpProgressEvent) => void
+  onSuccess?: (response: TResponse) => void
+  onError?: (errors: Errors) => void
+  onFinish?: () => void
+  onCancel?: () => void
+  onCancelToken?: (cancelToken: CancelToken) => void
+}
+
+export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+  headers?: HttpRequestHeaders
 }
 
 declare global {

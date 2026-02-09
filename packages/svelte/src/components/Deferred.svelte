@@ -1,43 +1,72 @@
 <script lang="ts">
-  import { untrack } from 'svelte'
+  import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
   import { page } from '../index'
 
   interface Props {
     data: string | string[]
     fallback?: import('svelte').Snippet
-    children?: import('svelte').Snippet
+    children?: import('svelte').Snippet<[{ reloading: boolean }]>
   }
 
   let { data, fallback, children }: Props = $props()
 
   const keys = $derived(Array.isArray(data) ? data : [data])
-  let loaded = $state(false)
+  const loaded = $derived(keys.every((key) => typeof page.props[key] !== 'undefined'))
 
-  const isServer = typeof window === 'undefined'
-  if (!isServer) {
-    // Use $effect to watch for changes in pageState.props
-    $effect(() => {
-      // Access pageState.props to make this effect reactive
-      const props = page.props
+  let reloading = $state(false)
+  const activeReloads = new Set<object>()
 
-      // Wrap this up into untrack, to make sure it doesn't gets picked as a depedency to retrigger the $effect
-      untrack(() => {
-        // Ensures the content isn't loaded before the deferred props are available
-        window.queueMicrotask(() => {
-          loaded = keys.every((key) => typeof props[key] !== 'undefined')
-        })
-      })
+  const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
+    if (only.length === 0 && except.length === 0) {
+      return true
+    }
+
+    if (only.length > 0) {
+      return keys.some((key) => only.includes(key))
+    }
+
+    return keys.some((key) => !except.includes(key))
+  }
+
+  $effect(() => {
+    const removeStartListener = router.on('start', (e) => {
+      const visit = e.detail.visit
+
+      if (
+        visit.preserveState === true &&
+        isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
+        keysAreBeingReloaded(visit.only, visit.except, keys)
+      ) {
+        activeReloads.add(visit)
+        reloading = true
+      }
     })
-  }
 
-  // svelte-ignore state_referenced_locally
-  if (!fallback) {
-    throw new Error('`<Deferred>` requires a `fallback` snippet')
-  }
+    const removeFinishListener = router.on('finish', (e) => {
+      const visit = e.detail.visit
+
+      if (activeReloads.has(visit)) {
+        activeReloads.delete(visit)
+        reloading = activeReloads.size > 0
+      }
+    })
+
+    return () => {
+      removeStartListener()
+      removeFinishListener()
+      activeReloads.clear()
+    }
+  })
+
+  $effect.pre(() => {
+    if (!fallback) {
+      throw new Error('`<Deferred>` requires a `fallback` snippet')
+    }
+  })
 </script>
 
 {#if loaded}
-  {@render children?.()}
+  {@render children?.({ reloading })}
 {:else}
   {@render fallback?.()}
 {/if}

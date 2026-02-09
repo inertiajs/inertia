@@ -34,11 +34,11 @@ const deferStateUpdate = (callback: () => void) => {
   typeof React.startTransition === 'function' ? React.startTransition(callback) : setTimeout(callback, 0)
 }
 
-type ComponentProps = (FormComponentProps &
+type FormProps<TForm extends object = Record<string, any>> = FormComponentProps &
   Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
-  Omit<React.AllHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'>) & {
-  children: ReactNode | ((props: FormComponentSlotProps) => ReactNode)
-}
+  Omit<React.AllHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> & {
+    children: ReactNode | ((props: FormComponentSlotProps<TForm>) => ReactNode)
+  }
 
 type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
 type FormSubmitter = HTMLElement | null
@@ -47,7 +47,7 @@ const noop = () => undefined
 
 const FormContext = createContext<FormComponentRef | undefined>(undefined)
 
-const Form = forwardRef<FormComponentRef, ComponentProps>(
+const Form = forwardRef<FormComponentRef, FormProps>(
   (
     {
       action = '',
@@ -198,6 +198,12 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
     const submit = (submitter?: FormSubmitter) => {
       const [url, data] = getUrlAndData(submitter)
+      const formTarget = (submitter as HTMLButtonElement | HTMLInputElement | null)?.getAttribute('formtarget')
+
+      if (formTarget === '_blank' && resolvedMethod === 'get') {
+        window.open(url, '_blank')
+        return
+      }
 
       const submitOptions: FormSubmitOptions = {
         headers,
@@ -243,7 +249,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       setIsDirty(false)
     }
 
-    const exposed = {
+    const exposed: FormComponentSlotProps = {
       errors: form.errors,
       hasErrors: form.hasErrors,
       processing: form.processing,
@@ -295,8 +301,13 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
 
 Form.displayName = 'InertiaForm'
 
-export function useFormContext(): FormComponentRef | undefined {
-  return use(FormContext)
+export function useFormContext<TForm extends object = Record<string, any>>(): FormComponentRef<TForm> | undefined {
+  return use(FormContext) as FormComponentRef<TForm> | undefined
 }
 
-export default Form
+export default Form as {
+  <TForm extends object = Record<string, any>>(
+    props: FormProps<TForm> & React.RefAttributes<FormComponentRef<TForm>>,
+  ): React.ReactElement
+  displayName: string
+}

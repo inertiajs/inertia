@@ -1,6 +1,5 @@
-import type { Errors, Page, PendingVisit } from '@inertiajs/core'
+import type { CancelToken, Errors, HttpProgressEvent, Page, PendingVisit } from '@inertiajs/core'
 import { useForm, usePage } from '@inertiajs/react'
-import type { AxiosProgressEvent, CancelTokenSource } from 'axios'
 import { useEffect } from 'react'
 
 declare global {
@@ -136,7 +135,7 @@ export default () => {
 
     form.post('/dump/post', {
       ...callbacks({
-        onProgress: (event: AxiosProgressEvent) => {
+        onProgress: (event: HttpProgressEvent) => {
           pushEvent('onProgress')
           pushData('progressEvent', event)
         },
@@ -147,12 +146,48 @@ export default () => {
   const cancelledVisit = () => {
     form.post('/sleep', {
       ...callbacks({
-        onCancelToken: (token: CancelTokenSource) => {
+        onCancelToken: (token: CancelToken) => {
           pushEvent('onCancelToken')
           setTimeout(() => {
             pushEvent('CANCELLING!')
             token.cancel()
           }, 10)
+        },
+      }),
+    })
+  }
+
+  const onCancelProcessing = () => {
+    form.post('/sleep', {
+      ...callbacks({
+        onCancelToken: (token: CancelToken) => {
+          pushEvent('onCancelToken')
+          setTimeout(() => {
+            token.cancel()
+          }, 10)
+        },
+        onCancel: () => {
+          pushEvent('onCancel')
+        },
+      }),
+    })
+  }
+
+  const onCancelProgress = () => {
+    form.transform((data) => ({
+      ...data,
+      file: new File(['foobar'], 'example.bin'),
+    }))
+    form.post('/sleep', {
+      ...callbacks({
+        onCancelToken: (token: CancelToken) => {
+          pushEvent('onCancelToken')
+          setTimeout(() => {
+            token.cancel()
+          }, 10)
+        },
+        onCancel: () => {
+          pushEvent('onCancel')
         },
       }),
     })
@@ -298,6 +333,13 @@ export default () => {
       </button>
       <button onClick={onErrorPromiseVisit} className="error-promise">
         onError promise
+      </button>
+
+      <button onClick={onCancelProcessing} className="cancel-processing">
+        onCancel resets processing
+      </button>
+      <button onClick={onCancelProgress} className="cancel-progress">
+        onCancel progress property
       </button>
 
       <button onClick={progressNoFiles} className="no-progress">

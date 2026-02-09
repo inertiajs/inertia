@@ -99,12 +99,39 @@ test('props will re-defer if a link is clicked to go to the same page again', as
   await expect(page.getByText('bar value')).toBeVisible()
 })
 
-const shoulReload = ['only']
+const shouldShowReloading = ['only', 'except-other']
 
-shoulReload.forEach((type) => {
-  test(`it will handle partial reloads properly when deferred is being reloaded (${type})`, async ({ page }) => {
-    test.skip(process.env.PACKAGE !== 'react', 'React only test')
+shouldShowReloading.forEach((type) => {
+  test(`it shows reloading indicator when deferred prop is being reloaded (${type})`, async ({ page }) => {
+    await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
 
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+
+    await page.waitForResponse(page.url())
+
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+
+    const responsePromise = page.waitForResponse(page.url())
+
+    await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
+
+    await expect(page.locator('#reloading-indicator')).toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+
+    await responsePromise
+
+    await expect(page.getByText('John Doe')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+  })
+})
+
+const shouldNotShowReloading = ['except', 'only-other']
+
+shouldNotShowReloading.forEach((type) => {
+  test(`it does not show reloading indicator when deferred prop is not reloaded (${type})`, async ({ page }) => {
     await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
 
     await expect(page.getByText('Loading...')).toBeVisible()
@@ -115,9 +142,9 @@ shoulReload.forEach((type) => {
     await expect(page.getByText('John Doe')).toBeVisible()
 
     const responsePromise = page.waitForResponse(page.url())
-
     await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
 
     await responsePromise
 
@@ -125,34 +152,27 @@ shoulReload.forEach((type) => {
   })
 })
 
-const noReload = ['except', 'only-other', 'none', 'except-other']
+test('it shows fallback during full reload without only/except (none)', async ({ page }) => {
+  await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/none`)
 
-noReload.forEach((type) => {
-  test(`it will handle partial reloads properly when deferred is not reloaded (${type})`, async ({ page }) => {
-    test.skip(process.env.PACKAGE !== 'react', 'React only test')
+  await expect(page.getByText('Loading...')).toBeVisible()
 
-    await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
+  await page.waitForResponse(page.url())
 
-    await expect(page.getByText('Loading...')).toBeVisible()
+  await expect(page.getByText('Loading...')).not.toBeVisible()
+  await expect(page.getByText('John Doe')).toBeVisible()
 
-    await page.waitForResponse(page.url())
+  const responsePromise = page.waitForResponse(page.url())
+  await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
 
-    await expect(page.getByText('Loading...')).not.toBeVisible()
-    await expect(page.getByText('John Doe')).toBeVisible()
+  await expect(page.getByText('Loading...')).toBeVisible()
 
-    const responsePromise = page.waitForResponse(page.url())
-    await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
-    await expect(page.getByText('Loading...')).not.toBeVisible()
+  await responsePromise
 
-    await responsePromise
-
-    await expect(page.getByText('John Doe')).toBeVisible()
-  })
+  await expect(page.getByText('John Doe')).toBeVisible()
 })
 
 test('it will not revert to fallback when fetching a url that is different than the current page', async ({ page }) => {
-  test.skip(process.env.PACKAGE !== 'react', 'React only test')
-
   await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/only`)
 
   await expect(page.getByText('Loading...')).toBeVisible()
@@ -169,6 +189,7 @@ test('it will not revert to fallback when fetching a url that is different than 
   await page.waitForTimeout(100)
 
   await expect(page.getByText('Loading...')).not.toBeVisible()
+  await expect(page.locator('#reloading-indicator')).not.toBeVisible()
 
   await responsePromise
 
@@ -328,6 +349,39 @@ test('router.reload() without only/except triggers deferred props to reload', as
   await expect(page.getByText('Loading results...')).not.toBeVisible()
   await expect(page.locator('#results-data')).toHaveText('Item 2-1, Item 2-2, Item 2-3')
   await expect(page.locator('#results-page')).toHaveText('Page: 2')
+})
+
+test('it does not render children with undefined props during reload (#2758)', async ({ page }) => {
+  consoleMessages.listen(page)
+
+  await gotoPageAndWaitForContent(page, '/deferred-props/reload-without-optional-chaining')
+
+  expect(consoleMessages.errors).toHaveLength(0)
+
+  await expect(page.getByText('Loading results...')).toBeVisible()
+
+  await page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'results' && response.status() === 200,
+  )
+
+  await expect(page.getByText('Loading results...')).not.toBeVisible()
+  await expect(page.locator('#results-data')).toHaveText('Item 1-1, Item 1-2, Item 1-3')
+  await expect(page.locator('#results-page')).toHaveText('Page: 1')
+
+  consoleMessages.errors = []
+
+  const deferredResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'results' && response.status() === 200,
+  )
+
+  await page.getByRole('button', { name: 'Reload with page 2' }).click()
+
+  await deferredResponsePromise
+
+  await expect(page.locator('#results-data')).toHaveText('Item 2-1, Item 2-2, Item 2-3')
+  await expect(page.locator('#results-page')).toHaveText('Page: 2')
+
+  expect(consoleMessages.errors).toHaveLength(0)
 })
 
 test('deferred props do not clear validation errors', async ({ page }) => {
