@@ -192,7 +192,7 @@ export class Router {
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
-    return polls.add(interval, () => this.reload(requestOptions), {
+    return polls.add(interval, () => this.reload({ preserveErrors: true, ...requestOptions }), {
       autoStart: options.autoStart ?? true,
       keepAlive: options.keepAlive ?? false,
     })
