@@ -291,3 +291,38 @@ test('it does not trigger unneeded requests when params change while visible', a
 
   expect(requests.requests).toHaveLength(0)
 })
+
+test('it preserves validation errors when WhenVisible loads data', async ({ page }) => {
+  await page.goto('/when-visible/preserve-errors')
+
+  await expect(page.locator('#page-error')).not.toBeVisible()
+  await expect(page.locator('#form-error')).not.toBeVisible()
+
+  // Submit form to trigger validation error
+  const errorResponsePromise = page.waitForResponse(
+    (response) => !response.request().headers()['x-inertia-partial-data'] && response.status() === 200,
+  )
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await errorResponsePromise
+
+  // Errors should be visible
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+
+  // Scroll to trigger WhenVisible
+  const whenVisibleResponsePromise = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+  )
+  await page.evaluate(() => (window as any).scrollTo(0, 3000))
+  await expect(page.locator('#loading')).toBeVisible()
+  await whenVisibleResponsePromise
+
+  // Errors should still be visible after WhenVisible loads
+  await expect(page.locator('#foo')).toHaveText('Foo: foo value')
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+})
