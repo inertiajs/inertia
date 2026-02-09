@@ -107,21 +107,24 @@ shoulReload.forEach((type) => {
 
     await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
 
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...', { exact: true })).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
 
     await page.waitForResponse(page.url())
 
-    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('Loading...', { exact: true })).not.toBeVisible()
     await expect(page.getByText('John Doe')).toBeVisible()
 
     const responsePromise = page.waitForResponse(page.url())
 
     await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...', { exact: true })).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).toBeVisible()
 
     await responsePromise
 
     await expect(page.getByText('John Doe')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
   })
 })
 
@@ -133,16 +136,16 @@ noReload.forEach((type) => {
 
     await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
 
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.getByText('Loading...', { exact: true })).toBeVisible()
 
     await page.waitForResponse(page.url())
 
-    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('Loading...', { exact: true })).not.toBeVisible()
     await expect(page.getByText('John Doe')).toBeVisible()
 
     const responsePromise = page.waitForResponse(page.url())
     await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
-    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('Loading...', { exact: true })).not.toBeVisible()
 
     await responsePromise
 
@@ -169,6 +172,85 @@ test('it will not revert to fallback when fetching a url that is different than 
   await page.waitForTimeout(100)
 
   await expect(page.getByText('Loading...')).not.toBeVisible()
+
+  await responsePromise
+
+  await expect(page.getByText('John Doe')).toBeVisible()
+})
+
+const shouldShowReloading = ['only', 'except-other']
+
+shouldShowReloading.forEach((type) => {
+  test(`it shows reloading indicator when deferred prop is being reloaded (${type})`, async ({ page }) => {
+    test.skip(process.env.PACKAGE === 'react', 'Vue and Svelte only test')
+
+    await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
+
+    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+
+    await page.waitForResponse(page.url())
+
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+
+    const responsePromise = page.waitForResponse(page.url())
+
+    await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
+
+    await expect(page.locator('#reloading-indicator')).toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+
+    await responsePromise
+
+    await expect(page.getByText('John Doe')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+  })
+})
+
+const shouldNotShowReloading = ['except', 'only-other']
+
+shouldNotShowReloading.forEach((type) => {
+  test(`it does not show reloading indicator when deferred prop is not reloaded (${type})`, async ({ page }) => {
+    test.skip(process.env.PACKAGE === 'react', 'Vue and Svelte only test')
+
+    await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/${type}`)
+
+    await expect(page.getByText('Loading...')).toBeVisible()
+
+    await page.waitForResponse(page.url())
+
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.getByText('John Doe')).toBeVisible()
+
+    const responsePromise = page.waitForResponse(page.url())
+    await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
+    await expect(page.getByText('Loading...')).not.toBeVisible()
+    await expect(page.locator('#reloading-indicator')).not.toBeVisible()
+
+    await responsePromise
+
+    await expect(page.getByText('John Doe')).toBeVisible()
+  })
+})
+
+test('it shows fallback during full reload without only/except (none)', async ({ page }) => {
+  test.skip(process.env.PACKAGE === 'react', 'Vue and Svelte only test')
+
+  await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/none`)
+
+  await expect(page.getByText('Loading...')).toBeVisible()
+
+  await page.waitForResponse(page.url())
+
+  await expect(page.getByText('Loading...')).not.toBeVisible()
+  await expect(page.getByText('John Doe')).toBeVisible()
+
+  const responsePromise = page.waitForResponse(page.url())
+  await page.getByRole('button', { exact: true, name: 'Trigger a partial reload' }).click()
+
+  await expect(page.getByText('Loading...')).toBeVisible()
 
   await responsePromise
 
