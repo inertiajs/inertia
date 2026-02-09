@@ -47,6 +47,12 @@ module.exports = {
         return carry
       }, {})
 
+    if (data.alwaysProps) {
+      // To simulate Inertia::always() in the Laravel adapter...
+      data.props = { ...data.props, ...data.alwaysProps }
+      delete data.alwaysProps
+    }
+
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)

@@ -106,3 +106,32 @@ Object.entries({
     await expect(page.locator('.replaceStateCalls')).toHaveText('1')
   })
 })
+
+test('it preserves validation errors when poll reloads data', async ({ page }) => {
+  await page.goto('/poll/preserve-errors')
+
+  await expect(page.locator('#page-error')).not.toBeVisible()
+  await expect(page.locator('#form-error')).not.toBeVisible()
+
+  // Submit form to trigger validation error
+  const errorResponsePromise = page.waitForResponse(
+    (response) => !response.request().headers()['x-inertia-partial-data'] && response.status() === 200,
+  )
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await errorResponsePromise
+
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+
+  // Wait for a poll response (partial reload)
+  await page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'time' && response.status() === 200,
+  )
+
+  await expect(page.locator('#page-error')).toBeVisible()
+  await expect(page.locator('#page-error')).toHaveText('The name field is required.')
+  await expect(page.locator('#form-error')).toBeVisible()
+  await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+})

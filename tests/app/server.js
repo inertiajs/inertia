@@ -740,6 +740,28 @@ app.get('/poll/unchanged-data/encrypted', (req, res) =>
   }),
 )
 
+let pollPreserveErrorsState = {}
+
+app.get('/poll/preserve-errors', (req, res) => {
+  const errors = { ...pollPreserveErrorsState }
+  pollPreserveErrorsState = {}
+
+  inertia.render(req, res, {
+    component: 'Poll/PreserveErrors',
+    props: {
+      time: Date.now(),
+    },
+    alwaysProps: {
+      errors,
+    },
+  })
+})
+
+app.post('/poll/preserve-errors', (req, res) => {
+  pollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/poll/preserve-errors')
+})
+
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
 })
@@ -1013,23 +1035,17 @@ app.get('/when-visible/preserve-errors', (req, res) => {
   const errors = { ...whenVisiblePreserveErrorsState }
   whenVisiblePreserveErrorsState = {}
 
-  if (req.headers['x-inertia-partial-data']) {
-    setTimeout(() => {
-      inertia.render(req, res, {
-        component: 'WhenVisiblePreserveErrors',
-        props: {
-          foo: 'foo value',
-          errors: {},
-        },
-      })
-    }, 100)
-  } else {
+  const render = (props) =>
     inertia.render(req, res, {
       component: 'WhenVisiblePreserveErrors',
-      props: {
-        errors,
-      },
+      props,
+      alwaysProps: { errors },
     })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => render({ foo: 'foo value' }), 100)
+  } else {
+    render({})
   }
 })
 
@@ -2165,8 +2181,8 @@ app.get('/infinite-scroll/preserve-errors', (req, res) => {
         component: 'InfiniteScroll/PreserveErrors',
         props: {
           users: paginated,
-          errors: partialReload ? {} : errors,
         },
+        alwaysProps: { errors },
         [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
         scrollProps: { users: scrollProp },
       }),
