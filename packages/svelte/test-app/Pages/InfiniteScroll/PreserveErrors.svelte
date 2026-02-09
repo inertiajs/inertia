@@ -2,42 +2,46 @@
   import { InfiniteScroll, useForm, page } from '@inertiajs/svelte'
   import UserCard, { type User } from './UserCard.svelte'
 
-  export let users: { data: User[] }
+  interface Props {
+    users: { data: User[] }
+  }
+
+  let { users }: Props = $props()
 
   const form = useForm({ name: '' })
 
-  function submit() {
-    $form.post('/infinite-scroll/preserve-errors')
+  const submit = () => {
+    form.post('/infinite-scroll/preserve-errors')
   }
 </script>
 
-{#if $page.props.errors?.name}
-  <p id="page-error">{$page.props.errors.name}</p>
+{#if page.props.errors?.name}
+  <p id="page-error">{page.props.errors.name}</p>
 {/if}
-{#if $form.errors.name}
-  <p id="form-error">{$form.errors.name}</p>
+{#if form.errors.name}
+  <p id="form-error">{form.errors.name}</p>
 {/if}
 
-<button type="button" on:click={submit}>Submit</button>
+<button type="button" onclick={submit}>Submit</button>
 
 <InfiniteScroll data="users" style="display: grid; gap: 20px" manual>
-  <div slot="previous" let:hasMore let:loading let:fetch>
+  {#snippet previous({ hasMore, loading, fetch })}
     {#if hasMore}
-      <button id="load-previous" on:click={fetch}>
+      <button id="load-previous" onclick={fetch}>
         {loading ? 'Loading previous items...' : 'Load previous items'}
       </button>
     {/if}
-  </div>
+  {/snippet}
 
   {#each users.data as user (user.id)}
     <UserCard {user} />
   {/each}
 
-  <div slot="next" let:hasMore let:loading let:fetch>
+  {#snippet next({ hasMore, loading, fetch })}
     {#if hasMore}
-      <button id="load-next" on:click={fetch}>
+      <button id="load-next" onclick={fetch}>
         {loading ? 'Loading next items...' : 'Load next items'}
       </button>
     {/if}
-  </div>
+  {/snippet}
 </InfiniteScroll>
