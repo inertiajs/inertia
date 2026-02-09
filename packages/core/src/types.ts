@@ -573,7 +573,7 @@ export type InertiaAppConfig = {
     forceIndicesArrayFormatInFormData: boolean
   }
   legacy: {
-    useDataElementForInitialPage: boolean
+    useDataAttributeForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]

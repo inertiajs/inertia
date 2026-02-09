@@ -47,8 +47,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   const isServer = typeof window === 'undefined'
-  const useDataElement = config.get('legacy.useDataElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataElement)!
+  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
 
   const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve(name, page))
 
@@ -69,7 +69,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const { body, head, css } = svelteApp
 
     return {
-      body: useDataElement
+      body: useDataAttribute
         ? `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${body}</div>`
         : `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${body}</div>`,
       head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
