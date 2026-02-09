@@ -76,7 +76,7 @@ export const config = new Config<InertiaAppConfig>({
     forceIndicesArrayFormatInFormData: true,
   },
   legacy: {
-    useDataElementForInitialPage: false,
+    useDataAttributeForInitialPage: false,
   },
   prefetch: {
     cacheFor: 30_000,

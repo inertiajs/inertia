@@ -70,8 +70,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   const isServer = typeof window === 'undefined'
-  const useDataElement = config.get('legacy.useDataElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataElement)!
+  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve(name, page)).then((module) => {
@@ -116,7 +116,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render) {
     const element = () => {
-      if (useDataElement) {
+      if (useDataAttribute) {
         return createElement(
           'div',
           {
