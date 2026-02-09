@@ -15,7 +15,7 @@ type SourceMapResolver = (
 
 let sourceMapResolver: SourceMapResolver | null = null
 
-export function setSourceMapResolver(resolver: SourceMapResolver): void {
+export function setSourceMapResolver(resolver: SourceMapResolver | null): void {
   sourceMapResolver = resolver
 }
 

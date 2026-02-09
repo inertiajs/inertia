@@ -3,7 +3,7 @@ import { classifySSRError, formatConsoleError, setSourceMapResolver } from '../s
 
 describe('SSR Errors', () => {
   beforeEach(() => {
-    setSourceMapResolver(null as any)
+    setSourceMapResolver(null)
   })
 
   describe('classifySSRError', () => {
