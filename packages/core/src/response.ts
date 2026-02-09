@@ -1,6 +1,5 @@
-import { AxiosResponse } from 'axios'
 import { get, isEqual, set } from 'lodash-es'
-import { config, router } from '.'
+import { router } from '.'
 import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
@@ -11,12 +10,11 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
-import modal from './modal'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
@@ -26,11 +24,11 @@ export class Response {
 
   constructor(
     protected requestParams: RequestParams,
-    protected response: AxiosResponse,
+    protected response: HttpResponse,
     protected originatingPage: Page,
   ) {}
 
-  public static create(params: RequestParams, response: AxiosResponse, originatingPage: Page): Response {
+  public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
     return new Response(params, response, originatingPage)
   }
 
@@ -131,7 +129,7 @@ export class Response {
     }
 
     if (fireInvalidEvent(response)) {
-      return config.get('future.useDialogForErrorModal') ? dialog.show(response.data) : modal.show(response.data)
+      return dialog.show(response.data)
     }
   }
 
@@ -253,7 +251,7 @@ export class Response {
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
-    if (pageResponse.component !== currentPage.get().component || config.get('future.preserveEqualProps') !== true) {
+    if (pageResponse.component !== currentPage.get().component) {
       return
     }
 
@@ -334,13 +332,8 @@ export class Response {
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
-    if (this.requestParams.isDeferredPropsRequest()) {
-      const currentErrors = currentPage.get().props.errors
-
-      if (currentErrors && Object.keys(currentErrors).length > 0) {
-        // Preserve existing errors during deferred props requests
-        pageResponse.props.errors = currentErrors
-      }
+    if (this.shouldPreserveErrors(pageResponse)) {
+      pageResponse.props.errors = currentPage.get().props.errors
     }
 
     // Preserve the existing scrollProps
@@ -369,6 +362,32 @@ export class Response {
     if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
       pageResponse.initialDeferredProps = currentOriginalDeferred
     }
+  }
+
+  /**
+   * By default, the Laravel adapter shares validation errors via Inertia::always(),
+   * so responses always include errors, even when empty. Components like
+   * InfiniteScroll and WhenVisible, as well as loading deferred props,
+   * perform async requests that should practically never reset errors.
+   */
+  protected shouldPreserveErrors(pageResponse: Page): boolean {
+    if (!this.requestParams.all().preserveErrors) {
+      return false
+    }
+
+    const currentErrors = currentPage.get().props.errors
+
+    if (!currentErrors || Object.keys(currentErrors).length === 0) {
+      return false
+    }
+
+    const responseErrors = pageResponse.props.errors
+
+    if (responseErrors && Object.keys(responseErrors).length > 0) {
+      return false
+    }
+
+    return true
   }
 
   protected mergeOrMatchItems(

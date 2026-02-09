@@ -7,7 +7,7 @@
 
   let { appName, foo, bar, quux } = $props()
 
-  let customHeaders = { 'X-Custom-Header': 'Demo-Value' }
+  let customHeaders = $state({ 'X-Custom-Header': 'Demo-Value' })
   let errorBag = 'custom-bag'
 </script>
 

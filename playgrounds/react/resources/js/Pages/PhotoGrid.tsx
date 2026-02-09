@@ -35,6 +35,6 @@ const PhotoGrid = ({
   )
 }
 
-PhotoGrid.layout = (page: React.ReactElement) => <Layout>{page}</Layout>
+PhotoGrid.layout = Layout
 
 export default PhotoGrid

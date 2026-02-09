@@ -22,6 +22,6 @@ const User = ({ user }) => {
   )
 }
 
-User.layout = (page) => <Layout children={page} />
+User.layout = Layout
 
 export default User

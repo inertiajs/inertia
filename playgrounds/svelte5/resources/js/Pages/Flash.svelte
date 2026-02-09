@@ -3,9 +3,11 @@
 </script>
 
 <script>
-  import { Link, page, router } from '@inertiajs/svelte'
+  import { Link, usePage, router } from '@inertiajs/svelte'
 
   let { appName } = $props()
+
+  const page = usePage()
 
   let flashLog = $state([])
 
@@ -38,7 +40,7 @@
 <div class="mt-6 space-y-6">
   <div>
     <h2 class="text-lg font-semibold">Current page.flash</h2>
-    <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify($page.flash ?? 'null', null, 2)}</pre>
+    <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">{JSON.stringify(page.flash ?? 'null', null, 2)}</pre>
   </div>
 
   <div>

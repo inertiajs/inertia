@@ -1,11 +1,7 @@
-import { config, HeadManager, HeadManagerOnUpdateCallback, HeadManagerTitleCallback } from '.'
+import { HeadManager, HeadManagerOnUpdateCallback, HeadManagerTitleCallback } from '.'
 import debounce from './debounce'
 
 const Renderer = {
-  preferredAttribute(): 'data-inertia' | 'inertia' {
-    return config.get('future.useDataInertiaHeadAttribute') ? 'data-inertia' : 'inertia'
-  },
-
   buildDOMElement(tag: string): ChildNode {
     const template = document.createElement('template')
     template.innerHTML = tag
@@ -25,14 +21,13 @@ const Renderer = {
   },
 
   isInertiaManagedElement(element: Element): boolean {
-    return element.nodeType === Node.ELEMENT_NODE && element.getAttribute(this.preferredAttribute()) !== null
+    return element.nodeType === Node.ELEMENT_NODE && element.getAttribute('data-inertia') !== null
   },
 
   findMatchingElementIndex(element: Element, elements: Array<Element>): number {
-    const attribute = this.preferredAttribute()
-    const key = element.getAttribute(attribute)
+    const key = element.getAttribute('data-inertia')
     if (key !== null) {
-      return elements.findIndex((element) => element.getAttribute(attribute) === key)
+      return elements.findIndex((element) => element.getAttribute('data-inertia') === key)
     }
 
     return -1
@@ -100,10 +95,9 @@ export default function createHeadManager(
 
   function collect(): Array<string> {
     const title = titleCallback('')
-    const attribute = Renderer.preferredAttribute()
 
     const defaults: Record<string, string> = {
-      ...(title ? { title: `<title ${attribute}="">${title}</title>` } : {}),
+      ...(title ? { title: `<title data-inertia="">${title}</title>` } : {}),
     }
 
     const elements = Object.values(states)
@@ -119,7 +113,7 @@ export default function createHeadManager(
           return carry
         }
 
-        const match = element.match(attribute === 'inertia' ? / inertia="[^"]+"/ : / data-inertia="[^"]+"/)
+        const match = element.match(/ data-inertia="[^"]+"/)
         if (match) {
           carry[match[0]] = element
         } else {
@@ -146,7 +140,6 @@ export default function createHeadManager(
       const id = connect()
 
       return {
-        preferredAttribute: Renderer.preferredAttribute,
         reconnect: () => reconnect(id),
         update: (elements) => update(id, elements),
         disconnect: () => disconnect(id),

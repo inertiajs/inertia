@@ -40,9 +40,6 @@ importers:
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
-      axios:
-        specifier: ^1.13.2
-        version: 1.13.2
       laravel-precognition:
         specifier: ^1.0.1
         version: 1.0.1
@@ -56,6 +53,9 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.10.9
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       es-check:
         specifier: ^9.5.3
         version: 9.5.3

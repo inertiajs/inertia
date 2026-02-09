@@ -4,6 +4,7 @@ import {
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
   getInitialPageFromDOM,
+  http as httpModule,
   InertiaAppSSRResponse,
   Page,
   PageProps,
@@ -81,14 +82,19 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   page,
   render,
   defaults = {},
+  http,
 }:
   | InertiaAppOptionsForCSR<SharedProps>
   | InertiaAppOptionsForSSR<SharedProps>
   | InertiaAppOptionsAuto<SharedProps>): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
   config.replace(defaults)
 
+  if (http) {
+    httpModule.setClient(http)
+  }
+
   const isServer = typeof window === 'undefined'
-  const useScriptElement = config.get('future.useScriptElementForInitialPage')
+  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve!(name, page)).then((module) => {
@@ -124,13 +130,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       }
 
       const html = renderToString(reactApp)
-      const body = buildSSRBody(id, page, html, useScriptElement)
+      const body = buildSSRBody(id, page, html, !useDataAttribute)
 
       return { head, body }
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
 
   let head: string[] = []
 
@@ -178,7 +184,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render && reactApp) {
     const html = render(reactApp)
-    const body = buildSSRBody(id, initialPage, html, useScriptElement)
+    const body = buildSSRBody(id, initialPage, html, !useDataAttribute)
 
     return { head, body }
   }

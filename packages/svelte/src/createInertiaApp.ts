@@ -1,6 +1,7 @@
 import {
   buildSSRBody,
   getInitialPageFromDOM,
+  http as httpModule,
   router,
   setupProgress,
   type CreateInertiaAppOptions,
@@ -59,13 +60,18 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   progress = {},
   page,
   defaults = {},
+  http,
 }: InertiaAppOptionsForCSR<SharedProps> | InertiaAppOptionsAuto<SharedProps>): Promise<
   InertiaAppSSRResponse | RenderFunction<SharedProps> | void
 > {
   config.replace(defaults)
 
+  if (http) {
+    httpModule.setClient(http)
+  }
+
   const isServer = typeof window === 'undefined'
-  const useScriptElement = config.get('future.useScriptElementForInitialPage')
+  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
 
   const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve!(name, page))
 
@@ -93,7 +99,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         svelteApp = render(App, { props })
       }
 
-      const body = buildSSRBody(id, page, svelteApp.body, useScriptElement)
+      const body = buildSSRBody(id, page, svelteApp.body, !useDataAttribute)
 
       return {
         body,
@@ -102,7 +108,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElement)!
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
@@ -120,7 +126,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const svelteApp = await setup({ el: null, App, props })
 
     if (svelteApp) {
-      const body = buildSSRBody(id, initialPage, svelteApp.body, useScriptElement)
+      const body = buildSSRBody(id, initialPage, svelteApp.body, !useDataAttribute)
 
       return {
         body,

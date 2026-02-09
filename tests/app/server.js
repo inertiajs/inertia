@@ -211,9 +211,7 @@ app.get('/links/partial-reloads', (req, res) =>
     },
   }),
 )
-app.all('/error-modal', (req, res) =>
-  inertia.render(req, res, { component: 'ErrorModal', props: { dialog: !!req.query.dialog } }),
-)
+app.all('/error-modal', (req, res) => inertia.render(req, res, { component: 'ErrorModal' }))
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )
@@ -789,6 +787,14 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
 )
 
+app.get('/layout-props/basic', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/navigate', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/nested', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named-static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/default', (req, res) => inertia.render(req, res, {}))
+
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
@@ -806,6 +812,28 @@ app.get('/poll/unchanged-data/encrypted', (req, res) =>
     encryptHistory: true,
   }),
 )
+
+let pollPreserveErrorsState = {}
+
+app.get('/poll/preserve-errors', (req, res) => {
+  const errors = { ...pollPreserveErrorsState }
+  pollPreserveErrorsState = {}
+
+  inertia.render(req, res, {
+    component: 'Poll/PreserveErrors',
+    props: {
+      time: Date.now(),
+    },
+    alwaysProps: {
+      errors,
+    },
+  })
+})
+
+app.post('/poll/preserve-errors', (req, res) => {
+  pollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/poll/preserve-errors')
+})
 
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
@@ -1072,6 +1100,31 @@ app.get('/when-visible-params-update', (req, res) => {
       props: {},
     })
   }
+})
+
+let whenVisiblePreserveErrorsState = {}
+
+app.get('/when-visible/preserve-errors', (req, res) => {
+  const errors = { ...whenVisiblePreserveErrorsState }
+  whenVisiblePreserveErrorsState = {}
+
+  const render = (props) =>
+    inertia.render(req, res, {
+      component: 'WhenVisiblePreserveErrors',
+      props,
+      alwaysProps: { errors },
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => render({ foo: 'foo value' }), 100)
+  } else {
+    render({})
+  }
+})
+
+app.post('/when-visible/preserve-errors', (req, res) => {
+  whenVisiblePreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/when-visible/preserve-errors')
 })
 
 app.get('/progress/:pageNumber', (req, res) => {
@@ -2184,6 +2237,37 @@ app.get('/infinite-scroll/deferred', (req, res) => {
   )
 })
 
+let infiniteScrollPreserveErrorsState = {}
+
+app.get('/infinite-scroll/preserve-errors', (req, res) => {
+  const errors = { ...infiniteScrollPreserveErrorsState }
+  infiniteScrollPreserveErrorsState = {}
+
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/PreserveErrors',
+        props: {
+          users: paginated,
+        },
+        alwaysProps: { errors },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+app.post('/infinite-scroll/preserve-errors', (req, res) => {
+  infiniteScrollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/infinite-scroll/preserve-errors')
+})
+
 app.post('/view-transition/form-errors', (req, res) =>
   inertia.render(req, res, {
     component: 'ViewTransition/FormErrors',
@@ -2557,6 +2641,190 @@ app.get('/reload/concurrent', (req, res) => {
   )
 })
 
+// JSON API endpoints for useHttp testing
+app.get('/api/data', (req, res) => {
+  res.json({
+    items: ['apple', 'banana', 'cherry'],
+    total: 3,
+    query: req.query.query || null,
+  })
+})
+
+app.post('/api/users', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    id: 123,
+    user: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  })
+})
+
+app.post('/api/validate', upload.none(), (req, res) => {
+  const errors = {}
+
+  if (!req.body.name || req.body.name.trim() === '') {
+    errors.name = ['The name field is required.']
+  }
+
+  if (!req.body.email || !req.body.email.includes('@')) {
+    errors.email = ['The email field must be a valid email address.']
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(422).json({ errors })
+  }
+
+  res.json({ success: true })
+})
+
+app.delete('/api/users/:id', (req, res) => {
+  res.json({
+    success: true,
+    deleted: parseInt(req.params.id),
+  })
+})
+
+app.put('/api/users/:id', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    id: parseInt(req.params.id),
+    user: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  })
+})
+
+app.patch('/api/users/:id', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    id: parseInt(req.params.id),
+    user: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  })
+})
+
+app.get('/api/slow', (req, res) => {
+  setTimeout(() => {
+    res.json({ result: 'slow response' })
+  }, 2000)
+})
+
+app.post('/api/error', upload.none(), (req, res) => {
+  res.status(500).json({ message: 'Internal server error' })
+})
+
+// File upload endpoint
+app.post('/api/upload', upload.any(), (req, res) => {
+  const files = (req.files || []).map((file) => ({
+    fieldname: file.fieldname,
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+  }))
+
+  res.json({
+    success: true,
+    files,
+    fileCount: files.length,
+    formData: req.body,
+  })
+})
+
+// Headers dump endpoint
+app.all('/api/headers', upload.none(), (req, res) => {
+  res.json({
+    headers: req.headers,
+    method: req.method.toLowerCase(),
+  })
+})
+
+// Nested data endpoint
+app.post('/api/nested', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    received: req.body,
+  })
+})
+
+// Transform endpoint
+app.post('/api/transform', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    received: req.body,
+  })
+})
+
+// Lifecycle callbacks test endpoint
+app.post('/api/lifecycle', upload.none(), (req, res) => {
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: 'Lifecycle test complete',
+      received: req.body,
+    })
+  }, 100)
+})
+
+// Lifecycle callbacks test endpoint that returns validation error
+app.post('/api/lifecycle-error', upload.none(), (req, res) => {
+  setTimeout(() => {
+    res.status(422).json({
+      errors: {
+        field: ['Validation error for lifecycle test'],
+      },
+    })
+  }, 100)
+})
+
+// Slow upload endpoint for progress testing
+app.post('/api/slow-upload', upload.any(), (req, res) => {
+  setTimeout(() => {
+    const files = (req.files || []).map((file) => ({
+      fieldname: file.fieldname,
+      originalname: file.originalname,
+      size: file.size,
+    }))
+
+    res.json({
+      success: true,
+      files,
+    })
+  }, 500)
+})
+
+// Mixed content endpoint (files + nested data)
+app.post('/api/mixed', upload.any(), (req, res) => {
+  const files = (req.files || []).map((file) => ({
+    fieldname: file.fieldname,
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+  }))
+
+  res.json({
+    success: true,
+    files,
+    fileCount: files.length,
+    formData: req.body,
+  })
+})
+
+app.get('/use-http', (req, res) => inertia.render(req, res, { component: 'UseHttp/Index' }))
+app.get('/use-http/methods', (req, res) => inertia.render(req, res, { component: 'UseHttp/Methods' }))
+app.get('/use-http/file-upload', (req, res) => inertia.render(req, res, { component: 'UseHttp/FileUpload' }))
+app.get('/use-http/headers', (req, res) => inertia.render(req, res, { component: 'UseHttp/Headers' }))
+app.get('/use-http/nested-data', (req, res) => inertia.render(req, res, { component: 'UseHttp/NestedData' }))
+app.get('/use-http/transform', (req, res) => inertia.render(req, res, { component: 'UseHttp/Transform' }))
+app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { component: 'UseHttp/Lifecycle' }))
+app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
+app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
+app.get('/use-http/submit', (req, res) => inertia.render(req, res, { component: 'UseHttp/Submit' }))
+
 app.get('/reload/concurrent-with-data', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']
   const timeframe = req.query.timeframe || 'day'
@@ -2584,6 +2852,12 @@ app.get('/reload/concurrent-with-data', (req, res) => {
       }),
     600,
   )
+})
+
+app.get('/http-handlers', (req, res) => inertia.render(req, res, { component: 'HttpHandlers', props: {} }))
+
+app.get('/http-handlers/error', (req, res) => {
+  res.status(500).send('Internal Server Error')
 })
 
 app.all('*page', (req, res) => inertia.render(req, res))

@@ -13,6 +13,6 @@ const Login = () => {
   )
 }
 
-Login.layout = (page) => <Layout children={page} />
+Login.layout = Layout
 
 export default Login

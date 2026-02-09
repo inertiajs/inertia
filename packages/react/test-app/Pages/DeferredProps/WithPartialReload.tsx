@@ -11,7 +11,12 @@ const WithPartialReload = ({ withOnly, withExcept }: { withOnly?: string[]; with
   return (
     <div>
       <Deferred data="users" fallback={<span>Loading...</span>}>
-        <DeferredUsers />
+        {({ reloading }) => (
+          <>
+            {reloading && <span id="reloading-indicator">Reloading...</span>}
+            <DeferredUsers />
+          </>
+        )}
       </Deferred>
       <button onClick={handleTriggerPartialReload}>Trigger a partial reload</button>
       <Link href="/deferred-props/page-1" prefetch="hover">

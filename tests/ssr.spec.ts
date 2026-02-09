@@ -11,8 +11,7 @@ test.describe('SSR', () => {
       const response = await page.request.get('/ssr/page1')
       const html = await response.text()
 
-      // Verify server-rendered content (using regex to handle React's comment nodes)
-      expect(html).toContain('data-page=')
+      expect(html).toContain('<script data-page="app" type="application/json">')
       expect(html).toMatch(/Name:.*John Doe/)
       expect(html).toMatch(/Email:.*john@example\.com/)
       expect(html).toContain('Item 1')
@@ -34,7 +33,7 @@ test.describe('SSR', () => {
     })
   })
 
-  test('embeds page data in a script element instead of data-page attribute', async ({ page }) => {
+  test('embeds page data in a script element', async ({ page }) => {
     const response = await page.request.get('/ssr/page-with-script-element')
     const html = await response.text()
 

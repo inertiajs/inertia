@@ -14,6 +14,6 @@ const First = ({ foo, bar, baz1, qux }: { foo: string; bar: string; baz1: string
   )
 }
 
-First.layout = (page: React.ReactNode) => <Layout children={page} />
+First.layout = Layout
 
 export default First
