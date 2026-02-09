@@ -566,6 +566,8 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   title?: HeadManagerTitleCallback
   progress?: ProgressOptions | false
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
 }
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
