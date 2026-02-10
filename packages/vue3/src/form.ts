@@ -371,8 +371,20 @@ const Form = defineComponent({
   },
 })
 
-export function useFormContext(): FormComponentRef | undefined {
-  return inject(FormContextKey)
+export function useFormContext<TForm extends object = Record<string, any>>(): FormComponentRef<TForm> | undefined {
+  return inject(FormContextKey) as FormComponentRef<TForm> | undefined
+}
+
+type TypedFormComponent<TForm extends Record<string, any>> = typeof Form & {
+  new (): {
+    $slots: {
+      default: (props: FormComponentSlotProps<TForm>) => any
+    }
+  }
+}
+
+export function createForm<TForm extends Record<string, any>>(): TypedFormComponent<TForm> {
+  return Form as TypedFormComponent<TForm>
 }
 
 export default Form

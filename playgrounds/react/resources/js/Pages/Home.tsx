@@ -15,6 +15,6 @@ const Home = () => {
   )
 }
 
-Home.layout = (page) => <Layout children={page} />
+Home.layout = Layout
 
 export default Home

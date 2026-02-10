@@ -11,7 +11,7 @@
   "homepage": "https://inertiajs.com/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inertiajs/inertia.git",
+    "url": "git+https://github.com/inertiajs/inertia.git",
     "directory": "packages/inertia"
   },
   "bugs": {
@@ -50,9 +50,11 @@
     "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
     "dev:build": "./build.js --watch",
     "dev:types": "tsc --watch --preserveWatchOutput",
-    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
+    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.31",
     "@types/lodash-es": "^4.17.12",
     "laravel-precognition": "^1.0.1",
     "lodash-es": "^4.17.23",
@@ -72,6 +74,7 @@
     "es-check": "^9.5.3",
     "esbuild": "^0.27.2",
     "esbuild-node-externals": "^1.20.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

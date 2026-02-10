@@ -30,6 +30,8 @@ export class RequestParams {
         onCancel: this.wrapCallback(params, 'onCancel'),
         onSuccess: this.wrapCallback(params, 'onSuccess'),
         onError: this.wrapCallback(params, 'onError'),
+        onHttpException: this.wrapCallback(params, 'onHttpException'),
+        onNetworkError: this.wrapCallback(params, 'onNetworkError'),
         onFlash: this.wrapCallback(params, 'onFlash'),
         onCancelToken: this.wrapCallback(params, 'onCancelToken'),
         onPrefetched: this.wrapCallback(params, 'onPrefetched'),

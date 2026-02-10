@@ -448,41 +448,71 @@ test.describe('Events', () => {
     })
   })
 
-  test.describe('invalid', () => {
+  test.describe('httpException', () => {
     test('gets fired when a non-Inertia response is received', async ({ page }) => {
-      await listenForGlobalMessages(page, 'inertia:invalid')
-      await clickAndWaitForResponse(page, 'Invalid Event', 'non-inertia')
+      await listenForGlobalMessages(page, 'inertia:httpException')
+      await clickAndWaitForResponse(page, 'HTTP Exception Event', 'non-inertia')
 
-      const messages = await waitForMessages(page, 4)
-      const globalMessages = await waitForGlobalMessages(page, 'inertia:invalid', 1)
+      const messages = await waitForMessages(page, 5)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:httpException', 1)
 
-      await assertIsGlobalEvent(globalMessages[0], 'inertia:invalid', true)
+      await assertIsGlobalEvent(globalMessages[0], 'inertia:httpException', true)
       await assertResponseObject(globalMessages[0].detail.response)
 
+      // Local Event Callback
+      await expect(messages[0]).toBe('onHttpException')
+
       // Global Inertia Event Listener
-      await expect(messages[0]).toBe('Inertia.on(invalid)')
+      await expect(messages[1]).toBe('Inertia.on(httpException)')
 
       // Global Native Event Listener
-      await expect(messages[2]).toBe('addEventListener(inertia:invalid)')
+      await expect(messages[3]).toBe('addEventListener(inertia:httpException)')
+    })
+
+    test('can prevent the default behavior by returning false from the visit callback', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:httpException')
+      await clickAndWaitForResponse(page, 'HTTP Exception Event (Prevent)', 'non-inertia')
+
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:httpException')
+
+      // Local Event Callback fires
+      await expect(messages[0]).toBe('onHttpException')
+      await assertResponseObject(messages[1])
+
+      // Global events should not have fired
+      await expect(globalMessages).toHaveLength(0)
     })
   })
 
-  test.describe('exception', () => {
+  test.describe('networkError', () => {
     test('gets fired when an unexpected situation occurs (e.g. network disconnect)', async ({ page }) => {
-      await listenForGlobalMessages(page, 'inertia:exception', true)
-      await page.getByRole('link', { exact: true, name: 'Exception Event' }).click()
+      await listenForGlobalMessages(page, 'inertia:networkError', true)
+      await page.getByRole('link', { exact: true, name: 'Network Error Event' }).click()
 
-      const messages = await waitForMessages(page, 4)
-      const globalMessages = await waitForGlobalMessages(page, 'inertia:exception', 1)
+      const messages = await waitForMessages(page, 5)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:networkError', 1)
 
-      await assertIsGlobalEvent(globalMessages[0], 'inertia:exception', true)
+      await assertIsGlobalEvent(globalMessages[0], 'inertia:networkError', true)
       await assertExceptionObject(JSON.parse(globalMessages[0].detail))
 
+      // Local Event Callback
+      await expect(messages[0]).toBe('onNetworkError')
+
       // Global Inertia Event Listener
-      await expect(messages[0]).toBe('Inertia.on(exception)')
+      await expect(messages[1]).toBe('Inertia.on(networkError)')
 
       // Global Native Event Listener
-      await expect(messages[2]).toBe('addEventListener(inertia:exception)')
+      await expect(messages[3]).toBe('addEventListener(inertia:networkError)')
+    })
+
+    test('can prevent the default behavior by returning false from the visit callback', async ({ page }) => {
+      await page.getByRole('link', { exact: true, name: 'Network Error Event (Prevent)' }).click()
+
+      const messages = await waitForMessages(page, 2)
+
+      // Local Event Callback fires
+      await expect(messages[0]).toBe('onNetworkError')
     })
   })
 

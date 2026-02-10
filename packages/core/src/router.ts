@@ -201,7 +201,7 @@ export class Router {
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
-    return polls.add(interval, () => this.reload(requestOptions), {
+    return polls.add(interval, () => this.reload({ preserveErrors: true, ...requestOptions }), {
       autoStart: options.autoStart ?? true,
       keepAlive: options.keepAlive ?? false,
     })
@@ -583,6 +583,7 @@ export class Router {
       fresh: false,
       reset: [],
       preserveUrl: false,
+      preserveErrors: false,
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
@@ -625,6 +626,8 @@ export class Router {
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onHttpException: options.onHttpException || (() => {}),
+      onNetworkError: options.onNetworkError || (() => {}),
       onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
@@ -674,7 +677,7 @@ export class Router {
   protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
-        this.doReload({ only: group, deferredProps: true })
+        this.doReload({ only: group, deferredProps: true, preserveErrors: true })
       })
     }
   }

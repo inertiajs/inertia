@@ -14,6 +14,6 @@ const Second = ({ foo, bar, baz2, qux }: { foo: string; bar: string; baz2: strin
   )
 }
 
-Second.layout = (page: React.ReactNode) => <Layout children={page} />
+Second.layout = Layout
 
 export default Second

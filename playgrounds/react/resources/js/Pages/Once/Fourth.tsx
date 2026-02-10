@@ -14,6 +14,6 @@ const Fourth = ({ foo, bar, baz4, qux }: { foo: string; bar: string; baz4: strin
   )
 }
 
-Fourth.layout = (page: React.ReactNode) => <Layout children={page} />
+Fourth.layout = Layout
 
 export default Fourth

@@ -4,6 +4,7 @@ import {
   InfiniteScrollComponentBaseProps,
   InfiniteScrollRef,
   InfiniteScrollSlotProps,
+  ReloadOptions,
   useInfiniteScroll,
   UseInfiniteScrollProps,
 } from '@inertiajs/core'
@@ -68,6 +69,9 @@ interface ComponentProps
   next?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
   loading?: React.ReactNode | ((props: InfiniteScrollActionSlotProps) => React.ReactNode)
 
+  // Request options
+  params?: ReloadOptions
+
   onlyNext?: boolean
   onlyPrevious?: boolean
 }
@@ -90,6 +94,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       previous,
       next,
       loading,
+      params = {},
       onlyNext = false,
       onlyPrevious = false,
       ...props
@@ -139,6 +144,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       onlyPrevious,
       reverse,
       preserveUrl,
+      params,
     })
 
     callbackPropsRef.current = {
@@ -147,6 +153,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       onlyPrevious,
       reverse,
       preserveUrl,
+      params,
     }
 
     const [infiniteScroll, setInfiniteScroll] = useState<UseInfiniteScrollProps | null>(null)
@@ -187,6 +194,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         shouldFetchNext: () => !callbackPropsRef.current.onlyPrevious,
         shouldFetchPrevious: () => !callbackPropsRef.current.onlyNext,
         shouldPreserveUrl: () => callbackPropsRef.current.preserveUrl,
+        getReloadOptions: () => callbackPropsRef.current.params,
 
         // Elements
         getTriggerMargin: () => callbackPropsRef.current.buffer,

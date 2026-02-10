@@ -41,6 +41,6 @@ const Async = ({
   )
 }
 
-Async.layout = (page) => <Layout children={page} />
+Async.layout = Layout
 
 export default Async

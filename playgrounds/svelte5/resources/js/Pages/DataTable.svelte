@@ -14,11 +14,11 @@
 </svelte:head>
 
 <InfiniteScroll data="users" class="mx-auto max-w-7xl px-8" buffer={3000} itemsElement="tbody">
-  <div slot="loading">
+  {#snippet loading()}
     <div class="flex justify-center py-16">
       <Spinner class="size-6 text-gray-400" />
     </div>
-  </div>
+  {/snippet}
 
   <div class="overflow-hidden rounded-2xl shadow ring-1 ring-gray-200">
     <table class="min-w-full">

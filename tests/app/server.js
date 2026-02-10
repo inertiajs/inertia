@@ -70,6 +70,79 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+// SSR auto-transform test routes (uses the Vite plugin SSR transform)
+app.get('/ssr-auto/page1', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page1',
+    props: {
+      user: { name: 'Auto User', email: 'auto@example.com' },
+      items: ['Auto 1', 'Auto 2', 'Auto 3'],
+      count: 100,
+    },
+  }),
+)
+
+app.get('/ssr-auto/page2', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
+// createInertiaApp (unified) test routes
+app.get('/unified', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'FooBar',
+    },
+  }),
+)
+
+app.get('/unified/navigate', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'Navigated',
+    },
+  }),
+)
+
+app.get('/unified/props', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Unified/Props',
+    props: {
+      foo: 'bar',
+      count: 42,
+      items: ['a', 'b', 'c'],
+    },
+  }),
+)
+
+// Auto transform test routes (pages shorthand transformed by Vite plugin)
+// Uses VitePages directory to prove transform uses the configured path
+app.get('/auto', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Home',
+    props: {
+      example: 'AutoTransform',
+    },
+  }),
+)
+
+app.get('/auto/props', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Props',
+    props: {
+      foo: 'vite-bar',
+      count: 123,
+      items: ['vite', 'plugin', 'test'],
+    },
+  }),
+)
+
 // Intercepts all CSS and JS assets (including files loaded via code splitting)
 app.get(/.*\.(?:js|css)$/, (req, res) => {
   const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
@@ -138,9 +211,7 @@ app.get('/links/partial-reloads', (req, res) =>
     },
   }),
 )
-app.all('/error-modal', (req, res) =>
-  inertia.render(req, res, { component: 'ErrorModal', props: { dialog: !!req.query.dialog } }),
-)
+app.all('/error-modal', (req, res) => inertia.render(req, res, { component: 'ErrorModal' }))
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )
@@ -716,6 +787,14 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
 )
 
+app.get('/layout-props/basic', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/navigate', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/nested', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named-static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/default', (req, res) => inertia.render(req, res, {}))
+
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
@@ -733,6 +812,28 @@ app.get('/poll/unchanged-data/encrypted', (req, res) =>
     encryptHistory: true,
   }),
 )
+
+let pollPreserveErrorsState = {}
+
+app.get('/poll/preserve-errors', (req, res) => {
+  const errors = { ...pollPreserveErrorsState }
+  pollPreserveErrorsState = {}
+
+  inertia.render(req, res, {
+    component: 'Poll/PreserveErrors',
+    props: {
+      time: Date.now(),
+    },
+    alwaysProps: {
+      errors,
+    },
+  })
+})
+
+app.post('/poll/preserve-errors', (req, res) => {
+  pollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/poll/preserve-errors')
+})
 
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
@@ -999,6 +1100,31 @@ app.get('/when-visible-params-update', (req, res) => {
       props: {},
     })
   }
+})
+
+let whenVisiblePreserveErrorsState = {}
+
+app.get('/when-visible/preserve-errors', (req, res) => {
+  const errors = { ...whenVisiblePreserveErrorsState }
+  whenVisiblePreserveErrorsState = {}
+
+  const render = (props) =>
+    inertia.render(req, res, {
+      component: 'WhenVisiblePreserveErrors',
+      props,
+      alwaysProps: { errors },
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => render({ foo: 'foo value' }), 100)
+  } else {
+    render({})
+  }
+})
+
+app.post('/when-visible/preserve-errors', (req, res) => {
+  whenVisiblePreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/when-visible/preserve-errors')
 })
 
 app.get('/progress/:pageNumber', (req, res) => {
@@ -2109,6 +2235,37 @@ app.get('/infinite-scroll/deferred', (req, res) => {
       }),
     250,
   )
+})
+
+let infiniteScrollPreserveErrorsState = {}
+
+app.get('/infinite-scroll/preserve-errors', (req, res) => {
+  const errors = { ...infiniteScrollPreserveErrorsState }
+  infiniteScrollPreserveErrorsState = {}
+
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/PreserveErrors',
+        props: {
+          users: paginated,
+        },
+        alwaysProps: { errors },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+app.post('/infinite-scroll/preserve-errors', (req, res) => {
+  infiniteScrollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/infinite-scroll/preserve-errors')
 })
 
 app.post('/view-transition/form-errors', (req, res) =>

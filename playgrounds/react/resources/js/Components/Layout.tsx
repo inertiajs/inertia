@@ -1,7 +1,8 @@
-import { Link, usePage } from '@inertiajs/react'
+import { Link, useLayoutProps, usePage } from '@inertiajs/react'
 
-export default function Layout({ children, padding = true }: { children: React.ReactNode; padding?: boolean }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   const { appName } = usePage().props
+  const { padding } = useLayoutProps({ padding: true })
 
   return (
     <>
@@ -51,6 +52,9 @@ export default function Layout({ children, padding = true }: { children: React.R
         </Link>
         <Link href="/flash" className="hover:underline">
           Flash
+        </Link>
+        <Link href="/ssr-debug" className="hover:underline">
+          SSR Debug
         </Link>
         <Link href="/logout" method="post" className="hover:underline">
           Logout

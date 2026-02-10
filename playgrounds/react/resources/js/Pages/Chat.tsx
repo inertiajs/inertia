@@ -153,6 +153,6 @@ const Chat = ({
   )
 }
 
-Chat.layout = (page: React.ReactElement) => <Layout padding={false}>{page}</Layout>
+Chat.layout = [Layout, { padding: false }]
 
 export default Chat

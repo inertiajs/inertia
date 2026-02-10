@@ -304,6 +304,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  preserveErrors: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
   optimistic?: OptimisticCallback
@@ -371,14 +372,14 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
-  invalid: {
+  httpException: {
     parameters: [HttpResponse]
     details: {
       response: HttpResponse
     }
     result: boolean | void
   }
-  exception: {
+  networkError: {
     parameters: [Error]
     details: {
       exception: Error
@@ -454,6 +455,8 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancel: GlobalEventCallback<'cancel', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
+  onHttpException: GlobalEventCallback<'httpException', T>
+  onNetworkError: GlobalEventCallback<'networkError', T>
   onFlash: GlobalEventCallback<'flash', T>
   onPrefetched: GlobalEventCallback<'prefetched', T>
   onPrefetching: GlobalEventCallback<'prefetching', T>
@@ -505,8 +508,24 @@ type FirstLevelOptional<T> = {
   [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
 }
 
-interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+type PagesOption =
+  | string
+  | {
+      path: string
+      extension?: string | string[]
+      transform?: (name: string) => string
+    }
+
+type ProgressOptions = {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
+interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
+  pages?: PagesOption
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
@@ -520,17 +539,10 @@ export interface CreateInertiaAppOptionsForCSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   page?: Page<SharedProps>
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
+  progress?: ProgressOptions | false
   render?: undefined
 }
 
@@ -540,7 +552,7 @@ export interface CreateInertiaAppOptionsForSSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined
@@ -551,11 +563,22 @@ export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
+
+export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+  id?: string
+  resolve?: TComponentResolver
+  pages?: PagesOption
+  setup?: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
+  progress?: ProgressOptions | false
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
+}
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   createProvider: () => {
-    preferredAttribute: () => 'data-inertia' | 'inertia'
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
     disconnect: () => void
@@ -577,15 +600,8 @@ export type InertiaAppConfig = {
     recentlySuccessfulDuration: number
     forceIndicesArrayFormatInFormData: boolean
   }
-  // experimental: {
-  //   /* not guaranteed */
-  // }
-  future: {
-    /* planned defaults */
-    preserveEqualProps: boolean
-    useDataInertiaHeadAttribute: boolean
-    useDialogForErrorModal: boolean
-    useScriptElementForInitialPage: boolean
+  legacy: {
+    useDataAttributeForInitialPage: boolean
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
@@ -713,30 +729,36 @@ export type FormComponentProps = Partial<
   withAllErrors?: boolean
 }
 
-export type FormComponentMethods = {
-  clearErrors: (...fields: string[]) => void
-  resetAndClearErrors: (...fields: string[]) => void
+export type FormComponentMethods<TForm extends object = Record<string, any>> = {
+  clearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  resetAndClearErrors: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   setError: {
-    (field: string, value: ErrorValue): void
-    (errors: Record<string, ErrorValue>): void
+    <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
+    (errors: FormDataErrors<TForm>): void
   }
-  reset: (...fields: string[]) => void
+  reset: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   submit: () => void
   defaults: () => void
-  getData: () => Record<string, FormDataConvertible>
+  getData: () => TForm
   getFormData: () => FormData
-  valid: (field: string) => boolean
-  invalid: (field: string) => boolean
-  validate: (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => void
-  touch: (...fields: string[]) => void
-  touched: (field?: string) => boolean
+  valid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  invalid: <K extends FormDataKeys<TForm>>(field: K) => boolean
+  validate: <K extends FormDataKeys<TForm>>(
+    field?: K | NamedInputEvent | ValidationConfig,
+    config?: ValidationConfig,
+  ) => void
+  touch: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
+  touched: <K extends FormDataKeys<TForm>>(field?: K) => boolean
   validator: () => Validator
 }
 
-export type FormComponentonSubmitCompleteArguments = Pick<FormComponentMethods, 'reset' | 'defaults'>
+export type FormComponentonSubmitCompleteArguments<TForm extends object = Record<string, any>> = Pick<
+  FormComponentMethods<TForm>,
+  'reset' | 'defaults'
+>
 
-export type FormComponentState = {
-  errors: Record<string, ErrorValue>
+export type FormComponentState<TForm extends object = Record<string, any>> = {
+  errors: FormDataErrors<TForm>
   hasErrors: boolean
   processing: boolean
   progress: Progress | null
@@ -746,9 +768,10 @@ export type FormComponentState = {
   validating: boolean
 }
 
-export type FormComponentSlotProps = FormComponentMethods & FormComponentState
+export type FormComponentSlotProps<TForm extends object = Record<string, any>> = FormComponentMethods<TForm> &
+  FormComponentState<TForm>
 
-export type FormComponentRef = FormComponentSlotProps
+export type FormComponentRef<TForm extends object = Record<string, any>> = FormComponentSlotProps<TForm>
 
 export interface UseInfiniteScrollOptions {
   // Core data
@@ -757,6 +780,7 @@ export interface UseInfiniteScrollOptions {
   shouldFetchNext: () => boolean
   shouldFetchPrevious: () => boolean
   shouldPreserveUrl: () => boolean
+  getReloadOptions?: () => ReloadOptions
 
   // Elements
   getTriggerMargin: () => number
@@ -861,8 +885,8 @@ declare global {
     'inertia:progress': GlobalEvent<'progress'>
     'inertia:success': GlobalEvent<'success'>
     'inertia:error': GlobalEvent<'error'>
-    'inertia:invalid': GlobalEvent<'invalid'>
-    'inertia:exception': GlobalEvent<'exception'>
+    'inertia:httpException': GlobalEvent<'httpException'>
+    'inertia:networkError': GlobalEvent<'networkError'>
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
