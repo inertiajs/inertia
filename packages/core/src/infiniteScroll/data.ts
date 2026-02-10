@@ -129,9 +129,10 @@ export const useInfiniteScrollData = (options: {
     state.loading = true
 
     router.reload({
+      preserveErrors: true,
       ...reloadOptions,
-      data: { [getPageName()]: page },
-      only: [options.getPropName()],
+      data: { ...(reloadOptions.data || {}), [getPageName()]: page },
+      only: [...(reloadOptions.only || []), options.getPropName()],
       preserveUrl: true, // we handle URL updates manually via useInfiniteScrollQueryString()
       headers: {
         [MERGE_INTENT_HEADER]: side === 'previous' ? 'prepend' : 'append',

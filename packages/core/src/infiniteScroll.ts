@@ -69,6 +69,8 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
 
   const originalFetchNext = dataManager.fetchNext
   dataManager.fetchNext = (reloadOptions: ReloadOptions = {}) => {
+    reloadOptions = { ...options.getReloadOptions?.(), ...reloadOptions }
+
     if (options.inReverseMode()) {
       reloadOptions = addScrollPreservationCallbacks(reloadOptions)
     }
@@ -78,6 +80,8 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
 
   const originalFetchPrevious = dataManager.fetchPrevious
   dataManager.fetchPrevious = (reloadOptions: ReloadOptions = {}) => {
+    reloadOptions = { ...options.getReloadOptions?.(), ...reloadOptions }
+
     if (!options.inReverseMode()) {
       reloadOptions = addScrollPreservationCallbacks(reloadOptions)
     }

@@ -110,7 +110,7 @@ export default defineComponent({
       this.observer.observe(this.$el.nextSibling)
     },
     getReloadParams(): Partial<ReloadOptions> {
-      const reloadParams: Partial<ReloadOptions> = { ...this.$props.params }
+      const reloadParams: Partial<ReloadOptions> = { preserveErrors: true, ...this.$props.params }
 
       if (this.$props.data) {
         reloadParams.only = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]

@@ -336,13 +336,8 @@ export class Response {
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
-    if (this.requestParams.isDeferredPropsRequest()) {
-      const currentErrors = currentPage.get().props.errors
-
-      if (currentErrors && Object.keys(currentErrors).length > 0) {
-        // Preserve existing errors during deferred props requests
-        pageResponse.props.errors = currentErrors
-      }
+    if (this.shouldPreserveErrors(pageResponse)) {
+      pageResponse.props.errors = currentPage.get().props.errors
     }
 
     // Preserve the existing scrollProps
@@ -371,6 +366,32 @@ export class Response {
     if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
       pageResponse.initialDeferredProps = currentOriginalDeferred
     }
+  }
+
+  /**
+   * By default, the Laravel adapter shares validation errors via Inertia::always(),
+   * so responses always include errors, even when empty. Components like
+   * InfiniteScroll and WhenVisible, as well as loading deferred props,
+   * perform async requests that should practically never reset errors.
+   */
+  protected shouldPreserveErrors(pageResponse: Page): boolean {
+    if (!this.requestParams.all().preserveErrors) {
+      return false
+    }
+
+    const currentErrors = currentPage.get().props.errors
+
+    if (!currentErrors || Object.keys(currentErrors).length === 0) {
+      return false
+    }
+
+    const responseErrors = pageResponse.props.errors
+
+    if (responseErrors && Object.keys(responseErrors).length > 0) {
+      return false
+    }
+
+    return true
   }
 
   protected mergeOrMatchItems(
