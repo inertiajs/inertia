@@ -25,9 +25,7 @@ const config = {
   ],
 }
 
-const builds = [
-  { entryPoints: ['src/index.ts'], format: 'esm', outfile: 'dist/index.js', platform: 'node' },
-]
+const builds = [{ entryPoints: ['src/index.ts'], format: 'esm', outfile: 'dist/index.js', platform: 'node' }]
 
 builds.forEach(async (build) => {
   const context = await esbuild.context({ ...config, ...build })
