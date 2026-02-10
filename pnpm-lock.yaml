@@ -41,8 +41,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^2.0.0-beta.0
+        version: 2.0.0-beta.0(axios@1.13.2)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -81,8 +81,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^2.0.0-beta.0
+        version: 2.0.0-beta.0(axios@1.13.2)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -185,8 +185,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^2.0.0-beta.0
+        version: 2.0.0-beta.0(axios@1.13.2)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -320,8 +320,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^2.0.0-beta.0
+        version: 2.0.0-beta.0(axios@1.13.2)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -2322,8 +2322,13 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  laravel-precognition@1.0.1:
-    resolution: {integrity: sha512-BYaDUjEclKbxuQTG9yZnRjjD7ag1Xh+8hGOXmcrw91/vpbIOJ8cSFADTI0kvwetIr3AM1vOJzYwaoA9+KHhLwA==}
+  laravel-precognition@2.0.0-beta.0:
+    resolution: {integrity: sha512-em+Ke1x4ovACh2G0ed7DSxIegFy44OphZ8HpTDX6NH/L94N/Wuh4yIvoJeBMzdNz2HVurfSRJVHDkWlkIDwDYg==}
+    peerDependencies:
+      axios: ^1.4.0
+    peerDependenciesMeta:
+      axios:
+        optional: true
 
   laravel-vite-plugin@2.0.1:
     resolution: {integrity: sha512-zQuvzWfUKQu9oNVi1o0RZAJCwhGsdhx4NEOyrVQwJHaWDseGP9tl7XUPLY2T8Cj6+IrZ6lmyxlR1KC8unf3RLA==}
@@ -5331,12 +5336,11 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@1.0.1:
+  laravel-precognition@2.0.0-beta.0(axios@1.13.2):
     dependencies:
-      axios: 1.13.2
       lodash-es: 4.17.23
-    transitivePeerDependencies:
-      - debug
+    optionalDependencies:
+      axios: 1.13.2
 
   laravel-vite-plugin@2.0.1(vite@7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)):
     dependencies:

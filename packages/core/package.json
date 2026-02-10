@@ -56,9 +56,8 @@
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
     "@types/lodash-es": "^4.17.12",
-    "laravel-precognition": "^1.0.1",
-    "lodash-es": "^4.17.23",
-    "qs": "^6.14.1"
+    "laravel-precognition": "^2.0.0-beta.0",
+    "lodash-es": "^4.17.23"
   },
   "peerDependencies": {
     "axios": "^1.13.2"
