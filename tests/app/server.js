@@ -2873,26 +2873,42 @@ app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
 
-// Optimistic updates
-let optimisticTodoId = 3
-let optimisticTodos = [
-  { id: 1, name: 'Learn Inertia.js', done: true },
-  { id: 2, name: 'Build something awesome', done: false },
-]
+// Optimistic updates (state scoped per session cookie to avoid cross-worker interference)
+const optimisticSessions = {}
 
-app.get('/optimistic', (req, res) =>
+function getDefaultTodos() {
+  return [
+    { id: 1, name: 'Learn Inertia.js', done: true },
+    { id: 2, name: 'Build something awesome', done: false },
+  ]
+}
+
+function getOptimisticSession(req) {
+  const cookies = req.headers.cookie || ''
+  const match = cookies.match(/optimistic-session=([^;]+)/)
+  const sessionId = match ? match[1] : 'default'
+
+  if (!optimisticSessions[sessionId]) {
+    optimisticSessions[sessionId] = { todoId: 3, todos: getDefaultTodos() }
+  }
+
+  return optimisticSessions[sessionId]
+}
+
+app.get('/optimistic', (req, res) => {
+  const session = getOptimisticSession(req)
+
   inertia.render(req, res, {
     component: 'Optimistic',
     props: {
-      todos: [...optimisticTodos],
+      todos: [...session.todos],
     },
-  }),
-)
+  })
+})
 
 app.post('/optimistic/todos', (req, res) => {
-  const delay = 500
-
   setTimeout(() => {
+    const session = getOptimisticSession(req)
     const name = req.body.name?.trim()
 
     if (!name || name.length < 3) {
@@ -2900,43 +2916,45 @@ app.post('/optimistic/todos', (req, res) => {
         url: '/optimistic',
         component: 'Optimistic',
         props: {
-          todos: [...optimisticTodos],
+          todos: [...session.todos],
           errors: { name: !name ? 'The name field is required.' : 'The name must be at least 3 characters.' },
           serverTimestamp: Date.now(),
         },
       })
     }
 
-    optimisticTodos.push({ id: optimisticTodoId++, name, done: false })
+    session.todos.push({ id: session.todoId++, name, done: false })
     res.redirect(303, '/optimistic')
-  }, delay)
+  }, 500)
 })
 
 app.patch('/optimistic/todos/:id', (req, res) => {
   setTimeout(() => {
-    const todo = optimisticTodos.find((t) => t.id === parseInt(req.params.id))
+    const session = getOptimisticSession(req)
+    const todo = session.todos.find((t) => t.id === parseInt(req.params.id))
+
     if (todo) {
       if (req.body.done !== undefined) {
         todo.done = req.body.done === 'true' || req.body.done === true
       }
     }
+
     res.redirect(303, '/optimistic')
   }, 500)
 })
 
 app.delete('/optimistic/todos/:id', (req, res) => {
   setTimeout(() => {
-    optimisticTodos = optimisticTodos.filter((t) => t.id !== parseInt(req.params.id))
+    const session = getOptimisticSession(req)
+    session.todos = session.todos.filter((t) => t.id !== parseInt(req.params.id))
     res.redirect(303, '/optimistic')
   }, 500)
 })
 
 app.post('/optimistic/clear', (req, res) => {
-  optimisticTodoId = 3
-  optimisticTodos = [
-    { id: 1, name: 'Learn Inertia.js', done: true },
-    { id: 2, name: 'Build something awesome', done: false },
-  ]
+  const session = getOptimisticSession(req)
+  session.todoId = 3
+  session.todos = getDefaultTodos()
   res.redirect(303, '/optimistic')
 })
 

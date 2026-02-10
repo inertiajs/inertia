@@ -168,7 +168,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
     if (options.optimistic) {
       snapshot = cloneDeep(form.data())
-      const optimisticData = options.optimistic(snapshot)
+      const optimisticData = options.optimistic(cloneDeep(snapshot))
 
       Object.keys(optimisticData).forEach((key) => {
         ;(baseForm as any)[key] = (optimisticData as any)[key]

@@ -1,104 +1,92 @@
 import test, { expect } from '@playwright/test'
 import { pageLoads } from './support'
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/optimistic')
-  await page.locator('#clear-btn').click()
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
-})
+test.describe('Optimistic', () => {
+  test.describe.configure({ mode: 'serial' })
 
-test('it applies optimistic update immediately before request completes', async ({ page }) => {
-  pageLoads.watch(page)
+  test.beforeEach(async ({ page }, testInfo) => {
+    await page
+      .context()
+      .addCookies([
+        { name: 'optimistic-session', value: `worker-${testInfo.workerIndex}`, domain: 'localhost', path: '/' },
+      ])
 
-  await page.goto('/optimistic')
+    await page.goto('/optimistic')
+    await page.locator('#clear-btn').click()
+    await expect(page.locator('#todo-list li')).toHaveCount(2)
+  })
 
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
+  test('it applies optimistic update immediately before request completes', async ({ page }) => {
+    pageLoads.watch(page)
 
-  await page.locator('#new-todo').fill('New optimistic todo')
-  await page.locator('#add-btn').click()
+    await page.locator('#new-todo').fill('New optimistic todo')
+    await page.locator('#add-btn').click()
 
-  await expect(page.locator('#todo-list li')).toHaveCount(3)
-  await expect(page.locator('#todo-list')).toContainText('New optimistic todo')
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
+    await expect(page.locator('#todo-list')).toContainText('New optimistic todo')
 
-  await expect(page.locator('#success-count')).toContainText('Success: 1')
-  await expect(page.locator('#todo-list li')).toHaveCount(3)
-})
+    await expect(page.locator('#success-count')).toContainText('Success: 1')
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
+  })
 
-test('it rolls back optimistic update on error and preserves validation errors', async ({ page }) => {
-  pageLoads.watch(page)
+  test('it rolls back optimistic update on error and preserves validation errors', async ({ page }) => {
+    pageLoads.watch(page)
 
-  await page.goto('/optimistic')
+    await page.locator('#add-btn').click()
 
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
 
-  // Don't fill in a name - this will cause a validation error
-  await page.locator('#add-btn').click()
+    await expect(page.locator('#error-count')).toContainText('Error: 1')
+    await expect(page.locator('#todo-list li')).toHaveCount(2)
 
-  await expect(page.locator('#todo-list li')).toHaveCount(3)
+    await expect(page.locator('.error')).toContainText('The name field is required.')
+  })
 
-  await expect(page.locator('#error-count')).toContainText('Error: 1')
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
+  test('it only snapshots props that actually changed (preserves other server response props)', async ({ page }) => {
+    pageLoads.watch(page)
 
-  // Validation errors should be preserved (not wiped by snapshot restore)
-  await expect(page.locator('.error')).toContainText('The name field is required.')
-})
+    await expect(page.locator('#server-timestamp')).not.toBeVisible()
 
-test('it only snapshots props that actually changed (preserves other server response props)', async ({ page }) => {
-  pageLoads.watch(page)
+    await page.locator('#add-btn').click()
 
-  await page.goto('/optimistic')
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
 
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
-  await expect(page.locator('#server-timestamp')).not.toBeVisible()
+    await expect(page.locator('#error-count')).toContainText('Error: 1')
 
-  // Server will respond with errors AND serverTimestamp (not in optimistic callback)
-  await page.locator('#add-btn').click()
+    // 'todos' rolled back, but 'errors' and 'serverTimestamp' preserved from server
+    await expect(page.locator('#todo-list li')).toHaveCount(2)
+    await expect(page.locator('.error')).toContainText('The name field is required.')
+    await expect(page.locator('#server-timestamp')).toBeVisible()
+    await expect(page.locator('#server-timestamp')).toContainText('Server timestamp:')
+  })
 
-  await expect(page.locator('#todo-list li')).toHaveCount(3)
+  test('it rolls back optimistic update on server error (500)', async ({ page }) => {
+    pageLoads.watch(page)
 
-  await expect(page.locator('#error-count')).toContainText('Error: 1')
+    await page.locator('#server-error-btn').click()
 
-  // 'todos' rolled back, but 'errors' and 'serverTimestamp' preserved from server
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
-  await expect(page.locator('.error')).toContainText('The name field is required.')
-  await expect(page.locator('#server-timestamp')).toBeVisible()
-  await expect(page.locator('#server-timestamp')).toContainText('Server timestamp:')
-})
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
+    await expect(page.locator('#todo-list')).toContainText('Will fail...')
 
-test('it rolls back optimistic update on server error (500)', async ({ page }) => {
-  pageLoads.watch(page)
+    // Error modal contains an iframe
+    await expect(page.locator('iframe')).toBeVisible()
 
-  await page.goto('/optimistic')
+    // Rolled back via onFinish (onSuccess never called for 500 errors)
+    await expect(page.locator('#todo-list li')).toHaveCount(2)
+    await expect(page.locator('#todo-list')).not.toContainText('Will fail...')
+  })
 
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
+  test('it rolls back first optimistic update when second visit cancels it', async ({ page }) => {
+    pageLoads.watch(page)
 
-  await page.locator('#server-error-btn').click()
+    // Second click cancels first, restoring its state before applying own optimistic update
+    await page.locator('#add-btn').click()
+    await page.locator('#add-btn').click()
 
-  await expect(page.locator('#todo-list li')).toHaveCount(3)
-  await expect(page.locator('#todo-list')).toContainText('Will fail...')
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
 
-  // Error modal contains an iframe
-  await expect(page.locator('iframe')).toBeVisible()
-
-  // Rolled back via onFinish (onSuccess never called for 500 errors)
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
-  await expect(page.locator('#todo-list')).not.toContainText('Will fail...')
-})
-
-test('it rolls back first optimistic update when second visit cancels it', async ({ page }) => {
-  pageLoads.watch(page)
-
-  await page.goto('/optimistic')
-
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
-
-  // Second click cancels first, restoring its state before applying own optimistic update
-  await page.locator('#add-btn').click()
-  await page.locator('#add-btn').click()
-
-  await expect(page.locator('#todo-list li')).toHaveCount(3)
-
-  // Only the second request completes (first was cancelled)
-  await expect(page.locator('#error-count')).toContainText('Error: 1')
-  await expect(page.locator('#todo-list li')).toHaveCount(2)
+    // Only the second request completes (first was cancelled)
+    await expect(page.locator('#error-count')).toContainText('Error: 1')
+    await expect(page.locator('#todo-list li')).toHaveCount(2)
+  })
 })

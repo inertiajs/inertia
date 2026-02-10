@@ -197,10 +197,10 @@ class CurrentPage {
     this.page = { ...this.page, ...data }
   }
 
-  public setPropsQuietly(props: Page['props']): void {
+  public setPropsQuietly(props: Page['props']): Promise<unknown> {
     this.page = { ...this.page, props }
 
-    this.resolve(this.page.component, this.page).then((component) => {
+    return this.resolve(this.page.component, this.page).then((component) => {
       return this.swap({ component, page: this.page, preserveState: true, viewTransition: false })
     })
   }
