@@ -9,6 +9,7 @@ import type {
   FormDataValues,
   HttpProgressEvent,
   Method,
+  OptimisticCallback,
   Page,
   PendingVisit,
   Progress,
@@ -87,6 +88,7 @@ export interface InertiaFormProps<TForm extends object> {
   delete(url: string, options?: UseFormSubmitOptions): void
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  optimistic<TProps>(callback: OptimisticCallback<TProps>): this
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormStore<TForm>
 }
 
@@ -148,6 +150,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   validateFormDataKeys(resolvedData)
 
   let cancelToken: CancelToken | null = null
+  let pendingOptimisticCallback: OptimisticCallback | null = null
 
   const {
     form: baseForm,
@@ -226,6 +229,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       },
     }
 
+    _options.optimistic = _options.optimistic ?? pendingOptimisticCallback ?? undefined
+    pendingOptimisticCallback = null
+
     if (method === 'delete') {
       router.delete(url, { ..._options, data: transformedData })
     } else {
@@ -254,6 +260,11 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     cancel,
     dontRemember(...keys: FormDataKeys<TForm>[]) {
       setRememberExcludeKeys(keys)
+      return form
+    },
+
+    optimistic<TProps>(callback: OptimisticCallback<TProps>) {
+      pendingOptimisticCallback = callback as OptimisticCallback
       return form
     },
   })

@@ -197,6 +197,14 @@ class CurrentPage {
     this.page = { ...this.page, ...data }
   }
 
+  public setPropsQuietly(props: Page['props']): Promise<unknown> {
+    this.page = { ...this.page, props }
+
+    return this.resolve(this.page.component, this.page).then((component) => {
+      return this.swap({ component, page: this.page, preserveState: true, viewTransition: false })
+    })
+  }
+
   public setFlash(flash: FlashData): void {
     this.page = { ...this.page, flash }
     this.onFlashCallback?.(flash)

@@ -23,6 +23,7 @@ export {
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { progress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
+export { buildSSRBody } from './ssrUtils'
 export * from './types'
 export {
   hrefToUrl,

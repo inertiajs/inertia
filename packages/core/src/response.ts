@@ -5,7 +5,7 @@ import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
   fireFlashEvent,
-  fireInvalidEvent,
+  fireHttpExceptionEvent,
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
@@ -128,7 +128,11 @@ export class Response {
       data: this.getDataFromResponse(this.response.data),
     }
 
-    if (fireInvalidEvent(response)) {
+    if (this.requestParams.all().onHttpException(response) === false) {
+      return
+    }
+
+    if (fireHttpExceptionEvent(response)) {
       return dialog.show(response.data)
     }
   }

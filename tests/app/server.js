@@ -70,6 +70,79 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+// SSR auto-transform test routes (uses the Vite plugin SSR transform)
+app.get('/ssr-auto/page1', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page1',
+    props: {
+      user: { name: 'Auto User', email: 'auto@example.com' },
+      items: ['Auto 1', 'Auto 2', 'Auto 3'],
+      count: 100,
+    },
+  }),
+)
+
+app.get('/ssr-auto/page2', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
+// createInertiaApp (unified) test routes
+app.get('/unified', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'FooBar',
+    },
+  }),
+)
+
+app.get('/unified/navigate', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'Navigated',
+    },
+  }),
+)
+
+app.get('/unified/props', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Unified/Props',
+    props: {
+      foo: 'bar',
+      count: 42,
+      items: ['a', 'b', 'c'],
+    },
+  }),
+)
+
+// Auto transform test routes (pages shorthand transformed by Vite plugin)
+// Uses VitePages directory to prove transform uses the configured path
+app.get('/auto', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Home',
+    props: {
+      example: 'AutoTransform',
+    },
+  }),
+)
+
+app.get('/auto/props', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Props',
+    props: {
+      foo: 'vite-bar',
+      count: 123,
+      items: ['vite', 'plugin', 'test'],
+    },
+  }),
+)
+
 // Intercepts all CSS and JS assets (including files loaded via code splitting)
 app.get(/.*\.(?:js|css)$/, (req, res) => {
   const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
@@ -1388,7 +1461,7 @@ app.get('/deferred-props/many-groups', (req, res) => {
 
 app.get('/deferred-props/instant-reload', (req, res) => {
   const requestedProps = req.headers['x-inertia-partial-data']
-  const delay = requestedProps === 'bar' ? 300 : 0
+  const delay = requestedProps === 'bar' ? 500 : 0
 
   setTimeout(
     () =>
@@ -1568,7 +1641,7 @@ app.get('/deferred-props/with-reload', (req, res) => {
             : undefined,
         },
       }),
-    300,
+    500,
   )
 })
 
@@ -2645,6 +2718,18 @@ app.post('/api/error', upload.none(), (req, res) => {
   res.status(500).json({ message: 'Internal server error' })
 })
 
+app.post('/api/optimistic-todo', upload.none(), (req, res) => {
+  setTimeout(() => {
+    const name = req.body.name?.trim()
+
+    if (!name) {
+      return res.status(422).json({ errors: { name: 'The name field is required.' } })
+    }
+
+    res.json({ success: true, id: Date.now(), name })
+  }, 500)
+})
+
 // File upload endpoint
 app.post('/api/upload', upload.any(), (req, res) => {
   const files = (req.files || []).map((file) => ({
@@ -2751,6 +2836,7 @@ app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { componen
 app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
 app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
 app.get('/use-http/submit', (req, res) => inertia.render(req, res, { component: 'UseHttp/Submit' }))
+app.get('/use-http/optimistic', (req, res) => inertia.render(req, res, { component: 'UseHttp/Optimistic' }))
 
 app.get('/reload/concurrent-with-data', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']
@@ -2785,6 +2871,97 @@ app.get('/http-handlers', (req, res) => inertia.render(req, res, { component: 'H
 
 app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
+})
+
+// Optimistic updates (state scoped per session cookie to avoid cross-worker interference)
+const optimisticSessions = {}
+
+function getDefaultTodos() {
+  return [
+    { id: 1, name: 'Learn Inertia.js', done: true },
+    { id: 2, name: 'Build something awesome', done: false },
+  ]
+}
+
+function getOptimisticSession(req) {
+  const cookies = req.headers.cookie || ''
+  const match = cookies.match(/optimistic-session=([^;]+)/)
+  const sessionId = match ? match[1] : 'default'
+
+  if (!optimisticSessions[sessionId]) {
+    optimisticSessions[sessionId] = { todoId: 3, todos: getDefaultTodos() }
+  }
+
+  return optimisticSessions[sessionId]
+}
+
+app.get('/optimistic', (req, res) => {
+  const session = getOptimisticSession(req)
+
+  inertia.render(req, res, {
+    component: 'Optimistic',
+    props: {
+      todos: [...session.todos],
+    },
+  })
+})
+
+app.post('/optimistic/todos', (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    const name = req.body.name?.trim()
+
+    if (!name || name.length < 3) {
+      return inertia.render(req, res, {
+        url: '/optimistic',
+        component: 'Optimistic',
+        props: {
+          todos: [...session.todos],
+          errors: { name: !name ? 'The name field is required.' : 'The name must be at least 3 characters.' },
+          serverTimestamp: Date.now(),
+        },
+      })
+    }
+
+    session.todos.push({ id: session.todoId++, name, done: false })
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.patch('/optimistic/todos/:id', (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    const todo = session.todos.find((t) => t.id === parseInt(req.params.id))
+
+    if (todo) {
+      if (req.body.done !== undefined) {
+        todo.done = req.body.done === 'true' || req.body.done === true
+      }
+    }
+
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.delete('/optimistic/todos/:id', (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    session.todos = session.todos.filter((t) => t.id !== parseInt(req.params.id))
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.post('/optimistic/clear', (req, res) => {
+  const session = getOptimisticSession(req)
+  session.todoId = 3
+  session.todos = getDefaultTodos()
+  res.redirect(303, '/optimistic')
+})
+
+app.post('/optimistic/server-error', (req, res) => {
+  setTimeout(() => {
+    res.status(500).send('Internal Server Error')
+  }, 500)
 })
 
 app.all('*page', (req, res) => inertia.render(req, res))

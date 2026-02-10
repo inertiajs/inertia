@@ -267,6 +267,7 @@ class PrefetchedRequests {
         'onPrefetching',
         'async',
         'viewTransition',
+        'optimistic',
       ],
     )
   }

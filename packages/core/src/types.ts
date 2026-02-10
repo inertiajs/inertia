@@ -284,6 +284,8 @@ export type CancelToken = {
 
 export type CancelTokenCallback = (cancelToken: CancelToken) => void
 
+export type OptimisticCallback<TProps = Page['props']> = (props: TProps) => Partial<TProps> | void
+
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
   data: T
@@ -305,6 +307,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   preserveErrors: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
+  optimistic?: OptimisticCallback
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -369,14 +372,14 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
-  invalid: {
+  httpException: {
     parameters: [HttpResponse]
     details: {
       response: HttpResponse
     }
     result: boolean | void
   }
-  exception: {
+  networkError: {
     parameters: [Error]
     details: {
       exception: Error
@@ -452,6 +455,8 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancel: GlobalEventCallback<'cancel', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
+  onHttpException: GlobalEventCallback<'httpException', T>
+  onNetworkError: GlobalEventCallback<'networkError', T>
   onFlash: GlobalEventCallback<'flash', T>
   onPrefetched: GlobalEventCallback<'prefetched', T>
   onPrefetching: GlobalEventCallback<'prefetching', T>
@@ -487,7 +492,8 @@ export type PendingVisitOptions = {
 
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
-export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions<T>>
+export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> &
+  Required<Omit<VisitOptions<T>, 'optimistic'>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
@@ -502,8 +508,24 @@ type FirstLevelOptional<T> = {
   [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
 }
 
-interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+type PagesOption =
+  | string
+  | {
+      path: string
+      extension?: string | string[]
+      transform?: (name: string) => string
+    }
+
+type ProgressOptions = {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
+interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
+  pages?: PagesOption
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
@@ -517,17 +539,10 @@ export interface CreateInertiaAppOptionsForCSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   page?: Page<SharedProps>
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
+  progress?: ProgressOptions | false
   render?: undefined
 }
 
@@ -537,7 +552,7 @@ export interface CreateInertiaAppOptionsForSSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined
@@ -548,6 +563,18 @@ export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
+
+export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+  id?: string
+  resolve?: TComponentResolver
+  pages?: PagesOption
+  setup?: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
+  progress?: ProgressOptions | false
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
+}
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
@@ -674,10 +701,10 @@ export type UseFormSubmitArguments =
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
 
-export type UseHttpSubmitArguments<TResponse = unknown> =
-  | [Method, string, UseHttpSubmitOptions<TResponse>?]
-  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
-  | [UseHttpSubmitOptions<TResponse>?]
+export type UseHttpSubmitArguments<TResponse = unknown, TForm = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse, TForm>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse, TForm>?]
+  | [UseHttpSubmitOptions<TResponse, TForm>?]
 
 export type FormComponentOptions = Pick<
   VisitOptions,
@@ -846,8 +873,9 @@ export type UseHttpOptions<TResponse = unknown> = {
   onCancelToken?: (cancelToken: CancelToken) => void
 }
 
-export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+export type UseHttpSubmitOptions<TResponse = unknown, TForm = unknown> = UseHttpOptions<TResponse> & {
   headers?: HttpRequestHeaders
+  optimistic?: (currentData: TForm) => Partial<TForm>
 }
 
 declare global {
@@ -857,8 +885,8 @@ declare global {
     'inertia:progress': GlobalEvent<'progress'>
     'inertia:success': GlobalEvent<'success'>
     'inertia:error': GlobalEvent<'error'>
-    'inertia:invalid': GlobalEvent<'invalid'>
-    'inertia:exception': GlobalEvent<'exception'>
+    'inertia:httpException': GlobalEvent<'httpException'>
+    'inertia:networkError': GlobalEvent<'networkError'>
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>

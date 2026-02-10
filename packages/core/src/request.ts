@@ -1,4 +1,10 @@
-import { fireExceptionEvent, fireFinishEvent, firePrefetchingEvent, fireProgressEvent, fireStartEvent } from './events'
+import {
+  fireFinishEvent,
+  fireNetworkErrorEvent,
+  firePrefetchingEvent,
+  fireProgressEvent,
+  fireStartEvent,
+} from './events'
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { page as currentPage } from './page'
@@ -77,7 +83,11 @@ export class Request {
           return
         }
 
-        if (fireExceptionEvent(error)) {
+        if (this.requestParams.all().onNetworkError(error) === false) {
+          return
+        }
+
+        if (fireNetworkErrorEvent(error)) {
           if (originallyPrefetch) {
             this.requestParams.onPrefetchError(error)
           }
