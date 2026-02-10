@@ -1,9 +1,7 @@
-import { config as coreConfig, http as Http, progress as Progress, router as Router } from '@inertiajs/core'
-import { ReactInertiaAppConfig } from './types'
+import { config as coreConfig } from '@inertiajs/core'
+import type { ReactInertiaAppConfig } from './types'
 
-export const http = Http
-export const progress = Progress
-export const router = Router
+export { http, progress, router } from '@inertiajs/core'
 export { default as App } from './App'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
@@ -14,6 +12,7 @@ export { setLayoutProps, setLayoutPropsFor, useLayoutProps } from './layoutProps
 export { InertiaLinkProps, default as Link } from './Link'
 export { ReactComponent as ResolvedComponent } from './types'
 export {
+  InertiaForm,
   InertiaFormProps,
   InertiaPrecognitiveFormProps,
   SetDataAction,
