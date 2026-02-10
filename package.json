@@ -4,8 +4,9 @@
   "type": "module",
   "scripts": {
     "build:all": "pnpm -r --filter './packages/*' build",
-    "dev": "pnpx concurrently -c \"#b794f4,#61dafb,#d43008,#32a06f\" \"pnpm dev:core\" \"pnpm dev:react\" \"pnpm dev:svelte\" \"pnpm dev:vue\" --names=core,react,svelte,vue",
+    "dev": "pnpx concurrently -c \"#b794f4,#61dafb,#d43008,#32a06f,#bd34fe,#ffa800\" \"pnpm dev:core\" \"pnpm dev:react\" \"pnpm dev:svelte\" \"pnpm dev:vue\" \"pnpm dev:vite\" --names=core,react,svelte,vue,vite",
     "dev:core": "cd packages/core && pnpm run dev",
+    "dev:vite": "cd packages/vite && pnpm run dev",
     "dev:vue": "cd packages/vue3 && pnpm run dev",
     "dev:react": "cd packages/react && pnpm run dev",
     "dev:svelte": "cd packages/svelte && pnpm run dev",
@@ -34,14 +35,14 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@playwright/test": "^1.57.0",
-    "prettier": "^3.8.0",
+    "@playwright/test": "^1.58.2",
+    "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-svelte": "^3.4.1",
     "prettier-plugin-tailwindcss": "^0.7.2"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.55.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.57.1"
   },
   "pnpm": {
     "overrides": {

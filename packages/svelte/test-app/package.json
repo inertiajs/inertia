@@ -9,20 +9,20 @@
     "type-check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@types/node": "^24",
     "@eslint/js": "^9.39.2",
-    "@sveltejs/eslint-config": "^8.3.4",
-    "@sveltejs/vite-plugin-svelte": "^6.2.1",
-    "@tsconfig/svelte": "^5.0.6",
+    "@sveltejs/eslint-config": "^8.3.5",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tsconfig/svelte": "^5.0.7",
+    "@types/node": "^24.10.13",
     "eslint": "^9.39.2",
-    "eslint-plugin-svelte": "^3.14.0",
-    "globals": "^17.0.0",
+    "eslint-plugin-svelte": "^3.15.0",
+    "globals": "^17.3.0",
     "nodemon": "^3.1.11",
-    "svelte": "^5.46.4",
-    "svelte-check": "^4.3.5",
+    "svelte": "^5.50.1",
+    "svelte-check": "^4.3.6",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.0",
-    "vite": "^7.1.12"
+    "typescript-eslint": "^8.55.0",
+    "vite": "^7.3.1"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
