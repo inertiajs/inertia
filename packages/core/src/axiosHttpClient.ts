@@ -1,4 +1,5 @@
 import type { AxiosInstance, AxiosProgressEvent } from 'axios'
+import axios from 'axios'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
@@ -52,8 +53,7 @@ export class AxiosHttpClient implements HttpClient {
 
   private async getAxios(): Promise<AxiosInstance> {
     if (!this.axios) {
-      const axios = await import('axios')
-      this.axios = axios.default
+      return (this.axios = axios)
     }
 
     return this.axios

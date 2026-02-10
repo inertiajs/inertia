@@ -1,3 +1,4 @@
+import { client as precognitionClient } from 'laravel-precognition'
 import { httpHandlers } from './httpHandlers'
 import { HttpClient, HttpClientOptions } from './types'
 import { XhrHttpClient, xhrHttpClient } from './xhrHttpClient'
@@ -19,8 +20,21 @@ export const http = {
   /**
    * Set the HTTP client to use for all Inertia requests
    */
-  setClient(client: HttpClient | HttpClientOptions): void {
-    httpClient = isHttpClientOptions(client) ? new XhrHttpClient(client) : client
+  setClient(clientOrOptions: HttpClient | HttpClientOptions): void {
+    if (!isHttpClientOptions(clientOrOptions)) {
+      httpClient = clientOrOptions
+      return
+    }
+
+    httpClient = new XhrHttpClient(clientOrOptions)
+
+    if (clientOrOptions.xsrfCookieName) {
+      precognitionClient.withXsrfCookieName(clientOrOptions.xsrfCookieName)
+    }
+
+    if (clientOrOptions.xsrfHeaderName) {
+      precognitionClient.withXsrfHeaderName(clientOrOptions.xsrfHeaderName)
+    }
   },
 
   /**
