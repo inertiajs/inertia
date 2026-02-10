@@ -39,12 +39,28 @@ export default (render: AppCallback, options?: Port | ServerOptions): void => {
       cluster.fork()
     }
 
+    cluster.on('message', (_worker, message) => {
+      if (message === 'shutdown') {
+        for (const id in cluster.workers) {
+          cluster.workers[id]?.kill()
+        }
+
+        process.exit()
+      }
+    })
+
     return
   }
 
   const routes: Record<string, RouteHandler> = {
     '/health': async () => ({ status: 'OK', timestamp: Date.now() }),
-    '/shutdown': () => process.exit(),
+    '/shutdown': async () => {
+      if (cluster.isWorker) {
+        process.send?.('shutdown')
+      }
+
+      process.exit()
+    },
     '/render': async (request) => render(JSON.parse(await readableToString(request))),
     '/404': async () => ({ status: 'NOT_FOUND', timestamp: Date.now() }),
   }
