@@ -607,6 +607,8 @@ export class Router {
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onHttpException: options.onHttpException || (() => {}),
+      onNetworkError: options.onNetworkError || (() => {}),
       onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
