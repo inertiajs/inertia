@@ -10,7 +10,7 @@
     "require": {
         "php": "^8.2",
         "guzzlehttp/guzzle": "^7.2",
-        "inertiajs/inertia-laravel": "@dev",
+        "inertiajs/inertia-laravel": "3.x-dev",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.7",
@@ -70,12 +70,5 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "repositories": [
-        {
-            "name": "inertia-laravel",
-            "type": "path",
-            "url": "/Users/pascal/Sites/inertia-laravel"
-        }
-    ]
+    "prefer-stable": true
 }
