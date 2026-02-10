@@ -45,7 +45,7 @@ export const config: FrameworkConfig = {
   extractDefault: true,
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
-  // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
+  // Uses import.meta.env.PROD to skip the standalone server in dev mode
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/react/server'
 import { renderToString } from 'react-dom/server'
@@ -54,7 +54,7 @@ const render = await ${configureCall}
 
 const renderPage = (page) => render(page, renderToString)
 
-if (!import.meta.hot) {
+if (import.meta.env.PROD) {
   createServer(renderPage${options})
 }
 

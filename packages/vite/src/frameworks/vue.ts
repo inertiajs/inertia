@@ -27,8 +27,8 @@
  *
  * const renderPage = (page) => render(page, renderToString)
  *
- * // Only start server in production (import.meta.hot is only available in Vite dev)
- * if (!import.meta.hot) {
+ * // Only start server in production
+ * if (import.meta.env.PROD) {
  *   createServer(renderPage)
  * }
  *
@@ -49,7 +49,7 @@ export const config: FrameworkConfig = {
   extractDefault: true,
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
-  // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
+  // Uses import.meta.env.PROD to skip the standalone server in dev mode
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/vue3/server'
 import { renderToString } from 'vue/server-renderer'
@@ -58,7 +58,7 @@ const render = await ${configureCall}
 
 const renderPage = (page) => render(page, renderToString)
 
-if (!import.meta.hot) {
+if (import.meta.env.PROD) {
   createServer(renderPage${options})
 }
 

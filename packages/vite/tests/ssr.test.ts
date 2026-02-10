@@ -445,7 +445,7 @@ createInertiaApp({ resolve: (name) => name })`
       expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
       expect(result).toContain('const render = await createInertiaApp')
       expect(result).toContain('const renderPage = (page) => render(page, renderToString)')
-      expect(result).toContain('if (!import.meta.hot)')
+      expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
       expect(result).toContain('export default renderPage')
     })
@@ -465,7 +465,7 @@ createInertiaApp({ resolve: (name) => name })`
       expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
       expect(result).toContain("import { render } from 'svelte/server'")
       expect(result).toContain('const renderPage = (page) => ssr(page, render)')
-      expect(result).toContain('if (!import.meta.hot)')
+      expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
       expect(result).toContain('export default renderPage')
     })
@@ -491,8 +491,6 @@ createInertiaApp({})`
       const plugin = inertia()
       const logger = createMockLogger()
 
-      // Even in dev mode (command: 'serve'), the transform is the same
-      // Runtime detection via import.meta.hot handles the difference
       plugin.configResolved!({ ...createMockConfig(logger, false), command: 'serve' } as ResolvedConfig)
 
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
@@ -500,7 +498,7 @@ createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
       expect(result).toContain('export default renderPage')
-      expect(result).toContain('if (!import.meta.hot)')
+      expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
     })
 

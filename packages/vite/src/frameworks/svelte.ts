@@ -27,8 +27,8 @@
  *
  * const renderPage = (page) => ssr(page, render)
  *
- * // Only start server in production (import.meta.hot is only available in Vite dev)
- * if (!import.meta.hot) {
+ * // Only start server in production
+ * if (import.meta.env.PROD) {
  *   createServer(renderPage)
  * }
  *
@@ -50,7 +50,7 @@ export const config: FrameworkConfig = {
   extractDefault: false,
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
-  // Uses import.meta.hot to detect dev mode at runtime (only available in Vite dev server)
+  // Uses import.meta.env.PROD to skip the standalone server in dev mode
   // Note: Svelte uses a different variable name (ssr) and render function import
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/svelte/server'
@@ -60,7 +60,7 @@ const ssr = await ${configureCall}
 
 const renderPage = (page) => ssr(page, render)
 
-if (!import.meta.hot) {
+if (import.meta.env.PROD) {
   createServer(renderPage${options})
 }
 

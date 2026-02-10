@@ -11,9 +11,9 @@
  * The function receives the original `createInertiaApp(...)` call as a string
  * and should return code that wraps it with server bootstrap logic.
  *
- * The generated code uses `import.meta.hot` to detect dev mode at runtime:
- * - In dev: `import.meta.hot` exists, so createServer is skipped
- * - In production: `import.meta.hot` is undefined, so createServer runs
+ * The generated code uses `import.meta.env.PROD` to detect dev vs production:
+ * - In dev: `import.meta.env.PROD` is false, so createServer is skipped
+ * - In production: `import.meta.env.PROD` is true, so createServer runs
  *
  * @param configureCall - The original createInertiaApp(...) call, e.g., `createInertiaApp({ resolve: ... })`
  * @param options - Formatted SSR options string, e.g., `, {"port":13715}` or empty string
@@ -27,7 +27,7 @@
  *   const render = await ${configureCall}
  *   const renderPage = (page) => render(page, renderToString)
  *
- *   if (!import.meta.hot) {
+ *   if (import.meta.env.PROD) {
  *     createServer(renderPage${options})
  *   }
  *

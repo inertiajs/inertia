@@ -45,7 +45,7 @@ createInertiaApp({ resolve: (name) => name })`
 
         const renderPage = (page) => ssr(page, render)
 
-        if (!import.meta.hot) {
+        if (import.meta.env.PROD) {
           createServer(renderPage)
         }
 
@@ -66,7 +66,7 @@ createInertiaApp({})`
 
         const renderPage = (page) => render(page, renderToString)
 
-        if (!import.meta.hot) {
+        if (import.meta.env.PROD) {
           createServer(renderPage)
         }
 
@@ -87,7 +87,7 @@ createInertiaApp({})`
 
         const renderPage = (page) => render(page, renderToString)
 
-        if (!import.meta.hot) {
+        if (import.meta.env.PROD) {
           createServer(renderPage)
         }
 
@@ -108,7 +108,7 @@ createInertiaApp({})`
 
         const renderPage = (page) => ssr(page, render)
 
-        if (!import.meta.hot) {
+        if (import.meta.env.PROD) {
           createServer(renderPage, {"port":13715,"cluster":true})
         }
 
@@ -149,7 +149,7 @@ initializeTheme()`
 
         const renderPage = (page) => render(page, renderToString)
 
-        if (!import.meta.hot) {
+        if (import.meta.env.PROD) {
           createServer(renderPage)
         }
 
@@ -159,7 +159,7 @@ initializeTheme()`
       `)
     })
 
-    it('adds export default to legacy createServer pattern', () => {
+    it('wraps legacy createServer pattern with import.meta.env.PROD guard', () => {
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 import createServer from '@inertiajs/vue3/server'
 import { createSSRApp, h } from 'vue'
@@ -182,7 +182,7 @@ createServer((page) =>
         import { createSSRApp, h } from 'vue'
         import { renderToString } from 'vue/server-renderer'
 
-        export default createServer((page) =>
+        const renderPage = (page) =>
           createInertiaApp({
             page,
             render: renderToString,
@@ -190,8 +190,31 @@ createServer((page) =>
             setup({ App, props, plugin }) {
               return createSSRApp({ render: () => h(App, props) }).use(plugin)
             },
-          }),
-        )"
+          })
+
+        if (import.meta.env.PROD) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
+      `)
+    })
+
+    it('preserves options in legacy createServer pattern', () => {
+      const code = `import createServer from '@inertiajs/vue3/server'
+
+createServer((page) => renderApp(page), { port: 13715 })`
+
+      expect(wrap(code)).toMatchInlineSnapshot(`
+        "import createServer from '@inertiajs/vue3/server'
+
+        const renderPage = (page) => renderApp(page)
+
+        if (import.meta.env.PROD) {
+          createServer(renderPage, { port: 13715 })
+        }
+
+        export default renderPage"
       `)
     })
 

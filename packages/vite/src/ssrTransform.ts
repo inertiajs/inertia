@@ -70,16 +70,14 @@ export function findInertiaAppExport(code: string): boolean {
  *
  * The SSR template is defined in each framework's config file (e.g., `frameworks/vue.ts`).
  *
- * The generated code uses `import.meta.hot` to detect dev vs production at runtime:
- * - In dev: `import.meta.hot` exists, so createServer is skipped (Vite handles HTTP)
- * - In production: `import.meta.hot` is undefined, so createServer runs
+ * The generated code uses `import.meta.env.PROD` to detect dev vs production:
+ * - In dev: `import.meta.env.PROD` is false, so createServer is skipped (Vite handles SSR)
+ * - In production: `import.meta.env.PROD` is true, so createServer runs
  *
  * For backwards compatibility, it also handles the legacy createServer pattern:
  * ```js
  * createServer((page) => createInertiaApp({ ... }))
  * ```
- *
- * By adding `export default` so Vite's SSR dev mode can access the render function.
  *
  * @returns The transformed code, or null if no transformation was needed
  */
@@ -116,12 +114,21 @@ export function wrapWithServerBootstrap(
   }
 
   // Handle the legacy pattern: createServer((page) => createInertiaApp({ ... }))
-  // We just need to add `export default` so Vite can access the render function
   if (parsed.createServerStatement) {
     const statement = parsed.createServerStatement
+    const args = (statement.expression as unknown as { arguments: Array<{ start: number; end: number }> }).arguments
+    const callback = code.slice(args[0].start, args[0].end)
+    const trailingArgs = code.slice(args[0].end, args[args.length - 1].end)
 
-    // Add `export default` before the createServer call
-    return code.slice(0, statement.start) + 'export default ' + code.slice(statement.start)
+    const replacement = `const renderPage = ${callback}
+
+if (import.meta.env.PROD) {
+  createServer(renderPage${trailingArgs})
+}
+
+export default renderPage`
+
+    return code.slice(0, statement.start) + replacement + code.slice(statement.end)
   }
 
   return null
