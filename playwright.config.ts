@@ -18,6 +18,7 @@ const runsOnMac = process.platform === 'darwin'
 const ssrEnabled = process.env.SSR === 'true'
 
 const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
+const ssrAutoPorts = { vue3: 13718, react: 13719, svelte: 13720 }
 const url = `http://localhost:${adapterPorts[adapter]}`
 
 const adapters = ['react', 'svelte', 'vue3']
@@ -55,6 +56,7 @@ const projects = [
 // Build commands
 const buildCommand = `pnpm -r --filter './packages/${adapter}/test-app' build`
 const buildSSRCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr`
+const buildSSRAutoCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr-auto`
 const serveCommand = `cd tests/app && PACKAGE=${adapter} pnpm serve`
 
 // Web server configuration based on SSR mode
@@ -63,6 +65,11 @@ const webServerConfig = ssrEnabled
       {
         command: `${buildCommand} && ${buildSSRCommand} && node packages/${adapter}/test-app/dist/ssr.js`,
         url: 'http://localhost:13714/health',
+        reuseExistingServer: !runsInCI,
+      },
+      {
+        command: `${buildSSRAutoCommand} && node packages/${adapter}/test-app/dist/ssr-auto.js`,
+        url: `http://localhost:${ssrAutoPorts[adapter]}/health`,
         reuseExistingServer: !runsInCI,
       },
       {

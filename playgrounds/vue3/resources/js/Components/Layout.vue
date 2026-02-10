@@ -28,6 +28,7 @@ const layoutProps = useLayoutProps({ padding: true })
     <Link href="/data-table" class="hover:underline">Table</Link>
     <Link href="/once/1" class="hover:underline">Once</Link>
     <Link href="/flash" class="hover:underline">Flash</Link>
+    <Link href="/ssr-debug" class="hover:underline">SSR Debug</Link>
   </nav>
   <main :class="layoutProps.padding ? 'px-10 py-8' : ''">
     <slot />

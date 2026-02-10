@@ -434,3 +434,8 @@ Route::get('/flash/direct', function () {
 Route::post('/flash/form', function () {
     return Inertia::flash('message', 'Sent with redirect!')->back();
 });
+
+Route::get('/ssr-debug', fn () => inertia('SsrDebug'));
+Route::get('/ssr-debug/window', fn () => inertia('SsrDebug/WindowError'));
+Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));
+Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageError'));

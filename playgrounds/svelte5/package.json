@@ -11,6 +11,7 @@
   "devDependencies": {
     "@inertiajs/core": "workspace:*",
     "@inertiajs/svelte": "workspace:*",
+    "@inertiajs/vite": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "@tsconfig/svelte": "^5.0.6",

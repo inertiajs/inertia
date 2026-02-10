@@ -502,8 +502,24 @@ type FirstLevelOptional<T> = {
   [K in keyof T]?: T[K] extends object ? { [P in keyof T[K]]?: T[K][P] } : T[K]
 }
 
-interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+type PagesOption =
+  | string
+  | {
+      path: string
+      extension?: string | string[]
+      transform?: (name: string) => string
+    }
+
+type ProgressOptions = {
+  delay?: number
+  color?: string
+  includeCSS?: boolean
+  showSpinner?: boolean
+}
+
+interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
+  pages?: PagesOption
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
@@ -517,17 +533,10 @@ export interface CreateInertiaAppOptionsForCSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   page?: Page<SharedProps>
-  progress?:
-    | false
-    | {
-        delay?: number
-        color?: string
-        includeCSS?: boolean
-        showSpinner?: boolean
-      }
+  progress?: ProgressOptions | false
   render?: undefined
 }
 
@@ -537,7 +546,7 @@ export interface CreateInertiaAppOptionsForSSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined
@@ -548,6 +557,18 @@ export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
 export type HeadManagerTitleCallback = (title: string) => string
+
+export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+  id?: string
+  resolve?: TComponentResolver
+  pages?: PagesOption
+  setup?: (options: TSetupOptions) => TSetupReturn
+  title?: HeadManagerTitleCallback
+  progress?: ProgressOptions | false
+  defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
+  /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
+  http?: HttpClient | HttpClientOptions
+}
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void

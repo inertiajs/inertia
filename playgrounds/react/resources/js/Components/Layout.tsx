@@ -53,6 +53,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/flash" className="hover:underline">
           Flash
         </Link>
+        <Link href="/ssr-debug" className="hover:underline">
+          SSR Debug
+        </Link>
         <Link href="/logout" method="post" className="hover:underline">
           Logout
         </Link>

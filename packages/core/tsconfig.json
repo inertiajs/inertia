@@ -1,4 +1,6 @@
 {
+  "exclude": ["tests"],
+  "include": ["src/**/*.ts"],
   "compilerOptions": {
     "rootDir": "src",
     "noEmitOnError": true,
