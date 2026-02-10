@@ -7,6 +7,7 @@ type SveltePage<TPageProps extends PageProps = PageProps> = Omit<Page<TPageProps
   }
 }
 
+let pageAccessor: Readable<SveltePage> | null = null
 const { set, subscribe } = writable<SveltePage>()
 
 export const setPage = set
@@ -14,5 +15,9 @@ export const setPage = set
 export default { subscribe }
 
 export function usePage<TPageProps extends PageProps = PageProps>(): Readable<SveltePage<TPageProps>> {
-  return derived({ subscribe }, ($page) => $page as SveltePage<TPageProps>)
+  if (!pageAccessor) {
+    pageAccessor = derived({ subscribe }, ($page) => $page)
+  }
+
+  return pageAccessor as Readable<SveltePage<TPageProps>>
 }

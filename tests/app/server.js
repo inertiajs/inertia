@@ -2513,6 +2513,20 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
+app.get('/use-page/page1', (req, res) =>
+  inertia.render(req, res, {
+    component: 'UsePage/Page1',
+    props: { name: 'Alice' },
+  }),
+)
+
+app.get('/use-page/page2', (req, res) =>
+  inertia.render(req, res, {
+    component: 'UsePage/Page2',
+    props: { title: 'Dashboard' },
+  }),
+)
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

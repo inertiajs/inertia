@@ -36,6 +36,7 @@ export type InertiaApp = DefineComponent<InertiaAppProps>
 
 const component = ref<DefineComponent | undefined>(undefined)
 const page = ref<Page>()
+let pageAccessor: Page | null = null
 const layout = shallowRef(null)
 const key = ref<number | undefined>(undefined)
 let headManager: HeadManager
@@ -139,19 +140,23 @@ export const plugin: Plugin = {
 }
 
 export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageProps & SharedPageProps> {
-  return reactive({
-    props: computed(() => page.value?.props),
-    url: computed(() => page.value?.url),
-    component: computed(() => page.value?.component),
-    version: computed(() => page.value?.version),
-    clearHistory: computed(() => page.value?.clearHistory),
-    deferredProps: computed(() => page.value?.deferredProps),
-    mergeProps: computed(() => page.value?.mergeProps),
-    prependProps: computed(() => page.value?.prependProps),
-    deepMergeProps: computed(() => page.value?.deepMergeProps),
-    matchPropsOn: computed(() => page.value?.matchPropsOn),
-    rememberedState: computed(() => page.value?.rememberedState),
-    encryptHistory: computed(() => page.value?.encryptHistory),
-    flash: computed(() => page.value?.flash),
-  }) as Page<TPageProps>
+  if (!pageAccessor) {
+    pageAccessor = reactive({
+      props: computed(() => page.value?.props),
+      url: computed(() => page.value?.url),
+      component: computed(() => page.value?.component),
+      version: computed(() => page.value?.version),
+      clearHistory: computed(() => page.value?.clearHistory),
+      deferredProps: computed(() => page.value?.deferredProps),
+      mergeProps: computed(() => page.value?.mergeProps),
+      prependProps: computed(() => page.value?.prependProps),
+      deepMergeProps: computed(() => page.value?.deepMergeProps),
+      matchPropsOn: computed(() => page.value?.matchPropsOn),
+      rememberedState: computed(() => page.value?.rememberedState),
+      encryptHistory: computed(() => page.value?.encryptHistory),
+      flash: computed(() => page.value?.flash),
+    }) as Page
+  }
+
+  return pageAccessor as Page<TPageProps>
 }
