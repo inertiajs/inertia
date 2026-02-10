@@ -91,6 +91,16 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
       cluster.fork()
     }
 
+    cluster.on('message', (_worker, message) => {
+      if (message === 'shutdown') {
+        for (const id in cluster.workers) {
+          cluster.workers[id]?.kill()
+        }
+
+        process.exit()
+      }
+    })
+
     return render
   }
 
@@ -128,7 +138,13 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
 
   const routes: Record<string, RouteHandler> = {
     '/health': async () => ({ status: 'OK', timestamp: Date.now() }),
-    '/shutdown': () => process.exit(),
+    '/shutdown': async () => {
+      if (cluster.isWorker) {
+        process.send?.('shutdown')
+      }
+
+      process.exit()
+    },
     '/render': handleRender,
     '/404': async () => ({ status: 'NOT_FOUND', timestamp: Date.now() }),
   }
