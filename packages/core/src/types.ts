@@ -517,7 +517,7 @@ type ProgressOptions = {
   showSpinner?: boolean
 }
 
-interface LegacyCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
   pages?: PagesOption
   setup: (options: TSetupOptions) => TSetupReturn
@@ -533,7 +533,7 @@ export interface CreateInertiaAppOptionsForCSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends LegacyCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
   page?: Page<SharedProps>
   progress?: ProgressOptions | false
@@ -546,7 +546,7 @@ export interface CreateInertiaAppOptionsForSSR<
   TSetupOptions,
   TSetupReturn,
   TAdditionalInertiaAppConfig,
-> extends LegacyCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
+> extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: undefined
   page: Page<SharedProps>
   progress?: undefined

@@ -10,7 +10,7 @@
   "homepage": "https://inertiajs.com/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inertiajs/inertia.git",
+    "url": "git+https://github.com/inertiajs/inertia.git",
     "directory": "packages/react"
   },
   "bugs": {
