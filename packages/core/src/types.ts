@@ -284,6 +284,8 @@ export type CancelToken = {
 
 export type CancelTokenCallback = (cancelToken: CancelToken) => void
 
+export type OptimisticCallback<TProps = Page['props']> = (props: TProps) => Partial<TProps> | void
+
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
   data: T
@@ -305,6 +307,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   preserveErrors: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
+  optimistic?: OptimisticCallback
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -489,7 +492,8 @@ export type PendingVisitOptions = {
 
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
-export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> & Required<VisitOptions<T>>
+export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> &
+  Required<Omit<VisitOptions<T>, 'optimistic'>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
@@ -697,10 +701,10 @@ export type UseFormSubmitArguments =
   | [UrlMethodPair, UseFormSubmitOptions?]
   | [UseFormSubmitOptions?]
 
-export type UseHttpSubmitArguments<TResponse = unknown> =
-  | [Method, string, UseHttpSubmitOptions<TResponse>?]
-  | [UrlMethodPair, UseHttpSubmitOptions<TResponse>?]
-  | [UseHttpSubmitOptions<TResponse>?]
+export type UseHttpSubmitArguments<TResponse = unknown, TForm = unknown> =
+  | [Method, string, UseHttpSubmitOptions<TResponse, TForm>?]
+  | [UrlMethodPair, UseHttpSubmitOptions<TResponse, TForm>?]
+  | [UseHttpSubmitOptions<TResponse, TForm>?]
 
 export type FormComponentOptions = Pick<
   VisitOptions,
@@ -869,8 +873,9 @@ export type UseHttpOptions<TResponse = unknown> = {
   onCancelToken?: (cancelToken: CancelToken) => void
 }
 
-export type UseHttpSubmitOptions<TResponse = unknown> = UseHttpOptions<TResponse> & {
+export type UseHttpSubmitOptions<TResponse = unknown, TForm = unknown> = UseHttpOptions<TResponse> & {
   headers?: HttpRequestHeaders
+  optimistic?: (currentData: TForm) => Partial<TForm>
 }
 
 declare global {

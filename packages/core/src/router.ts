@@ -1,4 +1,4 @@
-import { cloneDeep, get, set } from 'lodash-es'
+import { cloneDeep, get, isEqual, set } from 'lodash-es'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
@@ -23,6 +23,7 @@ import {
   GlobalEventResult,
   InFlightPrefetch,
   Method,
+  OptimisticCallback,
   Page,
   PageFlashData,
   PendingVisit,
@@ -59,6 +60,8 @@ export class Router {
 
   protected clientVisitQueue = new Queue<Promise<void>>()
 
+  protected pendingOptimisticCallback: OptimisticCallback | null = null
+
   public init<ComponentType = Component>({
     initialPage,
     resolveComponent,
@@ -89,6 +92,12 @@ export class Router {
     eventHandler.on('historyQuotaExceeded', (url) => {
       window.location.href = url
     })
+  }
+
+  public optimistic<TProps>(callback: OptimisticCallback<TProps>): this {
+    this.pendingOptimisticCallback = callback as OptimisticCallback
+
+    return this
   }
 
   public get<T extends RequestPayload = RequestPayload>(
@@ -211,6 +220,7 @@ export class Router {
 
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
+      this.pendingOptimisticCallback = null
       return
     }
 
@@ -228,8 +238,17 @@ export class Router {
       this.asyncRequestStream.cancelInFlight({ prefetch: false })
     }
 
+    // Interrupt in-flight requests before taking the optimistic snapshot
+    // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+    }
+
+    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback ?? undefined
+    this.pendingOptimisticCallback = null
+
+    if (options.optimistic) {
+      this.applyOptimisticUpdate(options.optimistic, events)
     }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
@@ -612,6 +631,46 @@ export class Router {
       onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
+    }
+  }
+
+  protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks): void {
+    const optimisticProps = optimistic(cloneDeep(currentPage.get().props))
+
+    if (!optimisticProps) {
+      return
+    }
+
+    const currentProps = cloneDeep(currentPage.get().props)
+    const propsSnapshot: Partial<Page['props']> = {}
+
+    for (const key of Object.keys(optimisticProps)) {
+      if (!isEqual(currentProps[key], optimisticProps[key])) {
+        propsSnapshot[key] = cloneDeep(currentProps[key])
+      }
+    }
+
+    if (Object.keys(propsSnapshot).length === 0) {
+      return
+    }
+
+    currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
+
+    let shouldRestore = true
+
+    const originalOnSuccess = events.onSuccess
+    events.onSuccess = (page) => {
+      shouldRestore = false
+      return originalOnSuccess(page)
+    }
+
+    const originalOnFinish = events.onFinish
+    events.onFinish = (visit) => {
+      if (shouldRestore) {
+        currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
+      }
+
+      return originalOnFinish(visit)
     }
   }
 
