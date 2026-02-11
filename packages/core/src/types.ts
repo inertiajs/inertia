@@ -532,6 +532,7 @@ export type InertiaAppConfig = {
   form: {
     recentlySuccessfulDuration: number
     forceIndicesArrayFormatInFormData: boolean
+    withAllErrors: boolean
   }
   // experimental: {
   //   /* not guaranteed */
@@ -661,7 +662,7 @@ export type FormComponentProps = Partial<
   setDefaultsOnSuccess?: boolean
   validateFiles?: boolean
   validationTimeout?: number
-  withAllErrors?: boolean
+  withAllErrors?: boolean | null
 }
 
 export type FormComponentMethods = {

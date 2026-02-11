@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    config,
     formDataToObject,
     FormComponentResetSymbol,
     resetFormFields,
@@ -46,7 +47,7 @@
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
   export let validateFiles: FormComponentProps['validateFiles'] = false
   export let validationTimeout: FormComponentProps['validationTimeout'] = 1500
-  export let withAllErrors: FormComponentProps['withAllErrors'] = false
+  export let withAllErrors: FormComponentProps['withAllErrors'] = null
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
   type FormSubmitter = HTMLElement | null
@@ -67,7 +68,7 @@
     form.validateFiles()
   }
 
-  if (withAllErrors) {
+  if (withAllErrors ?? config.get('form.withAllErrors')) {
     form.withAllErrors()
   }
 
