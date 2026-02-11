@@ -120,7 +120,8 @@ export default function useFormState<TForm extends object>(
   let defaults = cloneDeep(initialData)
   let transform: UseFormTransformCallback<TForm> = (data) => data
   let validatorRef: Validator | null = null
-  let withAllErrors = false
+  let withAllErrors: boolean | null = null
+  const withAllErrorsEnabled = () => withAllErrors ?? config.get('form.withAllErrors')
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | undefined
   let defaultsCalledInOnSuccess = false
   let rememberExcludeKeys: FormDataKeys<TForm>[] = []
@@ -163,10 +164,9 @@ export default function useFormState<TForm extends object>(
           formWithPrecognition.__touched = validator.touched()
         })
         .on('errorsChanged', () => {
-          const validationErrors =
-            (withAllErrors ?? config.get('form.withAllErrors'))
-              ? validator.errors()
-              : toSimpleValidationErrors(validator.errors())
+          const validationErrors = withAllErrorsEnabled()
+            ? validator.errors()
+            : toSimpleValidationErrors(validator.errors())
 
           this.errors = {} as FormDataErrors<TForm>
 
@@ -425,7 +425,7 @@ export default function useFormState<TForm extends object>(
       typedForm.progress = null
     },
     withAllErrors: {
-      enabled: () => withAllErrors,
+      enabled: withAllErrorsEnabled,
       enable: () => {
         withAllErrors = true
       },

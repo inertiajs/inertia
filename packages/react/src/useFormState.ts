@@ -146,6 +146,7 @@ export default function useFormState<TForm extends object>(
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
   const withAllErrorsRef = useRef<boolean | null>(null)
+  const withAllErrorsEnabled = () => withAllErrorsRef.current ?? config.get('form.withAllErrors')
 
   const dataRef = useRef(data)
 
@@ -400,10 +401,9 @@ export default function useFormState<TForm extends object>(
           setTouchedFields(validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors =
-            (withAllErrorsRef.current ?? config.get('form.withAllErrors'))
-              ? validator.errors()
-              : toSimpleValidationErrors(validator.errors())
+          const validationErrors = withAllErrorsEnabled()
+            ? validator.errors()
+            : toSimpleValidationErrors(validator.errors())
 
           setErrors(validationErrors as FormDataErrors<TForm>)
           setHasErrors(Object.keys(validationErrors).length > 0)
@@ -469,7 +469,7 @@ export default function useFormState<TForm extends object>(
     resetBeforeSubmit,
     finishProcessing,
     withAllErrors: {
-      enabled: () => withAllErrorsRef.current,
+      enabled: withAllErrorsEnabled,
       enable: () => {
         withAllErrorsRef.current = true
       },

@@ -116,7 +116,8 @@ export default function useFormState<TForm extends object>(
   let defaults = cloneDeep(initialData)
   let transform: TransformCallback<TForm> = (data) => data as object
   let validatorRef: Validator | null = null
-  let withAllErrors = false
+  let withAllErrors: boolean | null = null
+  const withAllErrorsEnabled = () => withAllErrors ?? config.get('form.withAllErrors')
   let precognitionEndpoint = initialPrecognitionEndpoint ?? null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let defaultsCalledInOnSuccess = false
@@ -158,10 +159,9 @@ export default function useFormState<TForm extends object>(
           setFormStateInternal('__touched', validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors =
-            (withAllErrors ?? config.get('form.withAllErrors'))
-              ? validator.errors()
-              : toSimpleValidationErrors(validator.errors())
+          const validationErrors = withAllErrorsEnabled()
+            ? validator.errors()
+            : toSimpleValidationErrors(validator.errors())
 
           setFormStateInternal('errors', {} as FormDataErrors<TForm>)
           formWithPrecognition().setError(validationErrors as FormDataErrors<TForm>)
@@ -439,7 +439,7 @@ export default function useFormState<TForm extends object>(
       setFormStateInternal('progress', null)
     },
     withAllErrors: {
-      enabled: () => withAllErrors,
+      enabled: withAllErrorsEnabled,
       enable: () => {
         withAllErrors = true
       },
