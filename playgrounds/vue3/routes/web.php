@@ -602,6 +602,10 @@ Route::post('/optimistic/reset', function () {
     return redirect('/optimistic');
 });
 
+Route::get('/error/{status}', function (int $status) {
+    abort($status);
+});
+
 Route::get('/ssr-debug', fn () => inertia('SsrDebug'));
 Route::get('/ssr-debug/window', fn () => inertia('SsrDebug/WindowError'));
 Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));

@@ -20,6 +20,7 @@
   <a href="/once/1" use:inertia class="hover:underline">Once</a>
   <a href="/optimistic" use:inertia class="hover:underline">Optimistic</a>
   <a href="/flash" use:inertia class="hover:underline">Flash</a>
+  <a href="/error/404" use:inertia class="hover:underline">Errors</a>
   <a href="/ssr-debug" use:inertia class="hover:underline">SSR Debug</a>
   <button use:inertia={{ method: 'post', href: '/logout' }} type="button" class="hover:underline">Logout</button>
 </nav>
