@@ -48,7 +48,7 @@
     "@sveltejs/kit": "^2.49.5",
     "@sveltejs/package": "^2.5.7",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "es-check": "^9.5.3",
     "publint": "^0.3.16",
     "svelte": "^4.2.20",

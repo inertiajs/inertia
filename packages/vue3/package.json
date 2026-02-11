@@ -51,7 +51,7 @@
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.esm.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "es-check": "^9.5.3",
     "esbuild": "^0.27.2",
     "esbuild-node-externals": "^1.20.1",
