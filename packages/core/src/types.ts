@@ -712,6 +712,11 @@ export type FormComponentOptions = Pick<
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
+export type FormComponentOptimisticCallback<TProps = Page['props']> = (
+  props: TProps,
+  formData: Record<string, FormDataConvertible>,
+) => Partial<TProps> | void
+
 export type FormComponentProps = Partial<
   Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress' | 'invalidateCacheTags'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
@@ -719,6 +724,7 @@ export type FormComponentProps = Partial<
   method?: Method | Uppercase<Method>
   action?: string | UrlMethodPair
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
+  optimistic?: FormComponentOptimisticCallback
   options?: FormComponentOptions
   onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
   disableWhileProcessing?: boolean
