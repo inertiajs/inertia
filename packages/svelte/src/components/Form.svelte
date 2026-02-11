@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    config,
     formDataToObject,
     FormComponentResetSymbol,
     resetFormFields,

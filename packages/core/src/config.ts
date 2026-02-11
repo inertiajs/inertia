@@ -74,6 +74,7 @@ export const config = new Config<InertiaAppConfig>({
   form: {
     recentlySuccessfulDuration: 2_000,
     forceIndicesArrayFormatInFormData: true,
+    withAllErrors: false,
   },
   legacy: {
     useDataAttributeForInitialPage: false,
