@@ -1,14 +1,9 @@
-<script lang="ts">
-import usePoll from '../../../../../packages/vue3/src/usePoll'
-import Layout from '../Components/Layout.vue'
-import TestGrid from '../Components/TestGrid.vue'
-import TestGridItem from '../Components/TestGridItem.vue'
-export default { layout: Layout }
-</script>
-
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3'
 import { onMounted, ref } from 'vue'
+import usePoll from '../../../../../packages/vue3/src/usePoll'
+import TestGrid from '../Components/TestGrid.vue'
+import TestGridItem from '../Components/TestGridItem.vue'
 
 defineProps<{
   users: string[]

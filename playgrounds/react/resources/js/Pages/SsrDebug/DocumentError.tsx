@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react'
-import Layout from '../../Components/Layout'
 
 // This will cause an SSR error because document doesn't exist in Node.js
 const bodyClasses = document.body.className
@@ -27,7 +26,5 @@ const DocumentError = () => {
     </>
   )
 }
-
-DocumentError.layout = (page) => <Layout children={page} />
 
 export default DocumentError

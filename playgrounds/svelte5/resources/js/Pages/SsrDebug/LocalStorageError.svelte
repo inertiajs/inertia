@@ -1,6 +1,4 @@
 <script module>
-  export { default as layout } from '../../Components/Layout.svelte'
-
   // This will cause an SSR error because localStorage doesn't exist in Node.js
   const savedTheme = localStorage.getItem('theme')
 </script>

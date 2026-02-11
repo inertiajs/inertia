@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const SsrDebug = () => {
   return (
@@ -61,7 +60,5 @@ before using it.`}
     </>
   )
 }
-
-SsrDebug.layout = (page) => <Layout children={page} />
 
 export default SsrDebug

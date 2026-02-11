@@ -27,7 +27,9 @@ const layoutProps = useLayoutProps({ padding: true })
     <Link href="/photo-grid/horizontal" class="hover:underline">Photo Row</Link>
     <Link href="/data-table" class="hover:underline">Table</Link>
     <Link href="/once/1" class="hover:underline">Once</Link>
+    <Link href="/optimistic" class="hover:underline">Optimistic</Link>
     <Link href="/flash" class="hover:underline">Flash</Link>
+    <Link href="/error/404" class="hover:underline">Errors</Link>
     <Link href="/ssr-debug" class="hover:underline">SSR Debug</Link>
   </nav>
   <main :class="layoutProps.padding ? 'px-10 py-8' : ''">

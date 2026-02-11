@@ -1,7 +1,3 @@
-<script module>
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script lang="ts">
   import { router, useForm } from '@inertiajs/svelte'
   import TestGrid from '../Components/TestGrid.svelte'

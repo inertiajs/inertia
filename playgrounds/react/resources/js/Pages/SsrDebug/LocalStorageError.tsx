@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react'
-import Layout from '../../Components/Layout'
 
 // This will cause an SSR error because localStorage doesn't exist in Node.js
 const savedTheme = localStorage.getItem('theme')
@@ -27,7 +26,5 @@ const LocalStorageError = () => {
     </>
   )
 }
-
-LocalStorageError.layout = (page) => <Layout children={page} />
 
 export default LocalStorageError

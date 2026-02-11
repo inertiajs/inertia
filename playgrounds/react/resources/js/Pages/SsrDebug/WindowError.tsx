@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react'
-import Layout from '../../Components/Layout'
 
 // This will cause an SSR error because window doesn't exist in Node.js
 const viewportWidth = window.innerWidth
@@ -27,7 +26,5 @@ const WindowError = () => {
     </>
   )
 }
-
-WindowError.layout = (page) => <Layout children={page} />
 
 export default WindowError

@@ -1,7 +1,3 @@
-<script module>
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script>
   import { InfiniteScroll } from '@inertiajs/svelte'
   import Spinner from '../Components/Spinner.svelte'

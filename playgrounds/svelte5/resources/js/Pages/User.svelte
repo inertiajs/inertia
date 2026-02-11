@@ -1,7 +1,3 @@
-<script module>
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script>
   let { appName, user } = $props()
 </script>

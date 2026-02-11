@@ -1,7 +1,3 @@
-<script module>
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script>
   import { onMount } from 'svelte'
   import { router, usePoll } from '@inertiajs/svelte'

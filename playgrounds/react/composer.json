@@ -53,6 +53,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
+            "@php artisan view:clear",
             "pnpx concurrently -c \"#93c5fd,#c4b5fd\" \"php artisan serve\" \"pnpm run dev\" --names=server,vite"
         ]
     },

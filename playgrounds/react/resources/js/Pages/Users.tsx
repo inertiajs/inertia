@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const Users = ({ users }) => {
   return (
@@ -29,7 +28,5 @@ const Users = ({ users }) => {
     </>
   )
 }
-
-Users.layout = Layout
 
 export default Users
