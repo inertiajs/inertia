@@ -662,7 +662,7 @@ export type FormComponentProps = Partial<
   setDefaultsOnSuccess?: boolean
   validateFiles?: boolean
   validationTimeout?: number
-  withAllErrors?: boolean
+  withAllErrors?: boolean | null
 }
 
 export type FormComponentMethods = {

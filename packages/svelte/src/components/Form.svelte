@@ -47,7 +47,7 @@
   export let setDefaultsOnSuccess: FormComponentProps['setDefaultsOnSuccess'] = false
   export let validateFiles: FormComponentProps['validateFiles'] = false
   export let validationTimeout: FormComponentProps['validationTimeout'] = 1500
-  export let withAllErrors: FormComponentProps['withAllErrors'] = undefined
+  export let withAllErrors: FormComponentProps['withAllErrors'] = null
 
   type FormSubmitOptions = Omit<VisitOptions, 'data' | 'onPrefetched' | 'onPrefetching'>
   type FormSubmitter = HTMLElement | null

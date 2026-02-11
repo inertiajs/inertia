@@ -143,7 +143,7 @@ const Form = defineComponent({
     },
     withAllErrors: {
       type: Boolean as PropType<FormComponentProps['withAllErrors']>,
-      default: undefined,
+      default: null,
     },
   },
   setup(props, { slots, attrs, expose }) {

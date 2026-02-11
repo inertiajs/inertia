@@ -76,7 +76,7 @@ const Form = forwardRef<FormComponentRef, ComponentProps>(
       invalidateCacheTags = [],
       validateFiles = false,
       validationTimeout = 1500,
-      withAllErrors,
+      withAllErrors = null,
       children,
       ...props
     },
