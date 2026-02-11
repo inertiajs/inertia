@@ -1,11 +1,16 @@
 <script lang="ts">
   import { useLayoutProps } from '@inertiajs/svelte'
+  import { onMount } from 'svelte'
 
   interface Props {
     children?: import('svelte').Snippet
   }
 
   let { children }: Props = $props()
+
+  onMount(() => {
+    window._inertia_app_layout_id = crypto.randomUUID()
+  })
 
   const layoutProps = useLayoutProps({
     title: 'Default Title',

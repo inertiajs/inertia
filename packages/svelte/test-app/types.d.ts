@@ -22,6 +22,8 @@ declare global {
     _inertia_nested_layout_id: number | string | undefined
     _inertia_nested_layout_props: PageProps
     _inertia_page_props: PageProps
+    _inertia_app_layout_id: string | undefined
+    _inertia_content_layout_id: string | undefined
     _plugin_global_props: object
     resolverReceivedPage: Page | null
   }

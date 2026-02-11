@@ -1,7 +1,10 @@
 import { useLayoutProps } from '@inertiajs/react'
-import { ReactNode } from 'react'
+import { ReactNode, useId } from 'react'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const layoutId = useId()
+  window._inertia_app_layout_id = layoutId
+
   const layoutProps = useLayoutProps({
     title: 'Default Title',
     showSidebar: true,
