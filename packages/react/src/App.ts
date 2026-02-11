@@ -63,6 +63,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   resolveComponent?: (name: string, page?: Page) => ReactComponent | Promise<ReactComponent>
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
+  defaultLayout?: (name: string, page: Page) => unknown
 }
 
 export type InertiaApp = FunctionComponent<InertiaAppProps>
@@ -74,6 +75,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
   resolveComponent,
   titleCallback,
   onHeadUpdate,
+  defaultLayout,
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
@@ -143,11 +145,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
     (({ Component, props, key }) => {
       const child = createElement(Component, { key, ...props })
 
-      if (isRenderFunction(Component.layout)) {
+      if (Component.layout && isRenderFunction(Component.layout)) {
         return (Component.layout as LayoutFunction)(child)
       }
 
-      const layouts = normalizeLayouts(Component.layout, isComponent, isRenderFunction)
+      const effectiveLayout = Component.layout ?? defaultLayout?.(current.page.component, current.page)
+      const layouts = normalizeLayouts(effectiveLayout, isComponent, Component.layout ? isRenderFunction : undefined)
 
       if (layouts.length > 0) {
         return layouts.reduceRight((childNode, layout) => {

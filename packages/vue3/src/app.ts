@@ -67,6 +67,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   resolveComponent?: (name: string, page?: Page) => DefineComponent | Promise<DefineComponent>
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
+  defaultLayout?: (name: string, page: Page) => unknown
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -102,8 +103,19 @@ const App: InertiaApp = defineComponent({
       required: false,
       default: () => () => {},
     },
+    defaultLayout: {
+      type: Function as PropType<(name: string, page: Page) => unknown>,
+      required: false,
+    },
   },
-  setup({ initialPage, initialComponent, resolveComponent, titleCallback, onHeadUpdate }: InertiaAppProps) {
+  setup({
+    initialPage,
+    initialComponent,
+    resolveComponent,
+    titleCallback,
+    onHeadUpdate,
+    defaultLayout,
+  }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
     key.value = undefined
@@ -146,12 +158,18 @@ const App: InertiaApp = defineComponent({
           layout.value = null
         }
 
-        if (component.value.layout) {
-          if (isRenderFunction(component.value.layout)) {
-            return (component.value.layout as Function)(h, child)
-          }
+        if (component.value.layout && isRenderFunction(component.value.layout)) {
+          return (component.value.layout as Function)(h, child)
+        }
 
-          const layouts = normalizeLayouts(component.value.layout, isComponent, isRenderFunction)
+        const effectiveLayout = component.value.layout ?? defaultLayout?.(page.value!.component, page.value!)
+
+        if (effectiveLayout) {
+          const layouts = normalizeLayouts(
+            effectiveLayout,
+            isComponent,
+            component.value.layout ? isRenderFunction : undefined,
+          )
 
           if (layouts.length > 0) {
             return layouts.reduceRight((childNode, layout) => {
