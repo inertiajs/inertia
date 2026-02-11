@@ -1626,4 +1626,35 @@ test.describe('Form Component', () => {
       await newPage.close()
     })
   })
+
+  test.describe('Optimistic', () => {
+    test.beforeEach(async ({ page }, testInfo) => {
+      await page.context().addCookies([
+        {
+          name: 'optimistic-session',
+          value: `form-worker-${testInfo.workerIndex}-${Date.now()}`,
+          domain: 'localhost',
+          path: '/',
+        },
+      ])
+
+      await page.goto('/form-component/optimistic')
+      await expect(page.locator('#todo-list li')).toHaveCount(2)
+    })
+
+    test('it applies optimistic update immediately using the form data', async ({ page }) => {
+      pageLoads.watch(page)
+
+      await page.locator('#name-input').fill('Optimistic Form Todo')
+      await page.locator('#submit-btn').click()
+
+      await expect(page.locator('#todo-list li')).toHaveCount(3)
+      await expect(page.locator('#todo-list')).toContainText('Optimistic Form Todo')
+
+      await page.waitForResponse('**/form-component/optimistic')
+
+      await expect(page.locator('#todo-list li')).toHaveCount(3)
+      await expect(page.locator('#todo-count')).toContainText('Count: 3')
+    })
+  })
 })

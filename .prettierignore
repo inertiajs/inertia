@@ -24,6 +24,8 @@ packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Simple/PageA.vue
 packages/vue3/test-app/Pages/PersistentLayouts/RenderFunction/Simple/PageB.vue
 packages/vue3/test-app/Pages/PersistentLayouts/Shorthand/Nested/PageA.vue
 packages/vue3/test-app/Pages/PersistentLayouts/Shorthand/Nested/PageB.vue
+packages/vue3/test-app/Pages/LayoutProps/PersistentA.vue
+packages/vue3/test-app/Pages/LayoutProps/PersistentB.vue
 
 # Directories we don't want to format
 **/test-results/

@@ -47,6 +47,7 @@
     setDefaultsOnSuccess?: FormComponentProps['setDefaultsOnSuccess']
     validateFiles?: FormComponentProps['validateFiles']
     validationTimeout?: FormComponentProps['validationTimeout']
+    optimistic?: FormComponentProps['optimistic']
     withAllErrors?: FormComponentProps['withAllErrors']
     children?: import('svelte').Snippet<[FormComponentSlotProps]>
     [key: string]: any
@@ -77,6 +78,7 @@
     setDefaultsOnSuccess = false,
     validateFiles = false,
     validationTimeout = 1500,
+    optimistic,
     withAllErrors = false,
     children,
     ...rest
@@ -155,6 +157,7 @@
       errorBag,
       showProgress,
       invalidateCacheTags,
+      optimistic: optimistic ? (pageProps) => optimistic(pageProps, data) : undefined,
       onCancelToken,
       onBefore,
       onStart,
