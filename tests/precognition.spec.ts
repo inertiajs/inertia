@@ -184,6 +184,20 @@ integrations.forEach((integration) => {
       await expect(page.locator('#name-error-1')).toHaveText('The name contains invalid characters.')
     })
 
+    test(prefix + 'shows all errors using global config', async ({ page }) => {
+      await page.goto('/' + integration + '/precognition/with-all-errors-config')
+
+      await page.fill('input[name="name"]', 'ab')
+      await page.locator('input[name="name"]').blur()
+
+      await expect(page.getByText('Validating...')).toBeVisible()
+      await expect(page.getByText('Validating...')).not.toBeVisible()
+
+      // Should show all errors from the array
+      await expect(page.locator('#name-error-0')).toHaveText('The name must be at least 3 characters.')
+      await expect(page.locator('#name-error-1')).toHaveText('The name contains invalid characters.')
+    })
+
     test(prefix + 'validates all touched fields when calling validate() without arguments', async ({ page }) => {
       await page.goto('/' + integration + '/precognition/methods')
 
