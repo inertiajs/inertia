@@ -513,4 +513,30 @@ test.describe('useHttp', () => {
       await expect(page.locator('#optimistic-inline-processing')).not.toBeVisible()
     })
   })
+
+  test.describe('WithAllErrors', () => {
+    test('it flattens validation errors to first message by default', async ({ page }) => {
+      await page.goto('/use-http/with-all-errors')
+
+      await page.click('#simple-submit')
+
+      await expect(page.locator('#simple-has-errors')).toBeVisible()
+      await expect(page.locator('#simple-name-error')).toContainText('The name field is required.')
+      await expect(page.locator('#simple-name-error')).not.toContainText('The name must be at least 3 characters.')
+      await expect(page.locator('#simple-email-error')).toContainText('The email field is required.')
+      await expect(page.locator('#simple-email-error')).not.toContainText('The email must be a valid email address.')
+    })
+
+    test('it keeps all validation errors when withAllErrors is called', async ({ page }) => {
+      await page.goto('/use-http/with-all-errors')
+
+      await page.click('#all-submit')
+
+      await expect(page.locator('#all-has-errors')).toBeVisible()
+      await expect(page.locator('#all-name-error')).toContainText('The name field is required.')
+      await expect(page.locator('#all-name-error')).toContainText('The name must be at least 3 characters.')
+      await expect(page.locator('#all-email-error')).toContainText('The email field is required.')
+      await expect(page.locator('#all-email-error')).toContainText('The email must be a valid email address.')
+    })
+  })
 })

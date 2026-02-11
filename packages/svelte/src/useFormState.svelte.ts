@@ -97,6 +97,7 @@ export interface UseFormStateReturn<TForm extends object> {
   setRememberExcludeKeys: (keys: FormDataKeys<TForm>[]) => void
   resetBeforeSubmit: () => void
   finishProcessing: () => void
+  withAllErrors: { enabled: () => boolean; enable: () => void }
 }
 
 export default function useFormState<TForm extends object>(
@@ -115,6 +116,7 @@ export default function useFormState<TForm extends object>(
   let defaults = cloneDeep(initialData)
   let transform: TransformCallback<TForm> = (data) => data as object
   let validatorRef: Validator | null = null
+  let withAllErrors = false
   let precognitionEndpoint = initialPrecognitionEndpoint ?? null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let defaultsCalledInOnSuccess = false
@@ -131,8 +133,6 @@ export default function useFormState<TForm extends object>(
     precognitionEndpoint = UseFormUtils.createWayfinderCallback(...args)
 
     const formWithPrecognition = () => form as any as FormStateWithPrecognition<TForm>
-
-    let withAllErrors = false
 
     if (!validatorRef) {
       const validator = createValidator(
@@ -434,6 +434,12 @@ export default function useFormState<TForm extends object>(
     finishProcessing: () => {
       setFormStateInternal('processing', false)
       setFormStateInternal('progress', null)
+    },
+    withAllErrors: {
+      enabled: () => withAllErrors,
+      enable: () => {
+        withAllErrors = true
+      },
     },
   }
 }

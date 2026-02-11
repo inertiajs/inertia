@@ -27,6 +27,7 @@ import {
   UseFormUtils,
 } from '@inertiajs/core'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import { toSimpleValidationErrors } from 'laravel-precognition'
 import { cloneDeep } from 'lodash-es'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
@@ -60,6 +61,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   optimistic(callback: (currentData: TForm) => Partial<TForm>): this
+  withAllErrors(): this
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => UseHttpPrecognitiveProps<TForm, TResponse>
 }
 
@@ -127,6 +129,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     setRememberExcludeKeys,
     resetBeforeSubmit,
     finishProcessing,
+    withAllErrors,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -247,14 +250,12 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         if (error.response.status === 422) {
           const responseData = JSON.parse(error.response.data)
           const validationErrors = responseData.errors || {}
-          const flatErrors: FormDataErrors<TForm> = {} as FormDataErrors<TForm>
+          const processedErrors = (
+            withAllErrors.enabled() ? validationErrors : toSimpleValidationErrors(validationErrors)
+          ) as FormDataErrors<TForm>
 
-          for (const [key, value] of Object.entries(validationErrors)) {
-            ;(flatErrors as Record<string, string>)[key] = Array.isArray(value) ? value[0] : (value as string)
-          }
-
-          form.clearErrors().setError(flatErrors)
-          options.onError?.(flatErrors as Errors)
+          form.clearErrors().setError(processedErrors)
+          options.onError?.(processedErrors as Errors)
         }
 
         throw error
@@ -306,6 +307,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       pendingOptimisticCallback = callback
       return form
     },
+
+    withAllErrors() {
+      withAllErrors.enable()
+      return form
+    },
   })
 
   // Cast to the full form type
@@ -315,6 +321,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
   const originalWithPrecognition = formWithPrecognition().withPrecognition
   form.withPrecognition = (...args: UseFormWithPrecognitionArguments): UseHttpPrecognitiveProps<TForm, TResponse> => {
     originalWithPrecognition(...args)
+
     return form as any as UseHttpPrecognitiveProps<TForm, TResponse>
   }
 

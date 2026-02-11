@@ -109,6 +109,7 @@ export interface UseFormStateReturn<TForm extends object> {
   defaultsCalledInOnSuccessRef: React.MutableRefObject<boolean>
   resetBeforeSubmit: () => void
   finishProcessing: () => void
+  withAllErrors: { enabled: () => boolean; enable: () => void }
 }
 
 export default function useFormState<TForm extends object>(
@@ -466,5 +467,11 @@ export default function useFormState<TForm extends object>(
     defaultsCalledInOnSuccessRef,
     resetBeforeSubmit,
     finishProcessing,
+    withAllErrors: {
+      enabled: () => withAllErrorsRef.current,
+      enable: () => {
+        withAllErrorsRef.current = true
+      },
+    },
   }
 }

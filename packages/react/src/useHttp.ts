@@ -24,7 +24,7 @@ import {
   UseHttpSubmitArguments,
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
-import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
+import { NamedInputEvent, toSimpleValidationErrors, ValidationConfig, Validator } from 'laravel-precognition'
 import { cloneDeep } from 'lodash-es'
 import { useCallback, useRef, useState } from 'react'
 import useFormState, { SetDataAction } from './useFormState'
@@ -67,6 +67,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => UseHttpProps<TForm, TResponse>
   optimistic: (callback: (currentData: TForm) => Partial<TForm>) => UseHttpProps<TForm, TResponse>
+  withAllErrors: () => UseHttpProps<TForm, TResponse>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => UseHttpPrecognitiveProps<TForm, TResponse>
 }
 
@@ -150,6 +151,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     defaultsCalledInOnSuccessRef,
     resetBeforeSubmit,
     finishProcessing,
+    withAllErrors,
   } = useFormState<TForm>({
     data,
     precognitionEndpoint,
@@ -270,18 +272,16 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           if (error.response.status === 422) {
             const responseData = JSON.parse(error.response.data)
             const validationErrors = responseData.errors || {}
-            const flatErrors: FormDataErrors<TForm> = {} as FormDataErrors<TForm>
-
-            for (const [key, value] of Object.entries(validationErrors)) {
-              ;(flatErrors as Record<string, string>)[key] = Array.isArray(value) ? value[0] : (value as string)
-            }
+            const processedErrors = (
+              withAllErrors.enabled() ? validationErrors : toSimpleValidationErrors(validationErrors)
+            ) as FormDataErrors<TForm>
 
             if (isMounted.current) {
               clearErrors()
-              setError(flatErrors)
+              setError(processedErrors)
             }
 
-            options.onError?.(flatErrors as Errors)
+            options.onError?.(processedErrors as Errors)
           }
 
           throw error
@@ -343,6 +343,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
     optimistic: (callback: (currentData: TForm) => Partial<TForm>) => {
       pendingOptimisticRef.current = callback
+      return form
+    },
+
+    withAllErrors: () => {
+      withAllErrors.enable()
       return form
     },
   })
