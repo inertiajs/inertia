@@ -787,6 +787,14 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
 )
 
+app.get('/default-layout', (req, res) => inertia.render(req, res, { component: 'DefaultLayout/Index' }))
+app.get('/default-layout/with-own-layout', (req, res) =>
+  inertia.render(req, res, { component: 'DefaultLayout/WithOwnLayout' }),
+)
+app.get('/default-layout/callback-excluded', (req, res) =>
+  inertia.render(req, res, { component: 'DefaultLayout/CallbackExcluded' }),
+)
+
 app.get('/layout-props/basic', (req, res) => inertia.render(req, res, {}))
 app.get('/layout-props/static', (req, res) => inertia.render(req, res, {}))
 app.get('/layout-props/named', (req, res) => inertia.render(req, res, {}))

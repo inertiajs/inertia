@@ -6,6 +6,7 @@
     initialComponent: ResolvedComponent
     initialPage: Page<SharedProps>
     resolveComponent: ComponentResolver
+    defaultLayout?: (name: string, page: Page) => unknown
   }
 </script>
 
@@ -22,9 +23,10 @@
     initialComponent: InertiaAppProps['initialComponent']
     initialPage: InertiaAppProps['initialPage']
     resolveComponent: InertiaAppProps['resolveComponent']
+    defaultLayout?: InertiaAppProps['defaultLayout']
   }
 
-  const { initialComponent, initialPage, resolveComponent }: Props = $props()
+  const { initialComponent, initialPage, resolveComponent, defaultLayout }: Props = $props()
 
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
@@ -87,9 +89,14 @@
 
   function resolveRenderProps(component: ResolvedComponent, page: Page, key: number | null = null): RenderProps {
     const child = h(component.default, page.props, [], key)
-    const layout = component.layout
 
-    return layout ? resolveLayout(layout, child, page.props, key) : child
+    if (component.layout && isRenderFunction(component.layout)) {
+      return (component.layout as LayoutResolver)(h, child)
+    }
+
+    const effectiveLayout = (component.layout ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
+
+    return effectiveLayout ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout) : child
   }
 
   function resolveLayout(
@@ -97,12 +104,13 @@
     child: RenderProps,
     pageProps: PageProps,
     key: number | null,
+    isFromPage: boolean = true,
   ): RenderProps {
-    if (isRenderFunction(layout)) {
+    if (isFromPage && isRenderFunction(layout)) {
       return (layout as LayoutResolver)(h, child)
     }
 
-    const layouts = normalizeLayouts(layout, isComponent, isRenderFunction)
+    const layouts = normalizeLayouts(layout, isComponent, isFromPage ? isRenderFunction : undefined)
 
     if (layouts.length > 0) {
       return layouts.reduceRight((child, layout) => {

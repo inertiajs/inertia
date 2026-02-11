@@ -84,6 +84,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     render,
     defaults = {},
     http,
+    layout,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -117,6 +118,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         resolveComponent,
         titleCallback: title,
         onHeadUpdate: (elements: string[]) => (head = elements),
+        defaultLayout: layout,
       }
 
       let reactApp: ReactElement
@@ -152,6 +154,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       resolveComponent,
       titleCallback: title,
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
+      defaultLayout: layout,
     }
 
     if (isServer) {

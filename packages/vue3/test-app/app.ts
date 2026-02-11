@@ -3,6 +3,7 @@ import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
+import DefaultLayout from './Layouts/DefaultLayout.vue'
 
 window.testing = { Inertia: router }
 window.resolverReceivedPage = null as Page | null
@@ -55,6 +56,17 @@ createInertiaApp({
       visitOptions: (href: string, options: VisitOptions) => {
         return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }
       },
+    },
+  }),
+  ...(params.has('withDefaultLayout') && {
+    layout: () => DefaultLayout,
+  }),
+  ...(params.has('withDefaultLayoutCallback') && {
+    layout: (name: string) => {
+      if (name.startsWith('DefaultLayout/CallbackExcluded')) {
+        return null
+      }
+      return DefaultLayout
     },
   }),
 })

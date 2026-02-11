@@ -526,6 +526,7 @@ type ProgressOptions = {
 interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
   pages?: PagesOption
+  layout?: (name: string, page: Page) => unknown
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
@@ -568,6 +569,7 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   id?: string
   resolve?: TComponentResolver
   pages?: PagesOption
+  layout?: (name: string, page: Page) => unknown
   setup?: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   progress?: ProgressOptions | false

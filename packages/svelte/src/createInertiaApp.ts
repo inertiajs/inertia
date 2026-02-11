@@ -62,6 +62,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     page,
     defaults = {},
     http,
+    layout,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
@@ -87,6 +88,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         initialPage: page,
         initialComponent,
         resolveComponent,
+        defaultLayout: layout,
       }
 
       let svelteApp: SvelteRenderResult
@@ -117,7 +119,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.decryptHistory().catch(() => {}),
   ])
 
-  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent }
+  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent, defaultLayout: layout }
 
   // SSR with page provided (legacy pattern used by ssr.ts)
   if (isServer) {
