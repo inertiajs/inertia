@@ -2846,9 +2846,7 @@ app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { comp
 app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
 app.get('/use-http/submit', (req, res) => inertia.render(req, res, { component: 'UseHttp/Submit' }))
 app.get('/use-http/optimistic', (req, res) => inertia.render(req, res, { component: 'UseHttp/Optimistic' }))
-app.get('/use-http/with-all-errors', (req, res) =>
-  inertia.render(req, res, { component: 'UseHttp/WithAllErrors' }),
-)
+app.get('/use-http/with-all-errors', (req, res) => inertia.render(req, res, { component: 'UseHttp/WithAllErrors' }))
 
 app.get('/reload/concurrent-with-data', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']
