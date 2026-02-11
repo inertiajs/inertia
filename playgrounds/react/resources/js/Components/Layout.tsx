@@ -50,6 +50,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/once/1" className="hover:underline">
           Once
         </Link>
+        <Link href="/optimistic" className="hover:underline">
+          Optimistic
+        </Link>
         <Link href="/flash" className="hover:underline">
           Flash
         </Link>

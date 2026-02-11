@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Models\Todo;
 use Inertia\Inertia;
 
 /*
@@ -486,6 +487,36 @@ Route::get('/once/{page}', function (int $page) {
         'baz' . $page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
         'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
     ]);
+});
+
+Route::get('/optimistic', function () {
+    return inertia('Optimistic', ['todos' => Todo::all()]);
+});
+
+Route::post('/optimistic', function () {
+    request()->validate(['name' => ['required', 'string', 'min:3']]);
+
+    Todo::create(['name' => request('name')]);
+
+    return back();
+});
+
+Route::patch('/optimistic/{todo}', function (Todo $todo) {
+    $todo->update(['done' => ! $todo->done]);
+
+    return back();
+});
+
+Route::delete('/optimistic/{todo}', function (Todo $todo) {
+    $todo->delete();
+
+    return back();
+});
+
+Route::post('/optimistic/reset', function () {
+    Todo::truncate();
+
+    return redirect('/optimistic');
 });
 
 Route::get('/flash', function () {
