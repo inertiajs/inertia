@@ -109,6 +109,7 @@ export interface UseFormStateReturn<TForm extends object> {
   defaultsCalledInOnSuccessRef: React.MutableRefObject<boolean>
   resetBeforeSubmit: () => void
   finishProcessing: () => void
+  withAllErrors: { enabled: () => boolean; enable: () => void }
 }
 
 export default function useFormState<TForm extends object>(
@@ -145,6 +146,7 @@ export default function useFormState<TForm extends object>(
   const [touchedFields, setTouchedFields] = useState<string[]>([])
   const [validFields, setValidFields] = useState<string[]>([])
   const withAllErrorsRef = useRef<boolean | null>(null)
+  const withAllErrorsEnabled = () => withAllErrorsRef.current ?? config.get('form.withAllErrors')
 
   const dataRef = useRef(data)
 
@@ -399,10 +401,9 @@ export default function useFormState<TForm extends object>(
           setTouchedFields(validator.touched())
         })
         .on('errorsChanged', () => {
-          const validationErrors =
-            (withAllErrorsRef.current ?? config.get('form.withAllErrors'))
-              ? validator.errors()
-              : toSimpleValidationErrors(validator.errors())
+          const validationErrors = withAllErrorsEnabled()
+            ? validator.errors()
+            : toSimpleValidationErrors(validator.errors())
 
           setErrors(validationErrors as FormDataErrors<TForm>)
           setHasErrors(Object.keys(validationErrors).length > 0)
@@ -467,5 +468,11 @@ export default function useFormState<TForm extends object>(
     defaultsCalledInOnSuccessRef,
     resetBeforeSubmit,
     finishProcessing,
+    withAllErrors: {
+      enabled: withAllErrorsEnabled,
+      enable: () => {
+        withAllErrorsRef.current = true
+      },
+    },
   }
 }
