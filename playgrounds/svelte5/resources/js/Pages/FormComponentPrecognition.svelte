@@ -1,7 +1,3 @@
-<script module>
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script lang="ts">
   import type { FormComponentMethods } from '@inertiajs/core'
   import { Form } from '@inertiajs/svelte'

@@ -1,7 +1,6 @@
 import { FormComponentMethods } from '@inertiajs/core'
 import { Form, Head } from '@inertiajs/react'
 import { useState } from 'react'
-import Layout from '../Components/Layout'
 
 const FormComponentPrecognition = () => {
   const [validateFiles, setValidateFiles] = useState(false)
@@ -256,7 +255,5 @@ const FormComponentPrecognition = () => {
     </>
   )
 }
-
-FormComponentPrecognition.layout = Layout
 
 export default FormComponentPrecognition

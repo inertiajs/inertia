@@ -1,6 +1,4 @@
 <script module>
-  export { default as layout } from '../../Components/Layout.svelte'
-
   // This will cause an SSR error because window doesn't exist in Node.js
   const viewportWidth = window.innerWidth
 </script>

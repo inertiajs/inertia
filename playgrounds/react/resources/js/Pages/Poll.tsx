@@ -1,6 +1,5 @@
 import { Head, router } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
-import Layout from '../Components/Layout'
 import TestGrid from '../Components/TestGrid'
 import TestGridItem from '../Components/TestGridItem'
 
@@ -72,7 +71,5 @@ const Poll = ({ users, companies }) => {
     </>
   )
 }
-
-Poll.layout = Layout
 
 export default Poll

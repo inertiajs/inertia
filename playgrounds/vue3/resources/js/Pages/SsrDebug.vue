@@ -1,8 +1,3 @@
-<script lang="ts">
-import Layout from '../Components/Layout.vue'
-export default { layout: Layout }
-</script>
-
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 </script>

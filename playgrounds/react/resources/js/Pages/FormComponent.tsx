@@ -1,6 +1,5 @@
 import { Form, Head } from '@inertiajs/react'
 import { useState } from 'react'
-import Layout from '../Components/Layout'
 
 const FormComponent = () => {
   const [customHeaders, setCustomHeaders] = useState({ 'X-Custom-Header': 'Demo-Value' })
@@ -250,7 +249,5 @@ const FormComponent = () => {
     </>
   )
 }
-
-FormComponent.layout = Layout
 
 export default FormComponent

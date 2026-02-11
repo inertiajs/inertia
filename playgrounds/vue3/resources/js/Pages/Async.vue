@@ -1,13 +1,8 @@
-<script lang="ts">
-import Layout from '../Components/Layout.vue'
-import TestGrid from '../Components/TestGrid.vue'
-import TestGridItem from '../Components/TestGridItem.vue'
-export default { layout: Layout }
-</script>
-
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import TestGrid from '../Components/TestGrid.vue'
+import TestGridItem from '../Components/TestGridItem.vue'
 
 const reloadCount = ref(0)
 
