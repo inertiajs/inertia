@@ -52,9 +52,7 @@ const Optimistic = ({ todos }: { todos: Todo[] }) => {
   }
 
   const resetTodos = () => {
-    router
-      .optimistic<{ todos: Todo[] }>(() => ({ todos: [] }))
-      .post('/optimistic/reset')
+    router.optimistic<{ todos: Todo[] }>(() => ({ todos: [] })).post('/optimistic/reset')
   }
 
   return (

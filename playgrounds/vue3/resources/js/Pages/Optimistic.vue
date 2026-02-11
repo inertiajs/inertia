@@ -54,9 +54,7 @@ const deleteTodo = (todo: Todo) => {
 }
 
 const resetTodos = () => {
-  router
-    .optimistic<{ todos: Todo[] }>(() => ({ todos: [] }))
-    .post('/optimistic/reset')
+  router.optimistic<{ todos: Todo[] }>(() => ({ todos: [] })).post('/optimistic/reset')
 }
 </script>
 
@@ -78,9 +76,13 @@ const resetTodos = () => {
     </form>
 
     <ul class="space-y-2">
-      <li v-for="todo in todos" :key="todo.id" class="flex items-center gap-2 rounded-sm border border-gray-200 px-3 py-2">
+      <li
+        v-for="todo in todos"
+        :key="todo.id"
+        class="flex items-center gap-2 rounded-sm border border-gray-200 px-3 py-2"
+      >
         <input type="checkbox" :checked="todo.done" @change="toggleTodo(todo)" />
-        <span class="flex-1" :class="{ 'line-through text-gray-400': todo.done }">{{ todo.name }}</span>
+        <span class="flex-1" :class="{ 'text-gray-400 line-through': todo.done }">{{ todo.name }}</span>
         <button @click="deleteTodo(todo)" class="text-sm text-red-600">Delete</button>
       </li>
     </ul>

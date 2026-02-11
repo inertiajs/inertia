@@ -47,9 +47,7 @@
   }
 
   function resetTodos() {
-    router
-      .optimistic(() => ({ todos: [] }))
-      .post('/optimistic/reset')
+    router.optimistic(() => ({ todos: [] })).post('/optimistic/reset')
   }
 </script>
 
