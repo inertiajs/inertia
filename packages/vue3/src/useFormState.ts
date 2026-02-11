@@ -138,7 +138,7 @@ export default function useFormState<TForm extends object>(
 
       const formWithPrecognition = this as any as FormStateWithPrecognition<TForm>
 
-      let withAllErrors = false
+      let withAllErrors: boolean | null = null
       const validator = createValidator(
         (client) => {
           const { method, url } = precognitionEndpoint!()
@@ -162,7 +162,10 @@ export default function useFormState<TForm extends object>(
           formWithPrecognition.__touched = validator.touched()
         })
         .on('errorsChanged', () => {
-          const validationErrors = withAllErrors ? validator.errors() : toSimpleValidationErrors(validator.errors())
+          const validationErrors =
+            (withAllErrors ?? config.get('form.withAllErrors'))
+              ? validator.errors()
+              : toSimpleValidationErrors(validator.errors())
 
           this.errors = {} as FormDataErrors<TForm>
 
