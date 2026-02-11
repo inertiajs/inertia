@@ -17,7 +17,7 @@
     method="post"
     action="/form-component/optimistic"
     optimistic={(props, data) => ({
-      todos: [...(props.todos), { id: Date.now(), name: data.name || '(empty todo...)', done: false }],
+      todos: [...(props.todos as Todo[]), { id: Date.now(), name: data.name || '(empty todo...)', done: false }],
     })}
     options={{ preserveScroll: true }}
   >
