@@ -71,7 +71,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   options: InertiaAppOptionsForSSR<SharedProps>,
 ): Promise<InertiaAppSSRResponse>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
-  options: InertiaAppOptionsAuto<SharedProps>,
+  options?: InertiaAppOptionsAuto<SharedProps>,
 ): Promise<void | RenderFunction<SharedProps>>
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
   id = 'app',
@@ -86,7 +86,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 }:
   | InertiaAppOptionsForCSR<SharedProps>
   | InertiaAppOptionsForSSR<SharedProps>
-  | InertiaAppOptionsAuto<SharedProps>): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
+  | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
   config.replace(defaults)
 
   if (http) {
