@@ -82,4 +82,27 @@ test.describe('layout props', () => {
     await expect(page.locator('.sidebar')).not.toBeVisible()
     await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'dark')
   })
+
+  test('it preserves named layout instances across navigations', async ({ page }) => {
+    await page.goto('/layout-props/persistent-a')
+
+    await expect(page.locator('.app-title')).toHaveText('Persistent Page A')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'lg')
+
+    const appLayoutId = await page.evaluate(() => window._inertia_app_layout_id)
+    const contentLayoutId = await page.evaluate(() => window._inertia_content_layout_id)
+    await expect(appLayoutId).toBeDefined()
+    await expect(contentLayoutId).toBeDefined()
+
+    await page.getByRole('link', { name: 'Go to Page B' }).click()
+
+    await expect(page).toHaveURL('/layout-props/persistent-b')
+    await expect(page.locator('.app-title')).toHaveText('Persistent Page B')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'xl')
+
+    const appLayoutIdAfter = await page.evaluate(() => window._inertia_app_layout_id)
+    const contentLayoutIdAfter = await page.evaluate(() => window._inertia_content_layout_id)
+    await expect(appLayoutIdAfter).toEqual(appLayoutId)
+    await expect(contentLayoutIdAfter).toEqual(contentLayoutId)
+  })
 })

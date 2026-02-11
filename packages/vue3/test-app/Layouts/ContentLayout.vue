@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { useLayoutProps } from '@inertiajs/vue3'
+import { getCurrentInstance, onMounted } from 'vue'
+
+onMounted(() => {
+  window._inertia_content_layout_id = String(getCurrentInstance()?.uid)
+})
 
 const layoutProps = useLayoutProps({
   padding: 'md',

@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { useLayoutProps } from '@inertiajs/vue3'
+import { getCurrentInstance, onMounted } from 'vue'
+
+onMounted(() => {
+  window._inertia_app_layout_id = String(getCurrentInstance()?.uid)
+})
 
 const layoutProps = useLayoutProps({
   title: 'Default Title',
