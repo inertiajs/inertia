@@ -1629,16 +1629,14 @@ test.describe('Form Component', () => {
 
   test.describe('Optimistic', () => {
     test.beforeEach(async ({ page }, testInfo) => {
-      await page
-        .context()
-        .addCookies([
-          {
-            name: 'optimistic-session',
-            value: `form-worker-${testInfo.workerIndex}-${Date.now()}`,
-            domain: 'localhost',
-            path: '/',
-          },
-        ])
+      await page.context().addCookies([
+        {
+          name: 'optimistic-session',
+          value: `form-worker-${testInfo.workerIndex}-${Date.now()}`,
+          domain: 'localhost',
+          path: '/',
+        },
+      ])
 
       await page.goto('/form-component/optimistic')
       await expect(page.locator('#todo-list li')).toHaveCount(2)
