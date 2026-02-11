@@ -97,7 +97,6 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   const isServer = typeof window === 'undefined'
-  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve!(name, page)).then((module) => {
@@ -134,13 +133,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       }
 
       const html = renderToString(reactApp)
-      const body = buildSSRBody(id, page, html, !useDataAttribute)
+      const body = buildSSRBody(id, page, html)
 
       return { head, body }
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
 
   let head: string[] = []
 
@@ -189,7 +188,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render && reactApp) {
     const html = render(reactApp)
-    const body = buildSSRBody(id, initialPage, html, !useDataAttribute)
+    const body = buildSSRBody(id, initialPage, html)
 
     return { head, body }
   }

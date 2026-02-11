@@ -59,10 +59,6 @@ return [
     | The `paths` and `extensions` options define where to look for page
     | components and which file extensions to consider.
     |
-    | By default, the initial page data is passed via a script element.
-    | Set `use_data_attribute_for_initial_page` to true to use a data
-    | attribute on the root element instead.
-    |
     */
 
     'pages' => [
@@ -85,8 +81,6 @@ return [
             'vue',
 
         ],
-
-        'use_data_attribute_for_initial_page' => (bool) env('INERTIA_USE_DATA_ATTRIBUTE_FOR_INITIAL_PAGE', false),
 
     ],
 
