@@ -14,7 +14,7 @@
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "@tsconfig/svelte": "^5.0.6",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "laravel-vite-plugin": "^2.0.1",
     "lodash": "^4.17.23",
     "svelte": "^5.46.4",
