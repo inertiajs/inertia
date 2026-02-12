@@ -2,11 +2,14 @@
   import { inertia, usePage } from '@inertiajs/svelte'
   import Child from './Child.svelte'
 
-  export let name: string
+  interface Props {
+    name: string
+  }
+
+  let { name }: Props = $props()
 
   const pageA = usePage()
   const pageB = usePage()
-  // eslint-disable-next-line svelte/require-store-reactive-access
   const sameInstance = pageA === pageB
 </script>
 
@@ -14,8 +17,8 @@
   <h2>Page 1</h2>
 
   <p data-testid="name-props">Name (props): <strong>{name}</strong></p>
-  <p data-testid="name-usepage">Name (usePage): <strong>{$pageA.props.name}</strong></p>
-  <p data-testid="url">URL: {$pageA.url}</p>
+  <p data-testid="name-usepage">Name (usePage): <strong>{pageA.props.name}</strong></p>
+  <p data-testid="url">URL: {pageA.url}</p>
   <p data-testid="same-ref">usePage() same instance: <strong>{sameInstance ? 'yes' : 'no'}</strong></p>
 
   <hr />
