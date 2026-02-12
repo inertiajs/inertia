@@ -76,9 +76,6 @@ export const config = new Config<InertiaAppConfig>({
     forceIndicesArrayFormatInFormData: true,
     withAllErrors: false,
   },
-  legacy: {
-    useDataAttributeForInitialPage: false,
-  },
   prefetch: {
     cacheFor: 30_000,
     hoverDelay: 75,

@@ -74,7 +74,6 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   const isServer = typeof window === 'undefined'
-  const useDataAttribute = config.get('legacy.useDataAttributeForInitialPage')
 
   const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve!(name, page))
 
@@ -103,7 +102,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         svelteApp = render(App, { props })
       }
 
-      const body = buildSSRBody(id, page, svelteApp.body, !useDataAttribute)
+      const body = buildSSRBody(id, page, svelteApp.body)
 
       return {
         body,
@@ -112,7 +111,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useDataAttribute)!
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
@@ -130,7 +129,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const svelteApp = await setup({ el: null, App, props })
 
     if (svelteApp) {
-      const body = buildSSRBody(id, initialPage, svelteApp.body, !useDataAttribute)
+      const body = buildSSRBody(id, initialPage, svelteApp.body)
 
       return {
         body,

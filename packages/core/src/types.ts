@@ -603,9 +603,6 @@ export type InertiaAppConfig = {
     forceIndicesArrayFormatInFormData: boolean
     withAllErrors: boolean
   }
-  legacy: {
-    useDataAttributeForInitialPage: boolean
-  }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
     hoverDelay: number
