@@ -16,6 +16,7 @@ class EventHandler {
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
+      window.addEventListener('pageshow', this.handlePageshowEvent.bind(this))
       window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
     }
 
@@ -65,6 +66,15 @@ class EventHandler {
     document.addEventListener(type, listener)
 
     return () => document.removeEventListener(type, listener)
+  }
+
+  // bfcache restores pages without firing `popstate`, so we use `pageshow` to
+  // re-validate encrypted history entries after `clearHistory` removed the keys.
+  // https://web.dev/articles/bfcache
+  protected handlePageshowEvent(event: PageTransitionEvent): void {
+    if (event.persisted) {
+      history.decrypt().catch(() => this.onMissingHistoryItem())
+    }
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
