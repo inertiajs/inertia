@@ -38,6 +38,16 @@ test.describe('Flash Data', () => {
     await expect(page.locator('#flash-event-count')).toHaveText('1')
   })
 
+  test('preserves flash data and fires event when page has InfiniteScroll', async ({ page }) => {
+    await page.goto('/')
+
+    await page.evaluate(() => window.testing.Inertia.visit('/flash/with-infinite-scroll'))
+    await page.waitForURL('**/flash/with-infinite-scroll')
+
+    await expect(page.locator('#flash')).toContainText('Flash with infinite scroll')
+    await expect(page.locator('#flash-event-count')).toHaveText('1')
+  })
+
   test('does not fire flash event on partial request when flash is unchanged', async ({ page }) => {
     await page.goto('/flash/partial')
 

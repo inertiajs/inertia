@@ -2134,6 +2134,24 @@ app.get('/flash/initial', (req, res) =>
     flash: { message: 'Hello from server' },
   }),
 )
+app.get('/flash/with-infinite-scroll', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Flash/WithInfiniteScroll',
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+        flash: partialReload ? {} : { message: 'Flash with infinite scroll' },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
 app.get('/flash/with-deferred', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {

@@ -169,7 +169,10 @@ class History {
       return
     }
 
-    currentPage.merge(page)
+    // Exclude flash from the merge to prevent callers (like router.remember())
+    // from accidentally clearing flash data on the current page.
+    const { flash, ...pageWithoutFlash } = page
+    currentPage.merge(pageWithoutFlash)
 
     if (isServer) {
       return
