@@ -52,11 +52,11 @@
   },
   "devDependencies": {
     "axios": "^1.13.5",
-    "es-check": "^9.5.3",
-    "esbuild": "^0.27.2",
+    "es-check": "^9.5.4",
+    "esbuild": "^0.27.3",
     "esbuild-node-externals": "^1.20.1",
     "typescript": "^5.9.3",
-    "vue": "^3.5.26"
+    "vue": "^3.5.28"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -64,7 +64,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
-    "laravel-precognition": "^1.0.1",
+    "laravel-precognition": "^1.0.2",
     "lodash-es": "^4.17.23"
   }
 }
