@@ -31,8 +31,8 @@ test.describe('updating config via config instance', () => {
 
   test('prefetch duration', async ({ page }) => {
     const link = await page.getByRole('link', { name: 'Prefetch Link' })
-    const prefetchPromise = page.waitForRequest(
-      (request) => request.url().includes('/dump/get') && request.headers().purpose === 'prefetch',
+    const prefetchPromise = page.waitForResponse(
+      (response) => response.url().includes('/dump/get') && response.request().headers().purpose === 'prefetch',
     )
 
     // Wait for the page to be prefetched

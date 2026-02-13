@@ -18,6 +18,9 @@ async function scrollToTop(page: Page) {
 
 async function scrollToBottom(page: Page) {
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect
+    .poll(() => page.evaluate(() => Math.abs(window.scrollY + window.innerHeight - document.body.scrollHeight) < 2))
+    .toBe(true)
 }
 
 async function smoothScrollTo(page: any, targetY: number) {
@@ -29,8 +32,7 @@ async function smoothScrollTo(page: any, targetY: number) {
     setTimeout(() => window.scrollTo(0, top), 10)
   }, targetY)
 
-  // Wait for the setTimeout to fire and scroll to settle
-  await page.waitForTimeout(20)
+  await expect.poll(() => page.evaluate((top: number) => Math.abs(window.scrollY - top) < 2, targetY)).toBe(true)
 }
 
 async function scrollElementSmoothTo(element: Locator, targetY: number) {
@@ -41,8 +43,7 @@ async function scrollElementSmoothTo(element: Locator, targetY: number) {
     setTimeout(() => el.scrollTo(0, top), 10)
   }, targetY)
 
-  // Wait for the setTimeout to fire and scroll to settle
-  await element.page().waitForTimeout(20)
+  await expect.poll(() => element.evaluate((el, top) => Math.abs(el.scrollTop - top) < 2, targetY)).toBe(true)
 }
 
 async function scrollElementToBottom(element: Locator) {
@@ -432,8 +433,10 @@ test.describe('Manual page loading', () => {
     await expect(page.getByText('Has more next items: true')).toBeVisible()
 
     requests.listen(page)
-    await page.getByRole('button', { name: 'Load previous items' }).click()
-    await expect(page.getByText('Loading previous items...')).toBeVisible()
+    await Promise.all([
+      expect(page.getByText('Loading previous items...')).toBeVisible(),
+      page.getByRole('button', { name: 'Load previous items' }).click(),
+    ])
     await expect(page.getByText('Loading next items...')).toBeHidden()
 
     await expect(page.getByText('User 15')).toBeVisible()
@@ -444,8 +447,10 @@ test.describe('Manual page loading', () => {
 
     await expect(infiniteScrollRequests().length).toBe(1)
 
-    await page.getByRole('button', { name: 'Load next items' }).click()
-    await expect(page.getByText('Loading next items...')).toBeVisible()
+    await Promise.all([
+      expect(page.getByText('Loading next items...')).toBeVisible(),
+      page.getByRole('button', { name: 'Load next items' }).click(),
+    ])
     await expect(page.getByText('Loading previous items...')).toBeHidden()
 
     await expect(page.getByText('User 31')).toBeVisible()

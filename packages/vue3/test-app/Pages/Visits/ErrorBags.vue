@@ -29,8 +29,8 @@ const postVisit = () => {
 <template>
   <div>
     <span class="text">This is the page that demonstrates error bags using manual visits</span>
-    <a href="#" @click="defaultVisit" class="default">Default visit</a>
-    <a href="#" @click="basicVisit" class="visit">Basic visit</a>
-    <a href="#" @click="postVisit" class="get">POST visit</a>
+    <a href="#" @click.prevent="defaultVisit" class="default">Default visit</a>
+    <a href="#" @click.prevent="basicVisit" class="visit">Basic visit</a>
+    <a href="#" @click.prevent="postVisit" class="get">POST visit</a>
   </div>
 </template>
