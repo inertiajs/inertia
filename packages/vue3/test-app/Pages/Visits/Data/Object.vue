@@ -69,16 +69,16 @@ const deleteQueryParam = (e: Event) => {
   <div>
     <span class="text">This is the page that demonstrates manual visit data passing through plain objects</span>
 
-    <a href="#" @click="visitMethod" class="visit">Visit Link</a>
-    <a href="#" @click="getMethod" class="get">GET Link</a>
-    <a href="#" @click="postMethod" class="post">POST Link</a>
-    <a href="#" @click="putMethod" class="put">PUT Link</a>
-    <a href="#" @click="patchMethod" class="patch">PATCH Link</a>
-    <a href="#" @click="deleteMethod" class="delete">DELETE Link</a>
+    <a href="#" @click.prevent="visitMethod" class="visit">Visit Link</a>
+    <a href="#" @click.prevent="getMethod" class="get">GET Link</a>
+    <a href="#" @click.prevent="postMethod" class="post">POST Link</a>
+    <a href="#" @click.prevent="putMethod" class="put">PUT Link</a>
+    <a href="#" @click.prevent="patchMethod" class="patch">PATCH Link</a>
+    <a href="#" @click.prevent="deleteMethod" class="delete">DELETE Link</a>
 
-    <a href="#" @click="qsafDefault" class="qsaf-default">QSAF Defaults</a>
-    <a href="#" @click="qsafIndices" class="qsaf-indices">QSAF Indices</a>
-    <a href="#" @click="qsafBrackets" class="qsaf-brackets">QSAF Brackets</a>
-    <a href="#" @click="deleteQueryParam" className="delete-query-param">Delete Query Param</a>
+    <a href="#" @click.prevent="qsafDefault" class="qsaf-default">QSAF Defaults</a>
+    <a href="#" @click.prevent="qsafIndices" class="qsaf-indices">QSAF Indices</a>
+    <a href="#" @click.prevent="qsafBrackets" class="qsaf-brackets">QSAF Brackets</a>
+    <a href="#" @click.prevent="deleteQueryParam" className="delete-query-param">Delete Query Param</a>
   </div>
 </template>

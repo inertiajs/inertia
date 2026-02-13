@@ -384,6 +384,8 @@ test.describe('Form Component', () => {
     })
 
     test('updates wasSuccessful and recentlySuccessful after success', async ({ page }) => {
+      test.setTimeout(7_500)
+
       await expect(page.locator('#was-successful')).toHaveText('false')
       await expect(page.locator('#recently-successful')).toHaveText('false')
 
@@ -391,9 +393,6 @@ test.describe('Form Component', () => {
 
       await expect(page.locator('#was-successful')).toHaveText('true')
       await expect(page.locator('#recently-successful')).toHaveText('true')
-
-      await page.waitForTimeout(2500)
-
       await expect(page.locator('#recently-successful')).toHaveText('false')
     })
   })
@@ -1481,14 +1480,15 @@ test.describe('Form Component', () => {
       // User-tagged page should be invalidated and refetched
       requests.listen(page)
       await page.getByRole('link', { name: 'User Tagged Page' }).click()
-      await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
       await expect(page).toHaveURL('/prefetch/tags/1')
+      await expect.poll(() => requests.requests.length).toBeGreaterThanOrEqual(1)
 
       // Go back and check product page is still cached
       await page.goBack()
       requests.listen(page)
       await page.getByRole('link', { name: 'Product Tagged Page' }).click()
-      await expect(requests.requests.length).toBe(0)
+      await expect(page).toHaveURL('/prefetch/tags/2')
+      expect(requests.requests.length).toBe(0)
     })
   })
 

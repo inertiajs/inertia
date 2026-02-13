@@ -112,16 +112,18 @@ const partialReloadGetExceptBaz = () => {
     <span class="baz-text">Baz is now {{ baz }}</span>
     <pre class="headers">{{ headers }}</pre>
 
-    <a href="#" @click="partialReloadVisit" class="visit">Update All (visit)</a>
-    <a href="#" @click="partialReloadVisitFooBar" class="visit-foo-bar">'Only' foo + bar (visit)</a>
-    <a href="#" @click="partialReloadVisitBaz" class="visit-baz">'Only' baz (visit)</a>
-    <a href="#" @click="partialReloadVisitExceptFooBar" class="visit-except-foo-bar">'Except' foo + bar (visit)</a>
-    <a href="#" @click="partialReloadVisitExceptBaz" class="visit-except-baz">'Except' baz (visit)</a>
+    <a href="#" @click.prevent="partialReloadVisit" class="visit">Update All (visit)</a>
+    <a href="#" @click.prevent="partialReloadVisitFooBar" class="visit-foo-bar">'Only' foo + bar (visit)</a>
+    <a href="#" @click.prevent="partialReloadVisitBaz" class="visit-baz">'Only' baz (visit)</a>
+    <a href="#" @click.prevent="partialReloadVisitExceptFooBar" class="visit-except-foo-bar"
+      >'Except' foo + bar (visit)</a
+    >
+    <a href="#" @click.prevent="partialReloadVisitExceptBaz" class="visit-except-baz">'Except' baz (visit)</a>
 
-    <a href="#" @click="partialReloadGet" class="get">Update All (GET)</a>
-    <a href="#" @click="partialReloadGetFooBar" class="get-foo-bar">'Only' foo + bar (GET)</a>
-    <a href="#" @click="partialReloadGetBaz" class="get-baz">'Only' baz (GET)</a>
-    <a href="#" @click="partialReloadGetExceptFooBar" class="get-except-foo-bar">'Except' foo + bar (GET)</a>
-    <a href="#" @click="partialReloadGetExceptBaz" class="get-except-baz">'Except' baz (GET)</a>
+    <a href="#" @click.prevent="partialReloadGet" class="get">Update All (GET)</a>
+    <a href="#" @click.prevent="partialReloadGetFooBar" class="get-foo-bar">'Only' foo + bar (GET)</a>
+    <a href="#" @click.prevent="partialReloadGetBaz" class="get-baz">'Only' baz (GET)</a>
+    <a href="#" @click.prevent="partialReloadGetExceptFooBar" class="get-except-foo-bar">'Except' foo + bar (GET)</a>
+    <a href="#" @click.prevent="partialReloadGetExceptBaz" class="get-except-baz">'Except' baz (GET)</a>
   </div>
 </template>

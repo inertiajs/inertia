@@ -37,14 +37,14 @@ window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProp
     <Link href="/links/replace" class="links-replace">'Replace' Links</Link>
     <Link href="/links/as-component" class="links-as-component">Custom Component</Link>
 
-    <a href="#" @click="visitsMethod" class="visits-method">Manual basic visits</a>
-    <a href="#" @click="visitsReplace" class="visits-replace">Manual 'Replace' visits</a>
+    <a href="#" @click.prevent="visitsMethod" class="visits-method">Manual basic visits</a>
+    <a href="#" @click.prevent="visitsReplace" class="visits-replace">Manual 'Replace' visits</a>
 
     <Link href="/redirect" method="post" class="links-redirect">Internal Redirect Link</Link>
-    <a href="#" @click="redirect" class="visits-redirect">Manual Redirect visit</a>
+    <a href="#" @click.prevent="redirect" class="visits-redirect">Manual Redirect visit</a>
 
     <Link href="/redirect-external" method="post" class="links-redirect-external">External Redirect Link</Link>
-    <a href="#" @click="redirectExternal" class="visits-redirect-external">Manual External Redirect visit</a>
+    <a href="#" @click.prevent="redirectExternal" class="visits-redirect-external">Manual External Redirect visit</a>
 
     <Link id="navigate-back" href="/head/mixed">Go to Mixed Head</Link>
   </div>
