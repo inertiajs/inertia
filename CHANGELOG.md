@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.14...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.15...master)
 
 - Nothing yet
+
+## [v2.3.15](https://github.com/inertiajs/inertia/compare/v2.3.14...v2.3.15) - 2026-02-13
+
+### What's Changed
+
+* Bump axios from 1.13.2 to 1.13.5 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2888
+* [2.x] Fix flash data being cleared by `history.replaceState` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2889
+* [2.x] Handle `bfcache` restoration for encrypted history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2890
+* [2.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2891
+* [2.x] Fix InfiniteScroll loading all pages in reverse mode with flex/grid layouts by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2893
+* [2.x] Improve flaky tests and test app quality by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2895
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.14...v2.3.15
 
 ## [v2.3.14](https://github.com/inertiajs/inertia/compare/v2.3.13...v2.3.14) - 2026-02-11
 
