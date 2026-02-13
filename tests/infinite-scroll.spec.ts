@@ -22,7 +22,7 @@ async function scrollToBottom(page: Page) {
     window.scrollTo(0, document.body.scrollHeight)
     return target
   })
-  await expect.poll(() => page.evaluate((target: number) => window.scrollY >= target - 2, scrollTarget)).toBe(true)
+  await page.waitForFunction((target: number) => window.scrollY >= target - 2, scrollTarget)
 }
 
 async function smoothScrollTo(page: any, targetY: number) {
