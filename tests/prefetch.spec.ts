@@ -531,13 +531,13 @@ test.describe('tags', () => {
 
     requests.listen(page)
     await page.getByRole('link', { name: 'User Page 2' }).click()
-    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
     await isTagsPage(page, 2)
+    await expect.poll(() => requests.requests.length).toBeGreaterThanOrEqual(1)
 
     requests.listen(page)
     await page.getByRole('link', { name: 'Product Page 3' }).click()
-    await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
     await isTagsPage(page, 3)
+    await expect.poll(() => requests.requests.length).toBeGreaterThanOrEqual(1)
 
     requests.listen(page)
     await page.getByRole('link', { name: 'Admin Page 5' }).click()

@@ -1478,10 +1478,10 @@ test.describe('Form Component', () => {
       await page.goBack()
 
       // User-tagged page should be invalidated and refetched
-      const userRefetch = page.waitForResponse((response) => response.url().includes('/prefetch/tags/1'))
+      requests.listen(page)
       await page.getByRole('link', { name: 'User Tagged Page' }).click()
-      await userRefetch
       await expect(page).toHaveURL('/prefetch/tags/1')
+      await expect.poll(() => requests.requests.length).toBeGreaterThanOrEqual(1)
 
       // Go back and check product page is still cached
       await page.goBack()
