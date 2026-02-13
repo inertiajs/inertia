@@ -308,6 +308,8 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
   optimistic?: OptimisticCallback
+  component: string | null
+  pageProps: Record<string, unknown>
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -613,6 +615,7 @@ export type InertiaAppConfig = {
 export interface LinkComponentBaseProps extends Partial<
   Pick<
     Visit<RequestPayload>,
+    | 'component'
     | 'data'
     | 'method'
     | 'replace'
@@ -628,6 +631,8 @@ export interface LinkComponentBaseProps extends Partial<
   > &
     VisitCallbacks & {
       href: string | UrlMethodPair
+      clientSide: boolean
+      pageProps: Record<string, unknown>
       prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
       cacheFor: CacheForOption | CacheForOption[]
       cacheTags: string | string[]
@@ -679,7 +684,7 @@ export type ProgressSettings = {
   color: string
 }
 
-export type UrlMethodPair = { url: string; method: Method }
+export type UrlMethodPair = { url: string; method: Method; component?: string }
 
 export type UseFormTransformCallback<TForm> = (data: TForm) => object
 export type UseFormWithPrecognitionArguments =
@@ -722,6 +727,8 @@ export type FormComponentProps = Partial<
 > & {
   method?: Method | Uppercase<Method>
   action?: string | UrlMethodPair
+  component?: string
+  clientSide?: boolean
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   optimistic?: FormComponentOptimisticCallback
   options?: FormComponentOptions

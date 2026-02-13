@@ -21,6 +21,9 @@
     cacheFor?: LinkComponentBaseProps['cacheFor']
     cacheTags?: LinkComponentBaseProps['cacheTags']
     viewTransition?: LinkComponentBaseProps['viewTransition']
+    component?: LinkComponentBaseProps['component']
+    clientSide?: LinkComponentBaseProps['clientSide']
+    pageProps?: LinkComponentBaseProps['pageProps']
     children?: import('svelte').Snippet
     [key: string]: any
   }
@@ -66,12 +69,22 @@
     cacheFor = 0,
     cacheTags = [],
     viewTransition = false,
+    component = undefined,
+    clientSide = false,
+    pageProps = {},
     children,
     ...rest
   }: Props & Callbacks = $props()
 
   let _method = $derived(isUrlMethodPair(href) ? href.method : method)
   let _href = $derived(isUrlMethodPair(href) ? href.url : href)
+  let resolvedComponent = $derived(
+    component
+      ? component
+      : clientSide && isUrlMethodPair(href) && href.component
+        ? href.component
+        : null,
+  )
 
   let asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())
   let elProps = $derived(
@@ -102,6 +115,8 @@
     cacheFor,
     cacheTags,
     viewTransition,
+    component: resolvedComponent,
+    pageProps,
   }}
   {...rest}
   {...elProps}

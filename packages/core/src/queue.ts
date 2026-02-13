@@ -10,6 +10,10 @@ export default class Queue<T> {
   public process() {
     this.processingPromise ??= this.processNext().finally(() => {
       this.processingPromise = null
+
+      if (this.items.length > 0) {
+        this.process()
+      }
     })
 
     return this.processingPromise

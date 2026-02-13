@@ -261,15 +261,28 @@ export class Router {
       ...events,
     }
 
-    const prefetched = prefetchedRequests.get(requestParams)
+    const sendRequest = () => {
+      const prefetched = prefetchedRequests.get(requestParams)
 
-    if (prefetched) {
-      progress.reveal(prefetched.inFlight)
-      prefetchedRequests.use(prefetched, requestParams)
+      if (prefetched) {
+        progress.reveal(prefetched.inFlight)
+        prefetchedRequests.use(prefetched, requestParams)
+      } else {
+        progress.reveal(true)
+        const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
+        requestStream.send(Request.create(requestParams, currentPage.get()))
+      }
+    }
+
+    if (visit.component) {
+      this.performInstantSwap(visit).then(() => {
+        requestParams.preserveState = true
+        requestParams.replace = true
+        requestParams.viewTransition = false
+        sendRequest()
+      })
     } else {
-      progress.reveal(true)
-      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-      requestStream.send(Request.create(requestParams, currentPage.get()))
+      sendRequest()
     }
   }
 
@@ -540,6 +553,31 @@ export class Router {
       .finally(() => onFinish?.(params))
   }
 
+  protected performInstantSwap(visit: PendingVisit): Promise<void> {
+    const current = currentPage.get()
+
+    const intermediatePage: Page = {
+      component: visit.component!,
+      url: visit.url.pathname + visit.url.search + visit.url.hash,
+      version: current.version,
+      props: {
+        ...visit.pageProps,
+        errors: {},
+      },
+      flash: {},
+      clearHistory: false,
+      encryptHistory: current.encryptHistory,
+      rememberedState: {},
+    }
+
+    return currentPage.set(intermediatePage, {
+      replace: visit.replace,
+      preserveScroll: RequestParams.resolvePreserveOption(visit.preserveScroll, intermediatePage),
+      preserveState: false,
+      viewTransition: visit.viewTransition,
+    })
+  }
+
   protected getPrefetchParams(href: string | URL | UrlMethodPair, options: VisitOptions): ActiveVisit {
     return {
       ...this.getPendingVisit(href, {
@@ -587,6 +625,8 @@ export class Router {
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
+      component: null,
+      pageProps: {},
       ...options,
       ...configuredOptions,
     }

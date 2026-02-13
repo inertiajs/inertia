@@ -326,6 +326,67 @@ app.get('/client-side-visit/sequential', (req, res) =>
   }),
 )
 
+app.get('/instant-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'InstantVisit/Page1',
+    props: { foo: 'foo from server' },
+  }),
+)
+
+app.get('/instant-visit/target', (req, res) => {
+  const delay = parseInt(req.query.delay || '0', 10)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'InstantVisit/Target',
+      props: {
+        greeting: 'Hello from server',
+        timestamp: Date.now(),
+      },
+    })
+  }, delay)
+})
+
+app.get('/instant-visit/redirect-target', (req, res) => {
+  inertia.render(req, res, {
+    component: 'InstantVisit/RedirectTarget',
+    props: { redirected: true },
+  })
+})
+
+app.get('/instant-visit/redirecting', (req, res) => {
+  const delay = parseInt(req.query.delay || '0', 10)
+
+  setTimeout(() => {
+    res.redirect(303, '/instant-visit/redirect-target')
+  }, delay)
+})
+
+app.get('/instant-visit/deferred', (req, res) => {
+  if (req.headers['x-inertia-partial-data']?.includes('heavyData')) {
+    return inertia.render(req, res, {
+      component: 'InstantVisit/Deferred',
+      props: {
+        heavyData: 'loaded via deferred',
+      },
+    })
+  }
+
+  const delay = parseInt(req.query.delay || '0', 10)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'InstantVisit/Deferred',
+      props: {
+        title: 'Deferred Page',
+      },
+      deferredProps: {
+        slow: ['heavyData'],
+      },
+    })
+  }, delay)
+})
+
 app.get('/visits/proxy', (req, res) => {
   const timeout = req.headers['x-inertia-partial-data'] ? 250 : 0
   const statuses = ['pending', 'running', 'success', 'failed', 'canceled']

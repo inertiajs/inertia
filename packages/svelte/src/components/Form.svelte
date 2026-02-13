@@ -49,6 +49,8 @@
     validationTimeout?: FormComponentProps['validationTimeout']
     optimistic?: FormComponentProps['optimistic']
     withAllErrors?: FormComponentProps['withAllErrors']
+    component?: FormComponentProps['component']
+    clientSide?: FormComponentProps['clientSide']
     children?: import('svelte').Snippet<[FormComponentSlotProps]>
     [key: string]: any
   }
@@ -80,6 +82,8 @@
     validationTimeout = 1500,
     optimistic,
     withAllErrors = false,
+    component = undefined,
+    clientSide = false,
     children,
     ...rest
   }: Props = $props()
@@ -105,6 +109,13 @@
 
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
+  const resolvedComponent = $derived(
+    component
+      ? component
+      : clientSide && isUrlMethodPair(action) && action.component
+        ? action.component
+        : null,
+  )
 
   export function getFormData(submitter?: FormSubmitter): FormData {
     return new FormData(formElement, submitter)
@@ -157,6 +168,7 @@
       errorBag,
       showProgress,
       invalidateCacheTags,
+      component: resolvedComponent,
       optimistic: optimistic ? (pageProps) => optimistic(pageProps, data) : undefined,
       onCancelToken,
       onBefore,
