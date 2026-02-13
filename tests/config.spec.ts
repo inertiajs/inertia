@@ -46,7 +46,7 @@ test.describe('updating config via config instance', () => {
     requests.listen(page)
     await link.click()
     await shouldBeDumpPage(page, 'get')
-    await expect(requests.requests.length).toBe(1)
+    await expect.poll(() => requests.requests.length).toBe(1)
   })
 
   test('recently successful duration', async ({ page }) => {

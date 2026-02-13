@@ -49,25 +49,37 @@ export const requests = {
   finished: [] as Request[],
   failed: [] as Request[],
   responses: [] as Response[],
+  _handlers: {} as Record<string, { page: Page; handler: (...args: any[]) => void }>,
+
+  _replaceListener(page: Page, event: string, handler: (...args: any[]) => void) {
+    const existing = this._handlers[event]
+
+    if (existing) {
+      existing.page.off(event, existing.handler)
+    }
+
+    this._handlers[event] = { page, handler }
+    page.on(event, handler)
+  },
 
   listen(page: Page) {
     this.requests = []
-    page.on('request', (request) => this.requests.push(request))
+    this._replaceListener(page, 'request', (request: Request) => this.requests.push(request))
   },
 
   listenForFinished(page: Page) {
     this.finished = []
-    page.on('requestfinished', (request) => this.finished.push(request))
+    this._replaceListener(page, 'requestfinished', (request: Request) => this.finished.push(request))
   },
 
   listenForFailed(page: Page) {
     this.failed = []
-    page.on('requestfailed', (request) => this.failed.push(request))
+    this._replaceListener(page, 'requestfailed', (request: Request) => this.failed.push(request))
   },
 
   listenForResponses(page: Page) {
     this.responses = []
-    page.on('response', (data) => this.responses.push(data))
+    this._replaceListener(page, 'response', (data: Response) => this.responses.push(data))
   },
 }
 
