@@ -7,7 +7,7 @@
 
   let { users }: Props = $props()
 
-  let flashEventCount = 0
+  let flashEventCount = $state(0)
 
   router.on('flash', () => {
     flashEventCount++
@@ -15,7 +15,7 @@
 </script>
 
 <div>
-  <span id="flash">{JSON.stringify($page.flash)}</span>
+  <span id="flash">{JSON.stringify(page.flash)}</span>
   <span id="flash-event-count">{flashEventCount}</span>
 
   <InfiniteScroll data="users" style="display: grid; gap: 20px">

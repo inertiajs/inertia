@@ -15,9 +15,9 @@
 
   let { todos, errors = {}, serverTimestamp = null }: Props = $props()
 
-  let newTodoName = ''
-  let errorCount = 0
-  let successCount = 0
+  let newTodoName = $state('')
+  let errorCount = $state(0)
+  let successCount = $state(0)
 
   const addForm = useForm({ name: '' })
 
