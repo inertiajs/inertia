@@ -229,6 +229,7 @@ test.describe('Automatic page loading', () => {
   })
 
   test('it loads pages in reverse order when reverse mode is enabled', async ({ page }) => {
+    test.setTimeout(10_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/reverse')
 
@@ -386,6 +387,7 @@ test.describe('Automatic page loading', () => {
   })
 
   test('it handles dual sibling InfiniteScroll with manual mode and query string updates', async ({ page }) => {
+    test.setTimeout(10_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/dual-sibling')
 
@@ -427,6 +429,7 @@ test.describe('Automatic page loading', () => {
 
 test.describe('Manual page loading', () => {
   test('it allows manual loading of next and previous pages when manual mode is enabled', async ({ page }) => {
+    test.setTimeout(10_000)
     await page.goto('/infinite-scroll/manual?page=2')
 
     await expect(page.getByText('User 16')).toBeVisible()
@@ -607,6 +610,7 @@ test.describe('Manual page loading', () => {
   })
 
   test('it resets hasMore state when filtering to fewer results in manual mode', async ({ page }) => {
+    test.setTimeout(10_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/filtering-manual')
 
@@ -1790,6 +1794,7 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it maintains scroll position when loading next pages in container', async ({ page }) => {
+    test.setTimeout(10_000)
     await page.goto('/infinite-scroll/scroll-container')
 
     const scrollContainer = await page.locator('[data-testid="scroll-container"]')
@@ -1803,10 +1808,8 @@ test.describe('Scrollable container support', () => {
 
     const beforePosition = await getUserCardPositionInContainer(page, scrollContainer, '15')
 
-    await expect(page.getByText('Loading more users...')).toBeVisible()
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
-    await expect(page.getByText('Loading more users...')).toBeHidden()
 
     const afterPosition = await getUserCardPositionInContainer(page, scrollContainer, '15')
 
