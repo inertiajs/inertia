@@ -620,11 +620,11 @@ test.describe('Manual page loading', () => {
 
     await page.getByRole('button', { name: 'Load next items' }).click()
     await expect(page.getByText('Camylle Metz Sr.')).toBeVisible()
-    await expect(infiniteScrollRequests().length).toBe(1)
+    await expect.poll(() => infiniteScrollRequests().length).toBe(1)
 
     await page.getByRole('button', { name: 'Load next items' }).click()
     await expect(page.getByText('Diamond Gibson PhD')).toBeVisible()
-    await expect(infiniteScrollRequests().length).toBe(2)
+    await expect.poll(() => infiniteScrollRequests().length).toBe(2)
 
     await page.locator('input[placeholder="Search..."]').fill('adelle')
     await expect(page.getByText('Adelle Crona DVM')).toBeVisible()
@@ -1538,7 +1538,7 @@ test.describe('URL query string management', () => {
 })
 
 test.describe('Scroll position preservation', () => {
-  test('it maintains scroll position when loading previous pages', async ({ page, context }) => {
+  test('it maintains scroll position when loading previous pages', async ({ page }) => {
     await page.goto('/infinite-scroll/trigger-both?page=3')
 
     // Wait for page 2 to load...
