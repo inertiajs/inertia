@@ -17,10 +17,12 @@ async function scrollToTop(page: Page) {
 }
 
 async function scrollToBottom(page: Page) {
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-  await expect
-    .poll(() => page.evaluate(() => Math.abs(window.scrollY + window.innerHeight - document.body.scrollHeight) < 2))
-    .toBe(true)
+  const scrollTarget = await page.evaluate(() => {
+    const target = document.body.scrollHeight - window.innerHeight
+    window.scrollTo(0, document.body.scrollHeight)
+    return target
+  })
+  await expect.poll(() => page.evaluate((target: number) => window.scrollY >= target - 2, scrollTarget)).toBe(true)
 }
 
 async function smoothScrollTo(page: any, targetY: number) {
