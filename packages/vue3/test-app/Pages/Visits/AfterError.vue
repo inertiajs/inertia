@@ -19,8 +19,8 @@ const throwErrorOnSuccess = (e: Event) => {
 
 <template>
   <div>
-    <a href="#" @click="visitDump"> Visit dump page </a>
+    <a href="#" @click.prevent="visitDump"> Visit dump page </a>
 
-    <a href="#" @click="throwErrorOnSuccess"> Throw error on success </a>
+    <a href="#" @click.prevent="throwErrorOnSuccess"> Throw error on success </a>
   </div>
 </template>

@@ -627,24 +627,27 @@ test.describe('tags', () => {
 
         await page.goBack()
 
+        await page.waitForLoadState('networkidle')
         requests.listen(page)
         await page.getByRole('link', { name: 'User Page 2' }).click()
         await isTagsPage(page, 2)
-        await expect(requests.requests.length).toBeGreaterThanOrEqual(1)
+        await expect.poll(() => requests.requests.length).toBeGreaterThanOrEqual(1)
 
         await page.goBack()
 
+        await page.waitForLoadState('networkidle')
         requests.listen(page)
         await page.getByRole('link', { name: 'Product Page 3' }).click()
         await isTagsPage(page, 3)
-        await expect(requests.requests.length).toBe(0)
+        expect(requests.requests.length).toBe(0)
 
         await page.goBack()
 
+        await page.waitForLoadState('networkidle')
         requests.listen(page)
         await page.getByRole('link', { name: 'Untagged Page 6' }).click()
         await isTagsPage(page, 6)
-        await expect(requests.requests.length).toBe(0)
+        expect(requests.requests.length).toBe(0)
       })
     })
   })
