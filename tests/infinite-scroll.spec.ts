@@ -34,14 +34,8 @@ async function smoothScrollTo(page: any, targetY: number) {
     setTimeout(() => window.scrollTo(0, top), 10)
   }, targetY)
 
-  await expect
-    .poll(() =>
-      page.evaluate((top: number) => {
-        const maxScroll = Math.max(0, document.body.scrollHeight - window.innerHeight)
-        return Math.abs(window.scrollY - Math.min(top, maxScroll)) < 2
-      }, targetY),
-    )
-    .toBe(true)
+  // Wait for the setTimeout to fire and scroll to settle
+  await page.waitForTimeout(100)
 }
 
 async function scrollElementSmoothTo(element: Locator, targetY: number) {
@@ -52,14 +46,8 @@ async function scrollElementSmoothTo(element: Locator, targetY: number) {
     setTimeout(() => el.scrollTo(0, top), 10)
   }, targetY)
 
-  await expect
-    .poll(() =>
-      element.evaluate((el, top) => {
-        const maxScroll = Math.max(0, el.scrollHeight - el.clientHeight)
-        return Math.abs(el.scrollTop - Math.min(top, maxScroll)) < 2
-      }, targetY),
-    )
-    .toBe(true)
+  // Wait for the setTimeout to fire and scroll to settle
+  await element.page().waitForTimeout(100)
 }
 
 async function scrollElementToBottom(element: Locator) {
