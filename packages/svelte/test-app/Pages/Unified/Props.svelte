@@ -1,9 +1,13 @@
 <script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 
-  export let foo: string
-  export let count: number
-  export let items: string[]
+  interface Props {
+    foo: string
+    count: number
+    items: string[]
+  }
+
+  let { foo, count, items }: Props = $props()
 </script>
 
 <div>

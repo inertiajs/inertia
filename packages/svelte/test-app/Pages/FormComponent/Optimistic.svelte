@@ -7,7 +7,11 @@
     done: boolean
   }
 
-  export let todos: Todo[]
+  interface Props {
+    todos: Todo[]
+  }
+
+  let { todos }: Props = $props()
 </script>
 
 <div>

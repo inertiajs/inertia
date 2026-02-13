@@ -1,7 +1,11 @@
 <script lang="ts">
   import { InfiniteScroll, page, router } from '@inertiajs/svelte'
 
-  export let users: { data: { id: number; name: string }[] }
+  interface Props {
+    users: { data: { id: number; name: string }[] }
+  }
+
+  let { users }: Props = $props()
 
   let flashEventCount = 0
 

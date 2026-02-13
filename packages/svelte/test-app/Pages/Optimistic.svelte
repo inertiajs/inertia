@@ -7,9 +7,13 @@
     done: boolean
   }
 
-  export let todos: Todo[]
-  export let errors: Record<string, string> = {}
-  export let serverTimestamp: number | null = null
+  interface Props {
+    todos: Todo[]
+    errors?: Record<string, string>
+    serverTimestamp?: number | null
+  }
+
+  let { todos, errors = {}, serverTimestamp = null }: Props = $props()
 
   let newTodoName = ''
   let errorCount = 0
@@ -92,30 +96,30 @@
         type="text"
         bind:value={newTodoName}
         placeholder="What needs to be done?"
-        on:keyup={handleKeyUp}
+        onkeyup={handleKeyUp}
       />
       {#if errors?.name}
         <p class="error" style="margin: 4px 0 0">{errors.name}</p>
       {/if}
     </div>
-    <button id="add-btn" on:click={addTodo}>Add Todo</button>
+    <button id="add-btn" onclick={addTodo}>Add Todo</button>
   </div>
 
   <ul id="todo-list">
     {#each todos as todo (todo.id)}
       <li class="todo-item">
-        <input type="checkbox" checked={todo.done} on:change={() => toggleTodo(todo)} />
+        <input type="checkbox" checked={todo.done} onchange={() => toggleTodo(todo)} />
         <span style="text-decoration: {todo.done ? 'line-through' : 'none'}">
           {todo.name}
         </span>
-        <button on:click={() => deleteTodo(todo)}>Delete</button>
+        <button onclick={() => deleteTodo(todo)}>Delete</button>
       </li>
     {/each}
   </ul>
 
   <div class="actions">
-    <button id="clear-btn" on:click={clearTodos}>Reset</button>
-    <button id="server-error-btn" on:click={triggerServerError}>Trigger Server Error</button>
+    <button id="clear-btn" onclick={clearTodos}>Reset</button>
+    <button id="server-error-btn" onclick={triggerServerError}>Trigger Server Error</button>
   </div>
 
   <div class="counters">
