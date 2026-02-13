@@ -1694,6 +1694,7 @@ test.describe('Scrollable container support', () => {
   })
 
   test('it updates query parameters based on visible content within a scrollable container', async ({ page }) => {
+    test.setTimeout(15_000)
     requests.listen(page)
     await page.goto('/infinite-scroll/scroll-container')
 

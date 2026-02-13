@@ -40,5 +40,7 @@
   <button use:inertia={{ href: '/redirect-external', method: 'post' }} class="links-redirect-external"
     >External Redirect Link</button
   >
-  <a href={'#'} on:click|preventDefault={redirectExternal} class="visits-redirect-external">Manual External Redirect visit</a>
+  <a href={'#'} on:click|preventDefault={redirectExternal} class="visits-redirect-external"
+    >Manual External Redirect visit</a
+  >
 </div>
