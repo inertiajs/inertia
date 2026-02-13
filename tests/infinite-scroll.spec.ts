@@ -281,6 +281,31 @@ test.describe('Automatic page loading', () => {
     await expect(page.getByText('User 25')).not.toBeVisible()
   })
 
+  test('it does not load all pages in reverse mode when content is shorter than the scroll container', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 })
+    requests.listen(page)
+    await page.goto('/infinite-scroll/reverse-short-content') // 40 users, 5 per page, DESC = 8 pages
+
+    const container = page.locator('[data-testid="scroll-container"]')
+    await expect(container).toBeVisible()
+    await expect(page.getByText('User 40')).toBeVisible()
+
+    // Wait for enough pages to load to fill the scroll container
+    await expect.poll(() => container.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true)
+
+    await page.waitForTimeout(500)
+
+    // There are 8 pages total (40 items, 5 per page). The component should load
+    // enough pages to fill the scroll container, but not all of them.
+    expect(infiniteScrollRequests().length).toBeLessThan(7)
+
+    // The oldest users (last page) should NOT have been loaded
+    await expect(page.getByText('User 1', { exact: true })).not.toBeVisible()
+    await expect(page.getByText('User 5', { exact: true })).not.toBeVisible()
+  })
+
   test('it handles dual scroll containers with separate data props and page query parameters', async ({ page }) => {
     requests.listen(page)
     await page.goto('/infinite-scroll/dual-containers')

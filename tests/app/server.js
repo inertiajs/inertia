@@ -1973,6 +1973,9 @@ app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerStartBuffer'),
 )
 app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
+app.get('/infinite-scroll/reverse-short-content', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ReverseShortContent', 40, true, 5),
+)
 app.get('/infinite-scroll/manual-reverse', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),
 )
@@ -2331,6 +2334,24 @@ app.get('/flash/initial', (req, res) =>
     flash: { message: 'Hello from server' },
   }),
 )
+app.get('/flash/with-infinite-scroll', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Flash/WithInfiniteScroll',
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+        flash: partialReload ? {} : { message: 'Flash with infinite scroll' },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
 app.get('/flash/with-deferred', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {

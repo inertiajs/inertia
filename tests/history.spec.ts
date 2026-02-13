@@ -145,6 +145,27 @@ test('url will update after scrolling and pressing back', async ({ page }) => {
   await page.waitForURL('/history/1')
 })
 
+test('it handles bfcache restoration after history is cleared', async ({ page }) => {
+  await clickAndWaitForResponse(page, 'Page 3', '/history/3')
+  await expect(page.getByText('This is page 3')).toBeVisible()
+
+  // Simulate clearHistory removing the encryption keys
+  await page.evaluate(() => {
+    window.sessionStorage.removeItem('historyKey')
+    window.sessionStorage.removeItem('historyIv')
+  })
+
+  requests.listen(page)
+
+  // Simulate bfcache restoration
+  await page.evaluate(() => {
+    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))
+  })
+
+  await page.waitForTimeout(1000)
+  expect(requests.requests.length).toBeGreaterThan(0)
+})
+
 test('will pull from server if history version is different than current version when pressing back', async ({
   page,
 }) => {

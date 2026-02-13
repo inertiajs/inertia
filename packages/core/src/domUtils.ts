@@ -29,7 +29,7 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
       return true
     }
 
-    return hasDimensionConstraint(computedStyle.maxHeight, el.style.height)
+    return hasDimensionConstraint(computedStyle.maxHeight, el.style.height) || isConstrainedByLayout(el, 'height')
   }
 
   const allowsHorizontalScroll = (el: HTMLElement): boolean => {
@@ -47,7 +47,7 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
       return true
     }
 
-    return hasDimensionConstraint(computedStyle.maxWidth, el.style.width)
+    return hasDimensionConstraint(computedStyle.maxWidth, el.style.width) || isConstrainedByLayout(el, 'width')
   }
 
   const hasDimensionConstraint = (computedMaxDimension: string, inlineStyleDimension: string): boolean => {
@@ -60,6 +60,27 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
     }
 
     return false
+  }
+
+  // When overflow is set to 'auto' on one axis, the browser implicitly sets the other axis
+  // to 'auto' as well (CSS spec), which causes the 'visible'/'clip' checks above to fail.
+  // In flex/grid layouts, the element's size may be constrained by the parent layout rather
+  // than explicit dimension properties, so we check for that here.
+  const isConstrainedByLayout = (el: HTMLElement, dimension: 'height' | 'width'): boolean => {
+    const parent = el.parentElement
+
+    if (!parent) {
+      return false
+    }
+
+    const parentStyle = window.getComputedStyle(parent)
+
+    if (['flex', 'inline-flex'].includes(parentStyle.display)) {
+      const isColumnLayout = ['column', 'column-reverse'].includes(parentStyle.flexDirection)
+      return dimension === 'height' ? isColumnLayout : !isColumnLayout
+    }
+
+    return ['grid', 'inline-grid'].includes(parentStyle.display)
   }
 
   let parent = element?.parentElement

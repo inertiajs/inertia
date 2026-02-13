@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "2.3.13",
+  "version": "2.3.14",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -50,7 +50,7 @@
     "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
-    "@types/react": "^19.2.13",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "axios": "^1.13.5",
     "es-check": "^9.5.4",

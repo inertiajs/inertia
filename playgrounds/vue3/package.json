@@ -18,7 +18,7 @@
     "axios": "^1.13.5",
     "laravel-vite-plugin": "^2.1.0",
     "lodash": "^4.17.23",
-    "marked": "^17.0.1",
+    "marked": "^17.0.2",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
