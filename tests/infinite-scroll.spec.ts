@@ -437,10 +437,8 @@ test.describe('Manual page loading', () => {
     await expect(page.getByText('Has more next items: true')).toBeVisible()
 
     requests.listen(page)
-    await Promise.all([
-      expect(page.getByText('Loading previous items...')).toBeVisible(),
-      page.getByRole('button', { name: 'Load previous items' }).click(),
-    ])
+    await page.getByRole('button', { name: 'Load previous items' }).click()
+    await expect(page.getByText('Loading previous items...')).toBeVisible()
     await expect(page.getByText('Loading next items...')).toBeHidden()
 
     await expect(page.getByText('User 15')).toBeVisible()
@@ -451,10 +449,8 @@ test.describe('Manual page loading', () => {
 
     await expect(infiniteScrollRequests().length).toBe(1)
 
-    await Promise.all([
-      expect(page.getByText('Loading next items...')).toBeVisible(),
-      page.getByRole('button', { name: 'Load next items' }).click(),
-    ])
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Loading next items...')).toBeVisible()
     await expect(page.getByText('Loading previous items...')).toBeHidden()
 
     await expect(page.getByText('User 31')).toBeVisible()
