@@ -87,10 +87,12 @@ test('can prefetch using link props', async ({ page }) => {
   await isPrefetchPage(page, 3)
   await expect(requests.requests.length).toBe(0)
 
+  // Wait for mount-based prefetches to settle before testing hover behavior
+  await page.waitForLoadState('networkidle')
+
   requests.listen(page)
   await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
   await page.getByRole('link', { name: 'On Click' }).hover()
-  await page.waitForTimeout(100)
   // If they just do a quick hover, it shouldn't make the request
   await expect(requests.requests.length).toBe(0)
 

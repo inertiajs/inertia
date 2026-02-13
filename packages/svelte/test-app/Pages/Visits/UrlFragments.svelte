@@ -43,13 +43,13 @@
     <!-- prettier-ignore -->
     <button on:click={handleScrollEvent}>Update scroll positions</button>
     <div class="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
-    <a href={'#'} on:click={basicVisit} class="basic">Basic visit</a>
-    <a href={'#'} on:click={fragmentVisit} class="fragment">Fragment visit</a>
-    <a href={'#'} on:click={nonExistentFragmentVisit} class="non-existent-fragment">Non-existent fragment visit</a>
+    <a href={'#'} on:click|preventDefault={basicVisit} class="basic">Basic visit</a>
+    <a href={'#'} on:click|preventDefault={fragmentVisit} class="fragment">Fragment visit</a>
+    <a href={'#'} on:click|preventDefault={nonExistentFragmentVisit} class="non-existent-fragment">Non-existent fragment visit</a>
 
-    <a href={'#'} on:click={basicGetVisit} class="basic-get">Basic GET visit</a>
-    <a href={'#'} on:click={fragmentGetVisit} class="fragment-get">Fragment GET visit</a>
-    <a href={'#'} on:click={nonExistentFragmentGetVisit} class="non-existent-fragment-get"
+    <a href={'#'} on:click|preventDefault={basicGetVisit} class="basic-get">Basic GET visit</a>
+    <a href={'#'} on:click|preventDefault={fragmentGetVisit} class="fragment-get">Fragment GET visit</a>
+    <a href={'#'} on:click|preventDefault={nonExistentFragmentGetVisit} class="non-existent-fragment-get"
       >Non-existent fragment GET visit</a
     >
 
