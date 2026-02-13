@@ -1058,12 +1058,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/inertiajs/inertia-laravel.git",
-                "reference": "e28f3854daf49ed4bf25559f998c99bbfdabea2f"
+                "reference": "6df5bbbe980842340cc9bbe73dde4dadb63a93f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/e28f3854daf49ed4bf25559f998c99bbfdabea2f",
-                "reference": "e28f3854daf49ed4bf25559f998c99bbfdabea2f",
+                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/6df5bbbe980842340cc9bbe73dde4dadb63a93f3",
+                "reference": "6df5bbbe980842340cc9bbe73dde4dadb63a93f3",
                 "shasum": ""
             },
             "require": {
@@ -1120,7 +1120,7 @@
                 "issues": "https://github.com/inertiajs/inertia-laravel/issues",
                 "source": "https://github.com/inertiajs/inertia-laravel/tree/3.x"
             },
-            "time": "2026-02-12T13:46:32+00:00"
+            "time": "2026-02-13T07:49:52+00:00"
         },
         {
             "name": "laravel/framework",
