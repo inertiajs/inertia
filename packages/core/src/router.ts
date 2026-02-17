@@ -275,11 +275,13 @@ export class Router {
     }
 
     if (visit.component) {
-      this.performInstantSwap(visit).then(() => {
-        requestParams.preserveState = true
-        requestParams.replace = true
-        requestParams.viewTransition = false
-        sendRequest()
+      history.processQueue().then(() => {
+        this.performInstantSwap(visit).then(() => {
+          requestParams.preserveState = true
+          requestParams.replace = true
+          requestParams.viewTransition = false
+          sendRequest()
+        })
       })
     } else {
       sendRequest()
