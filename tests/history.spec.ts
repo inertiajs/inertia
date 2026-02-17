@@ -32,11 +32,15 @@ test('it will not encrypt history by default', async ({ page }) => {
 
 test('it can encrypt history', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 3', '/history/3')
-  const historyState3 = await page.evaluate(() => window.history.state)
   // When history is encrypted, the page is an ArrayBuffer,
   // but Playwright doesn't transfer it as such over the wire (page.evaluate),
   // so if the object is "empty" and the page check below works, it's working.
-  await expect(historyState3.page).toEqual({})
+  await expect
+    .poll(async () => {
+      const state = await page.evaluate(() => window.history.state)
+      return state.page
+    })
+    .toEqual({})
 
   requests.listen(page)
 
@@ -52,8 +56,12 @@ test('it can encrypt history', async ({ page }) => {
 
   await page.goForward()
   await page.waitForURL('/history/3')
-  const historyState3Check = await page.evaluate(() => window.history.state)
-  await expect(historyState3Check.page).toEqual({})
+  await expect
+    .poll(async () => {
+      const state = await page.evaluate(() => window.history.state)
+      return state.page
+    })
+    .toEqual({})
   await expect(page.getByText('This is page 3')).toBeVisible()
   await expect(requests.requests).toHaveLength(0)
 })

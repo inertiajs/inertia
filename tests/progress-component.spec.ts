@@ -70,10 +70,7 @@ test.describe('Progress Component', () => {
 
     await page.getByRole('button', { name: 'Finish' }).click()
 
-    await page.waitForTimeout(100)
-
-    const duringFinish = await getProgressPercent(bar)
-    await expect(duringFinish).toBeGreaterThan(-75)
+    await expect.poll(async () => await getProgressPercent(bar), { timeout: 2000 }).toBeGreaterThan(-75)
 
     await page.waitForFunction(
       () => {

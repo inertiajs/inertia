@@ -836,6 +836,7 @@ test.describe('Partial Reloads', () => {
     test(`does not have headers specific to partial reloads when the feature is not being used ${label}`, async ({
       page,
     }) => {
+      test.setTimeout(10_000)
       requests.listen(page)
 
       await page.getByRole('link', { name: `Update All (${label})` }).click()

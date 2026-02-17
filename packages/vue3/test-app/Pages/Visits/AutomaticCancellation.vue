@@ -16,6 +16,6 @@ const visit = () => {
 <template>
   <div>
     <span class="text">This is the page that demonstrates that only one visit can be active at a time</span>
-    <a href="#" @click="visit" class="visit">Link</a>
+    <a href="#" @click.prevent="visit" class="visit">Link</a>
   </div>
 </template>
