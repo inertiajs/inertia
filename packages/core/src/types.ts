@@ -309,7 +309,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
   optimistic?: OptimisticCallback
   component: string | null
-  pageProps: Record<string, unknown>
+  pageProps: Record<string, unknown> | ((currentProps: PageProps) => Record<string, unknown>)
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -632,7 +632,7 @@ export interface LinkComponentBaseProps extends Partial<
     VisitCallbacks & {
       href: string | UrlMethodPair
       clientSide: boolean
-      pageProps: Record<string, unknown>
+      pageProps: Record<string, unknown> | ((currentProps: PageProps) => Record<string, unknown>)
       prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
       cacheFor: CacheForOption | CacheForOption[]
       cacheTags: string | string[]

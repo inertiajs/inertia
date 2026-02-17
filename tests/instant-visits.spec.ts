@@ -42,6 +42,23 @@ test('it passes pageProps as placeholder data during instant swap', async ({ pag
   await expect(page.locator('#timestamp')).not.toContainText('Timestamp: none')
 })
 
+test('it accepts a pageProps callback that receives current props', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/instant-visit')
+
+  await page.getByRole('button', { exact: true, name: 'Visit with pageProps callback' }).click()
+
+  // Callback receives current page's props and uses them as placeholder
+  await expect(page.locator('#target')).toBeVisible()
+  await expect(page.locator('#greeting')).toContainText('Greeting: Was on page with foo: foo from server')
+
+  // Server response replaces placeholder props
+  await page.waitForResponse('**/instant-visit/target**')
+
+  await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+})
+
 test('it handles server redirects after instant swap', async ({ page }) => {
   pageLoads.watch(page)
 

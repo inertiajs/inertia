@@ -24,6 +24,13 @@ const visitRedirecting = () => {
   })
 }
 
+const visitWithPagePropsCallback = () => {
+  router.visit('/instant-visit/target?delay=500', {
+    component: 'InstantVisit/Target',
+    pageProps: (currentProps) => ({ greeting: `Was on page with foo: ${currentProps.foo}` }),
+  })
+}
+
 const visitDeferred = () => {
   router.visit('/instant-visit/deferred?delay=500', {
     component: 'InstantVisit/Deferred',
@@ -39,6 +46,7 @@ const visitDeferred = () => {
 
     <button @click="visitWithComponent">Visit with component</button>
     <button @click="visitWithComponentAndPageProps">Visit with component and pageProps</button>
+    <button @click="visitWithPagePropsCallback">Visit with pageProps callback</button>
     <button @click="visitRedirecting">Visit redirecting</button>
     <button @click="visitDeferred">Visit deferred</button>
 

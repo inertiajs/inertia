@@ -558,12 +558,15 @@ export class Router {
   protected performInstantSwap(visit: PendingVisit): Promise<void> {
     const current = currentPage.get()
 
+    const resolvedPageProps =
+      typeof visit.pageProps === 'function' ? visit.pageProps(cloneDeep(current.props)) : visit.pageProps
+
     const intermediatePage: Page = {
       component: visit.component!,
       url: visit.url.pathname + visit.url.search + visit.url.hash,
       version: current.version,
       props: {
-        ...visit.pageProps,
+        ...resolvedPageProps,
         errors: {},
       },
       flash: {},
