@@ -16,6 +16,7 @@ export class RequestParams {
   }[] = []
 
   protected params: InternalActiveVisit
+
   constructor(params: InternalActiveVisit) {
     if (!params.prefetch) {
       this.params = params
