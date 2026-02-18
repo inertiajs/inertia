@@ -247,7 +247,11 @@ export class Response {
   protected pageUrl(pageResponse: Page) {
     const responseUrl = hrefToUrl(pageResponse.url)
 
-    setHashIfSameUrl(this.requestParams.all().url, responseUrl)
+    if (pageResponse.retainFragment) {
+      responseUrl.hash = this.requestParams.all().url.hash
+    } else {
+      setHashIfSameUrl(this.requestParams.all().url, responseUrl)
+    }
 
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
   }

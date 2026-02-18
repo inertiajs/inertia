@@ -2534,6 +2534,23 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
+app.get('/retain-fragment', (req, res) =>
+  inertia.render(req, res, {
+    component: 'RetainFragment',
+  }),
+)
+
+app.get('/retain-fragment/redirect', (req, res) => res.redirect(303, '/retain-fragment/target'))
+
+app.get('/retain-fragment/target', (req, res) =>
+  inertia.render(req, res, {
+    component: 'RetainFragment/Target',
+    retainFragment: true,
+  }),
+)
+
+app.post('/retain-fragment/post-redirect', (req, res) => res.redirect(303, '/retain-fragment/target'))
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
