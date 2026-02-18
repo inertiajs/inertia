@@ -159,6 +159,34 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#likes-count')).toContainText('Likes: 5')
   })
 
+  test('it works when submitting to the same URL', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    await page.locator('#like-same-url-btn').click()
+    await page.locator('#like-same-url-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(800)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+  })
+
+  test('it completes optimistic request even when redirecting to a different page', async ({ page }) => {
+    pageLoads.watch(page, 2)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    await page.locator('#like-and-redirect-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 1')
+
+    await page.waitForURL('**/dump/get')
+  })
+
   test('it updates non-optimistic props while preserving optimistic ones', async ({ page }) => {
     pageLoads.watch(page)
 

@@ -3084,6 +3084,26 @@ app.post('/optimistic/like-error', (req, res) => {
   }, delay)
 })
 
+app.post('/optimistic', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    session.likes = (session.likes || 0) + 1
+    res.redirect(303, '/optimistic')
+  }, delay)
+})
+
+app.post('/optimistic/like-and-redirect', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    session.likes = (session.likes || 0) + 1
+    res.redirect(303, '/dump/get')
+  }, delay)
+})
+
 app.post('/optimistic/reset-likes', (req, res) => {
   const session = getOptimisticSession(req)
   session.likes = 0

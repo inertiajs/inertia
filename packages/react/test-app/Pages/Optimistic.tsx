@@ -109,6 +109,22 @@ export default ({
       .post('/optimistic/like-controlled?delay=900&likes=3&foo=bar_updated_twice', {}, { preserveScroll: true })
   }
 
+  const likeSameUrl = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
+  const likeAndRedirect = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like-and-redirect?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
   const likeError = (delay: number) => {
     router
       .optimistic<{ likes: number }>((props) => ({
@@ -194,6 +210,12 @@ export default ({
         </button>
         <button id="like-controlled-fast-btn" onClick={() => likeControlled(100, 3)}>
           Like Controlled (fast, 3)
+        </button>
+        <button id="like-same-url-btn" onClick={() => likeSameUrl(500)}>
+          Like Same URL
+        </button>
+        <button id="like-and-redirect-btn" onClick={() => likeAndRedirect(500)}>
+          Like &amp; Redirect
         </button>
         <button id="like-error-btn" onClick={() => likeError(100)}>
           Like Error (fast)
