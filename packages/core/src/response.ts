@@ -1,5 +1,5 @@
 import { get, isEqual, set } from 'lodash-es'
-import { router } from '.'
+import { router, VisitOptions } from '.'
 import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
@@ -121,6 +121,17 @@ export class Response {
   }
 
   protected async handleNonInertiaResponse() {
+    if (this.isInertiaRedirect()) {
+      const visitParams = { ...this.requestParams.all() } as VisitOptions
+
+      delete visitParams.method
+      delete visitParams.data
+
+      router.visit(this.getHeader('x-inertia-redirect'), visitParams)
+
+      return
+    }
+
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
 
@@ -157,6 +168,10 @@ export class Response {
 
   protected hasHeader(header: string): boolean {
     return this.getHeader(header) !== undefined
+  }
+
+  protected isInertiaRedirect(): boolean {
+    return this.hasStatus(409) && this.hasHeader('x-inertia-redirect')
   }
 
   protected isLocationVisit(): boolean {
