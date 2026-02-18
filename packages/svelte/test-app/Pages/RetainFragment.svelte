@@ -11,5 +11,7 @@
 
   <a href="/retain-fragment/redirect#my-fragment" use:inertia id="link-with-fragment">Link with fragment</a>
 
-  <a href={'#'} on:click|preventDefault={visitWithFragment} id="manual-visit-with-fragment">Manual visit with fragment</a>
+  <a href={'#'} on:click|preventDefault={visitWithFragment} id="manual-visit-with-fragment"
+    >Manual visit with fragment</a
+  >
 </div>
