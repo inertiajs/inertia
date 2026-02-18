@@ -262,19 +262,19 @@ export class Response {
   }
 
   protected preserveOptimisticProps(pageResponse: Page): void {
-    const tracking = currentPage.get().optimisticUpdatedAt
+    const optimisticUpdatedAt = currentPage.get().optimisticUpdatedAt
 
-    if (!tracking || !router.hasPendingOptimistic()) {
+    if (!optimisticUpdatedAt || !router.hasPendingOptimistic()) {
       return
     }
 
     for (const key of Object.keys(pageResponse.props)) {
-      if (key in tracking) {
+      if (key in optimisticUpdatedAt) {
         pageResponse.props[key] = currentPage.get().props[key]
       }
     }
 
-    pageResponse.optimisticUpdatedAt = { ...tracking }
+    pageResponse.optimisticUpdatedAt = { ...optimisticUpdatedAt }
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
