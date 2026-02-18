@@ -1,5 +1,5 @@
 import { get, isEqual, set } from 'lodash-es'
-import { router, VisitOptions } from '.'
+import { router } from '.'
 import dialog from './dialog'
 import {
   fireBeforeUpdateEvent,
@@ -122,12 +122,11 @@ export class Response {
 
   protected async handleNonInertiaResponse() {
     if (this.isInertiaRedirect()) {
-      const visitParams = { ...this.requestParams.all() } as VisitOptions
-
-      delete visitParams.method
-      delete visitParams.data
-
-      router.visit(this.getHeader('x-inertia-redirect'), visitParams)
+      router.visit(this.getHeader('x-inertia-redirect'), {
+        ...this.requestParams.all(),
+        method: 'get',
+        data: {},
+      })
 
       return
     }
