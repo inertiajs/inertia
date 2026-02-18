@@ -86,7 +86,7 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#error-count')).toContainText('Error: 2')
   })
 
-    // Only the second request completes (first was cancelled)
+  // Only the second request completes (first was cancelled)
   test('it does not cancel previous optimistic requests', async ({ page }) => {
     pageLoads.watch(page)
 
