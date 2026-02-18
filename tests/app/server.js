@@ -2534,18 +2534,18 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
-app.get('/retain-fragment', (req, res) =>
+app.get('/preserve-fragment', (req, res) =>
   inertia.render(req, res, {
-    component: 'RetainFragment',
+    component: 'PreserveFragment',
   }),
 )
 
-app.get('/retain-fragment/redirect', (req, res) => res.redirect(303, '/retain-fragment/target'))
+app.get('/preserve-fragment/redirect', (req, res) => res.redirect(303, '/preserve-fragment/target'))
 
-app.get('/retain-fragment/target', (req, res) =>
+app.get('/preserve-fragment/target', (req, res) =>
   inertia.render(req, res, {
-    component: 'RetainFragment/Target',
-    retainFragment: true,
+    component: 'PreserveFragment/Target',
+    preserveFragment: true,
   }),
 )
 

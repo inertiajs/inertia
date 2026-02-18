@@ -5,14 +5,14 @@ export default () => {
 
   const visitWithFragment = (e: React.MouseEvent) => {
     e.preventDefault()
-    router.visit('/retain-fragment/redirect#my-fragment')
+    router.visit('/preserve-fragment/redirect#my-fragment')
   }
 
   return (
     <div>
       <span id="current-url">{page.url}</span>
 
-      <Link href="/retain-fragment/redirect#my-fragment" id="link-with-fragment">
+      <Link href="/preserve-fragment/redirect#my-fragment" id="link-with-fragment">
         Link with fragment
       </Link>
 

@@ -247,7 +247,7 @@ export class Response {
   protected pageUrl(pageResponse: Page) {
     const responseUrl = hrefToUrl(pageResponse.url)
 
-    if (pageResponse.retainFragment) {
+    if (pageResponse.preserveFragment) {
       responseUrl.hash = this.requestParams.all().url.hash
     } else {
       setHashIfSameUrl(this.requestParams.all().url, responseUrl)
