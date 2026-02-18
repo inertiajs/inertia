@@ -3066,6 +3066,24 @@ app.post('/optimistic/like-controlled', (req, res) => {
   }, delay)
 })
 
+app.post('/optimistic/like-error', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Optimistic',
+      url: '/optimistic',
+      props: {
+        todos: [...session.todos],
+        likes: session.likes || 0,
+        foo: session.foo || 'bar',
+        errors: { likes: 'Something went wrong' },
+      },
+    })
+  }, delay)
+})
+
 app.post('/optimistic/reset-likes', (req, res) => {
   const session = getOptimisticSession(req)
   session.likes = 0

@@ -141,6 +141,24 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#likes-count')).toContainText('Likes: 5')
   })
 
+  test('it does not roll back when a newer optimistic update exists for the same prop', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    await page.locator('#like-error-btn').click()
+    await page.locator('#like-controlled-slow-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(800)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 5')
+  })
+
   test('it updates non-optimistic props while preserving optimistic ones', async ({ page }) => {
     pageLoads.watch(page)
 

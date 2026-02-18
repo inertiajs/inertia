@@ -109,6 +109,14 @@ export default ({
       .post('/optimistic/like-controlled?delay=900&likes=3&foo=bar_updated_twice', {}, { preserveScroll: true })
   }
 
+  const likeError = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like-error?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
   const resetLikes = () => {
     router.post('/optimistic/reset-likes')
   }
@@ -186,6 +194,9 @@ export default ({
         </button>
         <button id="like-controlled-fast-btn" onClick={() => likeControlled(100, 3)}>
           Like Controlled (fast, 3)
+        </button>
+        <button id="like-error-btn" onClick={() => likeError(100)}>
+          Like Error (fast)
         </button>
         <button id="like-triple-btn" onClick={likeTriple}>
           Like Triple

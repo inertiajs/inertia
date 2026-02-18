@@ -105,6 +105,14 @@ const likeTriple = () => {
     .post('/optimistic/like-controlled?delay=900&likes=3&foo=bar_updated_twice', {}, { preserveScroll: true })
 }
 
+const likeError = (delay: number) => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post(`/optimistic/like-error?delay=${delay}`, {}, { preserveScroll: true })
+}
+
 const resetLikes = () => {
   router.post('/optimistic/reset-likes')
 }
@@ -163,6 +171,7 @@ const triggerServerError = () => {
       <button id="like-fast-btn" @click="likeSlow(100)">Like (fast)</button>
       <button id="like-controlled-slow-btn" @click="likeControlled(800, 5)">Like Controlled (slow, 5)</button>
       <button id="like-controlled-fast-btn" @click="likeControlled(100, 3)">Like Controlled (fast, 3)</button>
+      <button id="like-error-btn" @click="likeError(100)">Like Error (fast)</button>
       <button id="like-triple-btn" @click="likeTriple">Like Triple</button>
       <button id="reset-likes-btn" @click="resetLikes">Reset Likes</button>
     </div>
