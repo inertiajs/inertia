@@ -501,7 +501,6 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
-  isOptimistic?: boolean
 }
 
 export type VisitId = unknown

@@ -263,11 +263,10 @@ export class Router {
       Scroll.save()
     }
 
-    const requestParams = {
+    const requestParams: PendingVisit & VisitCallbacks = {
       ...visit,
       ...events,
-      isOptimistic: !!options.optimistic,
-    } as PendingVisit & VisitCallbacks
+    }
 
     const prefetched = prefetchedRequests.get(requestParams)
 
@@ -277,7 +276,7 @@ export class Router {
     } else {
       progress.reveal(true)
       const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-      requestStream.send(Request.create(requestParams, currentPage.get()))
+      requestStream.send(Request.create(requestParams, currentPage.get(), { optimistic: !!options.optimistic }))
     }
   }
 
