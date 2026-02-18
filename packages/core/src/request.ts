@@ -44,7 +44,7 @@ export class Request {
   }
 
   public isPendingOptimistic(): boolean {
-    return this.isOptimistic() && !this.requestParams.isResponseProcessed()
+    return this.isOptimistic() && (!this.response || !this.response.isProcessed())
   }
 
   public async send() {

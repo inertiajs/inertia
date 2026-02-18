@@ -21,6 +21,7 @@ const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
   protected wasPrefetched = false
+  protected processed = false
 
   constructor(
     protected requestParams: RequestParams,
@@ -30,6 +31,10 @@ export class Response {
 
   public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
     return new Response(params, response, originatingPage)
+  }
+
+  public isProcessed(): boolean {
+    return this.processed
   }
 
   public async handlePrefetch() {
@@ -54,7 +59,7 @@ export class Response {
     }
 
     this.requestParams.runCallbacks()
-    this.requestParams.markResponseProcessed()
+    this.processed = true
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
