@@ -19,21 +19,32 @@ export class Request {
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
   protected requestHasFinished = false
+  protected optimistic: boolean
 
   constructor(
     params: ActiveVisit,
     protected page: Page,
+    { optimistic = false }: { optimistic?: boolean } = {},
   ) {
     this.requestParams = RequestParams.create(params)
     this.cancelToken = new AbortController()
+    this.optimistic = optimistic
   }
 
-  public static create(params: ActiveVisit, page: Page): Request {
-    return new Request(params, page)
+  public static create(params: ActiveVisit, page: Page, options?: { optimistic?: boolean }): Request {
+    return new Request(params, page, options)
   }
 
   public isPrefetch(): boolean {
     return this.requestParams.isPrefetch()
+  }
+
+  public isOptimistic(): boolean {
+    return this.optimistic
+  }
+
+  public isPendingOptimistic(): boolean {
+    return this.isOptimistic() && (!this.response || !this.response.isProcessed())
   }
 
   public async send() {

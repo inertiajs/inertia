@@ -232,6 +232,8 @@ export interface Page<SharedProps extends PageProps = PageProps> {
 
   /** @internal */
   rememberedState: Record<string, unknown>
+  /** @internal */
+  optimisticUpdatedAt?: Record<string, number>
 }
 
 export type ScrollRegion = {

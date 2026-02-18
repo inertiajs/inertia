@@ -2973,6 +2973,8 @@ app.get('/optimistic', (req, res) => {
     component: 'Optimistic',
     props: {
       todos: [...session.todos],
+      likes: session.likes || 0,
+      foo: session.foo || 'bar',
     },
   })
 })
@@ -3033,6 +3035,59 @@ app.post('/optimistic/server-error', (req, res) => {
   setTimeout(() => {
     res.status(500).send('Internal Server Error')
   }, 500)
+})
+
+app.post('/optimistic/like', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    session.likes = (session.likes || 0) + 1
+    res.redirect(303, '/optimistic')
+  }, delay)
+})
+
+app.post('/optimistic/like-controlled', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const likes = parseInt(req.query.likes || '0')
+  const foo = req.query.foo || undefined
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Optimistic',
+      url: '/optimistic',
+      props: {
+        todos: [...session.todos],
+        likes,
+        foo: foo || session.foo || 'bar',
+      },
+    })
+  }, delay)
+})
+
+app.post('/optimistic/like-error', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Optimistic',
+      url: '/optimistic',
+      props: {
+        todos: [...session.todos],
+        likes: session.likes || 0,
+        foo: session.foo || 'bar',
+        errors: { likes: 'Something went wrong' },
+      },
+    })
+  }, delay)
+})
+
+app.post('/optimistic/reset-likes', (req, res) => {
+  const session = getOptimisticSession(req)
+  session.likes = 0
+  res.redirect(303, '/optimistic')
 })
 
 app.get('/use-page/page1', (req, res) =>

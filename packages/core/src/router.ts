@@ -190,6 +190,10 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
+  public hasPendingOptimistic(): boolean {
+    return this.asyncRequestStream.hasPendingOptimistic()
+  }
+
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })
@@ -211,6 +215,13 @@ export class Router {
     href: string | URL | UrlMethodPair,
     options: VisitOptions<T> = {},
   ): void {
+    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback ?? undefined
+    this.pendingOptimisticCallback = null
+
+    if (options.optimistic) {
+      options.async = options.async ?? true
+    }
+
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,
@@ -220,7 +231,6 @@ export class Router {
 
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
-      this.pendingOptimisticCallback = null
       return
     }
 
@@ -235,7 +245,7 @@ export class Router {
 
     if (!isSamePage) {
       // Only cancel non-prefetch requests (deferred props + partial reloads)
-      this.asyncRequestStream.cancelInFlight({ prefetch: false })
+      this.asyncRequestStream.cancelInFlight({ prefetch: false, optimistic: false })
     }
 
     // Interrupt in-flight requests before taking the optimistic snapshot
@@ -243,9 +253,6 @@ export class Router {
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
     }
-
-    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback ?? undefined
-    this.pendingOptimisticCallback = null
 
     if (options.optimistic) {
       this.applyOptimisticUpdate(options.optimistic, events)
@@ -269,7 +276,7 @@ export class Router {
     } else {
       progress.reveal(true)
       const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-      requestStream.send(Request.create(requestParams, currentPage.get()))
+      requestStream.send(Request.create(requestParams, currentPage.get(), { optimistic: !!options.optimistic }))
     }
   }
 
@@ -635,13 +642,13 @@ export class Router {
   }
 
   protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks): void {
-    const optimisticProps = optimistic(cloneDeep(currentPage.get().props))
+    const currentProps = currentPage.get().props
+    const optimisticProps = optimistic(cloneDeep(currentProps))
 
     if (!optimisticProps) {
       return
     }
 
-    const currentProps = cloneDeep(currentPage.get().props)
     const propsSnapshot: Partial<Page['props']> = {}
 
     for (const key of Object.keys(optimisticProps)) {
@@ -654,6 +661,8 @@ export class Router {
       return
     }
 
+    const updatedAt = Date.now()
+    currentPage.recordOptimisticUpdate(Object.keys(propsSnapshot), updatedAt)
     currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
 
     let shouldRestore = true
@@ -667,7 +676,17 @@ export class Router {
     const originalOnFinish = events.onFinish
     events.onFinish = (visit) => {
       if (shouldRestore) {
-        currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsSnapshot })
+        const propsToRestore: Partial<Page['props']> = {}
+
+        for (const [key, value] of Object.entries(propsSnapshot)) {
+          if (!currentPage.shouldPreserveOptimistic(key, updatedAt)) {
+            propsToRestore[key] = value
+          }
+        }
+
+        if (Object.keys(propsToRestore).length > 0) {
+          currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsToRestore })
+        }
       }
 
       return originalOnFinish(visit)

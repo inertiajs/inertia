@@ -24,9 +24,10 @@ export class RequestStream {
     this.cancel({ interrupted: true }, false)
   }
 
-  public cancelInFlight({ prefetch = true } = {}): void {
+  public cancelInFlight({ prefetch = true, optimistic = true } = {}): void {
     this.requests
       .filter((request) => prefetch || !request.isPrefetch())
+      .filter((request) => optimistic || !request.isOptimistic())
       .forEach((request) => request.cancel({ cancelled: true }))
   }
 
@@ -42,5 +43,9 @@ export class RequestStream {
 
   protected shouldCancel(): boolean {
     return this.interruptible && this.requests.length >= this.maxConcurrent
+  }
+
+  public hasPendingOptimistic(): boolean {
+    return this.requests.some((request) => request.isPendingOptimistic())
   }
 }
