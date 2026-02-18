@@ -36,6 +36,14 @@ export class Request {
     return this.requestParams.isPrefetch()
   }
 
+  public isOptimistic(): boolean {
+    return this.requestParams.all().isOptimistic === true
+  }
+
+  public isPendingOptimistic(): boolean {
+    return this.isOptimistic() && !this.requestParams.isResponseProcessed()
+  }
+
   public async send() {
     this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
 

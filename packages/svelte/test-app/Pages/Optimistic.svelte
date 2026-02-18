@@ -9,11 +9,13 @@
 
   interface Props {
     todos: Todo[]
+    likes?: number
+    foo?: string
     errors?: Record<string, string>
     serverTimestamp?: number | null
   }
 
-  let { todos, errors = {}, serverTimestamp = null }: Props = $props()
+  let { todos, likes = 0, foo, errors = {}, serverTimestamp = null }: Props = $props()
 
   let newTodoName = $state('')
   let errorCount = $state(0)
@@ -64,6 +66,48 @@
 
   const clearTodos = () => {
     router.post('/optimistic/clear')
+  }
+
+  const like = () => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post('/optimistic/like', {}, { preserveScroll: true })
+  }
+
+  const likeSlow = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
+  const likeControlled = (delay: number, serverLikes: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like-controlled?delay=${delay}&likes=${serverLikes}`, {}, { preserveScroll: true })
+  }
+
+  const likeTriple = () => {
+    router
+      .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+      .post('/optimistic/like-controlled?delay=300&likes=1', {}, { preserveScroll: true })
+
+    router
+      .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+      .post('/optimistic/like-controlled?delay=600&likes=2&foo=bar_updated', {}, { preserveScroll: true })
+
+    router
+      .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+      .post('/optimistic/like-controlled?delay=900&likes=3&foo=bar_updated_twice', {}, { preserveScroll: true })
+  }
+
+  const resetLikes = () => {
+    router.post('/optimistic/reset-likes')
   }
 
   const triggerServerError = () => {
@@ -121,6 +165,21 @@
     <button id="clear-btn" onclick={clearTodos}>Reset</button>
     <button id="server-error-btn" onclick={triggerServerError}>Trigger Server Error</button>
   </div>
+
+  <div class="likes" style="margin: 16px 0">
+    <span id="likes-count">Likes: {likes}</span>
+    <button id="like-btn" onclick={() => like()}>Like</button>
+    <button id="like-slow-btn" onclick={() => likeSlow(800)}>Like (slow)</button>
+    <button id="like-fast-btn" onclick={() => likeSlow(100)}>Like (fast)</button>
+    <button id="like-controlled-slow-btn" onclick={() => likeControlled(800, 5)}>Like Controlled (slow, 5)</button>
+    <button id="like-controlled-fast-btn" onclick={() => likeControlled(100, 3)}>Like Controlled (fast, 3)</button>
+    <button id="like-triple-btn" onclick={likeTriple}>Like Triple</button>
+    <button id="reset-likes-btn" onclick={resetLikes}>Reset Likes</button>
+  </div>
+
+  {#if foo}
+    <div id="foo-value">Foo: {foo}</div>
+  {/if}
 
   <div class="counters">
     <div id="success-count">Success: {successCount}</div>

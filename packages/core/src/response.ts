@@ -54,6 +54,7 @@ export class Response {
     }
 
     this.requestParams.runCallbacks()
+    this.requestParams.markResponseProcessed()
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
@@ -189,6 +190,7 @@ export class Response {
 
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)
+    this.preserveOptimisticProps(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -252,6 +254,22 @@ export class Response {
     setHashIfSameUrl(this.requestParams.all().url, responseUrl)
 
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
+  }
+
+  protected preserveOptimisticProps(pageResponse: Page): void {
+    const tracking = currentPage.get().optimisticUpdatedAt
+
+    if (!tracking || !router.hasPendingOptimistic()) {
+      return
+    }
+
+    for (const key of Object.keys(pageResponse.props)) {
+      if (key in tracking) {
+        pageResponse.props[key] = currentPage.get().props[key]
+      }
+    }
+
+    pageResponse.optimisticUpdatedAt = { ...tracking }
   }
 
   protected preserveEqualProps(pageResponse: Page): void {

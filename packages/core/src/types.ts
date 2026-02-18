@@ -232,6 +232,8 @@ export interface Page<SharedProps extends PageProps = PageProps> {
 
   /** @internal */
   rememberedState: Record<string, unknown>
+  /** @internal */
+  optimisticUpdatedAt?: Record<string, number>
 }
 
 export type ScrollRegion = {
@@ -499,6 +501,7 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
+  isOptimistic?: boolean
 }
 
 export type VisitId = unknown

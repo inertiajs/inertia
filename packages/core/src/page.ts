@@ -89,6 +89,7 @@ class CurrentPage {
 
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
+      delete pageForHistory.optimisticUpdatedAt
 
       return new Promise<void>((resolve) =>
         replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
@@ -248,6 +249,24 @@ class CurrentPage {
 
   public resolve(component: string, page?: Page): Promise<Component> {
     return Promise.resolve(this.resolveComponent(component, page))
+  }
+
+  public recordOptimisticUpdate(keys: string[], updatedAt: number): void {
+    if (!this.page.optimisticUpdatedAt) {
+      this.page.optimisticUpdatedAt = {}
+    }
+
+    for (const key of keys) {
+      if (updatedAt > (this.page.optimisticUpdatedAt[key] || 0)) {
+        this.page.optimisticUpdatedAt[key] = updatedAt
+      }
+    }
+  }
+
+  public shouldPreserveOptimistic(key: string, updatedAt: number): boolean {
+    const lastUpdatedAt = this.page.optimisticUpdatedAt?.[key]
+
+    return lastUpdatedAt !== undefined && updatedAt < lastUpdatedAt
   }
 
   public isTheSame(page: Page): boolean {

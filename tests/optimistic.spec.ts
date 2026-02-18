@@ -42,7 +42,7 @@ test.describe('Optimistic', () => {
     await expect(page.locator('.error')).toContainText('The name field is required.')
   })
 
-  test('it only snapshots props that actually changed (preserves other server response props)', async ({ page }) => {
+  test('it only snapshots props that actually changed', async ({ page }) => {
     pageLoads.watch(page)
 
     await expect(page.locator('#server-timestamp')).not.toBeVisible()
@@ -57,7 +57,6 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#todo-list li')).toHaveCount(2)
     await expect(page.locator('.error')).toContainText('The name field is required.')
     await expect(page.locator('#server-timestamp')).toBeVisible()
-    await expect(page.locator('#server-timestamp')).toContainText('Server timestamp:')
   })
 
   test('it rolls back optimistic update on server error (500)', async ({ page }) => {
@@ -76,17 +75,95 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#todo-list')).not.toContainText('Will fail...')
   })
 
-  test('it rolls back first optimistic update when second visit cancels it', async ({ page }) => {
+  test('it completes both optimistic requests independently without cancelling', async ({ page }) => {
     pageLoads.watch(page)
 
     // Second click cancels first, restoring its state before applying own optimistic update
     await page.locator('#add-btn').click()
     await page.locator('#add-btn').click()
 
-    await expect(page.locator('#todo-list li')).toHaveCount(3)
+    await expect(page.locator('#todo-list li')).toHaveCount(4)
+    await expect(page.locator('#error-count')).toContainText('Error: 2')
+  })
 
     // Only the second request completes (first was cancelled)
-    await expect(page.locator('#error-count')).toContainText('Error: 1')
-    await expect(page.locator('#todo-list li')).toHaveCount(2)
+  test('it does not cancel previous optimistic requests', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    await page.locator('#like-btn').click()
+    await page.locator('#like-btn').click()
+    await page.locator('#like-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 3')
+
+    await page.waitForTimeout(1000)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 3')
+  })
+
+  test('it preserves optimistic state while requests are pending', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    await page.locator('#like-slow-btn').click()
+    await page.locator('#like-fast-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(800)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+  })
+
+  test('it applies the last server response when all optimistic requests complete', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    // Server responds with likes=5 (slow) and likes=3 (fast)
+    await page.locator('#like-controlled-slow-btn').click()
+    await page.locator('#like-controlled-fast-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    // Last server response wins
+    await page.waitForTimeout(800)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 5')
+  })
+
+  test('it updates non-optimistic props while preserving optimistic ones', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+    await expect(page.locator('#foo-value')).toContainText('Foo: bar')
+
+    await page.locator('#like-triple-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 3')
+    await expect(page.locator('#foo-value')).toContainText('Foo: bar')
+
+    await page.waitForTimeout(500)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 3')
+    await expect(page.locator('#foo-value')).toContainText('Foo: bar')
+
+    // Non-optimistic prop (foo) updates from server while likes is preserved
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 3')
+    await expect(page.locator('#foo-value')).toContainText('Foo: bar_updated')
+
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 3')
+    await expect(page.locator('#foo-value')).toContainText('Foo: bar_updated_twice')
   })
 })

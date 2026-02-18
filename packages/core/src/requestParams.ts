@@ -16,6 +16,7 @@ export class RequestParams {
   }[] = []
 
   protected params: InternalActiveVisit
+  protected responseProcessed = false
 
   constructor(params: InternalActiveVisit) {
     if (!params.prefetch) {
@@ -76,6 +77,14 @@ export class RequestParams {
     this.params.onCancelToken({
       cancel: cb,
     })
+  }
+
+  public markResponseProcessed() {
+    this.responseProcessed = true
+  }
+
+  public isResponseProcessed() {
+    return this.responseProcessed
   }
 
   public markAsFinished() {
