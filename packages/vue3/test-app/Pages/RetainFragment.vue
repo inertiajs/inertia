@@ -4,10 +4,6 @@ import { Link, router } from '@inertiajs/vue3'
 const visitWithFragment = () => {
   router.visit('/retain-fragment/redirect#my-fragment')
 }
-
-const postWithFragment = () => {
-  router.post('/retain-fragment/post-redirect', {}, { headers: { 'x-fragment': 'true' } })
-}
 </script>
 
 <template>
