@@ -1,6 +1,5 @@
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import Image from '../Components/Image'
-import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
 const PhotoHorizontal = ({
@@ -38,7 +37,5 @@ const PhotoHorizontal = ({
     </>
   )
 }
-
-PhotoHorizontal.layout = (page: React.ReactElement) => <Layout>{page}</Layout>
 
 export default PhotoHorizontal

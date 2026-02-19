@@ -1,5 +1,10 @@
 <script lang="ts">
   import { inertia } from '@inertiajs/svelte'
+  interface Props {
+    children?: import('svelte').Snippet
+  }
+
+  let { children }: Props = $props()
 </script>
 
 <div>
@@ -10,6 +15,6 @@
   </a>
   <a href="/prefetch/swr/5" use:inertia={{ prefetch: true, cacheFor: [1000, 3000] }}> 1s Stale, 2s Expired (Number) </a>
   <div>
-    <slot />
+    {@render children?.()}
   </div>
 </div>

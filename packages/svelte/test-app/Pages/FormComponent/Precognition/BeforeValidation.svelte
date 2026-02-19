@@ -22,42 +22,36 @@
 <div>
   <h1>Precognition - onBefore</h1>
 
-  <Form
-    action="/precognition/default"
-    method="post"
-    let:errors
-    let:invalid
-    let:validate
-    let:validating
-    validationTimeout={100}
-  >
-    <div>
-      <label for="name">Name:</label>
-      <input
-        id="name"
-        name="name"
-        on:change={() =>
-          validate('name', {
-            onBeforeValidation: handleBeforeValidation,
-          })}
-      />
-      {#if invalid('name')}
-        <p class="error">{errors.name}</p>
+  <Form action="/precognition/default" method="post" validationTimeout={100}>
+    {#snippet children({ errors, invalid, validate, validating })}
+      <div>
+        <label for="name">Name:</label>
+        <input
+          id="name"
+          name="name"
+          onchange={() =>
+            validate('name', {
+              onBeforeValidation: handleBeforeValidation,
+            })}
+        />
+        {#if invalid('name')}
+          <p class="error">{errors.name}</p>
+        {/if}
+      </div>
+
+      <div>
+        <label for="email">Email:</label>
+        <input id="email" name="email" onchange={() => validate('email')} />
+        {#if invalid('email')}
+          <p class="error">{errors.email}</p>
+        {/if}
+      </div>
+
+      {#if validating}
+        <p class="validating">Validating...</p>
       {/if}
-    </div>
 
-    <div>
-      <label for="email">Email:</label>
-      <input id="email" name="email" on:change={() => validate('email')} />
-      {#if invalid('email')}
-        <p class="error">{errors.email}</p>
-      {/if}
-    </div>
-
-    {#if validating}
-      <p class="validating">Validating...</p>
-    {/if}
-
-    <button type="submit">Submit</button>
+      <button type="submit">Submit</button>
+    {/snippet}
   </Form>
 </div>

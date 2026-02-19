@@ -10,24 +10,22 @@
     method="post"
     headers={{ 'X-Custom-Header': 'custom-value' }}
     validationTimeout={100}
-    let:invalid
-    let:errors
-    let:validate
-    let:validating
   >
-    <div>
-      <input name="name" placeholder="Name" on:blur={() => validate('name')} />
-      {#if invalid('name')}
-        <p>
-          {errors.name}
-        </p>
+    {#snippet children({ invalid, errors, validate, validating })}
+      <div>
+        <input name="name" placeholder="Name" onblur={() => validate('name')} />
+        {#if invalid('name')}
+          <p>
+            {errors.name}
+          </p>
+        {/if}
+      </div>
+
+      {#if validating}
+        <p>Validating...</p>
       {/if}
-    </div>
 
-    {#if validating}
-      <p>Validating...</p>
-    {/if}
-
-    <button type="submit">Submit</button>
+      <button type="submit">Submit</button>
+    {/snippet}
   </Form>
 </div>

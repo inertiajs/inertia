@@ -1,8 +1,12 @@
-<script>
+<script lang="ts">
   import { Link } from '@inertiajs/svelte'
   import { onMount, onDestroy } from 'svelte'
 
-  export let page
+  interface Props {
+    page: string
+  }
+
+  let { page }: Props = $props()
 
   onMount(() => {
     document.documentElement.style.scrollBehavior = 'smooth'

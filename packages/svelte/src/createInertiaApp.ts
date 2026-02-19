@@ -1,18 +1,21 @@
 import {
+  buildSSRBody,
   getInitialPageFromDOM,
+  http as httpModule,
   router,
   setupProgress,
+  type CreateInertiaAppOptions,
   type CreateInertiaAppOptionsForCSR,
-  type InertiaAppResponse,
+  type InertiaAppSSRResponse,
   type Page,
   type PageProps,
 } from '@inertiajs/core'
-import { escape } from 'lodash-es'
+import { hydrate, mount } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
-import type { ComponentResolver, SvelteInertiaAppConfig } from './types'
+import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
 
-type SvelteRenderResult = { html: string; head: string; css?: { code: string } }
+type SvelteRenderResult = { body: string; head: string }
 
 type SetupOptions<SharedProps extends PageProps> = {
   el: HTMLElement | null
@@ -20,9 +23,7 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: InertiaAppProps<SharedProps>
 }
 
-// Svelte doesn't use CreateInertiaAppOptionsForSSR as it doesn't pass a
-// 'render' function, it calls it directly in the setup() method...
-type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
+type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
   SetupOptions<SharedProps>,
@@ -30,45 +31,127 @@ type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsF
   SvelteInertiaAppConfig
 >
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
-  id = 'app',
-  resolve,
-  setup,
-  progress = {},
-  page,
-  defaults = {},
-}: InertiaAppOptions<SharedProps>): InertiaAppResponse {
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
+  ComponentResolver,
+  SetupOptions<SharedProps>,
+  SvelteRenderResult | void,
+  SvelteInertiaAppConfig
+> & {
+  page?: Page<SharedProps>
+}
+
+type SvelteServerRender = (component: typeof App, options: { props: InertiaAppProps<PageProps> }) => SvelteRenderResult
+
+type RenderFunction<SharedProps extends PageProps> = (
+  page: Page<SharedProps>,
+  render: SvelteServerRender,
+) => Promise<InertiaAppSSRResponse>
+
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options: InertiaAppOptionsForCSR<SharedProps>,
+): Promise<InertiaAppSSRResponse | void>
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  options?: InertiaAppOptionsAuto<SharedProps>,
+): Promise<void | RenderFunction<SharedProps>>
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+  {
+    id = 'app',
+    resolve,
+    setup,
+    progress = {},
+    page,
+    defaults = {},
+    http,
+    layout,
+  }:
+    | InertiaAppOptionsForCSR<SharedProps>
+    | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
+): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
   config.replace(defaults)
 
+  if (http) {
+    httpModule.setClient(http)
+  }
+
   const isServer = typeof window === 'undefined'
-  const useScriptElementForInitialPage = config.get('future.useScriptElementForInitialPage')
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id, useScriptElementForInitialPage)!
 
-  const resolveComponent = (name: string) => Promise.resolve(resolve(name))
+  const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve!(name, page))
 
-  const svelteApp = await Promise.all([
-    resolveComponent(initialPage.component),
-    router.decryptHistory().catch(() => {}),
-  ]).then(([initialComponent]) => {
-    return setup({
-      el: isServer ? null : document.getElementById(id),
-      App,
-      props: { initialPage, initialComponent, resolveComponent },
-    })
-  })
+  // SSR render function factory - when on server without page, return a render function
+  // This is used by the Vite plugin's SSR transform
+  if (isServer && !page) {
+    return async (page: Page<SharedProps>, render: SvelteServerRender) => {
+      const initialComponent = (await resolveComponent(page.component, page)) as ResolvedComponent
 
-  if (isServer && svelteApp) {
-    const { html, head, css } = svelteApp
+      const props: InertiaAppProps<SharedProps> = {
+        initialPage: page,
+        initialComponent,
+        resolveComponent,
+        defaultLayout: layout,
+      }
 
-    return {
-      body: useScriptElementForInitialPage
-        ? `<script data-page="${id}" type="application/json">${JSON.stringify(initialPage).replace(/\//g, '\\/')}</script><div data-server-rendered="true" id="${id}">${html}</div>`
-        : `<div data-server-rendered="true" id="${id}" data-page="${escape(JSON.stringify(initialPage))}">${html}</div>`,
-      head: [head, css ? `<style data-vite-css>${css.code}</style>` : ''],
+      let svelteApp: SvelteRenderResult
+
+      if (setup) {
+        const result = await setup({ el: null, App, props })
+        if (!result) {
+          throw new Error('Inertia SSR setup function must return a render result ({ body, head })')
+        }
+        svelteApp = result
+      } else {
+        svelteApp = render(App, { props })
+      }
+
+      const body = buildSSRBody(id, page, svelteApp.body)
+
+      return {
+        body,
+        head: [svelteApp.head],
+      }
     }
   }
 
-  if (!isServer && progress) {
+  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
+
+  const [initialComponent] = await Promise.all([
+    resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
+    router.decryptHistory().catch(() => {}),
+  ])
+
+  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent, defaultLayout: layout }
+
+  // SSR with page provided (legacy pattern used by ssr.ts)
+  if (isServer) {
+    if (!setup) {
+      throw new Error('Inertia SSR requires a setup function that returns a render result ({ body, head })')
+    }
+
+    const svelteApp = await setup({ el: null, App, props })
+
+    if (svelteApp) {
+      const body = buildSSRBody(id, initialPage, svelteApp.body)
+
+      return {
+        body,
+        head: [svelteApp.head],
+      }
+    }
+
+    return
+  }
+
+  // CSR
+  const target = document.getElementById(id)!
+
+  if (setup) {
+    await setup({ el: target, App, props })
+  } else if (target.hasAttribute('data-server-rendered')) {
+    hydrate(App, { target, props })
+  } else {
+    mount(App, { target, props })
+  }
+
+  if (progress) {
     setupProgress(progress)
   }
 }

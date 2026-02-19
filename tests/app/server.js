@@ -70,6 +70,79 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+// SSR auto-transform test routes (uses the Vite plugin SSR transform)
+app.get('/ssr-auto/page1', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page1',
+    props: {
+      user: { name: 'Auto User', email: 'auto@example.com' },
+      items: ['Auto 1', 'Auto 2', 'Auto 3'],
+      count: 100,
+    },
+  }),
+)
+
+app.get('/ssr-auto/page2', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
+// createInertiaApp (unified) test routes
+app.get('/unified', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'FooBar',
+    },
+  }),
+)
+
+app.get('/unified/navigate', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Home',
+    props: {
+      example: 'Navigated',
+    },
+  }),
+)
+
+app.get('/unified/props', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Unified/Props',
+    props: {
+      foo: 'bar',
+      count: 42,
+      items: ['a', 'b', 'c'],
+    },
+  }),
+)
+
+// Auto transform test routes (pages shorthand transformed by Vite plugin)
+// Uses VitePages directory to prove transform uses the configured path
+app.get('/auto', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Home',
+    props: {
+      example: 'AutoTransform',
+    },
+  }),
+)
+
+app.get('/auto/props', (req, res) =>
+  inertia.renderAuto(req, res, {
+    component: 'Props',
+    props: {
+      foo: 'vite-bar',
+      count: 123,
+      items: ['vite', 'plugin', 'test'],
+    },
+  }),
+)
+
 // Intercepts all CSS and JS assets (including files loaded via code splitting)
 app.get(/.*\.(?:js|css)$/, (req, res) => {
   const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
@@ -138,9 +211,7 @@ app.get('/links/partial-reloads', (req, res) =>
     },
   }),
 )
-app.all('/error-modal', (req, res) =>
-  inertia.render(req, res, { component: 'ErrorModal', props: { dialog: !!req.query.dialog } }),
-)
+app.all('/error-modal', (req, res) => inertia.render(req, res, { component: 'ErrorModal' }))
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )
@@ -716,6 +787,24 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
   inertia.render(req, res, { props: { foo: 'bar', baz: 'example' } }),
 )
 
+app.get('/default-layout', (req, res) => inertia.render(req, res, { component: 'DefaultLayout/Index' }))
+app.get('/default-layout/with-own-layout', (req, res) =>
+  inertia.render(req, res, { component: 'DefaultLayout/WithOwnLayout' }),
+)
+app.get('/default-layout/callback-excluded', (req, res) =>
+  inertia.render(req, res, { component: 'DefaultLayout/CallbackExcluded' }),
+)
+
+app.get('/layout-props/basic', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/navigate', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/nested', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/named-static', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/default', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/persistent-a', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/persistent-b', (req, res) => inertia.render(req, res, {}))
+
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
@@ -733,6 +822,28 @@ app.get('/poll/unchanged-data/encrypted', (req, res) =>
     encryptHistory: true,
   }),
 )
+
+let pollPreserveErrorsState = {}
+
+app.get('/poll/preserve-errors', (req, res) => {
+  const errors = { ...pollPreserveErrorsState }
+  pollPreserveErrorsState = {}
+
+  inertia.render(req, res, {
+    component: 'Poll/PreserveErrors',
+    props: {
+      time: Date.now(),
+    },
+    alwaysProps: {
+      errors,
+    },
+  })
+})
+
+app.post('/poll/preserve-errors', (req, res) => {
+  pollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/poll/preserve-errors')
+})
 
 app.get('/prefetch/after-error', (req, res) => {
   inertia.render(req, res, { component: 'Prefetch/AfterError' })
@@ -999,6 +1110,31 @@ app.get('/when-visible-params-update', (req, res) => {
       props: {},
     })
   }
+})
+
+let whenVisiblePreserveErrorsState = {}
+
+app.get('/when-visible/preserve-errors', (req, res) => {
+  const errors = { ...whenVisiblePreserveErrorsState }
+  whenVisiblePreserveErrorsState = {}
+
+  const render = (props) =>
+    inertia.render(req, res, {
+      component: 'WhenVisiblePreserveErrors',
+      props,
+      alwaysProps: { errors },
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => render({ foo: 'foo value' }), 100)
+  } else {
+    render({})
+  }
+})
+
+app.post('/when-visible/preserve-errors', (req, res) => {
+  whenVisiblePreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/when-visible/preserve-errors')
 })
 
 app.get('/progress/:pageNumber', (req, res) => {
@@ -1335,7 +1471,7 @@ app.get('/deferred-props/many-groups', (req, res) => {
 
 app.get('/deferred-props/instant-reload', (req, res) => {
   const requestedProps = req.headers['x-inertia-partial-data']
-  const delay = requestedProps === 'bar' ? 300 : 0
+  const delay = requestedProps === 'bar' ? 500 : 0
 
   setTimeout(
     () =>
@@ -1515,7 +1651,7 @@ app.get('/deferred-props/with-reload', (req, res) => {
             : undefined,
         },
       }),
-    300,
+    500,
   )
 })
 
@@ -1770,6 +1906,36 @@ app.get('/form-component/invalidate-tags/:propType', (req, res) =>
 app.post('/form-component/view-transition', (req, res) =>
   inertia.render(req, res, { component: 'ViewTransition/PageB' }),
 )
+app.get('/form-component/optimistic', (req, res) => {
+  const session = getOptimisticSession(req)
+
+  inertia.render(req, res, {
+    component: 'FormComponent/Optimistic',
+    props: {
+      todos: [...session.todos],
+    },
+  })
+})
+app.post('/form-component/optimistic', upload.none(), (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    const name = req.body.name?.trim()
+
+    if (!name || name.length < 3) {
+      return inertia.render(req, res, {
+        url: '/form-component/optimistic',
+        component: 'FormComponent/Optimistic',
+        props: {
+          todos: [...session.todos],
+          errors: { name: !name ? 'The name field is required.' : 'The name must be at least 3 characters.' },
+        },
+      })
+    }
+
+    session.todos.push({ id: session.todoId++, name, done: false })
+    res.redirect(303, '/form-component/optimistic')
+  }, 500)
+})
 
 function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
   const page = req.query.page ? parseInt(req.query.page) : 1
@@ -2112,6 +2278,37 @@ app.get('/infinite-scroll/deferred', (req, res) => {
       }),
     250,
   )
+})
+
+let infiniteScrollPreserveErrorsState = {}
+
+app.get('/infinite-scroll/preserve-errors', (req, res) => {
+  const errors = { ...infiniteScrollPreserveErrorsState }
+  infiniteScrollPreserveErrorsState = {}
+
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/PreserveErrors',
+        props: {
+          users: paginated,
+        },
+        alwaysProps: { errors },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    partialReload ? 250 : 0,
+  )
+})
+
+app.post('/infinite-scroll/preserve-errors', (req, res) => {
+  infiniteScrollPreserveErrorsState = { name: 'The name field is required.' }
+  res.redirect(303, '/infinite-scroll/preserve-errors')
 })
 
 app.post('/view-transition/form-errors', (req, res) =>
@@ -2505,6 +2702,213 @@ app.get('/reload/concurrent', (req, res) => {
   )
 })
 
+// JSON API endpoints for useHttp testing
+app.get('/api/data', (req, res) => {
+  res.json({
+    items: ['apple', 'banana', 'cherry'],
+    total: 3,
+    query: req.query.query || null,
+  })
+})
+
+app.post('/api/users', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    id: 123,
+    user: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  })
+})
+
+app.post('/api/validate', upload.none(), (req, res) => {
+  const errors = {}
+
+  if (!req.body.name || req.body.name.trim() === '') {
+    errors.name = ['The name field is required.']
+  }
+
+  if (!req.body.email || !req.body.email.includes('@')) {
+    errors.email = ['The email field must be a valid email address.']
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(422).json({ errors })
+  }
+
+  res.json({ success: true })
+})
+
+app.post('/api/validate-multiple', upload.none(), (req, res) => {
+  res.status(422).json({
+    errors: {
+      name: ['The name field is required.', 'The name must be at least 3 characters.'],
+      email: ['The email field is required.', 'The email must be a valid email address.'],
+    },
+  })
+})
+
+app.delete('/api/users/:id', (req, res) => {
+  res.json({
+    success: true,
+    deleted: parseInt(req.params.id),
+  })
+})
+
+app.put('/api/users/:id', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    id: parseInt(req.params.id),
+    user: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  })
+})
+
+app.patch('/api/users/:id', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    id: parseInt(req.params.id),
+    user: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  })
+})
+
+app.get('/api/slow', (req, res) => {
+  setTimeout(() => {
+    res.json({ result: 'slow response' })
+  }, 2000)
+})
+
+app.post('/api/error', upload.none(), (req, res) => {
+  res.status(500).json({ message: 'Internal server error' })
+})
+
+app.post('/api/optimistic-todo', upload.none(), (req, res) => {
+  setTimeout(() => {
+    const name = req.body.name?.trim()
+
+    if (!name) {
+      return res.status(422).json({ errors: { name: 'The name field is required.' } })
+    }
+
+    res.json({ success: true, id: Date.now(), name })
+  }, 500)
+})
+
+// File upload endpoint
+app.post('/api/upload', upload.any(), (req, res) => {
+  const files = (req.files || []).map((file) => ({
+    fieldname: file.fieldname,
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+  }))
+
+  res.json({
+    success: true,
+    files,
+    fileCount: files.length,
+    formData: req.body,
+  })
+})
+
+// Headers dump endpoint
+app.all('/api/headers', upload.none(), (req, res) => {
+  res.json({
+    headers: req.headers,
+    method: req.method.toLowerCase(),
+  })
+})
+
+// Nested data endpoint
+app.post('/api/nested', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    received: req.body,
+  })
+})
+
+// Transform endpoint
+app.post('/api/transform', upload.none(), (req, res) => {
+  res.json({
+    success: true,
+    received: req.body,
+  })
+})
+
+// Lifecycle callbacks test endpoint
+app.post('/api/lifecycle', upload.none(), (req, res) => {
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: 'Lifecycle test complete',
+      received: req.body,
+    })
+  }, 100)
+})
+
+// Lifecycle callbacks test endpoint that returns validation error
+app.post('/api/lifecycle-error', upload.none(), (req, res) => {
+  setTimeout(() => {
+    res.status(422).json({
+      errors: {
+        field: ['Validation error for lifecycle test'],
+      },
+    })
+  }, 100)
+})
+
+// Slow upload endpoint for progress testing
+app.post('/api/slow-upload', upload.any(), (req, res) => {
+  setTimeout(() => {
+    const files = (req.files || []).map((file) => ({
+      fieldname: file.fieldname,
+      originalname: file.originalname,
+      size: file.size,
+    }))
+
+    res.json({
+      success: true,
+      files,
+    })
+  }, 500)
+})
+
+// Mixed content endpoint (files + nested data)
+app.post('/api/mixed', upload.any(), (req, res) => {
+  const files = (req.files || []).map((file) => ({
+    fieldname: file.fieldname,
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+  }))
+
+  res.json({
+    success: true,
+    files,
+    fileCount: files.length,
+    formData: req.body,
+  })
+})
+
+app.get('/use-http', (req, res) => inertia.render(req, res, { component: 'UseHttp/Index' }))
+app.get('/use-http/methods', (req, res) => inertia.render(req, res, { component: 'UseHttp/Methods' }))
+app.get('/use-http/file-upload', (req, res) => inertia.render(req, res, { component: 'UseHttp/FileUpload' }))
+app.get('/use-http/headers', (req, res) => inertia.render(req, res, { component: 'UseHttp/Headers' }))
+app.get('/use-http/nested-data', (req, res) => inertia.render(req, res, { component: 'UseHttp/NestedData' }))
+app.get('/use-http/transform', (req, res) => inertia.render(req, res, { component: 'UseHttp/Transform' }))
+app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { component: 'UseHttp/Lifecycle' }))
+app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
+app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
+app.get('/use-http/submit', (req, res) => inertia.render(req, res, { component: 'UseHttp/Submit' }))
+app.get('/use-http/optimistic', (req, res) => inertia.render(req, res, { component: 'UseHttp/Optimistic' }))
+app.get('/use-http/with-all-errors', (req, res) => inertia.render(req, res, { component: 'UseHttp/WithAllErrors' }))
+
 app.get('/reload/concurrent-with-data', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']
   const timeframe = req.query.timeframe || 'day'
@@ -2546,6 +2950,192 @@ app.get('/preserve-fragment/target', (req, res) =>
   inertia.render(req, res, {
     component: 'PreserveFragment/Target',
     preserveFragment: true,
+  }),
+)
+
+app.get('/http-handlers', (req, res) => inertia.render(req, res, { component: 'HttpHandlers', props: {} }))
+
+app.get('/http-handlers/error', (req, res) => {
+  res.status(500).send('Internal Server Error')
+})
+
+// Optimistic updates (state scoped per session cookie to avoid cross-worker interference)
+const optimisticSessions = {}
+
+function getDefaultTodos() {
+  return [
+    { id: 1, name: 'Learn Inertia.js', done: true },
+    { id: 2, name: 'Build something awesome', done: false },
+  ]
+}
+
+function getOptimisticSession(req) {
+  const cookies = req.headers.cookie || ''
+  const match = cookies.match(/optimistic-session=([^;]+)/)
+  const sessionId = match ? match[1] : 'default'
+
+  if (!optimisticSessions[sessionId]) {
+    optimisticSessions[sessionId] = { todoId: 3, todos: getDefaultTodos() }
+  }
+
+  return optimisticSessions[sessionId]
+}
+
+app.get('/optimistic', (req, res) => {
+  const session = getOptimisticSession(req)
+
+  inertia.render(req, res, {
+    component: 'Optimistic',
+    props: {
+      todos: [...session.todos],
+      likes: session.likes || 0,
+      foo: session.foo || 'bar',
+    },
+  })
+})
+
+app.post('/optimistic/todos', (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    const name = req.body.name?.trim()
+
+    if (!name || name.length < 3) {
+      return inertia.render(req, res, {
+        url: '/optimistic',
+        component: 'Optimistic',
+        props: {
+          todos: [...session.todos],
+          errors: { name: !name ? 'The name field is required.' : 'The name must be at least 3 characters.' },
+          serverTimestamp: Date.now(),
+        },
+      })
+    }
+
+    session.todos.push({ id: session.todoId++, name, done: false })
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.patch('/optimistic/todos/:id', (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    const todo = session.todos.find((t) => t.id === parseInt(req.params.id))
+
+    if (todo) {
+      if (req.body.done !== undefined) {
+        todo.done = req.body.done === 'true' || req.body.done === true
+      }
+    }
+
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.delete('/optimistic/todos/:id', (req, res) => {
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    session.todos = session.todos.filter((t) => t.id !== parseInt(req.params.id))
+    res.redirect(303, '/optimistic')
+  }, 500)
+})
+
+app.post('/optimistic/clear', (req, res) => {
+  const session = getOptimisticSession(req)
+  session.todoId = 3
+  session.todos = getDefaultTodos()
+  res.redirect(303, '/optimistic')
+})
+
+app.post('/optimistic/server-error', (req, res) => {
+  setTimeout(() => {
+    res.status(500).send('Internal Server Error')
+  }, 500)
+})
+
+app.post('/optimistic/like', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+
+  setTimeout(() => {
+    const session = getOptimisticSession(req)
+    session.likes = (session.likes || 0) + 1
+    res.redirect(303, '/optimistic')
+  }, delay)
+})
+
+app.post('/optimistic/like-controlled', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const likes = parseInt(req.query.likes || '0')
+  const foo = req.query.foo || undefined
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Optimistic',
+      url: '/optimistic',
+      props: {
+        todos: [...session.todos],
+        likes,
+        foo: foo || session.foo || 'bar',
+      },
+    })
+  }, delay)
+})
+
+app.post('/optimistic/like-error', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Optimistic',
+      url: '/optimistic',
+      props: {
+        todos: [...session.todos],
+        likes: session.likes || 0,
+        foo: session.foo || 'bar',
+        errors: { likes: 'Something went wrong' },
+      },
+    })
+  }, delay)
+})
+
+app.post('/optimistic', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    session.likes = (session.likes || 0) + 1
+    res.redirect(303, '/optimistic')
+  }, delay)
+})
+
+app.post('/optimistic/like-and-redirect', (req, res) => {
+  const delay = parseInt(req.query.delay || '0')
+  const session = getOptimisticSession(req)
+
+  setTimeout(() => {
+    session.likes = (session.likes || 0) + 1
+    res.redirect(303, '/dump/get')
+  }, delay)
+})
+
+app.post('/optimistic/reset-likes', (req, res) => {
+  const session = getOptimisticSession(req)
+  session.likes = 0
+  res.redirect(303, '/optimistic')
+})
+
+app.get('/use-page/page1', (req, res) =>
+  inertia.render(req, res, {
+    component: 'UsePage/Page1',
+    props: { name: 'Alice' },
+  }),
+)
+
+app.get('/use-page/page2', (req, res) =>
+  inertia.render(req, res, {
+    component: 'UsePage/Page2',
+    props: { title: 'Dashboard' },
   }),
 )
 

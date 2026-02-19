@@ -74,7 +74,7 @@ class CurrentPage {
       history.clear()
     }
 
-    return this.resolve(page.component).then((component) => {
+    return this.resolve(page.component, page).then((component) => {
       if (componentId !== this.componentId) {
         // Component has changed since we started resolving this component, bail
         return
@@ -89,6 +89,7 @@ class CurrentPage {
 
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
+      delete pageForHistory.optimisticUpdatedAt
 
       return new Promise<void>((resolve) =>
         replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
@@ -165,7 +166,7 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
-    return this.resolve(page.component).then((component) => {
+    return this.resolve(page.component, page).then((component) => {
       this.page = page
       this.cleared = false
       history.setCurrent(page)
@@ -195,6 +196,14 @@ class CurrentPage {
 
   public merge(data: Partial<Page>): void {
     this.page = { ...this.page, ...data }
+  }
+
+  public setPropsQuietly(props: Page['props']): Promise<unknown> {
+    this.page = { ...this.page, props }
+
+    return this.resolve(this.page.component, this.page).then((component) => {
+      return this.swap({ component, page: this.page, preserveState: true, viewTransition: false })
+    })
   }
 
   public setFlash(flash: FlashData): void {
@@ -238,8 +247,26 @@ class CurrentPage {
     })
   }
 
-  public resolve(component: string): Promise<Component> {
-    return Promise.resolve(this.resolveComponent(component))
+  public resolve(component: string, page?: Page): Promise<Component> {
+    return Promise.resolve(this.resolveComponent(component, page))
+  }
+
+  public recordOptimisticUpdate(keys: string[], updatedAt: number): void {
+    if (!this.page.optimisticUpdatedAt) {
+      this.page.optimisticUpdatedAt = {}
+    }
+
+    for (const key of keys) {
+      if (updatedAt > (this.page.optimisticUpdatedAt[key] || 0)) {
+        this.page.optimisticUpdatedAt[key] = updatedAt
+      }
+    }
+  }
+
+  public shouldPreserveOptimistic(key: string, updatedAt: number): boolean {
+    const lastUpdatedAt = this.page.optimisticUpdatedAt?.[key]
+
+    return lastUpdatedAt !== undefined && updatedAt < lastUpdatedAt
   }
 
   public isTheSame(page: Page): boolean {

@@ -1,6 +1,5 @@
 import { Deferred, Head } from '@inertiajs/react'
 import DeferredUsers from '../Components/DeferredUsers'
-import Layout from '../Components/Layout'
 
 const Defer = ({
   users,
@@ -52,7 +51,5 @@ const Defer = ({
     </>
   )
 }
-
-Defer.layout = (page) => <Layout children={page} />
 
 export default Defer

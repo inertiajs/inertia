@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const Article = () => {
   return (
@@ -73,7 +72,5 @@ const Article = () => {
     </>
   )
 }
-
-Article.layout = (page) => <Layout children={page} />
 
 export default Article

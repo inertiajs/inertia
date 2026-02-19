@@ -1,4 +1,4 @@
-import { cloneDeep, get, set } from 'lodash-es'
+import { cloneDeep, get, isEqual, set } from 'lodash-es'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
@@ -23,10 +23,10 @@ import {
   GlobalEventResult,
   InFlightPrefetch,
   Method,
+  OptimisticCallback,
   Page,
   PageFlashData,
   PendingVisit,
-  PendingVisitOptions,
   PollOptions,
   PrefetchedResponse,
   PrefetchOptions,
@@ -60,6 +60,8 @@ export class Router {
 
   protected clientVisitQueue = new Queue<Promise<void>>()
 
+  protected pendingOptimisticCallback: OptimisticCallback | null = null
+
   public init<ComponentType = Component>({
     initialPage,
     resolveComponent,
@@ -90,6 +92,12 @@ export class Router {
     eventHandler.on('historyQuotaExceeded', (url) => {
       window.location.href = url
     })
+  }
+
+  public optimistic<TProps>(callback: OptimisticCallback<TProps>): this {
+    this.pendingOptimisticCallback = callback as OptimisticCallback
+
+    return this
   }
 
   public get<T extends RequestPayload = RequestPayload>(
@@ -182,6 +190,10 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
+  public hasPendingOptimistic(): boolean {
+    return this.asyncRequestStream.hasPendingOptimistic()
+  }
+
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })
@@ -193,7 +205,7 @@ export class Router {
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
-    return polls.add(interval, () => this.reload(requestOptions), {
+    return polls.add(interval, () => this.reload({ preserveErrors: true, ...requestOptions }), {
       autoStart: options.autoStart ?? true,
       keepAlive: options.keepAlive ?? false,
     })
@@ -203,6 +215,13 @@ export class Router {
     href: string | URL | UrlMethodPair,
     options: VisitOptions<T> = {},
   ): void {
+    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback ?? undefined
+    this.pendingOptimisticCallback = null
+
+    if (options.optimistic) {
+      options.async = options.async ?? true
+    }
+
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       showProgress: options.showProgress ?? !options.async,
@@ -226,11 +245,17 @@ export class Router {
 
     if (!isSamePage) {
       // Only cancel non-prefetch requests (deferred props + partial reloads)
-      this.asyncRequestStream.cancelInFlight({ prefetch: false })
+      this.asyncRequestStream.cancelInFlight({ prefetch: false, optimistic: false })
     }
 
+    // Interrupt in-flight requests before taking the optimistic snapshot
+    // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+    }
+
+    if (options.optimistic) {
+      this.applyOptimisticUpdate(options.optimistic, events)
     }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
@@ -251,7 +276,7 @@ export class Router {
     } else {
       progress.reveal(true)
       const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-      requestStream.send(Request.create(requestParams, currentPage.get()))
+      requestStream.send(Request.create(requestParams, currentPage.get(), { optimistic: !!options.optimistic }))
     }
   }
 
@@ -361,8 +386,8 @@ export class Router {
     return history.decrypt()
   }
 
-  public resolveComponent(component: string): Promise<Component> {
-    return currentPage.resolve(component)
+  public resolveComponent(component: string, page?: Page): Promise<Component> {
+    return currentPage.resolve(component, page)
   }
 
   public replace<TProps = Page['props']>(params: ClientSideVisitOptions<TProps>): void {
@@ -535,11 +560,7 @@ export class Router {
     }
   }
 
-  protected getPendingVisit(
-    href: string | URL | UrlMethodPair,
-    options: VisitOptions,
-    pendingVisitOptions: Partial<PendingVisitOptions> = {},
-  ): PendingVisit {
+  protected getPendingVisit(href: string | URL | UrlMethodPair, options: VisitOptions): PendingVisit {
     if (isUrlMethodPair(href)) {
       const urlMethodPair = href
       href = urlMethodPair.url
@@ -569,6 +590,7 @@ export class Router {
       fresh: false,
       reset: [],
       preserveUrl: false,
+      preserveErrors: false,
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
@@ -589,7 +611,6 @@ export class Router {
       completed: false,
       interrupted: false,
       ...mergedOptions,
-      ...pendingVisitOptions,
       url,
       data: _data,
     }
@@ -612,16 +633,70 @@ export class Router {
       onCancel: options.onCancel || (() => {}),
       onSuccess: options.onSuccess || (() => {}),
       onError: options.onError || (() => {}),
+      onHttpException: options.onHttpException || (() => {}),
+      onNetworkError: options.onNetworkError || (() => {}),
       onFlash: options.onFlash || (() => {}),
       onPrefetched: options.onPrefetched || (() => {}),
       onPrefetching: options.onPrefetching || (() => {}),
     }
   }
 
+  protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks): void {
+    const currentProps = currentPage.get().props
+    const optimisticProps = optimistic(cloneDeep(currentProps))
+
+    if (!optimisticProps) {
+      return
+    }
+
+    const propsSnapshot: Partial<Page['props']> = {}
+
+    for (const key of Object.keys(optimisticProps)) {
+      if (!isEqual(currentProps[key], optimisticProps[key])) {
+        propsSnapshot[key] = cloneDeep(currentProps[key])
+      }
+    }
+
+    if (Object.keys(propsSnapshot).length === 0) {
+      return
+    }
+
+    const updatedAt = Date.now()
+    currentPage.recordOptimisticUpdate(Object.keys(propsSnapshot), updatedAt)
+    currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
+
+    let shouldRestore = true
+
+    const originalOnSuccess = events.onSuccess
+    events.onSuccess = (page) => {
+      shouldRestore = false
+      return originalOnSuccess(page)
+    }
+
+    const originalOnFinish = events.onFinish
+    events.onFinish = (visit) => {
+      if (shouldRestore) {
+        const propsToRestore: Partial<Page['props']> = {}
+
+        for (const [key, value] of Object.entries(propsSnapshot)) {
+          if (!currentPage.shouldPreserveOptimistic(key, updatedAt)) {
+            propsToRestore[key] = value
+          }
+        }
+
+        if (Object.keys(propsToRestore).length > 0) {
+          currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsToRestore })
+        }
+      }
+
+      return originalOnFinish(visit)
+    }
+  }
+
   protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
       Object.entries(deferred).forEach(([_, group]) => {
-        this.doReload({ only: group, deferredProps: true })
+        this.doReload({ only: group, deferredProps: true, preserveErrors: true })
       })
     }
   }

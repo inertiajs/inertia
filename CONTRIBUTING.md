@@ -20,7 +20,6 @@ inertia/
 │       └── test-app/  Vue 3 test application
 ├── playgrounds/       Full Laravel applications for manual testing
 │   ├── react/         Laravel + React
-│   ├── svelte4/       Laravel + Svelte 4
 │   ├── svelte5/       Laravel + Svelte 5
 │   └── vue3/          Laravel + Vue 3
 └── tests/             End-to-end tests and test server
@@ -222,6 +221,7 @@ pnpm playground:react
 ```
 
 The playground script will automatically handle initial setup if needed:
+
 - Installing PHP dependencies via Composer
 - Installing Node.js dependencies via pnpm
 - Creating the `.env` file from `.env.example`
@@ -235,8 +235,7 @@ Each playground has its own pnpm script:
 
 ```sh
 pnpm playground:react
-pnpm playground:svelte4
-pnpm playground:svelte5
+pnpm playground:svelte
 pnpm playground:vue
 ```
 
@@ -249,6 +248,7 @@ Releasing is handled by the included release script. You'll need both the `git` 
 ```
 
 The script will:
+
 - Ensure you're on the master branch with a clean working tree
 - Prompt you to select the type of version bump (patch, minor, or major)
 - Update all package versions automatically

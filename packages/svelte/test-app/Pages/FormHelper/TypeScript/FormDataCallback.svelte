@@ -15,17 +15,17 @@
   }
 
   const form = useForm<FormData>(() => defaultData)
-  $form.name = 'John Doe'
-  $form.company.name = 'Acme Corp'
-  $form.users = [{ name: 'Jane Doe' }]
+  form.name = 'John Doe'
+  form.company.name = 'Acme Corp'
+  form.users = [{ name: 'Jane Doe' }]
   // @ts-expect-error - A form has no email field
-  $form.email = 'john@example.com'
+  form.email = 'john@example.com'
   // @ts-expect-error - A company has no street field
-  $form.company.street = '123 Main St'
+  form.company.street = '123 Main St'
   // @ts-expect-error - A company has no street field
-  $form.company = { name: 'Acme Corp', street: '123 Main St' }
+  form.company = { name: 'Acme Corp', street: '123 Main St' }
   // @ts-expect-error - A form has no email field
-  $form.users = [{ name: 'Jane Doe', email: 'jane@example.com' }]
+  form.users = [{ name: 'Jane Doe', email: 'jane@example.com' }]
 
   const inferredData = {
     name: '',
@@ -34,16 +34,16 @@
   }
 
   const inferred = useForm(() => inferredData)
-  $inferred.name = 'John Doe'
-  $inferred.company.name = 'Acme Corp'
-  $inferred.users = [{ name: 'Jane Doe' }]
+  inferred.name = 'John Doe'
+  inferred.company.name = 'Acme Corp'
+  inferred.users = [{ name: 'Jane Doe' }]
   // @ts-expect-error - A form has no email field
-  $inferred.email = 'john@example.com'
+  inferred.email = 'john@example.com'
 
   const withRememberKey = useForm<FormData>('myKey', () => defaultData)
-  $withRememberKey.name = 'John Doe'
+  withRememberKey.name = 'John Doe'
   // @ts-expect-error - A form has no email field
-  $withRememberKey.email = 'john@example.com'
+  withRememberKey.email = 'john@example.com'
 
   // @ts-expect-error - progress is a reserved form key
   useForm(() => ({ progress: 1 }))

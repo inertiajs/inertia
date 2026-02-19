@@ -10,10 +10,10 @@
 </script>
 
 <Deferred data="results">
-  <svelte:fragment slot="fallback">
+  {#snippet fallback()}
     <div>Loading results...</div>
-  </svelte:fragment>
+  {/snippet}
   <ReloadResults />
 </Deferred>
 
-<button on:click={handleReload}>Reload with page 2</button>
+<button onclick={handleReload}>Reload with page 2</button>

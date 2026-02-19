@@ -12,24 +12,24 @@ jobs:
         shard: ['1', '2', '3', '4']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22.14
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build Inertia
-        run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
+        run: pnpm -r --filter './packages/{core,vite}' --filter './packages/${{ matrix.adapter }}*' build
 
       - name: Install Playwright Browsers
         run: pnpm playwright install webkit
@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload failure screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-failure-screenshots-${{ matrix.adapter }}-webkit-shard-${{ matrix.shard }}
           path: test-results

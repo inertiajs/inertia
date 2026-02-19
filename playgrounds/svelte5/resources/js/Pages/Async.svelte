@@ -1,29 +1,25 @@
-<script context="module">
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script lang="ts">
   import { router, useForm } from '@inertiajs/svelte'
   import TestGrid from '../Components/TestGrid.svelte'
   import TestGridItem from '../Components/TestGridItem.svelte'
 
-  export let appName
-  export let jonathan: boolean
-  export let taylor: boolean
-  export let joe: boolean
+  let { appName, jonathan, taylor, joe }: { appName: string; jonathan: boolean; taylor: boolean; joe: boolean } =
+    $props()
 
-  let reloadCount = 0
+  let reloadCount = $state(0)
   const form = useForm({ jonathan, taylor, joe })
 
-  $: console.log('watched reload count value', reloadCount)
+  $effect(() => {
+    console.log('watched reload count value', reloadCount)
+  })
 
   function submit() {
     router.post(
       '/async/checkbox',
       {
-        jonathan: $form.jonathan,
-        taylor: $form.taylor,
-        joe: $form.joe,
+        jonathan: form.jonathan,
+        taylor: form.taylor,
+        joe: form.joe,
       },
       {
         async: true,
@@ -105,21 +101,21 @@
 <TestGrid>
   <TestGridItem class="space-y-4">
     <p>Trigger an async reload that takes a moment and immediately programmatically visit another page</p>
-    <button class="rounded-sm bg-green-600 px-4 py-2 text-white" on:click={simulateConflict}>Reload → Visit</button>
+    <button class="rounded-sm bg-green-600 px-4 py-2 text-white" onclick={simulateConflict}>Reload → Visit</button>
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
-    <form on:change={submit}>
+    <form onchange={submit}>
       <label class="block">
-        <input bind:checked={$form.jonathan} type="checkbox" class="mr-2" />
+        <input bind:checked={form.jonathan} type="checkbox" class="mr-2" />
         Jonathan
       </label>
       <label class="block">
-        <input bind:checked={$form.taylor} type="checkbox" class="mr-2" />
+        <input bind:checked={form.taylor} type="checkbox" class="mr-2" />
         Taylor
       </label>
       <label class="block">
-        <input bind:checked={$form.joe} type="checkbox" class="mr-2" />
+        <input bind:checked={form.joe} type="checkbox" class="mr-2" />
         Joe
       </label>
     </form>
@@ -132,26 +128,24 @@
 
     <p>Reload should still happen but won't re-direct back to the reloaded component, we should respect the visit</p>
 
-    <button on:click={triggerVisitThenReload} class="rounded-sm bg-green-600 px-4 py-2 text-white"
-      >Visit → Reload</button
+    <button onclick={triggerVisitThenReload} class="rounded-sm bg-green-600 px-4 py-2 text-white">Visit → Reload</button
     >
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Simply trigger a 4 second reload so you can navigate or do whatever you'd like during it.</p>
-    <button on:click={triggerLongReload} class="rounded-sm bg-green-600 px-4 py-2 text-white"
-      >Trigger Long Reload</button
+    <button onclick={triggerLongReload} class="rounded-sm bg-green-600 px-4 py-2 text-white">Trigger Long Reload</button
     >
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Trigger an automatic cancellation from the token.</p>
-    <button on:click={triggerCancel} class="rounded-sm bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
+    <button onclick={triggerCancel} class="rounded-sm bg-green-600 px-4 py-2 text-white">Trigger Cancel</button>
   </TestGridItem>
 
   <TestGridItem class="space-y-4">
     <p>Trigger an automatic cancellation from the token after finishing request.</p>
-    <button on:click={triggerCancelAfterFinish} class="rounded-sm bg-green-600 px-4 py-2 text-white">
+    <button onclick={triggerCancelAfterFinish} class="rounded-sm bg-green-600 px-4 py-2 text-white">
       Trigger Cancel After Finish
     </button>
   </TestGridItem>

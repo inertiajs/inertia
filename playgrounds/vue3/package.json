@@ -3,10 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && vite build --ssr"
+    "build": "vite build && vite build --ssr"
   },
   "devDependencies": {
     "@inertiajs/core": "workspace:*",
+    "@inertiajs/vite": "workspace:*",
     "@inertiajs/vue3": "workspace:*",
     "@laravel/stream-vue": "^0.3.10",
     "@tailwindcss/typography": "^0.5.19",

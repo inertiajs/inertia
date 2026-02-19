@@ -3,6 +3,7 @@
   "scripts": {
     "build": "vite build .",
     "build:ssr": "vite build --ssr ssr.tsx --outDir dist",
+    "build:ssr-auto": "vite build --config vite.config.ssr-auto.ts --ssr ssr-auto.tsx --outDir dist",
     "dev": "nodemon --watch . --watch ../../core/dist --watch ../../react/dist --ext js,tsx,html,json --ignore dist/ --exec 'vite build .'",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
@@ -25,6 +26,7 @@
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@inertiajs/react": "workspace:*",
+    "@inertiajs/vite": "workspace:*",
     "@vitejs/plugin-react": "^5.1.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"

@@ -8,17 +8,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22.14
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -26,3 +26,6 @@ jobs:
 
       - name: Build Inertia
         run: pnpm build:all
+
+      - name: Test Core and Vite Plugin
+        run: pnpm --filter './packages/{core,vite}' test

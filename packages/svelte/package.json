@@ -10,7 +10,7 @@
   "homepage": "https://inertiajs.com/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/inertiajs/inertia.git",
+    "url": "git+https://github.com/inertiajs/inertia.git",
     "directory": "packages/svelte"
   },
   "bugs": {
@@ -44,26 +44,26 @@
     "package": "svelte-kit sync && svelte-package --input src"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.50.2",
+    "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/kit": "^2.51.0",
     "@sveltejs/package": "^2.5.7",
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "axios": "^1.13.5",
-    "es-check": "^9.5.4",
+    "es-check": "9.5.3",
     "publint": "^0.3.17",
-    "svelte": "^4.2.20",
+    "svelte": "^5.50.3",
     "svelte-check": "^4.3.6",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21"
+    "vite": "^7.3.1"
   },
   "peerDependencies": {
-    "svelte": "^4.0.0 || ^5.0.0"
+    "svelte": "^5.0.0"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "@types/lodash-es": "^4.17.12",
-    "laravel-precognition": "^1.0.2",
+    "laravel-precognition": "2.0.0-beta.0",
     "lodash-es": "^4.17.23"
   }
 }

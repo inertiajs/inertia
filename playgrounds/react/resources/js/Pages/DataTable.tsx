@@ -1,5 +1,4 @@
 import { Head, InfiniteScroll } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
 const DataTable = ({
@@ -49,7 +48,5 @@ const DataTable = ({
     </>
   )
 }
-
-DataTable.layout = (page: React.ReactElement) => <Layout>{page}</Layout>
 
 export default DataTable

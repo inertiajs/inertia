@@ -146,17 +146,9 @@ export const requestAnimationFrame = (cb: () => void, times: number = 1): void =
   })
 }
 
-export const getInitialPageFromDOM = <T>(id: string, useScriptElement: boolean = false): T | null => {
+export const getInitialPageFromDOM = <T>(id: string): T | null => {
   if (typeof window === 'undefined') {
     return null
-  }
-
-  if (!useScriptElement) {
-    const el = document.getElementById(id)
-
-    if (el?.dataset.page) {
-      return JSON.parse(el.dataset.page)
-    }
   }
 
   const scriptEl = document.querySelector(`script[data-page="${id}"][type="application/json"]`)

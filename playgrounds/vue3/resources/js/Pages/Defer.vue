@@ -1,13 +1,8 @@
-<script lang="ts">
-import Layout from '../Components/Layout.vue'
+<script setup lang="ts">
+import { Deferred, Head, WhenVisible } from '@inertiajs/vue3'
 import Spinner from '../Components/Spinner.vue'
 import TestGrid from '../Components/TestGrid.vue'
 import TestGridItem from '../Components/TestGridItem.vue'
-export default { layout: Layout }
-</script>
-
-<script setup lang="ts">
-import { Deferred, Head, WhenVisible } from '@inertiajs/vue3'
 
 defineProps<{
   users?: {

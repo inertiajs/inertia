@@ -1,9 +1,14 @@
 import type { FormComponentRef } from '@inertiajs/core'
-import { getContext } from 'svelte'
-import type { Readable } from 'svelte/store'
+import { createContext } from 'svelte'
 
-export const FormContextKey = Symbol('InertiaFormContext')
+const [getFormContext, setFormContext] = createContext<FormComponentRef>()
 
-export function useFormContext(): Readable<FormComponentRef> | undefined {
-  return getContext(FormContextKey)
+export function useFormContext<TForm extends object = Record<string, any>>(): FormComponentRef<TForm> | undefined {
+  try {
+    return getFormContext() as unknown as FormComponentRef<TForm>
+  } catch {
+    return undefined
+  }
 }
+
+export { setFormContext }

@@ -20,7 +20,7 @@
 
   onMount(() => {
     window._inertia_page_key = crypto.randomUUID()
-    window._inertia_props = $page.props
+    window._inertia_props = page.props
     window._plugin_global_props = {}
   })
 </script>
@@ -31,16 +31,14 @@
   <a href="/links/method" use:inertia class="links-method">Basic Links</a>
   <a href="/links/replace" use:inertia class="links-replace">'Replace' Links</a>
 
-  <a href={'#'} on:click|preventDefault={visitsMethod} class="visits-method">Manual basic visits</a>
-  <a href={'#'} on:click|preventDefault={visitsReplace} class="visits-replace">Manual 'Replace' visits</a>
+  <a href={'#'} onclick={visitsMethod} class="visits-method">Manual basic visits</a>
+  <a href={'#'} onclick={visitsReplace} class="visits-replace">Manual 'Replace' visits</a>
 
   <button use:inertia={{ href: '/redirect', method: 'post' }} class="links-redirect">Internal Redirect Link</button>
-  <a href={'#'} on:click|preventDefault={redirect} class="visits-redirect">Manual Redirect visit</a>
+  <a href={'#'} onclick={redirect} class="visits-redirect">Manual Redirect visit</a>
 
   <button use:inertia={{ href: '/redirect-external', method: 'post' }} class="links-redirect-external"
     >External Redirect Link</button
   >
-  <a href={'#'} on:click|preventDefault={redirectExternal} class="visits-redirect-external"
-    >Manual External Redirect visit</a
-  >
+  <a href={'#'} onclick={redirectExternal} class="visits-redirect-external">Manual External Redirect visit</a>
 </div>

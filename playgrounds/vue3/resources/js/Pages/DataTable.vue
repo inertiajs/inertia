@@ -1,8 +1,3 @@
-<script lang="ts">
-import Layout from '../Components/Layout.vue'
-export default { layout: Layout }
-</script>
-
 <script setup lang="ts">
 import { Head, InfiniteScroll } from '@inertiajs/vue3'
 import Spinner from '../Components/Spinner.vue'

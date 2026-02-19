@@ -1,7 +1,11 @@
 <script lang="ts">
   import { inertia } from '@inertiajs/svelte'
 
-  export let navigatedTo: boolean
+  interface Props {
+    navigatedTo: boolean
+  }
+
+  let { navigatedTo }: Props = $props()
 </script>
 
 <div>

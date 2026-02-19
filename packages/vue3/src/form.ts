@@ -141,6 +141,10 @@ const Form = defineComponent({
       type: Number as PropType<FormComponentProps['validationTimeout']>,
       default: 1500,
     },
+    optimistic: {
+      type: Function as PropType<FormComponentProps['optimistic']>,
+      default: undefined,
+    },
     withAllErrors: {
       type: Boolean as PropType<FormComponentProps['withAllErrors']>,
       default: null,
@@ -254,6 +258,7 @@ const Form = defineComponent({
         errorBag: props.errorBag,
         showProgress: props.showProgress,
         invalidateCacheTags: props.invalidateCacheTags,
+        optimistic: props.optimistic ? (pageProps) => props.optimistic!(pageProps, data) : undefined,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,
         onStart: props.onStart,
@@ -372,8 +377,20 @@ const Form = defineComponent({
   },
 })
 
-export function useFormContext(): FormComponentRef | undefined {
-  return inject(FormContextKey)
+export function useFormContext<TForm extends object = Record<string, any>>(): FormComponentRef<TForm> | undefined {
+  return inject(FormContextKey) as FormComponentRef<TForm> | undefined
+}
+
+type TypedFormComponent<TForm extends Record<string, any>> = typeof Form & {
+  new (): {
+    $slots: {
+      default: (props: FormComponentSlotProps<TForm>) => any
+    }
+  }
+}
+
+export function createForm<TForm extends Record<string, any>>(): TypedFormComponent<TForm> {
+  return Form as TypedFormComponent<TForm>
 }
 
 export default Form

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  let documentScrollTop = 0
-  let documentScrollLeft = 0
+  let documentScrollTop = $state(0)
+  let documentScrollLeft = $state(0)
 
   const handleScrollEvent = () => {
     documentScrollTop = document.documentElement.scrollTop
@@ -35,23 +35,21 @@
   }
 </script>
 
-<svelte:document on:scroll={handleScrollEvent} />
+<svelte:document onscroll={handleScrollEvent} />
 
 <div>
   <span class="text">This is the page that demonstrates url fragment behaviour using manual visits</span>
   <div style="width: 200vw; height: 200vh; margin-top: 50vh">
     <!-- prettier-ignore -->
-    <button on:click={handleScrollEvent}>Update scroll positions</button>
+    <button onclick={handleScrollEvent}>Update scroll positions</button>
     <div class="document-position">Document scroll position is {documentScrollLeft} & {documentScrollTop}</div>
-    <a href={'#'} on:click|preventDefault={basicVisit} class="basic">Basic visit</a>
-    <a href={'#'} on:click|preventDefault={fragmentVisit} class="fragment">Fragment visit</a>
-    <a href={'#'} on:click|preventDefault={nonExistentFragmentVisit} class="non-existent-fragment"
-      >Non-existent fragment visit</a
-    >
+    <a href={'#'} onclick={basicVisit} class="basic">Basic visit</a>
+    <a href={'#'} onclick={fragmentVisit} class="fragment">Fragment visit</a>
+    <a href={'#'} onclick={nonExistentFragmentVisit} class="non-existent-fragment">Non-existent fragment visit</a>
 
-    <a href={'#'} on:click|preventDefault={basicGetVisit} class="basic-get">Basic GET visit</a>
-    <a href={'#'} on:click|preventDefault={fragmentGetVisit} class="fragment-get">Fragment GET visit</a>
-    <a href={'#'} on:click|preventDefault={nonExistentFragmentGetVisit} class="non-existent-fragment-get"
+    <a href={'#'} onclick={basicGetVisit} class="basic-get">Basic GET visit</a>
+    <a href={'#'} onclick={fragmentGetVisit} class="fragment-get">Fragment GET visit</a>
+    <a href={'#'} onclick={nonExistentFragmentGetVisit} class="non-existent-fragment-get"
       >Non-existent fragment GET visit</a
     >
 

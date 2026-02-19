@@ -15,5 +15,5 @@
 
 <div>
   <span class="text">This is the page that demonstrates that only one visit can be active at a time</span>
-  <a href={'#'} on:click|preventDefault={visit} class="visit">Link</a>
+  <a href={'#'} onclick={visit} class="visit">Link</a>
 </div>

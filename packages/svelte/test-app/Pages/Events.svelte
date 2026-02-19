@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   declare global {
     interface Window {
       messages: unknown[]
@@ -19,18 +19,22 @@
     window.messages.push(...args)
   }
 
-  const withoutEventListeners = () => {
-    router.post($page.url, {})
+  const withoutEventListeners = (e: Event) => {
+    e.preventDefault()
+
+    router.post(page.url, {})
   }
 
-  const removeInertiaListener = () => {
+  const removeInertiaListener = (e: Event) => {
+    e.preventDefault()
+
     const removeEventListener = router.on('before', () => internalAlert('Inertia.on(before)'))
 
     internalAlert('Removing Inertia.on Listener')
     removeEventListener()
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onBefore: () => internalAlert('onBefore'),
@@ -39,7 +43,9 @@
     )
   }
 
-  const beforeVisit = () => {
+  const beforeVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('before', (event) => {
       internalAlert('Inertia.on(before)')
       internalAlert(event)
@@ -51,7 +57,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onBefore: (event) => {
@@ -63,12 +69,14 @@
     )
   }
 
-  const beforeVisitPreventLocal = () => {
+  const beforeVisitPreventLocal = (e: Event) => {
+    e.preventDefault()
+
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
     router.on('before', () => internalAlert('Inertia.on(before)'))
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onBefore: () => {
@@ -80,7 +88,8 @@
     )
   }
 
-  const beforeVisitPreventGlobalInertia = () => {
+  const beforeVisitPreventGlobalInertia = (e: Event) => {
+    e.preventDefault()
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
     router.on('before', () => {
       internalAlert('Inertia.on(before)')
@@ -88,7 +97,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onBefore: () => internalAlert('onBefore'),
@@ -97,7 +106,9 @@
     )
   }
 
-  const beforeVisitPreventGlobalNative = () => {
+  const beforeVisitPreventGlobalNative = (e: Event) => {
+    e.preventDefault()
+
     router.on('before', () => internalAlert('Inertia.on(before)'))
     document.addEventListener('inertia:before', (event) => {
       internalAlert('addEventListener(inertia:before)')
@@ -105,7 +116,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onBefore: () => internalAlert('onBefore'),
@@ -114,13 +125,15 @@
     )
   }
 
-  const cancelTokenVisit = () => {
+  const cancelTokenVisit = (e: Event) => {
+    e.preventDefault()
+
     // @ts-expect-error - We're testing that the router doesn't have an onCancelToken listener
     router.on('cancelToken', () => internalAlert('This listener should not have been called.'))
     document.addEventListener('inertia:cancelToken', () => internalAlert('This listener should not have been called.'))
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onCancelToken: (event) => {
@@ -131,7 +144,9 @@
     )
   }
 
-  const startVisit = () => {
+  const startVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('start', (event) => {
       internalAlert('Inertia.on(start)')
       internalAlert(event)
@@ -143,7 +158,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onStart: (event) => {
@@ -154,7 +169,9 @@
     )
   }
 
-  const progressVisit = () => {
+  const progressVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('progress', (event) => {
       internalAlert('Inertia.on(progress)')
       internalAlert(event)
@@ -165,7 +182,7 @@
       internalAlert(event)
     })
 
-    router.post($page.url, payloadWithFile, {
+    router.post(page.url, payloadWithFile, {
       onProgress: (event) => {
         internalAlert('onProgress')
         internalAlert(event)
@@ -173,7 +190,9 @@
     })
   }
 
-  const progressNoFilesVisit = () => {
+  const progressNoFilesVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('progress', (event) => {
       internalAlert('Inertia.on(progress)')
       internalAlert(event)
@@ -185,7 +204,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onBefore: () => internalAlert('progressNoFilesOnBefore'),
@@ -197,7 +216,9 @@
     )
   }
 
-  const cancelVisit = () => {
+  const cancelVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('cancel', (event) => {
       internalAlert('Inertia.on(cancel)')
       internalAlert(event)
@@ -209,7 +230,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onCancelToken: (token) => {
@@ -224,7 +245,9 @@
     )
   }
 
-  const errorVisit = () => {
+  const errorVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('error', (event) => {
       internalAlert('Inertia.on(error)')
       internalAlert(event)
@@ -247,7 +270,9 @@
     )
   }
 
-  const errorPromiseVisit = () => {
+  const errorPromiseVisit = (e: Event) => {
+    e.preventDefault()
+
     router.post(
       '/events/errors',
       {},
@@ -259,7 +284,9 @@
     )
   }
 
-  const successVisit = () => {
+  const successVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('success', (event) => {
       internalAlert('Inertia.on(success)')
       internalAlert(event)
@@ -271,7 +298,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onError: () => internalAlert('This listener should not have been called'),
@@ -283,9 +310,11 @@
     )
   }
 
-  const successPromiseVisit = () => {
+  const successPromiseVisit = (e: Event) => {
+    e.preventDefault()
+
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onSuccess: () => callbackSuccessErrorPromise('onSuccess'),
@@ -295,7 +324,9 @@
     )
   }
 
-  const finishVisit = () => {
+  const finishVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('finish', (event) => {
       internalAlert('Inertia.on(finish)')
       internalAlert(event)
@@ -307,7 +338,7 @@
     })
 
     router.post(
-      $page.url,
+      page.url,
       {},
       {
         onFinish: (event) => {
@@ -318,14 +349,16 @@
     )
   }
 
-  const invalidVisit = () => {
-    router.on('invalid', (event) => {
-      internalAlert('Inertia.on(invalid)')
+  const httpExceptionVisit = (e: Event) => {
+    e.preventDefault()
+
+    router.on('httpException', (event) => {
+      internalAlert('Inertia.on(httpException)')
       internalAlert(event)
     })
 
-    document.addEventListener('inertia:invalid', (event) => {
-      internalAlert('addEventListener(inertia:invalid)')
+    document.addEventListener('inertia:httpException', (event) => {
+      internalAlert('addEventListener(inertia:httpException)')
       internalAlert(event)
     })
 
@@ -333,20 +366,47 @@
       '/non-inertia',
       {},
       {
-        // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onInvalid method
-        onInvalid: () => internalAlert('This listener should not have been called.'),
+        onHttpException: () => internalAlert('onHttpException'),
       },
     )
   }
 
-  const exceptionVisit = () => {
-    router.on('exception', (event) => {
-      internalAlert('Inertia.on(exception)')
+  const httpExceptionPreventVisit = (e: Event) => {
+    e.preventDefault()
+
+    router.on('httpException', (event) => {
+      internalAlert('Inertia.on(httpException)')
       internalAlert(event)
     })
 
-    document.addEventListener('inertia:exception', (event) => {
-      internalAlert('addEventListener(inertia:exception)')
+    document.addEventListener('inertia:httpException', (event) => {
+      internalAlert('addEventListener(inertia:httpException)')
+      internalAlert(event)
+    })
+
+    router.post(
+      '/non-inertia',
+      {},
+      {
+        onHttpException: (response) => {
+          internalAlert('onHttpException')
+          internalAlert(response)
+          return false
+        },
+      },
+    )
+  }
+
+  const networkErrorVisit = (e: Event) => {
+    e.preventDefault()
+
+    router.on('networkError', (event) => {
+      internalAlert('Inertia.on(networkError)')
+      internalAlert(event)
+    })
+
+    document.addEventListener('inertia:networkError', (event) => {
+      internalAlert('addEventListener(inertia:networkError)')
       internalAlert(event)
     })
 
@@ -354,13 +414,40 @@
       '/disconnect',
       {},
       {
-        // @ts-expect-error - We're testing that the VisitCallbacks interface does not have an onException method
-        onException: () => internalAlert('This listener should not have been called.'),
+        onNetworkError: () => internalAlert('onNetworkError'),
       },
     )
   }
 
-  const navigateVisit = () => {
+  const networkErrorPreventVisit = (e: Event) => {
+    e.preventDefault()
+
+    router.on('networkError', (event) => {
+      internalAlert('Inertia.on(networkError)')
+      internalAlert(event)
+    })
+
+    document.addEventListener('inertia:networkError', (event) => {
+      internalAlert('addEventListener(inertia:networkError)')
+      internalAlert(event)
+    })
+
+    router.post(
+      '/disconnect',
+      {},
+      {
+        onNetworkError: (error) => {
+          internalAlert('onNetworkError')
+          internalAlert(error)
+          return false
+        },
+      },
+    )
+  }
+
+  const navigateVisit = (e: Event) => {
+    e.preventDefault()
+
     router.on('navigate', (event) => {
       internalAlert('Inertia.on(navigate)')
       internalAlert(event)
@@ -390,8 +477,8 @@
     router.on('progress', () => internalAlert('Inertia.on(progress)'))
     router.on('error', () => internalAlert('Inertia.on(error)'))
     router.on('success', () => internalAlert('Inertia.on(success)'))
-    router.on('invalid', () => internalAlert('Inertia.on(invalid)'))
-    router.on('exception', () => internalAlert('Inertia.on(exception)'))
+    router.on('httpException', () => internalAlert('Inertia.on(httpException)'))
+    router.on('networkError', () => internalAlert('Inertia.on(networkError)'))
     router.on('finish', () => internalAlert('Inertia.on(finish)'))
     router.on('navigate', () => internalAlert('Inertia.on(navigate)'))
     document.addEventListener('inertia:before', () => internalAlert('addEventListener(inertia:before)'))
@@ -401,8 +488,8 @@
     document.addEventListener('inertia:progress', () => internalAlert('addEventListener(inertia:progress)'))
     document.addEventListener('inertia:error', () => internalAlert('addEventListener(inertia:error)'))
     document.addEventListener('inertia:success', () => internalAlert('addEventListener(inertia:success)'))
-    document.addEventListener('inertia:invalid', () => internalAlert('addEventListener(inertia:invalid)'))
-    document.addEventListener('inertia:exception', () => internalAlert('addEventListener(inertia:exception)'))
+    document.addEventListener('inertia:httpException', () => internalAlert('addEventListener(inertia:httpException)'))
+    document.addEventListener('inertia:networkError', () => internalAlert('addEventListener(inertia:networkError)'))
     document.addEventListener('inertia:finish', () => internalAlert('addEventListener(inertia:finish)'))
     document.addEventListener('inertia:navigate', () => internalAlert('addEventListener(inertia:navigate)'))
 
@@ -414,22 +501,28 @@
       onProgress: () => internalAlert('onProgress'),
       onError: () => internalAlert('onError'),
       onSuccess: () => internalAlert('onSuccess'),
-      onInvalid: () => internalAlert('onInvalid'), // Does not exist.
-      onException: () => internalAlert('onException'), // Does not exist.
+      onHttpException: () => internalAlert('onHttpException'),
+      onNetworkError: () => internalAlert('onNetworkError'),
       onFinish: () => internalAlert('onFinish'),
       onNavigate: () => internalAlert('onNavigate'), // Does not exist.
     }
   }
 
-  const lifecycleSuccess = () => {
-    router.post($page.url, payloadWithFile, registerAllListeners())
+  const lifecycleSuccess = (e: Event) => {
+    e.preventDefault()
+
+    router.post(page.url, payloadWithFile, registerAllListeners())
   }
 
-  const lifecycleError = () => {
+  const lifecycleError = (e: Event) => {
+    e.preventDefault()
+
     router.post('/events/errors', payloadWithFile, registerAllListeners())
   }
 
-  const lifecycleCancel = () => {
+  const lifecycleCancel = (e: Event) => {
+    e.preventDefault()
+
     router.post('/sleep', payloadWithFile, {
       ...registerAllListeners(),
       onCancelToken: (token) => {
@@ -443,10 +536,12 @@
     })
   }
 
-  const lifecycleCancelAfterFinish = () => {
+  const lifecycleCancelAfterFinish = (e: Event) => {
+    e.preventDefault()
+
     let cancelToken: { cancel: () => void } | null = null
 
-    router.post($page.url, payloadWithFile, {
+    router.post(page.url, payloadWithFile, {
       ...registerAllListeners(),
       onCancelToken: (token) => {
         internalAlert('onCancelToken')
@@ -488,151 +583,144 @@
 
 <div>
   <!-- Listeners -->
-  <a href={'#'} on:click|preventDefault={withoutEventListeners} class="without-listeners">Basic Visit</a>
-  <a href={'#'} on:click|preventDefault={removeInertiaListener} class="remove-inertia-listener"
-    >Remove Inertia Listener</a
-  >
+  <a href={'#'} onclick={withoutEventListeners} class="without-listeners">Basic Visit</a>
+  <a href={'#'} onclick={removeInertiaListener} class="remove-inertia-listener">Remove Inertia Listener</a>
 
   <!-- Events: Before -->
-  <a href={'#'} on:click|preventDefault={beforeVisit} class="before">Before Event</a>
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a
-  >
+  <a href={'#'} onclick={beforeVisit} class="before">Before Event</a>
+  <a href={'#'} onclick={beforeVisitPreventLocal} class="before-prevent-local">Before Event (Prevent)</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:before={(event) => internalAlert('linkOnBefore', event.detail.visit)}
-    on:start={() => internalAlert('linkOnStart')}
+    use:inertia={{ href: page.url, method: 'post' }}
+    onbefore={(event) => internalAlert('linkOnBefore', event.detail.visit)}
+    onstart={() => internalAlert('linkOnStart')}
     class="link-before">Before Event Link</button
   >
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:before={(event) => {
+    use:inertia={{ href: page.url, method: 'post' }}
+    onbefore={(event) => {
       event.preventDefault()
       internalAlert('linkOnBefore')
     }}
-    on:start={() => {
+    onstart={() => {
       internalAlert('This listener should not have been called.')
     }}
     class="link-before-prevent-local">Before Event Link (Prevent)</button
   >
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventGlobalInertia} class="before-prevent-global-inertia"
+  <a href={'#'} onclick={beforeVisitPreventGlobalInertia} class="before-prevent-global-inertia"
     >Before Event - Prevent globally using Inertia Event Listener</a
   >
-  <a href={'#'} on:click|preventDefault={beforeVisitPreventGlobalNative} class="before-prevent-global-native"
+  <a href={'#'} onclick={beforeVisitPreventGlobalNative} class="before-prevent-global-native"
     >Before Event - Prevent globally using Native Event Listeners</a
   >
 
   <!-- Events: CancelToken -->
-  <a href={'#'} on:click|preventDefault={cancelTokenVisit} class="canceltoken">Cancel Token Event</a>
+  <a href={'#'} onclick={cancelTokenVisit} class="canceltoken">Cancel Token Event</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:cancel-token={(event) => internalAlert('linkOnCancelToken', event.detail)}
+    use:inertia={{ href: page.url, method: 'post' }}
+    oncancel-token={(event) => internalAlert('linkOnCancelToken', event.detail)}
     class="link-canceltoken">Cancel Token Event Link</button
   >
 
   <!-- Events: Cancel -->
-  <a href={'#'} on:click|preventDefault={cancelVisit} class="cancel">Cancel Event</a>
+  <a href={'#'} onclick={cancelVisit} class="cancel">Cancel Event</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:cancel-token={handleCancelToken}
-    on:cancel={handleCancel}
+    use:inertia={{ href: page.url, method: 'post' }}
+    oncancel-token={handleCancelToken}
+    oncancel={handleCancel}
     class="link-cancel">Cancel Event Link</button
   >
 
   <!-- Events: Start -->
-  <a href={'#'} on:click|preventDefault={startVisit} class="start">Start Event</a>
+  <a href={'#'} onclick={startVisit} class="start">Start Event</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:start={(event) => internalAlert('linkOnStart', event.detail.visit)}
+    use:inertia={{ href: page.url, method: 'post' }}
+    onstart={(event) => internalAlert('linkOnStart', event.detail.visit)}
     class="link-start">Start Event Link</button
   >
 
   <!-- Events: Progress -->
-  <a href={'#'} on:click|preventDefault={progressVisit} class="progress">Progress Event</a>
-  <a href={'#'} on:click|preventDefault={progressNoFilesVisit} class="progress-no-files"
-    >Missing Progress Event (no files)</a
-  >
+  <a href={'#'} onclick={progressVisit} class="progress">Progress Event</a>
+  <a href={'#'} onclick={progressNoFilesVisit} class="progress-no-files">Missing Progress Event (no files)</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post', data: payloadWithFile }}
-    on:progress={handleProgress}
+    use:inertia={{ href: page.url, method: 'post', data: payloadWithFile }}
+    onprogress={handleProgress}
     class="link-progress">Progress Event Link</button
   >
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:before={() => internalAlert('linkProgressNoFilesOnBefore')}
-    on:progress={handleProgress}
+    use:inertia={{ href: page.url, method: 'post' }}
+    onbefore={() => internalAlert('linkProgressNoFilesOnBefore')}
+    onprogress={handleProgress}
     class="link-progress-no-files">Progress Event Link (no files)</button
   >
 
   <!-- Events: Error -->
-  <a href={'#'} on:click|preventDefault={errorVisit} class="error">Error Event</a>
-  <a href={'#'} on:click|preventDefault={errorPromiseVisit} class="error-promise"
-    >Error Event (delaying onFinish w/ Promise)</a
-  >
+  <a href={'#'} onclick={errorVisit} class="error">Error Event</a>
+  <a href={'#'} onclick={errorPromiseVisit} class="error-promise">Error Event (delaying onFinish w/ Promise)</a>
   <button
     use:inertia={{ href: '/events/errors', method: 'post' }}
-    on:error={handleError}
-    on:success={() => internalAlert('This listener should not have been called')}
+    onerror={handleError}
+    onsuccess={() => internalAlert('This listener should not have been called')}
     class="link-error">Error Event Link</button
   >
   <button
     use:inertia={{ href: '/events/errors', method: 'post' }}
-    on:error={() => callbackSuccessErrorPromise('linkOnError')}
-    on:success={() => internalAlert('This listener should not have been called')}
-    on:finish={() => internalAlert('linkOnFinish')}
+    onerror={() => callbackSuccessErrorPromise('linkOnError')}
+    onsuccess={() => internalAlert('This listener should not have been called')}
+    onfinish={() => internalAlert('linkOnFinish')}
     class="link-error-promise">Error Event Link (delaying onFinish w/ Promise)</button
   >
 
   <!-- Events: Success -->
-  <a href={'#'} on:click|preventDefault={successVisit} class="success">Success Event</a>
-  <a href={'#'} on:click|preventDefault={successPromiseVisit} class="success-promise"
-    >Success Event (delaying onFinish w/ Promise)</a
-  >
+  <a href={'#'} onclick={successVisit} class="success">Success Event</a>
+  <a href={'#'} onclick={successPromiseVisit} class="success-promise">Success Event (delaying onFinish w/ Promise)</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:error={() => internalAlert('This listener should not have been called')}
-    on:success={(event) => internalAlert('linkOnSuccess', event.detail.page)}
+    use:inertia={{ href: page.url, method: 'post' }}
+    onerror={() => internalAlert('This listener should not have been called')}
+    onsuccess={(event) => internalAlert('linkOnSuccess', event.detail.page)}
     class="link-success">Success Event Link</button
   >
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:error={() => internalAlert('This listener should not have been called')}
-    on:success={() => callbackSuccessErrorPromise('linkOnSuccess')}
-    on:finish={() => internalAlert('linkOnFinish')}
+    use:inertia={{ href: page.url, method: 'post' }}
+    onerror={() => internalAlert('This listener should not have been called')}
+    onsuccess={() => callbackSuccessErrorPromise('linkOnSuccess')}
+    onfinish={() => internalAlert('linkOnFinish')}
     class="link-success-promise">Success Event Link (delaying onFinish w/ Promise)</button
   >
 
-  <!-- Events: Invalid -->
-  <a href={'#'} on:click|preventDefault={invalidVisit} class="invalid">Invalid Event</a>
+  <!-- Events: HTTP Exception -->
+  <a href={'#'} onclick={httpExceptionVisit} class="http-exception">HTTP Exception Event</a>
+  <a href={'#'} onclick={httpExceptionPreventVisit} class="http-exception-prevent">HTTP Exception Event (Prevent)</a>
 
-  <!-- Events: Exception -->
-  <a href={'#'} on:click|preventDefault={exceptionVisit} class="exception">Exception Event</a>
+  <!-- Events: Network Error -->
+  <a href={'#'} onclick={networkErrorVisit} class="network-error">Network Error Event</a>
+  <a href={'#'} onclick={networkErrorPreventVisit} class="network-error-prevent">Network Error Event (Prevent)</a>
 
   <!-- Events: Finish -->
-  <a href={'#'} on:click|preventDefault={finishVisit} class="finish">Finish Event</a>
+  <a href={'#'} onclick={finishVisit} class="finish">Finish Event</a>
   <button
-    use:inertia={{ href: $page.url, method: 'post' }}
-    on:finish={(event) => internalAlert('linkOnFinish', event.detail.visit)}
+    use:inertia={{ href: page.url, method: 'post' }}
+    onfinish={(event) => internalAlert('linkOnFinish', event.detail.visit)}
     class="link-finish">Finish Event Link</button
   >
 
   <!-- Events: Navigate -->
-  <a href={'#'} on:click|preventDefault={navigateVisit} class="navigate">Navigate Event</a>
+  <a href={'#'} onclick={navigateVisit} class="navigate">Navigate Event</a>
 
   <!-- Events: Prefetch -->
   <button
     use:inertia={{ href: '/prefetch/2', prefetch: 'hover' }}
-    on:prefetching={(event) => internalAlert('linkOnPrefetching', event.detail.visit)}
-    on:prefetched={(event) => internalAlert('linkOnPrefetched', event.detail.response, event.detail.visit)}
+    onprefetching={(event) => internalAlert('linkOnPrefetching', event.detail.visit)}
+    onprefetched={(event) => internalAlert('linkOnPrefetched', event.detail.response, event.detail.visit)}
     class="link-prefetch-hover"
   >
     Prefetch Event Link (Hover)
   </button>
 
   <!-- Lifecycles -->
-  <a href={'#'} on:click|preventDefault={lifecycleSuccess} class="lifecycle-success">Lifecycle Success</a>
-  <a href={'#'} on:click|preventDefault={lifecycleError} class="lifecycle-error">Lifecycle Error</a>
-  <a href={'#'} on:click|preventDefault={lifecycleCancel} class="lifecycle-cancel">Lifecycle Cancel</a>
-  <a href={'#'} on:click|preventDefault={lifecycleCancelAfterFinish} class="lifecycle-cancel-after-finish"
+  <a href={'#'} onclick={lifecycleSuccess} class="lifecycle-success">Lifecycle Success</a>
+  <a href={'#'} onclick={lifecycleError} class="lifecycle-error">Lifecycle Error</a>
+  <a href={'#'} onclick={lifecycleCancel} class="lifecycle-cancel">Lifecycle Cancel</a>
+  <a href={'#'} onclick={lifecycleCancelAfterFinish} class="lifecycle-cancel-after-finish"
     >Lifecycle Cancel - After Finish</a
   >
 </div>

@@ -1,28 +1,45 @@
 <script lang="ts">
-  import { config, Link } from '@inertiajs/svelte'
+  import { Link } from '@inertiajs/svelte'
+  import { untrack } from 'svelte'
 
-  export let nestedA: { count: number }
-  export let nestedB: { date: number }
+  type NestedA = { count: number }
+  type NestedB = { date: number }
 
-  let effectACount = 1
-  let effectBCount = 1
-
-  let previousNestedA: { count: number } = nestedA
-  let previousNestedB: { date: number } = nestedB
-
-  $: if (nestedA !== previousNestedA) {
-    effectACount = effectACount + 1
-    previousNestedA = nestedA
+  interface Props {
+    nestedA: NestedA
+    nestedB: NestedB
   }
 
-  $: if (nestedB !== previousNestedB) {
-    effectBCount = effectBCount + 1
-    previousNestedB = nestedB
-  }
+  let { nestedA, nestedB }: Props = $props()
 
-  function enable() {
-    config.set('future.preserveEqualProps', true)
-  }
+  let effectACount = $state(1)
+  let effectBCount = $state(1)
+
+  // svelte-ignore state_referenced_locally
+  let previousNestedAJson = $state(JSON.stringify(nestedA))
+
+  $effect(() => {
+    const currentJson = JSON.stringify(nestedA)
+
+    if (currentJson !== previousNestedAJson) {
+      effectACount++
+      previousNestedAJson = currentJson
+    }
+  })
+
+  // svelte-ignore state_referenced_locally
+  let previousNestedBJson = $state(JSON.stringify(nestedB))
+
+  $effect(() => {
+    const currentJson = JSON.stringify(nestedB)
+
+    if (currentJson !== previousNestedBJson) {
+      untrack(() => {
+        effectBCount++
+        previousNestedBJson = currentJson
+      })
+    }
+  })
 </script>
 
 <div>
@@ -32,5 +49,4 @@
   <p id="effect-a">Effect A Count: {effectACount}</p>
   <p id="effect-b">Effect B Count: {effectBCount}</p>
   <Link method="post" href="/preserve-equal-props/back">Submit and redirect back</Link>
-  <button on:click={enable}>Enable</button>
 </div>

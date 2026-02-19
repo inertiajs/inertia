@@ -76,12 +76,6 @@ export const config = new Config<InertiaAppConfig>({
     forceIndicesArrayFormatInFormData: true,
     withAllErrors: false,
   },
-  future: {
-    preserveEqualProps: false,
-    useDataInertiaHeadAttribute: false,
-    useDialogForErrorModal: false,
-    useScriptElementForInitialPage: false,
-  },
   prefetch: {
     cacheFor: 30_000,
     hoverDelay: 75,

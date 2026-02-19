@@ -1,5 +1,5 @@
 import { escape } from 'lodash-es'
-import React, { FunctionComponent, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, ReactElement, ReactNode, use, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
 type InertiaHeadProps = {
@@ -10,7 +10,7 @@ type InertiaHeadProps = {
 type InertiaHead = FunctionComponent<InertiaHeadProps>
 
 const Head: InertiaHead = function ({ children, title }) {
-  const headManager = useContext(HeadContext)
+  const headManager = use(HeadContext)
   const provider = useMemo(() => headManager!.createProvider(), [headManager])
   const isServer = typeof window === 'undefined'
 
@@ -97,7 +97,7 @@ const Head: InertiaHead = function ({ children, title }) {
 
   function ensureNodeHasInertiaProp(node: ReactElement<any>) {
     return React.cloneElement(node, {
-      [provider.preferredAttribute()]: node.props['head-key'] !== undefined ? node.props['head-key'] : '',
+      'data-inertia': node.props['head-key'] !== undefined ? node.props['head-key'] : '',
     })
   }
 
@@ -111,7 +111,7 @@ const Head: InertiaHead = function ({ children, title }) {
       .map((node) => renderNode(node as ReactElement<any>))
 
     if (title && !elements.find((tag) => tag.startsWith('<title'))) {
-      elements.push(`<title ${provider.preferredAttribute()}>${title}</title>`)
+      elements.push(`<title data-inertia="">${title}</title>`)
     }
 
     return elements

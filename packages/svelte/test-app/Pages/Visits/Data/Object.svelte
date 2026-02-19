@@ -68,15 +68,15 @@
 <div>
   <span class="text">This is the page that demonstrates manual visit data passing through plain objects</span>
 
-  <a href={'#'} on:click|preventDefault={visitMethod} class="visit">Visit Link</a>
-  <a href={'#'} on:click|preventDefault={getMethod} class="get">GET Link</a>
-  <a href={'#'} on:click|preventDefault={postMethod} class="post">POST Link</a>
-  <a href={'#'} on:click|preventDefault={putMethod} class="put">PUT Link</a>
-  <a href={'#'} on:click|preventDefault={patchMethod} class="patch">PATCH Link</a>
-  <a href={'#'} on:click|preventDefault={deleteMethod} class="delete">DELETE Link</a>
+  <a href={'#'} onclick={visitMethod} class="visit">Visit Link</a>
+  <a href={'#'} onclick={getMethod} class="get">GET Link</a>
+  <a href={'#'} onclick={postMethod} class="post">POST Link</a>
+  <a href={'#'} onclick={putMethod} class="put">PUT Link</a>
+  <a href={'#'} onclick={patchMethod} class="patch">PATCH Link</a>
+  <a href={'#'} onclick={deleteMethod} class="delete">DELETE Link</a>
 
-  <a href={'#'} on:click|preventDefault={qsafDefault} class="qsaf-default">QSAF Defaults</a>
-  <a href={'#'} on:click|preventDefault={qsafIndices} class="qsaf-indices">QSAF Indices</a>
-  <a href={'#'} on:click|preventDefault={qsafBrackets} class="qsaf-brackets">QSAF Brackets</a>
-  <a href={'#'} on:click|preventDefault={deleteQueryParam} class="delete-query-param">Delete Query Param</a>
+  <a href={'#'} onclick={qsafDefault} class="qsaf-default">QSAF Defaults</a>
+  <a href={'#'} onclick={qsafIndices} class="qsaf-indices">QSAF Indices</a>
+  <a href={'#'} onclick={qsafBrackets} class="qsaf-brackets">QSAF Brackets</a>
+  <a href={'#'} onclick={deleteQueryParam} class="delete-query-param">Delete Query Param</a>
 </div>

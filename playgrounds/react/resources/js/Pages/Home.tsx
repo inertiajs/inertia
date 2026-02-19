@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const Home = () => {
   return (
@@ -14,7 +13,5 @@ const Home = () => {
     </>
   )
 }
-
-Home.layout = (page) => <Layout children={page} />
 
 export default Home

@@ -1,5 +1,4 @@
 import { Head, useForm } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const Form = () => {
   const form = useForm('NewUser', {
@@ -78,7 +77,5 @@ const Form = () => {
     </>
   )
 }
-
-Form.layout = (page) => <Layout children={page} />
 
 export default Form

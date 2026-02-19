@@ -1,6 +1,5 @@
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import Image from '../Components/Image'
-import Layout from '../Components/Layout'
 import Spinner from '../Components/Spinner'
 
 const PhotoGrid = ({
@@ -34,7 +33,5 @@ const PhotoGrid = ({
     </>
   )
 }
-
-PhotoGrid.layout = (page: React.ReactElement) => <Layout>{page}</Layout>
 
 export default PhotoGrid

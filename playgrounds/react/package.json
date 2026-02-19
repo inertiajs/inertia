@@ -9,6 +9,7 @@
   "devDependencies": {
     "@inertiajs/core": "workspace:*",
     "@inertiajs/react": "workspace:*",
+    "@inertiajs/vite": "workspace:*",
     "@laravel/stream-react": "^0.3.10",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",

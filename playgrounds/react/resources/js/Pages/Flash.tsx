@@ -1,6 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
-import Layout from '../Components/Layout'
 
 const Flash = () => {
   const { flash } = usePage()
@@ -84,7 +83,5 @@ const Flash = () => {
     </>
   )
 }
-
-Flash.layout = (page) => <Layout children={page} />
 
 export default Flash

@@ -41,6 +41,10 @@ export default ({ users, preserveState, filter, search }: Props) => {
     if (data.search !== search) {
       debouncedSearch()
     }
+
+    return () => {
+      debouncedSearch.cancel?.()
+    }
   }, [data.search, search, debouncedSearch])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

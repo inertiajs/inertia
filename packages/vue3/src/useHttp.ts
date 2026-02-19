@@ -1,0 +1,327 @@
+import {
+  CancelToken,
+  Errors,
+  ErrorValue,
+  FormDataConvertible,
+  FormDataErrors,
+  FormDataKeys,
+  FormDataType,
+  FormDataValues,
+  hasFiles,
+  http,
+  HttpCancelledError,
+  HttpProgressEvent,
+  HttpResponseError,
+  mergeDataIntoQueryString,
+  Method,
+  objectToFormData,
+  Progress,
+  UrlMethodPair,
+  UseFormArguments,
+  UseFormTransformCallback,
+  UseFormUtils,
+  UseFormWithPrecognitionArguments,
+  UseHttpSubmitArguments,
+  UseHttpSubmitOptions,
+} from '@inertiajs/core'
+import { NamedInputEvent, toSimpleValidationErrors, ValidationConfig, Validator } from 'laravel-precognition'
+import { cloneDeep } from 'lodash-es'
+import useFormState from './useFormState'
+
+export interface UseHttpProps<TForm extends object, TResponse = unknown> {
+  isDirty: boolean
+  errors: FormDataErrors<TForm>
+  hasErrors: boolean
+  processing: boolean
+  progress: Progress | null
+  wasSuccessful: boolean
+  recentlySuccessful: boolean
+  response: TResponse | null
+  data(): TForm
+  transform(callback: UseFormTransformCallback<TForm>): this
+  defaults(): this
+  defaults<T extends FormDataKeys<TForm>>(field: T, value: FormDataValues<TForm, T>): this
+  defaults(fields: Partial<TForm>): this
+  reset<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  clearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
+  setError(errors: FormDataErrors<TForm>): this
+  submit(...args: UseHttpSubmitArguments<TResponse, TForm>): Promise<TResponse>
+  get(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  post(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  put(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  patch(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  delete(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  cancel(): void
+  dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
+  optimistic(callback: (currentData: TForm) => Partial<TForm>): this
+  withAllErrors(): this
+  withPrecognition(...args: UseFormWithPrecognitionArguments): UseHttpPrecognitiveProps<TForm, TResponse>
+}
+
+type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
+  only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
+}
+
+export interface UseHttpValidationProps<TForm extends object> {
+  invalid<K extends FormDataKeys<TForm>>(field: K): boolean
+  setValidationTimeout(duration: number): this
+  touch<K extends FormDataKeys<TForm>>(field: K | NamedInputEvent | Array<K>, ...fields: K[]): this
+  touched<K extends FormDataKeys<TForm>>(field?: K): boolean
+  valid<K extends FormDataKeys<TForm>>(field: K): boolean
+  validate<K extends FormDataKeys<TForm>>(
+    field?: K | NamedInputEvent | PrecognitionValidationConfig<K>,
+    config?: PrecognitionValidationConfig<K>,
+  ): this
+  validateFiles(): this
+  validating: boolean
+  validator: () => Validator
+  withAllErrors(): this
+  withoutFileValidation(): this
+  setErrors(errors: FormDataErrors<TForm> | Record<string, string | string[]>): this
+  forgetError<K extends FormDataKeys<TForm> | NamedInputEvent>(field: K): this
+}
+
+interface InternalPrecognitionState {
+  __touched: string[]
+  __valid: string[]
+}
+
+export type UseHttp<TForm extends object, TResponse = unknown> = TForm & UseHttpProps<TForm, TResponse>
+export type UseHttpPrecognitiveProps<TForm extends object, TResponse = unknown> = UseHttp<TForm, TResponse> &
+  UseHttpValidationProps<TForm> &
+  InternalPrecognitionState
+
+export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
+  method: Method | (() => Method),
+  url: string | (() => string),
+  data: TForm | (() => TForm),
+): UseHttpPrecognitiveProps<TForm, TResponse>
+export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
+  urlMethodPair: UrlMethodPair | (() => UrlMethodPair),
+  data: TForm | (() => TForm),
+): UseHttpPrecognitiveProps<TForm, TResponse>
+export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
+  rememberKey: string,
+  data: TForm | (() => TForm),
+): UseHttp<TForm, TResponse>
+export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
+  data: TForm | (() => TForm),
+): UseHttp<TForm, TResponse>
+export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(): UseHttp<TForm, TResponse>
+export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
+  ...args: UseFormArguments<TForm>
+): UseHttp<TForm, TResponse> | UseHttpPrecognitiveProps<TForm, TResponse> {
+  const { rememberKey, data, precognitionEndpoint } = UseFormUtils.parseUseFormArguments<TForm>(...args)
+
+  let abortController: AbortController | null = null
+  let pendingOptimisticCallback: ((currentData: TForm) => Partial<TForm>) | null = null
+
+  const {
+    form: baseForm,
+    setDefaults,
+    getTransform,
+    getPrecognitionEndpoint,
+    markAsSuccessful,
+    wasDefaultsCalledInOnSuccess,
+    resetDefaultsCalledInOnSuccess,
+    setRememberExcludeKeys,
+    resetBeforeSubmit,
+    finishProcessing,
+    withAllErrors,
+  } = useFormState({
+    data,
+    rememberKey,
+    precognitionEndpoint,
+  })
+
+  // Cast needed: baseForm has all form state/methods, we're adding HTTP methods below via Object.assign
+  const form = baseForm as unknown as UseHttp<TForm, TResponse>
+
+  // Add response property
+  ;(form as any).response = null as TResponse | null
+
+  const submit = async (
+    method: Method,
+    url: string,
+    options: UseHttpSubmitOptions<TResponse, TForm>,
+  ): Promise<TResponse> => {
+    const onBefore = options.onBefore?.()
+
+    if (onBefore === false) {
+      return Promise.reject(new Error('Request cancelled by onBefore'))
+    }
+
+    resetDefaultsCalledInOnSuccess()
+    resetBeforeSubmit()
+
+    abortController = new AbortController()
+
+    const cancelToken: CancelToken = {
+      cancel: () => abortController?.abort(),
+    }
+
+    options.onCancelToken?.(cancelToken)
+
+    options.optimistic = options.optimistic ?? pendingOptimisticCallback ?? undefined
+    pendingOptimisticCallback = null
+
+    let snapshot: TForm | undefined
+
+    if (options.optimistic) {
+      snapshot = cloneDeep(form.data())
+      const optimisticData = options.optimistic(cloneDeep(snapshot))
+
+      Object.keys(optimisticData).forEach((key) => {
+        ;(form as any)[key] = (optimisticData as any)[key]
+      })
+    }
+
+    form.processing = true
+    options.onStart?.()
+
+    const transform = getTransform()
+    const transformedData = transform(form.data())
+    const useFormData = hasFiles(transformedData as Record<string, FormDataConvertible>)
+
+    let requestUrl = url
+    let requestData: FormData | string | undefined
+    let contentType: string | undefined
+
+    if (method === 'get') {
+      const [urlWithParams] = mergeDataIntoQueryString(
+        method,
+        url,
+        transformedData as Record<string, FormDataConvertible>,
+      )
+      requestUrl = urlWithParams
+    } else {
+      if (useFormData) {
+        requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
+      } else {
+        requestData = JSON.stringify(transformedData)
+        contentType = 'application/json'
+      }
+    }
+
+    try {
+      const response = await http.getClient().request({
+        method,
+        url: requestUrl,
+        data: requestData,
+        headers: {
+          Accept: 'application/json',
+          ...(contentType ? { 'Content-Type': contentType } : {}),
+          ...options.headers,
+        },
+        signal: abortController.signal,
+        onUploadProgress: (event: HttpProgressEvent) => {
+          form.progress = event
+          options.onProgress?.(event)
+        },
+      })
+
+      const responseData = JSON.parse(response.data) as TResponse
+
+      if (response.status >= 200 && response.status < 300) {
+        markAsSuccessful()
+        ;(form as any).response = responseData
+
+        options.onSuccess?.(responseData)
+
+        if (!wasDefaultsCalledInOnSuccess()) {
+          setDefaults(cloneDeep(form.data()))
+        }
+
+        form.isDirty = false
+
+        return responseData
+      }
+
+      throw new HttpResponseError(`Request failed with status ${response.status}`, response, url)
+    } catch (error: unknown) {
+      if (snapshot) {
+        Object.keys(snapshot).forEach((key) => {
+          ;(form as any)[key] = (snapshot as any)[key]
+        })
+      }
+
+      if (error instanceof HttpResponseError) {
+        if (error.response.status === 422) {
+          const responseData = JSON.parse(error.response.data)
+          const validationErrors = responseData.errors || {}
+          const processedErrors = (
+            withAllErrors.enabled() ? validationErrors : toSimpleValidationErrors(validationErrors)
+          ) as FormDataErrors<TForm>
+
+          form.clearErrors().setError(processedErrors)
+          options.onError?.(processedErrors as Errors)
+        }
+
+        throw error
+      }
+
+      if (error instanceof HttpCancelledError || (error instanceof Error && error.name === 'AbortError')) {
+        options.onCancel?.()
+        throw new HttpCancelledError('Request was cancelled', url)
+      }
+
+      throw error
+    } finally {
+      finishProcessing()
+      abortController = null
+      options.onFinish?.()
+    }
+  }
+
+  const createSubmitMethod =
+    (method: Method) =>
+    async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> => {
+      return submit(method, url, options)
+    }
+
+  Object.assign(form, {
+    submit(...args: UseHttpSubmitArguments<TResponse, TForm>) {
+      const parsed = UseFormUtils.parseSubmitArguments(args as any, getPrecognitionEndpoint())
+
+      return submit(parsed.method, parsed.url, parsed.options as UseHttpSubmitOptions<TResponse, TForm>)
+    },
+
+    get: createSubmitMethod('get'),
+    post: createSubmitMethod('post'),
+    put: createSubmitMethod('put'),
+    patch: createSubmitMethod('patch'),
+    delete: createSubmitMethod('delete'),
+
+    cancel() {
+      if (abortController) {
+        abortController.abort()
+      }
+    },
+
+    dontRemember(...keys: FormDataKeys<TForm>[]) {
+      setRememberExcludeKeys(keys)
+      return form
+    },
+
+    optimistic(callback: (currentData: TForm) => Partial<TForm>) {
+      pendingOptimisticCallback = callback
+      return form
+    },
+
+    withAllErrors() {
+      withAllErrors.enable()
+      return form
+    },
+  })
+
+  const originalWithPrecognition = form.withPrecognition
+  form.withPrecognition = (...args: UseFormWithPrecognitionArguments): UseHttpPrecognitiveProps<TForm, TResponse> => {
+    originalWithPrecognition.call(form, ...args)
+
+    return form as UseHttpPrecognitiveProps<TForm, TResponse>
+  }
+
+  return getPrecognitionEndpoint() ? (form as UseHttpPrecognitiveProps<TForm, TResponse>) : form
+}

@@ -339,8 +339,6 @@ test.describe('Form Helper', () => {
     })
 
     test('form should be dirty after setting the defaults', async ({ page }) => {
-      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
-
       await expect(page.getByText('Form is clean')).toBeVisible()
       await page.getByRole('button', { name: 'Defaults', exact: true }).click()
       await expect(page.getByText('Form is clean')).toBeVisible()
@@ -349,8 +347,6 @@ test.describe('Form Helper', () => {
     })
 
     test('form should be clean after setting data and then setting the defaults', async ({ page }) => {
-      test.skip(process.env.PACKAGE === 'svelte', 'Skipping Svelte for now')
-
       await expect(page.getByText('Form is clean')).toBeVisible()
       await page.getByRole('button', { name: 'Data and Defaults' }).click()
       await expect(page.getByText('Form is clean')).toBeVisible()
@@ -770,36 +766,6 @@ test.describe('Form Helper', () => {
         await expect(pageData).toHaveProperty('version')
       })
 
-      test('marks the form as no longer processing', async ({ page }) => {
-        await page.getByRole('button', { exact: true, name: 'onSuccess resets processing' }).click()
-
-        const data = await waitForDataMessages(page, 7)
-
-        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
-        const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
-
-        await expect(processing).toBe(true)
-        await expect(notProcessing).toBe(false)
-      })
-
-      test('resets the progress property back to null', async ({ page }) => {
-        await clickAndWaitForResponse(page, 'onSuccess progress property', 'sleep', 'button')
-
-        const messages = await waitForEventMessages(page, 5)
-        const data = await waitForDataMessages(page, 5)
-        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
-        const endEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
-
-        await expect(event).toHaveProperty('percentage')
-        await expect(event).toHaveProperty('total')
-        await expect(event).toHaveProperty('loaded')
-        await expect(event.percentage).toBeGreaterThanOrEqual(0)
-        await expect(event.percentage).toBeLessThanOrEqual(100)
-
-        await expect(messages[4]).toBe('onFinish')
-        await expect(endEvent).toBeNull()
-      })
-
       test('can delay onFinish from firing by returning a promise', async ({ page }) => {
         await clickAndWaitForResponse(page, 'onSuccess promise', '/dump/post', 'button')
 
@@ -887,42 +853,6 @@ test.describe('Form Helper', () => {
         await expect(errors.name).toBe('Some name error')
       })
 
-      test('marks the form as no longer processing', async ({ page }) => {
-        await clickAndWaitForResponse(page, 'onError resets processing', 'form-helper/events/errors', 'button')
-
-        const messages = await waitForEventMessages(page, 5)
-        const data = await waitForDataMessages(page, 5)
-
-        await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
-
-        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
-        const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
-
-        await expect(processing).toBe(true)
-        await expect(notProcessing).toBe(false)
-      })
-
-      test('resets the progress property back to null', async ({ page }) => {
-        await clickAndWaitForResponse(page, 'onError progress property', 'form-helper/events/errors', 'button')
-
-        const messages = await waitForEventMessages(page, 4)
-        const data = await waitForDataMessages(page, 4)
-
-        await expect(messages[3]).toBe('onProgress')
-
-        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
-        const finishEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
-
-        await expect(event).toHaveProperty('percentage')
-        await expect(event).toHaveProperty('total')
-        await expect(event).toHaveProperty('loaded')
-        await expect(event.percentage).toBeGreaterThanOrEqual(0)
-        await expect(event.percentage).toBeLessThanOrEqual(100)
-
-        await expect(messages[4]).toBe('onError')
-        await expect(finishEvent).toBeNull()
-      })
-
       test('sets form errors', async ({ page }) => {
         await clickAndWaitForResponse(page, 'Errors set on error', 'form-helper/events/errors', 'button')
 
@@ -965,6 +895,91 @@ test.describe('Form Helper', () => {
         const messages = await waitForEventMessages(page, 5)
 
         await expect(messages).toEqual(['onBefore', 'onCancelToken', 'onStart', 'onSuccess', 'onFinish'])
+      })
+
+      test('marks the form as no longer processing', async ({ page }) => {
+        await page.getByRole('button', { exact: true, name: 'onSuccess resets processing' }).click()
+
+        const data = await waitForDataMessages(page, 7)
+
+        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
+        const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
+
+        await expect(processing).toBe(true)
+        await expect(notProcessing).toBe(false)
+      })
+
+      test('resets the progress property back to null', async ({ page }) => {
+        await clickAndWaitForResponse(page, 'onSuccess progress property', 'sleep', 'button')
+
+        const messages = await waitForEventMessages(page, 5)
+        const data = await waitForDataMessages(page, 5)
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
+        const endEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
+
+        await expect(event).toHaveProperty('percentage')
+        await expect(event).toHaveProperty('total')
+        await expect(event).toHaveProperty('loaded')
+        await expect(event.percentage).toBeGreaterThanOrEqual(0)
+        await expect(event.percentage).toBeLessThanOrEqual(100)
+
+        await expect(messages[4]).toBe('onFinish')
+        await expect(endEvent).toBeNull()
+      })
+
+      test('marks the form as no longer processing after error', async ({ page }) => {
+        await clickAndWaitForResponse(page, 'onError resets processing', 'form-helper/events/errors', 'button')
+
+        const data = await waitForDataMessages(page, 7)
+
+        const processing = data.find((d) => d.event === 'onStart' && d.type === 'processing').data
+        const notProcessing = data.find((d) => d.event === 'onFinish' && d.type === 'processing').data
+
+        await expect(processing).toBe(true)
+        await expect(notProcessing).toBe(false)
+      })
+
+      test('resets the progress property back to null after error', async ({ page }) => {
+        await clickAndWaitForResponse(page, 'onError progress property', 'form-helper/events/errors', 'button')
+
+        const data = await waitForDataMessages(page, 5)
+        const event = data.find((d) => d.event === 'onProgress' && d.type === 'progress').data
+        const endEvent = data.find((d) => d.event === 'onFinish' && d.type === 'progress').data
+
+        await expect(event).toHaveProperty('percentage')
+        await expect(event).toHaveProperty('total')
+        await expect(event).toHaveProperty('loaded')
+        await expect(event.percentage).toBeGreaterThanOrEqual(0)
+        await expect(event.percentage).toBeLessThanOrEqual(100)
+
+        await expect(endEvent).toBeNull()
+      })
+
+      test('marks the form as no longer processing after cancel', async ({ page }) => {
+        await page.getByRole('button', { exact: true, name: 'onCancel resets processing' }).click()
+
+        await page.waitForFunction(() => (window as any).events.includes('onFinish'))
+
+        const data = await page.evaluate(() => (window as any).data)
+
+        const processing = data.find((d: any) => d.event === 'onStart' && d.type === 'processing')?.data
+        const notProcessing = data.find((d: any) => d.event === 'onFinish' && d.type === 'processing')?.data
+
+        await expect(processing).toBe(true)
+        await expect(notProcessing).toBe(false)
+      })
+
+      test('resets the progress property back to null after cancel', async ({ page }) => {
+        await page.getByRole('button', { exact: true, name: 'onCancel progress property' }).click()
+
+        await page.waitForFunction(() => (window as any).events.includes('onFinish'))
+
+        const data = await page.evaluate(() => (window as any).data)
+        const progressEntries = data.filter((d: any) => d.type === 'progress')
+        const lastProgressEntry = progressEntries[progressEntries.length - 1]
+
+        // After cancel, progress should be null (either reset or never set)
+        await expect(lastProgressEntry?.data).toBeNull()
       })
     })
   })

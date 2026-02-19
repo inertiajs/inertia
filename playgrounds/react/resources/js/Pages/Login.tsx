@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const Login = () => {
   return (
@@ -12,7 +11,5 @@ const Login = () => {
     </>
   )
 }
-
-Login.layout = (page) => <Layout children={page} />
 
 export default Login

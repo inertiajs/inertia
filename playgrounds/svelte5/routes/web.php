@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Models\Todo;
 use Inertia\Inertia;
 
 /*
@@ -488,6 +489,36 @@ Route::get('/once/{page}', function (int $page) {
     ]);
 });
 
+Route::get('/optimistic', function () {
+    return inertia('Optimistic', ['todos' => Todo::all()]);
+});
+
+Route::post('/optimistic', function () {
+    request()->validate(['name' => ['required', 'string', 'min:3']]);
+
+    Todo::create(['name' => request('name')]);
+
+    return back();
+});
+
+Route::patch('/optimistic/{todo}', function (Todo $todo) {
+    $todo->update(['done' => ! $todo->done]);
+
+    return back();
+});
+
+Route::delete('/optimistic/{todo}', function (Todo $todo) {
+    $todo->delete();
+
+    return back();
+});
+
+Route::post('/optimistic/reset', function () {
+    Todo::truncate();
+
+    return redirect('/optimistic');
+});
+
 Route::get('/flash', function () {
     return inertia('Flash');
 });
@@ -499,3 +530,12 @@ Route::get('/flash/direct', function () {
 Route::post('/flash/form', function () {
     return Inertia::flash('message', 'Sent with redirect!')->back();
 });
+
+Route::get('/error/{status}', function (int $status) {
+    abort($status);
+});
+
+Route::get('/ssr-debug', fn () => inertia('SsrDebug'));
+Route::get('/ssr-debug/window', fn () => inertia('SsrDebug/WindowError'));
+Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));
+Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageError'));

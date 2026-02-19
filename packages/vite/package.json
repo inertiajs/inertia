@@ -1,0 +1,54 @@
+{
+  "name": "@inertiajs/vite",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Vite plugin for Inertia.js with SSR dev mode support.",
+  "contributors": [
+    "Pascal Baljet <pascal@laravel.com>"
+  ],
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inertiajs/inertia.git",
+    "directory": "packages/vite"
+  },
+  "bugs": {
+    "url": "https://github.com/inertiajs/inertia/issues"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && ./build.js && tsc",
+    "clean": "rm -rf types && rm -rf dist",
+    "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
+    "dev:build": "./build.js --watch",
+    "dev:types": "tsc --watch --preserveWatchOutput",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@inertiajs/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "devDependencies": {
+    "@types/estree": "^1.0.8",
+    "@types/node": "^24.10.13",
+    "esbuild": "^0.27.3",
+    "esbuild-node-externals": "^1.20.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^3.2.4"
+  }
+}

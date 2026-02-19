@@ -1,8 +1,7 @@
 <script>
   import { page } from '@inertiajs/svelte'
 
-  // Access props from page store - this component only renders when Deferred shows slot
-  $: results = $page.props.results
+  const results = $derived(page.props.results)
 </script>
 
 <div id="results-data">{results.data.join(', ')}</div>

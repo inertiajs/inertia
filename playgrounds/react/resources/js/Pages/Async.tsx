@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import Layout from '../Components/Layout'
 
 const Async = ({
   sleep,
@@ -40,7 +39,5 @@ const Async = ({
     </>
   )
 }
-
-Async.layout = (page) => <Layout children={page} />
 
 export default Async

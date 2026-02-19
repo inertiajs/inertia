@@ -1,13 +1,9 @@
-<script module>
-  export { default as layout } from '../Components/Layout.svelte'
-</script>
-
 <script>
   import { Form } from '@inertiajs/svelte'
 
   let { appName, foo, bar, quux } = $props()
 
-  let customHeaders = { 'X-Custom-Header': 'Demo-Value' }
+  let customHeaders = $state({ 'X-Custom-Header': 'Demo-Value' })
   let errorBag = 'custom-bag'
 </script>
 

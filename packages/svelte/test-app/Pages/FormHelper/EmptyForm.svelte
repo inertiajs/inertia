@@ -9,14 +9,14 @@
   const form = useForm<FormData>()
 
   const submit = () => {
-    $form.transform(() => ({
+    form.transform(() => ({
       name: 'John Doe',
       email: 'john@example.com',
     }))
-    $form.post('/dump/post')
+    form.post('/dump/post')
   }
 </script>
 
 <div>
-  <button on:click={submit}>Submit</button>
+  <button onclick={submit}>Submit</button>
 </div>
