@@ -1,16 +1,12 @@
 import { Deferred, usePage } from '@inertiajs/react'
 
-type PageProps = {
-  auth: {
-    user?: { name: string; email: string }
-    token?: string
-    notifications?: string[]
-    roles?: string[]
-  }
-}
-
 const DeferredContent = () => {
-  const { auth } = usePage<PageProps>().props
+  const { auth } = usePage<{
+    auth: {
+      notifications?: string[]
+      roles?: string[]
+    }
+  }>().props
 
   return (
     <>
@@ -20,7 +16,16 @@ const DeferredContent = () => {
   )
 }
 
-export default ({ auth }: PageProps) => {
+export default ({
+  auth,
+}: {
+  auth: {
+    user?: { name: string; email: string }
+    token?: string
+    notifications?: string[]
+    roles?: string[]
+  }
+}) => {
   return (
     <>
       <p id="user">

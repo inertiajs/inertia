@@ -105,6 +105,28 @@ test('it preserves sibling props when loading multiple nested deferred props', a
   await expect(page.locator('#token')).toContainText('Token: abc-123')
 })
 
+test('it preserves excluded nested dot-notation props on reload', async ({ page }) => {
+  await page.goto('/nested-props/except-dot-props')
+
+  await expect(page.locator('#user')).toContainText('User: John Doe')
+  await expect(page.locator('#token')).toContainText('Token: secret-token-123')
+  await expect(page.locator('#session-id')).toContainText('Session: sess-abc-456')
+
+  await clickAndWaitForResponse(page, 'Reload Without Token', '/nested-props/except-dot-props', 'button')
+
+  // The excluded nested prop should be preserved via deep merge
+  await expect(page.locator('#user')).toContainText('User: John Doe')
+  await expect(page.locator('#token')).toContainText('Token: secret-token-123')
+  await expect(page.locator('#session-id')).toContainText('Session: sess-abc-456')
+
+  // Excluding multiple siblings at the same level
+  await clickAndWaitForResponse(page, 'Reload Without Token and Session', '/nested-props/except-dot-props', 'button')
+
+  await expect(page.locator('#user')).toContainText('User: John Doe')
+  await expect(page.locator('#token')).toContainText('Token: secret-token-123')
+  await expect(page.locator('#session-id')).toContainText('Session: sess-abc-456')
+})
+
 test('it can use WhenVisible with nested dot-notation data prop', async ({ page }) => {
   await page.goto('/nested-props/when-visible')
 

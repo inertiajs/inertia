@@ -3266,22 +3266,54 @@ app.get('/nested-props/deep-merge', (req, res) => {
 app.get('/nested-props/shared-dot-props', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
 
-  const props = {
-    auth: {
-      user: {
-        name: 'John Doe',
-        email: 'john@example.com',
+  if (partialData.includes('auth.user.permissions')) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/SharedDotProps',
+      props: {
+        auth: {
+          user: {
+            permissions: ['edit-posts', 'delete-posts', 'create-posts'],
+          },
+        },
       },
-    },
-  }
-
-  // Simulate shared dot-notation prop like 'auth.user.permissions' from HandleInertiaRequests middleware
-  if (!partialData.length || partialData.includes('auth.user.permissions')) {
-    props.auth.user.permissions = ['edit-posts', 'delete-posts', 'create-posts']
+    })
   }
 
   inertia.render(req, res, {
     component: 'NestedProps/SharedDotProps',
+    props: {
+      auth: {
+        user: {
+          name: 'John Doe',
+          email: 'john@example.com',
+          permissions: ['edit-posts', 'delete-posts', 'create-posts'],
+        },
+      },
+    },
+  })
+})
+
+app.get('/nested-props/except-dot-props', (req, res) => {
+  const exceptData = req.headers['x-inertia-partial-except']?.split(',') ?? []
+
+  const props = {
+    auth: {
+      user: 'John Doe',
+      token: 'secret-token-123',
+      sessionId: 'sess-abc-456',
+    },
+  }
+
+  if (exceptData.includes('auth.token')) {
+    delete props.auth.token
+  }
+
+  if (exceptData.includes('auth.sessionId')) {
+    delete props.auth.sessionId
+  }
+
+  inertia.render(req, res, {
+    component: 'NestedProps/ExceptDotProps',
     props,
   })
 })
