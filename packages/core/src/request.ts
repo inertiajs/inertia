@@ -1,3 +1,4 @@
+import { get } from 'lodash-es'
 import {
   fireFinishEvent,
   fireNetworkErrorEvent,
@@ -173,7 +174,7 @@ export class Request {
 
     const onceProps = Object.entries(page.onceProps || {})
       .filter(([, onceProp]) => {
-        if (page.props[onceProp.prop] === undefined) {
+        if (get(page.props, onceProp.prop) === undefined) {
           // The prop could deferred and not be loaded yet
           return false
         }

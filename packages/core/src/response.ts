@@ -14,7 +14,7 @@ import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
@@ -329,8 +329,8 @@ export class Response {
     propsToPrepend.forEach((prop) => mergeProp(prop, false))
 
     propsToDeepMerge.forEach((prop) => {
-      const currentProp = currentPage.get().props[prop]
-      const incomingProp = pageResponse.props[prop]
+      const currentProp = get(currentPage.get().props, prop)
+      const incomingProp = get(pageResponse.props, prop)
 
       // Function to recursively merge objects and arrays
       const deepMerge = (target: any, source: any, matchProp: string) => {
@@ -354,8 +354,22 @@ export class Response {
       }
 
       // Apply the deep merge and update the page response
-      pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
+      set(pageResponse.props, prop, deepMerge(currentProp, incomingProp, prop))
     })
+
+    const nestedTopKeys = new Set(
+      [...this.requestParams.all().only, ...this.requestParams.all().except]
+        .filter((prop) => prop.includes('.'))
+        .map((prop) => prop.split('.')[0]),
+    )
+
+    for (const key of nestedTopKeys) {
+      const currentValue = currentPage.get().props[key]
+
+      if (this.isObject(currentValue) && this.isObject(pageResponse.props[key])) {
+        pageResponse.props[key] = this.deepMergeObjects(currentValue as PageProps, pageResponse.props[key] as PageProps)
+      }
+    }
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
@@ -415,6 +429,27 @@ export class Response {
     }
 
     return true
+  }
+
+  protected isObject(item: any): boolean {
+    return item && typeof item === 'object' && !Array.isArray(item)
+  }
+
+  protected deepMergeObjects(target: PageProps, source: PageProps): PageProps {
+    const result = { ...target }
+
+    for (const key of Object.keys(source)) {
+      const targetValue = target[key]
+      const sourceValue = source[key]
+
+      if (this.isObject(targetValue) && this.isObject(sourceValue)) {
+        result[key] = this.deepMergeObjects(targetValue as PageProps, sourceValue as PageProps)
+      } else {
+        result[key] = sourceValue
+      }
+    }
+
+    return result
   }
 
   protected mergeOrMatchItems(

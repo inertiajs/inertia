@@ -495,7 +495,10 @@ export class Router {
     const onceProps =
       typeof params.props === 'function'
         ? Object.fromEntries(
-            Object.values(current.onceProps ?? {}).map((onceProp) => [onceProp.prop, current.props[onceProp.prop]]),
+            Object.values(current.onceProps ?? {}).map((onceProp) => [
+              onceProp.prop,
+              get(current.props, onceProp.prop),
+            ]),
           )
         : {}
 
