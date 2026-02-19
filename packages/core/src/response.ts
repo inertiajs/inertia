@@ -89,7 +89,7 @@ export class Response {
 
     const { flash } = currentPage.get()
 
-    if (Object.keys(flash).length > 0 && (!this.requestParams.isPartial() || !isEqual(flash, previousFlash))) {
+    if (Object.keys(flash).length > 0) {
       fireFlashEvent(flash)
       this.requestParams.all().onFlash(flash)
     }
