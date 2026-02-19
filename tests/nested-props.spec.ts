@@ -74,6 +74,37 @@ test('it can deep merge nested props', async ({ page }) => {
   await expect(page.locator('#label')).toContainText('Label: Page 2')
 })
 
+test('it preserves parent props when reloading a deeply nested dot-notation prop', async ({ page }) => {
+  await page.goto('/nested-props/shared-dot-props')
+
+  await expect(page.locator('#name')).toContainText('Name: John Doe')
+  await expect(page.locator('#email')).toContainText('Email: john@example.com')
+  await expect(page.locator('#permissions')).toContainText('Permissions: edit-posts, delete-posts, create-posts')
+
+  await clickAndWaitForResponse(page, 'Reload Permissions', '/nested-props/shared-dot-props', 'button')
+
+  // Siblings at the same level must be preserved
+  await expect(page.locator('#name')).toContainText('Name: John Doe')
+  await expect(page.locator('#email')).toContainText('Email: john@example.com')
+  await expect(page.locator('#permissions')).toContainText('Permissions: edit-posts, delete-posts, create-posts')
+})
+
+test('it preserves sibling props when loading multiple nested deferred props', async ({ page }) => {
+  await page.goto('/nested-props/deferred-with-siblings')
+
+  await expect(page.locator('#user')).toContainText('User: John Doe (john@example.com)')
+  await expect(page.locator('#token')).toContainText('Token: abc-123')
+
+  await expect(page.locator('#notifications')).toContainText(
+    'Notifications: You have a new follower, Your post was liked',
+  )
+  await expect(page.locator('#roles')).toContainText('Roles: admin, editor')
+
+  // All sibling props must still be intact after deferred props loaded
+  await expect(page.locator('#user')).toContainText('User: John Doe (john@example.com)')
+  await expect(page.locator('#token')).toContainText('Token: abc-123')
+})
+
 test('it can use WhenVisible with nested dot-notation data prop', async ({ page }) => {
   await page.goto('/nested-props/when-visible')
 

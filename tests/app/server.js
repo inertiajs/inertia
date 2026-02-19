@@ -3263,6 +3263,72 @@ app.get('/nested-props/deep-merge', (req, res) => {
   })
 })
 
+app.get('/nested-props/shared-dot-props', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  const props = {
+    auth: {
+      user: {
+        name: 'John Doe',
+        email: 'john@example.com',
+      },
+    },
+  }
+
+  // Simulate shared dot-notation prop like 'auth.user.permissions' from HandleInertiaRequests middleware
+  if (!partialData.length || partialData.includes('auth.user.permissions')) {
+    props.auth.user.permissions = ['edit-posts', 'delete-posts', 'create-posts']
+  }
+
+  inertia.render(req, res, {
+    component: 'NestedProps/SharedDotProps',
+    props,
+  })
+})
+
+app.get('/nested-props/deferred-with-siblings', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  if (!partialData.length) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/DeferredWithSiblings',
+      deferredProps: {
+        default: ['auth.notifications', 'auth.roles'],
+      },
+      props: {
+        auth: {
+          user: {
+            name: 'John Doe',
+            email: 'john@example.com',
+          },
+          token: 'abc-123',
+        },
+      },
+    })
+  }
+
+  const authProps = {}
+
+  if (partialData.includes('auth.notifications')) {
+    authProps.notifications = ['You have a new follower', 'Your post was liked']
+  }
+
+  if (partialData.includes('auth.roles')) {
+    authProps.roles = ['admin', 'editor']
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'NestedProps/DeferredWithSiblings',
+        props: {
+          auth: authProps,
+        },
+      }),
+    300,
+  )
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
