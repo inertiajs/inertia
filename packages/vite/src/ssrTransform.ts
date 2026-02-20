@@ -27,7 +27,19 @@
  */
 
 import { ParsedCode } from './astUtils'
-import { type FrameworkConfig, type SSROptions, formatSSROptions } from './types'
+import type { FrameworkConfig, SSROptions } from './types'
+
+/**
+ * Format SSR options as a string to be inserted into generated code.
+ *
+ * Returns an empty string if no options are set, otherwise returns
+ * a comma-prefixed JSON string like `, {"port":13715,"cluster":true}`.
+ */
+function formatSSROptions(options: SSROptions): string {
+  const entries = Object.entries(options).filter(([, v]) => v !== undefined)
+
+  return entries.length > 0 ? `, ${JSON.stringify(Object.fromEntries(entries))}` : ''
+}
 
 /**
  * Check if the code contains a top-level Inertia app configuration call

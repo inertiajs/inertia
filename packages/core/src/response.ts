@@ -87,7 +87,7 @@ export class Response {
 
     if (!this.wasPrefetched) {
       // We end up here other than from the prefetch cache, so we assume this response is
-      // never than the cached one and therefore flush the cache.
+      // newer than the cached one and therefore flush the cache.
       router.flush(currentPage.get().url)
     }
 

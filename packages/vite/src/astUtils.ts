@@ -7,7 +7,7 @@
  *
  * The main class `ParsedCode` wraps a parsed AST and provides methods to:
  * - Detect which Inertia framework adapter is being used (Vue, React, Svelte)
- * - Find `createInertiaApp()` or `createInertiaApp()` calls
+ * - Find `createInertiaApp()` calls
  * - Extract the `pages` property for transformation
  * - Find calls that need a default resolver injected
  */
@@ -256,12 +256,7 @@ export class ParsedCode {
           continue
         }
 
-        const property = prop as NodeWithPos<Property>
-
-        // Ensure we have position info for string replacement
-        if (property.start !== undefined && property.end !== undefined) {
-          return property
-        }
+        return prop as NodeWithPos<Property>
       }
     }
 
@@ -284,12 +279,7 @@ export class ParsedCode {
    */
   get callWithoutResolver(): { callEnd: number; options?: InertiaCallOptions } | null {
     for (const call of this.inertiaCalls) {
-      const callee = call.callee as NodeWithPos<Identifier>
       const callWithPos = call as NodeWithPos<CallExpression>
-
-      if (callee.end === undefined || callWithPos.end === undefined) {
-        continue
-      }
 
       // Empty call: createInertiaApp()
       if (call.arguments.length === 0) {
@@ -309,7 +299,7 @@ export class ParsedCode {
           p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
       )
 
-      if (hasResolver || obj.start === undefined || obj.end === undefined) {
+      if (hasResolver) {
         continue
       }
 
@@ -353,4 +343,48 @@ export class ParsedCode {
       }
     }
   }
+}
+
+/**
+ * Extract a string value from an AST node.
+ * Handles both regular strings ('foo') and template literals (`foo`).
+ */
+export function extractString(node: Property['value']): string | undefined {
+  if (node.type === 'Literal' && typeof node.value === 'string') {
+    return node.value
+  }
+
+  // Template literal without expressions: `./Pages`
+  if (node.type === 'TemplateLiteral' && node.expressions.length === 0) {
+    return node.quasis[0].value.cooked ?? node.quasis[0].value.raw
+  }
+
+  return undefined
+}
+
+/**
+ * Extract a string array from an AST node.
+ * Handles: `['.tsx', '.jsx']`
+ */
+export function extractStringArray(node: Property['value']): string[] | undefined {
+  if (node.type !== 'ArrayExpression') {
+    return undefined
+  }
+
+  const strings = node.elements
+    .map((el) => (el ? extractString(el as Property['value']) : undefined))
+    .filter((s): s is string => s !== undefined)
+
+  return strings.length > 0 ? strings : undefined
+}
+
+/**
+ * Extract a boolean value from an AST node.
+ */
+export function extractBoolean(node: Property['value']): boolean | undefined {
+  if (node.type === 'Literal' && typeof node.value === 'boolean') {
+    return node.value
+  }
+
+  return undefined
 }

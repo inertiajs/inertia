@@ -47,6 +47,8 @@ import {
   transformUrlAndData,
 } from './url'
 
+const noop = () => {}
+
 export class Router {
   protected syncRequestStream = new RequestStream({
     maxConcurrent: 1,
@@ -60,7 +62,7 @@ export class Router {
 
   protected clientVisitQueue = new Queue<Promise<void>>()
 
-  protected pendingOptimisticCallback: OptimisticCallback | null = null
+  protected pendingOptimisticCallback: OptimisticCallback | undefined = undefined
 
   public init<ComponentType = Component>({
     initialPage,
@@ -215,8 +217,8 @@ export class Router {
     href: string | URL | UrlMethodPair,
     options: VisitOptions<T> = {},
   ): void {
-    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback ?? undefined
-    this.pendingOptimisticCallback = null
+    options.optimistic = options.optimistic ?? this.pendingOptimisticCallback
+    this.pendingOptimisticCallback = undefined
 
     if (options.optimistic) {
       options.async = options.async ?? true
@@ -624,20 +626,20 @@ export class Router {
 
   protected getVisitEvents(options: VisitOptions): VisitCallbacks {
     return {
-      onCancelToken: options.onCancelToken || (() => {}),
-      onBefore: options.onBefore || (() => {}),
-      onBeforeUpdate: options.onBeforeUpdate || (() => {}),
-      onStart: options.onStart || (() => {}),
-      onProgress: options.onProgress || (() => {}),
-      onFinish: options.onFinish || (() => {}),
-      onCancel: options.onCancel || (() => {}),
-      onSuccess: options.onSuccess || (() => {}),
-      onError: options.onError || (() => {}),
-      onHttpException: options.onHttpException || (() => {}),
-      onNetworkError: options.onNetworkError || (() => {}),
-      onFlash: options.onFlash || (() => {}),
-      onPrefetched: options.onPrefetched || (() => {}),
-      onPrefetching: options.onPrefetching || (() => {}),
+      onCancelToken: options.onCancelToken || noop,
+      onBefore: options.onBefore || noop,
+      onBeforeUpdate: options.onBeforeUpdate || noop,
+      onStart: options.onStart || noop,
+      onProgress: options.onProgress || noop,
+      onFinish: options.onFinish || noop,
+      onCancel: options.onCancel || noop,
+      onSuccess: options.onSuccess || noop,
+      onError: options.onError || noop,
+      onHttpException: options.onHttpException || noop,
+      onNetworkError: options.onNetworkError || noop,
+      onFlash: options.onFlash || noop,
+      onPrefetched: options.onPrefetched || noop,
+      onPrefetching: options.onPrefetching || noop,
     }
   }
 
@@ -695,8 +697,8 @@ export class Router {
 
   protected loadDeferredProps(deferred: Page['deferredProps']): void {
     if (deferred) {
-      Object.entries(deferred).forEach(([_, group]) => {
-        this.doReload({ only: group, deferredProps: true, preserveErrors: true })
+      Object.values(deferred).forEach((props) => {
+        this.doReload({ only: props, deferredProps: true, preserveErrors: true })
       })
     }
   }

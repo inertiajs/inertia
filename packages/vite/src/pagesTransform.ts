@@ -36,7 +36,7 @@
  */
 
 import type { Property } from 'estree'
-import { type NodeWithPos, ParsedCode } from './astUtils'
+import { type NodeWithPos, ParsedCode, extractBoolean, extractString, extractStringArray } from './astUtils'
 import type { FrameworkConfig } from './types'
 
 /**
@@ -197,7 +197,7 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
     } else if (key === 'extension') {
       // Supports both `extension: '.vue'` and `extension: ['.tsx', '.jsx']`
       extensions = extractString(value) ?? extractStringArray(value)
-    } else if (key === 'transform' && value.start !== undefined && value.end !== undefined) {
+    } else if (key === 'transform') {
       // For transform, we preserve the raw source code (could be arrow function, etc.)
       transform = code.slice(value.start, value.end)
     } else if (key === 'lazy') {
@@ -205,54 +205,7 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
     }
   }
 
-  // Must have either a directory or lazy setting to be valid
-  if (!directory && lazy === undefined) {
-    return null
-  }
-
   return { directory, extensions, transform, lazy }
-}
-
-/**
- * Extract a string value from an AST node.
- * Handles both regular strings ('foo') and template literals (`foo`).
- */
-function extractString(node: Property['value']): string | undefined {
-  if (node.type === 'Literal' && typeof node.value === 'string') {
-    return node.value
-  }
-
-  // Template literal without expressions: `./Pages`
-  if (node.type === 'TemplateLiteral' && node.expressions.length === 0) {
-    return node.quasis[0].value.cooked ?? node.quasis[0].value.raw
-  }
-
-  return undefined
-}
-
-/**
- * Extract a string array from an AST node.
- * Handles: `['.tsx', '.jsx']`
- */
-function extractStringArray(node: Property['value']): string[] | undefined {
-  if (node.type !== 'ArrayExpression') {
-    return undefined
-  }
-
-  return node.elements
-    .filter((el): el is typeof el & { value: string } => el?.type === 'Literal' && typeof el.value === 'string')
-    .map((el) => el.value)
-}
-
-/**
- * Extract a boolean value from an AST node.
- */
-function extractBoolean(node: Property['value']): boolean | undefined {
-  if (node.type === 'Literal' && typeof node.value === 'boolean') {
-    return node.value
-  }
-
-  return undefined
 }
 
 /**
