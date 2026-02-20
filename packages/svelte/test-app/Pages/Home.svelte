@@ -18,6 +18,14 @@
     router.post('/redirect-external')
   }
 
+  const redirectHash = () => {
+    router.get('/redirect-hash')
+  }
+
+  const redirectHashPost = () => {
+    router.post('/redirect-hash')
+  }
+
   onMount(() => {
     window._inertia_page_key = crypto.randomUUID()
     window._inertia_props = page.props
@@ -41,4 +49,7 @@
     >External Redirect Link</button
   >
   <a href={'#'} onclick={redirectExternal} class="visits-redirect-external">Manual External Redirect visit</a>
+
+  <a href={'#'} onclick={redirectHash} class="visits-redirect-hash">Manual Hash Redirect visit</a>
+  <a href={'#'} onclick={redirectHashPost} class="visits-redirect-hash-post">Manual Hash Redirect POST visit</a>
 </div>

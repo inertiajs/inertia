@@ -22,6 +22,14 @@ const redirectExternal = () => {
   router.post('/redirect-external')
 }
 
+const redirectHash = () => {
+  router.get('/redirect-hash')
+}
+
+const redirectHashPost = () => {
+  router.post('/redirect-hash')
+}
+
 window._inertia_page_key = getCurrentInstance()?.uid
 window._inertia_props = props
 window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProperties || {}
@@ -45,6 +53,9 @@ window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProp
 
     <Link href="/redirect-external" method="post" class="links-redirect-external">External Redirect Link</Link>
     <a href="#" @click.prevent="redirectExternal" class="visits-redirect-external">Manual External Redirect visit</a>
+
+    <a href="#" @click.prevent="redirectHash" class="visits-redirect-hash">Manual Hash Redirect visit</a>
+    <a href="#" @click.prevent="redirectHashPost" class="visits-redirect-hash-post">Manual Hash Redirect POST visit</a>
 
     <Link id="navigate-back" href="/head/mixed">Go to Mixed Head</Link>
   </div>

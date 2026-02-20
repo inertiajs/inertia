@@ -160,4 +160,5 @@ module.exports = {
     )
   },
   location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),
+  redirect: (res, href) => res.status(409).header('X-Inertia-Redirect', href).send(''),
 }

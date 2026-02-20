@@ -1076,6 +1076,26 @@ test.describe('Redirects', () => {
     await expect(page).toHaveURL('/non-inertia')
     await expect(pageLoads.count).toBe(2)
   })
+
+  test('it follows hash redirects via GET without a full page load', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/')
+
+    await page.getByRole('link', { name: 'Manual Hash Redirect visit' }).click()
+    await expect(page).toHaveURL('/links/url-fragments#target')
+    await expect(page.getByText("This is the element with id 'target'")).toBeVisible()
+    await expect(pageLoads.count).toBe(1)
+  })
+
+  test('it follows hash redirects via POST without a full page load', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/')
+
+    await page.getByRole('link', { name: 'Manual Hash Redirect POST visit' }).click()
+    await expect(page).toHaveURL('/links/url-fragments#target')
+    await expect(page.getByText("This is the element with id 'target'")).toBeVisible()
+    await expect(pageLoads.count).toBe(1)
+  })
 })
 
 test('can do a subsequent visit after the previous visit has thrown an error in onSuccess', async ({ page }) => {

@@ -121,6 +121,16 @@ export class Response {
   }
 
   protected async handleNonInertiaResponse() {
+    if (this.isInertiaRedirect()) {
+      router.visit(this.getHeader('x-inertia-redirect'), {
+        ...this.requestParams.all(),
+        method: 'get',
+        data: {},
+      })
+
+      return
+    }
+
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
 
@@ -157,6 +167,10 @@ export class Response {
 
   protected hasHeader(header: string): boolean {
     return this.getHeader(header) !== undefined
+  }
+
+  protected isInertiaRedirect(): boolean {
+    return this.hasStatus(409) && this.hasHeader('x-inertia-redirect')
   }
 
   protected isLocationVisit(): boolean {
