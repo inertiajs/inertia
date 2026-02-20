@@ -39,13 +39,8 @@ import type { Property } from 'estree'
 import { type NodeWithPos, ParsedCode, extractBoolean, extractString, extractStringArray } from './astUtils'
 import type { FrameworkConfig } from './types'
 
-/**
- * Main entry point for the pages transform.
- *
- * Returns the transformed code, or null if no transformation was needed.
- */
+/** Returns the transformed code, or null if no transformation was needed. */
 export function transformPageResolution(code: string, frameworks: Record<string, FrameworkConfig>): string | null {
-  // Quick check to avoid parsing files that definitely don't contain Inertia code
   if (!code.includes('InertiaApp')) {
     return null
   }
@@ -56,25 +51,19 @@ export function transformPageResolution(code: string, frameworks: Record<string,
     return null
   }
 
-  // Detect which framework is being used (Vue, React, Svelte, or custom)
   const framework = parsed.detectFramework(frameworks)
 
   if (!framework) {
     return null
   }
 
-  // Get framework-specific settings
   const extensions = framework.config.extensions
   const extractDefault = framework.config.extractDefault ?? true
 
-  // Case 1: User specified `pages: './Pages'` or `pages: { path: './Pages' }`
-  // Replace the entire `pages` property with a generated `resolve` function
   if (parsed.pagesProperty) {
     return replacePages(code, parsed.pagesProperty, extensions, extractDefault)
   }
 
-  // Case 2: User has a call without any resolver (no `pages` or `resolve` property)
-  // Inject a default resolver that looks in ./pages and ./Pages directories
   if (parsed.callWithoutResolver) {
     return injectResolver(code, parsed.callWithoutResolver, extensions, extractDefault)
   }
@@ -100,22 +89,18 @@ function replacePages(
     return code
   }
 
-  // Use custom extensions if provided, otherwise use framework defaults
   const extensions = config.extensions
     ? Array.isArray(config.extensions)
       ? config.extensions
       : [config.extensions]
     : defaultExtensions
 
-  // Default to lazy loading (dynamic imports with code splitting)
   const eager = !(config.lazy ?? true)
 
-  // Build the resolver function based on the configuration
   const resolver = config.directory
     ? buildResolver(config.directory.replace(/\/$/, ''), extensions, extractDefault, eager, config.transform)
     : buildDefaultResolver(extensions, extractDefault, eager)
 
-  // Replace the `pages: ...` property with the generated `resolve: ...` function
   return code.slice(0, property.start) + resolver + code.slice(property.end)
 }
 
@@ -123,9 +108,9 @@ function replacePages(
  * Inject a default resolver into a call that doesn't have one.
  *
  * Handles three cases:
- * 1. Empty call:    `createInertiaApp()`     → `createInertiaApp({ resolve: ... })`
- * 2. Empty object:  `createInertiaApp({})`   → `createInertiaApp({ resolve: ... })`
- * 3. Other options: `createInertiaApp({a})` → `createInertiaApp({ resolve: ..., a})`
+ * 1. Empty call:    `createInertiaApp()`    becomes `createInertiaApp({ resolve: ... })`
+ * 2. Empty object:  `createInertiaApp({})`  becomes `createInertiaApp({ resolve: ... })`
+ * 3. Other options: `createInertiaApp({a})` becomes `createInertiaApp({ resolve: ..., a})`
  */
 function injectResolver(
   code: string,
@@ -135,23 +120,18 @@ function injectResolver(
 ): string {
   const resolver = buildDefaultResolver(extensions, extractDefault)
 
-  // Case 1: No arguments - insert `{ resolver }` before the closing `)`
   if (!call.options) {
     return code.slice(0, call.callEnd - 1) + `{ ${resolver} })` + code.slice(call.callEnd)
   }
 
-  // Case 2: Empty object `{}` - replace with `{ resolver }`
   if (call.options.isEmpty) {
     return code.slice(0, call.options.start) + `{ ${resolver} }` + code.slice(call.options.end)
   }
 
-  // Case 3: Object with other properties - prepend resolver
   return code.slice(0, call.options.start + 1) + ` ${resolver},` + code.slice(call.options.start + 1)
 }
 
-/**
- * Configuration extracted from the `pages` property value.
- */
+/** The parsed representation of a `pages` property value. */
 interface PagesConfig {
   directory?: string
   extensions?: string | string[]
@@ -167,14 +147,12 @@ interface PagesConfig {
  * 2. Object: `pages: { path: './Pages', extension: '.vue', lazy: true, transform: fn }`
  */
 function extractPagesConfig(node: Property['value'], code: string): PagesConfig | null {
-  // Simple string format: `pages: './Pages'`
   const str = extractString(node)
 
   if (str) {
     return { directory: str }
   }
 
-  // Object format: `pages: { path: './Pages', ... }`
   if (node.type !== 'ObjectExpression') {
     return null
   }
@@ -195,10 +173,8 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
     if (key === 'path') {
       directory = extractString(value)
     } else if (key === 'extension') {
-      // Supports both `extension: '.vue'` and `extension: ['.tsx', '.jsx']`
       extensions = extractString(value) ?? extractStringArray(value)
     } else if (key === 'transform') {
-      // For transform, we preserve the raw source code (could be arrow function, etc.)
       transform = code.slice(value.start, value.end)
     } else if (key === 'lazy') {
       lazy = extractBoolean(value)
@@ -208,25 +184,6 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
   return { directory, extensions, transform, lazy }
 }
 
-/**
- * Build the resolve function code string.
- *
- * This generates code like:
- * ```js
- * resolve: async (name, page) => {
- *   const pages = import.meta.glob('./Pages/*.vue', { eager: true })
- *   const module = pages[`./Pages/${name}.vue`]
- *   if (!module) throw new Error(`Page not found: ${name}`)
- *   return module.default ?? module
- * }
- * ```
- *
- * @param directories - Directory or directories to search for pages
- * @param extensions - File extensions to include in the glob
- * @param extractDefault - Whether to extract `.default` from the module (Vue/React need this, Svelte doesn't)
- * @param eager - Whether to use eager loading (synchronous) or lazy loading (dynamic import)
- * @param transform - Optional transform function to modify the page name
- */
 function buildResolver(
   directories: string | string[],
   extensions: string[],
@@ -236,23 +193,16 @@ function buildResolver(
 ): string {
   const dirs = Array.isArray(directories) ? directories : [directories]
 
-  // Build glob patterns: './Pages/**/*.vue' or ['./pages/**/*.vue', './Pages/**/*.vue']
   const globs = dirs.map((d) => buildGlob(d, extensions))
   const glob = globs.length === 1 ? `'${globs[0]}'` : `['${globs.join("', '")}']`
 
-  // If transform is provided, we use `resolvedName` after applying the transform
   const nameVar = transform ? 'resolvedName' : 'name'
-
-  // Build the module lookup: pages[`./Pages/${name}.vue`] || pages[`./Pages/${name}.jsx`]
   const lookup = dirs.flatMap((d) => extensions.map((ext) => `pages[\`${d}/\${${nameVar}}${ext}\`]`)).join(' || ')
 
-  // Optional transform line: const resolvedName = (transform)(name, page)
   const transformLine = transform ? `const resolvedName = (${transform})(name, page)\n    ` : ''
 
-  // Vue/React export components as default, Svelte exports the component directly
   const returnValue = extractDefault ? 'module.default ?? module' : 'module'
 
-  // Eager mode loads all modules upfront, lazy mode uses dynamic import()
   const globOptions = `, { eager: ${eager} }`
   const moduleLookup = eager ? lookup : `await (${lookup})?.()`
 
@@ -264,17 +214,10 @@ function buildResolver(
   }`
 }
 
-/**
- * Build a resolver that searches both ./pages and ./Pages directories.
- * This is the default when no custom path is specified.
- */
 function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = false): string {
   return buildResolver(['./pages', './Pages'], extensions, extractDefault, eager)
 }
 
-// Build a glob pattern for Vite's import.meta.glob
-// Single extension: ./Pages/**/*.vue
-// Multiple extensions: ./Pages/**/*{.tsx,.jsx}
 function buildGlob(directory: string, extensions: string[]): string {
   const ext = extensions.length === 1 ? extensions[0] : `{${extensions.join(',')}}`
 

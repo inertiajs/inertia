@@ -19,40 +19,31 @@ import { parseAst } from 'vite'
 import type { FrameworkConfig } from './types'
 
 /**
- * Augments an ESTree node type with `start` and `end` position info
- * added by Rollup's parser, needed for string slicing during transforms.
+ * ESTree nodes augmented with the `start`/`end` positions Rollup's parser adds.
  */
 export type NodeWithPos<T> = T & { start: number; end: number }
 
 const INERTIA_APP_FUNCTION = 'createInertiaApp'
 const CREATE_SERVER_FUNCTION = 'createServer'
 
-/**
- * A top-level `createInertiaApp()` expression statement with position info.
- */
+/** A top-level `createInertiaApp()` expression statement with position info. */
 export interface InertiaStatement {
   statement: NodeWithPos<ExpressionStatement>
   call: NodeWithPos<SimpleCallExpression>
 }
 
-/**
- * Position info for the options object in a `createInertiaApp()` call.
- */
+/** Position info for the first argument of a `createInertiaApp()` call. */
 export interface InertiaCallOptions {
   start: number
   end: number
   isEmpty: boolean
 }
 
-/**
- * Wrapper around a parsed AST that provides Inertia-specific analysis methods.
- */
+/** Wraps a parsed AST with methods to find Inertia-specific patterns. */
 export class ParsedCode {
   private constructor(private ast: Program) {}
 
-  /**
-   * Returns null if parsing fails.
-   */
+  /** Returns null if parsing fails (e.g. non-JS file content). */
   static from(code: string): ParsedCode | null {
     try {
       return new ParsedCode(parseAst(code))
@@ -109,9 +100,7 @@ export class ParsedCode {
     return null
   }
 
-  /**
-   * Find a top-level `createServer()` expression statement.
-   */
+  /** Find a top-level `createServer()` call (not nested in exports). */
   get createServerStatement(): NodeWithPos<ExpressionStatement> | null {
     for (const node of this.ast.body) {
       if (node.type !== 'ExpressionStatement') {
@@ -134,7 +123,7 @@ export class ParsedCode {
   }
 
   /**
-   * Find all `createInertiaApp()` calls anywhere in the AST (including nested in exports).
+   * Find all `createInertiaApp()` calls, including those nested inside exports.
    */
   get inertiaCalls(): CallExpression[] {
     const calls: CallExpression[] = []
@@ -148,12 +137,8 @@ export class ParsedCode {
     return calls
   }
 
-  /**
-   * Find the `pages` property in a `createInertiaApp()` call's options.
-   */
   get pagesProperty(): NodeWithPos<Property> | null {
     for (const call of this.inertiaCalls) {
-      // Skip calls without arguments or with non-object first argument
       if (call.arguments.length === 0 || call.arguments[0].type !== 'ObjectExpression') {
         continue
       }
@@ -171,9 +156,7 @@ export class ParsedCode {
     return null
   }
 
-  /**
-   * Find a `createInertiaApp()` call that has no `pages` or `resolve` property.
-   */
+  /** Find a `createInertiaApp()` call that has no `pages` or `resolve` property yet. */
   get callWithoutResolver(): { callEnd: number; options?: InertiaCallOptions } | null {
     for (const call of this.inertiaCalls) {
       const callWithPos = call as NodeWithPos<CallExpression>
@@ -190,7 +173,6 @@ export class ParsedCode {
 
       const obj = call.arguments[0] as NodeWithPos<ObjectExpression>
 
-      // Check if it already has a pages or resolve property
       const hasResolver = obj.properties.some(
         (p) =>
           p.type === 'Property' && p.key.type === 'Identifier' && (p.key.name === 'pages' || p.key.name === 'resolve'),
@@ -200,7 +182,6 @@ export class ParsedCode {
         continue
       }
 
-      // Found a call with options but no resolver
       return {
         callEnd: callWithPos.end,
         options: { start: obj.start, end: obj.end, isEmpty: obj.properties.length === 0 },
@@ -236,8 +217,7 @@ export class ParsedCode {
 }
 
 /**
- * Extract a string value from an AST node.
- * Handles regular strings and simple template literals.
+ * Supports regular strings and simple template literals without expressions.
  */
 export function extractString(node: Property['value']): string | undefined {
   if (node.type === 'Literal' && typeof node.value === 'string') {
@@ -252,9 +232,7 @@ export function extractString(node: Property['value']): string | undefined {
   return undefined
 }
 
-/**
- * Extract a string array from an AST node.
- */
+/** Each element is passed through `extractString`, non-strings are skipped. */
 export function extractStringArray(node: Property['value']): string[] | undefined {
   if (node.type !== 'ArrayExpression') {
     return undefined

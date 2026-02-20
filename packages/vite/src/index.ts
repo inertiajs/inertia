@@ -30,10 +30,8 @@ export { InertiaSSROptions }
 
 export interface InertiaPluginOptions {
   /**
-   * SSR configuration. Can be a string path to the SSR entry file,
-   * or an object with additional options like port and cluster mode.
-   *
-   * If not specified, the plugin will auto-detect common entry locations:
+   * SSR configuration. Pass a string for the entry path, or an object
+   * for additional options. Auto-detected when not specified from:
    * - resources/js/ssr.{ts,tsx,js,jsx}
    * - src/ssr.{ts,tsx,js,jsx}
    * - resources/js/app.{ts,tsx,js,jsx}
@@ -65,8 +63,7 @@ export interface InertiaPluginOptions {
 }
 
 /**
- * Convert the flexible `frameworks` option (single config or array) into a
- * lookup record keyed by package name for efficient framework detection.
+ * Normalize the frameworks option into a record keyed by package name.
  */
 function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<string, FrameworkConfig> {
   if (!input) {
@@ -79,22 +76,14 @@ function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<
 }
 
 export default function inertia(options: InertiaPluginOptions = {}): Plugin {
-  // Normalize SSR options - accept either a string path or full options object
   const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : (options.ssr ?? {})
-
-  // Merge custom frameworks with defaults (custom frameworks override defaults with same package name)
   const frameworks = { ...defaultFrameworks, ...toFrameworkRecord(options.frameworks) }
 
-  // Will be set in configResolved once we know the project root
   let entry: string | null = null
 
   return {
     name: '@inertiajs/vite',
 
-    /**
-     * Modify Vite config before it's resolved.
-     * For SSR builds: auto-detects entry file and enables sourcemaps by default.
-     */
     config(config, { isSsrBuild }) {
       if (!isSsrBuild) {
         return
@@ -115,10 +104,6 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       }
     },
 
-    /**
-     * After Vite resolves its config, we can determine the SSR entry file.
-     * This runs before any transforms, so we know early if SSR is enabled.
-     */
     configResolved(config) {
       entry = resolveSSREntry(ssr, config)
 
@@ -127,22 +112,13 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       }
     },
 
-    /**
-     * Transform hook - runs on every JS/TS file during both dev and build.
-     *
-     * For SSR builds: Wraps the Inertia app configuration with server bootstrap code.
-     * For all builds: Transforms the `pages` shorthand into a full `resolve` function.
-     */
     transform(code, id, options) {
-      // Only process JavaScript/TypeScript files
       if (!/\.[jt]sx?$/.test(id)) {
         return null
       }
 
       let result = code
 
-      // SSR transform: wrap createInertiaApp() with server bootstrap code
-      // This only applies during SSR builds (options.ssr is true)
       if (options?.ssr && findInertiaAppExport(result)) {
         result =
           wrapWithServerBootstrap(
@@ -152,18 +128,9 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           ) ?? result
       }
 
-      // Pages transform: convert `pages: './Pages'` to a full resolve function
-      // This applies to both client and SSR builds
       return transformPageResolution(result, frameworks) ?? (result !== code ? result : null)
     },
 
-    /**
-     * Dev server middleware - exposes an HTTP endpoint for SSR rendering.
-     *
-     * During development, Laravel calls this endpoint instead of spawning a
-     * separate Node.js process. The endpoint loads the SSR entry module via
-     * Vite's SSR module loader (with full HMR support) and renders the page.
-     */
     configureServer(server) {
       if (!entry) {
         return
