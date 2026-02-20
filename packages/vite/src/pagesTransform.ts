@@ -28,7 +28,7 @@
  *   pages: {
  *     path: './Pages',
  *     extension: '.tsx',
- *     eager: false,
+ *     lazy: true,
  *     transform: (name, page) => name.replace('/', '-')
  *   }
  * })
@@ -108,7 +108,7 @@ function replacePages(
     : defaultExtensions
 
   // Default to eager loading (synchronous imports) for better performance
-  const eager = config.eager ?? true
+  const eager = !(config.lazy ?? false)
 
   // Build the resolver function based on the configuration
   const resolver = config.directory
@@ -156,7 +156,7 @@ interface PagesConfig {
   directory?: string
   extensions?: string | string[]
   transform?: string
-  eager?: boolean
+  lazy?: boolean
 }
 
 /**
@@ -164,7 +164,7 @@ interface PagesConfig {
  *
  * Supports two formats:
  * 1. String: `pages: './Pages'`
- * 2. Object: `pages: { path: './Pages', extension: '.vue', eager: false, transform: fn }`
+ * 2. Object: `pages: { path: './Pages', extension: '.vue', lazy: true, transform: fn }`
  */
 function extractPagesConfig(node: Property['value'], code: string): PagesConfig | null {
   // Simple string format: `pages: './Pages'`
@@ -182,7 +182,7 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
   let directory: string | undefined
   let extensions: string | string[] | undefined
   let transform: string | undefined
-  let eager: boolean | undefined
+  let lazy: boolean | undefined
 
   for (const prop of node.properties) {
     if (prop.type !== 'Property' || prop.key.type !== 'Identifier') {
@@ -200,17 +200,17 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
     } else if (key === 'transform' && value.start !== undefined && value.end !== undefined) {
       // For transform, we preserve the raw source code (could be arrow function, etc.)
       transform = code.slice(value.start, value.end)
-    } else if (key === 'eager') {
-      eager = extractBoolean(value)
+    } else if (key === 'lazy') {
+      lazy = extractBoolean(value)
     }
   }
 
-  // Must have either a directory or eager setting to be valid
-  if (!directory && eager === undefined) {
+  // Must have either a directory or lazy setting to be valid
+  if (!directory && lazy === undefined) {
     return null
   }
 
-  return { directory, extensions, transform, eager }
+  return { directory, extensions, transform, lazy }
 }
 
 /**

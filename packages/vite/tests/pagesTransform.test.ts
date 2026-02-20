@@ -145,9 +145,9 @@ export default createInertiaApp({
       `)
     })
 
-    it('transforms with eager: false and no path', () => {
+    it('transforms with lazy: true and no path', () => {
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
-export default createInertiaApp({ pages: { eager: false } })`
+export default createInertiaApp({ pages: { lazy: true } })`
 
       expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
