@@ -1,4 +1,5 @@
 import { ReloadOptions, router } from '@inertiajs/core'
+import { get } from 'lodash-es'
 import { createElement, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import usePage from './usePage'
 
@@ -24,7 +25,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   const pageProps = usePage().props
   const keys = useMemo(() => (data ? (Array.isArray(data) ? data : [data]) : []), [data])
 
-  const [loaded, setLoaded] = useState(() => keys.length > 0 && keys.every((key) => pageProps[key] !== undefined))
+  const [loaded, setLoaded] = useState(() => keys.length > 0 && keys.every((key) => get(pageProps, key) !== undefined))
   const [isFetching, setIsFetching] = useState(false)
   const fetching = useRef<boolean>(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -33,7 +34,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
 
   useEffect(() => {
     if (keys.length > 0) {
-      setLoaded(keys.every((key) => pageProps[key] !== undefined))
+      setLoaded(keys.every((key) => get(pageProps, key) !== undefined))
     }
   }, [pageProps, keys])
 

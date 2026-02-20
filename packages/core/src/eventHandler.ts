@@ -1,3 +1,4 @@
+import { get } from 'lodash-es'
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
@@ -113,7 +114,7 @@ class EventHandler {
           const pageProps = currentPage.get().props
 
           for (const [group, props] of Object.entries(data.initialDeferredProps ?? data.deferredProps ?? {})) {
-            const missing = props.filter((prop) => pageProps[prop] === undefined)
+            const missing = props.filter((prop) => get(pageProps, prop) === undefined)
 
             if (missing.length > 0) {
               pendingDeferred[group] = missing

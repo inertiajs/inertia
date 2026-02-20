@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, get } from 'lodash-es'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
@@ -280,7 +280,7 @@ class PrefetchedRequests {
         currentPage.mergeOncePropsIntoResponse(pageResponse, { force: true })
 
         for (const [group, deferredProps] of Object.entries(pageResponse.deferredProps ?? {})) {
-          const remaining = deferredProps.filter((prop) => pageResponse.props[prop] === undefined)
+          const remaining = deferredProps.filter((prop) => get(pageResponse.props, prop) === undefined)
 
           if (remaining.length > 0) {
             pageResponse.deferredProps![group] = remaining

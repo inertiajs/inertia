@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
+  import { get } from 'lodash-es'
   import { usePage } from '../page.svelte'
 
   interface Props {
@@ -15,7 +16,7 @@
   let { data = '', params = {}, buffer = 0, as = 'div', always = false, children, fallback }: Props = $props()
 
   let keys = $derived(data ? (Array.isArray(data) ? data : [data]) : [])
-  let loaded = $derived(keys.length > 0 && keys.every((key) => page.props[key] !== undefined))
+  let loaded = $derived(keys.length > 0 && keys.every((key) => get(page.props, key) !== undefined))
   let fetching = $state(false)
   let observer: IntersectionObserver | null = null
 

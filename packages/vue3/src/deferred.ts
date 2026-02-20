@@ -1,4 +1,5 @@
 import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
+import { get } from 'lodash-es'
 import { defineComponent, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
 
 const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
@@ -73,7 +74,7 @@ export default defineComponent({
       throw new Error('`<Deferred>` requires a `<template #fallback>` slot')
     }
 
-    return keys.every((key) => this.$page.props[key] !== undefined)
+    return keys.every((key) => get(this.$page.props, key) !== undefined)
       ? this.$slots.default?.({ reloading: this.reloading })
       : this.$slots.fallback({})
   },

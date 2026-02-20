@@ -1,4 +1,5 @@
 import { isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
+import { get } from 'lodash-es'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'
@@ -67,10 +68,10 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   }, [keys])
 
   useEffect(() => {
-    setLoaded(keys.every((key) => pageProps[key] !== undefined))
+    setLoaded(keys.every((key) => get(pageProps, key) !== undefined))
   }, [pageProps, keys])
 
-  const propsAreDefined = useMemo(() => keys.every((key) => pageProps[key] !== undefined), [keys, pageProps])
+  const propsAreDefined = useMemo(() => keys.every((key) => get(pageProps, key) !== undefined), [keys, pageProps])
 
   if (loaded && propsAreDefined) {
     if (typeof children === 'function') {
