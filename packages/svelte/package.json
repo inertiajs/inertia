@@ -51,7 +51,7 @@
     "axios": "^1.13.5",
     "es-check": "^9.5.4",
     "publint": "^0.3.17",
-    "svelte": "^4.2.20",
+    "svelte": "^5.51.5",
     "svelte-check": "^4.3.6",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
