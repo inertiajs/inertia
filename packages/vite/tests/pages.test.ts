@@ -16,7 +16,7 @@ describe('pages property transform', () => {
       `)
 
       expect(result).toContain('resolve: async (name, page)')
-      expect(result).toContain("import.meta.glob('./Pages/**/*.vue', { eager: true })")
+      expect(result).toContain("import.meta.glob('./Pages/**/*.vue', { eager: false })")
       expect(result).toContain('./Pages/${name}.vue')
     })
 
@@ -26,7 +26,7 @@ describe('pages property transform', () => {
         export default createInertiaApp({ pages: './Pages' })
       `)
 
-      expect(result).toContain("import.meta.glob('./Pages/**/*{.tsx,.jsx}', { eager: true })")
+      expect(result).toContain("import.meta.glob('./Pages/**/*{.tsx,.jsx}', { eager: false })")
       expect(result).toContain('${name}.tsx')
       expect(result).toContain('${name}.jsx')
     })
@@ -37,7 +37,7 @@ describe('pages property transform', () => {
         export default createInertiaApp({ pages: './Pages' })
       `)
 
-      expect(result).toContain("import.meta.glob('./Pages/**/*.svelte', { eager: true })")
+      expect(result).toContain("import.meta.glob('./Pages/**/*.svelte', { eager: false })")
       expect(result).toContain('${name}.svelte')
     })
 
@@ -59,7 +59,7 @@ describe('pages property transform', () => {
         export default createInertiaApp({ pages: { path: './Custom' } })
       `)
 
-      expect(result).toContain("import.meta.glob('./Custom/**/*.vue', { eager: true })")
+      expect(result).toContain("import.meta.glob('./Custom/**/*.vue', { eager: false })")
       expect(result).toContain('./Custom/${name}.vue')
     })
 
@@ -69,7 +69,7 @@ describe('pages property transform', () => {
         export default createInertiaApp({ pages: { path: './Pages', extension: '.jsx' } })
       `)
 
-      expect(result).toContain("import.meta.glob('./Pages/**/*.jsx', { eager: true })")
+      expect(result).toContain("import.meta.glob('./Pages/**/*.jsx', { eager: false })")
       expect(result).toContain('./Pages/${name}.jsx')
       expect(result).not.toContain('.tsx')
     })

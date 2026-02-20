@@ -13,8 +13,8 @@
  * ```js
  * createInertiaApp({
  *   resolve: async (name, page) => {
- *     const pages = import.meta.glob('./Pages/*.vue', { eager: true })
- *     const module = pages[`./Pages/${name}.vue`]
+ *     const pages = import.meta.glob('./Pages/*.vue')
+ *     const module = await (pages[`./Pages/${name}.vue`])?.()
  *     if (!module) throw new Error(`Page not found: ${name}`)
  *     return module.default ?? module
  *   }
@@ -107,8 +107,8 @@ function replacePages(
       : [config.extensions]
     : defaultExtensions
 
-  // Default to eager loading (synchronous imports) for better performance
-  const eager = !(config.lazy ?? false)
+  // Default to lazy loading (dynamic imports with code splitting)
+  const eager = !(config.lazy ?? true)
 
   // Build the resolver function based on the configuration
   const resolver = config.directory
@@ -300,7 +300,7 @@ function buildResolver(
   const returnValue = extractDefault ? 'module.default ?? module' : 'module'
 
   // Eager mode loads all modules upfront, lazy mode uses dynamic import()
-  const globOptions = eager ? ', { eager: true }' : ''
+  const globOptions = `, { eager: ${eager} }`
   const moduleLookup = eager ? lookup : `await (${lookup})?.()`
 
   return `resolve: async (name, page) => {
@@ -315,7 +315,7 @@ function buildResolver(
  * Build a resolver that searches both ./pages and ./Pages directories.
  * This is the default when no custom path is specified.
  */
-function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = true): string {
+function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = false): string {
   return buildResolver(['./pages', './Pages'], extensions, extractDefault, eager)
 }
 
