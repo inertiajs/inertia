@@ -1,39 +1,16 @@
 /**
  * SSR Transform
  *
- * This module transforms the SSR entry file to wrap the Inertia app configuration
- * with server bootstrap code. Instead of manually writing the server setup:
- *
- * ```js
- * import { createInertiaApp } from '@inertiajs/vue3'
- * import createServer from '@inertiajs/vue3/server'
- * import { renderToString } from 'vue/server-renderer'
- *
- * const render = await createInertiaApp({ ... })
- *
- * createServer((page) => render(page, renderToString))
- * ```
- *
- * Users can simply write:
- *
- * ```js
- * import { createInertiaApp } from '@inertiajs/vue3'
- *
- * createInertiaApp({ ... })
- * ```
- *
- * The plugin automatically detects the framework and injects the appropriate
- * server bootstrap code during SSR builds.
+ * Transforms the SSR entry file by wrapping `createInertiaApp()` with
+ * framework-specific server bootstrap code, so users don't need to
+ * write the boilerplate manually.
  */
 
 import { ParsedCode } from './astUtils'
 import type { FrameworkConfig, SSROptions } from './types'
 
 /**
- * Format SSR options as a string to be inserted into generated code.
- *
- * Returns an empty string if no options are set, otherwise returns
- * a comma-prefixed JSON string like `, {"port":13715,"cluster":true}`.
+ * Returns empty string if no options, otherwise `, {"port":13715}`.
  */
 function formatSSROptions(options: SSROptions): string {
   const entries = Object.entries(options).filter(([, v]) => v !== undefined)
@@ -42,30 +19,8 @@ function formatSSROptions(options: SSROptions): string {
 }
 
 /**
- * Check if the code contains a top-level Inertia app configuration call
- * or a createServer call that needs transformation.
- *
- * This is used as a quick check before applying the full transform.
- * Returns true for code like:
- *
- * ```js
- * createInertiaApp({ ... })
- * ```
- *
- * Or for legacy createServer patterns:
- *
- * ```js
- * createServer((page) => createInertiaApp({ ... }))
- * ```
- *
- * But NOT for code that already has an export:
- *
- * ```js
- * export default createInertiaApp({ ... })
- * ```
- *
- * The SSR entry should have a bare call, not an export, because we need
- * to wrap it with server bootstrap code.
+ * Quick check for a top-level `createInertiaApp()` or `createServer()` call
+ * that needs SSR wrapping. Does not match exported calls.
  */
 export function findInertiaAppExport(code: string): boolean {
   const parsed = ParsedCode.from(code)
@@ -73,25 +28,8 @@ export function findInertiaAppExport(code: string): boolean {
 }
 
 /**
- * Wrap the Inertia app configuration with server bootstrap code.
- *
- * This transform:
- * 1. Finds the `createInertiaApp()` or `createInertiaApp()` call
- * 2. Detects which framework is being used (Vue, React, Svelte)
- * 3. Wraps the call with the framework's SSR template
- *
- * The SSR template is defined in each framework's config file (e.g., `frameworks/vue.ts`).
- *
- * The generated code uses `import.meta.env.PROD` to detect dev vs production:
- * - In dev: `import.meta.env.PROD` is false, so createServer is skipped (Vite handles SSR)
- * - In production: `import.meta.env.PROD` is true, so createServer runs
- *
- * For backwards compatibility, it also handles the legacy createServer pattern:
- * ```js
- * createServer((page) => createInertiaApp({ ... }))
- * ```
- *
- * @returns The transformed code, or null if no transformation was needed
+ * Wrap `createInertiaApp()` with the framework's SSR template.
+ * Also handles the explicit `createServer()` pattern.
  */
 export function wrapWithServerBootstrap(
   code: string,
@@ -125,7 +63,7 @@ export function wrapWithServerBootstrap(
     return code.slice(0, statement.start) + ssrCode + code.slice(statement.end)
   }
 
-  // Handle the legacy pattern: createServer((page) => createInertiaApp({ ... }))
+  // Handle the explicit createServer() pattern
   if (parsed.createServerStatement) {
     const statement = parsed.createServerStatement
     const args = (statement.expression as unknown as { arguments: Array<{ start: number; end: number }> }).arguments

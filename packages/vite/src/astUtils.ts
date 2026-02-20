@@ -1,15 +1,9 @@
 /**
  * AST Utilities for Inertia Code Transforms
  *
- * This module provides utilities for parsing and analyzing JavaScript/TypeScript code
- * to find Inertia-specific patterns. We use Vite's built-in `parseAst` (which uses
- * Rollup's parser under the hood) to parse code into an ESTree-compatible AST.
- *
- * The main class `ParsedCode` wraps a parsed AST and provides methods to:
- * - Detect which Inertia framework adapter is being used (Vue, React, Svelte)
- * - Find `createInertiaApp()` calls
- * - Extract the `pages` property for transformation
- * - Find calls that need a default resolver injected
+ * Parses JavaScript/TypeScript code using Vite's built-in `parseAst` (Rollup's parser)
+ * and provides methods to find Inertia-specific patterns like `createInertiaApp()` calls,
+ * framework detection, and property extraction.
  */
 
 import type {
@@ -25,32 +19,16 @@ import { parseAst } from 'vite'
 import type { FrameworkConfig } from './types'
 
 /**
- * Augments an ESTree node type with position information.
- * Rollup's parser adds `start` and `end` properties to nodes,
- * which we need for string slicing during code transformation.
+ * Augments an ESTree node type with `start` and `end` position info
+ * added by Rollup's parser, needed for string slicing during transforms.
  */
 export type NodeWithPos<T> = T & { start: number; end: number }
 
-/**
- * The function name that indicates an Inertia app configuration.
- * We look for calls to this function to determine where to apply transforms.
- */
 const INERTIA_APP_FUNCTION = 'createInertiaApp'
-
-/**
- * The function name for the legacy SSR server pattern.
- * We need to detect `createServer(...)` calls to add export default for backwards compatibility.
- */
 const CREATE_SERVER_FUNCTION = 'createServer'
 
 /**
- * Represents a standalone Inertia call at the module level.
- * Used for SSR transform where we need to wrap the entire statement.
- *
- * Example of what this matches:
- * ```js
- * createInertiaApp({ resolve: name => name })  // ← This entire statement
- * ```
+ * A top-level `createInertiaApp()` expression statement with position info.
  */
 export interface InertiaStatement {
   statement: NodeWithPos<ExpressionStatement>
@@ -58,8 +36,7 @@ export interface InertiaStatement {
 }
 
 /**
- * Position information for the options object in an Inertia call.
- * Used when injecting a default resolver into existing calls.
+ * Position info for the options object in a `createInertiaApp()` call.
  */
 export interface InertiaCallOptions {
   start: number
@@ -69,22 +46,12 @@ export interface InertiaCallOptions {
 
 /**
  * Wrapper around a parsed AST that provides Inertia-specific analysis methods.
- *
- * Usage:
- * ```ts
- * const parsed = ParsedCode.from(code)
- * if (parsed) {
- *   const framework = parsed.detectFramework(frameworks)
- *   const pages = parsed.pagesProperty
- * }
- * ```
  */
 export class ParsedCode {
   private constructor(private ast: Program) {}
 
   /**
-   * Parse JavaScript/TypeScript code into a ParsedCode instance.
-   * Returns null if parsing fails (invalid syntax).
+   * Returns null if parsing fails.
    */
   static from(code: string): ParsedCode | null {
     try {
@@ -94,17 +61,6 @@ export class ParsedCode {
     }
   }
 
-  /**
-   * Extract all import source strings from the code.
-   *
-   * For example, given:
-   * ```js
-   * import { createInertiaApp } from '@inertiajs/vue3'
-   * import { Head } from '@inertiajs/vue3'
-   * ```
-   *
-   * Returns: ['@inertiajs/vue3', '@inertiajs/vue3']
-   */
   get importSources(): string[] {
     const sources: string[] = []
 
@@ -117,12 +73,6 @@ export class ParsedCode {
     return sources
   }
 
-  /**
-   * Detect which Inertia framework adapter is being used by checking imports.
-   *
-   * Looks for imports from known framework packages (e.g., '@inertiajs/vue3')
-   * and returns the matching framework configuration.
-   */
   detectFramework(frameworks: Record<string, FrameworkConfig>): { name: string; config: FrameworkConfig } | null {
     const name = this.importSources.find((source) => source in frameworks)
 
@@ -130,21 +80,8 @@ export class ParsedCode {
   }
 
   /**
-   * Find a top-level Inertia call statement (not inside any function or export).
-   *
-   * This is used for SSR transform, which needs to wrap code like:
-   * ```js
-   * createInertiaApp({ ... })
-   * ```
-   *
-   * Into:
-   * ```js
-   * const render = await createInertiaApp({ ... })
-   * createServer((page) => render(page, renderToString))
-   * ```
-   *
-   * Note: This specifically looks for ExpressionStatements, NOT export defaults.
-   * The SSR entry file should have a bare call, not `export default createInertiaApp()`.
+   * Find a top-level `createInertiaApp()` expression statement.
+   * Only matches bare calls, not `export default createInertiaApp()`.
    */
   get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
@@ -173,19 +110,7 @@ export class ParsedCode {
   }
 
   /**
-   * Find a top-level createServer() call statement that doesn't have an export.
-   *
-   * This is used for backwards compatibility with the legacy SSR pattern:
-   * ```js
-   * createServer((page) => createInertiaApp({ page, render, ... }))
-   * ```
-   *
-   * We need to transform this to:
-   * ```js
-   * export default createServer((page) => createInertiaApp({ page, render, ... }))
-   * ```
-   *
-   * So that Vite's SSR dev mode can access the render function.
+   * Find a top-level `createServer()` expression statement.
    */
   get createServerStatement(): NodeWithPos<ExpressionStatement> | null {
     for (const node of this.ast.body) {
@@ -209,15 +134,7 @@ export class ParsedCode {
   }
 
   /**
-   * Find ALL Inertia calls anywhere in the code (including nested).
-   *
-   * This is used for pages transform, which needs to find calls like:
-   * ```js
-   * export default createInertiaApp({ pages: './Pages' })
-   * ```
-   *
-   * The call might be inside an export, function, or other expression,
-   * so we walk the entire AST to find all matches.
+   * Find all `createInertiaApp()` calls anywhere in the AST (including nested in exports).
    */
   get inertiaCalls(): CallExpression[] {
     const calls: CallExpression[] = []
@@ -232,16 +149,7 @@ export class ParsedCode {
   }
 
   /**
-   * Find the `pages` property in an Inertia call's options object.
-   *
-   * Looks for patterns like:
-   * ```js
-   * createInertiaApp({ pages: './Pages' })
-   * createInertiaApp({ pages: { path: './Pages', extension: '.vue' } })
-   * ```
-   *
-   * Returns the Property node with position info so we can replace it
-   * with a generated `resolve` function.
+   * Find the `pages` property in a `createInertiaApp()` call's options.
    */
   get pagesProperty(): NodeWithPos<Property> | null {
     for (const call of this.inertiaCalls) {
@@ -264,18 +172,7 @@ export class ParsedCode {
   }
 
   /**
-   * Find an Inertia call that doesn't have a `pages` or `resolve` property.
-   *
-   * This is used to inject a default resolver for calls like:
-   * ```js
-   * createInertiaApp()                    // Empty call
-   * createInertiaApp({})                  // Empty options
-   * createInertiaApp({ title: t => t })   // Options but no resolver
-   * ```
-   *
-   * Returns position info needed to inject the resolver:
-   * - `callEnd`: Position of the closing `)` for empty calls
-   * - `options`: Position of the `{}` for calls with options
+   * Find a `createInertiaApp()` call that has no `pages` or `resolve` property.
    */
   get callWithoutResolver(): { callEnd: number; options?: InertiaCallOptions } | null {
     for (const call of this.inertiaCalls) {
@@ -313,17 +210,10 @@ export class ParsedCode {
     return null
   }
 
-  /**
-   * Check if a call expression is an Inertia app configuration call.
-   */
   private isInertiaCall(node: CallExpression | SimpleCallExpression): boolean {
     return node.callee.type === 'Identifier' && (node.callee as Identifier).name === INERTIA_APP_FUNCTION
   }
 
-  /**
-   * Recursively walk all nodes in the AST and call the callback for each.
-   * This is a simple depth-first traversal that handles both arrays and objects.
-   */
   private walkAst(node: unknown, callback: (node: { type: string }) => void): void {
     if (!node || typeof node !== 'object') {
       return
@@ -347,7 +237,7 @@ export class ParsedCode {
 
 /**
  * Extract a string value from an AST node.
- * Handles both regular strings ('foo') and template literals (`foo`).
+ * Handles regular strings and simple template literals.
  */
 export function extractString(node: Property['value']): string | undefined {
   if (node.type === 'Literal' && typeof node.value === 'string') {
@@ -364,7 +254,6 @@ export function extractString(node: Property['value']): string | undefined {
 
 /**
  * Extract a string array from an AST node.
- * Handles: `['.tsx', '.jsx']`
  */
 export function extractStringArray(node: Property['value']): string[] | undefined {
   if (node.type !== 'ArrayExpression') {
@@ -378,9 +267,6 @@ export function extractStringArray(node: Property['value']): string[] | undefine
   return strings.length > 0 ? strings : undefined
 }
 
-/**
- * Extract a boolean value from an AST node.
- */
 export function extractBoolean(node: Property['value']): boolean | undefined {
   if (node.type === 'Literal' && typeof node.value === 'boolean') {
     return node.value
