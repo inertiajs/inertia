@@ -17,7 +17,7 @@ Activate this skill when:
 - Creating or modifying Vue page components for Inertia
 - Working with forms in Vue (using `<Form>` or `useForm`)
 - Implementing client-side navigation with `<Link>` or `router`
-- Using v2 features: deferred props, prefetching, or polling
+- Using v2 features: deferred props, prefetching, WhenVisible, InfiniteScroll, once props, flash data, or polling
 - Building Vue-specific features with the Inertia protocol
 
 ## Documentation
@@ -31,8 +31,6 @@ Use `search-docs` for detailed Inertia v2 Vue patterns and documentation.
 Vue page components should be placed in the `{{ $assist->inertia()->pagesDirectory() }}` directory.
 
 ### Page Component Structure
-
-Important: Vue components must have a single root element.
 
 @verbatim
 @boostsnippet("Basic Vue Page Component", "vue")
@@ -362,33 +360,36 @@ onUnmounted(() => {
 @endboostsnippet
 @endverbatim
 
-### WhenVisible (Infinite Scroll)
+### WhenVisible
 
-Load more data when user scrolls to a specific element:
+Lazy-load a prop when an element scrolls into view. Useful for deferring expensive data that sits below the fold:
 
 @verbatim
-@boostsnippet("Infinite Scroll with WhenVisible", "vue")
+@boostsnippet("WhenVisible Example", "vue")
 <script setup>
 import { WhenVisible } from '@inertiajs/vue3'
 
 defineProps({
-    users: Object
+    stats: Object
 })
 </script>
 
 <template>
     <div>
-        <div v-for="user in users.data" :key="user.id">
-            {{ user.name }}
-        </div>
+        <h1>Dashboard</h1>
 
-        <WhenVisible
-            v-if="users.next_page_url"
-            data="users"
-            :params="{ page: users.current_page + 1 }"
-        >
+        <!-- stats prop is loaded only when this section scrolls into view -->
+        <WhenVisible data="stats" :buffer="200">
             <template #fallback>
-                <div>Loading more...</div>
+                <div class="animate-pulse">Loading stats...</div>
+            </template>
+
+            <template #default="{ fetching }">
+                <div>
+                    <p>Total Users: {{ stats.total_users }}</p>
+                    <p>Revenue: {{ stats.revenue }}</p>
+                    <span v-if="fetching">Refreshing...</span>
+                </div>
             </template>
         </WhenVisible>
     </div>
