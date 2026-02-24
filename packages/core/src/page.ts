@@ -1,3 +1,4 @@
+import { get, set } from 'lodash-es'
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
@@ -293,8 +294,8 @@ class CurrentPage {
         return
       }
 
-      if (force || response.props[onceProp.prop] === undefined) {
-        response.props[onceProp.prop] = this.page.props[existingOnceProp.prop]
+      if (force || get(response.props, onceProp.prop) === undefined) {
+        set(response.props, onceProp.prop, get(this.page.props, existingOnceProp.prop))
         response.onceProps![key].expiresAt = existingOnceProp.expiresAt
       }
     })

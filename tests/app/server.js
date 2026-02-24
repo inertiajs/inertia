@@ -3155,6 +3155,243 @@ app.get('/use-page/page2', (req, res) =>
   }),
 )
 
+// Nested props routes (dot-notation prop types)
+
+app.get('/nested-props/when-visible', (req, res) => {
+  const page = () =>
+    inertia.render(req, res, {
+      component: 'NestedProps/WhenVisible',
+      props: {},
+    })
+
+  if (req.headers['x-inertia-partial-data']) {
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'NestedProps/WhenVisible',
+        props: {
+          stats: {
+            visitors: 1250,
+          },
+        },
+      })
+    }, 250)
+  } else {
+    page()
+  }
+})
+
+app.get('/nested-props/deferred', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/Deferred',
+      deferredProps: {
+        default: ['auth.notifications'],
+      },
+      props: {
+        auth: {
+          user: 'John Doe',
+        },
+      },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'NestedProps/Deferred',
+        props: {
+          auth: partialData.includes('auth.notifications')
+            ? { notifications: ['Notification 1', 'Notification 2', 'Notification 3'] }
+            : undefined,
+        },
+      }),
+    300,
+  )
+})
+
+let nestedMergeRequestCount = 0
+
+app.get('/nested-props/merge', (req, res) => {
+  nestedMergeRequestCount++
+  const page = parseInt(req.query.page ?? 1)
+
+  const posts = new Array(3).fill(1).map((_, index) => ({
+    id: index + 1 + (page - 1) * 3,
+    title: `Post ${index + 1 + (page - 1) * 3}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'NestedProps/Merge',
+    props: {
+      feed: {
+        posts,
+        meta: { page },
+      },
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { mergeProps: ['feed.posts'] }),
+  })
+})
+
+app.get('/nested-props/prepend', (req, res) => {
+  const page = parseInt(req.query.page ?? 1)
+
+  const posts = new Array(3).fill(1).map((_, index) => ({
+    id: index + 1 + (page - 1) * 3,
+    title: `Post ${index + 1 + (page - 1) * 3}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'NestedProps/Prepend',
+    props: {
+      feed: {
+        posts: posts.slice().reverse(),
+        meta: { page },
+      },
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { prependProps: ['feed.posts'] }),
+  })
+})
+
+app.get('/nested-props/once', (req, res) => {
+  const isInertiaRequest = !!req.headers['x-inertia']
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+  const loadedOnceProps = req.headers['x-inertia-except-once-props']?.split(',') ?? []
+  const isPartialRequest = partialData.includes('config.locale')
+  const hasPropAlready = loadedOnceProps.includes('config.locale')
+  const shouldResolveLocale = !isInertiaRequest || isPartialRequest || !hasPropAlready
+
+  inertia.render(req, res, {
+    component: 'NestedProps/Once',
+    props: {
+      config: {
+        locale: shouldResolveLocale ? 'en-' + Date.now() : undefined,
+        timezone: 'UTC',
+      },
+    },
+    onceProps: { 'config.locale': { prop: 'config.locale', expiresAt: null } },
+  })
+})
+
+app.get('/nested-props/deep-merge', (req, res) => {
+  const page = parseInt(req.query.page ?? 1)
+
+  const items = new Array(2).fill(1).map((_, index) => ({
+    id: index + 1 + (page - 1) * 2,
+    name: `Item ${index + 1 + (page - 1) * 2}`,
+  }))
+
+  inertia.render(req, res, {
+    component: 'NestedProps/DeepMerge',
+    props: {
+      data: {
+        items,
+        label: `Page ${page}`,
+      },
+    },
+    ...(req.headers['x-inertia-reset'] ? {} : { deepMergeProps: ['data'] }),
+  })
+})
+
+app.get('/nested-props/shared-dot-props', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  if (partialData.includes('auth.user.permissions')) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/SharedDotProps',
+      props: {
+        auth: {
+          user: {
+            permissions: ['edit-posts', 'delete-posts', 'create-posts'],
+          },
+        },
+      },
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'NestedProps/SharedDotProps',
+    props: {
+      auth: {
+        user: {
+          name: 'John Doe',
+          email: 'john@example.com',
+          permissions: ['edit-posts', 'delete-posts', 'create-posts'],
+        },
+      },
+    },
+  })
+})
+
+app.get('/nested-props/except-dot-props', (req, res) => {
+  const exceptData = req.headers['x-inertia-partial-except']?.split(',') ?? []
+
+  const props = {
+    auth: {
+      user: 'John Doe',
+      token: 'secret-token-123',
+      sessionId: 'sess-abc-456',
+    },
+  }
+
+  if (exceptData.includes('auth.token')) {
+    delete props.auth.token
+  }
+
+  if (exceptData.includes('auth.sessionId')) {
+    delete props.auth.sessionId
+  }
+
+  inertia.render(req, res, {
+    component: 'NestedProps/ExceptDotProps',
+    props,
+  })
+})
+
+app.get('/nested-props/deferred-with-siblings', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  if (!partialData.length) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/DeferredWithSiblings',
+      deferredProps: {
+        default: ['auth.notifications', 'auth.roles'],
+      },
+      props: {
+        auth: {
+          user: {
+            name: 'John Doe',
+            email: 'john@example.com',
+          },
+          token: 'abc-123',
+        },
+      },
+    })
+  }
+
+  const authProps = {}
+
+  if (partialData.includes('auth.notifications')) {
+    authProps.notifications = ['You have a new follower', 'Your post was liked']
+  }
+
+  if (partialData.includes('auth.roles')) {
+    authProps.roles = ['admin', 'editor']
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'NestedProps/DeferredWithSiblings',
+        props: {
+          auth: authProps,
+        },
+      }),
+    300,
+  )
+})
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
