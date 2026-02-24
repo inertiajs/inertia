@@ -113,4 +113,3 @@ export interface SSROptions {
    */
   handleErrors?: boolean
 }
-

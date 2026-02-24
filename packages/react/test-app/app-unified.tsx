@@ -3,9 +3,10 @@ import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/rea
 
 window.testing = { Inertia: router }
 
-const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
+const params = new URLSearchParams(window.location.search)
 
 createInertiaApp({
+  strictMode: params.has('strictMode'),
   resolve: async (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.tsx', { eager: true })
 
@@ -19,7 +20,7 @@ createInertiaApp({
     delay: 0,
     color: 'red',
   },
-  ...(withAppDefaults && {
+  ...(params.has('withAppDefaults') && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {
         return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }

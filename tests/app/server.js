@@ -121,6 +121,13 @@ app.get('/unified/props', (req, res) =>
   }),
 )
 
+app.get('/unified/strict-mode', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'Unified/StrictMode',
+    props: {},
+  }),
+)
+
 // Auto transform test routes (pages shorthand transformed by Vite plugin)
 // Uses VitePages directory to prove transform uses the configured path
 app.get('/auto', (req, res) =>
