@@ -117,7 +117,7 @@ function link(
     viewTransition = false,
     component: componentProp,
     clientSide = false,
-    pageProps: pagePropsProp = {},
+    pageProps: pagePropsProp = null,
     ...params
   }: ActionParameters) {
     prefetchModes = (() => {

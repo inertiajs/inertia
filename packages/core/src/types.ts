@@ -221,6 +221,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   prependProps?: string[]
   deepMergeProps?: string[]
   matchPropsOn?: string[]
+  sharedProps?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
   flash: FlashData
   onceProps?: Record<
@@ -312,7 +313,10 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
   optimistic?: OptimisticCallback
   component: string | null
-  pageProps: Record<string, unknown> | ((currentProps: PageProps) => Record<string, unknown>)
+  pageProps:
+    | Record<string, unknown>
+    | ((currentProps: PageProps, sharedProps: Record<string, unknown>) => Record<string, unknown>)
+    | null
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -635,7 +639,10 @@ export interface LinkComponentBaseProps extends Partial<
     VisitCallbacks & {
       href: string | UrlMethodPair
       clientSide: boolean
-      pageProps: Record<string, unknown> | ((currentProps: PageProps) => Record<string, unknown>)
+      pageProps:
+        | Record<string, unknown>
+        | ((currentProps: PageProps, sharedProps: Record<string, unknown>) => Record<string, unknown>)
+        | null
       prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
       cacheFor: CacheForOption | CacheForOption[]
       cacheTags: string | string[]

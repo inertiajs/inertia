@@ -71,7 +71,7 @@
     viewTransition = false,
     component = undefined,
     clientSide = false,
-    pageProps = {},
+    pageProps = null,
     children,
     ...rest
   }: Props & Callbacks = $props()
@@ -79,11 +79,7 @@
   let _method = $derived(isUrlMethodPair(href) ? href.method : method)
   let _href = $derived(isUrlMethodPair(href) ? href.url : href)
   let resolvedComponent = $derived(
-    component
-      ? component
-      : clientSide && isUrlMethodPair(href) && href.component
-        ? href.component
-        : null,
+    component ? component : clientSide && isUrlMethodPair(href) && href.component ? href.component : null,
   )
 
   let asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())

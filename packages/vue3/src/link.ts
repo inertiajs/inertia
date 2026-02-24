@@ -142,8 +142,8 @@ const Link: InertiaLink = defineComponent({
       default: false,
     },
     pageProps: {
-      type: Object as PropType<InertiaLinkProps['pageProps']>,
-      default: () => ({}),
+      type: [Object, Function] as PropType<InertiaLinkProps['pageProps']>,
+      default: null,
     },
   },
   setup(props, { slots, attrs }) {

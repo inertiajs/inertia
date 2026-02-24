@@ -329,7 +329,8 @@ app.get('/client-side-visit/sequential', (req, res) =>
 app.get('/instant-visit', (req, res) =>
   inertia.render(req, res, {
     component: 'InstantVisit/Page1',
-    props: { foo: 'foo from server' },
+    props: { foo: 'foo from server', auth: { user: 'John' } },
+    sharedProps: ['auth'],
   }),
 )
 
@@ -342,7 +343,9 @@ app.get('/instant-visit/target', (req, res) => {
       props: {
         greeting: 'Hello from server',
         timestamp: Date.now(),
+        auth: { user: 'John' },
       },
+      sharedProps: ['auth'],
     })
   }, delay)
 })

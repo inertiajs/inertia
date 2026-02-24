@@ -59,7 +59,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       viewTransition = false,
       component = null,
       clientSide = false,
-      pageProps = {},
+      pageProps = null,
       ...props
     },
     ref,
@@ -115,7 +115,20 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         component: resolvedComponent,
         pageProps,
       }),
-      [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async, resolvedComponent, pageProps],
+      [
+        _data,
+        _method,
+        preserveScroll,
+        preserveState,
+        preserveUrl,
+        replace,
+        only,
+        except,
+        headers,
+        async,
+        resolvedComponent,
+        pageProps,
+      ],
     )
 
     const visitParams = useMemo<VisitOptions>(

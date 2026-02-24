@@ -570,20 +570,29 @@ export class Router {
   protected performInstantSwap(visit: PendingVisit): Promise<void> {
     const current = currentPage.get()
 
+    const sharedProps = Object.fromEntries(
+      (current.sharedProps ?? []).filter((key) => key in current.props).map((key) => [key, current.props[key]]),
+    )
+
     const resolvedPageProps =
-      typeof visit.pageProps === 'function' ? visit.pageProps(cloneDeep(current.props)) : visit.pageProps
+      typeof visit.pageProps === 'function'
+        ? visit.pageProps(cloneDeep(current.props), cloneDeep(sharedProps))
+        : visit.pageProps
+
+    const intermediateProps = resolvedPageProps !== null ? { ...resolvedPageProps } : { ...sharedProps }
 
     const intermediatePage: Page = {
       component: visit.component!,
       url: visit.url.pathname + visit.url.search + visit.url.hash,
       version: current.version,
       props: {
-        ...resolvedPageProps,
+        ...intermediateProps,
         errors: {},
       },
       flash: {},
       clearHistory: false,
       encryptHistory: current.encryptHistory,
+      sharedProps: current.sharedProps,
       rememberedState: {},
     }
 
@@ -643,7 +652,7 @@ export class Router {
       invalidateCacheTags: [],
       viewTransition: false,
       component: null,
-      pageProps: {},
+      pageProps: null,
       ...options,
       ...configuredOptions,
     }

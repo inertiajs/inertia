@@ -3,6 +3,7 @@ import { Link, router } from '@inertiajs/vue3'
 
 defineProps<{
   foo: string
+  auth?: { user: string }
 }>()
 
 const visitWithComponent = () => {
@@ -31,6 +32,16 @@ const visitWithPagePropsCallback = () => {
   })
 }
 
+const visitWithPagePropsCallbackUsingShared = () => {
+  router.visit('/instant-visit/target?delay=500', {
+    component: 'InstantVisit/Target',
+    pageProps: (_currentProps, sharedProps) => ({
+      ...sharedProps,
+      greeting: 'Placeholder with shared',
+    }),
+  })
+}
+
 const visitDeferred = () => {
   router.visit('/instant-visit/deferred?delay=500', {
     component: 'InstantVisit/Deferred',
@@ -43,10 +54,12 @@ const visitDeferred = () => {
   <div>
     <div id="page1">This is Page1</div>
     <div>Foo: {{ foo }}</div>
+    <div id="auth">Auth: {{ auth?.user ?? 'none' }}</div>
 
     <button @click="visitWithComponent">Visit with component</button>
     <button @click="visitWithComponentAndPageProps">Visit with component and pageProps</button>
     <button @click="visitWithPagePropsCallback">Visit with pageProps callback</button>
+    <button @click="visitWithPagePropsCallbackUsingShared">Visit with pageProps callback using shared</button>
     <button @click="visitRedirecting">Visit redirecting</button>
     <button @click="visitDeferred">Visit deferred</button>
 

@@ -110,11 +110,7 @@
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
   const resolvedComponent = $derived(
-    component
-      ? component
-      : clientSide && isUrlMethodPair(action) && action.component
-        ? action.component
-        : null,
+    component ? component : clientSide && isUrlMethodPair(action) && action.component ? action.component : null,
   )
 
   export function getFormData(submitter?: FormSubmitter): FormData {
