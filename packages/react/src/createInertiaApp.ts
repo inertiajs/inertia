@@ -11,7 +11,7 @@ import {
   router,
   setupProgress,
 } from '@inertiajs/core'
-import { createElement, ReactElement } from 'react'
+import { createElement, ReactElement, StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import App, { InertiaAppProps, type InertiaApp } from './App'
@@ -35,7 +35,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<HTMLElement, SharedProps>,
   void,
   ReactInertiaAppConfig
->
+> & {
+  strictMode?: undefined
+}
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
@@ -45,6 +47,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   ReactInertiaAppConfig
 > & {
   render: typeof renderToString
+  strictMode?: undefined
 }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
@@ -55,6 +58,7 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOpti
 > & {
   page?: Page<SharedProps>
   render?: undefined
+  strictMode?: boolean
 }
 
 type RenderToString = (element: ReactElement) => string
@@ -85,6 +89,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     defaults = {},
     http,
     layout,
+    strictMode = false,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -97,6 +102,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   const isServer = typeof window === 'undefined'
+
+  const wrapWithStrictMode = (element: ReactElement): ReactElement => {
+    return strictMode ? createElement(StrictMode, null, element) : element
+  }
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve!(name, page)).then((module) => {
@@ -129,7 +138,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           props,
         })
       } else {
-        reactApp = createElement(App, props)
+        reactApp = wrapWithStrictMode(createElement(App, props))
       }
 
       const html = renderToString(reactApp)
@@ -174,11 +183,12 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       })
     }
 
-    // Default mounting when setup is not provided
+    const appElement = wrapWithStrictMode(createElement(App, props))
+
     if (el.hasAttribute('data-server-rendered')) {
-      hydrateRoot(el, createElement(App, props))
+      hydrateRoot(el, appElement)
     } else {
-      createRoot(el).render(createElement(App, props))
+      createRoot(el).render(appElement)
     }
   })
 
