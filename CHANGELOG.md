@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.15...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.16...master)
 
 - Nothing yet
+
+## [v2.3.16](https://github.com/inertiajs/inertia/compare/v2.3.15...v2.3.16) - 2026-02-24
+
+### What's Changed
+
+* Bump [@sveltejs](https://github.com/sveltejs)/kit from 2.50.2 to 2.52.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2904
+* Add Boost Guidelines & Skills by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/inertiajs/inertia/pull/2896
+
+### New Contributors
+
+* [@pushpak1300](https://github.com/pushpak1300) made their first contribution in https://github.com/inertiajs/inertia/pull/2896
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.15...v2.3.16
 
 ## [v2.3.15](https://github.com/inertiajs/inertia/compare/v2.3.14...v2.3.15) - 2026-02-13
 
