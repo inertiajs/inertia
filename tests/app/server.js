@@ -1721,6 +1721,22 @@ app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserv
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))
 
+app.get('/redirect-hash', (req, res) => {
+  if (req.get('X-Inertia')) {
+    return inertia.redirect(res, '/links/url-fragments#target')
+  }
+
+  res.redirect('/links/url-fragments#target')
+})
+
+app.post('/redirect-hash', (req, res) => {
+  if (req.get('X-Inertia')) {
+    return inertia.redirect(res, '/links/url-fragments#target')
+  }
+
+  res.redirect(303, '/links/url-fragments#target')
+})
+
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
